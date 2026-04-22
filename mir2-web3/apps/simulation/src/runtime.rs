@@ -16438,6 +16438,7 @@ fn record_crystal_npc_service_context(
                 | ServerPacket::NPCGoods { .. }
                 | ServerPacket::NPCRepair { .. }
                 | ServerPacket::NPCSRepair { .. }
+                | ServerPacket::NPCStorage
         )
     }) {
         return;
@@ -17602,7 +17603,41 @@ fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> {
     })
 }
 
-#[cfg(not(windows))]
+#[cfg(unix)]
+fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> {
+    let mut now: libc::time_t = 0;
+    unsafe {
+        libc::time(&mut now);
+    }
+
+    let mut local_time = std::mem::MaybeUninit::<libc::tm>::uninit();
+    let local_time = unsafe {
+        let result = libc::localtime_r(&now, local_time.as_mut_ptr());
+        if result.is_null() {
+            return None;
+        }
+        local_time.assume_init()
+    };
+
+    let day_of_week = match local_time.tm_wday {
+        0 => "SUNDAY",
+        1 => "MONDAY",
+        2 => "TUESDAY",
+        3 => "WEDNESDAY",
+        4 => "THURSDAY",
+        5 => "FRIDAY",
+        6 => "SATURDAY",
+        _ => return None,
+    };
+
+    Some(CrystalLocalTimeSnapshot {
+        day_of_week,
+        hour: u16::try_from(local_time.tm_hour).ok()?,
+        minute: u16::try_from(local_time.tm_min).ok()?,
+    })
+}
+
+#[cfg(not(any(windows, unix)))]
 fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> {
     None
 }
@@ -45571,6 +45606,13 @@ mod tests {
             [ServerPacket::NPCStorage]
         ));
         assert!(session.world_snapshot().active_npc_dialog.is_none());
+        assert!(session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .active_npc_service
+            .as_ref()
+            .is_some_and(|service| service.label_key == "STORAGE"));
 
         let _ = session.interact(4990);
         let buy_sell_packets = session.select_npc_dialog_target("@BuySell");
@@ -45625,6 +45667,82 @@ mod tests {
             .iter()
             .any(|item| item.item_index == 664 && item.count == 1 && item.is_shop_item));
         assert!(session.world_snapshot().active_npc_dialog.is_none());
+    }
+
+    #[test]
+    fn crystal_npc_storage_service_context_allows_store_and_take_back_without_helper() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4991,
+            name: "Warehouse Keeper".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let bag_item = session
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .find(|item| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
+            .expect("bag item");
+
+        let _ = session.interact(4991);
+        let storage_packets = session.select_npc_dialog_target("@Storage");
+        assert!(matches!(
+            storage_packets.as_slice(),
+            [ServerPacket::NPCStorage]
+        ));
+        assert!(session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .active_npc_service
+            .as_ref()
+            .is_some_and(|service| service.label_key == "STORAGE"));
+
+        let store_packets = session.handle_packet(ClientPacket::StoreItem {
+            from: i32::from(bag_item.slot),
+            to: 4,
+        });
+        assert_eq!(
+            store_packets,
+            vec![ServerPacket::StoreItem {
+                from: i32::from(bag_item.slot),
+                to: 4,
+                success: true
+            }]
+        );
+
+        let take_back_packets = session.handle_packet(ClientPacket::TakeBackItem {
+            from: 4,
+            to: i32::from(bag_item.slot),
+        });
+        assert_eq!(
+            take_back_packets,
+            vec![ServerPacket::TakeBackItem {
+                from: 4,
+                to: i32::from(bag_item.slot),
+                success: true
+            }]
+        );
+
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == bag_item.key
+                && item.slot == bag_item.slot
+                && item.container == ItemContainer::Bag1));
+        assert!(!snapshot
+            .storage_items
+            .iter()
+            .any(|item| item.key == bag_item.key && item.slot == 4));
     }
 
     fn wicked_trader_config() -> SimulationConfig {

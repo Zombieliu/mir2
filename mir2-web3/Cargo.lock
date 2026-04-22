@@ -962,6 +962,7 @@ version = "0.1.0"
 dependencies = [
  "bevy_app",
  "bevy_ecs",
+ "libc",
  "mir2-game-data",
  "mir2-protocol",
  "serde",

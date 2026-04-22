@@ -805,7 +805,7 @@ Outcome:
 - Full `mir2-simulation` regression passed with 457 tests.
 - R25 opened for Crystal storage item flag/rejection semantics.
 
-## 2026-04-23-R25 partial / reboot handoff
+## 2026-04-23-R25
 
 Goal: align Crystal storage `StoreItem` / `TakeBackItem` item flag and rejection semantics.
 
@@ -826,12 +826,12 @@ Captured Crystal findings:
 - Store target occupied fails; TakeBack target occupied fails. Crystal does not swap in these packet handlers.
 - Rejections covered by this round are ack-only failures with no chat message.
 
-Partial Coordinator work before reboot:
+Coordinator local work:
 
-- Added the Crystal `DontStore` bind constant.
-- Added active-storage-service and inventory-slot validation helpers.
-- Partially rewrote `store_item_impl` and `take_back_item_impl` to use Crystal ack-only failure behavior, storage-page gating, lock rejection, capacity validation, occupied-slot rejection, and `DontStore` rejection for store.
-- Partially patched storage tests to activate the storage service and expect Crystal packet outcomes.
+- Finished the partial storage parity patch by recording `NPCStorage` as an active Crystal storage service so real `@Storage` NPC flows preserve `active_npc_service = STORAGE`.
+- Kept Crystal ack-only `StoreItem` / `TakeBackItem` failure semantics for inactive service, password lock, invalid slots/capacity, missing items, `DontStore`, and occupied targets, and added an end-to-end regression that opens `@Storage` and stores/takes back without the test helper.
+- Added a Unix `crystal_local_time_snapshot()` implementation plus the direct `libc` dependency so the existing `DAYOFWEEK` / `HOUR` / `MIN` NPC-condition regression also passes on the Mac verification environment; this was a pre-existing non-Windows test gap surfaced by the full suite.
+- Refreshed `Cargo.lock` after adding the direct `libc` dependency.
 
 Rust Explorer findings:
 
@@ -841,17 +841,19 @@ Rust Explorer findings:
 - Because normal dialogs clear `active_npc_service`, end-to-end NPC storage may fail unless `NPCStorage` is added to the recorded service labels.
 - Recommended first patch after restart: add `NPCStorage` service activation and a regression that opens `@Storage`, then performs store/takeback without using the test helper.
 
-Not yet complete:
+Verification:
 
-- `cargo fmt` passed after the partial R25 edits.
-- `cargo fmt --check` has not been rerun after the partial R25 edits.
-- Focused storage tests have not been run after the R25 edits.
-- Full `mir2-simulation` regression remains the R24 result: 457 tests passed.
-- Backend parity remains `77.12%`; do not increment until R25 passes format check, focused/broader tests, and completion docs.
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-simulation crystal_npc_storage_service_context_allows_store_and_take_back_without_helper -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation crystal_npc_time_and_bag_conditions_follow_runtime_state -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
 
-Next action after restart:
+Outcome:
 
-- Read `docs/AGENT-RESUME-HANDOFF.md`.
-- Continue R25 from the partial code state.
-- Run `cargo fmt --check`, then `cargo test -p mir2-simulation storage -- --test-threads=1 --nocapture`.
-- Fix any storage compile/test failures, add `NPCStorage` service activation plus missing `DontStore` / inactive-service coverage, then run adjacent `item` and full `mir2-simulation` regressions.
+- Round `2026-04-23-R25` complete.
+- Backend parity tracker moved from `77.12%` to `77.13%`.
+- Full `mir2-simulation` regression passed with 458 tests.
+- Mac verification note: default `rustc 1.87.0` does not compile locked `bevy_* 0.17.3`; verification used `cargo +1.89.0`.
+- R26 remains at queue-selection stage for the next bounded parity bite.
