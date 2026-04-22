@@ -151,6 +151,11 @@ pub enum ClientPacket {
     SRepairItem {
         unique_id: u64,
     },
+    CombineItem {
+        grid: MirGridType,
+        id_from: u64,
+        id_to: u64,
+    },
     UnlockStorage {
         password: String,
     },
@@ -201,6 +206,7 @@ impl ClientPacket {
             Self::SellItem { .. } => ClientPacketId::SellItem,
             Self::RepairItem { .. } => ClientPacketId::RepairItem,
             Self::SRepairItem { .. } => ClientPacketId::SRepairItem,
+            Self::CombineItem { .. } => ClientPacketId::CombineItem,
             Self::UnlockStorage { .. } => ClientPacketId::UnlockStorage,
             Self::SetStoragePassword { .. } => ClientPacketId::SetStoragePassword,
             Self::RemoveStoragePassword { .. } => ClientPacketId::RemoveStoragePassword,
@@ -275,6 +281,15 @@ impl ClientPacket {
             Self::StoreItem { from, to } | Self::TakeBackItem { from, to } => {
                 writer.write_i32(*from);
                 writer.write_i32(*to);
+            }
+            Self::CombineItem {
+                grid,
+                id_from,
+                id_to,
+            } => {
+                writer.write_u8(*grid as u8);
+                writer.write_u64(*id_from);
+                writer.write_u64(*id_to);
             }
             Self::MergeItem {
                 grid_from,
@@ -473,6 +488,11 @@ impl ClientPacket {
             ClientPacketId::TakeBackItem => Self::TakeBackItem {
                 from: reader.read_i32()?,
                 to: reader.read_i32()?,
+            },
+            ClientPacketId::CombineItem => Self::CombineItem {
+                grid: MirGridType::try_from(reader.read_u8()?)?,
+                id_from: reader.read_u64()?,
+                id_to: reader.read_u64()?,
             },
             ClientPacketId::MergeItem => Self::MergeItem {
                 grid_from: MirGridType::try_from(reader.read_u8()?)?,
@@ -708,6 +728,13 @@ pub enum ServerPacket {
         to: i32,
         success: bool,
     },
+    CombineItem {
+        grid: MirGridType,
+        id_from: u64,
+        id_to: u64,
+        success: bool,
+        destroy: bool,
+    },
     SplitItem {
         item: Option<UserItem>,
         grid: MirGridType,
@@ -931,6 +958,7 @@ impl ServerPacket {
             Self::RemoveSlotItem { .. } => ServerPacketId::RemoveSlotItem,
             Self::TakeBackItem { .. } => ServerPacketId::TakeBackItem,
             Self::StoreItem { .. } => ServerPacketId::StoreItem,
+            Self::CombineItem { .. } => ServerPacketId::CombineItem,
             Self::SplitItem { .. } => ServerPacketId::SplitItem,
             Self::SplitItem1 { .. } => ServerPacketId::SplitItem1,
             Self::UseItem { .. } => ServerPacketId::UseItem,
@@ -1153,6 +1181,19 @@ impl ServerPacket {
                 writer.write_i32(*from);
                 writer.write_i32(*to);
                 writer.write_bool(*success);
+            }
+            Self::CombineItem {
+                grid,
+                id_from,
+                id_to,
+                success,
+                destroy,
+            } => {
+                writer.write_u8(*grid as u8);
+                writer.write_u64(*id_from);
+                writer.write_u64(*id_to);
+                writer.write_bool(*success);
+                writer.write_bool(*destroy);
             }
             Self::SplitItem { item, grid } => {
                 writer.write_bool(item.is_some());
@@ -1433,6 +1474,13 @@ impl ServerPacket {
                 from: reader.read_i32()?,
                 to: reader.read_i32()?,
                 success: reader.read_bool()?,
+            },
+            ServerPacketId::CombineItem => Self::CombineItem {
+                grid: MirGridType::try_from(reader.read_u8()?)?,
+                id_from: reader.read_u64()?,
+                id_to: reader.read_u64()?,
+                success: reader.read_bool()?,
+                destroy: reader.read_bool()?,
             },
             ServerPacketId::SplitItem => {
                 let item = if reader.read_bool()? {

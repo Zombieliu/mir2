@@ -857,3 +857,36 @@ Outcome:
 - Full `mir2-simulation` regression passed with 458 tests.
 - Mac verification note: default `rustc 1.87.0` does not compile locked `bevy_* 0.17.3`; verification used `cargo +1.89.0`.
 - R26 remains at queue-selection stage for the next bounded parity bite.
+
+## 2026-04-23-R26
+
+Goal: close the bounded real-client `CombineItem` packet parity gap by wiring Crystal packet ids/payloads into the already-modeled shape-7 socket-growth and shape-8 seal semantics.
+
+Coordinator local work:
+
+- Confirmed Crystal `C.CombineItem` / `S.CombineItem` payload order, dispatch path, ack shape, and client-side source-stack handling against the Crystal client/server code.
+- Added protocol support for Crystal `CombineItem`: ids, client/server enum variants, encode/decode, trace names, and codec coverage.
+- Added gateway JSON conversion for `ServerPacket::CombineItem` plus a focused event test.
+- Wired `ClientPacket::CombineItem` into runtime `combine_item_impl` for the current inventory-grid socket/seal branches, preserving Crystal-style success ack ordering after hint plus `ItemSlotSizeChanged` / `ItemSealChanged`.
+- Threaded seal metadata through `ItemState`, `UserItem.SealedInfo`, and inventory/equipment round-trips so the packet path mutates the same saved/runtime state as the existing Stage 5 helpers.
+- Kept the round intentionally bounded: the strict Crystal target-type gate was left out of the packet path because the imported manifest currently lacks meaningful real socket-capacity targets for that rule; full target-type, hero-inventory, and other combine-branch parity remain open.
+- Re-ran the storage regression because the shared item/runtime state changed in the same file.
+
+Verification:
+
+- `cargo +1.89.0 fmt`
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-protocol item_and_combat_client_packets_use_crystal_payloads -- --nocapture`
+- `cargo +1.89.0 test -p mir2-protocol item_action_ack_server_packets_use_crystal_ids -- --nocapture`
+- `cargo +1.89.0 test -p mir2-gateway combine_item_server_event_exposes_crystal_payload_fields -- --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
+
+Outcome:
+
+- Round `2026-04-23-R26` complete.
+- Backend parity tracker moved from `77.13%` to `77.14%`.
+- Full `mir2-simulation` regression passed with 461 tests.
+- R27 reopened at queue-selection stage for the next bounded parity bite.

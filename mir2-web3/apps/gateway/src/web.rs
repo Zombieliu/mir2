@@ -1122,6 +1122,23 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "NPCStorage",
             "payload": {}
         }),
+        ServerPacket::CombineItem {
+            grid,
+            id_from,
+            id_to,
+            success,
+            destroy,
+        } => json!({
+            "type": "packet",
+            "packet": "CombineItem",
+            "payload": {
+                "grid": grid,
+                "idFrom": id_from,
+                "idTo": id_to,
+                "success": success,
+                "destroy": destroy
+            }
+        }),
         ServerPacket::ItemRepaired {
             unique_id,
             max_dura,
@@ -1860,7 +1877,7 @@ mod tests {
         responses_require_world_snapshot, should_send_world_snapshot_for_action, BrowserCommand,
         SessionAction,
     };
-    use mir2_protocol::{ClientPacket, ServerPacket};
+    use mir2_protocol::{ClientPacket, MirGridType, ServerPacket};
 
     #[test]
     fn login_command_accepts_camel_case_fields() {
@@ -2078,6 +2095,23 @@ mod tests {
             seal["payload"]["expiryDateBinaryDatetime"],
             638000000000000000_i64
         );
+    }
+
+    #[test]
+    fn combine_item_server_event_exposes_crystal_payload_fields() {
+        let packet = super::server_packet_to_event(&ServerPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+            success: true,
+            destroy: false,
+        });
+        assert_eq!(packet["packet"], "CombineItem");
+        assert_eq!(packet["payload"]["grid"], "Inventory");
+        assert_eq!(packet["payload"]["idFrom"], 31);
+        assert_eq!(packet["payload"]["idTo"], 32);
+        assert_eq!(packet["payload"]["success"], true);
+        assert_eq!(packet["payload"]["destroy"], false);
     }
 
     #[test]

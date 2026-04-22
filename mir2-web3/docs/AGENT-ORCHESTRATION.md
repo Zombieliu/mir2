@@ -110,11 +110,11 @@ The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file a
 
 Current checkpoint:
 
-- Active round: `2026-04-23-R25`.
-- Active task: Crystal storage item flag/rejection semantics.
-- Active round state: partial implementation/test edits exist and `cargo fmt` passed; R25 still needs `NPCStorage` service-context activation, `cargo fmt --check`, focused storage tests, adjacent item tests, and full simulation regression.
-- Last completed round: `2026-04-23-R24`, Crystal NPC `SellItem` item flag/type/price rejection semantics.
-- Backend/server parity estimate: `77.12%`.
+- Active round: `2026-04-23-R27`.
+- Active task: select the next bounded parity bite after verified R26 `CombineItem` packet parity completion.
+- Active round state: task-selection stage only; do not reopen R26 unless source inspection or tests show a regression.
+- Last completed round: `2026-04-23-R26`, Crystal `CombineItem` packet parity for current socket/seal branches.
+- Backend/server parity estimate: `77.14%`.
 - Whole-project 1:1 estimate: roughly `61.7%`.
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 
@@ -122,6 +122,8 @@ Latest completed rounds:
 
 | Round | Result |
 | --- | --- |
+| R26 | Crystal inventory-grid `CombineItem` packet parity for current socket-growth and seal branches, including protocol ids/codecs, gateway JSON, runtime dispatch, and 461-test `mir2-simulation` regression green. |
+| R25 | Crystal `StoreItem` / `TakeBackItem` active `@Storage` / `NPCStorage` gating, `DontStore`, password-lock/capacity/occupied-target no-swap, and ack-only failure semantics. |
 | R18 | Crystal drop visibility and pickup rejection edges. |
 | R19 | Crystal `HarvestMonster` pending drop transfer and full-bag retry semantics. |
 | R20 | Crystal harvest owner / `EXPOwner` corpse scan rejection. |
@@ -134,4 +136,5 @@ Restart rule:
 
 - Read `docs/AGENT-RESUME-HANDOFF.md` before continuing after a reboot or context loss.
 - Relaunch read-only explorers for any subagent findings that were not written to docs.
-- Continue from the partial R25 storage patch without asking for routine confirmation; do not bump progress until R25 verification passes.
+- Continue from R27 task selection without asking for routine confirmation; choose the next bounded task from the queue before starting new code work.
+- On this Mac verification environment, use `cargo +1.89.0` for Rust checks/tests unless the toolchain is explicitly pinned later; default `rustc 1.87.0` does not compile locked `bevy_* 0.17.3`.
