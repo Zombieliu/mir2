@@ -1,0 +1,110 @@
+{
+  "baseUrl": "http://127.0.0.1:3002",
+  "generatedAt": "2026-04-21T18:32:17.252Z",
+  "viewport": {
+    "width": 1024,
+    "height": 768,
+    "deviceScaleFactor": 1,
+    "mobile": false
+  },
+  "screenshots": [
+    "docs/stage5-screenshots/stage5-login.png",
+    "docs/stage5-screenshots/stage5-select.png",
+    "docs/stage5-screenshots/stage5-game.png",
+    "docs/stage5-screenshots/stage5-inventory.png",
+    "docs/stage5-screenshots/stage5-character.png",
+    "docs/stage5-screenshots/stage5-storage.png",
+    "docs/stage5-screenshots/stage5-npc.png",
+    "docs/stage5-screenshots/stage5-combat.png",
+    "docs/stage5-screenshots/stage5-map-transfer-1.png",
+    "docs/stage5-screenshots/stage5-systems.png"
+  ],
+  "stage5Systems": {
+    "appearance": {
+      "hair": 0
+    },
+    "auction": [],
+    "conquest": {
+      "activeWars": [
+        "Sabuk"
+      ],
+      "castleOwner": "BichonGuard",
+      "eventLog": [
+        "War started: Sabuk",
+        "Castle owner: BichonGuard"
+      ],
+      "gates": [],
+      "gold": 0,
+      "guards": [],
+      "openGates": [],
+      "taxRatePercent": 0,
+      "walls": []
+    },
+    "group": {
+      "lootMode": "free",
+      "members": [
+        "Scout",
+        "Miner"
+      ]
+    },
+    "guild": {
+      "chatLog": [],
+      "members": [
+        "Scout"
+      ],
+      "name": "BichonGuard",
+      "permissions": [
+        "invite",
+        "rank",
+        "storage",
+        "conquest"
+      ],
+      "rank": "Guild Chief"
+    },
+    "guildTerritory": {
+      "mapFileName": "GA0",
+      "owned": false,
+      "recallLog": [],
+      "rentalDaysLeft": 0
+    },
+    "hero": {
+      "behaviour": 0,
+      "level": 1,
+      "name": "Aide"
+    },
+    "mail": [
+      {
+        "body": "Take this",
+        "claimed": true,
+        "deleted": false,
+        "from": "Scout",
+        "gold": 5,
+        "id": 1,
+        "subject": "Reward",
+        "to": "Scout"
+      }
+    ],
+    "nameLists": [],
+    "profession": {
+      "craftedItems": [
+        "crafted-blade"
+      ],
+      "miningLevel": 1,
+      "ore": 1
+    },
+    "social": {
+      "blocked": [],
+      "friends": [
+        "Miner"
+      ]
+    },
+    "trade": {
+      "accepted": true,
+      "completed": true,
+      "offeredGold": 1,
+      "offeredItems": [],
+      "partner": "Trader"
+    }
+  },
+  "criticalConsoleErrors": []
+}

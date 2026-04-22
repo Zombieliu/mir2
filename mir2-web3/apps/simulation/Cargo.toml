@@ -1,0 +1,18 @@
+[package]
+name = "mir2-simulation"
+version = "0.1.0"
+edition = "2021"
+description = "Authoritative simulation core for the Mir2 web3 rewrite"
+license = "MIT"
+
+[lib]
+name = "mir2_simulation"
+path = "src/lib.rs"
+
+[dependencies]
+bevy_app = "0.17"
+bevy_ecs = "0.17"
+mir2-game-data = { path = "../../packages/game-data" }
+mir2-protocol = { path = "../../packages/protocol" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

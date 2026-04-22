@@ -1,0 +1,275 @@
+{
+  "monster_spawns": [
+    {
+      "object_id": 3001,
+      "key": "training-dummy",
+      "name": "Training Dummy",
+      "image": 10,
+      "position": {
+        "x": 338,
+        "y": 273
+      },
+      "direction": "Left",
+      "count": 1,
+      "spread": 0,
+      "respawn_delay_ticks": 8,
+      "random_delay_ticks": 0,
+      "can_wander": false,
+      "max_hp": 72
+    },
+    {
+      "object_id": 3002,
+      "key": "field-wasp",
+      "name": "Field Wasp",
+      "image": 12,
+      "position": {
+        "x": 334,
+        "y": 266
+      },
+      "direction": "Down",
+      "count": 1,
+      "spread": 1,
+      "respawn_delay_ticks": 12,
+      "random_delay_ticks": 0,
+      "can_wander": true,
+      "max_hp": 60
+    }
+  ],
+  "skills": [
+    {
+      "key": "minor-heal",
+      "crystal_spell": "Healing",
+      "name": "Minor Heal",
+      "description": "Restores a small amount of HP for backend skill-loop testing.",
+      "cooldown_ticks": 6,
+      "mana_cost": 6,
+      "effect": {
+        "kind": "heal",
+        "hp": 22
+      }
+    },
+    {
+      "key": "battle-focus",
+      "crystal_spell": "Fury",
+      "name": "Battle Focus",
+      "description": "Short attack/defence buff used to validate the buff runtime.",
+      "cooldown_ticks": 12,
+      "mana_cost": 8,
+      "effect": {
+        "kind": "buff",
+        "buff_key": "battle-focus",
+        "buff_name": "Battle Focus",
+        "buff_description": "Short melee focus buff increasing attack and defence.",
+        "duration_ticks": 10,
+        "attack_bonus": 4,
+        "defence_bonus": 1
+      }
+    },
+    {
+      "key": "summon-shinsu",
+      "crystal_spell": "SummonShinsu",
+      "name": "Summon Shinsu",
+      "description": "Summons or recalls a Shinsu pet for backend summon-parity testing.",
+      "cooldown_ticks": 180,
+      "mana_cost": 12,
+      "effect": {
+        "kind": "summon",
+        "spell": "SummonShinsu"
+      }
+    },
+    {
+      "key": "summon-vampire",
+      "crystal_spell": "SummonVampire",
+      "name": "Summon Vampire",
+      "description": "Summons or recalls a Vampire Spider pet for backend summon-parity testing.",
+      "cooldown_ticks": 210,
+      "mana_cost": 17,
+      "effect": {
+        "kind": "summon",
+        "spell": "SummonVampire"
+      }
+    },
+    {
+      "key": "summon-toad",
+      "crystal_spell": "SummonToad",
+      "name": "Summon Toad",
+      "description": "Summons or recalls a Spitting Toad pet for backend summon-parity testing.",
+      "cooldown_ticks": 180,
+      "mana_cost": 10,
+      "effect": {
+        "kind": "summon",
+        "spell": "SummonToad"
+      }
+    },
+    {
+      "key": "summon-snakes",
+      "crystal_spell": "SummonSnakes",
+      "name": "Summon Snakes",
+      "description": "Summons or recalls a Snake Totem pet for backend summon-parity testing.",
+      "cooldown_ticks": 180,
+      "mana_cost": 12,
+      "effect": {
+        "kind": "summon",
+        "spell": "SummonSnakes"
+      }
+    },
+    {
+      "key": "stonetrap",
+      "crystal_spell": "Stonetrap",
+      "name": "Stone Trap",
+      "description": "Summons a Stoning Spider trap for backend summon-parity testing.",
+      "cooldown_ticks": 180,
+      "mana_cost": 65,
+      "effect": {
+        "kind": "summon",
+        "spell": "Stonetrap"
+      }
+    }
+  ],
+  "monster_drops": [
+    {
+      "monster_object_id": 3002,
+      "drops": [
+        {
+          "kind": "gold",
+          "name": "Wasp Gold",
+          "amount": 45,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "monster_object_id": 3001,
+      "drops": [
+        {
+          "kind": "item",
+          "key": "training-splinter",
+          "name": "Training Splinter",
+          "description": "A chipped fragment from the practice dummy.",
+          "weight": 1,
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "quest_id": 1001,
+      "title": "Field Wasp Trial",
+      "summary": "Village Guide wants proof that you can handle the training road safely.",
+      "reward_preview": "300 gold, Guide Ring, Repair Powder x2",
+      "required": 1,
+      "stages": {
+        "available": {
+          "objective": "Speak with Village Guide to accept the first field assignment.",
+          "progress_label": "Not accepted",
+          "tracker": "Village Guide is waiting near the west banner."
+        },
+        "in_progress": {
+          "objective": "Defeat the Field Wasp east of the road and secure a Wasp Stinger.",
+          "progress_label": "{current}/{required} wasps cleared",
+          "tracker": "Field Wasp {current}/{required} defeated. Bring back proof."
+        },
+        "ready_to_turn_in": {
+          "objective": "Return to Village Guide and hand in the Wasp Stinger.",
+          "progress_label": "Objective complete",
+          "tracker": "Return to Village Guide for your starter reward."
+        },
+        "completed": {
+          "objective": "Field training completed. Open your bag and character panes to inspect the reward.",
+          "progress_label": "Turned in",
+          "tracker": "Training road certified."
+        }
+      },
+      "quest_item": {
+        "key": "quest-wasp-stinger",
+        "name": "Wasp Stinger",
+        "description": "Proof for Village Guide that the road-side Field Wasp has been cleared.",
+        "weight": 0,
+        "quantity": 1,
+        "preferred_slot": 0
+      },
+      "completion_rewards": {
+        "gold": 300,
+        "items": [
+          {
+            "key": "repair-powder",
+            "name": "Repair Powder",
+            "description": "Starter maintenance powder issued by Village Guide.",
+            "weight": 1,
+            "quantity": 2,
+            "preferred_slot": 6
+          }
+        ],
+        "equipment": [
+          {
+            "slot": "ring_right",
+            "name": "Guide Ring",
+            "shape": null,
+            "description": "Issued after the first live field assignment.",
+            "durability_current": 12,
+            "durability_max": 12,
+            "attack": 0,
+            "defence": 1
+          }
+        ]
+      }
+    }
+  ],
+  "npc_scripts": [
+    {
+      "npc_object_id": 4001,
+      "stages": [
+        {
+          "quest_stage": "available",
+          "title": "Field Assignment",
+          "body": [
+            "Good. The road is not safe unless you can hold your own.",
+            "Go east and defeat the Field Wasp by the lanterns. Bring back proof."
+          ],
+          "footer": "Objective accepted: kill 1 Field Wasp and return.",
+          "object_chat": "Go east and defeat the Field Wasp."
+        },
+        {
+          "quest_stage": "in_progress",
+          "title": "Current Objective",
+          "body": [
+            "The wasp is still alive. Stay in melee range before attacking.",
+            "Progress: {current}/{required} target defeated."
+          ],
+          "footer": "Return after you obtain the Wasp Stinger.",
+          "object_chat": "Bring me the Wasp Stinger when the field is clear."
+        },
+        {
+          "quest_stage": "ready_to_turn_in",
+          "title": "Training Cleared",
+          "body": [
+            "You handled the field assignment cleanly.",
+            "Take this Guide Ring and repair powder. Keep your bag organized."
+          ],
+          "footer": "Reward delivered: 300 gold, Guide Ring, Repair Powder x2.",
+          "object_chat": "Well done. Take your reward and prepare for the next road."
+        },
+        {
+          "quest_stage": "completed",
+          "title": "After Action",
+          "body": [
+            "Your starter reward is already issued.",
+            "Use the bag, belt, and character panes to inspect the live state."
+          ],
+          "footer": "More quest branches will be layered on top of this state model.",
+          "object_chat": "Training is complete. Review your gear before moving on."
+        }
+      ]
+    }
+  ],
+  "buffs": [
+    {
+      "key": "battle-focus",
+      "crystal_buff_type": "Fury",
+      "name": "Battle Focus",
+      "description": "Short melee focus buff increasing attack and defence.",
+      "visible": true
+    }
+  ]
+}

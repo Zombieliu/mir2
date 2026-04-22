@@ -1,0 +1,590 @@
+{
+  "type": "tcp",
+  "addr": "127.0.0.1:7000",
+  "runId": "1776795306393-10872",
+  "generatedAtUnixMs": 1776795316170,
+  "clients": 64,
+  "actionsPerClient": 20,
+  "durationMs": 9776,
+  "ready": 64,
+  "failed": 0,
+  "commandsSent": 2944,
+  "packetsReceived": 656,
+  "decodeErrors": 0,
+  "clientResults": [
+    {
+      "index": 0,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 1,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 18,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 2,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 3,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 4,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 5,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 18,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 6,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 29,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 7,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 8,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 26,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 9,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 21,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 10,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 11,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 12,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 13,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 14,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 15,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 16,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 17,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 18,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 19,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 20,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 21,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 22,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 26,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 23,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 24,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 25,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 27,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 26,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 27,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 28,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 18,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 29,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 30,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 31,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 26,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 32,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 33,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 34,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 35,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 36,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 37,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 38,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 39,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 40,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 41,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 18,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 42,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 43,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 20,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 44,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 16,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 45,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 46,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 21,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 47,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 48,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 26,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 49,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 50,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 51,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 24,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 52,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 53,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 54,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 55,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 56,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 57,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 20,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 58,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 59,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 4,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 60,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 3,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 61,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 62,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 2,
+      "decodeErrors": 0,
+      "error": null
+    },
+    {
+      "index": 63,
+      "ready": true,
+      "commandsSent": 46,
+      "packetsReceived": 15,
+      "decodeErrors": 0,
+      "error": null
+    }
+  ],
+  "rssSamples": [
+    {
+      "atUnixMs": 1776795307316,
+      "pid": 40536,
+      "workingSetBytes": 57929728,
+      "handleCount": 258
+    },
+    {
+      "atUnixMs": 1776795308426,
+      "pid": 40536,
+      "workingSetBytes": 55316480,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795309542,
+      "pid": 40536,
+      "workingSetBytes": 56172544,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795310645,
+      "pid": 40536,
+      "workingSetBytes": 56692736,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795311751,
+      "pid": 40536,
+      "workingSetBytes": 57241600,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795312851,
+      "pid": 40536,
+      "workingSetBytes": 56713216,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795313960,
+      "pid": 40536,
+      "workingSetBytes": 56741888,
+      "handleCount": 257
+    },
+    {
+      "atUnixMs": 1776795315061,
+      "pid": 40536,
+      "workingSetBytes": 57327616,
+      "handleCount": 253
+    },
+    {
+      "atUnixMs": 1776795316170,
+      "pid": 40536,
+      "workingSetBytes": 57491456,
+      "handleCount": 260
+    }
+  ],
+  "rss": {
+    "count": 9,
+    "min": 55316480,
+    "max": 57929728,
+    "avg": 56847473
+  }
+}

@@ -1,0 +1,1316 @@
+{
+  "generated_at": "2026-04-22T14:48:06.602Z",
+  "source_file": "Crystal/Build/Server/Debug/Configs/RandomItemStats.ini",
+  "total_profiles": 11,
+  "profiles": [
+    {
+      "id": 0,
+      "max_dura": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_ac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_mac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_dc": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_mc": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_sc": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 1,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 13,
+        "max_stat": 13
+      },
+      "max_ac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_mac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_dc": {
+        "chance": 60,
+        "stat_chance": 15,
+        "max_stat": 13
+      },
+      "max_mc": {
+        "chance": 60,
+        "stat_chance": 15,
+        "max_stat": 13
+      },
+      "max_sc": {
+        "chance": 60,
+        "stat_chance": 15,
+        "max_stat": 13
+      },
+      "accuracy": {
+        "chance": 80,
+        "stat_chance": 20,
+        "max_stat": 2
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 68,
+        "stat_chance": 20,
+        "max_stat": 2
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 130,
+        "stat_chance": 30,
+        "max_stat": 1
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 2,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 80,
+        "stat_chance": 15,
+        "max_stat": 7
+      },
+      "max_mac": {
+        "chance": 80,
+        "stat_chance": 15,
+        "max_stat": 7
+      },
+      "max_dc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 3,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 80,
+        "stat_chance": 15,
+        "max_stat": 7
+      },
+      "max_mac": {
+        "chance": 80,
+        "stat_chance": 15,
+        "max_stat": 7
+      },
+      "max_dc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 100,
+        "stat_chance": 20,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 4,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_mac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_dc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 140,
+        "stat_chance": 30,
+        "max_stat": 7
+      },
+      "agility": {
+        "chance": 140,
+        "stat_chance": 30,
+        "max_stat": 7
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 5,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 60,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_mac": {
+        "chance": 60,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_dc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_mc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_sc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 6,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 70,
+        "stat_chance": 20,
+        "max_stat": 6
+      },
+      "max_mac": {
+        "chance": 70,
+        "stat_chance": 20,
+        "max_stat": 6
+      },
+      "max_dc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_mc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "max_sc": {
+        "chance": 50,
+        "stat_chance": 30,
+        "max_stat": 6
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 7,
+      "max_dura": {
+        "chance": 2,
+        "stat_chance": 10,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "max_mac": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "max_dc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "max_mc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "max_sc": {
+        "chance": 80,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 140,
+        "stat_chance": 30,
+        "max_stat": 3
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 0,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 8,
+      "max_dura": {
+        "chance": 1,
+        "stat_chance": 5,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 3,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_mac": {
+        "chance": 3,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_dc": {
+        "chance": 5,
+        "stat_chance": 2,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 5,
+        "stat_chance": 2,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 5,
+        "stat_chance": 2,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 5,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 9,
+      "max_dura": {
+        "chance": 1,
+        "stat_chance": 5,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_mac": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "max_dc": {
+        "chance": 3,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 3,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 3,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 15,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "agility": {
+        "chance": 15,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 5,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    },
+    {
+      "id": 10,
+      "max_dura": {
+        "chance": 1,
+        "stat_chance": 5,
+        "max_stat": 3
+      },
+      "max_ac": {
+        "chance": 5,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_mac": {
+        "chance": 5,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_dc": {
+        "chance": 7,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_mc": {
+        "chance": 7,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "max_sc": {
+        "chance": 7,
+        "stat_chance": 3,
+        "max_stat": 7
+      },
+      "accuracy": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "agility": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "strong": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "magic_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_resist": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "hp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "mp_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_recovery": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_rate": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "critical_damage": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "freezing": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "poison_attack": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "attack_speed": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "luck": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      },
+      "curse_chance": 5,
+      "slot": {
+        "chance": 0,
+        "stat_chance": 0,
+        "max_stat": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Node
+node_modules/
+.next/
+dist/
+out/
+
+# Rust
+target/
+
+# Editors
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Env
+.env
+.env.local
+.env.*
+
+# Logs
+*.log

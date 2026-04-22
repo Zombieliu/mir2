@@ -1,0 +1,13 @@
+[package]
+name = "mir2-protocol"
+version = "0.1.0"
+edition = "2021"
+description = "Crystal MVP protocol types and codecs for the Mir2 web3 rewrite"
+license = "MIT"
+
+[lib]
+name = "mir2_protocol"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

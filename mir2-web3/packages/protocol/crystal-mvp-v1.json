@@ -1,0 +1,397 @@
+{
+  "name": "crystal-mvp-v1",
+  "source_root": "E:/mir2/Crystal/Shared",
+  "framing": {
+    "length_prefix": "u16_le",
+    "packet_id": "i16_le",
+    "payload_size_formula": "length - 4",
+    "string_encoding": ".NET BinaryWriter string (7-bit length prefix + UTF-8 bytes)",
+    "compression": "supported by base protocol, not used by MVP packets"
+  },
+  "enums": {
+    "MirGender": {
+      "type": "u8",
+      "values": {
+        "Male": 0,
+        "Female": 1
+      }
+    },
+    "MirClass": {
+      "type": "u8",
+      "values": {
+        "Warrior": 0,
+        "Wizard": 1,
+        "Taoist": 2,
+        "Assassin": 3,
+        "Archer": 4
+      }
+    },
+    "MirDirection": {
+      "type": "u8",
+      "values": {
+        "Up": 0,
+        "UpRight": 1,
+        "Right": 2,
+        "DownRight": 3,
+        "Down": 4,
+        "DownLeft": 5,
+        "Left": 6,
+        "UpLeft": 7
+      }
+    },
+    "ChatType": {
+      "type": "u8",
+      "values": {
+        "Normal": 0,
+        "Shout": 1,
+        "System": 2,
+        "Hint": 3,
+        "Announcement": 4,
+        "Group": 5,
+        "WhisperIn": 6,
+        "WhisperOut": 7,
+        "Guild": 8
+      }
+    }
+  },
+  "shared_structs": {
+    "SelectInfo": {
+      "fields": [
+        { "name": "index", "type": "i32" },
+        { "name": "name", "type": "string" },
+        { "name": "level", "type": "u16" },
+        { "name": "class", "type": "MirClass" },
+        { "name": "gender", "type": "MirGender" },
+        { "name": "last_access_binary_datetime", "type": "i64" }
+      ]
+    }
+  },
+  "client_packets": [
+    {
+      "id": 0,
+      "name": "ClientVersion",
+      "fields": [
+        { "name": "hash_length", "type": "i32" },
+        { "name": "version_hash", "type": "bytes", "length_from": "hash_length" }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Disconnect",
+      "fields": []
+    },
+    {
+      "id": 2,
+      "name": "KeepAlive",
+      "fields": [
+        { "name": "time", "type": "i64" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "NewAccount",
+      "fields": [
+        { "name": "account_id", "type": "string" },
+        { "name": "password", "type": "string" },
+        { "name": "birth_date_binary", "type": "i64" },
+        { "name": "user_name", "type": "string" },
+        { "name": "secret_question", "type": "string" },
+        { "name": "secret_answer", "type": "string" },
+        { "name": "email_address", "type": "string" }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Login",
+      "fields": [
+        { "name": "account_id", "type": "string" },
+        { "name": "password", "type": "string" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "NewCharacter",
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "gender", "type": "MirGender" },
+        { "name": "class", "type": "MirClass" }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "StartGame",
+      "fields": [
+        { "name": "character_index", "type": "i32" }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "LogOut",
+      "fields": []
+    },
+    {
+      "id": 10,
+      "name": "Turn",
+      "fields": [
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Walk",
+      "fields": [
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Run",
+      "fields": [
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Chat",
+      "fields": [
+        { "name": "message", "type": "string" },
+        { "name": "linked_item_count", "type": "i32" },
+        { "name": "linked_items", "type": "list", "item_type": "ChatItem", "count_from": "linked_item_count" }
+      ],
+      "notes": [
+        "Phase 1 clients can send linked_item_count=0."
+      ]
+    }
+  ],
+  "server_packets": [
+    {
+      "id": 0,
+      "name": "Connected",
+      "fields": []
+    },
+    {
+      "id": 1,
+      "name": "ClientVersion",
+      "fields": [
+        { "name": "result", "type": "u8" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Disconnect",
+      "fields": [
+        { "name": "reason", "type": "u8" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "KeepAlive",
+      "fields": [
+        { "name": "time", "type": "i64" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "NewAccount",
+      "fields": [
+        { "name": "result", "type": "u8" }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Login",
+      "fields": [
+        { "name": "result", "type": "u8" }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "LoginBanned",
+      "fields": [
+        { "name": "reason", "type": "string" },
+        { "name": "expiry_binary_datetime", "type": "i64" }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "LoginSuccess",
+      "fields": [
+        { "name": "character_count", "type": "i32" },
+        { "name": "characters", "type": "list", "item_type": "SelectInfo", "count_from": "character_count" }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "NewCharacter",
+      "fields": [
+        { "name": "result", "type": "u8" }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "NewCharacterSuccess",
+      "fields": [
+        { "name": "char_info", "type": "SelectInfo" }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "StartGame",
+      "fields": [
+        { "name": "result", "type": "u8" },
+        { "name": "resolution", "type": "i32" }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "StartGameBanned",
+      "fields": [
+        { "name": "reason", "type": "string" },
+        { "name": "expiry_binary_datetime", "type": "i64" }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "StartGameDelay",
+      "fields": [
+        { "name": "milliseconds", "type": "i64" }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "MapInformation",
+      "fields": [
+        { "name": "map_index", "type": "i32" },
+        { "name": "file_name", "type": "string" },
+        { "name": "title", "type": "string" },
+        { "name": "mini_map", "type": "u16" },
+        { "name": "big_map", "type": "u16" },
+        { "name": "lights", "type": "u8" },
+        { "name": "flags", "type": "u8" },
+        { "name": "map_dark_light", "type": "u8" },
+        { "name": "music", "type": "u16" },
+        { "name": "weather_particles", "type": "u16" }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "UserInformation",
+      "fields": [
+        { "name": "object_id", "type": "u32" },
+        { "name": "real_id", "type": "u32" },
+        { "name": "name", "type": "string" },
+        { "name": "guild_name", "type": "string" },
+        { "name": "guild_rank", "type": "string" },
+        { "name": "name_colour_argb", "type": "i32" },
+        { "name": "class", "type": "MirClass" },
+        { "name": "gender", "type": "MirGender" },
+        { "name": "level", "type": "u16" },
+        { "name": "location_x", "type": "i32" },
+        { "name": "location_y", "type": "i32" },
+        { "name": "direction", "type": "MirDirection" },
+        { "name": "hair", "type": "u8" },
+        { "name": "hp", "type": "i32" },
+        { "name": "mp", "type": "i32" },
+        { "name": "experience", "type": "i64" },
+        { "name": "max_experience", "type": "i64" },
+        { "name": "level_effects", "type": "u16" },
+        { "name": "has_hero", "type": "bool" },
+        { "name": "hero_behaviour", "type": "u8" },
+        { "name": "has_inventory", "type": "bool" },
+        { "name": "inventory", "type": "optional_slot_array", "item_type": "UserItem" },
+        { "name": "has_equipment", "type": "bool" },
+        { "name": "equipment", "type": "optional_slot_array", "item_type": "UserItem" },
+        { "name": "has_quest_inventory", "type": "bool" },
+        { "name": "quest_inventory", "type": "optional_slot_array", "item_type": "UserItem" },
+        { "name": "gold", "type": "u32" },
+        { "name": "credit", "type": "u32" },
+        { "name": "has_expanded_storage", "type": "bool" },
+        { "name": "has_storage_password", "type": "bool" },
+        { "name": "require_storage_password", "type": "bool" },
+        { "name": "storage_password_last_set_binary", "type": "i64" },
+        { "name": "expanded_storage_expiry_binary", "type": "i64" },
+        { "name": "magic_count", "type": "i32" },
+        { "name": "magics", "type": "list", "item_type": "ClientMagic", "count_from": "magic_count" },
+        { "name": "intelligent_creature_count", "type": "i32" },
+        { "name": "intelligent_creatures", "type": "list", "item_type": "ClientIntelligentCreature", "count_from": "intelligent_creature_count" },
+        { "name": "summoned_creature_type", "type": "u8" },
+        { "name": "creature_summoned", "type": "bool" },
+        { "name": "allow_observe", "type": "bool" },
+        { "name": "observer", "type": "bool" }
+      ],
+      "notes": [
+        "This packet contains nested types not yet extracted in detail.",
+        "Phase 1 clients can initially parse only the scene bootstrap fields if they still consume the full wire order."
+      ]
+    },
+    {
+      "id": 23,
+      "name": "UserLocation",
+      "fields": [
+        { "name": "x", "type": "i32" },
+        { "name": "y", "type": "i32" },
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "ObjectTurn",
+      "fields": [
+        { "name": "object_id", "type": "u32" },
+        { "name": "x", "type": "i32" },
+        { "name": "y", "type": "i32" },
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "ObjectWalk",
+      "fields": [
+        { "name": "object_id", "type": "u32" },
+        { "name": "x", "type": "i32" },
+        { "name": "y", "type": "i32" },
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "ObjectRun",
+      "fields": [
+        { "name": "object_id", "type": "u32" },
+        { "name": "x", "type": "i32" },
+        { "name": "y", "type": "i32" },
+        { "name": "direction", "type": "MirDirection" }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Chat",
+      "fields": [
+        { "name": "message", "type": "string" },
+        { "name": "chat_type", "type": "ChatType" }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "ObjectChat",
+      "fields": [
+        { "name": "object_id", "type": "u32" },
+        { "name": "text", "type": "string" },
+        { "name": "chat_type", "type": "ChatType" }
+      ]
+    },
+    {
+      "id": 58,
+      "name": "LogOutSuccess",
+      "fields": [
+        { "name": "character_count", "type": "i32" },
+        { "name": "characters", "type": "list", "item_type": "SelectInfo", "count_from": "character_count" }
+      ]
+    },
+    {
+      "id": 59,
+      "name": "LogOutFailed",
+      "fields": []
+    }
+  ]
+}

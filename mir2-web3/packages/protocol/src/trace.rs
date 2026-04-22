@@ -1,0 +1,184 @@
+use serde::{Deserialize, Serialize};
+
+use crate::packets::{ClientPacket, ServerPacket};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PacketTraceDirection {
+    Client,
+    Server,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PacketTraceEntry {
+    pub sequence: usize,
+    pub direction: PacketTraceDirection,
+    pub packet_id: i16,
+    pub packet: &'static str,
+}
+
+pub fn trace_client_packets(packets: &[ClientPacket]) -> Vec<PacketTraceEntry> {
+    packets
+        .iter()
+        .enumerate()
+        .map(|(sequence, packet)| PacketTraceEntry {
+            sequence,
+            direction: PacketTraceDirection::Client,
+            packet_id: packet.packet_id() as i16,
+            packet: client_packet_name(packet),
+        })
+        .collect()
+}
+
+pub fn trace_server_packets(packets: &[ServerPacket]) -> Vec<PacketTraceEntry> {
+    packets
+        .iter()
+        .enumerate()
+        .map(|(sequence, packet)| PacketTraceEntry {
+            sequence,
+            direction: PacketTraceDirection::Server,
+            packet_id: packet.packet_id() as i16,
+            packet: server_packet_name(packet),
+        })
+        .collect()
+}
+
+pub fn client_packet_name(packet: &ClientPacket) -> &'static str {
+    match packet {
+        ClientPacket::ClientVersion { .. } => "ClientVersion",
+        ClientPacket::Disconnect => "Disconnect",
+        ClientPacket::KeepAlive { .. } => "KeepAlive",
+        ClientPacket::NewAccount { .. } => "NewAccount",
+        ClientPacket::ChangePassword { .. } => "ChangePassword",
+        ClientPacket::Login { .. } => "Login",
+        ClientPacket::NewCharacter { .. } => "NewCharacter",
+        ClientPacket::DeleteCharacter { .. } => "DeleteCharacter",
+        ClientPacket::StartGame { .. } => "StartGame",
+        ClientPacket::LogOut => "LogOut",
+        ClientPacket::Turn { .. } => "Turn",
+        ClientPacket::Walk { .. } => "Walk",
+        ClientPacket::Run { .. } => "Run",
+        ClientPacket::Chat { .. } => "Chat",
+        ClientPacket::MoveItem { .. } => "MoveItem",
+        ClientPacket::StoreItem { .. } => "StoreItem",
+        ClientPacket::TakeBackItem { .. } => "TakeBackItem",
+        ClientPacket::MergeItem { .. } => "MergeItem",
+        ClientPacket::EquipItem { .. } => "EquipItem",
+        ClientPacket::RemoveItem { .. } => "RemoveItem",
+        ClientPacket::RemoveSlotItem { .. } => "RemoveSlotItem",
+        ClientPacket::SplitItem { .. } => "SplitItem",
+        ClientPacket::UseItem { .. } => "UseItem",
+        ClientPacket::DropItem { .. } => "DropItem",
+        ClientPacket::DeleteItem { .. } => "DeleteItem",
+        ClientPacket::DropGold { .. } => "DropGold",
+        ClientPacket::PickUp => "PickUp",
+        ClientPacket::RequestItemInfo { .. } => "RequestItemInfo",
+        ClientPacket::Attack { .. } => "Attack",
+        ClientPacket::RangeAttack { .. } => "RangeAttack",
+        ClientPacket::Harvest { .. } => "Harvest",
+        ClientPacket::BuyItem { .. } => "BuyItem",
+        ClientPacket::SellItem { .. } => "SellItem",
+        ClientPacket::RepairItem { .. } => "RepairItem",
+        ClientPacket::SRepairItem { .. } => "SRepairItem",
+        ClientPacket::UnlockStorage { .. } => "UnlockStorage",
+        ClientPacket::SetStoragePassword { .. } => "SetStoragePassword",
+        ClientPacket::RemoveStoragePassword { .. } => "RemoveStoragePassword",
+    }
+}
+
+pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
+    match packet {
+        ServerPacket::Connected => "Connected",
+        ServerPacket::ClientVersion { .. } => "ClientVersion",
+        ServerPacket::Disconnect { .. } => "Disconnect",
+        ServerPacket::KeepAlive { .. } => "KeepAlive",
+        ServerPacket::NewAccount { .. } => "NewAccount",
+        ServerPacket::ChangePassword { .. } => "ChangePassword",
+        ServerPacket::ChangePasswordBanned { .. } => "ChangePasswordBanned",
+        ServerPacket::Login { .. } => "Login",
+        ServerPacket::LoginBanned { .. } => "LoginBanned",
+        ServerPacket::LoginSuccess { .. } => "LoginSuccess",
+        ServerPacket::NewCharacter { .. } => "NewCharacter",
+        ServerPacket::NewCharacterSuccess { .. } => "NewCharacterSuccess",
+        ServerPacket::DeleteCharacter { .. } => "DeleteCharacter",
+        ServerPacket::DeleteCharacterSuccess { .. } => "DeleteCharacterSuccess",
+        ServerPacket::StartGame { .. } => "StartGame",
+        ServerPacket::StartGameBanned { .. } => "StartGameBanned",
+        ServerPacket::StartGameDelay { .. } => "StartGameDelay",
+        ServerPacket::MapInformation { .. } => "MapInformation",
+        ServerPacket::UserInformation { .. } => "UserInformation",
+        ServerPacket::UserLocation { .. } => "UserLocation",
+        ServerPacket::ObjectPlayer { .. } => "ObjectPlayer",
+        ServerPacket::ObjectRemove { .. } => "ObjectRemove",
+        ServerPacket::ObjectTurn { .. } => "ObjectTurn",
+        ServerPacket::ObjectWalk { .. } => "ObjectWalk",
+        ServerPacket::ObjectRun { .. } => "ObjectRun",
+        ServerPacket::ObjectBackStep { .. } => "ObjectBackStep",
+        ServerPacket::ObjectSitDown { .. } => "ObjectSitDown",
+        ServerPacket::Chat { .. } => "Chat",
+        ServerPacket::ObjectChat { .. } => "ObjectChat",
+        ServerPacket::NewItemInfo { .. } => "NewItemInfo",
+        ServerPacket::MoveItem { .. } => "MoveItem",
+        ServerPacket::EquipItem { .. } => "EquipItem",
+        ServerPacket::MergeItem { .. } => "MergeItem",
+        ServerPacket::RemoveItem { .. } => "RemoveItem",
+        ServerPacket::RemoveSlotItem { .. } => "RemoveSlotItem",
+        ServerPacket::TakeBackItem { .. } => "TakeBackItem",
+        ServerPacket::StoreItem { .. } => "StoreItem",
+        ServerPacket::SplitItem { .. } => "SplitItem",
+        ServerPacket::SplitItem1 { .. } => "SplitItem1",
+        ServerPacket::UseItem { .. } => "UseItem",
+        ServerPacket::DropItem { .. } => "DropItem",
+        ServerPacket::NewMonsterInfo { .. } => "NewMonsterInfo",
+        ServerPacket::NewNpcInfo { .. } => "NewNpcInfo",
+        ServerPacket::ObjectItem { .. } => "ObjectItem",
+        ServerPacket::ObjectGold { .. } => "ObjectGold",
+        ServerPacket::GainedItem { .. } => "GainedItem",
+        ServerPacket::GainedGold { .. } => "GainedGold",
+        ServerPacket::LoseGold { .. } => "LoseGold",
+        ServerPacket::GainedCredit { .. } => "GainedCredit",
+        ServerPacket::LoseCredit { .. } => "LoseCredit",
+        ServerPacket::ObjectMonster { .. } => "ObjectMonster",
+        ServerPacket::ObjectAttack { .. } => "ObjectAttack",
+        ServerPacket::Struck { .. } => "Struck",
+        ServerPacket::ObjectStruck { .. } => "ObjectStruck",
+        ServerPacket::DuraChanged { .. } => "DuraChanged",
+        ServerPacket::DeleteItem { .. } => "DeleteItem",
+        ServerPacket::ObjectDied { .. } => "ObjectDied",
+        ServerPacket::ObjectHarvest { .. } => "ObjectHarvest",
+        ServerPacket::ObjectHarvested { .. } => "ObjectHarvested",
+        ServerPacket::ObjectNpc { .. } => "ObjectNpc",
+        ServerPacket::ObjectHide { .. } => "ObjectHide",
+        ServerPacket::ObjectShow { .. } => "ObjectShow",
+        ServerPacket::ObjectTeleportOut { .. } => "ObjectTeleportOut",
+        ServerPacket::ObjectTeleportIn { .. } => "ObjectTeleportIn",
+        ServerPacket::TeleportIn => "TeleportIn",
+        ServerPacket::NPCGoods { .. } => "NPCGoods",
+        ServerPacket::NPCSell => "NPCSell",
+        ServerPacket::NPCRepair { .. } => "NPCRepair",
+        ServerPacket::NPCSRepair { .. } => "NPCSRepair",
+        ServerPacket::NPCRefine { .. } => "NPCRefine",
+        ServerPacket::NPCCheckRefine => "NPCCheckRefine",
+        ServerPacket::NPCCollectRefine { .. } => "NPCCollectRefine",
+        ServerPacket::NPCReplaceWedRing { .. } => "NPCReplaceWedRing",
+        ServerPacket::NPCStorage => "NPCStorage",
+        ServerPacket::SellItem { .. } => "SellItem",
+        ServerPacket::RepairItem { .. } => "RepairItem",
+        ServerPacket::CraftItem { .. } => "CraftItem",
+        ServerPacket::ItemRepaired { .. } => "ItemRepaired",
+        ServerPacket::ItemSlotSizeChanged { .. } => "ItemSlotSizeChanged",
+        ServerPacket::ItemSealChanged { .. } => "ItemSealChanged",
+        ServerPacket::ObjectRevived { .. } => "ObjectRevived",
+        ServerPacket::ObjectEffect { .. } => "ObjectEffect",
+        ServerPacket::ObjectHealth { .. } => "ObjectHealth",
+        ServerPacket::ObjectRangeAttack { .. } => "ObjectRangeAttack",
+        ServerPacket::RefreshItem { .. } => "RefreshItem",
+        ServerPacket::ObjectSpell { .. } => "ObjectSpell",
+        ServerPacket::ResizeStorage { .. } => "ResizeStorage",
+        ServerPacket::StorageUnlockResult { .. } => "StorageUnlockResult",
+        ServerPacket::StoragePasswordResult { .. } => "StoragePasswordResult",
+        ServerPacket::LogOutSuccess { .. } => "LogOutSuccess",
+        ServerPacket::LogOutFailed => "LogOutFailed",
+    }
+}

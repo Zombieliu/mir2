@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-04-22",
+  "scope": "Full Crystal/Mir2 1:1 packet and behavior parity matrix for mir2-web3.",
+  "sourceOfTruth": [
+    "E:/mir2/Crystal/Server",
+    "E:/mir2/Crystal/Server.MirDB",
+    "E:/mir2/Exports",
+    "E:/mir2/Localization"
+  ],
+  "statusLegend": {
+    "matrix_defined": "The flow is listed with expected evidence, but no accepted local-vs-Crystal comparison exists yet.",
+    "local_trace_ready": "The flow can be captured against the local Rust gateway trace harness.",
+    "web_smoke_ready": "The flow is currently reachable through browser/WebSocket smoke automation.",
+    "simulation_test_ready": "The flow has focused Rust simulation coverage but no accepted live Crystal trace.",
+    "live_trace_pending": "The flow requires MIR2_CRYSTAL_TCP_ADDR or a Crystal-side fixture before acceptance.",
+    "accepted": "Local and Crystal behavior evidence has been reviewed and accepted."
+  },
+  "requiredEvidence": [
+    "Crystal source or generated data reference",
+    "local Rust behavior or packet artifact",
+    "live Crystal behavior or packet artifact when the system is packet-visible",
+    "focused regression test or smoke script",
+    "roadmap completion note with commands"
+  ],
+  "diffProfile": {
+    "defaultTimingToleranceMs": 750,
+    "timingComparison": "disabled by default; enable with MIR2_PACKET_TRACE_COMPARE_TIMING=1 after endpoint latency is controlled",
+    "mismatchReasons": [
+      "endpoint_error",
+      "missing_local_packet",
+      "missing_crystal_packet",
+      "direction_mismatch",
+      "packet_id_mismatch",
+      "packet_name_mismatch",
+      "packet_order_mismatch",
+      "decode_status_mismatch",
+      "payload_length_mismatch",
+      "payload_hash_mismatch",
+      "timing_tolerance_mismatch"
+    ],
+    "knownNondeterministicFields": [
+      "generatedAtUnixMs",
+      "elapsedMs",
+      "fixture lifecycle names when fixtureMode=ephemeral",
+      "payloadHash fields containing timestamps, object ids, generated account names, randomized drops, or runtime allocation ids until field-level decoders are added"
+    ]
+  },
+  "flows": [
+    {
+      "id": "account.version_login_start",
+      "category": "account",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "core_bootstrap",
+      "actions": ["ClientVersion", "Login", "StartGame"],
+      "expectedPackets": ["Connected", "ClientVersion", "LoginSuccess", "StartGame", "MapInformation", "UserInformation", "UserLocation"],
+      "behaviorChecks": ["version negotiation result", "character list shape", "selected character bootstrap state"],
+      "crystalRequirement": "Capture the same flow against MIR2_CRYSTAL_TCP_ADDR and diff packet ids, order, payload length, and payload hash."
+    },
+    {
+      "id": "account.create_change_delete_logout",
+      "category": "account",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "account_lifecycle",
+      "actions": ["NewAccount", "Login", "NewCharacter", "DeleteCharacter", "ChangePassword", "Login", "LogOut"],
+      "expectedPackets": ["NewAccount", "LoginSuccess", "NewCharacterSuccess", "DeleteCharacterSuccess", "ChangePassword", "LoginSuccess", "LogOutSuccess"],
+      "behaviorChecks": ["account creation result", "password mutation", "character slot mutation", "logout select-list refresh"]
+    },
+    {
+      "id": "character.select_create_delete",
+      "category": "character",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "account_lifecycle",
+      "actions": ["Login", "NewCharacter", "DeleteCharacter"],
+      "expectedPackets": ["LoginSuccess", "NewCharacterSuccess", "DeleteCharacterSuccess"],
+      "behaviorChecks": ["class/gender fields", "select info packet fields", "slot index behavior"]
+    },
+    {
+      "id": "start_game.bootstrap_snapshot",
+      "category": "start_game",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "core_bootstrap",
+      "actions": ["StartGame"],
+      "expectedPackets": ["StartGame", "MapInformation", "UserInformation", "UserLocation", "ObjectPlayer", "ObjectMonster", "ObjectNpc"],
+      "behaviorChecks": ["map metadata", "player stats", "starter entities", "AOI initial visibility"]
+    },
+    {
+      "id": "movement.turn_walk_run_keepalive",
+      "category": "movement",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "movement_chat_keepalive",
+      "actions": ["Turn", "Walk", "Run", "KeepAlive"],
+      "expectedPackets": ["ObjectTurn", "ObjectWalk", "ObjectRun", "KeepAlive"],
+      "behaviorChecks": ["direction ids", "blocked tile handling", "run intermediate collision", "same-player object id"]
+    },
+    {
+      "id": "chat.normal_object_echo",
+      "category": "chat",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "movement_chat_keepalive",
+      "actions": ["Chat"],
+      "expectedPackets": ["Chat", "ObjectChat"],
+      "behaviorChecks": ["normal chat type", "object chat visibility", "linked item count handling"]
+    },
+    {
+      "id": "combat.basic_attack_range_attack",
+      "category": "combat",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "combat_basic",
+      "actions": ["Attack", "RangeAttack"],
+      "expectedPackets": ["ObjectAttack", "ObjectRangeAttack", "ObjectStruck", "Struck", "ObjectHealth", "ObjectDied"],
+      "behaviorChecks": ["delayed hit timing", "target id", "attack direction", "damage visibility", "death packet ordering"]
+    },
+    {
+      "id": "npc.dialog_input_reward",
+      "category": "npc",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_ui_smoke_and_simulation_tests",
+      "actions": ["Interact", "SelectNpcDialog", "SubmitNpcInput"],
+      "expectedPackets": ["ObjectNpc", "ObjectChat", "Chat"],
+      "behaviorChecks": ["dialog text", "link target", "input substitution", "flag persistence", "reward action"],
+      "crystalRequirement": "Add representative imported script path comparisons beyond command-name coverage."
+    },
+    {
+      "id": "inventory.move_split_merge_drop_pickup",
+      "category": "inventory",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "inventory_storage",
+      "actions": ["MoveItem", "SplitItem", "MergeItem", "DropItem", "DropGold", "PickUp"],
+      "expectedPackets": ["ObjectItem", "ObjectGold", "ObjectRemove", "UserInformation", "Chat"],
+      "behaviorChecks": ["slot mutation", "stack quantities", "drop ownership", "pickup inventory placement", "no item loss"]
+    },
+    {
+      "id": "storage.password_store_takeback",
+      "category": "storage",
+      "priority": "p0",
+      "status": "local_trace_ready",
+      "automation": "tcp_packet_trace",
+      "traceFlow": "storage_password",
+      "actions": ["SetStoragePassword", "UnlockStorage", "RemoveStoragePassword", "StoreItem", "TakeBackItem"],
+      "expectedPackets": ["StoragePasswordResult", "StorageUnlockResult", "ResizeStorage", "UserInformation"],
+      "behaviorChecks": ["password state", "expanded size fields", "locked storage rejection", "store/take-back mutation"]
+    },
+    {
+      "id": "item_use.consume_equip_repair_durability",
+      "category": "item_use",
+      "priority": "p0",
+      "status": "simulation_test_ready",
+      "automation": "simulation_tests_and_future_tcp_trace",
+      "actions": ["UseItem", "EquipItem", "RemoveItem", "RepairItem", "SRepairItem"],
+      "expectedPackets": ["UserInformation", "Chat"],
+      "behaviorChecks": ["consume conditions", "equip class/level restrictions", "durability loss", "normal repair", "special repair"]
+    },
+    {
+      "id": "map_transfer.safe_zone_aoi",
+      "category": "map_transfer",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_ui_smoke_and_map_api_smoke",
+      "actions": ["TransferMap", "Walk", "Run"],
+      "expectedPackets": ["MapInformation", "UserLocation", "ObjectRemove", "ObjectPlayer", "ObjectMonster", "ObjectNpc"],
+      "behaviorChecks": ["movement trigger bounds", "target spawn collision", "safe-zone flag", "mini/big map ids", "AOI refresh"]
+    },
+    {
+      "id": "death_revive.player_monster_revive",
+      "category": "death_revive",
+      "priority": "p1",
+      "status": "simulation_test_ready",
+      "automation": "simulation_tests_and_future_tcp_trace",
+      "actions": ["Attack", "Tick", "Revive"],
+      "expectedPackets": ["ObjectDied", "ObjectRevived", "ObjectHealth", "UserLocation"],
+      "behaviorChecks": ["dead state", "corpse delay", "monster respawn", "player revive percent", "special AI state reset"]
+    },
+    {
+      "id": "skills.cast_fail_success_cooldown",
+      "category": "skills",
+      "priority": "p0",
+      "status": "simulation_test_ready",
+      "automation": "simulation_tests_pending_packet_matrix",
+      "actions": ["CastSkill", "Attack", "RangeAttack"],
+      "expectedPackets": ["ObjectAttack", "ObjectRangeAttack", "ObjectHealth", "Chat"],
+      "behaviorChecks": ["MP cost", "cooldown", "safe-zone restrictions", "class restrictions", "packet-visible animation"]
+    },
+    {
+      "id": "summons.pet_spawn_combat_cleanup",
+      "category": "summons",
+      "priority": "p0",
+      "status": "simulation_test_ready",
+      "automation": "simulation_tests_pending_packet_matrix",
+      "actions": ["CastSkill", "Attack", "Tick"],
+      "expectedPackets": ["ObjectMonster", "ObjectAttack", "ObjectRangeAttack", "ObjectHide", "ObjectShow", "ObjectDied"],
+      "behaviorChecks": ["master object id", "extra presentation", "target selection", "timeout", "out-of-range cleanup"]
+    },
+    {
+      "id": "trade.offer_accept_cancel_disconnect",
+      "category": "trade",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_multi_client_tests",
+      "actions": ["stage5:trade.start", "stage5:trade.offerGold", "stage5:trade.offerItem", "stage5:trade.accept", "Disconnect"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["no loss before accept", "accepted transaction", "cancel rollback", "disconnect rollback"]
+    },
+    {
+      "id": "shop.buy_sell_repair",
+      "category": "shop",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:shop.buy", "SellItem", "RepairItem", "SRepairItem"],
+      "expectedPackets": ["UserInformation", "Chat"],
+      "behaviorChecks": ["shop table item", "price", "full bag rejection", "sell value", "repair cost"]
+    },
+    {
+      "id": "auction.list_buy_cancel_full_bag",
+      "category": "auction",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:auction.list", "stage5:auction.buy", "stage5:auction.cancel"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["listing ownership", "gold debit", "item transfer", "full bag no-sale", "cancel return"]
+    },
+    {
+      "id": "guild.create_permissions_territory",
+      "category": "guild",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:guild.create", "stage5:guild.invite", "stage5:guild.rank", "stage5:guildTerritory.buy"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["guild name", "member list", "rank permissions", "guild territory ownership", "recall"]
+    },
+    {
+      "id": "mail.send_claim_delete_attachment",
+      "category": "mail",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:mail.send", "stage5:mail.claim", "stage5:mail.delete"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["recipient", "read/claim/delete state", "gold attachment", "item attachment", "full bag rejection"]
+    },
+    {
+      "id": "conquest.castle_war_gate_wall_guard",
+      "category": "conquest",
+      "priority": "p0",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_npc_script_tests",
+      "actions": ["stage5:conquest.start", "stage5:conquest.owner", "NPC conquest commands"],
+      "expectedPackets": ["ObjectMonster", "ObjectNpc", "Chat", "UserInformation"],
+      "behaviorChecks": ["war schedule", "castle owner", "gate open/close", "walls", "guards", "tax"]
+    },
+    {
+      "id": "hero.recruit_behaviour_equipment_revive",
+      "category": "hero",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_npc_script_tests",
+      "actions": ["stage5:hero.recruit", "stage5:hero.behaviour", "NPC hero revive", "NPC hero seal"],
+      "expectedPackets": ["ObjectPlayer", "ObjectDied", "ObjectRevived", "Chat"],
+      "behaviorChecks": ["hero state persistence", "follow/attack mode", "equipment/inventory", "death revive seal"]
+    },
+    {
+      "id": "mining.ore_success_failure",
+      "category": "mining",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:mining.mine"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["map/weapon requirements", "success probability", "ore quality", "inventory full behavior"]
+    },
+    {
+      "id": "crafting.materials_probability_result",
+      "category": "crafting",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "stage5_command_and_simulation_tests",
+      "actions": ["stage5:crafting.craft", "stage5:crafting.refine"],
+      "expectedPackets": ["Chat", "UserInformation"],
+      "behaviorChecks": ["material consumption", "success/failure probability", "crafted item stats", "refining result"]
+    },
+    {
+      "id": "ui.visual_original_layout",
+      "category": "ui",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "stage5_ui_smoke",
+      "actions": ["login UI", "select UI", "game HUD", "inventory", "character", "storage", "NPC", "combat", "map transfer", "systems"],
+      "expectedPackets": ["not_applicable"],
+      "behaviorChecks": ["1024x768 no overlap", "original asset frame", "minimap", "sprite library ids", "critical console errors"]
+    },
+    {
+      "id": "operations.load_soak_recovery",
+      "category": "operations",
+      "priority": "p1",
+      "status": "web_smoke_ready",
+      "automation": "load_harness_and_future_long_soak",
+      "actions": ["WebSocket load", "TCP load", "save reload", "backup restore", "socket close", "restart"],
+      "expectedPackets": ["KeepAlive", "UserInformation", "Disconnect"],
+      "behaviorChecks": ["64 client smoke", "long soak", "RSS/handle bounds", "corrupt store fallback", "atomic write"]
+    }
+  ]
+}
