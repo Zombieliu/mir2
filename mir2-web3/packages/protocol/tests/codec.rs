@@ -369,6 +369,16 @@ fn item_action_ack_server_packets_use_crystal_ids() {
             ServerPacketId::StoreItem,
         ),
         (
+            ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 7,
+                id_to: 8,
+                success: true,
+                destroy: false,
+            },
+            ServerPacketId::CombineItem,
+        ),
+        (
             ServerPacket::SplitItem1 {
                 grid: MirGridType::Inventory,
                 unique_id: 6,
@@ -779,6 +789,14 @@ fn item_and_combat_client_packets_use_crystal_payloads() {
                 panel_type: 0,
             },
             ClientPacketId::BuyItem as i16,
+        ),
+        (
+            ClientPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+            },
+            ClientPacketId::CombineItem as i16,
         ),
     ];
 

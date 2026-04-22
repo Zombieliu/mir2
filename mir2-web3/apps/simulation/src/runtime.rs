@@ -197,6 +197,7 @@ const CRYSTAL_BIND_DONT_DROP: i16 = 0x0002;
 const CRYSTAL_BIND_DONT_SELL: i16 = 0x0004;
 const CRYSTAL_BIND_DONT_STORE: i16 = 0x0008;
 const CRYSTAL_BIND_DONT_REPAIR: i16 = 0x0020;
+const CRYSTAL_BIND_DONT_UPGRADE: i16 = 0x0040;
 const CRYSTAL_BIND_DESTROY_ON_DROP: i16 = 0x0080;
 const CRYSTAL_BIND_NO_SREPAIR: i16 = 0x0400;
 
@@ -559,6 +560,10 @@ struct ItemState {
     cursed: bool,
     #[serde(default)]
     socket_slots: u8,
+    #[serde(default)]
+    sealed_expiry_time_binary_datetime: i64,
+    #[serde(default)]
+    sealed_next_time_binary_datetime: i64,
     attack: i32,
     defence: i32,
     heal_hp: i32,
@@ -1020,6 +1025,13 @@ fn current_language(world: &World) -> LanguageCode {
 fn system_message_key(world: &World, key: &str) -> ServerPacket {
     let message = localized_text_or_fallback(current_language(world), key, key);
     system_message(&message)
+}
+
+fn hint_chat_key(world: &World, key: &str) -> ServerPacket {
+    ServerPacket::Chat {
+        message: localized_text_or_fallback(current_language(world), key, key),
+        chat_type: ChatType::Hint,
+    }
 }
 
 fn system_message_key_args<I, S>(world: &World, key: &str, args: I) -> ServerPacket
@@ -3569,6 +3581,11 @@ impl SimulationSession {
                 ServerPacket::RepairItem { unique_id },
                 repair_item_impl(self.app.world_mut(), unique_id, true),
             ),
+            ClientPacket::CombineItem {
+                grid,
+                id_from,
+                id_to,
+            } => combine_item_impl(self.app.world_mut(), grid, id_from, id_to),
         }
     }
 
@@ -4134,6 +4151,19 @@ fn add_minutes_to_binary_datetime(base_binary_datetime: i64, minutes: u64) -> i6
             .expect("minutes should fit in i64")
             .saturating_mul(TICKS_PER_MINUTE),
     ) | DOTNET_DATETIME_KIND_LOCAL
+}
+
+fn crystal_duration_label_from_minutes(minutes: u64) -> String {
+    if minutes == 1 {
+        "1 minute".to_string()
+    } else {
+        format!("{minutes} minutes")
+    }
+}
+
+fn crystal_duration_label_from_seconds(seconds: u64) -> String {
+    let rounded_minutes = seconds.saturating_add(59) / 60;
+    crystal_duration_label_from_minutes(rounded_minutes.max(1))
 }
 
 fn current_binary_datetime() -> i64 {
@@ -20097,7 +20127,10 @@ fn user_item_from_item_state(item: &ItemState) -> UserItem {
         expire_info: None,
         rental_information: None,
         is_shop_item: false,
-        sealed_info: None,
+        sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
+            expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
+            next_seal_binary_datetime: item.sealed_next_time_binary_datetime,
+        }),
         gm_made: false,
     }
 }
@@ -20698,6 +20731,8 @@ fn add_or_increment_item_with_random_metadata(
             added_stats: added_stats.clone(),
             cursed,
             socket_slots,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -22207,6 +22242,237 @@ fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacke
     }]
 }
 
+enum CombineItemOutcome {
+    AckOnlyFailure,
+    FailureHint {
+        key: &'static str,
+        args: Vec<String>,
+    },
+    SocketSuccess {
+        unique_id: u64,
+        slot_size: i32,
+    },
+    SealSuccess {
+        unique_id: u64,
+        expiry_date_binary_datetime: i64,
+        minutes: u64,
+    },
+}
+
+fn combine_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    id_from: u64,
+    id_to: u64,
+) -> Vec<ServerPacket> {
+    let failed_packet = ServerPacket::CombineItem {
+        grid,
+        id_from,
+        id_to,
+        success: false,
+        destroy: false,
+    };
+
+    if grid != MirGridType::Inventory {
+        return vec![failed_packet];
+    }
+
+    let Some(from_slot) = u8::try_from(id_from).ok() else {
+        return vec![failed_packet];
+    };
+    let Some(to_slot) = u8::try_from(id_to).ok() else {
+        return vec![failed_packet];
+    };
+
+    let now_binary_datetime = current_binary_datetime();
+    let now_ticks = binary_datetime_ticks(now_binary_datetime);
+    let outcome = {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        let Some(from_index) = resources.inventory_items.iter().position(|item| {
+            item.slot == from_slot
+                && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        }) else {
+            return vec![failed_packet];
+        };
+        let Some(to_index) = resources.inventory_items.iter().position(|item| {
+            item.slot == to_slot
+                && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        }) else {
+            return vec![failed_packet];
+        };
+        if from_index == to_index {
+            return vec![failed_packet];
+        }
+
+        let source_item = resources.inventory_items[from_index].clone();
+        let target_key = resources.inventory_items[to_index].key.clone();
+        let Some(target_template) = crystal_item_template_for_item_key(&target_key) else {
+            return vec![failed_packet];
+        };
+
+        let source_shape = if source_item.key == "stage5-socket-source" {
+            Some(CRYSTAL_GEM_SHAPE_SOCKET)
+        } else if source_item.key == "stage5-seal-source" {
+            Some(CRYSTAL_GEM_SHAPE_SEAL)
+        } else {
+            crystal_item_template_for_item_key(&source_item.key).and_then(|template| {
+                (template.item_type == CRYSTAL_ITEM_TYPE_GEM
+                    && (template.shape == CRYSTAL_GEM_SHAPE_SOCKET
+                        || template.shape == CRYSTAL_GEM_SHAPE_SEAL))
+                    .then_some(template.shape)
+            })
+        };
+
+        match source_shape {
+            Some(CRYSTAL_GEM_SHAPE_SOCKET) => {
+                if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
+                    || target_template.unique != 0
+                {
+                    CombineItemOutcome::AckOnlyFailure
+                } else if !crystal_socket_source_valid_for_item(&source_item, &target_key) {
+                    CombineItemOutcome::FailureHint {
+                        key: "server.InvalidCombination",
+                        args: Vec::new(),
+                    }
+                } else if target_template.slots == 0
+                    || resources.inventory_items[to_index].socket_slots >= target_template.slots
+                {
+                    CombineItemOutcome::FailureHint {
+                        key: "server.ItemMaxSockets",
+                        args: Vec::new(),
+                    }
+                } else {
+                    resources.inventory_items[to_index].socket_slots = resources.inventory_items
+                        [to_index]
+                        .socket_slots
+                        .saturating_add(1);
+                    let unique_id = u64::from(resources.inventory_items[to_index].slot);
+                    let slot_size = i32::from(resources.inventory_items[to_index].socket_slots);
+                    if resources.inventory_items[from_index].quantity > 1 {
+                        resources.inventory_items[from_index].quantity -= 1;
+                    } else {
+                        resources.inventory_items.remove(from_index);
+                    }
+                    CombineItemOutcome::SocketSuccess {
+                        unique_id,
+                        slot_size,
+                    }
+                }
+            }
+            Some(CRYSTAL_GEM_SHAPE_SEAL) => {
+                if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
+                    || target_template.unique != 0
+                {
+                    CombineItemOutcome::AckOnlyFailure
+                } else if resources.inventory_items[to_index].sealed_expiry_time_binary_datetime
+                    != 0
+                    && binary_datetime_ticks(
+                        resources.inventory_items[to_index].sealed_expiry_time_binary_datetime,
+                    ) > now_ticks
+                {
+                    CombineItemOutcome::FailureHint {
+                        key: "server.ItemAlreadySealed",
+                        args: Vec::new(),
+                    }
+                } else if resources.inventory_items[to_index].sealed_next_time_binary_datetime != 0
+                    && binary_datetime_ticks(
+                        resources.inventory_items[to_index].sealed_next_time_binary_datetime,
+                    ) > now_ticks
+                {
+                    let remaining_ticks = binary_datetime_ticks(
+                        resources.inventory_items[to_index].sealed_next_time_binary_datetime,
+                    ) - now_ticks;
+                    let remaining_seconds =
+                        u64::try_from((remaining_ticks + 9_999_999) / 10_000_000).unwrap_or(1);
+                    CombineItemOutcome::FailureHint {
+                        key: "server.ItemCannotBeResealedFor",
+                        args: vec![crystal_duration_label_from_seconds(
+                            remaining_seconds.max(1),
+                        )],
+                    }
+                } else {
+                    let Some(minutes) = crystal_seal_minutes_for_source_item(&source_item, 1)
+                    else {
+                        return vec![failed_packet];
+                    };
+                    let expiry_date_binary_datetime = future_binary_datetime_minutes(minutes);
+                    let next_seal_binary_datetime = add_minutes_to_binary_datetime(
+                        expiry_date_binary_datetime,
+                        CRYSTAL_ITEM_SEAL_DELAY_MINUTES,
+                    );
+                    resources.inventory_items[to_index].sealed_expiry_time_binary_datetime =
+                        expiry_date_binary_datetime;
+                    resources.inventory_items[to_index].sealed_next_time_binary_datetime =
+                        next_seal_binary_datetime;
+                    let unique_id = u64::from(resources.inventory_items[to_index].slot);
+                    if resources.inventory_items[from_index].quantity > 1 {
+                        resources.inventory_items[from_index].quantity -= 1;
+                    } else {
+                        resources.inventory_items.remove(from_index);
+                    }
+                    CombineItemOutcome::SealSuccess {
+                        unique_id,
+                        expiry_date_binary_datetime,
+                        minutes,
+                    }
+                }
+            }
+            _ => CombineItemOutcome::AckOnlyFailure,
+        }
+    };
+
+    match outcome {
+        CombineItemOutcome::AckOnlyFailure => vec![failed_packet],
+        CombineItemOutcome::FailureHint { key, args } => {
+            let message = if args.is_empty() {
+                hint_chat_key(world, key)
+            } else {
+                hint_chat_key_args(world, key, args)
+            };
+            vec![message, failed_packet]
+        }
+        CombineItemOutcome::SocketSuccess {
+            unique_id,
+            slot_size,
+        } => vec![
+            hint_chat_key(world, "server.ItemSocketsIncreased"),
+            ServerPacket::ItemSlotSizeChanged {
+                unique_id,
+                slot_size,
+            },
+            ServerPacket::CombineItem {
+                grid,
+                id_from,
+                id_to,
+                success: true,
+                destroy: false,
+            },
+        ],
+        CombineItemOutcome::SealSuccess {
+            unique_id,
+            expiry_date_binary_datetime,
+            minutes,
+        } => vec![
+            hint_chat_key_args(
+                world,
+                "server.ItemSealedFor",
+                [crystal_duration_label_from_minutes(minutes)],
+            ),
+            ServerPacket::ItemSealChanged {
+                unique_id,
+                expiry_date_binary_datetime,
+            },
+            ServerPacket::CombineItem {
+                grid,
+                id_from,
+                id_to,
+                success: true,
+                destroy: false,
+            },
+        ],
+    }
+}
+
 fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, preferred_slot: u8) {
     let mut resources = world.resource_mut::<SimulationResources>();
     let slot =
@@ -22229,6 +22495,8 @@ fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, prefe
         added_stats: equipment.added_stats,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,
+        sealed_expiry_time_binary_datetime: equipment.sealed_expiry_time_binary_datetime,
+        sealed_next_time_binary_datetime: equipment.sealed_next_time_binary_datetime,
         attack: equipment.attack,
         defence: equipment.defence,
         heal_hp: 0,
@@ -24118,8 +24386,8 @@ fn equip_inventory_item(
         added_stats: item.added_stats.clone(),
         cursed: item.cursed,
         socket_slots: item.socket_slots,
-        sealed_expiry_time_binary_datetime: 0,
-        sealed_next_time_binary_datetime: 0,
+        sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
+        sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
         attack: item.attack,
         defence: item.defence,
     };
@@ -24779,6 +25047,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -24802,6 +25072,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -24826,6 +25098,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -24850,6 +25124,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 2,
             heal_hp: 0,
@@ -24874,6 +25150,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 5,
             defence: 0,
             heal_hp: 0,
@@ -24898,6 +25176,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 4,
             heal_hp: 0,
@@ -24921,6 +25201,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -24949,6 +25231,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -24972,6 +25256,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -24995,6 +25281,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25023,6 +25311,8 @@ fn seed_storage_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -25046,6 +25336,8 @@ fn seed_storage_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 2,
             heal_hp: 0,
@@ -25564,6 +25856,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25595,6 +25889,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25625,6 +25921,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25655,6 +25953,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25692,6 +25992,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25728,6 +26030,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25769,6 +26073,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25799,6 +26105,48 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
+            attack: 0,
+            defence: 0,
+            heal_hp: 0,
+            heal_mp: 0,
+        });
+    }
+
+    fn add_inventory_crystal_item_with_socket_slots(
+        session: &mut SimulationSession,
+        template_name: &str,
+        slot: u8,
+        socket_slots: u8,
+    ) {
+        let template = mir2_game_data::crystal_item_by_name(template_name)
+            .expect("Crystal item template should exist");
+        let key = super::crystal_item_key_for_template(&template);
+        let mut resources = session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>();
+        resources.inventory_items.push(ItemState {
+            key: key.clone(),
+            name: template.name.clone(),
+            icon: super::item_icon_for_key(&key),
+            slot,
+            container: ItemContainer::Bag1,
+            quantity: 1,
+            description: template.tooltip.clone().unwrap_or_default(),
+            durability_current: (template.durability > 0).then_some(template.durability),
+            durability_max: (template.durability > 0).then_some(template.durability),
+            weight: u16::from(template.weight),
+            equip_slot: None,
+            grade: ItemGrade::None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25847,6 +26195,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25884,6 +26234,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -25923,6 +26275,8 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
             attack,
             defence,
             heal_hp: 0,
@@ -46316,6 +46670,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -46383,6 +46739,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -47807,6 +48165,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -49625,6 +49985,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -50903,6 +51265,8 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
                 attack: 0,
                 defence: 4,
                 heal_hp: 0,
@@ -54191,6 +54555,141 @@ mod tests {
                 && item.name == "Wooden Sword"
                 && item.socket_slots == 0
         }));
+    }
+
+    #[test]
+    fn combine_item_packet_socket_branch_emits_crystal_ack_and_slot_change() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item_with_socket_slots(&mut session, "BengalTiger", 32, 4);
+        add_socket_source_test_item(&mut session, 31, 2);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemSlotSizeChanged {
+                unique_id: 32,
+                slot_size: 5
+            }
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31
+            && item.key == "stage5-socket-source"
+            && item.quantity == 1));
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.name == "BengalTiger" && item.socket_slots == 5));
+    }
+
+    #[test]
+    fn combine_item_packet_socket_branch_rejects_maxed_target() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item_with_socket_slots(&mut session, "BengalTiger", 32, 5);
+        add_socket_source_test_item(&mut session, 31, 1);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31
+            && item.key == "stage5-socket-source"
+            && item.quantity == 1));
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.name == "BengalTiger" && item.socket_slots == 5));
+    }
+
+    #[test]
+    fn combine_item_packet_seal_branch_emits_crystal_ack_and_seal_change() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_seal_source_test_item(&mut session, 31, 2);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 4,
+        });
+        let expiry = packets.iter().find_map(|packet| match packet {
+            ServerPacket::ItemSealChanged {
+                unique_id,
+                expiry_date_binary_datetime,
+            } if *unique_id == 4 => Some(*expiry_date_binary_datetime),
+            _ => None,
+        });
+        let expiry = expiry.expect("seal packet should be emitted");
+        const TICKS_PER_MINUTE: i64 = 60 * 10_000_000;
+        let expected_delay_ticks = i64::try_from(super::CRYSTAL_ITEM_SEAL_DELAY_MINUTES)
+            .expect("seal delay fits i64")
+            * TICKS_PER_MINUTE;
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { chat_type: ChatType::Hint, message }
+                if message.contains("45 minutes")
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 4,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.key == "stage5-seal-source" && item.quantity == 1));
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 4 && item.name == "Dagger")
+            .expect("dagger should remain in inventory");
+        assert_eq!(dagger.sealed_expiry_time_binary_datetime, expiry);
+        assert_eq!(
+            super::binary_datetime_ticks(dagger.sealed_next_time_binary_datetime),
+            super::binary_datetime_ticks(expiry) + expected_delay_ticks
+        );
     }
 
     #[test]

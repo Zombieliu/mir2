@@ -20,22 +20,23 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
 
 ## Current Checkpoint
 
-- Active round: `2026-04-23-R25`
-- Active task: Crystal storage item flag/rejection semantics.
-- Active round state: partial code landed and `cargo fmt` passed, but R25 tests have not been run after the latest edits.
-- Last completed round: `2026-04-23-R24`
-- Backend/server parity estimate: `77.12%`
+- Active round: `2026-04-23-R27`
+- Active task: select the next highest-value small unchecked parity task after verified R26 `CombineItem` packet-parity completion.
+- Active round state: selection only. R26 is complete and should not be reopened unless tests or source inspection reveal a regression.
+- Last completed round: `2026-04-23-R26`
+- Backend/server parity estimate: `77.14%`
 - Whole-project 1:1 estimate: roughly `61.7%`
-- Latest completed code work: Crystal NPC `SellItem` `DontSell`, script `[Types]`, ack-only failure, `UserItem.Price() / 2`, and gold-cap semantics.
-- Latest full backend verification: `cargo test -p mir2-simulation -- --test-threads=1` passed with 457 tests.
-- Latest formatting verification: `cargo fmt` passed after the partial R25 edits. The latest `cargo fmt --check` remains the R24 pass.
-- This directory is not known to be a git repository in the current environment, so rely on docs and file inspection rather than `git status`.
+- Latest completed code work: Crystal inventory-grid `CombineItem` packet parity now exists for the currently modeled shape-7 socket-growth and shape-8 seal branches, including protocol ids/codecs, gateway JSON exposure, runtime dispatch, and persisted seal metadata flow-through.
+- Latest full backend verification: `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` passed with 461 tests.
+- Latest formatting verification: `cargo +1.89.0 fmt --check` passed.
+- Repository status note: `mir2` is a git repository on `main`; the known unrelated dirty item is outer-repo submodule drift at `refactor-pwa`. Do not revert or commit that drift unless explicitly asked.
+- Toolchain note: this Mac environment needs `cargo +1.89.0` for Rust verification because the default `rustc 1.87.0` fails on locked `bevy_* 0.17.3`.
 
-## R25 Partial State Before Reboot
+## R25 Completed State
 
-R25 has started and should be continued, not restarted as a fresh task. Do not move the backend parity estimate above `77.12%` until R25 passes focused and broader tests.
+R25 is complete and already accounted for. Do not rerun or reopen it unless current tests or code inspection show a regression.
 
-Crystal source audit completed:
+Crystal source audit confirmed:
 
 - `C.StoreItem` carries `from` and `to`; `S.StoreItem` returns `from`, `to`, and `success`.
 - `C.TakeBackItem` carries `from` and `to`; `S.TakeBackItem` returns `from`, `to`, and `success`.
@@ -45,80 +46,81 @@ Crystal source audit completed:
 - Store target occupied fails; TakeBack target occupied fails. There is no swap.
 - Store/TakeBack failures are ack-only `success=false` with no chat message.
 - Store blocks base bind `DontStore` and rental `DontStore`; TakeBack has no bind/rental check.
-- Current Rust simulation does not model the Crystal NPC object/range branch beyond the active service context.
+- Current Rust simulation still models the service-context branch rather than a full NPC object/range check, but it now preserves the real `NPCStorage` activation path used by imported `@Storage` dialogs.
 
-Partial code already edited in `apps/simulation/src/runtime.rs`:
+Implemented code/results:
 
 - Added Crystal `DontStore` bind constant.
 - Added storage active-service helper and inventory-slot validation helper.
 - Reworked `store_item_impl` to require active storage service, return ack-only failures, reject storage lock, invalid slots, inaccessible storage slot, missing item, `DontStore`, and occupied target.
 - Reworked `take_back_item_impl` to require active storage service, return ack-only failures, reject storage lock, invalid slots, inaccessible storage slot, missing item, and occupied target.
-- Partially patched storage tests to activate the storage service and expect Crystal ack-only behavior.
+- Recorded `NPCStorage` in the normal service-context activation path so a real `@Storage` dialog can store/take back without the test-only helper.
+- Added an end-to-end regression that opens the imported storage page and proves store/take-back succeeds through the actual NPC flow.
+- Added a Unix/Mac `crystal_local_time_snapshot()` implementation using `libc`; the full suite exposed a pre-existing non-Windows test gap in current NPC time-condition coverage.
+- Added direct `libc = "0.2"` in `apps/simulation/Cargo.toml` and refreshed `Cargo.lock`.
 
 Rust Explorer audit completed:
 
 - Packet dispatch is direct: `ClientPacket::StoreItem` / `TakeBackItem` route to `store_item_impl` / `take_back_item_impl`.
 - The new active-service gate only accepts `active_npc_service.label_key == "STORAGE"`.
-- `record_crystal_npc_service_context` currently records service context for sell/goods/repair-style packets, but not `NPCStorage`.
-- Because `set_dialog` clears `active_npc_service`, a real `@Storage` NPC flow may emit `NPCStorage` but still leave `StoreItem` / `TakeBackItem` failing unless the test-only helper sets service state.
-- Smallest next patch: include `NPCStorage` in service-context activation and add an end-to-end regression that opens an NPC `@Storage` page, then stores/takes back successfully without using the test-only helper.
+- `record_crystal_npc_service_context` now records `NPCStorage`, closing the real-dialog activation gap that previously only test helpers covered.
 
-R25 not yet verified:
-
-- `cargo fmt` passed after the partial R25 edits, but `cargo fmt --check` has not been rerun.
-- No R25 storage tests have been run after the partial edits.
-- Some storage tests may still need active-service setup or expectation updates.
-
-Immediate restart commands:
+R25 verification completed:
 
 ```powershell
 cd E:\mir2\mir2-web3
-rg -n "StoreItem \{|TakeBackItem \{|store_item|take_back|storage_" apps\simulation\src\runtime.rs
-cargo fmt --check
-cargo test -p mir2-simulation storage -- --test-threads=1 --nocapture
-cargo test -p mir2-simulation item -- --test-threads=1 --nocapture
-cargo test -p mir2-simulation -- --test-threads=1
+cargo +1.89.0 fmt --check
+cargo +1.89.0 test -p mir2-simulation crystal_npc_storage_service_context_allows_store_and_take_back_without_helper -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation crystal_npc_time_and_bag_conditions_follow_runtime_state -- --test-threads=1 --nocapture
+cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1
 ```
 
-Likely remaining R25 work:
+Observed results:
 
-- Fix any compile/test failures from the partial storage test edits.
-- Record `NPCStorage` as an active Crystal storage service in the normal NPC link flow.
-- Add a focused `DontStore` rejection test using a Crystal item with bind flag `0x0008`, such as a mapped sealed/rental-safe fixture if available.
-- Add or keep coverage proving inactive storage service returns only `StoreItem(success=false)` / `TakeBackItem(success=false)`.
-- Update roadmap/progress/server-parity docs only after tests pass.
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`: 16 / 16 passed
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`: 72 / 72 passed
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`: 458 / 458 passed
 
-## Last Completed Round: R24
+## Last Completed Round: R26
 
-R24 aligned current Crystal NPC `SellItem` behavior:
+R26 aligned the current real client `CombineItem` packet path:
 
-- `SellItem` now returns ack-only failures for zero count, inactive service, missing item, oversized count, `DontSell`, and partial-stack gold overflow.
-- Script `[Types]` mismatch emits `CannotSellItemHere` plus the failure ack.
-- Sale pages remain Crystal-compatible: `@SELL` and `@BUYSELL` are accepted; `@BUYSELLNEW` opens UI packets but is not accepted by `PlayerObject.SellItem`.
-- Sale payout now follows Crystal `UserItem.Price() / 2`, including durability and added-stat price factors for mapped Crystal items.
-- Partial-stack overflow rejects before mutation; full-stack overflow succeeds and clamps gained gold, including `GainedGold(0)` when already capped.
-- Buy-back tests now sell allowed WickedTrader item types rather than potions rejected by that script's `[Types]`.
+- Added Crystal `ClientPacket::CombineItem` / id `111` and `ServerPacket::CombineItem` / id `215` to protocol ids, codec, and trace output.
+- Gateway JSON now exposes Crystal `CombineItem` payload fields (`grid`, `idFrom`, `idTo`, `success`, `destroy`).
+- Runtime `ClientPacket::CombineItem` now dispatches to the current inventory-grid shape-7 socket-growth and shape-8 seal semantics instead of leaving those flows Stage-5-only.
+- Successful packet-driven socket/seal changes now mutate the same persisted runtime state as the existing helpers, including `UserItem.SealedInfo`, inventory/equipment round-trips, and item-change packets.
+- This round is intentionally bounded: full Crystal target-type gating, hero-inventory handling, and other gem/combine branches remain open.
 
-R24 verification commands:
+R26 verification commands:
 
 ```powershell
-cargo fmt
-cargo fmt --check
-cargo test -p mir2-simulation sell_item -- --test-threads=1 --nocapture
-cargo test -p mir2-simulation sell -- --test-threads=1 --nocapture
-cargo test -p mir2-simulation item -- --test-threads=1 --nocapture
-cargo test -p mir2-simulation -- --test-threads=1
+cargo +1.89.0 fmt --check
+cargo +1.89.0 test -p mir2-protocol item_and_combat_client_packets_use_crystal_payloads -- --nocapture
+cargo +1.89.0 test -p mir2-protocol item_action_ack_server_packets_use_crystal_ids -- --nocapture
+cargo +1.89.0 test -p mir2-gateway combine_item_server_event_exposes_crystal_payload_fields -- --nocapture
+cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture
+cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1
 ```
 
-## Active Round: R25 Continuation
+## Active Round: R27 Selection
 
-The active target remains Crystal storage item flag/rejection semantics. The Crystal source audit is complete and partial Rust code exists. Continue by running `cargo fmt --check`, repairing tests, and verifying the R25 patch.
+The active target is no longer R26 implementation. Use this round to choose the next bounded parity bite from the unchecked backend/frontend queue before starting more code work.
 
-Confirmed source facts:
+Current selection constraints:
 
-- Crystal gates on `@STORAGE`, NPC object/range, password lock, `DontStore` for store only, storage capacity, and direct slot indexes.
-- `StoreItem` / `TakeBackItem` send action acks for modeled failures and successes; no system chat is emitted for the storage rejection branches covered by R25.
-- Current Rust implementation and tests are in `apps/simulation/src/runtime.rs`; search for `store_item`, `take_back`, `ServerPacket::StoreItem`, `ServerPacket::TakeBackItem`, `locked_storage`, and `storage_`.
+- Prefer the highest-value small unchecked task over a large multi-system refactor.
+- Keep one writer on `apps/simulation/src/runtime.rs`.
+- Do not move the backend parity estimate again until the selected R27 task is implemented, verified, and documented.
+
+Explorer recommendations already captured in docs/run log:
+
+- Frontend candidate: screenshot baseline pack plus stage screenshot comparison harness.
+- Backend candidates should now be re-selected from the remaining queue; do not reopen `CombineItem` unless protocol/runtime regressions appear.
+- Current recommendation: choose the next bounded backend/frontend bite from the unchecked queue with the same one-writer discipline used in R25/R26.
 
 ## Subagent Workflow After Restart
 
@@ -147,24 +149,24 @@ Use the observed quota profile from the prior session unless the new session sho
 - Use `medium` for read-only explorers and docs/QA work.
 - Avoid multiple code-writing agents on the same file.
 
-## R25 Suggested Subagent Prompts
+## R27 Suggested Subagent Prompts
 
 Crystal Explorer prompt:
 
 ```text
-In E:\mir2\mir2-web3, do a read-only Crystal source audit for PlayerObject.StoreItem and TakeBackItem / storage behavior. Answer with source file paths and line numbers. Need: client packet fields; active @Storage page and NPC range requirements; inventory/storage UniqueID/count lookup; DontStore/rental/bound restrictions; storage password lock behavior; full storage/full bag behavior; exact rejection order; whether each failure is silent, sends StoreItem/TakeBackItem ack, or sends a system message. Do not edit files.
+In E:\mir2\mir2-web3, do a read-only Crystal/source audit of the top unchecked backend/frontend queue candidates. Use docs/AGENT-TASK-QUEUE.md as the source of truth, identify the best next bounded parity bite, and summarize exact Crystal behavior, file paths, line numbers, and the smallest safe scope. Do not edit files.
 ```
 
 Rust Explorer prompt:
 
 ```text
-In E:\mir2\mir2-web3, do a read-only audit of current Rust storage implementation and tests. Map ClientPacket::StoreItem/TakeBackItem dispatch, active NPC service state, storage lock/password handling, item lookup/count handling, bind flag helpers, full storage/full bag checks, and focused storage tests. Recommend the smallest safe R25 patch after Crystal semantics are known. Do not edit files.
+In E:\mir2\mir2-web3, do a read-only audit of the current Rust code/test surface for the top unchecked queue candidates. Recommend the smallest safe write set, likely regression risks, and focused/full verification commands for the best next bounded round. Do not edit files.
 ```
 
 Backend Worker prompt, only after Crystal semantics are known:
 
 ```text
-Implement the bounded R25 storage parity patch in E:\mir2\mir2-web3. You are not alone in the codebase; do not revert others' edits. Own only apps/simulation/src/runtime.rs unless explicitly told otherwise. Align storage item flag/rejection semantics with the audited Crystal behavior, add focused tests, run cargo fmt, and report changed files plus tests. Do not update docs.
+Implement the selected bounded R27 parity patch in E:\mir2\mir2-web3. You are not alone in the codebase; do not revert others' edits. Own only the explicitly assigned files, keep one writer on apps/simulation/src/runtime.rs when it is in scope, add focused regressions, run cargo +1.89.0 fmt/test commands, and report changed files plus tests. Do not update docs unless explicitly assigned.
 ```
 
 ## Ready-To-Paste Resume Prompt
