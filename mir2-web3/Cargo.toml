@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "apps/gateway",
+    "apps/simulation",
+    "packages/game-data",
+    "packages/protocol",
+]
+resolver = "2"

@@ -1,0 +1,187 @@
+{
+  "type": "websocket",
+  "wsUrl": "ws://127.0.0.1:7110/ws",
+  "runId": "mo8ye9wd-40836",
+  "host": "WIN-27HGHD7FBV0",
+  "clients": 64,
+  "pool": 32,
+  "actionsPerClient": 20,
+  "thinkMs": 20,
+  "startedAt": "2026-04-21T18:24:48.543Z",
+  "finishedAt": "2026-04-21T18:25:16.310Z",
+  "durationMs": 27753,
+  "opened": 64,
+  "ready": 64,
+  "closed": 64,
+  "errors": 0,
+  "messages": 1293,
+  "commandsSent": 3072,
+  "keepAliveLatenciesMs": [],
+  "clientFailures": [],
+  "rssSamples": [
+    {
+      "atUnixMs": 1776795889316,
+      "pid": 40536,
+      "workingSetBytes": 74612736,
+      "handleCount": 209
+    },
+    {
+      "atUnixMs": 1776795890444,
+      "pid": 40536,
+      "workingSetBytes": 71053312,
+      "handleCount": 209
+    },
+    {
+      "atUnixMs": 1776795891587,
+      "pid": 40536,
+      "workingSetBytes": 72364032,
+      "handleCount": 209
+    },
+    {
+      "atUnixMs": 1776795892720,
+      "pid": 40536,
+      "workingSetBytes": 81289216,
+      "handleCount": 209
+    },
+    {
+      "atUnixMs": 1776795893836,
+      "pid": 40536,
+      "workingSetBytes": 80994304,
+      "handleCount": 226
+    },
+    {
+      "atUnixMs": 1776795894977,
+      "pid": 40536,
+      "workingSetBytes": 81739776,
+      "handleCount": 224
+    },
+    {
+      "atUnixMs": 1776795896113,
+      "pid": 40536,
+      "workingSetBytes": 82337792,
+      "handleCount": 218
+    },
+    {
+      "atUnixMs": 1776795897250,
+      "pid": 40536,
+      "workingSetBytes": 80252928,
+      "handleCount": 226
+    },
+    {
+      "atUnixMs": 1776795898382,
+      "pid": 40536,
+      "workingSetBytes": 83255296,
+      "handleCount": 221
+    },
+    {
+      "atUnixMs": 1776795899505,
+      "pid": 40536,
+      "workingSetBytes": 82944000,
+      "handleCount": 215
+    },
+    {
+      "atUnixMs": 1776795900622,
+      "pid": 40536,
+      "workingSetBytes": 81092608,
+      "handleCount": 213
+    },
+    {
+      "atUnixMs": 1776795901739,
+      "pid": 40536,
+      "workingSetBytes": 82423808,
+      "handleCount": 213
+    },
+    {
+      "atUnixMs": 1776795902872,
+      "pid": 40536,
+      "workingSetBytes": 68853760,
+      "handleCount": 211
+    },
+    {
+      "atUnixMs": 1776795903986,
+      "pid": 40536,
+      "workingSetBytes": 73543680,
+      "handleCount": 211
+    },
+    {
+      "atUnixMs": 1776795905103,
+      "pid": 40536,
+      "workingSetBytes": 74506240,
+      "handleCount": 210
+    },
+    {
+      "atUnixMs": 1776795906204,
+      "pid": 40536,
+      "workingSetBytes": 75276288,
+      "handleCount": 207
+    },
+    {
+      "atUnixMs": 1776795907343,
+      "pid": 40536,
+      "workingSetBytes": 75276288,
+      "handleCount": 205
+    },
+    {
+      "atUnixMs": 1776795908472,
+      "pid": 40536,
+      "workingSetBytes": 74792960,
+      "handleCount": 202
+    },
+    {
+      "atUnixMs": 1776795909608,
+      "pid": 40536,
+      "workingSetBytes": 66441216,
+      "handleCount": 197
+    },
+    {
+      "atUnixMs": 1776795910725,
+      "pid": 40536,
+      "workingSetBytes": 66891776,
+      "handleCount": 194
+    },
+    {
+      "atUnixMs": 1776795911850,
+      "pid": 40536,
+      "workingSetBytes": 68661248,
+      "handleCount": 191
+    },
+    {
+      "atUnixMs": 1776795912957,
+      "pid": 40536,
+      "workingSetBytes": 69332992,
+      "handleCount": 189
+    },
+    {
+      "atUnixMs": 1776795914065,
+      "pid": 40536,
+      "workingSetBytes": 64151552,
+      "handleCount": 185
+    },
+    {
+      "atUnixMs": 1776795915176,
+      "pid": 40536,
+      "workingSetBytes": 64442368,
+      "handleCount": 182
+    },
+    {
+      "atUnixMs": 1776795916310,
+      "pid": 40536,
+      "workingSetBytes": 63004672,
+      "handleCount": 178
+    }
+  ],
+  "rss": {
+    "count": 25,
+    "min": 63004672,
+    "max": 83255296,
+    "avg": 74381393.92,
+    "p95": 82944000
+  },
+  "keepAlive": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  }
+}

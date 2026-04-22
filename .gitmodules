@@ -1,0 +1,7 @@
+[submodule "Crystal"]
+	path = Crystal
+	url = https://github.com/Suprcode/Crystal.git
+
+[submodule "refactor-pwa"]
+	path = refactor-pwa
+	url = git@github.com:Zombieliu/mir2-refactor-pwa.git

@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mir2-gateway manual smoke</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5efe5;
+        --panel: #fffaf2;
+        --ink: #2d2016;
+        --accent: #a64924;
+        --accent-soft: #e9c4a5;
+        --line: #d5b799;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background:
+          radial-gradient(circle at top, #fff8ef 0%, transparent 40%),
+          linear-gradient(180deg, #ead7bf 0%, var(--bg) 100%);
+        color: var(--ink);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 60px;
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 12px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 12px;
+        color: var(--accent);
+      }
+
+      .hero {
+        padding: 24px;
+        border: 1px solid var(--line);
+        background: rgba(255, 250, 242, 0.92);
+        box-shadow: 0 12px 30px rgba(73, 39, 17, 0.08);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .panel {
+        padding: 18px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .field,
+      .actions,
+      .movement,
+      .chat-row {
+        display: grid;
+        gap: 10px;
+      }
+
+      .field label {
+        font-size: 13px;
+        color: #6c4c38;
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px 12px;
+        font: inherit;
+        border: 1px solid var(--line);
+        background: #fffdf9;
+        color: var(--ink);
+      }
+
+      button {
+        cursor: pointer;
+        background: linear-gradient(180deg, #b5552d 0%, #8d3f1f 100%);
+        color: #fff6ef;
+        border: none;
+      }
+
+      button.secondary {
+        background: #dcc3aa;
+        color: var(--ink);
+      }
+
+      .movement-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .movement-grid .blank {
+        visibility: hidden;
+      }
+
+      #log {
+        min-height: 480px;
+        max-height: 700px;
+        overflow: auto;
+        padding: 14px;
+        margin: 0;
+        border: 1px solid var(--line);
+        background: #23160f;
+        color: #f8e8d2;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 12px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+      }
+
+      .status {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        background: #fff5e8;
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Manual Smoke</p>
+        <h1>mir2 gateway browser test surface</h1>
+        <p>
+          This page drives the local gateway directly over WebSocket. It is only
+          for the first human test checkpoint: version, login, start game,
+          movement, and chat.
+        </p>
+      </section>
+
+      <section class="grid">
+        <div class="stack">
+          <section class="panel">
+            <h2>Connection</h2>
+            <div class="status">
+              <span>WebSocket</span>
+              <strong id="ws-status">disconnected</strong>
+            </div>
+            <div class="actions" style="margin-top: 12px;">
+              <button id="connect">Connect</button>
+              <button class="secondary" id="client-version">Send ClientVersion</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Account</h2>
+            <div class="field">
+              <label for="account-id">Account ID</label>
+              <input id="account-id" value="demo" />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" value="demo" />
+            </div>
+            <div class="actions">
+              <button id="login">Login</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Character</h2>
+            <div class="field">
+              <label for="character-index">Character Index</label>
+              <input id="character-index" type="number" value="0" />
+            </div>
+            <div class="field">
+              <label for="new-name">New Character Name</label>
+              <input id="new-name" value="Blade" />
+            </div>
+            <div class="field">
+              <label for="new-gender">Gender</label>
+              <select id="new-gender">
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="new-class">Class</label>
+              <select id="new-class">
+                <option>Warrior</option>
+                <option>Wizard</option>
+                <option>Taoist</option>
+                <option>Assassin</option>
+                <option>Archer</option>
+              </select>
+            </div>
+            <div class="actions">
+              <button id="new-character">Create Character</button>
+              <button id="start-game">Start Game</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Movement</h2>
+            <div class="movement">
+              <div class="movement-grid">
+                <button data-action="walk" data-direction="UpLeft">UpLeft</button>
+                <button data-action="walk" data-direction="Up">Up</button>
+                <button data-action="walk" data-direction="UpRight">UpRight</button>
+                <button data-action="walk" data-direction="Left">Left</button>
+                <button class="secondary" data-action="turn" data-direction="Down">Turn Down</button>
+                <button data-action="walk" data-direction="Right">Right</button>
+                <button data-action="run" data-direction="DownLeft">Run DownLeft</button>
+                <button data-action="walk" data-direction="Down">Down</button>
+                <button data-action="run" data-direction="DownRight">Run DownRight</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Chat</h2>
+            <div class="chat-row">
+              <input id="chat-message" value="hello from browser" />
+              <button id="chat-send">Send Chat</button>
+              <button class="secondary" id="logout">Log Out</button>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Items</h2>
+            <div class="field">
+              <label for="item-slot">Item Slot / Unique ID</label>
+              <input id="item-slot" type="number" value="0" />
+            </div>
+            <div class="field">
+              <label for="item-grid">Grid</label>
+              <select id="item-grid">
+                <option value="inventory">inventory</option>
+                <option value="belt">belt</option>
+                <option value="storage">storage</option>
+                <option value="questInventory">questInventory</option>
+                <option value="equipment">equipment</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="equip-slot">Equipment Slot Index</label>
+              <input id="equip-slot" type="number" value="2" />
+            </div>
+            <div class="field">
+              <label for="item-count">Count</label>
+              <input id="item-count" type="number" value="1" />
+            </div>
+            <div class="field">
+              <label for="item-target-slot">Target Slot / Target ID</label>
+              <input id="item-target-slot" type="number" value="1" />
+            </div>
+            <div class="field">
+              <label for="item-target-grid">Target Grid</label>
+              <select id="item-target-grid">
+                <option value="inventory">inventory</option>
+                <option value="belt">belt</option>
+                <option value="storage">storage</option>
+                <option value="questInventory">questInventory</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="gold-amount">Gold Amount</label>
+              <input id="gold-amount" type="number" value="100" />
+            </div>
+            <div class="field">
+              <label for="storage-password">Storage Password</label>
+              <input id="storage-password" value="vault" />
+            </div>
+            <div class="field">
+              <label for="storage-new-password">Storage New Password</label>
+              <input id="storage-new-password" value="new-vault" />
+            </div>
+            <div class="actions">
+              <button id="use-item">Use Item</button>
+              <button id="drop-item">Drop Item</button>
+              <button id="equip-item">Equip Item</button>
+              <button id="remove-item">Remove Item</button>
+              <button id="remove-slot-item">Remove Slot Item</button>
+              <button id="move-item">Move Item</button>
+              <button id="merge-item">Merge Item</button>
+              <button id="split-item">Split Item</button>
+              <button id="store-item">Store Item</button>
+              <button id="take-back-item">Take Back Item</button>
+              <button id="sell-item">Sell Item</button>
+              <button id="repair-item">Repair Item</button>
+              <button id="special-repair-item">Special Repair</button>
+              <button id="drop-gold">Drop Gold</button>
+              <button id="unlock-storage">Unlock Storage</button>
+              <button id="set-storage-password">Set Storage Password</button>
+              <button id="remove-storage-password">Remove Storage Password</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <h2>Event Log</h2>
+          <pre id="log"></pre>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const logEl = document.getElementById("log");
+      const wsStatusEl = document.getElementById("ws-status");
+      let socket = null;
+
+      function log(message, payload) {
+        const line =
+          payload === undefined
+            ? `[${new Date().toLocaleTimeString()}] ${message}`
+            : `[${new Date().toLocaleTimeString()}] ${message}\n${JSON.stringify(payload, null, 2)}`;
+        logEl.textContent += `${line}\n\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function connect() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          return;
+        }
+
+        const protocol = location.protocol === "https:" ? "wss" : "ws";
+        socket = new WebSocket(`${protocol}://${location.host}/ws`);
+
+        wsStatusEl.textContent = "connecting";
+
+        socket.addEventListener("open", () => {
+          wsStatusEl.textContent = "open";
+          log("ws open");
+        });
+
+        socket.addEventListener("close", () => {
+          wsStatusEl.textContent = "closed";
+          log("ws closed");
+        });
+
+        socket.addEventListener("message", (event) => {
+          try {
+            log("recv", JSON.parse(event.data));
+          } catch {
+            log(`recv raw: ${event.data}`);
+          }
+        });
+      }
+
+      function send(command) {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+          log("cannot send: websocket is not open");
+          return;
+        }
+
+        socket.send(JSON.stringify(command));
+        log("sent", command);
+      }
+
+      document.getElementById("connect").addEventListener("click", connect);
+      document.getElementById("client-version").addEventListener("click", () =>
+        send({ type: "clientVersion" })
+      );
+      document.getElementById("login").addEventListener("click", () =>
+        send({
+          type: "login",
+          accountId: document.getElementById("account-id").value,
+          password: document.getElementById("password").value,
+        })
+      );
+      document.getElementById("new-character").addEventListener("click", () =>
+        send({
+          type: "newCharacter",
+          name: document.getElementById("new-name").value,
+          gender: document.getElementById("new-gender").value,
+          class: document.getElementById("new-class").value,
+        })
+      );
+      document.getElementById("start-game").addEventListener("click", () =>
+        send({
+          type: "startGame",
+          characterIndex: Number(document.getElementById("character-index").value),
+        })
+      );
+      document.getElementById("chat-send").addEventListener("click", () =>
+        send({
+          type: "chat",
+          message: document.getElementById("chat-message").value,
+        })
+      );
+      document.getElementById("logout").addEventListener("click", () =>
+        send({ type: "logOut" })
+      );
+      document.getElementById("use-item").addEventListener("click", () =>
+        send({
+          type: "useItem",
+          key: "",
+          slot: Number(document.getElementById("item-slot").value),
+          grid: document.getElementById("item-grid").value,
+        })
+      );
+      document.getElementById("drop-item").addEventListener("click", () =>
+        send({
+          type: "dropItem",
+          key: "",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          count: Number(document.getElementById("item-count").value),
+          heroInventory: false,
+        })
+      );
+      document.getElementById("equip-item").addEventListener("click", () =>
+        send({
+          type: "equipItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          grid: document.getElementById("item-grid").value,
+          to: Number(document.getElementById("equip-slot").value),
+        })
+      );
+      document.getElementById("remove-item").addEventListener("click", () =>
+        send({
+          type: "removeItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          grid: "equipment",
+          to: 0,
+        })
+      );
+      document.getElementById("remove-slot-item").addEventListener("click", () =>
+        send({
+          type: "removeSlotItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          grid: "equipment",
+          gridTo: document.getElementById("item-target-grid").value,
+          to: Number(document.getElementById("item-target-slot").value),
+          fromUniqueId: Number(document.getElementById("item-slot").value),
+        })
+      );
+      document.getElementById("move-item").addEventListener("click", () =>
+        send({
+          type: "moveItem",
+          grid: document.getElementById("item-grid").value,
+          from: Number(document.getElementById("item-slot").value),
+          to: Number(document.getElementById("item-target-slot").value),
+        })
+      );
+      document.getElementById("merge-item").addEventListener("click", () =>
+        send({
+          type: "mergeItem",
+          gridFrom: document.getElementById("item-grid").value,
+          gridTo: document.getElementById("item-target-grid").value,
+          idFrom: Number(document.getElementById("item-slot").value),
+          idTo: Number(document.getElementById("item-target-slot").value),
+        })
+      );
+      document.getElementById("split-item").addEventListener("click", () =>
+        send({
+          type: "splitItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          grid: document.getElementById("item-grid").value,
+          count: Number(document.getElementById("item-count").value),
+        })
+      );
+      document.getElementById("store-item").addEventListener("click", () =>
+        send({
+          type: "storeItem",
+          from: Number(document.getElementById("item-slot").value),
+          to: Number(document.getElementById("item-target-slot").value),
+        })
+      );
+      document.getElementById("take-back-item").addEventListener("click", () =>
+        send({
+          type: "takeBackItem",
+          from: Number(document.getElementById("item-slot").value),
+          to: Number(document.getElementById("item-target-slot").value),
+        })
+      );
+      document.getElementById("sell-item").addEventListener("click", () =>
+        send({
+          type: "sellItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+          count: Number(document.getElementById("item-count").value),
+        })
+      );
+      document.getElementById("repair-item").addEventListener("click", () =>
+        send({
+          type: "repairItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+        })
+      );
+      document.getElementById("special-repair-item").addEventListener("click", () =>
+        send({
+          type: "specialRepairItem",
+          uniqueId: Number(document.getElementById("item-slot").value),
+        })
+      );
+      document.getElementById("drop-gold").addEventListener("click", () =>
+        send({
+          type: "dropGold",
+          amount: Number(document.getElementById("gold-amount").value),
+        })
+      );
+      document.getElementById("unlock-storage").addEventListener("click", () =>
+        send({
+          type: "unlockStorage",
+          password: document.getElementById("storage-password").value,
+        })
+      );
+      document.getElementById("set-storage-password").addEventListener("click", () =>
+        send({
+          type: "setStoragePassword",
+          currentPassword: document.getElementById("storage-password").value,
+          newPassword: document.getElementById("storage-new-password").value,
+        })
+      );
+      document.getElementById("remove-storage-password").addEventListener("click", () =>
+        send({
+          type: "removeStoragePassword",
+          currentPassword: document.getElementById("storage-password").value,
+        })
+      );
+
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () =>
+          send({
+            type: button.dataset.action,
+            direction: button.dataset.direction,
+          })
+        );
+      });
+    </script>
+  </body>
+</html>

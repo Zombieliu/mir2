@@ -1,0 +1,52 @@
+# Local machine state
+.appdata/
+.dotnet/
+.localappdata/
+downloads/
+codex-proxy.cmd
+proxy-investigation/
+tools/procmon/
+**/.mir2-data/
+
+# JavaScript / frontend
+**/node_modules/
+**/.next/
+**/dist/
+**/out/
+**/*.tsbuildinfo
+
+# Rust / build output
+**/target/
+**/target-build/
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Browser automation profiles and transient UI captures
+**/.chrome-cdp-*/
+**/.edge-cdp-*/
+**/.tmp-*/
+**/.screens-*.png
+**/screenshots/
+**/playwright-report/
+**/test-results/
+
+# Logs and temporary notes
+**/*.log
+**/tmp_*.txt
+
+# Editors
+**/.idea/
+**/.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.sample

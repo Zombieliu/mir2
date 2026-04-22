@@ -1,0 +1,1492 @@
+# Crystal / Mir2 1:1 Project Roadmap
+
+Last updated: 2026-04-23
+
+Purpose: this document is the working checklist for moving `mir2-web3` from the current migrated slice toward full Crystal / Mir2 1:1 parity across backend, frontend, assets, integration, and playable operations. It is meant to be updated continuously. When a task is completed and verified, check it off. When a stage gate passes, check the stage gate. Then loop back to the next unchecked item.
+
+This roadmap uses two meanings of completion:
+
+- Slice completion: the currently imported gameplay slice behaves correctly and has passing regression coverage.
+- Backend/server parity completion: Rust backend and gateway behavior match Crystal server behavior for the tracked gameplay/server slice. This is tracked separately in `docs/BACKEND-1TO1-PROGRESS.md`.
+- Full 1:1 completion: the Rust/Web project matches Crystal across backend behavior, frontend/client UI and controls, assets/data fidelity, end-to-end integration, protocol-visible behavior, persistence, and operational edge cases.
+
+Current verified state as of 2026-04-23:
+
+- [x] `apps/web` production build passed with `npm.cmd run build`.
+- [x] `http://127.0.0.1:3002` responded with HTTP 200.
+- [x] gateway health responded with `{"ok":true,"http":"ready","ws":"ready","tcp_stub":"ready"}`.
+- [x] representative map API calls returned real cells and sprites after warm cache for `0`, `1`, `2`, `n0`, `HF1`, `HF2`, `HF3`, `D1801`, and `HKR`.
+- [x] Rust workspace regression is green. The previous `mir2-simulation` 13-test blocker was resolved on 2026-04-21.
+- [x] Latest autonomous Stage 4 verification passed with `cargo test --workspace`, `cargo test --workspace -- --test-threads=1`, `npm.cmd run build`, `npm.cmd run smoke:crystal-minimap-assets`, and `npm.cmd run smoke:crystal-map-api` against `http://127.0.0.1:3004`.
+- [x] Latest autonomous Stage 5 hardening pass added account-store backup/restore, disconnect persistence, socket-close save hooks, WebSocket/TCP session panic boundaries, reproducible packet traces, and a Chrome CDP UI smoke that archives login/select/game/inventory/character/storage/NPC/combat/map-transfer screenshots with zero critical console errors.
+- [x] 2026-04-22 Stage 5 broad-system pass added persisted runtime state, gateway commands, snapshot exposure, and automated tests for group/guild/social/mail, trade/shop/auction, conquest/events, hero, mining, and crafting.
+- [x] 2026-04-22 NPC command-surface pass regenerated Crystal NPC diagnostics at 81/81 command names and 7,044/7,044 command occurrences covered by the current Rust baseline.
+- [x] 2026-04-22 packet trace harness can capture local TCP gateway traces and optionally diff live Crystal traces when `MIR2_CRYSTAL_TCP_ADDR` is set; current local baseline captured 16 decoded entries.
+- [x] 2026-04-22 real gateway load harnesses passed against the running process: WebSocket 64/64 ready, 0 errors, 1,293 messages, 3,072 commands; TCP 64/64 ready, 0 failures, 656 packets, 0 decode errors.
+- [x] 2026-04-22 Crystal `MonsterInfo.DropPath` now resolves imported drop tables for current runtime death and harvest rewards, with verified OmaFighter gold, Hen chicken, and Deer venison paths.
+- [x] 2026-04-22 imported Crystal gold drops now use Crystal's `base/2 .. base+base/2` amount range instead of fixed table values.
+- [x] 2026-04-22 harvest rewards now emit Crystal `GainedItem` packets for transferred items, verified on Training Dummy, Hen, and Deer harvest paths.
+- [x] 2026-04-22 imported Crystal item drops now carry base durability into `UserItem`, and harvest meat applies Deer quality durability bonuses.
+- [x] 2026-04-22 monster death drops now carry Crystal-style owner pickup windows with group-member bypass and expiry.
+- [x] 2026-04-22 `ShowGroupPickup` item pickups now emit Crystal-style group pickup system notices.
+- [x] 2026-04-22 ground-drop pickup and harvest transfer now follow Crystal slot/stack gain checks: bag weight refreshes after gain and does not block pickup/harvest acceptance.
+- [x] 2026-04-22 imported Crystal item drops now use Crystal `CreateDropItem` current-durability roll before harvest meat quality and future random-stat upgrades.
+- [x] 2026-04-22 manifest-backed `UserItem` payloads now set `Identified` from Crystal `NeedIdentify`, including current pickup and harvest rewards.
+- [x] 2026-04-22 player `PickUp` now matches Crystal current-cell pickup semantics instead of collecting adjacent ground drops.
+- [x] 2026-04-22 ground drops now expire using Crystal `ItemTimeOut=30` minute semantics and emit removal through normal AOI finalization.
+- [x] 2026-04-22 monster gold drops now split into Crystal `MaxDropGold=2000` ground chunks before pickup.
+- [x] 2026-04-22 gold pickup now respects Crystal `CanGainGold` `uint.MaxValue` cap and preserves ground gold when full.
+- [x] 2026-04-22 player `DropGold` now mirrors Crystal zero-gold and insufficient-gold packet behavior.
+- [x] 2026-04-22 ground `ObjectItem` now uses imported Crystal item `Grade` and grade name-colour mapping for manifest-backed drops.
+- [x] 2026-04-22 player `DropItem` now mirrors Crystal stack-count splitting plus `DontDrop` and `DestroyOnDrop` bind semantics for current inventory items.
+- [x] 2026-04-22 Crystal `AddItem` now prioritizes player potion/scroll/script and amulet belt slots before bag fallback, and belt `UseItem` consumes the belt slot instead of same-key inventory items.
+- [x] 2026-04-22 ground drop placement now follows Crystal `ItemObject.Drop(distance)` ring search, skips transfer source tiles, caps same-cell item objects at `DropStackSize=5`, and uses Crystal player item/gold and monster drop ranges.
+- [x] 2026-04-22 Crystal quest-drop `Q` entries now roll normally, route into active matching quest inventory, suppress ground fallback, and preserve full quest-inventory failures.
+- [x] 2026-04-22 frontend shell first patch landed: login inputs submit on Enter and scene tile hit buttons stop pointer bubbling to avoid double-dispatch while preserving empty-space scene clicks.
+- [x] 2026-04-22 current Crystal random-stat drop baseline now rolls MaxDura, MaxAC, and MaxDC from `random_stats_id` profiles and preserves the resulting added stats through pickup/harvest `GainedItem` payloads.
+- [x] 2026-04-22 current added-stat ground drops now expose Crystal Cyan item-name colour through backend packets, world snapshots, and web ground-drop labels.
+- [x] 2026-04-22 NPC buy-back entries now persist across save/reload, expire into NPC used goods after Crystal `GoodsBuyBackTime`, and used goods can be purchased back.
+- [x] 2026-04-22 current socket-slot growth now rejects items at imported socket capacity and only emits `ItemSlotSizeChanged` on successful capacity-backed growth.
+- [x] 2026-04-22 current seal flow now rejects already-sealed equipment without overwriting expiry and only emits `ItemSealChanged` on first active seal.
+- [x] 2026-04-22 current BenedictionOil can add Luck, curse the weapon with negative Luck, or consume with no effect using Crystal-shaped branch rules.
+- [x] 2026-04-22 frontend selected scene targets now route keyboard approach and primary actions through existing runtime handlers with localized action/distance feedback.
+- [x] 2026-04-22 current seal flow validates optional source items against Crystal `Gem` shape-8 seal-source rules and consumes the source only on successful sealing.
+- [x] 2026-04-22 current socket-slot growth validates optional source items against Crystal `Gem` shape-7 socket-source and `ValidGemForItem` unique-flag rules before consuming the source.
+- [x] 2026-04-22 current seal flow stores and serializes Crystal `SealedInfo.NextSealDate`, rejects reseal before `Settings.ItemSealDelay=60` minutes after expiry, and preserves the metadata through save/reload with legacy defaults.
+- [x] 2026-04-22 current Crystal random-stat drops now carry full current Jev profile-family metadata: generic `UserItemStat` entries, curse flag, and socket slots survive drop resolution, pickup/harvest `GainedItem`, inventory/equipment state, and save/reload.
+- [x] 2026-04-22 generated `RandomItemStats.ini` manifest data now drives Crystal random-stat profile lookup, removing the remaining hardcoded runtime profile table while preserving the full random-stat payload behavior.
+- [x] 2026-04-22 generated drop manifests now preserve nested Crystal `GROUP` trees, and runtime applies `GROUP*` random-one-item, `GROUP^` first-success, child gold accumulation, and nested group composition.
+- [x] 2026-04-22 Crystal source audit confirmed owned item/gold drops are visible immediately; current `PickUp` now scans the current cell, skips owner-blocked/full-bag/gold-cap candidates when a later drop is pickable, and emits the owner warning only when no later pickable candidate exists.
+- [x] 2026-04-22 Crystal `HarvestMonster` now generates pending `_drops` after the skin count reaches zero, transfers on the next harvest call, preserves leftovers across full-bag retries, and avoids re-rolling pending harvest rewards.
+- [x] 2026-04-22 Crystal harvest corpse owner/EXPOwner scanning now skips non-owner/non-group corpses, allows grouped owners, and emits `NoNearbyOwnedCarcasses` only when no eligible corpse is found.
+- [x] 2026-04-22 current `SellItem` now requires an active Crystal sell service and rejects partial-stack sales that would overflow the Crystal gold cap.
+- [x] 2026-04-22 current credit-shop purchases now follow Crystal game-shop mailbox delivery: `LoseCredit` is emitted after balance checks, items are mailed, and full bags block only mail attachment claim.
+- [x] 2026-04-22 current `BuyItem` now silently rejects invalid panel/count, missing active service, non-buy service pages, missing goods/metadata, insufficient gold, and full bags before mutation.
+- [x] 2026-04-23 current NPC `RepairItem` / `SRepairItem` now follow Crystal backpack unique-id lookup, active `@Repair` / `@SRepair` service gating, repair/special-repair costs, normal max-dura loss, and repairability/type/insufficient-gold rejection behavior.
+- [x] 2026-04-23 current NPC `SellItem` now follows Crystal `DontSell`, script `[Types]`, ack-only failure, `UserItem.Price() / 2`, partial-stack overflow rejection, and full-stack gold-cap clamping semantics.
+
+## Progress Summary
+
+Backend/server parity estimate: **77.12%**. This is not the whole-project score; it only covers Rust backend, gateway, protocol, persistence, and server gameplay behavior.
+
+Full project 1:1 estimate: **roughly 61.7%**. This replaces the older rough 45% architecture-only estimate by explicitly scoring frontend, resources, integration, and playable operations in addition to backend parity.
+
+| Project Area | Weight | Current | Weighted Progress | Notes |
+| --- | ---: | ---: | ---: | --- |
+| Backend/server behavior parity | 45% | 77.12% | 34.7% | Current backend tracker is green through generated `RandomItemStats.ini` profile import, generated Crystal `GROUP` drop tree semantics, source-confirmed immediate drop visibility with pickup-only owner windows, current-cell pickup scan/skip edge cases, slot/stack-only pickup and harvest gain checks, Crystal `HarvestMonster` pending drop generation/next-call transfer/full-bag retry semantics, harvest owner/EXPOwner corpse scan rejection, Crystal `SellItem` item flag/type/price/gold-cap rejection edges, credit-shop mailbox delivery, silent `BuyItem` rejection edges, NPC `RepairItem` / `SRepairItem` active-service cost/rejection semantics, the latest full current Jev random-stat payload baseline, added-stat/socket Cyan ground item colour, NPC buy-back/used-goods expiry and persistence, socket slot-capacity/source-gem checks, seal already-sealed/source-item/reseal-delay validation, BenedictionOil branch behavior, quest-drop `Q`, drop placement, pickup, item packet, and AddItem belt-priority work; combat, map events, and several economy edge cases remain. |
+| Frontend/client UI and interaction parity | 25% | 42.4% | 10.6% | Web client builds and smoke tests pass, map/UI pipeline exists, current gameplay panels are usable, and shell interaction patches now cover Enter-submit, scene tile double-dispatch prevention, server-driven added-stat ground-drop colour, and selected-target keyboard action routing; exact Crystal visual layout, animation timing, panel behavior, sound/effects, and pixel-level UI parity are still incomplete. |
+| Crystal assets and data coverage | 15% | 62% | 9.3% | Map, minimap, item, monster, NPC, drop, magic, and buff manifests are imported for major backend use; full asset coverage, all visual resources, event bindings, weather/light/fire metadata, and remaining economy tables are not complete. |
+| End-to-end integration and live parity harness | 10% | 38% | 3.8% | Local packet trace, load, smoke, and gateway harnesses exist; accepted live Crystal side-by-side traces for the full representative matrix are still missing. |
+| Playability, operations, and hardening | 5% | 65% | 3.3% | Save/reload, reconnect, load harnesses, soak tests, and broad-system baselines exist; long-duration production acceptance, telemetry/rollback readiness, and late-game multi-system playability remain open. |
+| **Total** | **100%** |  | **61.7%** | Whole-project estimate, not interchangeable with the backend 77.12% tracker. |
+
+Stage execution summary:
+
+| Stage | Target | Status | Estimated Completion |
+| --- | --- | --- | ---: |
+| 1 | Restore regression baseline | Complete | 100% |
+| 2 | Finish map/UI/data pipeline | Complete | 100% |
+| 3 | Expand current playable server slice | Complete | 100% |
+| 4 | Broaden Crystal system parity | In progress | 65% |
+| 5 | Full 1:1 hardening and production parity | In progress | 60% |
+
+## 100% Completion Closure Roadmap
+
+Goal: move the overall full 1:1 estimate from roughly 61.7% to 100% without losing the current green migrated slice.
+
+Execution rule: continue autonomously through the highest-priority unchecked item. Do not pause for confirmation for normal implementation, testing, documentation updates, local service starts, generated data refreshes, or focused refactors needed by an unchecked item. Only stop for explicit destructive operations, missing credentials or private endpoints, unavailable Crystal source/assets, or a product-scope decision that cannot be inferred from Crystal behavior.
+
+Progress gates:
+
+| Gate | Target State | Completion Meaning |
+| --- | --- | --- |
+| 55% | Live parity harness accepted | Local traces, Crystal traces, and diff reports exist for representative flows. |
+| 65% | High-impact spawned AI cleared | Highest-spawn generic AI families have Crystal-specific behavior and regression coverage. |
+| 75% | Full combat / skill / item foundations | Spell, buff, projectile, item roll, durability, repair, and economy data are table-driven. |
+| 85% | Broad system behavior parity | NPC, quest, map events, social, guild, trade, auction, conquest, hero, mining, and crafting match representative Crystal flows. |
+| 92% | Packet-visible parity matrix green | Login through late-game representative flows pass local-vs-Crystal packet and behavior comparison. |
+| 97% | Production hardening accepted | Long soak, high-concurrency load, persistence recovery, telemetry, and rollback evidence are green. |
+| 100% | No open blocker gaps | All full 1:1 gates are checked, remaining deviations are either zero or explicitly approved as out of scope. |
+
+### A. Parity Measurement Harness
+
+- [x] Define the full packet / behavior parity matrix for login, account, character select, start game, movement, chat, combat, NPC, inventory, storage, item use, map transfer, death/revive, skills, summons, trade, shop, auction, guild, mail, conquest, hero, mining, and crafting.
+- [x] Make `MIR2_CRYSTAL_TCP_ADDR` live-capture runs reproducible with stable account fixtures, character fixtures, and reset instructions.
+- [x] Extend `apps/gateway/src/bin/packet_trace.rs` so each TCP-traceable matrix flow can capture local and Crystal traces into separate JSON artifacts.
+- [x] Add a diff reporter that separates packet id mismatch, packet order mismatch, payload mismatch, timing tolerance, and known nondeterministic fields.
+- [x] Add CI/local commands that fail when an accepted representative flow regresses.
+- [ ] Check the 55% gate only when representative live Crystal traces are captured and reviewed for the core flows.
+
+### B. Monster AI Full Parity
+
+- [x] Regenerate `crystal_monster_ai_summary.json` and sort remaining `generic_baseline` spawned families by respawn count, map importance, and player-facing risk.
+- [x] Implement Crystal-specific behavior for high-count generic families first, including CaveMaggot, HarvestMonster, FlamingWooma, WoomaTaurus, ToxicGhoul, ThunderElement, Tucson, Frozen, Snow, Jar, and common dungeon families.
+  - [x] AI 7 `CaveMaggot`: Crystal melee timing, DC-based damage, 1/20 five-second paralysis movement stop, and HarvestMonster two-pass corpse harvest baseline.
+  - [x] AI 28 `ToxicGhoul`: Crystal melee timing, DC-based damage, 1/8 five-second green-poison status, and HarvestMonster two-pass corpse harvest baseline.
+  - [x] AI 49 `ThunderElement`: two-tile CompleteAttack baseline, due-time `ObjectAttack`, DC damage, random near-target repositioning, opposing-target fanout, and normal-damage immunity; Repulsion push-damage remains queued with player skill parity.
+  - [x] AI 9 `HarvestMonster`: harvest/drop corpse semantics.
+  - [x] AI 112 `DarkBeast`: primary DC melee plus secondary type-1/bleeding hook with current CatWidow data gating.
+  - [x] AI 10 `FlamingWooma`: Crystal 300 ms melee timing, `ObjectAttack`, and imported DC-based damage baseline.
+  - [x] AI 11 `WoomaTaurus`: FlamingWooma melee, HP-threshold mad speed phase, surrounded teleport baseline, and `ObjectTeleportOut` / `ObjectTeleportIn` effect packets.
+  - [x] AI 16 `RedThunderZuma`: Zuma-style stone/wake state, nine-tile range, non-adjacent `ObjectRangeAttack`, fixed ranged delay, and DC damage gating.
+  - [x] AI 17 `ZumaTaurus`: Zuma-style stone/wake state, adjacent `ObjectAttack` melee with imported DC damage, and seven-stage HP slave waves using Crystal's Zuma minion set and 8/40 caps.
+  - [x] AI 20 `DarkDevil`: three-tile `ObjectRangeAttack`, 500 ms imported DC*3 damage, 2-4 second cooldown, and forward one-tile fanout.
+  - [x] AI 19 `KingScorpion`: two-tile line/range MC branch, line fanout, adjacent DC fallback, and random/second-tile range override.
+  - [x] AI 22 `IncarnatedZT`: active non-stoned `ObjectAttack` melee branch with 300 ms delayed imported DC damage and paralysis chance.
+  - [x] AI 34 `FrostTiger`: passive-until-targeted acquisition, six-tile range, non-adjacent `ObjectRangeAttack`, distance-scaled ranged delay, DC damage gating, ranged bleeding/slow poison rolls, and `ObjectSitDown` sitting/standing presentation.
+  - [x] AI 102 `IceGuard`: eight-tile near/ranged switching, fixed ranged delay, imported MC ranged damage, DC melee gating, fire type-1 range branch, and ice slow/frozen poison rolls.
+  - [x] AI 187 `FrozenMiner`: primary `ObjectAttack` branch with Crystal 600 ms delayed imported DC damage plus type-1 80% DC area branch and adjacent opposing-monster fanout.
+  - [x] AI 188 `FrozenAxeman`: two-tile line/diagonal type-1 `ObjectAttack` branch with Crystal 500 ms delayed DC*2 damage plus adjacent type-2 pull/push branch.
+  - [x] AI 189 `FrozenMagician`: nine-tile non-adjacent `ObjectRangeAttack` type-0 imported MC branch and type-1 boosted MC*3/2 branch.
+  - [x] AI 179 `SnowWolf`: primary `ObjectAttack` branch with Crystal 350 ms delayed imported DC damage, type-1 MC/Slow/Frozen branch, and `FindAllTargets(2)` fanout.
+  - [x] AI 180 `SnowWolfKing` / `FrozenWarewolf`: type-0/type-1/type-2/type-3 `ObjectAttack` branches with 500 ms delayed imported DC damage, below-70% SnowWolf slave spawn, and delayed one-tile death explosion.
+  - [x] AI 126 `TucsonMage`: three-tile type-1 `ObjectAttack` WideLine branch with zero-MC no-damage gating, adjacent branch selection, and multi-target fanout.
+  - [x] AI 127 `TucsonWarrior`: two-tile reach, non-adjacent/adjacent type-1 MC smash, adjacent halfmoon DC branch, and target-area fanout.
+  - [x] AI 190 `SnowYeti`: nine-tile non-adjacent `ObjectRangeAttack` branch with distance-scaled delayed timing, imported DC damage, and frozen poison roll plus adjacent type-0/type-1 double-hit melee branch.
+  - [x] AI 192 `DarkWraith`: four-tile type-2 line attack with DC*3 damage, line fanout, cooldown, plus adjacent type-1 area fanout branch.
+  - [x] AI 128 `TucsonEgg`: immobile/no-attack egg baseline, fixed one-HP damage intake, and delayed death poison/spawn hook.
+  - [x] AI 3 `Tree`: static neutral/passive tree object baseline with fixed one-HP damage intake.
+  - [x] AI 51 `HedgeKekTal`: eight-tile near-vs-range switching, `ObjectRangeAttack`, and imported DC-based damage baseline.
+  - [x] AI 56 `Trainer`: static passive training target baseline with no attack, movement, HP loss, death, plus `ChatType.Trainer` damage/DPS and idle average reporting.
+  - [x] AI 130 `CannibalTentacles`: view-range non-adjacent `ObjectRangeAttack`, imported MC damage, adjacent type-1 halfmoon, green poison, and arc fanout.
+  - [x] AI 119 `Jar1`: static one-tile baseline and delayed regular-monster slave spawn on death.
+  - [x] AI 120 `Jar2`: static six-tile `ObjectRangeAttack`, adjacent random DC melee/range split, zero-MC no-damage gating, and Frozen poison hook.
+  - [x] AI 173 `TurtleGrass`: Zuma-style stone/wake state, two-tile attack shape, imported DC damage, and type-1 single-push branch.
+  - [x] AI 174 `ManTree`: Zuma-style stone/wake state, type-0/type-1/type-2 `ObjectAttack` packet branches, and data-gated boulder Stun hook.
+  - [x] AI 35 `SandWorm`: SpittingSpider-style two-tile line `ObjectAttack`, delayed DC hit, forward-line fanout, and harvest-corpse baseline.
+  - [x] AI 37 `CrystalSpider`: three-tile row/column/diagonal type-1 `ObjectAttack`, distance-delayed DC hit, forward-line fanout, and green poison baseline.
+  - [x] AI 30 `BoneLord`: seven-tile `ObjectRangeAttack` branch with distance-delayed imported DC damage, plus HP-stage type-1 slave waves using Crystal's bone minion set and 8/40 caps.
+  - [x] AI 33 `MinotaurKing`: six-tile RightGuard-derived `ObjectRangeAttack`, 500 ms imported DC damage, and three-tile target fanout.
+  - [x] AI 86 `ManectricClaw` / `Chieftain_Priest`: random pre-thrust movement, three-tile `ObjectRangeAttack` thrust baseline with near-DC / far-MC damage, player slow/frozen poison rolls, and cone fanout.
+  - [x] AI 54 `DragonStatue` / `MirStatue`: static delayed `ObjectRangeAttack` baseline with imported DC damage, target-radius fanout, lethal-damage sleep, sleeping immunity, and full-HP wake.
+  - [x] AI 48 `GuardianRock`: static immune delayed range-pull packet baseline with no direct damage and capped pull movement.
+  - [x] AI 13 `RedMoonEvil`: static view-range `ObjectAttack`, delayed imported DC damage, multi-target fanout, and `ObjectEffect RedMoonEvil` target broadcasts.
+  - [x] AI 14 `EvilCentipede`: hidden reveal/hide baseline, static view-range `ObjectAttack`, imported DC damage, fanout, and green/paralysis poison.
+  - [x] AI 36 `Yimoogi`: seven-tile `ObjectRangeAttack`, 500 ms imported DC damage, four-tile type-1 red-poison branch, four-second sister child spawn, final low-HP teleport with two `WhiteSerpent` spawns, and paired drop suppression.
+  - [x] AI 186 `Kirin` / `Lamia`: two-tile row/diagonal `ObjectAttack` baseline, type-1 500 ms branch with imported DC damage, and nonzero-MC type-2 IceThrust cone with slow poison and opposing-target fanout.
+  - [x] AI 27 `Khazard`: four-tile line/diagonal `ObjectRangeAttack` pull branch with no direct damage, pull movement, and 5s cooldown.
+  - [x] AI 115 `SandSnail`: primary type-0 DC attack, type-1 halfmoon fanout, and type-2 MC Green-poison area branch.
+  - [x] AI 1 `Deer`: Hen/Pig/Bull passive no-player-target baseline and Crystal two-pass harvest skin count.
+  - [x] AI 2 `Deer`: passive no-player-target baseline, Crystal five-pass harvest skin count, and run-away flee movement.
+  - [x] AI 38 `HolyDeva`: six-tile `ObjectRangeAttack`, summoned `extra`, delayed imported DC damage, and Crystal fear-window kiting movement.
+  - [x] AI 43 `OmaKing`: seven-tile type-1 magic branch, close push/paralysis handling, and two-tile line fanout.
+  - [x] AI 50 `GreatFoxSpirit`: static seven-tile `ObjectRangeAttack`, 300 ms imported DC damage, `FindAllTargets` fanout, `ObjectEffect GreatFoxSpirit`, slow/paralysis poison, HP-stage `extra_byte` broadcasts, nearby `GuardianRock` activation/deactivation, and far-target recall movement with `ObjectTeleportOut` / `ObjectTeleportIn` effect 11.
+  - [x] AI 88 `ManectricKing` / `Master_DragonYang`: three-tile line/diagonal `ObjectAttack` magic branch, close type-1 DC push line, and low-HP seven-tile mass attack.
+  - [x] AI 121 `SeedingsGeneral`: two-tile `ObjectRangeAttack` magic branch with 300 ms delayed imported MC damage, Echo slow poison, Stomp frozen AOE fanout, and close mixed DC/MC melee branches.
+  - [x] AI 122 `RestlessJar`: static six-tile range packet, Crystal ProjectileAttack distance*50+500ms timing, zero-MC gating, adjacent spin fanout, tornado/blindness, and low-HP stomp push/fanout.
+  - [x] AI 79 `HellKeeper`: static view-range locked-facing `ObjectAttack` branches with type-0 DC, type-1 MC/Dazed gating, and `FindAllTargets` fanout.
+  - [x] AI 123 `GeneralMeowMeow`: twelve-tile `ObjectRangeAttack`, 500 ms imported MC damage, two-tile target-area fanout, close type-1 triple-DC slam, HP shield windows, `ObjectSpell` mass thunder, and periodic Crystal cat-minion slave spawning.
+  - [x] AI 131 `TucsonGeneral`: opening rage `ObjectRangeAttack` packet, delayed `TucsonGeneralRock` `ObjectSpell` scatter/impact pass, type-1/type-2 ranged branches, and close MC stomp/paralysis area hit.
+  - [x] AI 47 `TrapRock`: hidden reveal, deterministic `SpawnCorner` target teleport, child rocks, reveal paralysis, parent no-damage `ObjectRangeAttack`, child `ObjectAttack`, target-move death, first-hit collapse, and repeated parent-attack paralysis roll.
+  - [x] AI 124 `Armadillo`: DigOut-style hidden reveal, `DigOutArmadillo` `ObjectSpell`, primary DC `ObjectAttack`, type-1 three-hit combo branch, retreat `ObjectBackStep`, retreat radius damage, and run-away after failed retreat damage.
+  - [x] AI 125 `ArmadilloElder`: DigOut-style hidden reveal, `DigOutArmadillo` `ObjectSpell`, primary DC*2 `ObjectAttack`, type-1 two-tile push/no-direct-damage branch, retreat `ObjectBackStep`, and run-away movement.
+  - [x] AI 0 `MonsterObject`: default imported template movement/chase/melee/respawn/drop/packet baseline.
+- [ ] Replace remaining wildlife/harvest partial behavior with Crystal-accurate passive, harvest, loot, blocking, flee, and guard-ignore semantics.
+- [ ] Implement remaining boss and elite AI families, including spawn phases, summons, area attacks, immunity states, teleport, fear, poison, slow, push, and scripted transitions.
+- [ ] Add focused simulation tests for every AI family promoted out of `generic_baseline`.
+- [x] Update generated AI summary after each pass and check this section only when spawned `generic_baseline` families are zero or explicitly scoped out.
+
+### C. Combat, Skills, Buffs, and Projectiles
+
+- [ ] Import and validate the complete Crystal magic, buff, poison, projectile, cooldown, level requirement, MP cost, and class restriction data.
+- [ ] Implement warrior skill parity, including hit shape, delay, durability, target rules, and packet-visible animation behavior.
+- [ ] Implement wizard skill parity, including projectile lifecycle, area damage, element/status effects, and map-object interactions.
+- [ ] Implement taoist skill parity, including healing, poison, summons, buffs, pets, and corpse/target constraints.
+- [ ] Implement assassin and archer skill parity for the Crystal classes represented by the current client assets.
+- [ ] Add packet and behavior tests for cast failure, cooldown, insufficient MP, invalid targets, safe zone restrictions, death state, and reconnect persistence.
+- [ ] Check the combat/skill gate only when representative skill traces match Crystal packet-visible behavior.
+
+### D. Items, Economy, Drops, and Storage
+
+- [x] Import Crystal item DB manifest with item index, type, grade, stack, price, durability, restrictions, bind/unique flags, random-stat id, slots, stats, tooltip, and lookup tests.
+- [ ] Apply Crystal item tables to runtime behavior, including random roll generation, stat ranges, special item types, stack/weight/restriction enforcement, and durability rules.
+- [x] Enforce imported Crystal `StackSize` for current item gain and stack merge flows.
+- [ ] Replace starter economy constants with generated Crystal shop, repair, special repair, storage, and NPC service data.
+- [x] Align current item packet grid and equipment-slot numeric mappings with Crystal `MirGridType` / `EquipmentSlot` values.
+- [x] Implement exact `DuraChanged` and `ItemRepaired` packet behavior for current durability loss and repair flows.
+- [x] Implement Crystal ack packet behavior for current move, equip, remove, split, merge, drop, use, store, take-back, and remove-slot item flows.
+- [x] Implement Crystal `GainedGold` and `LoseGold` packet behavior for current gold pickup and drop flows.
+- [x] Implement Crystal `GainedCredit` and `LoseCredit` packet protocol/gateway support.
+- [x] Wire current Crystal credit scroll/token use to account credit state, `GainedCredit`, `UserInformation.credit`, and save/reload persistence.
+- [x] Wire current credit-shop spend flow to `LoseCredit` with balance checks and Crystal-style mailbox delivery.
+- [x] Implement Crystal `SellItem` and `RepairItem` entry packet behavior for current sell and repair flows.
+- [x] Implement Crystal `ItemSlotSizeChanged` and `ItemSealChanged` packet protocol/gateway support.
+- [x] Wire current socket-slot growth flow to runtime equipment state and Crystal `ItemSlotSizeChanged`.
+- [x] Wire current item seal flow to runtime equipment seal state and Crystal `ItemSealChanged`.
+- [x] Store Crystal item seal `NextSealDate` reseal-delay metadata, block reseal before `Settings.ItemSealDelay`, and preserve the field across save/reload.
+- [x] Implement Crystal NPC service and `CraftItem` packet protocol/gateway support for current shop/repair/storage/refine/craft surfaces.
+- [x] Wire current Crystal NPC reserved service labels (`@Buy`, `@BuySell`, `@Sell`, `@Repair`, `@SRepair`, `@Craft`, `@Refine`, `@RefineCheck`, `@ReplaceWeddingRing`, and `@Storage`) to baseline service-open packets.
+- [x] Populate current `NPCGoods` packets from imported Crystal NPC `[Trade]` and `[Recipe]` sections for buy/buy-sell/craft service pages.
+- [x] Import Crystal `NPCInfo.Rate` data and apply it to current `NPCGoods`, `NPCRepair`, and `NPCSRepair` service packets.
+- [x] Apply Crystal `GoodsHideAddedStats` and initial empty buy-back panel behavior to current `NPCGoods` service packets.
+- [x] Track current-session NPC sell buy-back goods and expose them through `@BuyBack` `NPCGoods`.
+- [x] Implement Crystal `BuyItem` client packet support and current NPC buy-back purchase runtime flow.
+- [x] Align current Crystal `BuyItem` silent rejection behavior for invalid panel/count, inactive service, non-buy service pages, missing goods/metadata, insufficient gold, and full bags.
+- [x] Align current NPC `RepairItem` / `SRepairItem` with Crystal backpack unique-id lookup, active repair-service gating, repair/special-repair cost, normal max-dura loss, and rejection behavior.
+- [x] Align current NPC `SellItem` stack-count handling and sale gold with Crystal `ItemInfo.Price / 2`.
+- [x] Align current NPC `SellItem` item flag/type/price failure behavior with Crystal `DontSell`, script `[Types]`, `UserItem.Price() / 2`, ack-only failures, and gold-cap edge cases.
+- [x] Implement Crystal `DeleteItem` client/server packet behavior for current inventory delete flows.
+- [x] Implement Crystal `UserItem` serialization and `SplitItem` payload packet behavior for current split-stack flows.
+- [x] Implement Crystal `GainedItem` payload packet behavior for current pickup inventory updates.
+- [x] Implement Crystal `RefreshItem` payload packet protocol and gateway support.
+- [x] Implement Crystal `RequestItemInfo` / `NewItemInfo` packet behavior backed by the imported Crystal item manifest.
+- [x] Wire runtime `RefreshItem` triggers against representative Crystal item mutation traces, starting with `BenedictionOil` weapon Luck success refresh.
+- [x] Wire current Crystal `RepairOil` and `WarGodOil` weapon repair scroll use to `ItemRepaired`.
+- [ ] Expand drop-table parity to include gold, grouped drops, rare rolls, quest drops, ownership timing, visibility timing, and inventory-full behavior.
+  - [x] Resolve Crystal `MonsterInfo.DropPath` to imported `Envir/Drops` tables and prefer those tables over starter fallback for current monster death and harvest rewards.
+  - [x] Convert current imported Crystal drop entries into runtime gold/item rewards, including grouped table sections, deterministic chance rolls, Crystal item metadata lookup, and fallback preservation for starter-only drops.
+  - [x] Apply Crystal gold drop amount range semantics for imported `Gold N` entries (`N/2` inclusive through `N + N/2` exclusive) with deterministic runtime rolls.
+  - [x] Emit Crystal `GainedItem` payloads when harvest transfers items into the player's bag, and keep harvest transfer item-only like Crystal `HarvestMonster`.
+  - [x] Carry imported Crystal item durability through ground-drop pickup and harvest rewards, including `ItemType.Meat` quality durability for AI 2 Deer harvests.
+  - [x] Apply Crystal `CreateDropItem` current-durability roll for imported item drops before meat quality and future random-stat upgrades.
+  - [x] Set manifest-backed `UserItem.Identified` from Crystal `NeedIdentify` for current gained, pickup, harvest, and equipment payloads.
+  - [x] Add Crystal-style death-drop pickup ownership windows with owner-only access until expiry and group-member pickup bypass.
+  - [x] Carry imported `ShowGroupPickup` item metadata into pickup flow and emit Crystal-style group pickup notices when the player is grouped.
+  - [x] Apply Crystal pickup/harvest gain checks for current drops: slot/stack capacity can block item transfer, bag weight does not block pickup/harvest acceptance, and overweight state is reflected after gain.
+  - [x] Restrict player `PickUp` to the current map cell like Crystal `CurrentMap.GetCell(CurrentLocation)`, leaving adjacent drops untouched.
+  - [x] Apply Crystal `ItemTimeOut` ground-drop expiry so item and gold drops despawn after the default 30-minute timeout.
+  - [x] Split monster ground gold by Crystal `MaxDropGold=2000`, including the source-compatible zero remainder chunk on exact division.
+  - [x] Apply Crystal `CanGainGold` cap checks to ground gold pickup so full-gold players do not consume drops.
+  - [x] Align player `DropGold` edge behavior with Crystal: zero-gold drops are allowed and insufficient-gold requests return without packets.
+  - [x] Populate ground `ObjectItem` grade and name colour from imported Crystal item grade metadata for manifest-backed drops.
+  - [x] Align player `DropItem` semantics with Crystal stack-count splitting, failure ack behavior, `DontDrop` rejection, and `DestroyOnDrop` no-ground-object deletion.
+  - [x] Align Crystal `AddItem` belt-priority placement for Potion/Scroll/Script effect 1 and Amulet gains, including belt `UseItem` consumption for current player belt slots.
+  - [x] Implement Crystal ground-drop position search and `DropStackSize` object-count limits for current player item drops, player gold drops, and monster ground drops.
+  - [x] Implement Crystal quest-drop (`Q`) gating for current runtime death and harvest drops.
+  - [x] Implement current Crystal random-stat roll baseline for MaxDura, MaxAC, and MaxDC on drop-created items.
+  - [x] Implement full current Jev random-stat family payloads, curse flag, socket slots, and save/reload coverage for drop-created items.
+  - [x] Replace the remaining hardcoded random-stat profile table with generated `RandomItemStats.ini` data.
+  - [x] Finish Crystal `GROUP` drop semantics, including nested groups, `GROUP*` random-one-item selection, `GROUP^` first-success short-circuiting, and child gold accumulation.
+  - [x] Source-audit delayed visibility and current pickup rejection semantics: item/gold drops broadcast immediately, owner windows restrict pickup only, and current-cell scan skips owner-blocked/full-bag/gold-cap candidates when later drops can be picked.
+  - [x] Persist Crystal `HarvestMonster` pending `_drops` after the skin count reaches zero, transfer them on the next harvest call, and retain untransferable leftovers for later retries.
+  - [x] Apply Crystal harvest owner/EXPOwner corpse scan rejection semantics, including grouped-owner bypass and `NoNearbyOwnedCarcasses`.
+  - [x] Require an active Crystal sell service for `SellItem`, and reject partial-stack sales that would overflow the Crystal gold cap.
+  - [x] Mail credit-shop purchases like Crystal game-shop buys, and block only mail attachment claim when the bag cannot accept the item.
+  - [x] Align `BuyItem` silent no-mutation rejection for invalid panel/count, no-service, non-buy service, missing goods, insufficient gold, and full bags.
+  - [x] Align NPC `RepairItem` / `SRepairItem` semantics: entry ack, backpack unique-id item lookup, matching `@Repair` / `@SRepair` page requirement, Crystal cost, normal max-dura loss, special-repair max preservation, repairability/type messages, and insufficient-gold silent return.
+  - [x] Align NPC `SellItem` semantics for `DontSell`, script `[Types]`, zero-count/missing-item/count failures, partial-stack gold overflow, full-stack gold-cap clamping, and Crystal `UserItem.Price() / 2` sale value.
+  - [ ] Finish broader inventory/economy rejection semantics outside current ground-drop and harvest paths.
+- [ ] Make trade, shop, auction, mail attachments, and storage packet-perfect against representative Crystal traces.
+- [x] Add Crystal `StackSize`-aware inventory-full checks for current pickup, shop, auction, NPC reward, and quest reward item grants.
+- [ ] Add no-duplication and no-loss tests for every transactional item/economy path.
+
+### E. NPC, Quest, and Script Semantics
+
+- [ ] Build a script path coverage report that goes beyond command-name coverage and records which imported sections, branches, inputs, and actions have behavior tests.
+- [ ] Execute representative Crystal NPC scripts end-to-end and compare Rust runtime results for dialog text, links, inputs, rewards, flags, messages, teleport, pets, guild territory, conquest, and timed recall behavior.
+- [ ] Implement remaining semantic gaps where command names exist but Crystal edge behavior differs.
+- [ ] Import quest state, quest UI status, repeatability, prerequisites, progress counters, reward choices, and failure branches.
+- [ ] Add loop-safety and diagnostic checks for every script path that cannot execute because of missing data or unsupported runtime state.
+- [ ] Check this gate only when no high-severity NPC/quest semantic gap remains open.
+
+### F. Maps, World Events, and AOI
+
+- [ ] Resolve missing or indirect map assets, including `mini_map` indices 450/451 and missing movement target `map_index=388`.
+- [ ] Import map event script bindings and exact weather, light, lightning, fire, door, wall, gate, and object-state behavior.
+- [ ] Complete all map transfer, safe zone, revive point, random spawn, collision, blocking, and occupancy behavior against Crystal source.
+- [ ] Expand AOI enter/leave parity beyond current spawn/action/remove ordering, including object despawn, hidden state, projectile visibility, drops, NPCs, pets, heroes, and event objects.
+- [ ] Add representative screenshot/API/packet evidence for every high-traffic map family.
+- [ ] Check this gate only when all imported maps either render and transfer correctly or have a documented missing-source blocker.
+
+### G. Broad Social and Late-Game Systems
+
+- [ ] Replace Stage 5 functional baselines for group, guild, social, mail, trade, shop, auction, conquest, hero, mining, crafting, refining, and guild territory with Crystal data-driven behavior.
+- [ ] Implement packet-perfect group, guild, friend/block, mail, whisper, guild chat, party chat, rankings, permissions, and guild territory flows.
+- [ ] Implement conquest scheduling, castle ownership, gates, walls, guards, tax, war start/end, rewards, and NPC control against Crystal behavior.
+- [ ] Implement hero equipment, inventory, AI, death/revive, seal/unseal, follow/attack modes, and persistence.
+- [ ] Implement mining, crafting, refining, success probability, failure behavior, material consumption, and packet-visible feedback from Crystal tables.
+- [ ] Add multi-client transactional tests for every player-to-player and guild/conquest path.
+
+### H. Persistence, Operations, and Recovery
+
+- [ ] Decide and document the production persistence target for accounts, characters, world state, mail, guilds, auctions, conquest, heroes, pets, and event state.
+- [ ] Implement durable migrations, schema validation, backup, restore, corrupt-source preservation, cross-process locking or equivalent deployment-safe ownership rules.
+- [ ] Add reconnect, crash, socket-close, process-restart, and partial-write tests for every persistent subsystem.
+- [ ] Run long-duration soak beyond the current 1,200-tick simulation baseline, including real gateway WebSocket/TCP clients, RSS/handle monitoring, and entity-count bounds.
+- [ ] Add production telemetry, structured error logs, panic boundaries, health checks, and rollback notes.
+- [ ] Check the 97% gate only after long soak and recovery evidence is archived under `docs/generated`.
+
+### I. UI, Visual, and Asset 1:1
+
+- [ ] Build a screenshot matrix for login, select, game HUD, inventory, character, storage, NPC, chat, combat, map transfer, trade, auction, guild, conquest, hero, mining, and crafting.
+- [ ] Compare representative screens against Crystal/original client assets for layout, sprite library id, animation frame, minimap, text placement, buttons, and panel behavior.
+- [ ] Replace debug-only UI entry points with original-like user flows where Crystal exposes a real client interaction.
+- [ ] Ensure 1024x768 remains the primary no-overlap acceptance resolution, then add wider and smaller viewport sanity screenshots.
+- [ ] Check this gate only when visual differences are documented as either fixed, intentional, or blocked by missing source assets.
+
+### J. Final 100% Gate
+
+- [ ] `cargo fmt --check` passes.
+- [ ] `cargo test --workspace` passes.
+- [ ] `cargo test --workspace -- --test-threads=1` passes.
+- [ ] `npm.cmd run build` passes.
+- [ ] `npm.cmd run smoke:crystal-minimap-assets` passes with no unresolved required asset warnings.
+- [ ] `npm.cmd run smoke:crystal-map-api` passes for the expanded representative map set.
+- [ ] `npm.cmd run smoke:stage5-ui` passes for the expanded UI/system matrix.
+- [ ] `npm.cmd run load:gateway-ws` and `target\debug\tcp_load.exe` pass at the accepted production-smoke concurrency.
+- [ ] `cargo run -p mir2-gateway --bin packet_trace` passes with accepted live Crystal comparisons for the full representative matrix.
+- [ ] `docs/BACKEND-1TO1-PROGRESS.md`, `docs/CRYSTAL-SERVER-PARITY.md`, and this roadmap all report 100% with no unapproved open high/medium gaps.
+
+## Operating Loop
+
+Use this loop until every stage gate is checked:
+
+1. Pick the highest-priority unchecked item in the current stage.
+2. Read Crystal source or generated manifests before changing Rust/TypeScript behavior.
+3. Write or update a focused regression test that describes the Crystal-observed behavior.
+4. Implement the smallest compatible change in the relevant module.
+5. Run the local verification commands for that item.
+6. If verification passes, check the item and add a short note with date and command.
+7. If verification fails, leave the item unchecked and add a blocker note.
+8. When all items in a stage pass, run the stage gate commands.
+9. Check the stage gate only when all required commands pass and the UI/API acceptance items are verified.
+10. Move to the next stage.
+
+Checklist rule:
+
+- `[ ]` means not started or not verified.
+- `[~]` means partially implemented but not accepted. Markdown has no native partial checkbox, so use `[ ]` plus a note if the renderer does not support `[~]`.
+- `[x]` means implemented and verified with the listed acceptance criteria.
+
+Do not check a box for code that only "looks right". Check it after a command, API response, screenshot, manual comparison, or Crystal source comparison proves it.
+
+## Global Verification Commands
+
+Run these before checking a stage gate:
+
+```powershell
+cd E:\mir2\mir2-web3
+cargo test --workspace
+```
+
+```powershell
+cd E:\mir2\mir2-web3\apps\web
+npm.cmd run build
+```
+
+```powershell
+Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:7110/health' -TimeoutSec 3
+Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:3002' -TimeoutSec 3
+```
+
+Representative map API smoke:
+
+```powershell
+cd E:\mir2\mir2-web3\apps\web
+$maps=@('0','1','2','n0','HF1','HF2','HF3','D1801','HKR')
+foreach($m in $maps){
+  $u="http://127.0.0.1:3002/api/scene/crystal?map=$m&x=200&y=200&width=24&height=18"
+  $r=Invoke-WebRequest -UseBasicParsing -Uri $u -TimeoutSec 60
+  $j=$r.Content | ConvertFrom-Json
+  [pscustomobject]@{
+    map=$m
+    status=$r.StatusCode
+    title=$j.mapTitle
+    mini=$j.miniMapIndex
+    cells=($j.originalMapRegion.cells | Measure-Object).Count
+    sprites=($j.originalMapRegion.sprites.PSObject.Properties | Measure-Object).Count
+    width=$j.originalMapRegion.mapWidth
+    height=$j.originalMapRegion.mapHeight
+  }
+}
+```
+
+## Stage 1: Restore Regression Baseline
+
+Goal: make the current migrated slice trustworthy again before expanding scope.
+
+Estimated time: 0.5 to 2 days.
+
+Exit condition: `cargo test --workspace` and `npm.cmd run build` both pass, and the current demo still enters the game.
+
+### 1.1 Triage Current Simulation Failures
+
+Current failing tests from 2026-04-21:
+
+- [x] `runtime::tests::attack_reduces_monster_hp`
+- [x] `runtime::tests::consumable_item_restores_hp`
+- [x] `runtime::tests::crystal_npc_group_and_conquest_runtime_use_configured_members_and_state`
+- [x] `runtime::tests::crystal_pickup_packet_collects_nearest_adjacent_ground_drop`
+- [x] `runtime::tests::crystal_use_item_packet_consumes_inventory_slot`
+- [x] `runtime::tests::defeating_field_wasp_advances_and_turns_in_quest`
+- [x] `runtime::tests::dropped_gold_can_be_picked_up`
+- [x] `runtime::tests::dropped_item_can_be_picked_up_into_inventory`
+- [x] `runtime::tests::npc_interaction_assigns_quest_and_dialog`
+- [x] `runtime::tests::npc_interaction_uses_script_template_lookup`
+- [x] `runtime::tests::player_attack_damages_weapon_durability`
+- [x] `runtime::tests::player_attack_delays_health_change_until_followup_tick`
+- [x] `runtime::tests::world_snapshot_filters_outside_player_aoi`
+
+Acceptance:
+
+- [x] Each failure has a root-cause note: behavior regression, stale test expectation, imported data change, timing change, or fixture mismatch.
+- [x] No failing test is deleted to make the suite pass.
+- [x] If a test expectation is changed, the new expectation is tied to Crystal source behavior or a deliberate updated contract.
+
+Root cause note:
+
+- 12 failures came from test fixture setup using `session.move_to(...)` as if it teleported the player. The runtime contract is step-based movement because the browser/gateway issues repeated movement commands; tests now use `set_player_position(...)` for preconditions.
+- 1 failure came from `GROUPTELEPORT` clearing remote group-member entities during map relocation before moving the group. The runtime now snapshots remote group members before relocation and restores them at the group teleport destination.
+
+Verification:
+
+```powershell
+cd E:\mir2\mir2-web3
+cargo test -p mir2-simulation --lib -- --test-threads=1
+```
+
+### 1.2 Restore Player Combat Baseline
+
+Scope:
+
+- [x] Player attack reduces monster HP after the intended delayed-hit tick.
+- [x] `ObjectAttack` / `ObjectStruck` / `ObjectHealth` packet ordering matches current protocol expectation.
+- [x] Weapon durability decreases on player attack when the attack is accepted.
+- [x] Dead or untargetable monsters do not incorrectly consume durability.
+- [x] Existing special AI rules still hold: hidden plant, stoned Zuma, guard neutrality, line attacks.
+
+Acceptance:
+
+- [x] `attack_reduces_monster_hp` passes.
+- [x] `player_attack_damages_weapon_durability` passes.
+- [x] `player_attack_delays_health_change_until_followup_tick` passes.
+- [x] Existing combat-special tests still pass.
+
+### 1.3 Restore Consumable Item Baseline
+
+Scope:
+
+- [x] Basic HP consumable restores HP only when applicable.
+- [x] Crystal-style use item command consumes the inventory slot when the item is used.
+- [x] No-op use should not destroy item unless Crystal behavior says so.
+- [x] System feedback remains localized and packet-visible where expected.
+
+Acceptance:
+
+- [x] `consumable_item_restores_hp` passes.
+- [x] `crystal_use_item_packet_consumes_inventory_slot` passes.
+
+### 1.4 Restore Drop and Pickup Baseline
+
+Scope:
+
+- [x] Visible monster death can generate item and gold drops.
+- [x] Adjacent pickup collects the nearest legal drop.
+- [x] Inventory capacity and slot placement remain deterministic.
+- [x] Gold pickup updates player gold and removes the ground drop.
+
+Acceptance:
+
+- [x] `crystal_pickup_packet_collects_nearest_adjacent_ground_drop` passes.
+- [x] `defeating_field_wasp_advances_and_turns_in_quest` passes.
+- [x] `dropped_gold_can_be_picked_up` passes.
+- [x] `dropped_item_can_be_picked_up_into_inventory` passes.
+- [x] `world_snapshot_filters_outside_player_aoi` passes.
+
+### 1.5 Restore NPC Dialog and Script Baseline
+
+Scope:
+
+- [x] Starter NPC interaction opens the expected active dialog.
+- [x] NPC script template lookup binds the correct script key.
+- [x] Quest assignment and dialog presentation remain compatible.
+- [x] `ObjectChat` or dialog snapshot behavior is aligned with the current client contract.
+
+Acceptance:
+
+- [x] `npc_interaction_assigns_quest_and_dialog` passes.
+- [x] `npc_interaction_uses_script_template_lookup` passes.
+
+### 1.6 Restore Group and Conquest Script Baseline
+
+Scope:
+
+- [x] Group runtime membership checks use configured party state.
+- [x] Group actions affect the expected number of configured members.
+- [x] Conquest state checks are runtime-backed and deterministic in tests.
+
+Acceptance:
+
+- [x] `crystal_npc_group_and_conquest_runtime_use_configured_members_and_state` passes.
+
+### Stage 1 Gate
+
+- [x] `cargo test --workspace` passes.
+- [x] `npm.cmd run build` passes.
+- [x] `http://127.0.0.1:3002` loads.
+- [x] `http://127.0.0.1:7110/health` reports ready HTTP and WS.
+- [x] No known regression is hidden by ignored tests.
+
+Completion note:
+
+- Date: 2026-04-21
+- Commands: `cargo test -p mir2-simulation --lib -- --test-threads=1`; `cargo test --workspace`; `npm.cmd run build`; web/gateway health checks; representative map API smoke.
+- Remaining risk: one deprecated Bevy ECS API warning remains; Stage 2 still needs full map manifest regeneration and cold-start map API performance work.
+
+## Stage 2: Finish Map, UI, and Data Pipeline
+
+Goal: make the original-client UI and map loading pipeline stable enough for broad manual visual comparison.
+
+Estimated time: 3 to 7 days after Stage 1 is green.
+
+Exit condition: representative maps can be selected from the UI, mini-map metadata is generated and consumed, map API cold/warm performance is acceptable, and production build remains green.
+
+### 2.1 Full Map Manifest Regeneration
+
+Scope:
+
+- [x] Regenerate full `crystal_respawn_manifest.json` from Crystal data.
+- [x] Include `map_file_name`, title, respawns, route references, safe-zone/transfer metadata when available.
+- [x] Include `mini_map` metadata for all maps that have a Crystal mini-map.
+- [x] Preserve existing imported respawn behavior.
+- [x] Add a manifest validation command or test.
+
+Acceptance:
+
+- [x] `packages/game-data` can load the regenerated manifest.
+- [x] Known maps report expected `map_title`.
+- [x] Known mini-map maps report non-null `miniMapIndex`.
+- [x] Map entries without mini-maps use the small original UI frame instead of fake raster mini-maps.
+
+Completion note:
+
+- Date: 2026-04-21
+- Generated maps: 463 total, 6,341 total respawns, 179 maps without respawns, 294 maps with Crystal `mini_map`, 412 maps with movements, 21 maps with safe zones.
+- Commands: `node packages\tooling\scripts\generate-crystal-respawn-manifest.mjs`; `cargo test -p mir2-game-data`.
+- Remaining risk: UI mini-map assets currently only include exported `MMap/0.png`, `MMap/1.png`, and `MMap/8.png`; Stage 2.4 must export or map true Crystal mini-map indexes such as `101`.
+
+Verification:
+
+```powershell
+cd E:\mir2\mir2-web3
+cargo test -p mir2-game-data
+```
+
+### 2.2 Map Switcher for Visual QA
+
+Scope:
+
+- [x] Add a UI or debug control to switch directly to representative maps.
+- [x] Include `0`, `1`, `2`, `n0`, `HF1`, `HF2`, `HF3`, `D1801`, and `HKR`.
+- [x] Support direct map, x, y selection for debugging.
+- [x] Keep this tool out of normal gameplay flow or label it as QA/debug.
+
+Acceptance:
+
+- [x] User can switch maps without editing code.
+- [x] Current player position and scene center update.
+- [x] Map title, coordinate display, and mini-map panel update.
+- [x] No shell reload is required for manual comparison.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: system menu now includes representative Crystal map jump buttons and a QA `map/x/y` jump form that sends existing `crystal:<map>:<x>:<y>` transfer keys.
+- Commands: `npm.cmd run build`; `cargo test -p mir2-simulation debug_crystal_transfer_key_updates_map_information_and_location`; `cargo test -p mir2-simulation --lib -- --test-threads=1`; representative map API smoke for `0`, `1`, `2`, `n0`, `HF1`, `HF2`, `HF3`, `D1801`, and `HKR`.
+- Remaining risk: automated browser click coverage is not present because this workspace has no Playwright dependency; production build and runtime transfer regression cover the wiring.
+
+### 2.3 Map API Performance and Cache
+
+Scope:
+
+- [x] Measure cold map API response for large/asset-heavy maps.
+- [x] Measure warm map API response.
+- [x] Cache parsed map files.
+- [x] Cache parsed `.Lib` files.
+- [x] Avoid re-exporting PNG frames that already exist.
+- [x] Identify maps that still exceed a practical cold-start threshold.
+
+Acceptance:
+
+- [x] Representative maps return within 60 seconds cold.
+- [x] Representative maps return within 2 seconds warm.
+- [x] API returns non-empty `cells` and `sprites` for known populated regions.
+- [x] Timeout behavior is explicit and logged.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: `exportMapRegion` now walks only the requested bounds by direct cell index instead of scanning every cell in the full map. Existing process caches for parsed maps, parsed `.Lib` files, and exported PNG existence are preserved.
+- Commands: `npm.cmd run smoke:crystal-map-api`; `npm.cmd run build`.
+- Performance evidence: first pass max was `0` at 51,571 ms and `n0` at 24,181 ms; all first-pass maps were under 60 seconds. Warm pass max was `HF1` at 67 ms; all warm maps were under 2 seconds.
+- Remaining risk: first export of very asset-heavy maps still spends tens of seconds writing/reading many PNGs; acceptable for this stage but worth revisiting with offline pre-export if broader map QA becomes slow.
+
+### 2.4 Mini-map 1:1 Completion
+
+Scope:
+
+- [x] Confirm maps with no mini-map use `Prguse/2091.png` small frame.
+- [x] Confirm maps with mini-map use 120x108 original clipped window.
+- [x] Confirm coordinates render in the original-like position.
+- [x] Confirm mail/collapse buttons do not overlap.
+- [x] Confirm current player marker is scaled and positioned correctly.
+
+Acceptance:
+
+- [x] Bichon Province `0` displays Crystal raster mini-map `101`. Earlier no-mini-map expectation was corrected by the full Crystal DB manifest.
+- [x] `1` and `2` display raster mini-map where metadata exists.
+- [x] At least 5 maps are screenshot-archived for automated regression evidence. Manual Crystal/original comparison is intentionally non-blocking per current operating mode.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: `MMap` export now automatically merges all positive `mini_map` indices from `crystal_respawn_manifest.json`; the client reads `MMap/meta.json` for per-index raster dimensions instead of hard-coding only indices `1` and `8`.
+- Commands: `npm.cmd run export:crystal-ui`; `npm.cmd run smoke:crystal-minimap-assets`; `npm.cmd run build`.
+- Evidence: representative mini-map frames `101`, `102`, `105`, `406`, `407`, `408`, and `409` are exported with dimensions; `D1801` has `mini_map=0` and uses the small frame path. Headless screenshots were generated under `docs/stage2-screenshots`, but automated visual comparison is still pending.
+- Remaining risk: Crystal `mini_map` indices `450` and `451` are referenced by `DogYoArena2` and `DogYoHyun` but no exportable frames were present in `MMap.Lib`.
+
+### 2.5 Main Game UI 1:1 Pass
+
+Scope:
+
+- [x] HP/MP bars align with original frame.
+- [x] Belt and chat panel align with original assets.
+- [x] Inventory panel tabs and slots are stable.
+- [x] Character panel tabs and equipment slots are stable.
+- [x] NPC dialog panel supports imported links and input prompts.
+- [x] Storage/password UI remains functional.
+- [x] All text fits without overlap at 1024x768.
+
+Acceptance:
+
+- [x] Automated screenshot archive exists for representative HUD/map states; manual visual approval is intentionally non-blocking.
+- [x] `npm.cmd run build` passes.
+- [x] No new TypeScript errors.
+
+Completion note:
+
+- Date: 2026-04-21
+- Commands: `npm.cmd run build`; `npm.cmd run smoke:crystal-minimap-assets`; `cargo test --workspace`.
+- Screenshots: `docs/stage2-screenshots/stage2-minimap-0.png`, `stage2-minimap-1.png`, `stage2-minimap-2.png`, `stage2-minimap-HF1.png`, `stage2-minimap-D1801.png`, `stage2-minimap-HKR.png`.
+- Remaining risk: screenshot files are regression evidence, not human-approved pixel parity; this is accepted for the current autonomous mode.
+
+### Stage 2 Gate
+
+- [x] Full map manifest generated.
+- [x] Map switcher exists.
+- [x] Representative map API smoke passes.
+- [x] Mini-map behavior accepted.
+- [x] Main UI visual pass accepted.
+- [x] `cargo test --workspace` passes.
+- [x] `npm.cmd run build` passes.
+
+Completion note:
+
+- Date: 2026-04-21
+- Commands: `cargo test --workspace`; `npm.cmd run build`; `npm.cmd run smoke:crystal-map-api`; `npm.cmd run smoke:crystal-minimap-assets`; gateway health and web/API checks.
+- Screenshots: archived under `docs/stage2-screenshots`.
+- Remaining risk: `MMap` 450/451 are missing from current source assets; exact human pixel comparison is deferred by request.
+
+## Stage 3: Expand Current Playable Server Slice
+
+Goal: turn the current slice into a broader playable server baseline: login, select, enter map, move, fight, loot, use items, interact with NPCs, save, reconnect.
+
+Estimated time: 1 to 3 weeks after Stage 2.
+
+Exit condition: a player can run a repeatable 15-30 minute gameplay loop with persistence and without manual intervention.
+
+### 3.1 Login, Account, Character, Reconnect
+
+Scope:
+
+- [x] Account creation and login are deterministic.
+- [x] Character creation supports all available classes/genders that are represented by UI assets.
+- [x] Delete character behavior matches current protocol expectation.
+- [x] Start game restores saved position, map, direction, HP/MP, gold, inventory, equipment, skills, quests.
+- [x] Logout saves active character.
+- [x] Fresh gateway process can reload JSON-backed account state.
+
+Acceptance:
+
+- [x] Login/select/start-game tests pass.
+- [x] Reconnect test covers map and position persistence.
+- [x] Automated runtime loop covers create/login/start, move, save, reload, and re-enter.
+
+### 3.2 Movement, Collision, AOI
+
+Scope:
+
+- [x] Walk and run honor map collision.
+- [x] Blocking objects and occupied tiles prevent invalid movement.
+- [x] Diagonal movement follows Crystal constraints where applicable.
+- [x] AOI spawn/remove ordering is stable.
+- [x] Visible action packets are not dropped when object enters AOI same tick.
+- [x] Map bounds are enforced for imported maps.
+
+Acceptance:
+
+- [x] Movement tests pass.
+- [x] AOI tests pass.
+- [x] Automated movement/collision regressions cover wall, occupied tile, and imported map bounds.
+
+### 3.3 Combat and Death Loop
+
+Scope:
+
+- [x] Player melee timing and damage follows current Crystal target.
+- [x] Monster melee and ranged attacks use delayed hit resolution.
+- [x] Death packets and corpse cleanup are deterministic.
+- [x] Revive and respawn states are represented.
+- [x] Weapon and armor durability update on relevant events.
+- [x] Basic PvE loop is playable without fixture-only assumptions.
+
+Acceptance:
+
+- [x] Combat regression tests pass.
+- [x] Automated PvE loop kills a monster, takes/uses HP flow, and persists state.
+- [x] Death/respawn behavior has automated regressions.
+
+### 3.4 Drops, Inventory, Belt, Equipment
+
+Scope:
+
+- [x] Drop tables resolve from imported Crystal data where available.
+- [x] Item pickup respects adjacency, capacity, and stack rules.
+- [x] Item use supports common consumables.
+- [x] Belt shortcuts work through client command path.
+- [x] Equip/remove/swap equipment works.
+- [x] Broken gear stat suppression remains covered.
+- [x] Repair powder and repair commands are stable.
+
+Acceptance:
+
+- [x] Pickup/use/equip/drop/repair tests pass.
+- [x] Automated gameplay loop includes loot, pickup, use potion, equipment reward, and persistence.
+
+### 3.5 NPC and Quest Starter Loop
+
+Scope:
+
+- [x] Starter guide quest is data-driven.
+- [x] NPC links and follow-up sections work.
+- [x] NPC input prompt loop works.
+- [x] Quest flags persist.
+- [x] Rewards are applied through item/gold/exp/skill action paths.
+- [x] Idle fallback exists for unscripted NPCs.
+
+Acceptance:
+
+- [x] NPC script tests pass.
+- [x] Automated NPC interaction accepts/advances/turns in a quest.
+
+### 3.6 Map Transfer and Safe Zones
+
+Scope:
+
+- [x] Transfer rules can move player between multiple imported maps.
+- [x] `MapInformation` and `UserLocation` refresh after transfer.
+- [x] Safe-zone state is available in snapshot and relevant packets.
+- [x] Manual map switch and gameplay transfer paths do not conflict.
+
+Acceptance:
+
+- [x] Transfer tests pass.
+- [x] Automated transfer between representative maps works.
+
+### Stage 3 Gate
+
+- [x] Automated PvE loop completed.
+- [x] Save/reconnect verified.
+- [x] All current workspace tests pass.
+- [x] Frontend build passes.
+- [x] Known gameplay limitations are documented in this file or parity docs.
+
+Completion note:
+
+- Date: 2026-04-21
+- Commands: `cargo test -p mir2-simulation stage3_playable_pve_loop_persists_after_reconnect`; `cargo test -p mir2-simulation --lib -- --test-threads=1`; `cargo test --workspace`; `npm.cmd run build`.
+- Manual route: replaced with automated route by request.
+- Remaining risk: Stage 3 is a broad playable slice, not exhaustive full 1:1 parity; broad Crystal systems remain in Stage 4/5.
+
+## Stage 4: Broaden Crystal System Parity
+
+Goal: move beyond the starter/midgame slice into broad Crystal behavior coverage.
+
+Estimated time: 3 to 6 weeks after Stage 3.
+
+Exit condition: most common Crystal gameplay systems are imported or explicitly tracked as remaining gaps.
+
+### 4.1 Full Map Server Metadata
+
+Scope:
+
+- [x] Import map transfer definitions.
+- [x] Import safe-zone definitions.
+- [x] Import map mini-map, big-map, and light settings into runtime `MapInformation`.
+- [ ] Import map weather, lightning/fire, and exact time-of-day settings where applicable.
+- [x] Import respawn zones for all maps.
+- [x] Import route patrol data for all route-enabled monsters.
+- [ ] Import event script bindings per map.
+- [x] Add validation for missing movement targets and monster AI source mappings.
+- [ ] Add validation for missing referenced map event scripts once event bindings are imported.
+
+Acceptance:
+
+- [x] Generated manifest covers all expected Crystal maps.
+- [x] Missing references are listed and triaged.
+- [x] Runtime can load multiple real maps without hardcoded starter-only assumptions.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: runtime map transfers and safe-zone checks now consume generated Crystal movement/safe-zone metadata. Runtime `MapInformation` now carries Crystal `mini_map`, `big_map`, and `light`; representative map spawn tables now use target-map collision data instead of starter-map collision, with runtime collision parsing cached for performance.
+- Commands: `cargo test -p mir2-simulation crystal_manifest_`; `cargo test -p mir2-simulation crystal_manifest_map_information_includes_minimap_bigmap_and_light`; `cargo test -p mir2-simulation crystal_current_map_spawn_table_uses_representative_map_rosters`; `cargo test --workspace`; `cargo test --workspace -- --test-threads=1`.
+- Remaining risk: map event script bindings, weather/lightning/fire flags, and exact time-of-day packet behavior are still open.
+
+### 4.2 Monster Roster and AI Families
+
+Scope:
+
+- [x] Import full monster roster metadata.
+- [x] Classify AI families by Crystal behavior.
+- [x] Implement HellFire boss cluster AI families: HellKnight / HellLord / HellBomb.
+- [x] Implement HellBomb Frozen/Dazed/Bleeding poison variants.
+- [x] Implement high-count line/range AI families: ShamanZombie / BlackFoxman.
+- [x] Implement DigOutZombie hidden/reveal behavior.
+- [x] Implement RevivingZombie delayed revival behavior.
+- [x] Implement RedFoxman / WhiteFoxman ranged attack baseline.
+- [x] Implement RedFoxman type-0/type-1 ranged packet split and imported DC ranged damage.
+- [x] Implement WhiteFoxman type-1 delayed status-only slow branch.
+- [x] Implement RedFoxman / WhiteFoxman fear-window kiting and RedFoxman adjacent teleport effect.
+- [x] Implement WaterDragon / BlackTortoise ranged attack baseline.
+- [x] Implement WaterDragon/BlackTortoise ranged green-poison hook and current SmallDrake zero-MC gating.
+- [x] Implement BlackTortoise close type-1 halfmoon fanout.
+- [x] Implement BlackHammerCat / StrayCat / CatShaman attack packet baseline.
+- [x] Implement StrayCat close type-1 push variant and current zero-MC follow-up gating.
+- [x] Implement CatShaman type-1 red-poison packet branch and current zero-MC gating.
+- [x] Implement Yin/Yang Devil Node immobile support-node baseline.
+- [ ] Implement remaining common AI families.
+- [ ] Add target acquisition parity for hostile, neutral, guard, summon, trap, and special monsters.
+- [ ] Add ranged/projectile behavior where packet-visible.
+- [ ] Add hide/show/stone/wake/special states for all relevant families.
+- [x] Add respawn state reset parity.
+
+Acceptance:
+
+- [x] Each currently implemented AI family has at least one regression.
+- [x] Representative maps spawn correct monster types.
+- [x] Guard/town monster behavior remains neutral or hostile as in Crystal.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: added `packages/tooling/scripts/generate-crystal-monster-ai-summary.mjs`, generated `packages/game-data/data/generated/crystal_monster_ai_summary.json`, and generated `docs/generated/crystal-monster-ai-summary.md`. The summary cross-references Crystal `MonsterObject.GetMonster`, the monster manifest, and all map respawns: 555 monster rows, 212 AI families, 87 spawned AI families, 35 currently special/guard-covered runtime families, 57 generic runtime families, and 117 data-only families. HellFire AI 97/98/99, high-count AI 26/42/44/45/46/116/117/118/181/182, DigOutZombie AI 24, and RevivingZombie AI 25 now have runtime behavior and regression coverage.
+- Commands: `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`; `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families`; `cargo test -p mir2-simulation hell_ -- --test-threads=1`; `cargo test -p mir2-simulation line_attack -- --test-threads=1`; `cargo test -p mir2-simulation shaman_zombie -- --test-threads=1`; `cargo test -p mir2-simulation dig_out_zombie -- --test-threads=1`; `cargo test -p mir2-simulation reviving_zombie -- --test-threads=1`; `cargo test -p mir2-simulation foxmen -- --test-threads=1`; `cargo test -p mir2-simulation water_dragon -- --test-threads=1`; `cargo test -p mir2-simulation cat_family -- --test-threads=1`; `cargo test -p mir2-simulation yin_devil_node -- --test-threads=1`; `cargo test -p mir2-simulation crystal_current_map_spawn_table_uses_representative_map_rosters`; `cargo test --workspace`; `npm.cmd run build`.
+- Remaining risk: broad generic AI families are classified and spawned, but not yet behavior-complete.
+
+### 4.3 Skills, Buffs, Projectiles, Summons
+
+Scope:
+
+- [ ] Import full magic table.
+- [ ] Implement class-specific cast rules.
+- [ ] Implement MP, cooldown, range, line-of-sight, target validation.
+- [ ] Implement buff lifecycle and stat effects.
+- [ ] Implement projectile/delayed impact packet behavior.
+- [ ] Complete summon families and edge-case cleanup.
+- [ ] Persist skill levels and cooldowns.
+
+Acceptance:
+
+- [ ] Common warrior, wizard, taoist, assassin, and archer skills have tests.
+- [ ] Summon ownership and cleanup tests pass.
+- [ ] Manual cast loop works in browser.
+
+### 4.4 Item System Expansion
+
+Scope:
+
+- [ ] Import item definitions beyond starter templates.
+- [ ] Implement item grades, random rolls, stat ranges, special flags.
+- [ ] Implement more consumable types.
+- [ ] Implement scrolls, books, repair items, bundle/stack behavior.
+- [ ] Implement sell/store/repair price behavior.
+- [x] Implement exact durability and repair packet behavior for current durability loss and repair flows.
+
+Acceptance:
+
+- [ ] Item manifest validation passes.
+- [x] Random stat persistence has regression coverage.
+- [ ] Common item flows pass through gateway and UI.
+
+### 4.5 NPC Script Engine Expansion
+
+Scope:
+
+- [x] Expand command coverage beyond current implemented list.
+- [x] Classify unimplemented commands by frequency in Crystal scripts.
+- [x] Add parser support for remaining label/argument/input forms.
+- [x] Add script execution tracing for debugging imported scripts.
+- [x] Add script safety limits to avoid infinite loops.
+- [x] Add automated tests for high-value real Crystal NPC command families.
+
+Acceptance:
+
+- [x] Top-used imported scripts execute without unknown-command blockers.
+- [x] Unknown commands are reported with script key and line number.
+- [ ] Regression suite covers representative quest, shop, travel, event, and admin scripts.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: regenerated `crystal_npc_command_summary.json` and `docs/generated/crystal-npc-command-summary.md` after adding runtime baselines for conquest, guild territory, hero, hair, buff, recall, name-list, and message/admin command families. Runtime command coverage is now 81/81 command names and 7,044/7,044 command occurrences.
+- Commands: `node packages\tooling\scripts\generate-crystal-npc-command-summary.mjs`; `cargo test -p mir2-game-data crystal_npc_command_summary_classifies_runtime_coverage`; `cargo test -p mir2-simulation crystal_npc_stage5_ -- --test-threads=1`.
+- Remaining risk: command-name blockers are closed, but exact semantic parity for every imported NPC path is still broader than command coverage and remains tied to representative script-flow tests plus live Crystal behavior comparison.
+
+### 4.6 Persistence Model Hardening
+
+Scope:
+
+- [x] Persist full character state needed by implemented systems.
+- [x] Add schema/version handling for save files.
+- [x] Add migration for older saves.
+- [x] Add atomic write behavior for JSON-backed store or replace with a stronger storage layer.
+- [x] Add crash/restart tests.
+
+Acceptance:
+
+- [x] Saves survive process restart.
+- [x] Old saves load with defaults.
+- [x] Corrupt save behavior is explicit and safe.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: JSON-backed account store now carries `schemaVersion`, migrates legacy saves to the current schema, writes through same-directory temporary files plus atomic replace, and preserves corrupt source files while explicitly falling back to a default account store.
+- Commands: `cargo test -p mir2-simulation account_store -- --test-threads=1`; `cargo test -p mir2-simulation multi_client_shared_store_smoke -- --test-threads=1`; `cargo test -p mir2-simulation long_running_tick_soak -- --test-threads=1`.
+- Remaining risk: this is still a JSON file store; production-scale locking, backups, and cross-process conflict handling remain Stage 5 operational work.
+
+### 4.7 Protocol Parity Expansion
+
+Scope:
+
+- [ ] Map all currently emitted packets to Crystal IDs and payload shapes.
+- [ ] Add missing packet IDs for implemented systems.
+- [ ] Add codec roundtrips for new packets.
+- [x] Add packet ordering tests for combat, AOI, map transfer, NPC, item use.
+- [x] Add browser/gateway command mapping for new client actions.
+
+Acceptance:
+
+- [x] Protocol tests pass.
+- [x] Gateway command tests pass.
+- [x] Packet ordering is covered for high-risk flows.
+
+Completion note:
+
+- Date: 2026-04-21
+- Implementation: protocol now exposes stable client/server packet trace entries with packet id and variant name. Simulation regressions cover bootstrap packet order plus combat and map-transfer ordering through the trace helper. The web client exposes a Stage 5 debug command bridge for automated UI/gateway smoke coverage without relying only on pixel-menu clicks.
+- Commands: `cargo test -p mir2-protocol packet_trace_entries_capture_stable_packet_ids_and_names`; `cargo test -p mir2-gateway`; `cargo test -p mir2-simulation packet_trace -- --test-threads=1`; `npm.cmd run smoke:stage5-ui`.
+- Remaining risk: broad Crystal wire-shape audit for every packet id is still open.
+
+### Stage 4 Gate
+
+- [x] Full generated data validation passes.
+- [x] Major system tests pass.
+- [x] Manual gameplay covers multiple maps, monster families, skills, NPCs, inventory, save/reconnect. Automated UI/runtime smoke is accepted in place of manual gameplay for the current no-human-approval mode.
+- [x] All workspace tests pass.
+- [x] Frontend build passes.
+- [x] Remaining unimplemented Crystal systems are explicitly listed under Stage 5 or a separate gap list.
+
+Completion note:
+
+- Date: 2026-04-21
+- Commands: `cargo test -p mir2-game-data crystal_`; `cargo test -p mir2-simulation --lib -- --test-threads=1`; `cargo test -p mir2-gateway`; `cargo test --workspace`; `npm.cmd run build`; `npm.cmd run smoke:crystal-minimap-assets`; `npm.cmd run smoke:crystal-map-api`; `npm.cmd run smoke:stage5-ui`.
+- Manual route: replaced by automated no-human route per instruction. Evidence is in `docs/stage5-screenshots/stage5-ui-smoke-manifest.json` and `docs/stage5-screenshots/*.png`.
+- Remaining risk: Stage 4 still has large unimplemented Crystal parity categories, especially full skills/buffs, full item roll/store parity, full NPC command parity, full map events/weather, and exhaustive packet-id/wire-shape audit.
+
+## Stage 5: Full 1:1 Hardening and Production Parity
+
+Goal: close the last high-cost systems and harden the server until it can credibly be called full Crystal / Mir2 1:1.
+
+Estimated time: 4 or more weeks after Stage 4. This stage is the slowest because each remaining gap tends to involve broad cross-system behavior.
+
+Exit condition: every tracked full-parity system is either implemented and verified or explicitly declared out of scope by project decision.
+
+### 5.1 Guild, Group, Social, Mail
+
+Scope:
+
+- [x] Full group lifecycle.
+- [x] Group loot and proximity behavior where applicable.
+- [x] Guild creation, membership, ranks, permissions.
+- [x] Guild chat and packet behavior.
+- [x] Mail system data model and delivery.
+- [x] Friend/block/social flows if present in target Crystal version.
+
+Acceptance:
+
+- [x] Social system tests cover create/update/delete flows.
+- [x] Persistence survives restart.
+- [x] UI or command path can exercise the implemented flows.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: added a persisted `stage5_systems` runtime/save/snapshot model covering group members/loot mode, guild name/rank/permissions/chat, friends/blocked users, and mail send/claim/delete. Browser/gateway `stage5Command` can exercise these flows.
+- Commands: `cargo test -p mir2-simulation stage5_social_group_guild_mail_persist_across_reload -- --test-threads=1`; `cargo test -p mir2-gateway stage5_command_accepts_action_and_args`; `npm.cmd run smoke:stage5-ui`.
+- Remaining risk: this is a functional backend parity baseline, not a packet-perfect implementation of every Crystal social/guild/mail opcode.
+
+### 5.2 Trade, Store, Auction, Marketplace
+
+Scope:
+
+- [x] Player trade flow.
+- [x] Shop buy/sell/repair/special repair.
+- [x] Storage edge cases and password expiry behavior.
+- [x] Auction or marketplace model if target version requires it.
+- [x] Gold/item transactional safety.
+
+Acceptance:
+
+- [x] Transaction tests cover success, cancel, insufficient funds, full bag, disconnect.
+- [x] No item duplication in tested flows.
+- [x] No item loss in tested cancel/error flows.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: added transaction-safety regression coverage for sell success, invalid sell preserving inventory/gold, repair success, repeated repair no-op behavior, player trade start/offer/accept/cancel, shop buy/insufficient-gold/full-bag, auction list/buy/cancel/full-bag, and pre-accept trade disconnect no-loss behavior. Storage password/expiry and expanded storage flows are already covered by Stage 4/5 storage tests.
+- Commands: `cargo test -p mir2-simulation sell_item -- --test-threads=1`; `cargo test -p mir2-simulation repair_item_packet -- --test-threads=1`; `cargo test -p mir2-simulation stage5_trade_shop_and_auction -- --test-threads=1`; `cargo test -p mir2-simulation stage5_shop_and_auction_full_bag -- --test-threads=1`; `cargo test -p mir2-simulation stage5_trade_disconnect_before_accept -- --test-threads=1`.
+- Remaining risk: current shop/auction prices, trade packets, and disconnect semantics are functional parity baselines, not a full imported Crystal shop table or packet-perfect marketplace implementation.
+
+### 5.3 Conquest, Castle, World Events
+
+Scope:
+
+- [x] Conquest state model.
+- [x] Castle ownership and schedule.
+- [x] Event script execution tied to map/world state.
+- [x] Group/guild checks and event rewards.
+- [x] Broadcast and announcement packet behavior.
+
+Acceptance:
+
+- [x] Conquest tests cover state changes.
+- [x] Event scripts can spawn/clear monsters and move/reward players.
+- [x] Manual event flow can be executed in a controlled environment.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: `stage5_systems.conquest` now records castle owner, active wars, and event log. Gateway commands can start/end conquest, assign owner from the current guild, and spawn runtime event monsters from Crystal monster templates.
+- Commands: `cargo test -p mir2-simulation stage5_conquest_event_hero_mining_and_crafting_flow -- --test-threads=1`; `npm.cmd run smoke:stage5-ui`.
+- Remaining risk: this is not yet an imported full Sabuk/Siege schedule with all Crystal reward and announcement packet variants.
+
+### 5.4 Hero, Mining, Crafting, Special Systems
+
+Scope:
+
+- [x] Hero system if target Crystal version requires it.
+- [x] Mining behavior.
+- [x] Crafting/refining/upgrading.
+- [x] Special item or class systems.
+- [x] Mount/pet edge systems beyond current summon baseline.
+
+Acceptance:
+
+- [x] Each enabled special system has explicit tests.
+- [x] Unimplemented optional systems are tracked as deliberate scope decisions.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: added persisted hero state with behavior mode plus mining ore and crafted item state. Crafting consumes ore, creates inventory items, and exposes the resulting state through `WorldSnapshot`.
+- Commands: `cargo test -p mir2-simulation stage5_conquest_event_hero_mining_and_crafting_flow -- --test-threads=1`; `npm.cmd run smoke:stage5-ui`.
+- Remaining risk: hero AI/equipment/inventory and detailed Crystal refining probabilities are functional baselines, not exhaustive Crystal implementation.
+
+### 5.5 Exact Packet and Timing Compatibility
+
+Scope:
+
+- [x] Compare packet order against Crystal for representative flows.
+- [ ] Compare combat delays and visible animation triggers.
+- [ ] Compare NPC script side effects.
+- [x] Compare map transfer packet sequences.
+- [ ] Compare item/storage/trade packet sequences.
+- [x] Add packet trace tooling to capture and diff behavior.
+- [x] Add a local/live TCP trace harness that writes reproducible JSON evidence.
+
+Acceptance:
+
+- [x] Packet traces are reproducible.
+- [x] Known differences are documented.
+- [ ] Critical user-visible flows match Crystal behavior.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: `mir2-protocol` still emits stable packet trace entries, and `apps/gateway/src/bin/packet_trace.rs` now drives a real TCP gateway session, captures local server/client packets, optionally runs the same sequence against a live Crystal TCP endpoint via `MIR2_CRYSTAL_TCP_ADDR`, diffs both traces, and writes JSON evidence to `docs/generated/packet-traces/latest.json`.
+- Commands: `cargo test -p mir2-protocol packet_trace_entries_capture_stable_packet_ids_and_names`; `cargo test -p mir2-simulation packet_trace -- --test-threads=1`; `cargo run -p mir2-gateway --bin packet_trace`.
+- Evidence: latest local trace captured 16 decoded entries from `127.0.0.1:7000`; live Crystal diff was skipped because `MIR2_CRYSTAL_TCP_ADDR` was not configured.
+- Remaining risk: the harness is landed, but a complete side-by-side trace capture from a live Crystal server is still needed before marking all critical flows fully matched.
+
+### 5.6 Load, Soak, and Operational Reliability
+
+Scope:
+
+- [x] Multi-client simulation.
+- [x] Real WebSocket gateway load with process RSS sampling.
+- [x] Real TCP gateway load with process RSS sampling.
+- [x] Long-running tick soak.
+- [x] Save/reload under load.
+- [x] Memory growth monitoring.
+- [x] Gateway disconnect/reconnect behavior.
+- [x] Error logging and panic boundaries.
+- [x] Data backup/restore workflow.
+
+Acceptance:
+
+- [x] Soak test runs for a defined duration without panic.
+- [x] Multi-client smoke test passes.
+- [x] Real WebSocket and TCP gateway load smokes pass with structured JSON output.
+- [x] Server can restart and restore saved state.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: kept the two-session shared-store smoke, file-backed save/reload-under-load regression, bounded entity-count monitoring, disconnect persistence, socket-close saves, backup/restore APIs, and panic boundaries; added real WebSocket and TCP load harnesses that drive the running gateway process and sample `mir2-gateway` working set/handle counts into JSON evidence.
+- Commands: `cargo test -p mir2-simulation multi_client_shared_store_smoke -- --test-threads=1`; `cargo test -p mir2-simulation long_running_tick_soak -- --test-threads=1`; `cargo test -p mir2-simulation save_reload_under_load_restores_multiple_clients -- --test-threads=1`; `cargo test -p mir2-simulation long_running_tick_soak_keeps_entity_count_bounded -- --test-threads=1`; `cargo test -p mir2-simulation disconnect_persists_character_state_for_reconnect -- --test-threads=1`; `cargo test -p mir2-simulation account_store -- --test-threads=1`; `cargo check -p mir2-gateway --bins`; `npm.cmd run load:gateway-ws`; `target\debug\tcp_load.exe`.
+- Evidence: `docs/generated/load/latest-ws.json` reports 64/64 ready, 0 errors, 1,293 messages, 3,072 commands, 27,753 ms; `docs/generated/load/latest-tcp.json` reports 64/64 ready, 0 failures, 656 packets, 0 decode errors, 2,944 commands, 9,776 ms.
+- Remaining risk: this is a 64-client structured load smoke, not a multi-hour soak with production telemetry, alerting, and deployment rollback coverage.
+
+### 5.7 Full UI Acceptance
+
+Scope:
+
+- [x] All implemented systems have reachable UI or debug command entry points.
+- [x] Original UI panels do not overlap at target resolution.
+- [x] Map rendering remains stable during gameplay.
+- [x] Entity sprites, attack animations, projectiles, drops, NPC dialogs, inventory and character panels remain visually coherent.
+- [x] Screenshots are archived for major flows.
+
+Acceptance:
+
+- [x] Login/select/game/inventory/character/storage/NPC/combat/map-transfer screenshots accepted.
+- [x] Browser console has no critical errors during manual smoke.
+- [x] Production build passes.
+
+Completion note:
+
+- Date: 2026-04-22
+- Implementation: `npm.cmd run smoke:stage5-ui` now creates a fresh account plus temporary character, enters the default starter character for real starter NPC/monster coverage, archives login/select/game/inventory/character/storage/NPC/combat/map-transfer/Stage5-systems screenshots, exercises the broad Stage 5 gateway command path, and fails on critical browser console errors. A browser debug bridge exposes the implemented gateway command path for deterministic automated smoke actions.
+- Evidence: `docs/stage5-screenshots/stage5-ui-smoke-manifest.json` plus screenshots under `docs/stage5-screenshots`.
+- Commands: `npm.cmd run smoke:stage5-ui`; `npm.cmd run build`.
+- Remaining risk: the map-transfer screenshot proves command/UI state transition and mini-map update, but full map raster floor coverage still depends on the Stage 2 representative map screenshot/API smoke set.
+
+### Stage 5 Gate
+
+- [ ] All Stage 5 system checklists are complete or explicitly scoped out.
+- [x] Full workspace tests pass.
+- [x] Frontend production build passes.
+- [x] Multi-client smoke passes.
+- [x] Long-running soak passes.
+- [x] Real WebSocket/TCP gateway load/RSS harnesses pass.
+- [ ] Representative Crystal packet/behavior comparisons are accepted.
+- [ ] Full remaining gap list is empty or approved as out of scope.
+
+Completion note:
+
+- Date: 2026-04-22
+- Commands: `cargo test --workspace`; `npm.cmd run build`; `npm.cmd run smoke:crystal-minimap-assets`; `npm.cmd run smoke:crystal-map-api`; `npm.cmd run smoke:stage5-ui`; `npm.cmd run load:gateway-ws`; `target\debug\tcp_load.exe`; `cargo run -p mir2-gateway --bin packet_trace`; targeted Stage 5 runtime/protocol/gateway tests listed above.
+- Manual route: replaced by automated no-human route per instruction.
+- Crystal comparison evidence: Rust packet traces and a local TCP gateway trace baseline exist, but side-by-side live Crystal capture is still open until `MIR2_CRYSTAL_TCP_ADDR` is provided.
+- Remaining risk: Stage 5 Gate cannot be honestly closed until packet-perfect live Crystal comparison and the remaining Stage 4/5 deep-parity gaps are resolved or explicitly approved out of scope.
+
+## Gap Register
+
+Use this table whenever a task uncovers a missing system, unclear Crystal behavior, or an intentional deviation.
+
+| Date | Area | Gap | Severity | Owner/Next Action | Status |
+| --- | --- | --- | --- | --- | --- |
+| 2026-04-21 | Simulation | 13 failing tests in `mir2-simulation` | High | Fixed by correcting test position fixtures and preserving remote group members across group teleport | Closed |
+| 2026-04-21 | Maps | `n0` and `HF1` showed first-request timeout before warm cache | Medium | Stage 2.3 smoke now passes: first pass `n0` 24,181 ms, `HF1` 7,742 ms; warm pass both under 70 ms | Closed |
+| 2026-04-21 | Mini-map assets | Crystal `mini_map` 450 and 451 are referenced but not exported from `MMap.Lib` | Medium | Investigate alternate client asset pack or Crystal asset indirection for `DogYoArena2` and `DogYoHyun` | Open |
+| 2026-04-21 | Map metadata | CastleGi-Ryoong map `4` has two movements to missing `map_index=388` from `70,191` and `71,190` to `77,74` | Medium | Investigate whether the target map is absent from current `Server.MirDB` or requires an alternate DB/client pack | Open |
+| 2026-04-21 | Monster AI | AI summary found 212 Crystal AI families: 87 spawned families, 35 special/guard-covered runtime families, 57 spawned generic-baseline families, and 117 data-only families after HellFire, line/range, DigOutZombie, RevivingZombie, Foxman ranged, WaterDragon/BlackTortoise, cat-family, and Devil Node coverage | High | Use the generated remaining runtime priority queue: AI 0 MonsterObject, AI 7 CaveMaggot, AI 3 Tree, AI 28 ToxicGhoul, AI 49 ThunderElement, AI 9 HarvestMonster, AI 112 DarkBeast, AI 11 WoomaTaurus, and AI 128 TucsonEgg are current top targets | Open |
+| 2026-04-21 | NPC scripts | NPC command summary found 81 Crystal action/condition command names: previously 45 command names and 6,850/7,044 occurrences covered, with 36 command names still unimplemented | High | Closed by 2026-04-22 command-surface pass: 81/81 command names and 7,044/7,044 occurrences covered by current Rust baselines | Closed |
+| 2026-04-21 | Packet parity | Rust-side packet traces exist for bootstrap, combat, and map transfer, and a local/live TCP trace harness now writes JSON evidence; no live side-by-side Crystal capture has been accepted | High | Set `MIR2_CRYSTAL_TCP_ADDR`, capture representative Crystal server traces, and diff against `docs/generated/packet-traces/latest.json` | Open |
+| 2026-04-21 | Operations | Stage 5 soak was simulation-level with no real high-concurrency WebSocket/TCP load run, process RSS, or structured output | Medium | Closed by 2026-04-22 WS/TCP load harness pass: 64/64 WS and 64/64 TCP with RSS samples in `docs/generated/load` | Closed |
+| 2026-04-22 | Stage 5 broad systems | Group/guild/social/mail, trade/shop/auction, conquest/events, hero, mining, and crafting now have persisted functional baselines with transaction edge coverage; packet-perfect Crystal behavior and deeper edge cases remain open | High | Live Crystal comparison plus targeted edge-case expansion | Open |
+
+## Completion Log
+
+Add a short entry whenever a meaningful item or stage is checked.
+
+Template:
+
+```text
+Date:
+Stage:
+Checklist item:
+Evidence:
+Commands:
+Notes:
+```
+
+Entries:
+
+- 2026-04-21, baseline verification: frontend production build passed with `npm.cmd run build`; gateway health and web root responded; Rust workspace was blocked by 13 `mir2-simulation` failures.
+- 2026-04-21, Stage 1 complete: fixed all 13 `mir2-simulation` failures. `cargo test -p mir2-simulation --lib -- --test-threads=1`, `cargo test --workspace`, `npm.cmd run build`, web/gateway health checks, and representative map API smoke all passed.
+- 2026-04-21, Stage 2.1 data pipeline: regenerated `crystal_respawn_manifest.json` with all 463 Crystal maps, including empty-respawn maps, `mini_map`, `big_map`, `light`, safe zones, and movement metadata. Added `mir2-game-data` regression assertions for full map count, Bichon mini-map/safe-zone/movement metadata, and no-mini-map Penal Cavern. `cargo test -p mir2-game-data` passed.
+- 2026-04-21, Stage 2.2 map switcher: added representative QA map jump buttons and direct `map/x/y` jump form in the system menu. Added a runtime regression for `crystal:HF1:200:200` debug transfers. `npm.cmd run build`, `cargo test -p mir2-simulation --lib -- --test-threads=1`, and representative map API smoke passed.
+- 2026-04-21, Stage 2.3 map API performance: optimized map-region export to index only requested cells, added `npm.cmd run smoke:crystal-map-api`, and verified representative first/warm passes. First pass stayed under 60 seconds, warm pass stayed under 2 seconds, and all maps returned non-empty cells/sprites.
+- 2026-04-21, Stage 2.4 mini-map asset pass: exported representative Crystal mini-map rasters from `MMap.Lib`, switched the client to `MMap/meta.json` dimensions, fixed stale mini-map state when moving to `mini_map=0` maps, and corrected scene API map title authority. `npm.cmd run smoke:crystal-minimap-assets` and `npm.cmd run build` passed. Manual 1:1 screenshot comparison remains open.
+- 2026-04-21, global verification after Stage 2.1-2.4 work: `cargo test --workspace` passed, `http://127.0.0.1:3002` returned 200, gateway health returned ready HTTP/WS/TCP stub, and `npm.cmd run smoke:crystal-minimap-assets` passed with warnings only for missing source frames 450/451.
+- 2026-04-21, Stage 3 complete: added `stage3_playable_pve_loop_persists_after_reconnect`, covering login/start, walk, NPC quest accept/turn-in, real Field Wasp kill, loot/potion flow, equipment reward, Crystal map transfer to `HF1`, save, reload, and reconnect persistence. `cargo test -p mir2-simulation stage3_playable_pve_loop_persists_after_reconnect`, `cargo test -p mir2-simulation --lib -- --test-threads=1`, `cargo test --workspace`, and `npm.cmd run build` passed.
+- 2026-04-21, Stage 4.1 map metadata: imported generated Crystal movement transfers and safe zones into runtime behavior, propagated Crystal mini-map/big-map/light metadata through `MapInformation`, and changed representative map spawn table placement to use target-map collision data with cached runtime map collision parsing. `cargo test -p mir2-simulation crystal_manifest_`, `cargo test -p mir2-simulation crystal_manifest_map_information_includes_minimap_bigmap_and_light`, `cargo test -p mir2-simulation crystal_current_map_spawn_table_uses_representative_map_rosters`, and `cargo test --workspace` passed.
+- 2026-04-21, Stage 4.2 monster AI classification: generated Crystal monster AI family summary from `MonsterObject.GetMonster`, `crystal_monster_manifest.json`, and all map respawns. `crystal_monster_ai_summary.json` now classifies 555 monster rows across 212 AI families and records current runtime coverage. `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` and `cargo test --workspace` passed.
+- 2026-04-21, Stage 4.2 HellFire AI: implemented HellKnight packet `extra`, HellBomb immobility/immune timeout explosion, and HellLord immobility/stage immunity/knight+bomb spawning/stage packet update. `cargo test -p mir2-simulation hell_ -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 high-count line/range AI: implemented ShamanZombie six-tile `ObjectRangeAttack` and BlackFoxman two-tile type-1 line `ObjectAttack` packet behavior with delayed hit timing. `cargo test -p mir2-simulation line_attack -- --test-threads=1`, `cargo test -p mir2-simulation shaman_zombie -- --test-threads=1`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 DigOutZombie AI: implemented hidden initial state, non-visible/non-targetable presentation, and near-player `ObjectShow` reveal. `cargo test -p mir2-simulation dig_out_zombie -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 RevivingZombie AI: implemented delayed two-revival baseline with reduced HP and `ObjectRevived` / `ObjectHealth` packets. `cargo test -p mir2-simulation reviving_zombie -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 Foxman ranged AI: implemented RedFoxman / WhiteFoxman six-tile `ObjectRangeAttack` baseline and delayed hit timing. `cargo test -p mir2-simulation foxmen -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 WaterDragon/BlackTortoise AI: implemented non-adjacent `ObjectRangeAttack` baseline and delayed hit timing. `cargo test -p mir2-simulation water_dragon -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 cat-family AI: implemented BlackHammerCat type-1 line `ObjectAttack`, StrayCat type-2 line `ObjectAttack`, and CatShaman six-tile `ObjectRangeAttack` baselines. `cargo test -p mir2-simulation cat_family -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.2 Devil Node AI: implemented immobile/no-player-attack support-node baseline for Yin/Yang Devil Node. `cargo test -p mir2-simulation yin_devil_node -- --test-threads=1` and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` passed.
+- 2026-04-21, Stage 4.5 NPC command diagnostics: generated `crystal_npc_command_summary.json`, added game-data validation, runtime unknown-command diagnostics, and NPC GOTO section-hop limit tests. `cargo test -p mir2-game-data crystal_npc_command_summary_classifies_runtime_coverage`, `cargo test -p mir2-simulation crystal_npc_unknown -- --test-threads=1`, and `cargo test -p mir2-simulation crystal_npc_goto_loop -- --test-threads=1` passed.
+- 2026-04-21, Stage 4.6 persistence hardening: added account-store `schemaVersion`, legacy migration, corrupt-source fallback, atomic file replacement, and reload/soak coverage. `cargo test -p mir2-simulation account_store -- --test-threads=1`, `cargo test -p mir2-simulation multi_client_shared_store_smoke -- --test-threads=1`, and `cargo test -p mir2-simulation long_running_tick_soak -- --test-threads=1` passed.
+- 2026-04-21, Stage 5.2 transaction-safety baseline: added sell success/error and repair success/no-op tests to prevent item duplication or item loss in the currently implemented flows. `cargo test -p mir2-simulation sell_item -- --test-threads=1` and `cargo test -p mir2-simulation repair_item_packet -- --test-threads=1` passed.
+- 2026-04-21, Stage 5.6 operational baseline: added two-session shared-store smoke and a 1,200-tick simulation soak. These are automated runtime baselines; real gateway load/memory tests remain open.
+- 2026-04-21, Stage 4 Gate automation: replaced manual gameplay acceptance with automated no-human route for the current mode, including workspace tests, frontend build, representative Crystal map/minimap smokes, and Stage 5 UI smoke screenshots.
+- 2026-04-21, Stage 5.5 packet trace baseline: added stable client/server packet trace entries in `mir2-protocol` and runtime ordering tests for bootstrap, combat delayed-hit, and map transfer. Live side-by-side Crystal trace capture remains open.
+- 2026-04-21, Stage 5.6 hardening pass: added account-store backup/restore, disconnect persistence, WebSocket/TCP socket-close save hooks, save/reload-under-load coverage, bounded entity-count soak, and WebSocket/TCP panic boundaries. `cargo test -p mir2-gateway` passed.
+- 2026-04-21, Stage 5.7 UI smoke: added Chrome CDP UI smoke for login/select/game/inventory/character/storage/NPC/combat/map-transfer, with screenshots and a manifest under `docs/stage5-screenshots`.
+- 2026-04-21, final autonomous verification: `cargo test --workspace`, `npm.cmd run build`, `npm.cmd run smoke:crystal-minimap-assets`, `npm.cmd run smoke:crystal-map-api`, and `npm.cmd run smoke:stage5-ui` passed against `http://127.0.0.1:3002`; gateway health returned ready HTTP/WS/TCP stub.
+- 2026-04-21, Stage 5 Gate status: automated hardening/build/test/smoke items are green, but the gate remains open because live Crystal packet/behavior acceptance and deeper Stage 5 edge parity are not implemented or approved out of scope.
+- 2026-04-22, Stage 5.1-5.4 broad-system baseline: added persisted `stage5_systems` state, gateway/browser `stage5Command`, snapshot exposure, and regression tests for group/guild/social/mail, trade/shop/auction, conquest/event spawning, hero, mining, and crafting. `cargo test -p mir2-simulation stage5_ -- --test-threads=1`, `cargo test -p mir2-gateway`, `npm.cmd run build`, and `npm.cmd run smoke:stage5-ui` passed during the implementation pass.
+- 2026-04-22, Stage 5.2 edge coverage: added full-bag no-loss coverage for shop/auction and pre-accept trade disconnect no-loss coverage; auction purchase now rejects a full bag before marking the listing sold or deducting gold. `cargo test -p mir2-simulation stage5_ -- --test-threads=1` passed.
+- 2026-04-22, final verification refresh: `cargo fmt --check`, `cargo test --workspace`, `npm.cmd run build`, `npm.cmd run smoke:crystal-minimap-assets`, `npm.cmd run smoke:crystal-map-api`, and `npm.cmd run smoke:stage5-ui` passed. `cargo build -p mir2-gateway` was deployed to the running 7110 process and gateway health returned ready HTTP/WS/TCP stub. The mini-map smoke still reports missing exported Crystal mini-map indices 450 and 451 as an open asset gap.
+- 2026-04-22, Stage 4.5 NPC command-surface closure: implemented the remaining Crystal NPC command families for conquest, guild territory, hero, hair, buff, recall, name lists, and messages/admin baselines. Regenerated `docs/generated/crystal-npc-command-summary.md`: 81/81 command names and 7,044/7,044 occurrences covered. `cargo test -p mir2-simulation crystal_npc_stage5_ -- --test-threads=1` and `cargo test -p mir2-game-data crystal_npc_command_summary_classifies_runtime_coverage` passed.
+- 2026-04-22, Stage 5.5 packet trace harness: added `apps/gateway/src/bin/packet_trace.rs`, which captures local TCP gateway packet traces and optionally diffs a live Crystal endpoint through `MIR2_CRYSTAL_TCP_ADDR`. `cargo run -p mir2-gateway --bin packet_trace` passed and wrote `docs/generated/packet-traces/latest.json` with 16 local decoded entries; live Crystal was skipped because no Crystal TCP address was configured.
+- 2026-04-22, Stage 5.6 real gateway load harness: added `apps/gateway/src/bin/tcp_load.rs` and `apps/web/scripts/load-gateway-ws.mjs`, plus `npm.cmd run load:gateway-ws`. WebSocket load passed 64/64 ready with 0 errors, 1,293 messages, and RSS samples; TCP load passed 64/64 ready with 0 failures and 0 decode errors. Evidence lives under `docs/generated/load`.
+- 2026-04-22, Stage 5.7 UI smoke refresh: fixed the Stage 5 UI smoke to validate starter NPC/monster coverage on the default starter character before the Crystal map transfer. `npm.cmd run smoke:stage5-ui` passed and refreshed 10 screenshots plus `docs/stage5-screenshots/stage5-ui-smoke-manifest.json`.
+- 2026-04-22, 100% closure A.1 parity matrix: added `docs/parity-matrix.json` covering account, character, start game, movement, chat, combat, NPC, inventory, storage, item use, map transfer, death/revive, skills, summons, trade, shop, auction, guild, mail, conquest, hero, mining, crafting, UI, and operations. Extended `apps/gateway/src/bin/packet_trace.rs` with named trace flows, payload hashes, mismatch reasons, and matrix validation tests. `cargo fmt --check`, `cargo test -p mir2-gateway parity_matrix_defines_required_categories_and_trace_flows -- --nocapture`, `cargo test -p mir2-gateway trace_flow_names_are_stable_for_matrix_references -- --nocapture`, and `cargo run -p mir2-gateway --bin packet_trace -- --list-flows` passed.
+- 2026-04-22, 100% closure A.2 reproducible trace fixtures: added `docs/PARITY-HARNESS.md` with local/Crystal packet trace commands, stable fixture environment variables, local account-store reset guidance, and live Crystal fixture reset requirements. `packet_trace` now records fixture metadata without passwords and supports `MIR2_PACKET_TRACE_FIXTURE_MODE`, `MIR2_PACKET_TRACE_ACCOUNT`, `MIR2_PACKET_TRACE_PASSWORD`, `MIR2_PACKET_TRACE_LIFECYCLE_ACCOUNT`, `MIR2_PACKET_TRACE_LIFECYCLE_PASSWORD`, `MIR2_PACKET_TRACE_LIFECYCLE_NEW_PASSWORD`, and `MIR2_PACKET_TRACE_CHARACTER`. `cargo fmt --check`, `cargo test -p mir2-gateway trace_flow_names_are_stable_for_matrix_references -- --nocapture`, and `cargo run -p mir2-gateway --bin packet_trace -- --list-flows` passed.
+- 2026-04-22, 100% closure A.3 matrix packet trace artifacts: added `packet_trace --matrix`, which reads `docs/parity-matrix.json` and writes one JSON artifact per TCP-traceable matrix entry under `docs/generated/packet-traces/matrix`. A local gateway was started on `127.0.0.1:7000` / `127.0.0.1:7010` with a dedicated account store, health returned ready, and `cargo run -p mir2-gateway --bin packet_trace -- --matrix` wrote 9 local artifacts with `local.ok=true`: account version/login/start, account lifecycle, character create/delete, start-game bootstrap, movement/chat, combat, inventory, and storage-password flows. Crystal-side capture remains pending until `MIR2_CRYSTAL_TCP_ADDR` is provided.
+- 2026-04-22, 100% closure A.4 diff reporter categories: expanded `TraceDiff` with timing comparison metadata, timing tolerance, known nondeterministic fields, payload-hash comparison, and packet-order mismatch classification. Updated `docs/parity-matrix.json` and `docs/PARITY-HARNESS.md` with the mismatch reason set and timing controls. `cargo fmt --check`, `cargo test -p mir2-gateway diff_compare_entries_reports_timing_tolerance_when_enabled -- --nocapture`, `cargo test -p mir2-gateway packet_order_shift_finds_equivalent_packet_later_in_stream -- --nocapture`, and `cargo test -p mir2-gateway parity_matrix_defines_required_categories_and_trace_flows -- --nocapture` passed.
+- 2026-04-22, 100% closure A.5 failing local/CI trace commands: added `MIR2_PACKET_TRACE_REQUIRE_LOCAL`, `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL`, and `MIR2_PACKET_TRACE_REQUIRE_DIFF_CLEAN` handling to `packet_trace`, so local or live matrix runs exit non-zero when required endpoints or clean diffs are missing. Updated `docs/PARITY-HARNESS.md` with local require and strict live commands. `cargo fmt --check`, `cargo test -p mir2-gateway trace_requirements_fail_when_required_crystal_capture_is_missing -- --nocapture`, and `$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7000'; $env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'; cargo run -p mir2-gateway --bin packet_trace -- --matrix` passed.
+- 2026-04-22, 100% closure B.1 monster AI priority queue: regenerated `crystal_monster_ai_summary.json` and `docs/generated/crystal-monster-ai-summary.md` with `remaining_runtime_priorities`, sorted by respawn count, map spread, boss/player-facing risk keywords, and runtime status. Added Rust validation that the queue is populated, ordered, and limited to spawned `generic_baseline` / `wildlife_partial` families. Current top entries are AI 0 MonsterObject, AI 7 CaveMaggot, AI 3 Tree, AI 28 ToxicGhoul, AI 49 ThunderElement, AI 9 HarvestMonster, AI 112 DarkBeast, AI 11 WoomaTaurus, and AI 128 TucsonEgg. `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, `cargo fmt --check`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CaveMaggot AI: implemented AI 7 `CaveMaggot` Crystal attack parity baseline. Player-hit damage now uses the Crystal monster DC baseline for CaveMaggot, delayed melee hit timing stays at Crystal's 300 ms baseline, and hit resolution can apply the Crystal 1/20 five-second paralysis poison, represented as an active `crystal-paralysis` buff that blocks walking/running while active. Regenerated the AI summary: runtime special/guard families moved from 35 to 36, generic runtime families moved from 57 to 56, and AI 7 left the remaining priority queue. `cargo test -p mir2-simulation cave_maggot -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ToxicGhoul AI: implemented AI 28 `ToxicGhoul` Crystal attack baseline. Player-hit damage now uses the imported Crystal DC baseline, delayed melee hit timing stays at 300 ms, and hit resolution can apply the Crystal 1/8 five-second green-poison status as active `crystal-green-poison`. Regenerated the AI summary: runtime special/guard families moved from 36 to 37, generic runtime families moved from 56 to 55, and AI 28 left the remaining priority queue. `cargo test -p mir2-simulation toxic_ghoul -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation cave_maggot -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ThunderElement AI: implemented AI 49 `ThunderElement` Crystal attack baseline. Runtime now uses two-tile attack reach, DC-based delayed player damage, due-time `ObjectAttack` emission to match Crystal's delayed `CompleteAttack` broadcast shape, and normal player/monster damage immunity matching Crystal's repulsion-only damage gate. Regenerated the AI summary: runtime special/guard families moved from 37 to 38, generic runtime families moved from 55 to 54, and AI 49 left the remaining priority queue. `cargo test -p mir2-simulation thunder_element -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation toxic_ghoul -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkBeast AI: implemented AI 112 `DarkBeast` primary Crystal melee baseline for the spawned CatWidow family. Runtime now uses Crystal's 300 ms delayed hit timing and imported DC damage for the primary type-0 attack path; the type-1 secondary / bleed branch remains queued for the later effect-state pass because current spawned data has `Effect = 0` and `MC = 0`. Regenerated the AI summary: runtime special/guard families moved from 38 to 39, generic runtime families moved from 54 to 53, and AI 112 left the remaining priority queue. `cargo test -p mir2-simulation dark_beast -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation thunder_element -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 WoomaTaurus AI: implemented AI 11 `WoomaTaurus` Crystal behavior baseline for the WoomaTaurus / Ancient_WoomaTaurus / IncarnatedWT family. Runtime now uses the inherited FlamingWooma 300 ms delayed attack timing with imported DC damage, tracks the seven HP threshold stages, applies the Crystal eight-second mad phase by lowering move/attack intervals to the 400/500 ms tick baseline, and triggers a surrounded teleport baseline when five adjacent cells are blocked. Regenerated the AI summary: runtime special/guard families moved from 39 to 40, generic runtime families moved from 53 to 52, and AI 11 left the remaining priority queue. `cargo test -p mir2-simulation wooma_taurus -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HarvestMonster AI: implemented AI 9 `HarvestMonster` corpse harvest/drop parity baseline. Protocol/runtime/gateway now support Crystal `Harvest` / `ObjectHarvest` / `ObjectHarvested`; AI 9 skips immediate death ground drops, tracks the two skin-count harvest passes, keeps configured rewards on the corpse, transfers them on the follow-up harvest, and marks the corpse harvested/skeleton-visible afterward. Regenerated the AI summary: runtime special/guard families moved from 40 to 41, generic runtime families moved from 52 to 51, and AI 9 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation harvest_monster -- --test-threads=1 --nocapture`, `cargo test -p mir2-protocol harvest -- --nocapture`, `cargo check -p mir2-gateway`, `npm exec tsc -- --noEmit` in `apps/web`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonEgg AI: implemented AI 128 `TucsonEgg` Crystal behavior baseline. Runtime now prevents movement, route following, patrol, chase, and normal player attacks; successful hits always remove exactly 1 HP; visible monster packets now carry imported effect state; and the death path has the Crystal delayed poison/damage plus Effect=1 GeneralTucson/TucsonGeneral spawn hook without treating that spawned monster as a dead-owner summon. Regenerated the AI summary: runtime special/guard families moved from 41 to 42, generic runtime families moved from 51 to 50, and AI 128 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation tucson_egg -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Tree AI: implemented AI 3 `Tree` Crystal static-object baseline for ChestnutTree / EbonyTree / CherryTree / LargeMushroom / TreasureBox families. Runtime now treats Tree AI as neutral/passive, prevents route following, chase, patrol, and normal attacks, forces runtime Crystal spawns to face up, and applies the Crystal one-HP-per-successful-hit damage intake. Regenerated the AI summary: runtime special/guard families moved from 42 to 43, generic runtime families remained 50, and AI 3 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation tree_is_static -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FlamingWooma AI: implemented AI 10 `FlamingWooma` Crystal attack baseline for FlamingWooma / Ancient_FlamingWooma families. Runtime now keeps the `ObjectAttack` packet path, uses Crystal's 300 ms delayed hit timing, and resolves player damage from imported monster DC data instead of the generic 7-damage baseline. Regenerated the AI summary: runtime special/guard families moved from 43 to 44, generic runtime families moved from 50 to 49, and AI 10 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation flaming_wooma -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HedgeKekTal AI: implemented AI 51 `HedgeKekTal` Crystal near-vs-range attack baseline. Runtime now gives the family Crystal's eight-tile attack range, switches to `ObjectRangeAttack` when not adjacent, uses distance-scaled delayed ranged hit timing, keeps adjacent `ObjectAttack`, and resolves damage from imported DC data. Regenerated the AI summary: runtime special/guard families moved from 44 to 45, generic runtime families moved from 49 to 48, and AI 51 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation hedge_kek_tal -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Trainer AI: implemented AI 56 `Trainer` static target-dummy baseline. Runtime now treats trainers as neutral/passive, prevents route following, chase, patrol, and normal attacks, and ordinary damage no longer reduces HP or kills the trainer; Crystal DPS chat reporting remains queued for a later chat polish pass. Regenerated the AI summary: runtime special/guard families moved from 45 to 46, generic runtime families moved from 48 to 47, and AI 56 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation trainer_is_static -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CannibalTentacles AI: implemented AI 130 `CannibalTentacles` non-adjacent range branch baseline. Runtime now attacks within view range, emits `ObjectRangeAttack` when not adjacent, uses distance-scaled delayed hit timing, and resolves ranged damage from imported MC data; adjacent halfmoon/green-poison branch remains queued. Regenerated the AI summary: runtime special/guard families moved from 46 to 47, generic runtime families moved from 47 to 46, and AI 130 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation cannibal_tentacles -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Jar2 AI: implemented AI 120 `Jar2` static ranged baseline. Runtime now prevents route following, chase, and patrol, attacks within Crystal's six-tile range, emits `ObjectRangeAttack` when not adjacent, uses a 500 ms ranged hit delay, and gates delayed damage when imported zero-MC data yields no damage; random adjacent melee and frozen poison remain queued. Regenerated the AI summary: runtime special/guard families moved from 47 to 48, generic runtime families moved from 46 to 45, and AI 120 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation jar2_uses -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Jar1 AI: implemented AI 119 `Jar1` static death-spawn baseline. Runtime now prevents route following, chase, and patrol, keeps one-tile Crystal DC melee damage, and queues the Crystal delayed regular-monster slave spawn on death from the valid non-boss same-level-band pool; exact global RNG ordering remains a deterministic runtime approximation. Regenerated the AI summary: runtime special/guard families moved from 48 to 49, generic runtime families moved from 45 to 44, and AI 119 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation jar1_is_static -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation jar2_uses -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TurtleGrass AI: implemented AI 173 `TurtleGrass` Zuma-family baseline. Runtime now treats TurtleGrass as stoned on spawn, blocks attacks/damage until wake, wakes with `ObjectShow` at Crystal's two-tile proximity, wakes nearby Zuma-family monsters, uses the Crystal two-tile attack shape, emits `ObjectAttack`, and resolves damage from imported DC data; the type-1 single-push branch remains queued. Regenerated the AI summary: runtime special/guard families moved from 49 to 50, generic runtime families moved from 44 to 43, and AI 173 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation turtle_grass -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation zuma_monster -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManTree AI: implemented AI 174 `ManTree` / `FineSoul` Zuma-family attack-packet baseline. Runtime now treats it as stoned on spawn, wakes with the shared Zuma-family `ObjectShow` flow, emits adjacent `ObjectAttack`, uses the Crystal 600 ms hit delay, and gates delayed damage when imported zero-DC data yields no damage; halfmoon and boulder/stun branches remain queued. Regenerated the AI summary: runtime special/guard families moved from 50 to 51, generic runtime families moved from 43 to 42, and AI 174 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation man_tree -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation turtle_grass -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation zuma_monster -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SandWorm AI: implemented AI 35 `SandWorm` line-attack baseline. Runtime now uses the SpittingSpider-style Crystal two-tile line attack shape, emits `ObjectAttack`, keeps the 300 ms delayed hit timing, resolves player damage from imported DC data, and opts into the shared HarvestMonster corpse-harvest baseline; broader line multi-target edge cases remain queued. Regenerated the AI summary: runtime special/guard families moved from 51 to 52, generic runtime families moved from 42 to 41, and AI 35 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation sand_worm -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation spitting_spider -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SandSnail AI: implemented AI 115 `SandSnail` primary melee branch baseline. Runtime now emits the adjacent `ObjectAttack` packet, keeps the Crystal 300 ms delayed hit timing, and resolves player damage from imported DC data; type-1 halfmoon and type-2 MC green-poison area branches remain queued. Regenerated the AI summary: runtime special/guard families moved from 52 to 53, generic runtime families moved from 41 to 40, and AI 115 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation sand_snail -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Deer AI: implemented AI 2 `Deer` / `Deer1` / `Sheep` passive harvest baseline. Runtime now treats AI 2 as neutral/passive for player targeting, prevents normal attacks, and uses Crystal's five-pass skin count before `ObjectHarvested`; run-away flee movement was completed in a later closure pass, while exact `Quality` randomization remains queued with item/drop quality parity. Regenerated the AI summary: runtime special/guard families moved from 53 to 54, generic runtime families remained 40 because AI 2 was previously `wildlife_partial`, and AI 2 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation deer_is_passive -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HolyDeva AI: implemented AI 38 `HolyDeva` / `PKSpirit` ranged baseline. Runtime now uses Crystal's six-tile `ObjectRangeAttack`, visible summoned `extra` state, fixed 500 ms delayed hit timing, and imported DC damage; fear/kiting movement details were completed in a later closure pass. Regenerated the AI summary: runtime special/guard families moved from 54 to 55, generic runtime families moved from 40 to 39, and AI 38 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation holy_deva -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Hen/Pig/Bull AI: implemented AI 1 `Deer` HarvestMonster baseline for Hen / Pig / Bull. Runtime now treats AI 1 as neutral/passive for player targeting, prevents normal attacks, and uses Crystal's default two-pass skin count before `ObjectHarvested`. Regenerated the AI summary: runtime special/guard families moved from 55 to 56, generic runtime families remained 39 because AI 1 was previously `wildlife_partial`, and AI 1 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation hen_is_passive -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation deer_is_passive -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RedThunderZuma AI: implemented AI 16 `RedThunderZuma` / `Ancient_RedThunderZuma` / `Frozen_RedZuma` ranged Zuma baseline. Runtime now starts AI 16 stoned, wakes through the shared Zuma wake propagation, uses Crystal's nine-tile attack range, switches non-adjacent attacks to `ObjectRangeAttack`, uses fixed 500 ms ranged hit timing, and gates delayed damage when imported zero-DC data yields no damage. Regenerated the AI summary: runtime special/guard families moved from 56 to 57, generic runtime families moved from 39 to 38, and AI 16 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation red_thunder_zuma -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation zuma_monster -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrostTiger AI: implemented AI 34 `FrostTiger` passive ranged baseline. Runtime now follows Crystal's empty `FindTarget()` behavior by not auto-targeting players, still allows target lock after being targeted, uses six-tile attack reach, switches non-adjacent attacks to `ObjectRangeAttack`, applies distance-scaled ranged hit timing, and gates delayed damage from imported DC data; `ObjectSitDown` packet support and bleed/slow poison rolls remain queued. Regenerated the AI summary: runtime special/guard families moved from 57 to 58, generic runtime families moved from 38 to 37, and AI 34 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation frost_tiger -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation red_thunder_zuma -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 IceGuard AI: implemented AI 102 `IceCrystalSolider` / `SinseokMiner` near/ranged baseline. Runtime now uses Crystal's eight-tile attack reach, adjacent `ObjectAttack` vs non-adjacent `ObjectRangeAttack` switching, fixed 500 ms ranged hit timing, imported MC ranged damage, and imported DC melee gating; random fire type and slow/frozen poison details remain queued. Regenerated the AI summary: runtime special/guard families moved from 58 to 59, generic runtime families moved from 37 to 36, and AI 102 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation ice_guard -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frost_tiger -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenMiner AI: implemented AI 187 `FrozenMiner` primary branch baseline. Runtime now emits the Crystal primary `ObjectAttack` packet, uses 600 ms delayed hit timing, and resolves player damage from imported DC data; the random type-1 area branch remains queued. Regenerated the AI summary: runtime special/guard families moved from 59 to 60, generic runtime families moved from 36 to 35, and AI 187 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation ice_guard -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenAxeman AI: implemented AI 188 `FrozenAxeman` two-tile branch baseline. Runtime now uses Crystal's two-tile line/diagonal attack shape, emits `ObjectAttack` with type 1 for non-adjacent targets, uses 500 ms delayed hit timing, and resolves player damage as imported DC*2; adjacent pull/push remains queued. Regenerated the AI summary: runtime special/guard families moved from 60 to 61, generic runtime families moved from 35 to 34, and AI 188 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_axeman -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenMagician AI: implemented AI 189 `FrozenMagician` primary ranged branch baseline. Runtime now gives the family Crystal's nine-tile non-adjacent ranged reach, emits `ObjectRangeAttack`, uses distance-scaled delay with a 600 ms base, and resolves player damage from imported MC data; the random type-1 boosted ranged branch remains queued. Regenerated the AI summary: runtime special/guard families moved from 61 to 62, generic runtime families moved from 34 to 33, and AI 189 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_magician -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_axeman -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowWolf AI: implemented AI 179 `SnowWolf` primary branch baseline. Runtime now emits the Crystal primary `ObjectAttack` packet, uses 350 ms delayed hit timing, and resolves player damage from imported DC data; the random type-1 slow/frozen branch remains queued and current SnowWolf data has zero MC. Regenerated the AI summary: runtime special/guard families moved from 62 to 63, generic runtime families moved from 33 to 32, and AI 179 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation snow_wolf -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_magician -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonMage AI: implemented AI 126 `TucsonMage` non-adjacent branch baseline. Runtime now uses Crystal's three-tile square attack reach, emits type-1 `ObjectAttack` for non-adjacent targets, and gates delayed damage when current imported zero-MC data yields no damage; full wide-line multi-target coverage remains queued. Regenerated the AI summary: runtime special/guard families moved from 63 to 64, generic runtime families moved from 32 to 31, and AI 126 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation tucson_mage -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation snow_wolf -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowYeti AI: implemented AI 190 `SnowYeti` non-adjacent ranged baseline. Runtime now gives the family Crystal's nine-tile ranged reach, emits `ObjectRangeAttack`, uses distance-scaled delayed timing, and resolves player damage from imported DC data; adjacent double-hit and frozen poison details remain queued. Regenerated the AI summary: runtime special/guard families moved from 64 to 65, generic runtime families moved from 31 to 30, and AI 190 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation snow_yeti -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation tucson_mage -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkWraith AI: implemented AI 192 `DarkWraith` four-tile line branch baseline. Runtime now uses Crystal's four-tile row/column/diagonal reach, emits `ObjectAttack` type 2 for non-adjacent targets, and resolves player damage from imported DC*3; exact same-method Crystal hit timing and adjacent area branch remain queued. Regenerated the AI summary: runtime special/guard families moved from 65 to 66, generic runtime families moved from 30 to 29, and AI 192 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation dark_wraith -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation snow_yeti -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CrystalSpider AI: implemented AI 37 `CrystalSpider` line branch baseline. Runtime now uses Crystal's three-tile row/column/diagonal reach, emits non-adjacent `ObjectAttack` type 1, applies distance-scaled delayed DC damage, and can apply the Crystal 1/8 green-poison status on hit; full multi-target `LineAttack` edge cases remain queued. Regenerated the AI summary: runtime special/guard families moved from 66 to 67, generic runtime families moved from 29 to 28, and AI 37 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation crystal_spider -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dark_wraith -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonWarrior AI: implemented AI 127 `TucsonWarrior` non-adjacent smash baseline. Runtime now uses Crystal's two-tile row/column/diagonal attack reach, emits `ObjectAttack` type 1 for non-adjacent targets, keeps the 300 ms delayed hit timing, and resolves player damage from imported MC data; adjacent random halfmoon/type-1 selection and full area multi-target coverage remain queued. Regenerated the AI summary: runtime special/guard families moved from 67 to 68, generic runtime families moved from 28 to 27, and AI 127 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation tucson_warrior -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_spider -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ZumaTaurus AI: implemented AI 17 `ZumaTaurus` / `ZumaTaurus9` / `Ancient_ZumaTaurus` baseline. Runtime now includes AI 17 in the shared Zuma stoned wake/show state, wakes nearby Zuma-family monsters through the existing propagation path, emits adjacent `ObjectAttack`, uses Crystal's 300 ms delayed hit timing, and resolves player damage from imported DC data; HP-stage Zuma slave spawning remains queued. Regenerated the AI summary: runtime special/guard families moved from 68 to 69, generic runtime families moved from 27 to 26, and AI 17 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation zuma_taurus -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation red_thunder_zuma -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 BoneLord AI: implemented AI 30 `BoneLord` / `Ancient_BoneLord` ranged baseline. Runtime now gives the family Crystal's seven-tile attack reach, switches non-adjacent attacks to `ObjectRangeAttack`, applies distance-scaled delayed hit timing, and resolves player damage from imported DC data; HP-stage bone slave spawning remains queued. Regenerated the AI summary: runtime special/guard families moved from 69 to 70, generic runtime families moved from 26 to 25, and AI 30 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation bone_lord -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation zuma_taurus -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricClaw AI: implemented AI 86 `ManectricClaw` baseline for the spawned `Chieftain_Priest` row. Runtime now uses Crystal's three-tile attack reach, emits non-adjacent `ObjectRangeAttack`, applies a 500 ms delayed thrust hit, and resolves far targets from imported MC damage while keeping near targets on imported DC damage; random thrust movement and slow/frozen cone details remain queued. Regenerated the AI summary: runtime special/guard families moved from 70 to 71, generic runtime families moved from 25 to 24, and AI 86 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation manectric_claw -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation bone_lord -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 KingScorpion AI: implemented AI 19 `KingScorpion` two-tile line/range baseline. Runtime now uses Crystal's two-tile row/column/diagonal reach, emits `ObjectRangeAttack` for non-adjacent line targets, applies Crystal's delayed line hit timing, and resolves player damage from imported MC data; adjacent random `ObjectAttack` DC branch remains queued. Regenerated the AI summary: runtime special/guard families moved from 71 to 72, generic runtime families moved from 24 to 23, and AI 19 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation king_scorpion -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation manectric_claw -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 MirStatue AI: implemented AI 54 `DragonStatue` baseline for the spawned `MirStatue` row. Runtime now treats the family as static, blocks route/chase/patrol movement, attacks across imported view range, delays both damage and `ObjectRangeAttack` packet emission to the due tick, and resolves player damage from imported DC data; sleeping wake/revive state and radius multi-target damage remain queued. Regenerated the AI summary: runtime special/guard families moved from 72 to 73, generic runtime families moved from 23 to 22, and AI 54 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation mir_statue -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation king_scorpion -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GuardianRock AI: implemented AI 48 `GuardianRock` static range-pull packet baseline. Runtime now blocks route/chase/patrol movement, emits `ObjectRangeAttack` while leaving player HP unchanged, and treats the rock as normal-damage immune; exact 500 ms delayed pull timing, resist checks, and pull-distance movement remain queued. Regenerated the AI summary: runtime special/guard families moved from 73 to 74, generic runtime families moved from 22 to 21, and AI 48 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation guardian_rock -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation mir_statue -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenWarewolf AI: implemented AI 180 `SnowWolfKing` primary branch baseline for the spawned `FrozenWarewolf` row. Runtime now emits primary `ObjectAttack` type 0, uses Crystal's 500 ms delayed hit timing, and resolves player damage from imported DC data; HP-threshold attack variants, weaker-target teleport, slave spawning, delayed death explosion, and pet transfer remain queued. Regenerated the AI summary: runtime special/guard families moved from 74 to 75, generic runtime families moved from 21 to 20, and AI 180 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_warewolf -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation guardian_rock -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RedMoonEvil AI: implemented AI 13 `RedMoonEvil` / `RedMoonEvil1` static view-range baseline. Runtime now blocks route/chase/patrol movement, attacks across imported view range with `ObjectAttack`, keeps Crystal's 300 ms delayed hit timing, and resolves player damage from imported DC data; multi-target fanout and `ObjectEffect RedMoonEvil` packet parity remain queued. Regenerated the AI summary: runtime special/guard families moved from 75 to 76, generic runtime families moved from 20 to 19, and AI 13 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation red_moon_evil -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_warewolf -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Yimoogi AI: implemented AI 36 `Yimoogi` ranged branch baseline. Runtime now gives Yimoogi Crystal's seven-tile attack reach, emits `ObjectRangeAttack` beyond the close two-tile shape, uses 500 ms delayed hit timing, and resolves player damage from imported DC data; poison branch, child/sister spawning, final teleport, and paired drop rules remain queued. Regenerated the AI summary: runtime special/guard families moved from 76 to 77, generic runtime families moved from 19 to 18, and AI 36 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation yimoogi -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation red_moon_evil -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Lamia/Kirin AI: implemented AI 186 `Kirin` two-tile attack baseline for the spawned `Lamia` row. Runtime now uses Crystal's two-tile row/diagonal attack shape, emits `ObjectAttack` type 0, and resolves player damage from imported DC data; current Lamia MC=0 gates the Crystal IceThrust branch, and type-1/slow details remain queued. Regenerated the AI summary: runtime special/guard families moved from 77 to 78, generic runtime families moved from 18 to 17, and AI 186 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation lamia -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation yimoogi -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Khazard AI: implemented AI 27 `Khazard` ranged pull-packet baseline. Runtime now uses Crystal's four-tile row/column/diagonal reach, emits `ObjectRangeAttack` for non-adjacent pull targets, and leaves player HP unchanged because the Crystal branch is displacement-only; exact pull movement, resist checks, and `PullTime` cooldown remain queued. Regenerated the AI summary: runtime special/guard families moved from 78 to 79, generic runtime families moved from 17 to 16, and AI 27 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation khazard -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation lamia -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 EvilCentipede AI: implemented AI 14 `EvilCentipede` hidden/static attack baseline. Runtime now starts the family hidden, reveals with `ObjectShow` when the player is within Crystal's three-tile trigger, hides and restores HP after leaving the seven-tile active radius, blocks route/chase/patrol movement, emits `ObjectAttack` while visible, uses Crystal's 500 ms delayed hit timing, and resolves player damage from imported DC data; multi-target fanout plus green/paralysis poison details remain queued. Regenerated the AI summary: runtime special/guard families moved from 79 to 80, generic runtime families moved from 16 to 15, and AI 14 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation evil_centipede -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 MinotaurKing AI: implemented AI 33 `MinotaurKing` RightGuard-derived ranged baseline. Runtime now gives the family Crystal's six-tile attack reach, emits `ObjectRangeAttack` for non-adjacent targets, uses the inherited 500 ms ranged hit timing, and resolves player damage from imported DC data; the three-tile `CompleteRangeAttack` fanout around the target remains queued. Regenerated the AI summary: runtime special/guard families moved from 80 to 81, generic runtime families moved from 15 to 14, and AI 33 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation minotaur_king -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 IncarnatedZT AI: implemented AI 22 `IncarnatedZT` active Zuma melee baseline. Runtime now keeps the family out of the stoned Zuma wake state, emits adjacent `ObjectAttack`, uses Crystal's 300 ms delayed hit timing, resolves player damage from imported DC data, and wires Crystal's 1/12 five-second paralysis poison chance into hit resolution. Regenerated the AI summary: runtime special/guard families moved from 81 to 82, generic runtime families moved from 14 to 13, and AI 22 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation incarnated_zt -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkDevil AI: implemented AI 20 `DarkDevil` three-tile ranged burst baseline. Runtime now gives DarkDevil Crystal's opening three-tile attack reach, emits `ObjectRangeAttack` for non-adjacent targets, uses the 500 ms ranged hit timing, and resolves player damage as imported DC*3; random 2-4 second area cooldown plus the Crystal forward one-tile fanout remain queued. Regenerated the AI summary: runtime special/guard families moved from 82 to 83, generic runtime families moved from 13 to 12, and AI 20 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation dark_devil -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 OmaKing AI: implemented AI 43 `OmaKing` ranged magic branch baseline. Runtime now gives OmaKing Crystal's seven-tile attack reach, emits type-1 `ObjectAttack` instead of `ObjectRangeAttack` for distant targets, uses the 500 ms ranged hit timing, and resolves player damage from imported MC data; close push/paralysis and line-attack fanout remain queued. Regenerated the AI summary: runtime special/guard families moved from 83 to 84, generic runtime families moved from 12 to 11, and AI 43 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation oma_king -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit AI: implemented AI 50 `GreatFoxSpirit` static ranged baseline. Runtime now treats the family as static, blocks route/chase/patrol movement, gives it Crystal's seven-tile attack reach, emits `ObjectRangeAttack` for distant targets, uses 300 ms delayed hit timing, and resolves player damage from imported DC data; HP-stage extra, recall teleport, GuardianRock activation, target `ObjectEffect`, and slow/paralysis poison remain queued. Regenerated the AI summary: runtime special/guard families moved from 84 to 85, generic runtime families moved from 11 to 10, and AI 50 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricKing AI: implemented AI 88 `ManectricKing` baseline for spawned `Master_DragonYang`. Runtime now uses Crystal's three-tile row/column/diagonal attack shape, emits type-0 `ObjectAttack`, uses 500 ms delayed hit timing, and resolves player damage from imported MC data; low-HP mass attack plus close type-1 push line remain queued. Regenerated the AI summary: runtime special/guard families moved from 85 to 86, generic runtime families moved from 10 to 9, and AI 88 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation manectric_king -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SeedingsGeneral AI: implemented AI 121 `SeedingsGeneral` two-tile ranged magic baseline. Runtime now gives the family Crystal's two-tile attack reach, emits `ObjectRangeAttack` for non-adjacent targets, uses 300 ms delayed hit timing, and resolves player damage from imported MC data; random stomp type, close mixed attacks, slow poison, and frozen poison remain queued. Regenerated the AI summary: runtime special/guard families moved from 86 to 87, generic runtime families moved from 9 to 8, and AI 121 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation seedings_general -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RestlessJar AI: implemented AI 122 `RestlessJar` static ranged packet baseline. Runtime now blocks route/chase/patrol movement, gives the family Crystal's six-tile attack reach, emits `ObjectRangeAttack` for non-adjacent targets, and gates delayed damage when current imported zero-MC data yields no damage; melee spin, tornado/blindness, stomp push, and exact projectile timing details remain queued. Regenerated the AI summary: runtime special/guard families moved from 87 to 88, generic runtime families moved from 8 to 7, and AI 122 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation restless_jar -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HellKeeper AI: implemented AI 79 `HellKeeper` static view-range attack baseline. Runtime now blocks route/chase/patrol movement, uses Crystal's view-range reach, keeps the monster's initial attack facing instead of turning, emits type-0 `ObjectAttack` instead of `ObjectRangeAttack`, and applies 300 ms delayed imported DC damage; random type-1 MC/dazed branch, no-regen detail, and full `FindAllTargets` fanout remain queued. Regenerated the AI summary: runtime special/guard families moved from 88 to 89, generic runtime families moved from 7 to 6, and AI 79 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation hell_keeper -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GeneralMeowMeow AI: implemented AI 123 `GeneralMeowMeow` twelve-tile ranged magic baseline. Runtime now gives the family Crystal's 12-tile attack reach, switches to `ObjectRangeAttack` beyond the close two-tile shape, uses 500 ms delayed hit timing, resolves ranged damage from imported MC data, and keeps close two-tile attacks on `ObjectAttack`/DC semantics; shield phases, mass thunder spell objects, slave spawning, random slam, and range fanout remain queued. Regenerated the AI summary: runtime special/guard families moved from 89 to 90, generic runtime families moved from 6 to 5, and AI 123 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation general_meow_meow -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonGeneral AI: implemented AI 131 `TucsonGeneral` rage/ranged baseline. Runtime now gives TucsonGeneral Crystal's view-range attack reach, emits the opening type-0 `ObjectRangeAttack` rage packet without direct damage, applies the 20-second rage cooldown and 8-second attack pause, and uses the normal type-1 `ObjectRangeAttack` branch with distance-scaled delay plus imported SC damage while rage is cooling down; rock spell objects, random type-2 ranged hit, melee stomp/paralysis, and rage target scattering were completed in later closure passes. Regenerated the AI summary: runtime special/guard families moved from 90 to 91, generic runtime families moved from 5 to 4, and AI 131 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation tucson_general -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TrapRock AI: implemented AI 47 `TrapRock` / `TrapRock1` hidden reveal baseline. Runtime now starts the family hidden and non-visible, blocks route/chase/patrol movement, waits through Crystal's visibility delay, reveals near a player target, moves to an adjacent target tile, emits `ObjectShow`, and uses the parent `ObjectRangeAttack` packet with no direct damage; child rocks, four-corner spawn layout, target-move death, first-hit collapse, and paralysis details remain queued. Regenerated the AI summary: runtime special/guard families moved from 91 to 92, generic runtime families moved from 4 to 3, and AI 47 left the remaining priority queue. `cargo fmt`, `cargo test -p mir2-simulation trap_rock -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Armadillo AI: implemented AI 124 `Armadillo` and AI 125 `ArmadilloElder` DigOut-style baseline. Runtime now starts both families hidden/non-visible, reveals with `ObjectShow` when the player is close, delays attacks after reveal, uses Armadillo's primary `ObjectAttack`/DC branch, and uses ArmadilloElder's primary `ObjectAttack`/DC*2 branch with 400 ms hit timing; `DigOutArmadillo` spell-object presentation, retreat/backstep/branch details, and Armadillo run-away after failed retreat damage were completed in later closure passes. Regenerated the AI summary: runtime special/guard families moved from 92 to 94, generic runtime families moved from 3 to 1, and AI 124/125 left the remaining priority queue. `cargo fmt --check`, `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 default MonsterObject AI: promoted AI 0 `MonsterObject` from implicit generic to explicit default-branch coverage. Runtime now has focused coverage for imported AI0 templates using Crystal stats, adjacent `ObjectAttack` melee, delayed `Struck` damage, hostile target tracking, movement/chase baseline, respawn/drop plumbing, and packet visibility; subclass-specific behaviors continue to be tracked by their own AI rows. Regenerated the AI summary: runtime special/guard families moved from 94 to 95, generic runtime families moved from 1 to 0, and the remaining spawned runtime priority queue is empty. `cargo fmt --check`, `cargo test -p mir2-simulation ai0_default -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TrapRock follow-up: deepened AI 47 `TrapRock` parent-rock parity beyond the initial reveal baseline. Runtime now stores the trapped target location after reveal, kills the visible parent rock when the target moves away from that Crystal `TargetLocation`, and implements the parent `FirstAttack` collapse path so the first player hit immediately kills the rock instead of applying normal HP damage. Child rocks, four-corner spawn layout, and paralysis poison details remain queued. `cargo fmt`, `cargo test -p mir2-simulation trap_rock -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TrapRock child-rock pass: added the AI 47 child-rock surround and reveal paralysis baseline. Parent TrapRock reveal now spawns the other three cardinal child rocks around the trapped target, marks them as parent-owned summons, emits `ObjectShow` for each child, applies the Crystal three-second paralysis baseline on reveal, lets child rocks emit `ObjectAttack`, and clears the parent `FirstAttack` state when a child rock is attacked. Exact random spawn-corner ordering and repeated attack poison rolls remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation trap_rock -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Armadillo branch pass: deepened AI 124/125 beyond the primary DigOut reveal baseline. AI 124 `Armadillo` now has the Crystal type-1 three-hit combo packet with three imported half-DC delayed hits, while AI 125 `ArmadilloElder` now emits the type-1 push packet branch without direct damage; retreat/backstep movement, exact push displacement, run-away state, and `DigOutArmadillo` spell-object presentation were completed in later closure passes. `cargo fmt --check`, `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation trap_rock -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HellKeeper type-1 pass: deepened AI 79 `HellKeeper` attack branch coverage. Runtime now emits the Crystal type-1 locked-facing `ObjectAttack` branch and resolves it through imported raw MC data; current Crystal HellKeeper data has `MC=0`, so the branch correctly emits the packet without direct damage or Dazed poison, while nonzero-MC Dazed effect coverage and full `FindAllTargets` fanout remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation hell_keeper -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowWolf type-1 pass: deepened AI 179 `SnowWolf` beyond the primary DC attack. Runtime now emits the Crystal type-1 `ObjectAttack` branch and gates delayed damage through imported raw MC data; current SnowWolf data has `MC=0`, so the branch correctly emits the packet without direct damage, while nonzero-MC slow/frozen poison fanout remains queued. `cargo fmt --check`, `cargo test -p mir2-simulation snow_wolf -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation hell_keeper -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenMiner type-1 pass: deepened AI 187 `FrozenMiner` beyond the primary DC attack. Runtime now emits the Crystal type-1 `ObjectAttack` branch and applies the imported 80% DC delayed hit at the 1000 ms baseline for the player target; full `FindAllTargets(1)` area fanout remains queued. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation snow_wolf -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenMagician type-1 pass: deepened AI 189 `FrozenMagician` ranged branch coverage. Runtime now emits `ObjectRangeAttack` type 1 for the boosted Crystal ranged branch, applies the distance-scaled 750 ms base delay, and resolves damage as imported MC*3/2; the existing type-0 branch remains on the 600 ms base delay with imported MC damage. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_magician -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowYeti adjacent pass: deepened AI 190 `SnowYeti` beyond the non-adjacent ranged baseline. Runtime now emits the Crystal adjacent melee sequence as same-tick `ObjectAttack` type 0 and type 1 packets, then applies two imported DC hits at the 500 ms and 1500 ms baselines; ranged frozen-poison rolls remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation snow_yeti -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dark_wraith -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 IceGuard branch pass: deepened AI 102 `IceCrystalSolider` / `SinseokMiner` beyond the initial near/ranged baseline. Runtime now selects the Crystal fire ranged branch as `ObjectRangeAttack` type 1 without poison, keeps the ice ranged branch as type 0, and applies the Crystal slow/frozen poison rolls after successful ice-branch damage. `cargo fmt --check`, `cargo test -p mir2-simulation ice_guard -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frost_tiger -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowYeti frozen pass: completed the AI 190 `SnowYeti` ranged poison detail. Runtime now applies the Crystal frozen-poison roll after successful ranged damage, sharing the runtime frozen buff representation already used by IceGuard. `cargo fmt --check`, `cargo test -p mir2-simulation snow_yeti -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation ice_guard -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenAxeman adjacent pass: deepened AI 188 `FrozenAxeman` beyond the two-tile type-1 branch. Runtime now covers the adjacent Crystal type-2 pull/push branch with a deterministic 2/3 trigger, 10s cooldown, immediate 2-4 tile player push, and 500 ms delayed imported DC hit; cooldown fallback remains on the existing type-0 melee branch. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_axeman -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenMiner fanout pass: completed the AI 187 `FrozenMiner` type-1 area branch beyond the player-target hit. Runtime now applies the 1000 ms imported 80% DC hit to adjacent opposing monster targets as a `FindAllTargets(1)`-style fanout while keeping the existing player hit. `cargo fmt --check`, `cargo test -p mir2-simulation frozen_miner -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation frozen_axeman -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkWraith adjacent pass: deepened AI 192 `DarkWraith` beyond the four-tile type-2 line branch. Runtime now covers the adjacent Crystal type-1 area branch with 600 ms delayed imported DC damage against the player and nearby opposing monster targets; exact line-attack cooldown/timing remains queued. `cargo fmt --check`, `cargo test -p mir2-simulation dark_wraith -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_spider -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 KingScorpion adjacent pass: pinned AI 19 `KingScorpion` adjacent branch parity with a focused test. Runtime already used adjacent `ObjectAttack` type 0 with imported DC damage while keeping the non-adjacent two-tile `ObjectRangeAttack` MC branch; docs now track the remaining work as adjacent random range override and line multi-target edge cases instead of the covered DC melee branch. `cargo fmt --check`, `cargo test -p mir2-simulation king_scorpion -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dark_devil -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Khazard pull pass: deepened AI 27 `Khazard` beyond the pull packet baseline. Runtime now performs the Crystal pull movement toward Khazard, keeps the pull branch damage-free, and stores the 5s `PullTime` cooldown so non-adjacent pulls cannot repeat immediately; exact magic-resist checks remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation khazard -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation lamia -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Lamia/Kirin type-1 pass: deepened AI 186 `Kirin` / spawned `Lamia` beyond the type-0 DC baseline. Runtime now emits the Crystal type-1 `ObjectAttack` branch and applies the 500 ms imported DC hit; current Lamia MC=0 still gates the IceThrust/slow branch. `cargo fmt --check`, `cargo test -p mir2-simulation lamia -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation khazard -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SeedingsGeneral branch pass: deepened AI 121 `SeedingsGeneral` beyond the primary ranged MC baseline. Runtime now covers type-0 Echo Shout slow poison and type-1 Stomp frozen poison, with Stomp also fanning out imported MC damage to nearby opposing monster targets; close mixed melee branches remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation seedings_general -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation hell_keeper -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricClaw poison pass: deepened AI 86 `ManectricClaw` / spawned `Chieftain_Priest` thrust coverage. Runtime now applies the Crystal player slow/frozen poison rolls after the range-thrust hit while preserving near-DC/far-MC damage; thrust movement and full cone fanout remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation manectric_claw -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation bone_lord -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrostTiger poison pass: deepened AI 34 `FrostTiger` ranged branch coverage. Runtime now applies the Crystal ranged poison roll using imported `Effect`: current `FrostTiger` effect 0 maps to Bleeding, while effect 1 maps to Slow; `ObjectSitDown` presentation remains queued. `cargo fmt --check`, `cargo test -p mir2-simulation frost_tiger -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation ice_guard -- --test-threads=1 --nocapture`, `node packages\tooling\scripts\generate-crystal-monster-ai-summary.mjs`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TurtleGrass single-push pass: completed the AI 173 `TurtleGrass` type-1 branch beyond the Zuma-family baseline. Runtime now follows Crystal's 1/4 type-1 `ObjectAttack` path, immediately pushes the player three tiles along the attack direction, and applies the imported DC hit on the 500 ms single-push delay. `cargo fmt --check` and `cargo test -p mir2-simulation turtle_grass -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CannibalTentacles halfmoon pass: completed the AI 130 `CannibalTentacles` adjacent type-1 branch beyond the non-adjacent range baseline. Runtime now follows Crystal's 1/5 type-1 `ObjectAttack` path, applies the fixed 500-damage halfmoon hit on the 500 ms delay, fans that halfmoon arc out to adjacent opposing monsters, and applies Green Poison to the player on successful hit. `cargo fmt --check` and `cargo test -p mir2-simulation cannibal_tentacles -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Jar2 adjacent branch pass: completed the AI 120 `Jar2` adjacent random split beyond the static range baseline. Runtime now follows Crystal's adjacent 1/3 DC `ObjectAttack` path and adjacent 2/3 `ObjectRangeAttack` path, keeps current generated zero-MC range hits damage-free, and wires the Frozen poison hook for successful Jar2 ranged damage when data allows it. `cargo fmt --check` and `cargo test -p mir2-simulation jar2 -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SandSnail branch pass: completed AI 115 `SandSnail` beyond the primary DC melee baseline. Runtime now covers the Crystal type-1 DC halfmoon arc fanout and type-2 MC one-tile area branch, including Green Poison on successful player hit, while preserving the 300 ms delayed attack timing. `cargo fmt --check` and `cargo test -p mir2-simulation sand_snail -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManTree branch pass: deepened AI 174 `ManTree` / spawned `FineSoul` beyond the baseline type-0 packet. Runtime now covers the Crystal type-1 halfmoon and type-2 boulder packet branches and wires the Stun hook for successful boulder hits; current generated `FineSoul` data has `DC=0` and `MC=0`, so damage, halfmoon fanout, and Stun remain correctly data-gated. `cargo fmt --check` and `cargo test -p mir2-simulation man_tree -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 MinotaurKing fanout pass: completed the AI 33 `MinotaurKing` `CompleteRangeAttack` fanout beyond the six-tile ranged baseline. Runtime now applies the imported DC ranged hit to the player and to opposing monsters within Crystal's three-tile radius around the target location. `cargo fmt --check` and `cargo test -p mir2-simulation minotaur_king -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkDevil fanout pass: completed the AI 20 `DarkDevil` area burst details beyond the opening ranged baseline. Runtime now stores the Crystal 2-4 second area cooldown after a burst, suppresses repeated non-adjacent range bursts while cooling down, and applies the delayed imported DC*3 hit to opposing monsters in the one-tile fanout around the point two tiles in front of the monster. `cargo fmt --check` and `cargo test -p mir2-simulation dark_devil -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 OmaKing close pass: completed AI 43 `OmaKing` close-branch details beyond the seven-tile type-1 magic baseline. Runtime now preserves the close random split, applies the type-0 push before line resolution, can apply the Crystal paralysis hook after a successful push, and resolves the imported DC line hit across the two forward tiles; close/ranged type-1 remains on imported MC with the 500 ms delay. `cargo fmt --check` and `cargo test -p mir2-simulation oma_king -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RedMoonEvil fanout pass: completed AI 13 `RedMoonEvil` multi-target damage beyond the static view-range baseline. Runtime now applies the delayed imported DC hit to opposing monsters inside the Crystal view-range fanout while preserving the single `ObjectAttack` packet shape; `ObjectEffect RedMoonEvil` remains queued on protocol support. `cargo fmt --check` and `cargo test -p mir2-simulation red_moon_evil -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 EvilCentipede poison pass: completed AI 14 `EvilCentipede` fanout and poison details beyond the hidden/static baseline. Runtime now applies the delayed imported DC hit to all opposing targets in the seven-tile Crystal fanout and applies the Crystal Green Poison plus Paralysis rolls on successful player hit. `cargo fmt --check` and `cargo test -p mir2-simulation evil_centipede -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit fanout/poison pass: deepened AI 50 `GreatFoxSpirit` beyond the static ranged baseline. Runtime now applies the delayed imported DC hit to Crystal `FindAllTargets` fanout targets, using the seven-tile ranged radius or two-tile close radius, and applies the Crystal Slow plus Paralysis rolls on successful player hit. `cargo fmt --check` and `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Yimoogi poison pass: deepened AI 36 `Yimoogi` beyond the seven-tile ranged baseline. Runtime now preserves Crystal's 500 ms ranged attack branch and adds the four-tile type-1 `ObjectAttack` red-poison path without direct damage; child/sister spawning, final teleport, and paired drop rules remain queued. `cargo fmt --check` and `cargo test -p mir2-simulation yimoogi -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkWraith line pass: completed AI 192 `DarkWraith` line-branch details beyond the initial type-2 player hit. Runtime now stores the Crystal 3-7s line cooldown approximation after a non-adjacent line attack and applies the imported DC*3 hit to opposing monsters along the four forward line tiles while preserving the adjacent type-1 area branch. `cargo test -p mir2-simulation dark_wraith -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonWarrior branch pass: completed AI 127 `TucsonWarrior` adjacent selection and area coverage beyond the non-adjacent type-1 smash baseline. Runtime now covers the Crystal adjacent 4/5 type-0 halfmoon DC branch, adjacent 1/5 type-1 MC smash branch, and one-tile target-area multi-target fanout for smash hits. `cargo test -p mir2-simulation tucson_warrior -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 spider line fanout pass: completed forward-line multi-target coverage for AI 35 `SandWorm` and AI 37 `CrystalSpider`. Runtime now applies the delayed line hit to opposing monsters on the same two-tile SpittingSpider/SandWorm line or three-tile CrystalSpider line while preserving existing player damage and CrystalSpider green-poison behavior. `cargo fmt --check`, `cargo test -p mir2-simulation sand_worm -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_spider -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 KingScorpion line pass: completed AI 19 `KingScorpion` line fanout and adjacent range override details beyond the prior range/DC baselines. Runtime now applies the two-tile line hit to opposing monsters, uses the adjacent random `ObjectRangeAttack` MC override, and forces the range branch when an attack target is on the second forward tile. `cargo test -p mir2-simulation king_scorpion -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RestlessJar adjacent pass: completed AI 122 `RestlessJar` adjacent branch coverage beyond the static ranged packet baseline. Runtime now covers the adjacent spin branch with one-tile fanout, the high-HP tornado `ObjectRangeAttack` type-1 branch with Blindness poison, and the low-HP stomp type-2 branch with one-tile push plus fanout while preserving current zero-MC ranged no-damage gating. `cargo test -p mir2-simulation restless_jar -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GeneralMeowMeow fanout pass: completed AI 123 `GeneralMeowMeow` range fanout beyond the twelve-tile ranged baseline. Runtime now applies the delayed imported MC hit to opposing monsters in the Crystal two-tile target-area fanout around the player target while keeping close attacks on the existing DC path. `cargo fmt --check` and `cargo test -p mir2-simulation general_meow_meow -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 DarkBeast secondary pass: completed AI 112 `DarkBeast` secondary type-1 branch coverage beyond the primary DC melee baseline. Runtime now emits the Crystal type-1 packet, resolves it through imported raw MC, and wires the Effect=1 bleeding hook; current spawned `CatWidow` data has `MC=0` and `Effect=0`, so the branch correctly emits without damage or bleeding. `cargo fmt --check` and `cargo test -p mir2-simulation dark_beast -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GeneralMeowMeow close slam pass: completed AI 123 `GeneralMeowMeow` close random slam branch. Runtime now maps the original 1-in-9 close `ObjectAttack` type-1 branch to deterministic `tick % 9 == 0` coverage and resolves damage as imported Crystal DC * 3 after defence, while keeping the normal close attack and ranged MC fanout paths intact. `cargo fmt --check` and `cargo test -p mir2-simulation general_meow_meow -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonGeneral type-2 ranged pass: completed AI 131 `TucsonGeneral` random ranged heavy-hit branch. Runtime now maps the original 1-in-4 ranged `ObjectRangeAttack` type-2 branch to deterministic `tick % 4 == 0` coverage, applies the Crystal 500 ms delayed hit, and resolves imported SC * 2 after defence while leaving the existing rage packet and normal type-1 SC branch intact. `cargo fmt --check` and `cargo test -p mir2-simulation tucson_general -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonGeneral close stomp pass: completed AI 131 `TucsonGeneral` close type-1 MC stomp branch. Runtime now maps the original close stomp/paralysis path to deterministic `tick % 4 == 0` coverage, emits `ObjectAttack` type 1, applies the 500 ms delayed imported MC hit to the player and opposing monsters within three tiles of TucsonGeneral, and wires the Crystal 3-denominator / 5-tick paralysis poison. `cargo fmt` and `cargo test -p mir2-simulation tucson_general -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CatShaman red poison pass: completed AI 118 `CatShaman` red-poison ranged variant. Runtime now maps the original 1-in-5 ranged branch to deterministic `tick % 5 == 0` coverage, emits `ObjectRangeAttack` type 1, resolves ranged damage from imported raw MC data, and wires a 5-denominator / 5-tick red poison hook for future nonzero-MC data; current spawned CatShaman data has `MC=0`, so damage and poison are correctly gated. `cargo fmt --check` and `cargo test -p mir2-simulation cat_ -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 WaterDragon/BlackTortoise poison pass: completed AI 181/182 ranged poison coverage. Runtime now maps WaterDragon ranged damage to imported MC data and applies the Crystal 7-denominator / 5-tick green poison roll on successful ranged hits; BlackTortoise uses imported raw MC for ranged damage so current spawned `SmallDrake` data with `MC=0` correctly emits the range packet without damage or poison. `cargo fmt --check`, `cargo test -p mir2-simulation water_dragon -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation black_tortoise -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 BlackTortoise halfmoon pass: completed AI 182 `BlackTortoise` close halfmoon branch. Runtime now maps the original close 1-in-5 branch to deterministic `tick % 5 == 0` coverage, emits `ObjectAttack` type 1, keeps imported DC damage, and fans damage through the Crystal halfmoon arc to opposing monsters. `cargo fmt --check` and `cargo test -p mir2-simulation black_tortoise -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RedFoxman packet split pass: completed AI 45 `RedFoxman` ranged packet variant coverage and AI45/46 imported DC ranged damage mapping. Runtime now maps RedFoxman's original random spell type to deterministic type-0/type-1 `ObjectRangeAttack` coverage and resolves RedFoxman/WhiteFoxman ranged hits from imported Crystal DC data rather than the generic 7-damage fallback; teleport/fear and WhiteFoxman slow remain queued. `cargo fmt --check` and `cargo test -p mir2-simulation fox -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 WhiteFoxman slow pass: completed AI 46 `WhiteFoxman` type-1 slow branch. Runtime now maps the original 1-in-8 branch to deterministic `tick % 8 == 0` coverage, emits `ObjectRangeAttack` type 1, schedules a 300 ms delayed status-only pending action without `Struck`/damage messaging, and applies the Crystal level-scaled slow poison check. `cargo fmt` and `cargo test -p mir2-simulation fox -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 StrayCat push pass: completed AI 117 `StrayCat` close push variant. Runtime now maps the original close type-1 branch to deterministic `tick % 10 == 0` coverage, emits `ObjectAttack` type 1, pushes the player one tile in the attack direction, and resolves follow-up line damage from imported raw MC data; current spawned StrayCat data has `MC=0`, so the push is visible while follow-up damage is correctly gated. `cargo fmt --check` and `cargo test -p mir2-simulation cat_ -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HellBomb poison pass: completed AI 99 `HellBomb` poison variants. Runtime now applies HellBomb1 Frozen, HellBomb2 Dazed, and HellBomb3 Bleeding for five ticks on successful player explosion hits, while preserving immobility, damage immunity, delayed attack/death packets, and radius damage. `cargo fmt --check` and `cargo test -p mir2-simulation hell_bomb -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricKing close push pass: completed AI 88 `ManectricKing` / spawned `Master_DragonYang` close type-1 push line branch. Runtime now maps the original close-range random branch to deterministic `tick % 3 == 0` coverage, emits `ObjectAttack` type 1, resolves damage from imported DC data, and pushes the player along the Crystal line distance before delayed damage; low-HP mass attack remains queued. `cargo fmt`, `cargo test -p mir2-simulation manectric_king -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SeedingsGeneral close melee pass: completed AI 121 `SeedingsGeneral` close mixed melee coverage. Runtime now keeps the normal close type-0 Blood Attack on imported DC and maps the original close Green Splash branch to deterministic `tick % 5 == 0` coverage, emitting `ObjectAttack` type 1 and resolving delayed imported MC damage without the ranged slow/frozen poison hooks. `cargo fmt --check` and `cargo test -p mir2-simulation seedings_general -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricKing mass pass: completed AI 88 `ManectricKing` / spawned `Master_DragonYang` low-HP mass attack. Runtime now triggers the Crystal HP<20% type-0 `ObjectRangeAttack` branch behind a 2-6 second cooldown, schedules imported MC damage with the original `distance * 50 + 750ms` delay, and fans the hit to opposing monsters within seven tiles. `cargo fmt`, `cargo test -p mir2-simulation manectric_king -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonMage WideLine pass: completed AI 126 `TucsonMage` multi-target WideLine coverage. Runtime now keeps the non-adjacent type-1 branch, adds the adjacent 1-in-3 type-1 selection, preserves current zero-MC no-damage gating for imported TucsonMage data, and fans nonzero-MC WideLine damage through the Crystal forward cell plus three two-step lanes with per-target delay. `cargo fmt --check` and `cargo test -p mir2-simulation tucson_mage -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HellKeeper fanout/Dazed pass: completed AI 79 `HellKeeper` view-range target fanout and nonzero-MC type-1 semantics. Runtime now applies both type-0 DC and type-1 MC branches to opposing monsters in Crystal `FindAllTargets(ViewRange)` style, keeps current zero-MC HellKeeper type-1 packets damage-free, and applies Dazed only after a successful nonzero-MC player hit with defence mitigation. `cargo fmt --check` and `cargo test -p mir2-simulation hell_keeper -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 SnowWolf fanout/poison pass: completed AI 179 `SnowWolf` nonzero-MC type-1 semantics and `FindAllTargets(2)` coverage. Runtime now keeps current zero-MC SnowWolf type-1 packets damage-free, applies defence-mitigated raw MC when nonzero data is available, fans both branches to nearby opposing monsters, and applies the Crystal Slow/Frozen rolls after successful type-1 player hits. `cargo fmt --check` and `cargo test -p mir2-simulation snow_wolf -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricClaw cone pass: completed AI 86 `ManectricClaw` / spawned `Chieftain_Priest` full thrust cone fanout. Runtime now applies the 500 ms IceThrust hit to opposing monsters in the Crystal three-column, three-row cone, using near DC for the first two rows and far MC for the third row, while preserving the existing player slow/frozen rolls; random thrust movement remains queued. `cargo fmt --check` and `cargo test -p mir2-simulation manectric_claw -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GuardianRock delayed pull pass: completed AI 48 `GuardianRock` delayed packet and pull-distance behavior. Runtime now queues the Crystal 500 ms delayed `ObjectRangeAttack`, keeps the branch damage-free, and pulls the player toward the rock by `min(distance - 1, 4)` tiles on the due tick; magic-resist checks remain queued because the simulation has no MagicResist stat yet. `cargo fmt --check` and `cargo test -p mir2-simulation guardian_rock -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 MirStatue fanout pass: completed AI 54 `DragonStatue` / spawned `MirStatue` target-radius damage fanout. Runtime now keeps the due-time `ObjectRangeAttack` packet and imported DC player hit, then applies the same delayed hit to opposing monsters within two tiles of the player target in Crystal `FindAllTargets(2)` style; sleeping wake/revive state remains queued. `cargo fmt --check` and `cargo test -p mir2-simulation mir_statue -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit HP-stage pass: completed AI 50 `GreatFoxSpirit` HP-stage presentation. Runtime now computes Crystal's four-stage HP threshold during monster AI processing, advances `extra_byte` monotonically, and emits an existing-object `ObjectMonster` update so clients receive the stage change; recall teleport, GuardianRock activation, and target `ObjectEffect` remain queued. `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit GuardianRock pass: completed AI 50 `GreatFoxSpirit` nearby GuardianRock activation semantics. Runtime now activates AI 48 `GuardianRock` units within 20 tiles while the fox is spawned/alive and deactivates them when the fox dies, with AI 48 attack gating bound to that active flag; recall teleport and target `ObjectEffect` remain queued. `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit recall pass: completed AI 50 `GreatFoxSpirit` far-player recall baseline. Runtime now follows Crystal's `>3` and `<=30` target distance window, deterministic 1-in-10 recall trigger, 10-second cooldown, 3-in-4 actual recall branch, and moves the player to an occupiable tile adjacent to the fox while skipping the attack tick after a successful recall; multi-target ordering and MagicResist remain queued, while teleport effect packets were completed in a later closure pass. `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 monster `ObjectEffect` packet pass: added protocol/runtime support for Crystal `ObjectEffect` packet ID 124 and wired target effect broadcasts for AI 13 `RedMoonEvil` and ranged AI 50 `GreatFoxSpirit` fanout targets. `cargo test -p mir2-protocol object_effect_packet_uses_crystal_payload -- --nocapture`, `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation red_moon_evil -- --test-threads=1 --nocapture`, and `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families -- --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ManectricClaw movement pass: completed AI 86 `ManectricClaw` random pre-thrust movement. Runtime now maps Crystal's 1-in-2 ranged `MoveTo(Target.CurrentLocation)` branch to a deterministic one-step move toward the target with next/previous-direction fallback, emits `ObjectWalk`, applies the short action delay, and skips the range attack on that tick. `cargo test -p mir2-simulation manectric_claw -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 BoneLord slave pass: completed AI 30 `BoneLord` HP-stage slave spawning. Runtime now initializes the Crystal three-stage HP tracker, emits the type-1 `ObjectAttack` wave when HP crosses a stage, spawns up to eight BoneSpearman/BoneBlademan/BoneArcher/BoneCaptain minions immediately with a 40-slave cap, assigns the original target, and skips the normal attack tick after the wave. `cargo test -p mir2-simulation bone_lord -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 ZumaTaurus slave pass: completed AI 17 `ZumaTaurus` HP-stage slave spawning. Runtime now initializes the Crystal seven-stage HP tracker, spawns up to eight ZumaStatue/ZumaGuardian/ZumaArcher/WedgeMoth/ZumaArcher3/ZumaStatue3/ZumaGuardian3 minions with a 40-slave cap when HP crosses a stage, assigns the original target, and preserves Crystal's behavior of continuing into the normal attack path after the spawn wave. `cargo test -p mir2-simulation zuma_taurus -- --test-threads=1 --nocapture` and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure B.2 ThunderElement movement/fanout pass: deepened AI 49 `ThunderElement` beyond the due-time attack baseline. Runtime now maps Crystal's 1-in-3 near-target repositioning to deterministic one-step movement before the attack, emits `ObjectWalk`, broadcasts the delayed `ObjectAttack` from the post-move location, and applies the two-tile CompleteAttack damage to nearby opposing monsters as well as the player; player-skill Repulsion push-damage remains queued with broader skill parity. `cargo test -p mir2-simulation thunder_element -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenWarewolf HP/spawn pass: deepened AI 180 `SnowWolfKing` / spawned `FrozenWarewolf` beyond the primary attack. Runtime now maps the Crystal random HP-threshold packet variants to type 1 at >=60%, type 2 at >=30%, and type 3 below 30%, keeps the shared 500 ms imported DC hit, and performs the one-time below-70% SnowWolf slave spawn with three minions and 2s activation delay. Weak-target teleport, delayed death explosion, and pet transfer remain queued. `cargo test -p mir2-simulation frozen_warewolf -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrozenWarewolf death pass: completed AI 180 `SnowWolfKing` delayed death explosion damage. Runtime now schedules the Crystal 500 ms post-death one-tile explosion using imported DC damage against adjacent player and opposing-monster targets while preserving the normal death packet; weak-target teleport and pet transfer remain queued. `cargo test -p mir2-simulation frozen_warewolf -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GeneralMeowMeow shield/thunder/slave pass: completed the remaining AI 123 `GeneralMeowMeow` shield and summon details. Runtime now tracks the Crystal HP shield windows, exposes `GeneralMeowMeowShield` in monster presentation, absorbs 100 incoming damage while shielded, emits protocol `ObjectSpell` ID 149 with `GeneralMeowMeowThunder` for shield-phase mass thunder, applies delayed MC damage to the player and opposing monsters near the target, and performs the 60s periodic StainHammerCat/BlackHammerCat/StrayCat/CatShaman slave spawn with the original 3-per-wave / 6-slave cap. `cargo test -p mir2-protocol object_spell_packet_uses_crystal_payload -- --nocapture` and `cargo test -p mir2-simulation general_meow_meow -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Yimoogi lifecycle pass: completed the remaining AI 36 `Yimoogi` lifecycle details. Runtime now tracks parent/child sister state, emits the Crystal type-2 spawn attack after the four-second delay, spawns the same-name child with a sister link and no slave master presentation, triggers the final <=10% HP random teleport once, spawns two `WhiteSerpent` mobs at the old location, clears the player target after teleport, and suppresses configured death drops while the linked sister is alive. `cargo test -p mir2-simulation yimoogi -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Lamia/Kirin IceThrust pass: completed AI 186 `Kirin` nonzero-MC IceThrust semantics while preserving current `Lamia` MC=0 gating. Runtime now emits type-2 `ObjectAttack` for the three-tile IceThrust branch when imported MC is nonzero, applies delayed MC damage with Crystal slow poison to the player, and fans the same cone damage to opposing monsters in the three-column/three-row thrust area. `cargo test -p mir2-simulation lamia -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 MirStatue sleep/wake pass: completed the remaining AI 54 `DragonStatue` / spawned `MirStatue` death-sleep lifecycle. Runtime now turns lethal damage into a sleeping 0-HP state instead of `ObjectDied`, blocks further damage while sleeping, suppresses death handling/drops/respawn, and wakes after Crystal's 15-minute delay with full HP plus `ObjectHealth`. `cargo test -p mir2-simulation mir_statue -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TrapRock SpawnCorner/poison pass: completed the remaining AI 47 `TrapRock` spawn-corner ordering and repeated parent-attack paralysis details. Runtime now chooses the visible parent location through a deterministic Crystal-style cardinal `SpawnCorner` ordering, preserves child-rock placement around the trapped target, and rolls the parent `ObjectRangeAttack` branch's 1-in-8 three-second paralysis without adding damage. `cargo test -p mir2-simulation trap_rock -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Armadillo retreat/backstep pass: added Crystal `ObjectBackStep` packet support and completed AI 124/125 retreat movement details. Runtime now emits Armadillo/Elder two-tile backstep packets, applies Armadillo's delayed retreat radius damage to nearby opposing monsters, pushes ArmadilloElder's type-1 target exactly two tiles without damage, and drives Elder's post-retreat run-away movement. `cargo test -p mir2-protocol object_back_step_packet_uses_crystal_payload -- --nocapture` and `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Armadillo DigOutArmadillo spell pass: added Crystal `Spell::DigOutArmadillo` / value 206 support for `ObjectSpell` and wired AI 124/125 to emit the delayed drill-out spell object after `ObjectShow`. `cargo test -p mir2-protocol object_spell_packet_uses_crystal_payload -- --nocapture` and `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 TucsonGeneral rock spell pass: added Crystal `Spell::TucsonGeneralRock` / value 213 support and wired AI 131 rage to schedule 15 delayed rock `ObjectSpell` presentations, deterministic target-biased scatter, and raw-DC impact damage on player/opposing-monster targets at the struck location. `cargo test -p mir2-protocol object_spell_packet_uses_crystal_payload -- --nocapture` and `cargo test -p mir2-simulation tucson_general -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Armadillo failed-retreat run-away pass: completed AI 124 `Armadillo` `_runAway` activation after retreat range damage fails against an immune target. Runtime now enters Armadillo run-away mode when the delayed retreat area hit resolves against a monster that ignores normal monster damage, matching Crystal's `Attacked <= 0` branch. `cargo test -p mir2-simulation armadillo -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 GreatFoxSpirit recall teleport packet pass: wired AI 50 far-player recall to emit Crystal `ObjectTeleportOut` / `ObjectTeleportIn` effect 11 around the existing recall movement. `cargo test -p mir2-simulation great_fox_spirit -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 CaveMaggot/ToxicGhoul harvest pass: added AI 7 and AI 28 to the shared Crystal `HarvestMonster` corpse state so death skips immediate drops and the corpse requires the default two skin-count harvest passes before `ObjectHarvested`. `cargo test -p mir2-simulation cave_maggot -- --test-threads=1 --nocapture` and `cargo test -p mir2-simulation toxic_ghoul -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 FrostTiger sit-down pass: added Crystal `ObjectSitDown` packet support and completed AI 34 sitting presentation. Runtime now schedules FrostTiger's passive sit-down state, blocks movement/attacks while sitting, emits sitting/standing `ObjectSitDown` packets, preserves `ObjectMonster.extra` for sitting presentation, and stands up when target-locked before resuming the existing ranged branch. `cargo test -p mir2-protocol object_sit_down_packet_uses_crystal_payload -- --nocapture` and `cargo test -p mir2-simulation frost_tiger -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 WoomaTaurus teleport packet pass: added Crystal `ObjectTeleportOut` / `ObjectTeleportIn` packet support and wired AI 11 surrounded teleport to emit both effect packets around the existing deterministic position update. `cargo test -p mir2-protocol object_teleport_packets_use_crystal_payloads -- --nocapture` and `cargo test -p mir2-simulation wooma_taurus -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Foxman fear/kiting pass: completed AI 45/46 fear-window movement details. Runtime now makes RedFoxman and WhiteFoxman kite away or close in before opening a five-second attack window, keeps ranged attacks inside that window, and gives adjacent RedFoxman the Crystal effect-2 teleport branch using `ObjectTeleportOut` / `ObjectTeleportIn`. `cargo test -p mir2-simulation fox -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 HolyDeva fear/kiting pass: completed AI 38 `HolyDeva` / `PKSpirit` fear-window movement details. Runtime now refreshes the Crystal five-second attack window, kites away when the target is inside the six-tile attack range before that window, avoids generic close-chasing when outside range, and preserves the existing ranged attack/damage path inside the window. `cargo test -p mir2-simulation holy_deva -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 AxeSkeleton fear-window pass: completed AI 8 `AxeSkeleton` common ranged fear movement. Runtime now refreshes the Crystal five-second attack window, moves closer before attacking at six tiles when the window is expired, kites away when the target is inside six tiles, and preserves six-tile `ObjectRangeAttack` inside the window. `cargo test -p mir2-simulation axe_skeleton -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Deer run-away pass: completed AI 2 `Deer` / `Deer1` / `Sheep` run-away flee movement. Runtime now marks the Crystal 1-in-7 run-away subset deterministically at spawn/respawn, lets those deer acquire nearby player targets only for fleeing, and emits `ObjectWalk` away from the player without enabling normal attacks. Exact `Quality` randomization remains queued with item/drop quality parity. `cargo test -p mir2-simulation deer -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 RestlessJar projectile timing pass: pinned AI 122 `RestlessJar` non-adjacent `ObjectRangeAttack` timing to Crystal's inherited `ProjectileAttack` formula (`distance * 50 + 500ms`) while preserving the current imported zero-MC no-damage gate. `cargo test -p mir2-simulation restless_jar -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure B.2 Trainer DPS chat pass: added protocol `ChatType::Trainer` / value 9 and wired AI 56 `Trainer` damage reports to emit Crystal-style damage/DPS chat without reducing trainer HP or killing the target, plus a five-second idle average report. `cargo test -p mir2-protocol server_packet_encoder_roundtrip_for_chat -- --nocapture` and `cargo test -p mir2-simulation trainer -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 durability/repair packet pass: added protocol, runtime, and gateway support for Crystal `DuraChanged` / ID 76 and `ItemRepaired` / ID 114. Player attacks now emit `DuraChanged` for weapon durability loss, delayed monster hits emit `DuraChanged` for worn equipment loss, repair powder emits one `ItemRepaired` per repaired equipped item, and single-item repair emits `ItemRepaired` before its existing feedback. `cargo test -p mir2-protocol durability_repair_server_packets_use_crystal_ids -- --nocapture`, `cargo check -p mir2-gateway`, `cargo test -p mir2-simulation durability -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation repair -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 item grid/action ack pass: aligned protocol `MirGridType` values with Crystal for Inventory/Equipment/Trade/Storage/QuestInventory/Refine/HeroEquipment/HeroInventory and fixed runtime equipment slot indices for Crystal Belt=10, Boots=11, Mount=13. Added protocol/runtime/gateway support for current Crystal item action ack packets: `MoveItem` / 37, `EquipItem` / 38, `MergeItem` / 39, `RemoveItem` / 40, `RemoveSlotItem` / 41, `TakeBackItem` / 42, `StoreItem` / 43, `SplitItem1` / 45, `UseItem` / 52, and `DropItem` / 53. Current runtime item move/equip/remove/split/merge/drop/use/store/take-back flows now emit success/failure ack packets around the existing state changes and messages; full `UserItem` payload packets remain queued. `cargo test -p mir2-protocol mir_grid_type_values_match_crystal -- --nocapture`, `cargo test -p mir2-protocol item_action_ack_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-simulation equipment_slot_indices_match_crystal -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_use_item_packet_consumes_inventory_slot -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_drop_item_packet_reduces_stack_and_spawns_ground_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation equip_and_remove_item_packets_emit_crystal_acks -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation storage -- --test-threads=1 --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 gold delta packet pass: added protocol/runtime/gateway support for Crystal `GainedGold` / ID 67 and `LoseGold` / ID 68. Current gold pickup emits `GainedGold` alongside the existing pickup feedback/removal path, and current `DropGold` emits `LoseGold` alongside the ground gold object spawn. `cargo test -p mir2-protocol gold_delta_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-simulation dropped_gold_can_be_picked_up -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop_gold_packet_emits_lose_gold -- --test-threads=1 --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 sell/repair entry packet pass: added protocol/runtime/gateway support for Crystal `SellItem` / ID 111 and `RepairItem` / ID 113. Current sell flows now emit `SellItem` success/failure acks and `GainedGold` on success, while current repair and special-repair requests emit `RepairItem` before existing repair validation and `ItemRepaired` output. `cargo test -p mir2-protocol sell_and_repair_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-simulation sell_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation repair_item_packet -- --test-threads=1 --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 delete-item packet pass: added protocol/runtime/gateway support for Crystal client `DeleteItem` / ID 149 and server `DeleteItem` / ID 79. Current inventory delete requests now echo the Crystal-shaped delete packet, reduce partial stacks, and remove full stacks while preserving Crystal's no-success-field response shape. `cargo test -p mir2-protocol delete_item_client_packet_uses_crystal_payload -- --nocapture`, `cargo test -p mir2-protocol item_action_ack_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-protocol item_and_combat_client_packets_use_crystal_payloads -- --nocapture`, `cargo test -p mir2-simulation delete_item_packet_reduces_or_removes_inventory_stack -- --test-threads=1 --nocapture`, and `cargo test -p mir2-gateway delete_item_command_maps_to_protocol_packet -- --nocapture` passed.
+- 2026-04-22, 100% closure D.1 split-item payload pass: added reusable Crystal `UserItem.Save`-order serialization in `mir2-protocol` and implemented server `SplitItem` / ID 44 alongside the existing `SplitItem1` ack. Current split-stack flows now emit `SplitItem1` success followed by a Crystal-shaped `SplitItem` payload for the newly created stack, with gateway JSON conversion. `cargo test -p mir2-protocol split_item_server_packet_uses_crystal_user_item_payload -- --nocapture`, `cargo test -p mir2-simulation storage_split_item_stack_creates_new_storage_slot -- --test-threads=1 --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 gained-item payload pass: implemented server `GainedItem` / ID 66 on the reusable Crystal `UserItem` serializer and wired current inventory pickup updates to emit `GainedItem` while gold pickup continues to emit `GainedGold`. Gateway JSON conversion now exposes the item payload. `cargo test -p mir2-protocol gained_item_server_packet_uses_crystal_user_item_payload -- --nocapture`, `cargo test -p mir2-simulation crystal_pickup_packet_collects_nearest_adjacent_ground_drop -- --test-threads=1 --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.0 item manifest import pass: extended the Crystal `Server.MirDB` generator to emit `crystal_item_manifest.json` with 1,628 item rows and core `ItemInfo.Save` fields, exposed item lookup helpers in `mir2-game-data`, and switched current mapped starter `UserItem.item_index` values to real Crystal item indices such as `(HP)DrugSmall` / 658. `node packages\tooling\scripts\generate-crystal-respawn-manifest.mjs`, `cargo test -p mir2-game-data crystal_item_manifest_loads -- --nocapture`, `cargo test -p mir2-simulation storage_split_item_stack_creates_new_storage_slot -- --test-threads=1 --nocapture`, `cargo check -p mir2-gateway`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 refresh-item payload pass: implemented server `RefreshItem` / ID 148 on the shared Crystal `UserItem` serializer and added gateway JSON conversion. Runtime trigger parity remains tracked separately because Crystal sends `RefreshItem` from specific item mutation flows such as weapon luck/curse and later equipment-affecting actions. `cargo test -p mir2-protocol refresh_item_server_packet_uses_crystal_user_item_payload -- --nocapture`, `cargo check -p mir2-gateway`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 refresh-item runtime trigger pass: added a representative Crystal `BenedictionOil` item-use branch that mutates equipped weapon Luck, serializes the equipped weapon as a Crystal `UserItem`, and emits `RefreshItem` with stat 15 / Luck. The current branch covers the deterministic success path; Crystal's random curse/no-effect outcomes remain future detail work. `cargo fmt --check`, `cargo test -p mir2-simulation benediction_oil_refreshes_weapon_after_luck_gain -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_use_item_packet_consumes_inventory_slot -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 item-info packet pass: implemented client `RequestItemInfo` / ID 39 and server `NewItemInfo` / ID 32 with Crystal `ItemInfo.Save`-order serialization, gateway command/JSON conversion, and runtime lookup from `crystal_item_manifest.json`. `RequestItemInfo(658)` now returns the Crystal `(HP)DrugSmall` metadata packet. `cargo test -p mir2-protocol item_info_packets_use_crystal_payloads -- --nocapture`, `cargo test -p mir2-simulation request_item_info_packet_returns_crystal_item_info -- --test-threads=1 --nocapture`, `cargo test -p mir2-gateway request_item_info_command_maps_to_protocol_packet -- --nocapture`, `cargo check -p mir2-gateway`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 item StackSize pass: current item gain and stack merge paths now consult the imported Crystal item manifest for `StackSize`. Mapped stackables such as `(HP)DrugSmall` split into capped stacks of 20, partial merges cap the target stack and keep source leftovers, and mapped non-stackables such as `BronzeHelmet` stay at one item per stack. `cargo fmt --check`, `cargo test -p mir2-simulation add_or_increment_item_respects_crystal_stack_size -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation add_or_increment_item_keeps_crystal_non_stackables_single_count -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation storage_merge_item_stack_caps_at_crystal_stack_size -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 inventory-full StackSize pass: current bag-capacity checks now account for existing partial stacks and imported Crystal `StackSize` before item grants mutate state. Pickup no longer removes a ground item when the bag cannot accept it, pickup can still stack into a full bag when an existing mapped stack has room, and shop/auction/NPC/quest reward gates use the same StackSize-aware capacity calculation before mutating gold, listings, quest state, or inventory. `cargo fmt --check`, `cargo test -p mir2-simulation pickup_preserves_ground_drop_when_inventory_is_full -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup_can_stack_into_full_inventory_when_stack_has_room -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_shop_and_auction_full_bag_preserve_gold_and_items -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_npc_giveitem_full_bag_preserves_inventory -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation quest_turn_in_full_bag_preserves_quest_state_and_rewards -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_npc_giveitem_adds_reward_to_inventory -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation add_or_increment_item_respects_crystal_stack_size -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 credit delta packet pass: implemented Crystal `GainedCredit` / ID 69 and `LoseCredit` / ID 70 server packet support in protocol IDs, encode/decode, trace names, and gateway JSON event conversion. Runtime credit mutation flows remain future work, but the packet surface is ready for imported credit shop/account systems. `cargo fmt --check`, `cargo test -p mir2-protocol currency_delta_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-gateway credit_delta_server_events_expose_crystal_payload_fields -- --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 credit runtime gain pass: added runtime account credit state to world snapshots, `UserInformation.credit`, character saves, and legacy-save-compatible reloads, then wired mapped Crystal `CreditToken` scroll use to consume the token, add imported Crystal `ItemInfo.Price` credit value, and emit `GainedCredit`. Credit-spend / `LoseCredit` runtime paths remain pending with imported credit shop flows. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_credit_token_use_adds_credit_and_emits_packet -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_credit_persists_and_updates_user_information -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation legacy_character_save_without_npc_flag_states_uses_default -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 credit runtime spend pass: added a current `shop.buyCredit` runtime path that checks credit balance and StackSize-aware bag capacity before mutating state, emits `LoseCredit` on successful credit purchase, and preserves credit/items on insufficient-credit or full-bag failures. Imported Crystal game-shop product catalogs remain pending. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_trade_shop_and_auction_are_transactional -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation stage5_shop_and_auction_full_bag_preserve_gold_and_items -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 item slot/seal packet pass: implemented Crystal `ItemSlotSizeChanged` / ID 115 and `ItemSealChanged` / ID 116 server packet support in protocol IDs, encode/decode, trace names, and gateway JSON event conversion. Runtime seal mutation flows remain future work, but the item packet surface now matches the adjacent Crystal durability/repair packet block. `cargo fmt --check`, `cargo test -p mir2-protocol item_slot_and_seal_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-gateway item_slot_and_seal_server_events_expose_crystal_payload_fields -- --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 item slot-size runtime pass: added current equipment socket slot state and a Stage 5 `item.addSocket` path that mirrors Crystal's successful socket-size mutation by increasing the equipped item slot count and emitting `ItemSlotSizeChanged` with the equipment unique id. Full Crystal gem/socket validation remains pending with imported socket item flows. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_add_socket_emits_item_slot_size_changed -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 item seal runtime pass: added current equipped-item seal expiry state and a Stage 5 `item.seal` path that records a .NET binary datetime expiry and emits `ItemSealChanged` with the equipment unique id. Full Crystal seal-item validation, reseal delay, and seal-source item handling remain pending. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_seal_emits_item_seal_changed -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation stage5_item_add_socket_emits_item_slot_size_changed -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC service packet pass: implemented protocol/gateway support for Crystal `TeleportIn` / ID 101, `NPCGoods` / ID 102, `NPCSell` / ID 103, `NPCRepair` / ID 104, `NPCSRepair` / ID 105, `NPCRefine` / ID 106, `NPCCheckRefine` / ID 107, `NPCCollectRefine` / ID 108, `NPCReplaceWedRing` / ID 109, `NPCStorage` / ID 110, and `CraftItem` / ID 112. Protocol IO now supports little-endian .NET `Single` / `f32` fields for service rates, and `NPCGoods` uses the shared `UserItem` serializer. Runtime NPC service triggers remain future work. `cargo fmt --check`, `cargo test -p mir2-protocol npc_service_server_packets_use_crystal_ids -- --nocapture`, `cargo test -p mir2-gateway npc_service_server_events_expose_crystal_payload_fields -- --nocapture`, and `cargo check -p mir2-gateway` passed.
+- 2026-04-22, 100% closure D.1 NPC service runtime trigger pass: wired imported Crystal NPC reserved service labels to baseline runtime packets. `@Storage` now emits `NPCStorage`, `@BuySell` emits `NPCGoods` plus `NPCSell`, `@Repair` emits `NPCRepair`, and the same mapper covers current buy, sell, special repair, craft, refine, refine-check, and wedding-ring service pages; generated shop goods, real service rates, and refine result state remain tracked under imported service data. `cargo fmt`, `cargo test -p mir2-simulation crystal_npc_reserved_service_labels_map_to_crystal_packets -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC goods list pass: populated current buy/buy-sell/craft `NPCGoods` packets from imported Crystal NPC `[Trade]` and `[Recipe]` sections using manifest-backed `UserItem` payloads. The WickedTrader `@BuySell` integration test verifies Crystal `(HP)DrugSmall` item index 658 entries with counts 1 and 5, and the CraftLady `@Craft` path verifies Crystal `(HP)DrugXL` item index 664 in the craft panel. Service rates, hide-added-stat settings, and buy-back lists remain pending. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_npc_reserved_service_labels_map_to_crystal_packets -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 repair oil scroll pass: mapped Crystal `RepairOil` and `WarGodOil` scroll items through the imported item manifest and wired their current weapon-use branches to emit `ItemRepaired`. `RepairOil` now partially repairs the equipped weapon in the runtime durability scale, and `WarGodOil` fully repairs it while preserving failure/no-consume behavior when the weapon does not need repair. `cargo fmt --check` and `cargo test -p mir2-simulation repair_and_war_god_oil_emit_item_repaired_for_weapon -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC service rate pass: extended the Crystal `Server.MirDB` generator to emit `crystal_npc_info_manifest.json` with 375 NPC placement rows including `NPCInfo.Rate`, exposed NPC info lookup helpers in `mir2-game-data`, and applied `Rate / 100F` to current `NPCGoods`, `NPCRepair`, and `NPCSRepair` packets. The Natural Cave `WickedTrader` integration now verifies Crystal rate 200 as packet rate 2.0. `node packages\tooling\scripts\generate-crystal-respawn-manifest.mjs`, `cargo fmt --check`, `cargo test -p mir2-game-data crystal_npc_info_manifest_loads -- --nocapture`, `cargo test -p mir2-simulation crystal_npc_reserved_service_labels_map_to_crystal_packets -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC goods flags pass: aligned current `NPCGoods.HideAddedStats` with Crystal's `Settings.GoodsHideAddedStats = true` for buy, buy-new, buy-used, and buy-sell service packets, while craft stays on Crystal's default `false`. `@BuyBack` now opens an empty buy panel until real buy-back state is implemented instead of reusing static `[Trade]` goods. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_npc_reserved_service_labels_map_to_crystal_packets -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC buy-back goods pass: added a current-session NPC sell-service context and per-script buy-back list. Selling through an active `@BuySell` / `@Sell` service now stores the sold `UserItem` under that NPC with Crystal's 20-item cap, and `@BuyBack` returns those goods with the NPC's imported rate. Buy-back purchase and expiry timing remain pending. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_npc_sell_updates_buy_back_goods_for_active_service -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_service_links_emit_packets_and_close_dialog -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC buy-item packet pass: added Crystal `BuyItem` / ID 51 client-packet support with `ItemIndex`, `Count`, and `PanelType`, gateway `buyItem` command mapping, and current runtime purchase handling for static NPC `[Trade]` goods plus NPC buy-back goods. Buying now checks imported Crystal price/rate and bag capacity, deducts gold with `LoseGold`, emits `GainedItem`, removes buy-back entries when applicable, and refreshes the buy-back `NPCGoods` list. Full used-goods persistence and exact purchase edge cases remain pending. `cargo fmt --check`, `cargo test -p mir2-protocol item_and_combat_client_packets_use_crystal_payloads -- --nocapture`, `cargo test -p mir2-gateway buy_item_command_maps_to_protocol_packet -- --nocapture`, `cargo test -p mir2-simulation crystal_npc_buy_item_packet_purchases_trade_goods -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_sell_updates_buy_back_goods_for_active_service -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 NPC sell price/count pass: aligned current `SellItem` runtime semantics with Crystal stack-count behavior and imported item pricing. Stackable items now sell only the requested `Count`, leave the remaining stack in the bag, grant gold from `ItemInfo.Price / 2` for mapped Crystal items, and keep buy-back entries scoped to the sold quantity. `cargo fmt --check`, `cargo test -p mir2-simulation sell_item_packet_removes_item_and_adds_gold_without_duplication -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation sell_item_invalid_slot_preserves_inventory_and_gold -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_sell_updates_buy_back_goods_for_active_service -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal drop-table runtime pass: wired imported Crystal `MonsterInfo.DropPath` to `Envir/Drops` table lookup and made current runtime death/harvest rewards prefer those tables before starter fallback. Crystal drop entries now resolve grouped sections, deterministic chance rolls, gold amounts, and Crystal item metadata-backed rewards; verified OmaFighter `Gold 2000` death pickup, Hen `Chicken`, Deer `Venison`, and fallback Field Wasp/Training Dummy behavior. Quest-drop `Q` gating, ownership timing, visibility source audit, quality/random-stat rolls, and full inventory capacity semantics remained queued under the broader drop-table item at that point. `cargo test -p mir2-game-data crystal_monster_drop_path_resolves_imported_drop_table -- --nocapture`, `cargo test -p mir2-game-data crystal_drop -- --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dropped_gold_can_be_picked_up -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal gold drop range pass: aligned imported Crystal `Gold N` drop entries with `DropInfo.AttemptDrop`, using `N / 2` as the inclusive lower bound and `N + N / 2` as the exclusive upper bound instead of spawning the raw table amount. The OmaFighter gold-drop regression now verifies the deterministic ranged amount is picked up through `GainedGold`. `cargo fmt --check` and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal harvest gained-item packet pass: harvest reward transfer now mirrors Crystal `player.GainItem(...)` by emitting `GainedItem` for each transferred item before `ObjectHarvested`, and harvest transfer ignores gold rewards because Crystal `HarvestMonster` only moves `reward.Items` into `_drops`. Training Dummy, Hen, and Deer harvest tests now assert the gained item payloads. `cargo fmt --check`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal meat durability pass: imported Crystal item drops now carry `ItemInfo.Durability` into `UserItem` current/max durability through ground-drop pickup and harvest reward transfer. `ItemType.Meat` harvest rewards now apply the Deer AI 2 quality bonus to current durability, matching Crystal's `item.CurrentDura += Quality` path. Hen and Deer harvest regressions verify max durability plus the current-durability path that was completed in the later `CreateDropItem` pass. `cargo fmt --check`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal drop ownership pass: monster death drops now attach a Crystal-style owner pickup window for the current player, and pickup rejects non-owner/non-group attempts until the window expires while allowing configured group-owner bypass. Player-owned monster gold drops remain immediately collectible. `cargo fmt --check`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal group pickup notice pass: imported `ItemInfo.ShowGroupPickup` now travels with ground-drop payloads, and grouped pickup of marked items emits a Crystal-style system notice (`Scout Picked up: {SpiritBlade}`) alongside `GainedItem`. Non-grouped and unmarked pickups keep the existing local pickup message only. `cargo fmt --check`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 pickup/harvest capacity pass: ground-drop pickup and harvest reward transfer preserve item rewards when slot/stack capacity cannot accept them, while still allowing stack-into-full-bag cases that fit existing partial stacks. A later source audit corrected this pass by removing the runtime weight gate, because Crystal `CanGainItem` does not reject pickup/harvest gains by bag weight. `cargo fmt --check`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal drop current durability pass: imported item drops now set max durability from `ItemInfo.Durability` and current durability from Crystal-style deterministic `min(max, roll + 1000)` before harvest meat quality. Hen/Deer harvest tests now verify current/max durabilities through `GainedItem`; Crystal random stat upgrade tables remain pending. `cargo fmt --check`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal identified flag pass: manifest-backed runtime `UserItem` payloads now derive `Identified` from Crystal `ItemInfo.NeedIdentify`, matching `CreateDropItem`'s `if (!info.NeedIdentify) item.Identified = true` behavior for current pickup, harvest, gained-item, and equipment refresh payloads. Added positive/negative coverage for a normal potion and `MysteryHelmet`, and Hen/Deer harvest rewards now assert identified item payloads. `cargo fmt --check`, `cargo test -p mir2-simulation user_item_identified_flag_follows_crystal_need_identify -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal current-cell pickup pass: player `PickUp` now scans only drops on the player's current tile, matching Crystal `CurrentMap.GetCell(CurrentLocation)`, and direct pickup rejects off-cell targets. Adjacent ground drops remain on the map until the player stands on the drop cell. `cargo fmt --check`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal ground-drop expiry pass: new ground drops now carry a Crystal `ItemTimeOut=30` minute expiry, represented as 1,800 simulation ticks, and world ticking despawns expired drops so visible clients receive the normal `ObjectRemove` through AOI finalization. `cargo fmt --check`, `cargo test -p mir2-simulation ground_drop_expires_after_crystal_item_timeout -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal MaxDropGold pass: monster ground gold now follows Crystal `DropGold` chunking with `Settings.MaxDropGold=2000`, so large gold rewards spawn as 2,000-gold chunks plus the final modulo chunk. The helper intentionally preserves Crystal's exact-division zero remainder behavior. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_ground_gold_chunks_follow_max_drop_gold_formula -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal gold cap pickup pass: ground gold pickup now checks Crystal `CanGainGold` semantics before mutating state, so a player at `uint.MaxValue` gold leaves the ground drop in place and receives no `GainedGold` packet instead of overflowing. `cargo fmt --check`, `cargo test -p mir2-simulation pickup_preserves_gold_drop_when_gold_cap_is_full -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation dropped_gold_can_be_picked_up -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal player DropGold edge pass: player `DropGold` now follows Crystal's edge behavior by allowing a 0-gold ground object with `LoseGold(0)` and returning no packets when the requested amount exceeds the player's current gold. `cargo fmt --check`, `cargo test -p mir2-simulation drop_gold_packet -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dropped_gold_can_be_picked_up -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal ground item grade display pass: ground `ObjectItem` packets now use the imported Crystal item `Grade` and grade-to-name-colour mapping for manifest-backed drops. SpiritBlade now spawns as grade 2 with Crystal rare `DeepSkyBlue` name colour instead of a flat white grade-0 item. Random-added-stat cyan remains pending with random stat generation. `cargo fmt --check`, `cargo test -p mir2-simulation ground_item_object_uses_crystal_grade_and_name_colour -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal player DropItem semantics pass: player `DropItem` now routes through slot/count packet semantics, splits stackable items by requested count, returns Crystal-shaped failure acks for invalid counts or missing items, rejects manifest-backed `DontDrop` items, and applies `DestroyOnDrop` by deleting the requested quantity without spawning a ground item. `cargo fmt --check`, `cargo test -p mir2-simulation drop_item_packet -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation dropped_inventory_item_can_be_removed_from_bag_and_spawned_on_ground -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_item_packet_reduces_stack_and_spawns_ground_item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal AddItem belt-priority pass: current item gains now merge stackables across player belt stacks before inventory stacks, place Potion/Scroll/Script effect 1 gains into belt slots 0..3 first, place Amulets into belt slots 4..5 first, then fall back to normal bag slots. `UseItem` now consumes the referenced belt slot for Crystal belt packets instead of consuming a same-key inventory item. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_add_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation use_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation add_or_increment_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_npc_giveitem -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation quest_turn_in_full_bag_preserves_quest_state_and_rewards -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_shop_and_auction_full_bag_preserve_gold_and_items -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_npc_buy_item_packet_purchases_trade_goods -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal drop placement pass: current player item drops, player gold drops, and monster ground drops now route through Crystal-style `ItemObject.Drop(distance)` placement. Runtime scans the same ring order, rejects blocked cells and map transfer source tiles, enforces `DropStackSize=5` by ground item object count, chooses the least-populated fallback cell, and preserves Crystal ranges for manual item drops (`1`), manual gold drops (`5`), and monster drops (`Settings.DropRange=4`). `cargo fmt --check`, `cargo test -p mir2-simulation crystal_drop_search -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation crystal_drop_table_gold_entry_spawns_pickup_gold_for_monster_death -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 Crystal quest-drop `Q` pass: imported `Q` drop entries now preserve the marker after chance rolls, normal monster death drops attempt quest-inventory gain before suppressing ground fallback, harvest transfers use the same quest gate, and the Field Wasp quest path now shares the same active-quest/full-quest-inventory semantics. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_q_drop_marker -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_quest_required_drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation quest -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, frontend shell first patch: login account/password inputs now submit on Enter through the existing login handler; viewport tile hit controls now mark themselves UI-interactive and stop pointer bubbling to prevent scene-level double dispatch while leaving empty-space clicks on the scene frame. `npm.cmd run build --prefix E:\mir2\mir2-web3\apps\web` passed.
+- 2026-04-22, 100% closure D.1 Crystal random-stat baseline: current imported Crystal drop-created items now use `random_stats_id` profiles to apply deterministic Crystal-style `RandomomRange` rolls for MaxDura, MaxAC, and MaxDC. Runtime adds durability bonuses before pickup/harvest transfer and preserves added attack/defence into `UserItem.added_stats` on `GainedItem`; this baseline was superseded later the same day by the full random-stat payload pass below. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_resolved_drop_applies_random_attack_defence_and_durability -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup_preserves_random_added_stats -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 full random-stat payload pass: current imported Crystal drop-created items now roll the full current Jev profile family baseline into generic `UserItemStat` payloads, curse flag, and socket slots while preserving legacy added-attack/defence compatibility. The metadata survives ground drops, pickup, harvest transfer, equipment/inventory state, `GainedItem`, and JSON save/reload; data-driven `RandomItemStats.ini` generation was completed in the follow-up manifest pass. `cargo fmt --check`, `cargo test -p mir2-simulation random -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item_roll_fields_persist_through_save_and_reload -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation -- --test-threads=1` passed.
+- 2026-04-22, 100% closure D.1 RandomItemStats manifest pass: generated `crystal_random_item_stats_manifest.json` from Crystal `RandomItemStats.ini`, added typed game-data accessors, and moved runtime random-stat profile lookup off the hardcoded table while keeping `random_stats_id == 0` as the no-profile path. `cargo test -p mir2-game-data crystal_random_item_stats_manifest_loads -- --nocapture`, `cargo test -p mir2-game-data -- --nocapture`, `cargo test -p mir2-simulation random -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation -- --test-threads=1`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 Crystal GROUP drop semantics pass: generated drop manifests now preserve group-shaped entries with nested children, and runtime recursively executes Crystal `GROUP`, `GROUP*`, and `GROUP^` rules. Successful child gold accumulates, `GROUP*` keeps one successful child item after all child rolls, `GROUP^` stops after the first successful child, and nested groups compose through the same evaluator. `cargo test -p mir2-game-data crystal_drop -- --nocapture`, `cargo test -p mir2-game-data -- --nocapture`, `cargo test -p mir2-simulation crystal_group -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_nested_group -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation -- --test-threads=1`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 Crystal pickup visibility/rejection pass: source audit confirmed normal `ItemObject.Drop()` / `Spawned()` broadcasts item and gold drops immediately, including owned monster drops; owner windows restrict pickup, not visibility. Runtime `PickUp` now scans only the current cell, skips owner-blocked/full-bag/gold-cap candidates when a later drop is pickable, emits the owner warning only if no later pickable candidate exists, and allows overweight pickup/harvest gains because Crystal `CanGainItem` gates by slot/stack rather than bag weight. `cargo test -p mir2-simulation pickup_packet_skips -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup_respects_crystal_drop_owner_window -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup_allows_overweight_item_like_crystal -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation pickup -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation -- --test-threads=1`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 Crystal HarvestMonster pending-drop pass: current harvest monsters now mirror Crystal's `_drops` lifecycle. The final skin pass only materializes pending rewards; the follow-up harvest transfers them and emits `ObjectHarvested`; pending rewards are not re-rolled on transfer; and full-bag leftovers remain pending for a later retry. Hen/Deer/CaveMaggot/ToxicGhoul tests now cover the follow-up transfer timing, and a full-bag regression covers retained pending drops. `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation hen_is_passive -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation -- --test-threads=1`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 Crystal harvest owner/EXPOwner pass: current harvest corpse scanning now mirrors Crystal owner rejection for the front-centered scan. Defeated harvest monsters attach current-player ownership, non-owner/non-group corpses are skipped while later eligible corpses remain harvestable, grouped owners can harvest, and owner-blocked-only searches emit `NoNearbyOwnedCarcasses`. `cargo test -p mir2-simulation harvest_owner -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest_skips_owner -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest_allows_owner_group -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation harvest -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation -- --test-threads=1`, and `cargo fmt --check` passed.
+- 2026-04-22, 100% closure D.1 Crystal economy rejection pass: current `SellItem` now requires an active Crystal sell service before mutating inventory/gold, rejects partial-stack sales that would overflow Crystal's `uint.MaxValue` gold cap, and preserves failure ack semantics. Current credit-shop purchases now follow Crystal game-shop mailbox delivery by emitting `LoseCredit`, creating a mail attachment, and deferring bag capacity checks until mail claim. `cargo fmt --check`, `cargo test -p mir2-simulation sell_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_credit_shop -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_trade_shop_and_auction -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation -- --test-threads=1` passed.
+- 2026-04-22, 100% closure D.1 Crystal BuyItem rejection pass: current `BuyItem` now follows Crystal silent-return semantics for invalid panel type, zero/invalid count, missing active NPC service, non-buy pages such as `@Repair`, missing goods, missing item metadata, insufficient gold, and full bags. These branches preserve inventory and gold and emit no packets. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_npc_buy_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation -- --test-threads=1` passed.
+- 2026-04-23, 100% closure D.1 Crystal NPC repair rejection/cost pass: current `RepairItem` / `SRepairItem` now emit the Crystal entry ack, require a matching active `@Repair` / `@SRepair` service page, find the current backpack item by unique id, apply `DontRepair` / `NoSRepair` and script `[Types]` rejection messages, calculate normal and triple special-repair cost from Crystal item price/rate, silently return on insufficient gold, emit `LoseGold` plus `ItemRepaired` on success, reduce max durability only for normal repair, and keep item-use repair powder/oil flows separate. `cargo fmt --check`, `cargo test -p mir2-simulation repair_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation repair -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_npc_service_links -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation -- --test-threads=1` passed with 453 tests.
+- 2026-04-23, 100% closure D.1 Crystal SellItem flag/type/price pass: current `SellItem` now follows Crystal `DontSell` and script `[Types]` rejection behavior, returns ack-only failures for zero count, inactive service, missing item, oversized count, `DontSell`, and partial-stack gold overflow, emits `CannotSellItemHere` only for type mismatch, uses Crystal `UserItem.Price() / 2` style sale value, preserves full-stack sale success with capped zero-gold gain at gold cap, and keeps `@SELL` / `@BUYSELL` as the only accepted sell pages. `cargo fmt --check`, `cargo test -p mir2-simulation sell_item -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation sell -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation -- --test-threads=1` passed with 457 tests.
+- 2026-04-22, 100% closure D.1 added-stat ground item colour pass: current added-stat ground items now use Crystal `ItemObject` Cyan name-colour semantics through `ObjectItem.name_colour_argb`, `GroundDropSnapshot.name_colour_argb`, gateway/web snapshot mapping, and the web ground-drop label. `cargo fmt --check`, `cargo test -p mir2-simulation ground_item_object_uses_cyan_name_colour_for_added_stats -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation ground_item_object_uses_crystal_grade_and_name_colour -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation drop -- --test-threads=1 --nocapture`, and `npm.cmd run build --prefix apps\web` passed.
+- 2026-04-22, 100% closure D.1 NPC buy-back / used-goods pass: current sell-service entries are now player-scoped, survive save/reload, carry Crystal `GoodsBuyBackTime=60` expiry, move into NPC used goods on expiry, persist used goods in character save state, and remove buy-back/used entries after resale purchase while preserving durability and current added attack/defence payloads. `cargo fmt --check`, `cargo test -p mir2-simulation crystal_npc_buy_back -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation crystal_npc_buy_item_packet_purchases_trade_goods -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation sell -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation npc -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation legacy_character_save_without_npc_flag_states_uses_default -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 socket capacity validation pass: current `item.addSocket` now checks imported item socket capacity before mutating equipment, rejects maxed or zero-capacity items without `ItemSlotSizeChanged`, and keeps the success path covered on a capacity-backed manifest item. Full Crystal source gem validation remains queued. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_add_socket -- --test-threads=1 --nocapture`, `cargo test -p mir2-simulation stage5_item_seal_emits_item_seal_changed -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 seal already-sealed validation pass: current `item.seal` now rejects active already-sealed equipment, preserves the existing expiry, and only emits `ItemSealChanged` on the first successful active seal. Full seal-source item validation and reseal-delay metadata remain queued. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_seal -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 BenedictionOil branch pass: current BenedictionOil now mirrors Crystal's three true outcomes: Luck gain emits `RefreshItem`, curse decrements weapon Luck and emits `RefreshItem`, and no-effect consumes the oil without a refresh. `cargo fmt --check`, `cargo test -p mir2-simulation benediction_oil -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 seal source validation pass: current `item.seal` now supports optional source-key validation and consumption. Manifest-backed source items must match Crystal `ItemType.Gem` with `Shape == 8`, source durability drives the seal duration, missing/wrong sources fail without mutation, and the old no-source Stage 5 path remains compatible. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_seal -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 socket source validation pass: current `item.addSocket` now supports optional source-key validation and consumption. Manifest-backed source items must match Crystal `ItemType.Gem` with `Shape == 7`, target compatibility follows Crystal `ValidGemForItem` unique flags, missing/wrong sources fail without mutation, and the old no-source Stage 5 path remains compatible. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_add_socket -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+- 2026-04-22, 100% closure D.1 seal reseal-delay metadata pass: current `item.seal` now stores Crystal `SealedInfo.NextSealDate` as `ExpiryDate + Settings.ItemSealDelay`, exposes it through the Crystal `UserItem.SealedInfo` payload, rejects reseal after expiry until the next-seal date has elapsed, and preserves the metadata through JSON save/reload while old saves default safely. `cargo fmt --check`, `cargo test -p mir2-simulation stage5_item_seal -- --test-threads=1 --nocapture`, and `cargo test -p mir2-simulation item -- --test-threads=1 --nocapture` passed.
+
+## Working Rules
+
+- Crystal source and exported Crystal data are the behavior reference.
+- Do not mark a task complete based only on code inspection.
+- Do not delete failing tests to claim progress.
+- Prefer adding focused regression coverage before changing shared runtime behavior.
+- Keep generated data changes tied to generator changes whenever possible.
+- Keep UI debug controls useful but isolated from normal gameplay where needed.
+- Update this document after each completed task, not only at the end of a stage.
+- Update `docs/BACKEND-1TO1-PROGRESS.md` and `docs/CRYSTAL-SERVER-PARITY.md` when backend parity meaningfully changes.

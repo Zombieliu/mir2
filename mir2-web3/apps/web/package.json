@@ -1,0 +1,32 @@
+{
+  "name": "mir2-web3-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "export:crystal-ui": "node ./scripts/export-crystal-ui.mjs",
+    "export:crystal-map": "node ./scripts/export-crystal-starter-map.mjs",
+    "smoke:crystal-map-api": "node ./scripts/smoke-crystal-map-api.mjs",
+    "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
+    "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
+    "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
+    "runtime:build:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 dev",
+    "runtime:build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 release",
+    "dev": "npm run runtime:build:dev && next dev",
+    "build": "npm run runtime:build:release && next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.2.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

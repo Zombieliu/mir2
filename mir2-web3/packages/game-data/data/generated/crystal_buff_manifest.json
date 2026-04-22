@@ -1,0 +1,540 @@
+{
+  "generated_at": "2026-04-22T14:48:06.532Z",
+  "source_file": "Crystal/Server/MirDatabase/BuffInfo.cs",
+  "total_buffs": 59,
+  "buffs": [
+    {
+      "buffType": "BagWeight",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "BlessedArmour",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Blindness",
+      "stackType": "ResetDuration",
+      "properties": [
+        "RemoveOnDeath",
+        "Debuff"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ClearRing",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ColdArcherBuff",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Concentration",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "CounterAttack",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Curse",
+      "stackType": "ResetDuration",
+      "properties": [
+        "RemoveOnDeath",
+        "Debuff"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "DarkBody",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Defence",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Drop",
+      "stackType": "StackDuration",
+      "properties": [
+        "PauseInSafeZone"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ElementalBarrier",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "EnergyShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Exp",
+      "stackType": "StackDuration",
+      "properties": [
+        "PauseInSafeZone"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Fury",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "GameMaster",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": "Settings.GameMasterEffect"
+    },
+    {
+      "buffType": "General",
+      "stackType": "None",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "GeneralMeowMeowShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Gold",
+      "stackType": "StackDuration",
+      "properties": [
+        "PauseInSafeZone"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Guild",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Haste",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "HealthAid",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Hiding",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "HornedArcherBuff",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "HornedCommanderShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "HornedWarriorShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ImmortalSkin",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Impact",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Knapsack",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "LightBody",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Lover",
+      "stackType": "Infinite",
+      "properties": [
+        "RemoveOnExit"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Magic",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "MagicBooster",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "MagicDefence",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "MagicShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ManaAid",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "MentalState",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Mentee",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Mentor",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "MoonLight",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Newbie",
+      "stackType": "Infinite",
+      "properties": [
+        "RemoveOnExit"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "PetEnhancer",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "PoisonShot",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "PowerBeadBuff",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Prison",
+      "stackType": "None",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "ProtectionField",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Rage",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Rested",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "RhinoPriestDebuff",
+      "stackType": "ResetDuration",
+      "properties": [
+        "Debuff"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Skill",
+      "stackType": "Infinite",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "SoulShield",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Storm",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "SwiftFeet",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Taoist",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "TemporalFlux",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "Transform",
+      "stackType": "None",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "UltimateEnhancer",
+      "stackType": "ResetStatAndDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "VampireShot",
+      "stackType": "ResetDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": true,
+      "visibleExpression": null
+    },
+    {
+      "buffType": "WonderDrug",
+      "stackType": "StackDuration",
+      "properties": [
+        "None"
+      ],
+      "visible": null,
+      "visibleExpression": null
+    }
+  ]
+}
