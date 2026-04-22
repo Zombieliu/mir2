@@ -13,13 +13,19 @@ Status values:
 - `[x]` complete and verified
 - `[!]` blocked
 
-## Active Round: 2026-04-23-R25
+## Active Round: 2026-04-23-R26
 
-Restart note: R25 has partial Rust/test edits in `apps/simulation/src/runtime.rs`. The Crystal/Rust explorer audits are captured in `docs/AGENT-RUN-LOG.md` and `docs/AGENT-RESUME-HANDOFF.md`, and `cargo fmt` has passed after the partial edits, but the R25 code is not yet test-verified. Continue by adding `NPCStorage` service-context activation, then run `cargo fmt --check`, focused storage tests, adjacent item tests, and full `mir2-simulation` regression before marking this round complete.
+Restart note: R25 storage parity is complete and verified. Use this round to select the next highest-value small unchecked task from the remaining backend/frontend queues before starting new code work. Do not reopen R25 unless tests or source inspection show a regression.
 
 | Status | Task | Owner | Write Set | Verification |
 | --- | --- | --- | --- | --- |
-| [~] | Crystal storage item flag/rejection semantics | Coordinator + Explorers | `apps/simulation/src/runtime.rs`, docs | Crystal/Rust audits captured; `cargo fmt` passed; pending `NPCStorage` service-context fix, `cargo fmt --check`, focused storage rejection tests, `cargo test -p mir2-simulation item`, full `mir2-simulation` regression |
+| [~] | Select next parity bite after R25 storage completion | Coordinator | docs | Review remaining backend/frontend queue items and choose the next bounded round before spawning workers |
+
+## Completed Round: 2026-04-23-R25
+
+| Status | Task | Owner | Write Set | Verification |
+| --- | --- | --- | --- | --- |
+| [x] | Crystal storage item flag/rejection semantics | Coordinator + Explorers | `apps/simulation/src/runtime.rs`, `apps/simulation/Cargo.toml`, docs | Crystal source audit, `NPCStorage` service-context activation, end-to-end `@Storage` store/take-back regression, `cargo +1.89.0 fmt --check`, `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`, `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`, full `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` |
 
 ## Completed Round: 2026-04-23-R24
 
@@ -194,7 +200,7 @@ Restart note: R25 has partial Rust/test edits in `apps/simulation/src/runtime.rs
 | [x] | Crystal NPC `BuyItem` rejection edges | `BuyItem` now silently rejects invalid panel/count, missing active NPC service, non-buy service pages such as `@Repair`, missing goods/metadata, insufficient gold, and full-bag purchases without mutating gold or inventory. |
 | [x] | Crystal NPC `RepairItem` / `SRepairItem` rejection and cost edges | NPC repair now uses current backpack item unique ids, requires the matching active `@Repair` / `@SRepair` service page, applies Crystal repair/special-repair cost and normal max-dura loss semantics, emits `LoseGold` / `ItemRepaired` on success, and preserves Crystal message/silent rejection edges for non-repairable items, type mismatch, and insufficient gold. |
 | [x] | Crystal NPC `SellItem` remaining rejection edges | `SellItem` now follows Crystal ack-only failures for zero count, missing service/item/count, `DontSell`, and partial-stack gold overflow; emits `CannotSellItemHere` only for script type mismatch; uses `UserItem.Price() / 2` style sale value; and preserves full-stack gold-cap clamping. |
-| [~] | Crystal storage item flag/rejection edges | R25 audits and aligns `StoreItem` / `TakeBackItem` storage-page gating, `DontStore`/rental flags, password lock, capacity, and ack/message behavior. |
+| [x] | Crystal storage item flag/rejection edges | R25 now aligns `StoreItem` / `TakeBackItem` active `@Storage` / `NPCStorage` service context, `DontStore`/rental flags, password lock, accessible capacity, occupied-target no-swap behavior, and ack-only failure semantics. |
 | [x] | Added-stat cyan ground item display | Current added-stat ground drops now surface Crystal Cyan through `ObjectItem.name_colour_argb`, world snapshots, and the web ground-drop label. |
 | [x] | NPC buy-back expiry / used-goods persistence | Buy-back entries now persist across save/reload, carry Crystal 60-minute expiry, expire into NPC used goods, and used goods can be bought back through Buy/BuyUsed flows. |
 | [~] | Full gem/socket validation | Socket slot-capacity validation and source gem validation baseline are in. Full Crystal socket flow remains. |
