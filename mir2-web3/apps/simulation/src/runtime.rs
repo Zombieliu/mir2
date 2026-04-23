@@ -489,6 +489,8 @@ enum ResolvedDropTemplate {
 
 const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
 const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
+const CRYSTAL_GEM_SHAPE_UPGRADE_GEM: i16 = 3;
+const CRYSTAL_GEM_SHAPE_UPGRADE_ORB: i16 = 4;
 const CRYSTAL_GEM_SHAPE_SOCKET: i16 = 7;
 const CRYSTAL_GEM_SHAPE_SEAL: i16 = 8;
 const CRYSTAL_SPECIAL_PARALYZE: i16 = 0x0001;
@@ -514,6 +516,7 @@ const CRYSTAL_STAT_HP: u8 = 12;
 const CRYSTAL_STAT_MP: u8 = 13;
 const CRYSTAL_STAT_ATTACK_SPEED: u8 = 14;
 const CRYSTAL_STAT_LUCK: u8 = 15;
+const CRYSTAL_STAT_REFLECT: u8 = 19;
 const CRYSTAL_STAT_STRONG: u8 = 20;
 const CRYSTAL_STAT_FREEZING: u8 = 22;
 const CRYSTAL_STAT_POISON_ATTACK: u8 = 23;
@@ -524,6 +527,8 @@ const CRYSTAL_STAT_SPELL_RECOVERY: u8 = 33;
 const CRYSTAL_STAT_POISON_RECOVERY: u8 = 34;
 const CRYSTAL_STAT_CRITICAL_RATE: u8 = 35;
 const CRYSTAL_STAT_CRITICAL_DAMAGE: u8 = 36;
+const CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT: u8 = 48;
+const CRYSTAL_STAT_GEM_RATE_PERCENT: u8 = 104;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct CrystalRandomDropStats {
@@ -560,6 +565,8 @@ struct ItemState {
     cursed: bool,
     #[serde(default)]
     socket_slots: u8,
+    #[serde(default)]
+    gem_count: u16,
     #[serde(default)]
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
@@ -617,6 +624,8 @@ struct EquipmentState {
     cursed: bool,
     #[serde(default)]
     socket_slots: u8,
+    #[serde(default)]
+    gem_count: u16,
     #[serde(default)]
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
@@ -20065,6 +20074,7 @@ fn equipment_template_to_state(template: &EquipmentTemplate) -> EquipmentState {
         added_stats: Vec::new(),
         cursed: false,
         socket_slots: 0,
+        gem_count: 0,
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
         attack: template.attack,
@@ -20116,7 +20126,7 @@ fn user_item_from_item_state(item: &ItemState) -> UserItem {
         identified: crystal_default_identified_for_item_key(&item.key),
         cursed: item.cursed,
         slots: vec![None; usize::from(item.socket_slots)],
-        gem_count: 0,
+        gem_count: item.gem_count,
         added_stats,
         awake_type: 0,
         awake_values: Vec::new(),
@@ -20141,6 +20151,18 @@ fn upsert_user_item_stat(stats: &mut Vec<UserItemStat>, stat: u8, value: i32) {
     }
 
     stats.push(UserItemStat { stat, value });
+}
+
+fn increment_user_item_stat(stats: &mut Vec<UserItemStat>, stat: u8, value: i32) {
+    if value == 0 {
+        return;
+    }
+
+    if let Some(existing) = stats.iter_mut().find(|existing| existing.stat == stat) {
+        existing.value = existing.value.saturating_add(value);
+    } else {
+        stats.push(UserItemStat { stat, value });
+    }
 }
 
 fn merged_user_item_stats(
@@ -20191,7 +20213,7 @@ fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
         identified: crystal_default_identified_for_item_key(&item.key),
         cursed: item.cursed,
         slots: vec![None; usize::from(item.socket_slots)],
-        gem_count: 0,
+        gem_count: item.gem_count,
         added_stats,
         awake_type: 0,
         awake_values: Vec::new(),
@@ -20407,6 +20429,181 @@ fn crystal_seal_minutes_for_source_item(item: &ItemState, fallback_minutes: u64)
 
     let minutes = item.durability_current.unwrap_or(template.durability);
     (minutes > 0).then_some(u64::from(minutes))
+}
+
+fn crystal_item_stat_value(template: &CrystalItemTemplate, stat: u8) -> i32 {
+    template
+        .stats
+        .iter()
+        .find(|entry| entry.stat == stat)
+        .map(|entry| entry.value)
+        .unwrap_or(0)
+}
+
+fn crystal_item_added_stat_value(item: &ItemState, stat: u8) -> i32 {
+    let stats_total: i32 = item
+        .added_stats
+        .iter()
+        .filter(|entry| entry.stat == stat)
+        .map(|entry| entry.value)
+        .sum();
+
+    match stat {
+        CRYSTAL_STAT_MAX_AC => stats_total.saturating_add(item.added_defence),
+        CRYSTAL_STAT_MAX_DC => stats_total.saturating_add(item.added_attack),
+        _ => stats_total,
+    }
+}
+
+fn crystal_upgrade_target_stat(source_template: &CrystalItemTemplate) -> Option<u8> {
+    [
+        CRYSTAL_STAT_MAX_DC,
+        CRYSTAL_STAT_MAX_MC,
+        CRYSTAL_STAT_MAX_SC,
+        CRYSTAL_STAT_MAX_AC,
+        CRYSTAL_STAT_MAX_MAC,
+        CRYSTAL_STAT_ATTACK_SPEED,
+        CRYSTAL_STAT_AGILITY,
+        CRYSTAL_STAT_ACCURACY,
+        CRYSTAL_STAT_POISON_ATTACK,
+        CRYSTAL_STAT_FREEZING,
+        CRYSTAL_STAT_MAGIC_RESIST,
+        CRYSTAL_STAT_POISON_RESIST,
+        CRYSTAL_STAT_LUCK,
+        CRYSTAL_STAT_POISON_RECOVERY,
+        CRYSTAL_STAT_HP,
+        CRYSTAL_STAT_MP,
+        CRYSTAL_STAT_HEALTH_RECOVERY,
+        CRYSTAL_STAT_SPELL_RECOVERY,
+        CRYSTAL_STAT_STRONG,
+        CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT,
+    ]
+    .into_iter()
+    .find(|stat| crystal_item_stat_value(source_template, *stat) > 0)
+}
+
+fn crystal_upgrade_current_stat_count(
+    source_item: &ItemState,
+    source_template: &CrystalItemTemplate,
+    target_item: &ItemState,
+    target_template: &CrystalItemTemplate,
+) -> i32 {
+    if let Some(stat) = crystal_upgrade_target_stat(source_template) {
+        return crystal_item_added_stat_value(target_item, stat);
+    }
+
+    let source_durability = source_item
+        .durability_max
+        .unwrap_or(source_template.durability);
+    if source_durability == 0 && source_template.durability == 0 {
+        return 0;
+    }
+
+    let base_max = i32::from(target_template.durability);
+    let current_max = i32::from(
+        target_item
+            .durability_max
+            .unwrap_or(target_template.durability),
+    );
+    if current_max <= base_max {
+        0
+    } else {
+        (current_max - base_max) / 1000
+    }
+}
+
+fn crystal_upgrade_success_chance(
+    source_template: &CrystalItemTemplate,
+    target_item: &ItemState,
+) -> i32 {
+    let reflect = crystal_item_stat_value(source_template, CRYSTAL_STAT_REFLECT).max(0);
+    let multiplier = crystal_upgrade_target_stat(source_template)
+        .map(|stat| crystal_item_added_stat_value(target_item, stat).max(0))
+        .unwrap_or(i32::from(target_item.gem_count));
+    let adjusted = reflect.saturating_mul(multiplier);
+    let critical_rate = crystal_item_stat_value(source_template, CRYSTAL_STAT_CRITICAL_RATE).max(0);
+    let player_gem_rate_bonus = match CRYSTAL_STAT_GEM_RATE_PERCENT {
+        _ => 0,
+    };
+
+    if adjusted >= critical_rate {
+        0
+    } else {
+        critical_rate
+            .saturating_sub(adjusted)
+            .saturating_add(player_gem_rate_bonus)
+    }
+}
+
+fn crystal_upgrade_roll_succeeds(
+    current_tick: u64,
+    player_object_id: u32,
+    from_slot: u8,
+    to_slot: u8,
+    success_chance: i32,
+) -> bool {
+    if success_chance <= 0 {
+        return false;
+    }
+
+    deterministic_roll(
+        current_tick,
+        player_object_id as usize,
+        usize::from(from_slot) * 257 + usize::from(to_slot),
+        100,
+    ) < u64::try_from(success_chance.min(100)).unwrap_or(0)
+}
+
+fn crystal_upgrade_roll_destroys(
+    current_tick: u64,
+    player_object_id: u32,
+    from_slot: u8,
+    to_slot: u8,
+) -> bool {
+    deterministic_chance_roll(
+        current_tick,
+        player_object_id,
+        u64::from(from_slot) * 521 + u64::from(to_slot) + 3,
+        5,
+    )
+}
+
+fn apply_crystal_item_upgrade(
+    target_item: &mut ItemState,
+    target_template: &CrystalItemTemplate,
+    source_item: &ItemState,
+    source_template: &CrystalItemTemplate,
+) -> bool {
+    if let Some(stat) = crystal_upgrade_target_stat(source_template) {
+        let value = crystal_item_stat_value(source_template, stat);
+        if value <= 0 {
+            return false;
+        }
+
+        match stat {
+            CRYSTAL_STAT_MAX_DC => {
+                target_item.added_attack = target_item.added_attack.saturating_add(value);
+            }
+            CRYSTAL_STAT_MAX_AC => {
+                target_item.added_defence = target_item.added_defence.saturating_add(value);
+            }
+            _ => increment_user_item_stat(&mut target_item.added_stats, stat, value),
+        }
+        return true;
+    }
+
+    let source_durability = source_item
+        .durability_max
+        .unwrap_or(source_template.durability);
+    if source_durability == 0 && source_template.durability == 0 {
+        return false;
+    }
+
+    let current_max = target_item
+        .durability_max
+        .unwrap_or(target_template.durability);
+    target_item.durability_max = Some(current_max.saturating_add(source_durability));
+    true
 }
 
 fn crystal_item_template_for_item_key(key: &str) -> Option<CrystalItemTemplate> {
@@ -20731,6 +20928,7 @@ fn add_or_increment_item_with_random_metadata(
             added_stats: added_stats.clone(),
             cursed,
             socket_slots,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -22257,6 +22455,12 @@ enum CombineItemOutcome {
         expiry_date_binary_datetime: i64,
         minutes: u64,
     },
+    UpgradeResult {
+        key: &'static str,
+        args: Vec<String>,
+        item: Option<UserItem>,
+        destroy: bool,
+    },
 }
 
 fn combine_item_impl(
@@ -22286,6 +22490,8 @@ fn combine_item_impl(
 
     let now_binary_datetime = current_binary_datetime();
     let now_ticks = binary_datetime_ticks(now_binary_datetime);
+    let current_tick = world.resource::<SimulationResources>().tick;
+    let player_object_id = current_player_object_id(world).unwrap_or(0);
     let outcome = {
         let mut resources = world.resource_mut::<SimulationResources>();
         let Some(from_index) = resources.inventory_items.iter().position(|item| {
@@ -22317,13 +22523,134 @@ fn combine_item_impl(
         } else {
             crystal_item_template_for_item_key(&source_item.key).and_then(|template| {
                 (template.item_type == CRYSTAL_ITEM_TYPE_GEM
-                    && (template.shape == CRYSTAL_GEM_SHAPE_SOCKET
+                    && (template.shape == CRYSTAL_GEM_SHAPE_UPGRADE_GEM
+                        || template.shape == CRYSTAL_GEM_SHAPE_UPGRADE_ORB
+                        || template.shape == CRYSTAL_GEM_SHAPE_SOCKET
                         || template.shape == CRYSTAL_GEM_SHAPE_SEAL))
                     .then_some(template.shape)
             })
         };
 
         match source_shape {
+            Some(CRYSTAL_GEM_SHAPE_UPGRADE_GEM) | Some(CRYSTAL_GEM_SHAPE_UPGRADE_ORB) => {
+                if !(1..=11).contains(&target_template.item_type) {
+                    CombineItemOutcome::AckOnlyFailure
+                } else if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
+                    || target_template.unique != 0
+                {
+                    CombineItemOutcome::AckOnlyFailure
+                } else {
+                    let Some(source_template) =
+                        crystal_item_template_for_item_key(&source_item.key)
+                    else {
+                        return vec![failed_packet];
+                    };
+
+                    let max_gem_count =
+                        crystal_item_stat_value(&source_template, CRYSTAL_STAT_CRITICAL_DAMAGE);
+                    let max_stat_count = crystal_item_stat_value(
+                        &source_template,
+                        CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT,
+                    );
+                    if i32::from(resources.inventory_items[to_index].gem_count) >= max_gem_count
+                        || crystal_upgrade_current_stat_count(
+                            &source_item,
+                            &source_template,
+                            &resources.inventory_items[to_index],
+                            &target_template,
+                        ) >= max_stat_count
+                    {
+                        CombineItemOutcome::FailureHint {
+                            key: "server.ItemMaxAddedStats",
+                            args: Vec::new(),
+                        }
+                    } else if !crystal_socket_source_unique_matches_item_type(
+                        source_template.unique,
+                        target_template.item_type,
+                    ) {
+                        CombineItemOutcome::FailureHint {
+                            key: "server.InvalidCombination",
+                            args: Vec::new(),
+                        }
+                    } else {
+                        let success_chance = crystal_upgrade_success_chance(
+                            &source_template,
+                            &resources.inventory_items[to_index],
+                        );
+                        let succeeded = crystal_upgrade_roll_succeeds(
+                            current_tick,
+                            player_object_id,
+                            from_slot,
+                            to_slot,
+                            success_chance,
+                        );
+                        let mut destroy = false;
+                        let key = if succeeded {
+                            if !apply_crystal_item_upgrade(
+                                &mut resources.inventory_items[to_index],
+                                &target_template,
+                                &source_item,
+                                &source_template,
+                            ) {
+                                return vec![
+                                    hint_chat_key(world, "server.CannotCombineItems"),
+                                    failed_packet,
+                                ];
+                            }
+                            resources.inventory_items[to_index].gem_count = resources
+                                .inventory_items[to_index]
+                                .gem_count
+                                .saturating_add(1);
+                            "server.ItemUpgraded"
+                        } else if matches!(source_shape, Some(CRYSTAL_GEM_SHAPE_UPGRADE_GEM))
+                            && crystal_upgrade_roll_destroys(
+                                current_tick,
+                                player_object_id,
+                                from_slot,
+                                to_slot,
+                            )
+                        {
+                            destroy = true;
+                            "server.ItemHasBeenDestroyed"
+                        } else {
+                            "server.UpgradeNoEffect"
+                        };
+
+                        let item = if succeeded {
+                            Some(user_item_from_item_state(
+                                &resources.inventory_items[to_index],
+                            ))
+                        } else {
+                            None
+                        };
+                        let consume_source_stack =
+                            resources.inventory_items[from_index].quantity <= 1;
+                        if !consume_source_stack {
+                            resources.inventory_items[from_index].quantity -= 1;
+                        }
+
+                        let mut removal_indexes = Vec::new();
+                        if consume_source_stack {
+                            removal_indexes.push(from_index);
+                        }
+                        if destroy {
+                            removal_indexes.push(to_index);
+                        }
+                        removal_indexes.sort_unstable();
+                        removal_indexes.dedup();
+                        for index in removal_indexes.into_iter().rev() {
+                            resources.inventory_items.remove(index);
+                        }
+
+                        CombineItemOutcome::UpgradeResult {
+                            key,
+                            args: Vec::new(),
+                            item,
+                            destroy,
+                        }
+                    }
+                }
+            }
             Some(CRYSTAL_GEM_SHAPE_SOCKET) => {
                 if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
                     || target_template.unique != 0
@@ -22470,6 +22797,30 @@ fn combine_item_impl(
                 destroy: false,
             },
         ],
+        CombineItemOutcome::UpgradeResult {
+            key,
+            args,
+            item,
+            destroy,
+        } => {
+            let message = if args.is_empty() {
+                hint_chat_key(world, key)
+            } else {
+                hint_chat_key_args(world, key, args)
+            };
+            let mut packets = vec![message];
+            if let Some(item) = item {
+                packets.push(ServerPacket::ItemUpgraded { item });
+            }
+            packets.push(ServerPacket::CombineItem {
+                grid,
+                id_from,
+                id_to,
+                success: true,
+                destroy,
+            });
+            packets
+        }
     }
 }
 
@@ -22495,6 +22846,7 @@ fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, prefe
         added_stats: equipment.added_stats,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,
+        gem_count: equipment.gem_count,
         sealed_expiry_time_binary_datetime: equipment.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: equipment.sealed_next_time_binary_datetime,
         attack: equipment.attack,
@@ -24386,6 +24738,7 @@ fn equip_inventory_item(
         added_stats: item.added_stats.clone(),
         cursed: item.cursed,
         socket_slots: item.socket_slots,
+        gem_count: item.gem_count,
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
         attack: item.attack,
@@ -25047,6 +25400,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25072,6 +25426,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25098,6 +25453,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25124,6 +25480,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25150,6 +25507,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 5,
@@ -25176,6 +25534,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25201,6 +25560,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25231,6 +25591,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25256,6 +25617,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25281,6 +25643,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25311,6 +25674,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25336,6 +25700,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25364,6 +25729,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 4,
@@ -25386,6 +25752,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25407,6 +25774,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 1,
@@ -25428,6 +25796,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25449,6 +25818,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25470,6 +25840,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25856,6 +26227,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25889,6 +26261,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25921,6 +26294,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25953,6 +26327,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -25992,6 +26367,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26030,6 +26406,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26073,6 +26450,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26105,6 +26483,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26114,11 +26493,46 @@ mod tests {
         });
     }
 
+    fn add_inventory_crystal_item(session: &mut SimulationSession, template_name: &str, slot: u8) {
+        add_inventory_crystal_item_with_metadata(
+            session,
+            template_name,
+            slot,
+            0,
+            0,
+            0,
+            Vec::new(),
+            0,
+        );
+    }
+
     fn add_inventory_crystal_item_with_socket_slots(
         session: &mut SimulationSession,
         template_name: &str,
         slot: u8,
         socket_slots: u8,
+    ) {
+        add_inventory_crystal_item_with_metadata(
+            session,
+            template_name,
+            slot,
+            socket_slots,
+            0,
+            0,
+            Vec::new(),
+            0,
+        );
+    }
+
+    fn add_inventory_crystal_item_with_metadata(
+        session: &mut SimulationSession,
+        template_name: &str,
+        slot: u8,
+        socket_slots: u8,
+        added_attack: i32,
+        added_defence: i32,
+        added_stats: Vec<super::UserItemStat>,
+        gem_count: u16,
     ) {
         let template = mir2_game_data::crystal_item_by_name(template_name)
             .expect("Crystal item template should exist");
@@ -26140,11 +26554,12 @@ mod tests {
             weight: u16::from(template.weight),
             equip_slot: None,
             grade: ItemGrade::None,
-            added_attack: 0,
-            added_defence: 0,
-            added_stats: Vec::new(),
+            added_attack,
+            added_defence,
+            added_stats,
             cursed: false,
             socket_slots,
+            gem_count,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26152,6 +26567,40 @@ mod tests {
             heal_hp: 0,
             heal_mp: 0,
         });
+    }
+
+    fn set_combine_upgrade_tick(
+        session: &mut SimulationSession,
+        from_slot: u8,
+        to_slot: u8,
+        success_chance: i32,
+        want_success: bool,
+        want_destroy: Option<bool>,
+    ) {
+        let player_object_id =
+            super::current_player_object_id(session.app.world()).expect("player object id");
+        let start_tick = session.app.world().resource::<SimulationResources>().tick;
+        for tick in start_tick..start_tick + 10_000 {
+            let success = super::crystal_upgrade_roll_succeeds(
+                tick,
+                player_object_id,
+                from_slot,
+                to_slot,
+                success_chance,
+            );
+            let destroy = !success
+                && super::crystal_upgrade_roll_destroys(tick, player_object_id, from_slot, to_slot);
+            if success == want_success && want_destroy.is_none_or(|want| want == destroy) {
+                session
+                    .app
+                    .world_mut()
+                    .resource_mut::<SimulationResources>()
+                    .tick = tick;
+                return;
+            }
+        }
+
+        panic!("no matching combine upgrade tick found");
     }
 
     fn equip_bengal_tiger_with_socket_slots(session: &mut SimulationSession, socket_slots: u8) {
@@ -26195,6 +26644,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack: 0,
@@ -26234,6 +26684,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -26275,6 +26726,7 @@ mod tests {
             added_stats: Vec::new(),
             cursed: false,
             socket_slots: 0,
+            gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             attack,
@@ -46670,6 +47122,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -46739,6 +47192,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -48165,6 +48619,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -49985,6 +50440,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -51265,6 +51721,7 @@ mod tests {
                 added_stats: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
+                gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 attack: 0,
@@ -54690,6 +55147,199 @@ mod tests {
             super::binary_datetime_ticks(dagger.sealed_next_time_binary_datetime),
             super::binary_datetime_ticks(expiry) + expected_delay_ticks
         );
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_emits_item_upgraded_and_ack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("BraveryOrb")
+            .expect("BraveryOrb template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, true, None);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item.added_stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_DC && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 31));
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert_eq!(dagger.added_attack, 1);
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_rejects_max_added_stats() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BraveryGem", 31);
+        add_inventory_crystal_item_with_metadata(
+            &mut session,
+            "Dagger",
+            32,
+            0,
+            0,
+            0,
+            Vec::new(),
+            5,
+        );
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemUpgraded { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                ..
+            }
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.gem_count == 5));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_rejects_invalid_combination() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "ProtectionGem", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemUpgraded { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message.contains("Invalid combination")
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 32));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_failure_can_destroy_target_and_still_ack_success() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BraveryGem", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("BraveryGem")
+            .expect("BraveryGem template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, false, Some(true));
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemUpgraded { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message.contains("destroyed")
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: true,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 32));
     }
 
     #[test]

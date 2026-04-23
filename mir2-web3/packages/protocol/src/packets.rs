@@ -735,6 +735,9 @@ pub enum ServerPacket {
         success: bool,
         destroy: bool,
     },
+    ItemUpgraded {
+        item: UserItem,
+    },
     SplitItem {
         item: Option<UserItem>,
         grid: MirGridType,
@@ -959,6 +962,7 @@ impl ServerPacket {
             Self::TakeBackItem { .. } => ServerPacketId::TakeBackItem,
             Self::StoreItem { .. } => ServerPacketId::StoreItem,
             Self::CombineItem { .. } => ServerPacketId::CombineItem,
+            Self::ItemUpgraded { .. } => ServerPacketId::ItemUpgraded,
             Self::SplitItem { .. } => ServerPacketId::SplitItem,
             Self::SplitItem1 { .. } => ServerPacketId::SplitItem1,
             Self::UseItem { .. } => ServerPacketId::UseItem,
@@ -1195,6 +1199,7 @@ impl ServerPacket {
                 writer.write_bool(*success);
                 writer.write_bool(*destroy);
             }
+            Self::ItemUpgraded { item } => item.encode(writer)?,
             Self::SplitItem { item, grid } => {
                 writer.write_bool(item.is_some());
                 if let Some(item) = item {
@@ -1481,6 +1486,9 @@ impl ServerPacket {
                 id_to: reader.read_u64()?,
                 success: reader.read_bool()?,
                 destroy: reader.read_bool()?,
+            },
+            ServerPacketId::ItemUpgraded => Self::ItemUpgraded {
+                item: UserItem::decode(reader)?,
             },
             ServerPacketId::SplitItem => {
                 let item = if reader.read_bool()? {

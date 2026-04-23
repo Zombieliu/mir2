@@ -1139,6 +1139,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "destroy": destroy
             }
         }),
+        ServerPacket::ItemUpgraded { item } => json!({
+            "type": "packet",
+            "packet": "ItemUpgraded",
+            "payload": {
+                "item": item
+            }
+        }),
         ServerPacket::ItemRepaired {
             unique_id,
             max_dura,
@@ -1877,7 +1884,34 @@ mod tests {
         responses_require_world_snapshot, should_send_world_snapshot_for_action, BrowserCommand,
         SessionAction,
     };
-    use mir2_protocol::{ClientPacket, MirGridType, ServerPacket};
+    use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItem, UserItemStat};
+
+    fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
+        UserItem {
+            unique_id,
+            item_index: 321,
+            current_dura: 1000,
+            max_dura: 1000,
+            count,
+            soul_bound_id: -1,
+            identified: true,
+            cursed: false,
+            slots: Vec::new(),
+            gem_count: 1,
+            added_stats: vec![UserItemStat { stat: 5, value: 1 }],
+            awake_type: 0,
+            awake_values: Vec::new(),
+            refined_value: 0,
+            refine_added: 0,
+            refine_success_chance: 0,
+            wedding_ring: -1,
+            expire_info: None,
+            rental_information: None,
+            is_shop_item: false,
+            sealed_info: None,
+            gm_made: false,
+        }
+    }
 
     #[test]
     fn login_command_accepts_camel_case_fields() {
@@ -2095,6 +2129,12 @@ mod tests {
             seal["payload"]["expiryDateBinaryDatetime"],
             638000000000000000_i64
         );
+
+        let upgraded = super::server_packet_to_event(&ServerPacket::ItemUpgraded {
+            item: sample_user_item(44, 1),
+        });
+        assert_eq!(upgraded["packet"], "ItemUpgraded");
+        assert_eq!(upgraded["payload"]["item"]["unique_id"], 44);
     }
 
     #[test]
