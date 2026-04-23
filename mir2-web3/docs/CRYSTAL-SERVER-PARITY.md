@@ -216,6 +216,7 @@ The Rust backend is considered "done" only when these areas are functionally ali
 - current seal flow can now validate and consume an optional source item for Stage 5 sealing, matching Crystal's source-item gate while keeping the legacy seal command path available for older harnesses.
 - current socket-slot growth can now validate and consume an optional source item for Stage 5 socket growth, matching Crystal's shape-7 source and target-type unique-flag gate while keeping the legacy socket command path available for older harnesses.
 - current seal flow now persists Crystal reseal-delay metadata: `NextSealDate` is exposed in `UserItem.SealedInfo`, survives save/reload, defaults safely for older saves, and blocks reseal after expiry until `Settings.ItemSealDelay=60` minutes has elapsed.
+- current inventory-grid `CombineItem` now also covers Crystal repair-hammer and sewing source shapes `1/2/5/6`: wrong target families and `DontRepair` fail ack-only, full-durability targets emit `ItemNoRepairNeeded`, and successful repair-combine emits `ItemRepaired` after durability mutation and source consumption.
 
 ### In Progress
 
