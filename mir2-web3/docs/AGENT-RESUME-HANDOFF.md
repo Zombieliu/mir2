@@ -20,14 +20,14 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
 
 ## Current Checkpoint
 
-- Active round: `2026-04-23-R28`
-- Active task: select the next highest-value small unchecked parity task after verified R27 bounded `CombineItem` gem/orb parity completion.
-- Active round state: selection only. R27 is complete and should not be reopened unless tests or source inspection reveal a regression.
-- Last completed round: `2026-04-23-R27`
-- Backend/server parity estimate: `77.15%`
+- Active round: `2026-04-23-R29`
+- Active task: select the next highest-value small unchecked parity task after verified R28 bounded `CombineItem` target-type gating completion.
+- Active round state: selection only. R28 is complete and should not be reopened unless tests or source inspection reveal a regression.
+- Last completed round: `2026-04-23-R28`
+- Backend/server parity estimate: `77.16%`
 - Whole-project 1:1 estimate: roughly `61.7%`
-- Latest completed code work: Crystal inventory-grid `CombineItem` now covers the current shape-3/4 gem/orb upgrade branch in addition to the earlier shape-7 socket-growth and shape-8 seal branches, including protocol/gateway/runtime `ItemUpgraded` support and persisted `gem_count` flow-through.
-- Latest full backend verification: `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` passed with 465 tests.
+- Latest completed code work: Crystal inventory-grid `CombineItem` now also enforces the shared Crystal target item-type gate before socket/seal/upgrade branch handling, so out-of-window targets ack-fail without socket/seal hints or mutations.
+- Latest full backend verification: `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` passed with 466 tests.
 - Latest formatting verification: `cargo +1.89.0 fmt --check` passed.
 - Repository status note: `mir2` is a git repository on `main`; the known unrelated dirty item is outer-repo submodule drift at `refactor-pwa`. Do not revert or commit that drift unless explicitly asked.
 - Toolchain note: this Mac environment needs `cargo +1.89.0` for Rust verification because the default `rustc 1.87.0` fails on locked `bevy_* 0.17.3`.
@@ -83,7 +83,33 @@ Observed results:
 - `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`: 72 / 72 passed
 - `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`: 458 / 458 passed
 
-## Last Completed Round: R27
+## Last Completed Round: R28
+
+R28 aligned the shared Crystal `CombineItem` target gate:
+
+- Added the Crystal top-level target item-type gate to packet-driven `CombineItem`, matching `PlayerObject.CombineItem` by ack-failing any target outside item types `1..=11` before socket/seal/upgrade branch-specific handling.
+- This closes a real parity gap where current packet `CombineItem` could previously emit `InvalidCombination` for shape-7 on non-equipment targets or even seal non-equipment inventory items.
+- Added focused regressions that prove stage-5-style socket targets such as `BengalTiger` are rejected under the Crystal item-type window and that shape-8 seal attempts against inventory consumables fail ack-only without mutation.
+- The round remains intentionally bounded: hero-inventory handling, belt/id-collision cleanup, rental `DontUpgrade`, player `GemRatePercent`, and other gem-family branches remain open.
+
+R28 verification commands:
+
+```powershell
+cargo +1.89.0 fmt --check
+cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture
+cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture
+cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1
+```
+
+Observed results:
+
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`: 8 / 8 passed
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`: 16 / 16 passed
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`: 80 / 80 passed
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`: 466 / 466 passed
+
+## Previous Completed Round: R27
 
 R27 aligned the next bounded real client `CombineItem` branch:
 
@@ -135,15 +161,15 @@ cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture
 cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1
 ```
 
-## Active Round: R28 Selection
+## Active Round: R29 Selection
 
-The active target is no longer R27 implementation. Use this round to choose the next bounded parity bite from the unchecked backend/frontend queue before starting more code work.
+The active target is no longer R28 implementation. Use this round to choose the next bounded parity bite from the unchecked backend/frontend queue before starting more code work.
 
 Current selection constraints:
 
 - Prefer the highest-value small unchecked task over a large multi-system refactor.
 - Keep one writer on `apps/simulation/src/runtime.rs`.
-- Do not move the backend parity estimate again until the selected R28 task is implemented, verified, and documented.
+- Do not move the backend parity estimate again until the selected R29 task is implemented, verified, and documented.
 
 Explorer recommendations already captured in docs/run log:
 
@@ -178,7 +204,7 @@ Use the observed quota profile from the prior session unless the new session sho
 - Use `medium` for read-only explorers and docs/QA work.
 - Avoid multiple code-writing agents on the same file.
 
-## R28 Suggested Subagent Prompts
+## R29 Suggested Subagent Prompts
 
 Crystal Explorer prompt:
 
@@ -195,7 +221,7 @@ In E:\mir2\mir2-web3, do a read-only audit of the current Rust code/test surface
 Backend Worker prompt, only after Crystal semantics are known:
 
 ```text
-Implement the selected bounded R28 parity patch in E:\mir2\mir2-web3. You are not alone in the codebase; do not revert others' edits. Own only the explicitly assigned files, keep one writer on apps/simulation/src/runtime.rs when it is in scope, add focused regressions, run cargo +1.89.0 fmt/test commands, and report changed files plus tests. Do not update docs unless explicitly assigned.
+Implement the selected bounded R29 parity patch in E:\mir2\mir2-web3. You are not alone in the codebase; do not revert others' edits. Own only the explicitly assigned files, keep one writer on apps/simulation/src/runtime.rs when it is in scope, add focused regressions, run cargo +1.89.0 fmt/test commands, and report changed files plus tests. Do not update docs unless explicitly assigned.
 ```
 
 ## Ready-To-Paste Resume Prompt

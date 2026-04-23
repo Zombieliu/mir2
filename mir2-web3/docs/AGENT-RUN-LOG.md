@@ -921,3 +921,30 @@ Outcome:
 - Backend parity tracker moved from `77.14%` to `77.15%`.
 - Full `mir2-simulation` regression passed with 465 tests.
 - R28 reopened at queue-selection stage for the next bounded parity bite.
+
+## 2026-04-23-R28
+
+Goal: align the shared Crystal `CombineItem` target item-type gate across packet socket/seal/upgrade branches.
+
+Coordinator local work:
+
+- Confirmed from `Crystal/Server/MirObjects/PlayerObject.cs` that `PlayerObject.CombineItem` rejects any target whose `ItemType` is outside `1..=11` before branch-specific socket/seal/upgrade handling.
+- Added the same top-level target gate to current runtime `combine_item_impl`, so packet-driven shape-7 and shape-8 flows now ack-fail immediately on out-of-window targets instead of falling through into `InvalidCombination` or mutating non-equipment inventory items.
+- Updated focused regressions to cover the new Crystal behavior: a slotted-but-type-19 `BengalTiger` target is now rejected ack-only, and a shape-8 seal attempt against a `red-potion` target stays ack-only with no seal metadata mutation.
+- Kept the round intentionally bounded: hero-inventory handling, belt/id-collision cleanup, rental `DontUpgrade`, player `GemRatePercent`, and other gem-family branches remain open.
+
+Verification:
+
+- `cargo +1.89.0 fmt`
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
+
+Outcome:
+
+- Round `2026-04-23-R28` complete.
+- Backend parity tracker moved from `77.15%` to `77.16%`.
+- Full `mir2-simulation` regression passed with 466 tests.
+- R29 reopened at queue-selection stage for the next bounded parity bite.

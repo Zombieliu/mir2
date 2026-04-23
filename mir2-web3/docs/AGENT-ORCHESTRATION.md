@@ -110,11 +110,11 @@ The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file a
 
 Current checkpoint:
 
-- Active round: `2026-04-23-R28`.
-- Active task: select the next bounded parity bite after verified R27 bounded `CombineItem` gem/orb parity completion.
-- Active round state: task-selection stage only; do not reopen R27 unless source inspection or tests show a regression.
-- Last completed round: `2026-04-23-R27`, Crystal inventory-grid `CombineItem` shape-3/4 gem/orb parity.
-- Backend/server parity estimate: `77.15%`.
+- Active round: `2026-04-23-R29`.
+- Active task: select the next bounded parity bite after verified R28 bounded `CombineItem` target-type gating completion.
+- Active round state: task-selection stage only; do not reopen R28 unless source inspection or tests show a regression.
+- Last completed round: `2026-04-23-R28`, Crystal `CombineItem` target item-type gating across packet branches.
+- Backend/server parity estimate: `77.16%`.
 - Whole-project 1:1 estimate: roughly `61.7%`.
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 
@@ -122,6 +122,7 @@ Latest completed rounds:
 
 | Round | Result |
 | --- | --- |
+| R28 | Crystal `CombineItem` top-level target item-type gating across socket/seal/upgrade packet branches, including 466-test `mir2-simulation` regression green. |
 | R27 | Crystal inventory-grid `CombineItem` shape-3/4 gem/orb upgrade parity, including `ItemUpgraded`, persisted `gem_count`, and 465-test `mir2-simulation` regression green. |
 | R26 | Crystal inventory-grid `CombineItem` packet parity for current socket-growth and seal branches, including protocol ids/codecs, gateway JSON, runtime dispatch, and 461-test `mir2-simulation` regression green. |
 | R25 | Crystal `StoreItem` / `TakeBackItem` active `@Storage` / `NPCStorage` gating, `DontStore`, password-lock/capacity/occupied-target no-swap, and ack-only failure semantics. |
@@ -137,5 +138,5 @@ Restart rule:
 
 - Read `docs/AGENT-RESUME-HANDOFF.md` before continuing after a reboot or context loss.
 - Relaunch read-only explorers for any subagent findings that were not written to docs.
-- Continue from R28 task selection without asking for routine confirmation; choose the next bounded task from the queue before starting new code work.
+- Continue from R29 task selection without asking for routine confirmation; choose the next bounded task from the queue before starting new code work.
 - On this Mac verification environment, use `cargo +1.89.0` for Rust checks/tests unless the toolchain is explicitly pinned later; default `rustc 1.87.0` does not compile locked `bevy_* 0.17.3`.
