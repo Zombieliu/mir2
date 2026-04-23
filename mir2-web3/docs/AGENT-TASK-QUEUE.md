@@ -13,13 +13,19 @@ Status values:
 - `[x]` complete and verified
 - `[!]` blocked
 
-## Active Round: 2026-04-23-R30
+## Active Round: 2026-04-23-R31
 
-Restart note: R29 bounded `CombineItem` repair-hammer/sewing parity is complete and verified. Use this round to select the next highest-value small unchecked task from the remaining backend/frontend queues before starting new code work. Do not reopen R29 unless tests or source inspection show a regression.
+Restart note: R30 bounded rental binding flag parity is complete and verified. Use this round to select the next highest-value small unchecked task from the remaining backend/frontend queues before starting new code work. Do not reopen R30 unless tests or source inspection show a regression.
 
 | Status | Task | Owner | Write Set | Verification |
 | --- | --- | --- | --- | --- |
-| [~] | Select next parity bite after R29 bounded `CombineItem` repair-hammer/sewing parity completion | Coordinator | docs | Review remaining backend/frontend queue items and choose the next bounded round before spawning workers |
+| [~] | Select next parity bite after R30 rental binding flag parity completion | Coordinator | docs | Review remaining backend/frontend queue items and choose the next bounded round before spawning workers |
+
+## Completed Round: 2026-04-23-R30
+
+| Status | Task | Owner | Write Set | Verification |
+| --- | --- | --- | --- | --- |
+| [x] | Crystal rental binding flags for current storage and combine item paths | Coordinator | `apps/simulation/src/runtime.rs`, docs | Crystal source audit, focused rental `DontStore` / `DontUpgrade` regressions, `cargo +1.89.0 fmt --check`, `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`, `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`, `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`, full `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` |
 
 ## Completed Round: 2026-04-23-R29
 
@@ -227,7 +233,7 @@ Restart note: R29 bounded `CombineItem` repair-hammer/sewing parity is complete 
 | [x] | Crystal storage item flag/rejection edges | R25 now aligns `StoreItem` / `TakeBackItem` active `@Storage` / `NPCStorage` service context, `DontStore`/rental flags, password lock, accessible capacity, occupied-target no-swap behavior, and ack-only failure semantics. |
 | [x] | Added-stat cyan ground item display | Current added-stat ground drops now surface Crystal Cyan through `ObjectItem.name_colour_argb`, world snapshots, and the web ground-drop label. |
 | [x] | NPC buy-back expiry / used-goods persistence | Buy-back entries now persist across save/reload, carry Crystal 60-minute expiry, expire into NPC used goods, and used goods can be bought back through Buy/BuyUsed flows. |
-| [~] | Full gem/socket validation | Socket slot-capacity validation, source gem validation, the real inventory-grid `CombineItem` packet path, shape-1/2/5/6 repair-hammer/sewing parity, bounded shape-3/4 gem/orb upgrade parity with `ItemUpgraded` / persisted `gem_count`, and shared Crystal target-type gating across combine branches are in. Hero-inventory handling, belt/id-collision cleanup, rental `DontUpgrade`, player `GemRatePercent`, and other gem-family branches remain. |
+| [~] | Full gem/socket validation | Socket slot-capacity validation, source gem validation, the real inventory-grid `CombineItem` packet path, shape-1/2/5/6 repair-hammer/sewing parity, bounded shape-3/4 gem/orb upgrade parity with `ItemUpgraded` / persisted `gem_count`, shared Crystal target-type gating, and rental `DontUpgrade` rejection for current socket/upgrade combine branches are in. Hero-inventory handling, belt/id-collision cleanup, player `GemRatePercent`, and other gem-family branches remain. |
 | [~] | Full seal-source validation | Already-sealed rejection, source item validation, reseal-delay metadata, save/reload, the real inventory-grid `CombineItem` packet path, and shared Crystal target-type gating are in. Hero-inventory handling and any remaining shared combine-branch gaps remain. |
 | [ ] | Map event script bindings | Import map event scripts, weather/lightning/fire/door/wall/gate behavior. |
 | [ ] | Broader combat/skill parity | Spell tables, projectile objects, buff edge cases, live packet comparison. |
