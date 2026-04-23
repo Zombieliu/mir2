@@ -200,6 +200,14 @@ const CRYSTAL_BIND_DONT_REPAIR: i16 = 0x0020;
 const CRYSTAL_BIND_DONT_UPGRADE: i16 = 0x0040;
 const CRYSTAL_BIND_DESTROY_ON_DROP: i16 = 0x0080;
 const CRYSTAL_BIND_NO_SREPAIR: i16 = 0x0400;
+const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;
+const CRYSTAL_ITEM_TYPE_ARMOUR: u8 = 2;
+const CRYSTAL_ITEM_TYPE_HELMET: u8 = 4;
+const CRYSTAL_ITEM_TYPE_NECKLACE: u8 = 5;
+const CRYSTAL_ITEM_TYPE_BRACELET: u8 = 6;
+const CRYSTAL_ITEM_TYPE_RING: u8 = 7;
+const CRYSTAL_ITEM_TYPE_BELT: u8 = 9;
+const CRYSTAL_ITEM_TYPE_BOOTS: u8 = 10;
 
 #[cfg(windows)]
 #[repr(C)]
@@ -491,6 +499,10 @@ const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
 const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
 const CRYSTAL_GEM_SHAPE_UPGRADE_GEM: i16 = 3;
 const CRYSTAL_GEM_SHAPE_UPGRADE_ORB: i16 = 4;
+const CRYSTAL_GEM_SHAPE_REPAIR_HAMMER: i16 = 1;
+const CRYSTAL_GEM_SHAPE_REPAIR_SEWING: i16 = 2;
+const CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_HAMMER: i16 = 5;
+const CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_SEWING: i16 = 6;
 const CRYSTAL_GEM_SHAPE_SOCKET: i16 = 7;
 const CRYSTAL_GEM_SHAPE_SEAL: i16 = 8;
 const CRYSTAL_SPECIAL_PARALYZE: i16 = 0x0001;
@@ -22446,6 +22458,11 @@ enum CombineItemOutcome {
         key: &'static str,
         args: Vec<String>,
     },
+    RepairSuccess {
+        unique_id: u64,
+        max_dura: u16,
+        current_dura: u16,
+    },
     SocketSuccess {
         unique_id: u64,
         slot_size: i32,
@@ -22461,6 +22478,42 @@ enum CombineItemOutcome {
         item: Option<UserItem>,
         destroy: bool,
     },
+}
+
+fn crystal_combine_repair_matches_item_type(source_shape: i16, target_item_type: u8) -> bool {
+    match source_shape {
+        CRYSTAL_GEM_SHAPE_REPAIR_HAMMER | CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_HAMMER => matches!(
+            target_item_type,
+            CRYSTAL_ITEM_TYPE_WEAPON
+                | CRYSTAL_ITEM_TYPE_NECKLACE
+                | CRYSTAL_ITEM_TYPE_RING
+                | CRYSTAL_ITEM_TYPE_BRACELET
+        ),
+        CRYSTAL_GEM_SHAPE_REPAIR_SEWING | CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_SEWING => matches!(
+            target_item_type,
+            CRYSTAL_ITEM_TYPE_ARMOUR
+                | CRYSTAL_ITEM_TYPE_HELMET
+                | CRYSTAL_ITEM_TYPE_BOOTS
+                | CRYSTAL_ITEM_TYPE_BELT
+        ),
+        _ => false,
+    }
+}
+
+fn crystal_combine_repair_max_dura_loss(
+    current_tick: u64,
+    player_object_id: u32,
+    from_slot: u8,
+    to_slot: u8,
+) -> u16 {
+    u16::try_from(deterministic_roll(
+        current_tick,
+        usize::try_from(player_object_id).unwrap_or_default(),
+        usize::from(from_slot) * 733 + usize::from(to_slot) + 41,
+        10,
+    ))
+    .expect("combine repair roll should fit u16")
+    .saturating_mul(100)
 }
 
 fn combine_item_impl(
@@ -22526,8 +22579,12 @@ fn combine_item_impl(
         } else {
             crystal_item_template_for_item_key(&source_item.key).and_then(|template| {
                 (template.item_type == CRYSTAL_ITEM_TYPE_GEM
-                    && (template.shape == CRYSTAL_GEM_SHAPE_UPGRADE_GEM
+                    && (template.shape == CRYSTAL_GEM_SHAPE_REPAIR_HAMMER
+                        || template.shape == CRYSTAL_GEM_SHAPE_REPAIR_SEWING
+                        || template.shape == CRYSTAL_GEM_SHAPE_UPGRADE_GEM
                         || template.shape == CRYSTAL_GEM_SHAPE_UPGRADE_ORB
+                        || template.shape == CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_HAMMER
+                        || template.shape == CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_SEWING
                         || template.shape == CRYSTAL_GEM_SHAPE_SOCKET
                         || template.shape == CRYSTAL_GEM_SHAPE_SEAL))
                     .then_some(template.shape)
@@ -22654,6 +22711,57 @@ fn combine_item_impl(
                     }
                 }
             }
+            Some(CRYSTAL_GEM_SHAPE_REPAIR_HAMMER)
+            | Some(CRYSTAL_GEM_SHAPE_REPAIR_SEWING)
+            | Some(CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_HAMMER)
+            | Some(CRYSTAL_GEM_SHAPE_SPECIAL_REPAIR_SEWING) => {
+                let source_shape = source_shape.expect("repair branch should have source shape");
+                if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_REPAIR) {
+                    CombineItemOutcome::AckOnlyFailure
+                } else if !crystal_combine_repair_matches_item_type(
+                    source_shape,
+                    target_template.item_type,
+                ) {
+                    CombineItemOutcome::AckOnlyFailure
+                } else {
+                    let current_dura = resources.inventory_items[to_index]
+                        .durability_current
+                        .unwrap_or(0);
+                    let max_dura = resources.inventory_items[to_index]
+                        .durability_max
+                        .unwrap_or(0);
+                    if current_dura == max_dura {
+                        CombineItemOutcome::FailureHint {
+                            key: "server.ItemNoRepairNeeded",
+                            args: Vec::new(),
+                        }
+                    } else {
+                        let next_max_dura = if matches!(target_template.shape, 1 | 2) {
+                            max_dura.saturating_sub(crystal_combine_repair_max_dura_loss(
+                                current_tick,
+                                player_object_id,
+                                from_slot,
+                                to_slot,
+                            ))
+                        } else {
+                            max_dura
+                        };
+                        resources.inventory_items[to_index].durability_max = Some(next_max_dura);
+                        resources.inventory_items[to_index].durability_current =
+                            Some(next_max_dura);
+                        if resources.inventory_items[from_index].quantity > 1 {
+                            resources.inventory_items[from_index].quantity -= 1;
+                        } else {
+                            resources.inventory_items.remove(from_index);
+                        }
+                        CombineItemOutcome::RepairSuccess {
+                            unique_id: u64::from(to_slot),
+                            max_dura: next_max_dura,
+                            current_dura: next_max_dura,
+                        }
+                    }
+                }
+            }
             Some(CRYSTAL_GEM_SHAPE_SOCKET) => {
                 if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
                     || target_template.unique != 0
@@ -22761,6 +22869,25 @@ fn combine_item_impl(
             };
             vec![message, failed_packet]
         }
+        CombineItemOutcome::RepairSuccess {
+            unique_id,
+            max_dura,
+            current_dura,
+        } => vec![
+            hint_chat_key(world, "server.ItemRepaired"),
+            ServerPacket::ItemRepaired {
+                unique_id,
+                max_dura,
+                current_dura,
+            },
+            ServerPacket::CombineItem {
+                grid,
+                id_from,
+                id_to,
+                success: true,
+                destroy: false,
+            },
+        ],
         CombineItemOutcome::SocketSuccess {
             unique_id,
             slot_size,
@@ -55015,6 +55142,151 @@ mod tests {
                 && item.name == "Wooden Sword"
                 && item.socket_slots == 0
         }));
+    }
+
+    #[test]
+    fn combine_item_packet_repair_branch_emits_item_repaired_and_ack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.durability_current = Some(1_000);
+            dagger.durability_max = Some(5_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        let repaired = packets.iter().find_map(|packet| match packet {
+            ServerPacket::ItemRepaired {
+                unique_id,
+                max_dura,
+                current_dura,
+            } if *unique_id == 32 => Some((*max_dura, *current_dura)),
+            _ => None,
+        });
+        let (max_dura, current_dura) = repaired.expect("repair packet should be emitted");
+
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 31));
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("dagger should remain in inventory");
+        assert_eq!(dagger.durability_current, Some(current_dura));
+        assert_eq!(dagger.durability_max, Some(max_dura));
+        assert_eq!(current_dura, max_dura);
+        assert!(current_dura >= 1_000);
+        assert!(current_dura <= 5_000);
+    }
+
+    #[test]
+    fn combine_item_packet_repair_branch_rejects_fully_repaired_target_with_hint() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemRepaired { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message.contains("repair")
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.slot == 32
+                && item.durability_current == item.durability_max
+                && item.durability_max == Some(5_000)
+        }));
+    }
+
+    #[test]
+    fn combine_item_packet_repair_branch_rejects_wrong_target_family_with_ack_only_failure() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "MirArmour(M)", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let armour = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("armour should exist");
+            armour.durability_current = Some(2_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.durability_current == Some(2_000)));
     }
 
     #[test]

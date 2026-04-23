@@ -4,6 +4,35 @@ Last updated: 2026-04-23
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
 
+## 2026-04-23-R29
+
+Goal: close the next bounded inventory-grid `CombineItem` parity gap by implementing Crystal repair-hammer/sewing packet behavior.
+
+Coordinator local work:
+
+- Re-read the resume/task-queue checkpoint and narrowed the next safe round to Crystal `PlayerObject.CombineItem` shape `1/2/5/6` repair branches instead of larger remaining gaps such as hero inventory or player `GemRatePercent`.
+- Confirmed from Crystal `PlayerObject.CombineItem` that repair combine uses the shared target item-type gate, rejects `DontRepair` and wrong target families ack-only, emits `ItemNoRepairNeeded` for full-durability targets, and emits `ItemRepaired` plus success ack after durability mutation.
+- Implemented shape `1/2/5/6` source-shape recognition in runtime packet `CombineItem`.
+- Added Crystal-style repair target-family gating for hammer vs sewing sources, `DontRepair` ack-only rejection, and full-durability hint rejection.
+- Added deterministic repair max-durability loss for repair-combine success so packet tests remain reproducible while preserving Crystal's random-loss branch on target shapes `1/2`.
+- Added focused packet regressions for repair success, full-durability rejection with hint, and wrong target-family ack-only failure.
+
+Verification:
+
+- `cargo +1.89.0 fmt`
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
+
+Outcome:
+
+- Round `2026-04-23-R29` complete.
+- `CombineItem` packet parity now covers Crystal repair-hammer/sewing shapes `1/2/5/6` in addition to the existing socket/seal/upgrade branches.
+- Full `mir2-simulation` regression is green at `469 / 469`.
+- Backend parity tracker moved from `77.16%` to `77.17%`.
+
 ## 2026-04-22-R1
 
 Goal: start 100% Candidate workflow and complete the first backend small parity item under multi-agent coordination.
