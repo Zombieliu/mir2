@@ -22515,6 +22515,9 @@ fn combine_item_impl(
         let Some(target_template) = crystal_item_template_for_item_key(&target_key) else {
             return vec![failed_packet];
         };
+        if !(1..=11).contains(&target_template.item_type) {
+            return vec![failed_packet];
+        }
 
         let source_shape = if source_item.key == "stage5-socket-source" {
             Some(CRYSTAL_GEM_SHAPE_SOCKET)
@@ -55015,7 +55018,7 @@ mod tests {
     }
 
     #[test]
-    fn combine_item_packet_socket_branch_emits_crystal_ack_and_slot_change() {
+    fn combine_item_packet_socket_branch_rejects_targets_outside_crystal_item_type_window() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         add_inventory_crystal_item_with_socket_slots(&mut session, "BengalTiger", 32, 4);
@@ -55027,32 +55030,31 @@ mod tests {
             id_to: 32,
         });
 
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::ItemSlotSizeChanged {
-                unique_id: 32,
-                slot_size: 5
-            }
-        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         assert_eq!(
-            packets.last(),
-            Some(&ServerPacket::CombineItem {
+            packets,
+            vec![ServerPacket::CombineItem {
                 grid: MirGridType::Inventory,
                 id_from: 31,
                 id_to: 32,
-                success: true,
+                success: false,
                 destroy: false,
-            })
+            }]
         );
 
         let resources = session.app.world().resource::<SimulationResources>();
         assert!(resources.inventory_items.iter().any(|item| item.slot == 31
             && item.key == "stage5-socket-source"
-            && item.quantity == 1));
+            && item.quantity == 2));
         assert!(resources
             .inventory_items
             .iter()
-            .any(|item| item.slot == 32 && item.name == "BengalTiger" && item.socket_slots == 5));
+            .any(|item| item.slot == 32 && item.name == "BengalTiger" && item.socket_slots == 4));
     }
 
     #[test]
@@ -55147,6 +55149,46 @@ mod tests {
             super::binary_datetime_ticks(dagger.sealed_next_time_binary_datetime),
             super::binary_datetime_ticks(expiry) + expected_delay_ticks
         );
+    }
+
+    #[test]
+    fn combine_item_packet_seal_branch_rejects_non_equipment_targets_with_ack_only_failure() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_seal_source_test_item(&mut session, 31, 1);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 0,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 0,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.key == "stage5-seal-source"));
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 0
+            && item.key == "red-potion"
+            && item.sealed_expiry_time_binary_datetime == 0
+            && item.sealed_next_time_binary_datetime == 0));
     }
 
     #[test]
