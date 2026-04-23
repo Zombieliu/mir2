@@ -533,7 +533,7 @@ fn sell_and_repair_server_packets_use_crystal_ids() {
 }
 
 #[test]
-fn item_slot_and_seal_server_packets_use_crystal_ids() {
+fn item_slot_seal_and_upgrade_server_packets_use_crystal_ids() {
     let cases = [
         (
             ServerPacket::ItemSlotSizeChanged {
@@ -548,6 +548,12 @@ fn item_slot_and_seal_server_packets_use_crystal_ids() {
                 expiry_date_binary_datetime: 638000000000000000,
             },
             ServerPacketId::ItemSealChanged,
+        ),
+        (
+            ServerPacket::ItemUpgraded {
+                item: sample_user_item(44, 1),
+            },
+            ServerPacketId::ItemUpgraded,
         ),
     ];
 

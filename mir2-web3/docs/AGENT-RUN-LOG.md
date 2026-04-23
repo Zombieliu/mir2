@@ -1,6 +1,6 @@
 # Agent Run Log
 
-Last updated: 2026-04-22
+Last updated: 2026-04-23
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
 
@@ -890,3 +890,34 @@ Outcome:
 - Backend parity tracker moved from `77.13%` to `77.14%`.
 - Full `mir2-simulation` regression passed with 461 tests.
 - R27 reopened at queue-selection stage for the next bounded parity bite.
+
+## 2026-04-23-R27
+
+Goal: close the next bounded `CombineItem` parity bite by implementing Crystal inventory-grid shape-3/4 gem/orb upgrade semantics.
+
+Coordinator local work:
+
+- Confirmed Crystal shape-3/4 `CombineItem` behavior and `ItemUpgraded` enum ordering against `PlayerObject.CombineItem`, `ValidGemForItem`, `GetGemType`, `HumanObject.GetCurrentStatCount`, and the shared packet enums.
+- Added protocol support for Crystal `ServerPacket::ItemUpgraded` / id `216`, including ids, codec coverage, trace names, and gateway JSON conversion.
+- Extended runtime `ClientPacket::CombineItem` handling to cover the current inventory-grid shape-3/4 gem/orb upgrade branch with Crystal-shaped success, reject, consume, and destroy behavior.
+- Persisted `gem_count` through runtime item/equipment state plus `UserItem` round-trips so upgrade state survives inventory/equipment/save flows.
+- Added focused regressions for upgrade success emitting `ItemUpgraded` plus `CombineItem(success=true)`, max-added-stat rejection, invalid gem/item combinations, and failure destroy branches.
+- Kept the round intentionally bounded: full Crystal target-type gating across combine branches, hero-inventory handling, belt/id-collision cleanup, rental `DontUpgrade`, and player `GemRatePercent` remain open.
+
+Verification:
+
+- `cargo +1.89.0 fmt`
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-protocol item_slot_seal_and_upgrade_server_packets_use_crystal_ids -- --nocapture`
+- `cargo +1.89.0 test -p mir2-gateway item_slot_and_seal_server_events_expose_crystal_payload_fields -- --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
+
+Outcome:
+
+- Round `2026-04-23-R27` complete.
+- Backend parity tracker moved from `77.14%` to `77.15%`.
+- Full `mir2-simulation` regression passed with 465 tests.
+- R28 reopened at queue-selection stage for the next bounded parity bite.

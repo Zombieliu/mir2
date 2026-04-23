@@ -168,6 +168,7 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::RepairItem { .. } => "RepairItem",
         ServerPacket::CraftItem { .. } => "CraftItem",
         ServerPacket::CombineItem { .. } => "CombineItem",
+        ServerPacket::ItemUpgraded { .. } => "ItemUpgraded",
         ServerPacket::ItemRepaired { .. } => "ItemRepaired",
         ServerPacket::ItemSlotSizeChanged { .. } => "ItemSlotSizeChanged",
         ServerPacket::ItemSealChanged { .. } => "ItemSealChanged",

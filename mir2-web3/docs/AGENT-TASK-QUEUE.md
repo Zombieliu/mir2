@@ -13,13 +13,19 @@ Status values:
 - `[x]` complete and verified
 - `[!]` blocked
 
-## Active Round: 2026-04-23-R27
+## Active Round: 2026-04-23-R28
 
-Restart note: R26 `CombineItem` packet parity is complete and verified. Use this round to select the next highest-value small unchecked task from the remaining backend/frontend queues before starting new code work. Do not reopen R26 unless tests or source inspection show a regression.
+Restart note: R27 bounded `CombineItem` gem/orb upgrade parity is complete and verified. Use this round to select the next highest-value small unchecked task from the remaining backend/frontend queues before starting new code work. Do not reopen R27 unless tests or source inspection show a regression.
 
 | Status | Task | Owner | Write Set | Verification |
 | --- | --- | --- | --- | --- |
-| [~] | Select next parity bite after R26 `CombineItem` packet-parity completion | Coordinator | docs | Review remaining backend/frontend queue items and choose the next bounded round before spawning workers |
+| [~] | Select next parity bite after R27 bounded `CombineItem` gem/orb parity completion | Coordinator | docs | Review remaining backend/frontend queue items and choose the next bounded round before spawning workers |
+
+## Completed Round: 2026-04-23-R27
+
+| Status | Task | Owner | Write Set | Verification |
+| --- | --- | --- | --- | --- |
+| [x] | Crystal inventory-grid `CombineItem` shape-3/4 gem/orb upgrade parity | Coordinator | `packages/protocol/src/ids.rs`, `packages/protocol/src/packets.rs`, `packages/protocol/src/trace.rs`, `packages/protocol/tests/codec.rs`, `apps/gateway/src/web.rs`, `apps/simulation/src/runtime.rs`, docs | Crystal source audit, protocol/gateway/runtime `ItemUpgraded` coverage, persisted `gem_count` flow-through, `cargo +1.89.0 fmt --check`, `cargo +1.89.0 test -p mir2-protocol item_slot_seal_and_upgrade_server_packets_use_crystal_ids -- --nocapture`, `cargo +1.89.0 test -p mir2-gateway item_slot_and_seal_server_events_expose_crystal_payload_fields -- --nocapture`, `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`, `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`, `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`, full `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` |
 
 ## Completed Round: 2026-04-23-R26
 
@@ -209,7 +215,7 @@ Restart note: R26 `CombineItem` packet parity is complete and verified. Use this
 | [x] | Crystal storage item flag/rejection edges | R25 now aligns `StoreItem` / `TakeBackItem` active `@Storage` / `NPCStorage` service context, `DontStore`/rental flags, password lock, accessible capacity, occupied-target no-swap behavior, and ack-only failure semantics. |
 | [x] | Added-stat cyan ground item display | Current added-stat ground drops now surface Crystal Cyan through `ObjectItem.name_colour_argb`, world snapshots, and the web ground-drop label. |
 | [x] | NPC buy-back expiry / used-goods persistence | Buy-back entries now persist across save/reload, carry Crystal 60-minute expiry, expire into NPC used goods, and used goods can be bought back through Buy/BuyUsed flows. |
-| [~] | Full gem/socket validation | Socket slot-capacity validation, source gem validation, and the real inventory-grid `CombineItem` packet path are in. Full Crystal target-type gating, hero-inventory handling, and other gem-family branches remain. |
+| [~] | Full gem/socket validation | Socket slot-capacity validation, source gem validation, the real inventory-grid `CombineItem` packet path, and bounded shape-3/4 gem/orb upgrade parity with `ItemUpgraded` / persisted `gem_count` are in. Full Crystal target-type gating across combine branches, hero-inventory handling, belt/id-collision cleanup, rental `DontUpgrade`, player `GemRatePercent`, and other gem-family branches remain. |
 | [~] | Full seal-source validation | Already-sealed rejection, source item validation, reseal-delay metadata, save/reload, and the real inventory-grid `CombineItem` packet path are in. Exact seal item rules, hero-inventory handling, and other combine branches remain. |
 | [ ] | Map event script bindings | Import map event scripts, weather/lightning/fire/door/wall/gate behavior. |
 | [ ] | Broader combat/skill parity | Spell tables, projectile objects, buff edge cases, live packet comparison. |
