@@ -4,6 +4,36 @@ Last updated: 2026-04-23
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
 
+## 2026-04-23-R30
+
+Goal: close the bounded rental binding flag gap for current storage and inventory-grid combine item paths.
+
+Coordinator local work:
+
+- Selected rental `BindingFlags` as the next safe bounded backend bite because Crystal storage checks rental `DontStore`, and Crystal socket/upgrade combine branches check rental `DontUpgrade`.
+- Added runtime item/equipment state persistence for rental binding flags and surfaced nonzero values through `UserItem.RentalInformation`.
+- Preserved rental flags across inventory/equipment round-trips so equipped or unequipped items do not lose binding metadata.
+- Updated `StoreItem` to reject rental `DontStore` the same way it already rejects base `DontStore`.
+- Updated current shape-7 socket and shape-3/4 upgrade `CombineItem` branches to reject rental `DontUpgrade` ack-only while preserving source and target state.
+- Added focused regressions for rental `DontStore`, rental socket `DontUpgrade`, and rental upgrade `DontUpgrade`.
+- Kept the round intentionally bounded: seal rental handling was not added because the audited Crystal source only checked rental `DontUpgrade` on socket and upgrade branches; hero-inventory handling, belt/id-collision cleanup, player `GemRatePercent`, and other gem-family branches remain queued.
+
+Verification:
+
+- `cargo +1.89.0 fmt`
+- `cargo +1.89.0 fmt --check`
+- `cargo +1.89.0 test -p mir2-simulation combine_item_packet -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation storage -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test -p mir2-simulation item -- --test-threads=1 --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`
+
+Outcome:
+
+- Round `2026-04-23-R30` complete.
+- `CombineItem` packet parity now blocks rental `DontUpgrade` for the current socket and upgrade branches; storage now blocks rental `DontStore`.
+- Full `mir2-simulation` regression is green at `472 / 472`.
+- Backend parity tracker moved from `77.17%` to `77.18%`.
+
 ## 2026-04-23-R29
 
 Goal: close the next bounded inventory-grid `CombineItem` parity gap by implementing Crystal repair-hammer/sewing packet behavior.

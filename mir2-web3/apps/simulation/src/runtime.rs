@@ -35,8 +35,8 @@ use mir2_protocol::{
     MirGridType, MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
     ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectMovement, ObjectPlayerInfo,
     ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point,
-    ServerPacket, Spell, StruckInfo, UserInformation, UserItem, UserItemSealedInfo, UserItemStat,
-    UserLocation,
+    ServerPacket, Spell, StruckInfo, UserInformation, UserItem, UserItemRentalInformation,
+    UserItemSealedInfo, UserItemStat, UserLocation,
 };
 
 const GUIDE_QUEST_ID: i32 = 1001;
@@ -583,6 +583,8 @@ struct ItemState {
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
     sealed_next_time_binary_datetime: i64,
+    #[serde(default)]
+    rental_binding_flags: i16,
     attack: i32,
     defence: i32,
     heal_hp: i32,
@@ -642,6 +644,8 @@ struct EquipmentState {
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
     sealed_next_time_binary_datetime: i64,
+    #[serde(default)]
+    rental_binding_flags: i16,
     attack: i32,
     defence: i32,
 }
@@ -20089,6 +20093,7 @@ fn equipment_template_to_state(template: &EquipmentTemplate) -> EquipmentState {
         gem_count: 0,
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
         attack: template.attack,
         defence: template.defence,
     }
@@ -20147,7 +20152,7 @@ fn user_item_from_item_state(item: &ItemState) -> UserItem {
         refine_success_chance: 0,
         wedding_ring: -1,
         expire_info: None,
-        rental_information: None,
+        rental_information: user_item_rental_information(item.rental_binding_flags),
         is_shop_item: false,
         sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
             expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -20205,6 +20210,15 @@ fn user_item_added_attack_defence(item: &UserItem) -> (i32, i32) {
     (added_attack, added_defence)
 }
 
+fn user_item_rental_information(binding_flags: i16) -> Option<UserItemRentalInformation> {
+    (binding_flags != 0).then_some(UserItemRentalInformation {
+        owner_name: String::new(),
+        binding_flags,
+        expiry_binary_datetime: 0,
+        rental_locked: false,
+    })
+}
+
 fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
     let added_stats = merged_user_item_stats(
         &item.added_stats,
@@ -20234,7 +20248,7 @@ fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
         refine_success_chance: 0,
         wedding_ring: -1,
         expire_info: None,
-        rental_information: None,
+        rental_information: user_item_rental_information(item.rental_binding_flags),
         is_shop_item: false,
         sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
             expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -20661,6 +20675,14 @@ fn crystal_item_has_bind_flag(key: &str, flag: i16) -> bool {
     crystal_item_bind_for_item_key(key) & flag != 0
 }
 
+fn item_has_rental_bind_flag(item: &ItemState, flag: i16) -> bool {
+    item.rental_binding_flags & flag != 0
+}
+
+fn item_has_crystal_or_rental_bind_flag(item: &ItemState, flag: i16) -> bool {
+    crystal_item_has_bind_flag(&item.key, flag) || item_has_rental_bind_flag(item, flag)
+}
+
 fn crystal_credit_value_for_item(item: &ItemState) -> Option<u32> {
     let template = crystal_item_template_for_item_key(&item.key)?;
     (template.item_type == 17 && template.name.starts_with("CreditToken") && template.price > 0)
@@ -20943,6 +20965,7 @@ fn add_or_increment_item_with_random_metadata(
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -22369,6 +22392,9 @@ fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
         if crystal_item_has_bind_flag(
             &resources.inventory_items[index].key,
             CRYSTAL_BIND_DONT_STORE,
+        ) || item_has_rental_bind_flag(
+            &resources.inventory_items[index],
+            CRYSTAL_BIND_DONT_STORE,
         ) {
             return vec![failed_packet];
         }
@@ -22595,8 +22621,10 @@ fn combine_item_impl(
             Some(CRYSTAL_GEM_SHAPE_UPGRADE_GEM) | Some(CRYSTAL_GEM_SHAPE_UPGRADE_ORB) => {
                 if !(1..=11).contains(&target_template.item_type) {
                     CombineItemOutcome::AckOnlyFailure
-                } else if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
-                    || target_template.unique != 0
+                } else if item_has_crystal_or_rental_bind_flag(
+                    &resources.inventory_items[to_index],
+                    CRYSTAL_BIND_DONT_UPGRADE,
+                ) || target_template.unique != 0
                 {
                     CombineItemOutcome::AckOnlyFailure
                 } else {
@@ -22763,8 +22791,10 @@ fn combine_item_impl(
                 }
             }
             Some(CRYSTAL_GEM_SHAPE_SOCKET) => {
-                if crystal_item_has_bind_flag(&target_key, CRYSTAL_BIND_DONT_UPGRADE)
-                    || target_template.unique != 0
+                if item_has_crystal_or_rental_bind_flag(
+                    &resources.inventory_items[to_index],
+                    CRYSTAL_BIND_DONT_UPGRADE,
+                ) || target_template.unique != 0
                 {
                     CombineItemOutcome::AckOnlyFailure
                 } else if !crystal_socket_source_valid_for_item(&source_item, &target_key) {
@@ -22979,6 +23009,7 @@ fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, prefe
         gem_count: equipment.gem_count,
         sealed_expiry_time_binary_datetime: equipment.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: equipment.sealed_next_time_binary_datetime,
+        rental_binding_flags: equipment.rental_binding_flags,
         attack: equipment.attack,
         defence: equipment.defence,
         heal_hp: 0,
@@ -24871,6 +24902,7 @@ fn equip_inventory_item(
         gem_count: item.gem_count,
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
+        rental_binding_flags: item.rental_binding_flags,
         attack: item.attack,
         defence: item.defence,
     };
@@ -25533,6 +25565,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -25559,6 +25592,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25586,6 +25620,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25613,6 +25648,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 2,
             heal_hp: 0,
@@ -25640,6 +25676,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 5,
             defence: 0,
             heal_hp: 0,
@@ -25667,6 +25704,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 4,
             heal_hp: 0,
@@ -25693,6 +25731,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25724,6 +25763,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -25750,6 +25790,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25776,6 +25817,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -25807,6 +25849,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 35,
@@ -25833,6 +25876,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 2,
             heal_hp: 0,
@@ -25862,6 +25906,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 4,
             defence: 0,
         },
@@ -25885,6 +25930,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 3,
         },
@@ -25907,6 +25953,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 1,
             defence: 0,
         },
@@ -25929,6 +25976,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 1,
         },
@@ -25951,6 +25999,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 1,
         },
@@ -25973,6 +26022,7 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
         },
@@ -26360,6 +26410,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26394,6 +26445,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26427,6 +26479,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26460,6 +26513,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26500,6 +26554,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26539,6 +26594,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26583,6 +26639,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26616,6 +26673,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26692,6 +26750,7 @@ mod tests {
             gem_count,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26777,6 +26836,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -26817,6 +26877,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -26859,6 +26920,7 @@ mod tests {
             gem_count: 0,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
             attack,
             defence,
             heal_hp: 0,
@@ -47255,6 +47317,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -47325,6 +47388,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -48752,6 +48816,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -50573,6 +50638,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 0,
                 heal_hp: 0,
@@ -51854,6 +51920,7 @@ mod tests {
                 gem_count: 0,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
                 attack: 0,
                 defence: 4,
                 heal_hp: 0,
@@ -53080,6 +53147,43 @@ mod tests {
                     == u8::try_from(EXPANDED_STORAGE_SLOTS - 1)
                         .expect("expanded slot should fit in u8")
             }));
+    }
+
+    #[test]
+    fn storage_rejects_rental_dont_store_binding_flags() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 0 && item.container == ItemContainer::Bag1)
+                .expect("starter bag item should exist");
+            item.rental_binding_flags = super::CRYSTAL_BIND_DONT_STORE;
+        }
+
+        activate_storage_service(&mut session);
+        let packets = session.handle_packet(ClientPacket::StoreItem { from: 0, to: 7 });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::StoreItem {
+                from: 0,
+                to: 7,
+                success: false
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.slot == 0
+                && item.container == ItemContainer::Bag1
+                && item.rental_binding_flags == super::CRYSTAL_BIND_DONT_STORE
+        }));
+        assert!(!resources.storage_items.iter().any(|item| item.slot == 7));
     }
 
     #[test]
@@ -55367,6 +55471,58 @@ mod tests {
     }
 
     #[test]
+    fn combine_item_packet_socket_branch_rejects_rental_dont_upgrade_ack_only() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        add_socket_source_test_item(&mut session, 31, 1);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.rental_binding_flags = super::CRYSTAL_BIND_DONT_UPGRADE;
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("dagger should remain");
+        assert_eq!(
+            super::user_item_from_item_state(dagger)
+                .rental_information
+                .as_ref()
+                .map(|info| info.binding_flags),
+            Some(super::CRYSTAL_BIND_DONT_UPGRADE)
+        );
+    }
+
+    #[test]
     fn combine_item_packet_seal_branch_emits_crystal_ack_and_seal_change() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -55604,6 +55760,52 @@ mod tests {
         let resources = session.app.world().resource::<SimulationResources>();
         assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
         assert!(resources.inventory_items.iter().any(|item| item.slot == 32));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_rejects_rental_dont_upgrade_ack_only() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.rental_binding_flags = super::CRYSTAL_BIND_DONT_UPGRADE;
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.slot == 32
+                && item.gem_count == 0
+                && item.added_attack == 0
+                && item.rental_binding_flags == super::CRYSTAL_BIND_DONT_UPGRADE
+        }));
     }
 
     #[test]

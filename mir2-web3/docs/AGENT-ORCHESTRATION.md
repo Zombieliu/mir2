@@ -110,11 +110,11 @@ The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file a
 
 Current checkpoint:
 
-- Active round: `2026-04-23-R30`.
-- Active task: select the next bounded parity bite after verified R29 bounded `CombineItem` repair-hammer/sewing completion.
-- Active round state: task-selection stage only; do not reopen R29 unless source inspection or tests show a regression.
-- Last completed round: `2026-04-23-R29`, Crystal inventory-grid `CombineItem` repair-hammer and sewing parity.
-- Backend/server parity estimate: `77.17%`.
+- Active round: `2026-04-23-R31`.
+- Active task: select the next bounded parity bite after verified R30 rental binding flag parity completion.
+- Active round state: task-selection stage only; do not reopen R30 unless source inspection or tests show a regression.
+- Last completed round: `2026-04-23-R30`, Crystal rental binding flags for current storage and combine item paths.
+- Backend/server parity estimate: `77.18%`.
 - Whole-project 1:1 estimate: roughly `61.7%`.
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 
@@ -122,6 +122,7 @@ Latest completed rounds:
 
 | Round | Result |
 | --- | --- |
+| R30 | Crystal rental `BindingFlags` now persist through runtime item/equipment state, surface in `UserItem.RentalInformation`, block storage `DontStore`, and block current socket/upgrade `CombineItem` `DontUpgrade` ack-only with 472-test `mir2-simulation` regression green. |
 | R29 | Crystal inventory-grid `CombineItem` repair-hammer/sewing parity, including `ItemRepaired`, `ItemNoRepairNeeded`, and 469-test `mir2-simulation` regression green. |
 | R28 | Crystal `CombineItem` top-level target item-type gating across socket/seal/upgrade packet branches, including 466-test `mir2-simulation` regression green. |
 | R27 | Crystal inventory-grid `CombineItem` shape-3/4 gem/orb upgrade parity, including `ItemUpgraded`, persisted `gem_count`, and 465-test `mir2-simulation` regression green. |
@@ -139,5 +140,5 @@ Restart rule:
 
 - Read `docs/AGENT-RESUME-HANDOFF.md` before continuing after a reboot or context loss.
 - Relaunch read-only explorers for any subagent findings that were not written to docs.
-- Continue from R30 task selection without asking for routine confirmation; choose the next bounded task from the queue before starting new code work.
+- Continue from R31 task selection without asking for routine confirmation; choose the next bounded task from the queue before starting new code work.
 - On this Mac verification environment, use `cargo +1.89.0` for Rust checks/tests unless the toolchain is explicitly pinned later; default `rustc 1.87.0` does not compile locked `bevy_* 0.17.3`.
