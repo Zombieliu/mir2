@@ -1,124 +1,101 @@
 # apps/gateway
 
-Rust gateway workspace for the rewrite.
+Rust gateway for the Mir2 Web3 rewrite.
 
 ## Current Status
 
-The gateway now fronts a separate `simulation` crate for authority logic, but it
-is still an early local dev gateway rather than the final production service.
+The gateway is no longer just an early bootstrap stub. It fronts `apps/simulation`
+for authority logic, exposes browser HTTP/WebSocket routes, accepts Crystal-framed
+TCP packets, persists account/character state through the configured account
+store, and carries the local packet trace harness used by the 1:1 parity docs.
 
-Current implementation files:
+It is still not marked as a fully accepted drop-in Crystal replacement. The
+remaining hard gates are live Crystal packet comparison through
+`MIR2_CRYSTAL_TCP_ADDR`, missing local `Crystal/Build/Server/Debug/Server.MirDB`
+data import evidence, and final human Crystal visual/feel acceptance.
 
-- [Cargo.toml](/E:/mir2/mir2-web3/apps/gateway/Cargo.toml)
-- [src/main.rs](/E:/mir2/mir2-web3/apps/gateway/src/main.rs)
-- [src/session.rs](/E:/mir2/mir2-web3/apps/gateway/src/session.rs)
-- [src/bin/smoke.rs](/E:/mir2/mir2-web3/apps/gateway/src/bin/smoke.rs)
+## Main Surfaces
 
-## What It Does
+- `src/main.rs`: HTTP/WebSocket/TCP gateway entry point.
+- `src/session.rs`: Crystal-framed TCP session handling.
+- `src/web.rs`: browser API, WebSocket commands, and JSON event projection.
+- `src/bin/smoke.rs`: scripted local TCP smoke.
+- `src/bin/packet_trace.rs`: local/live packet trace and matrix artifact harness.
 
-- accepts Crystal-framed TCP packets
-- exposes HTTP + WebSocket for browser manual smoke
-- sends `Connected` on socket accept
-- handles:
-  - `ClientVersion`
-  - `Login`
-  - `NewCharacter`
-  - `StartGame`
-  - `Turn`
-  - `Walk`
-  - `Run`
-- `Chat`
-  - `KeepAlive`
-  - `LogOut`
-- forwards command handling into `apps/simulation`
+## Supported Local Flows
 
-## Bootstrap Sequence
-
-The current local stub emits:
-
-1. `StartGame { result = 4 }`
-2. `MapInformation`
-3. `UserInformation` as raw payload bytes
-4. `UserLocation`
-5. `Chat` welcome line
-
-## Important Limitation
-
-This is not yet a drop-in Crystal-compatible gameplay server.
-
-Known gaps:
-
-- no persistence
-- no real account validation
-- no AOI or entity streaming
-- `UserInformation` is manually encoded for a minimal bootstrap only
-- no `ObjectPlayer`/`ObjectMonster`/`ObjectNPC` feed yet
-- no Sui integration yet
-
-## Intended Near-Term Use
-
-This gateway exists so the rewrite can validate:
-
-- the Rust protocol crate
-- the Crystal packet order we actually need
-- a deterministic login/start-game smoke path
-- the boundary between transport and authority
-
-## Planned Next Step
-
-After this step, the next gateway work is:
-
-1. add richer browser-side smoke assertions
-2. replace raw bootstrap payloads with typed decode/encode paths
-3. move from single-session local state to multi-session simulation integration
+The current gateway covers local account lifecycle, login/start-game bootstrap,
+movement/chat/keepalive, inventory/storage actions, basic combat packets, and
+storage password actions through the simulation runtime. Exact Crystal acceptance
+is tracked in `docs/BACKEND-1TO1-PROGRESS.md`, `docs/CRYSTAL-SERVER-PARITY.md`,
+and `docs/PARITY-HARNESS.md`.
 
 ## Local Run
 
-Use non-default ports if `7000` or `7010` are already occupied on your machine.
-
-Example:
+Use non-default ports if `7000` or `7010` are already occupied.
 
 ```powershell
-$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7100'
-$env:MIR2_GATEWAY_WEB_ADDR='127.0.0.1:7110'
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7000'
+$env:MIR2_GATEWAY_WEB_ADDR='127.0.0.1:7010'
 cargo run -p mir2-gateway --bin mir2-gateway
 ```
 
 Manual browser surface:
 
-- [http://127.0.0.1:7110/](http://127.0.0.1:7110/)
+- `http://127.0.0.1:7010/`
 
 Health check:
 
-- [http://127.0.0.1:7110/health](http://127.0.0.1:7110/health)
+- `http://127.0.0.1:7010/health`
+
+## Smoke And Trace
 
 Scripted TCP smoke:
 
 ```powershell
-$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7100'
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7000'
 cargo run -p mir2-gateway --bin smoke
 ```
 
-## Current Human Test Path
+List packet trace flows:
 
-In the browser page:
+```powershell
+cd E:\mir2\mir2-web3
+cargo run -p mir2-gateway --bin packet_trace -- --list-flows
+```
 
-1. click `Connect`
-2. click `Send ClientVersion`
-3. click `Login`
-4. click `Start Game`
-5. click movement buttons and confirm `UserLocation` / `ObjectRun` style events appear
-6. send chat and confirm both `Chat` and `ObjectChat` appear in the event log
+Capture the local packet trace matrix:
 
-The current verified local smoke sequence is:
+```powershell
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7000'
+$env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
+cargo run -p mir2-gateway --bin packet_trace -- --matrix
+```
 
-- `Connected`
-- `ClientVersion`
-- `LoginSuccess`
-- `StartGame`
-- `MapInformation`
-- `UserInformation`
-- `UserLocation`
-- `Chat`
-- movement update
-- chat echo
+Capture local and live Crystal side by side:
+
+```powershell
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7000'
+$env:MIR2_CRYSTAL_TCP_ADDR='<crystal-host>:<crystal-port>'
+$env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_CRYSTAL='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_DIFF_CLEAN='1'
+cargo run -p mir2-gateway --bin packet_trace -- --matrix
+```
+
+Matrix output is written under `docs/generated/packet-traces/matrix` unless
+`MIR2_PACKET_TRACE_MATRIX_OUT_DIR` is set.
+
+## Current Limitations
+
+- Live Crystal diff is blocked until `MIR2_CRYSTAL_TCP_ADDR` points at a stable
+  Crystal server fixture.
+- Source-data import remains blocked on machines that do not have
+  `Crystal/Build/Server/Debug/Server.MirDB` and matching `Envir/Routes`.
+- Some full-project systems are still covered by WebSocket/UI smoke or simulation
+  baselines rather than accepted live Crystal TCP traces.
+- `100% Candidate` is an automation status, not final `100% Accepted`.

@@ -1,5 +1,7 @@
 # Backend 1:1 Progress
 
+> Latest sync: R225 completed on the integration/global Candidate track; backend/server gameplay code is unchanged from R183 and remains green. `mir2-gateway` now passes 54/54 including packet trace bin tests 7/7 after adding matrix summary coverage, local require-mode matrix evidence wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r225-matrix`, and full package regressions passed (`mir2-game-data` 22/22, `mir2-simulation` 664/664). Active follow-up round is R226; backend/server tracked-slice parity estimate is 99.70%, automation status is 100.0% Candidate, and real full-project accepted 1:1 remains roughly 90.0%.
+
 > Latest sync: R224 completed on the integration/global Candidate track; backend/server gameplay code is unchanged from R183 and remains green. The `mir2-gateway` packet trace bin target is restored, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local matrix evidence wrote 9/9 TCP-traceable artifacts with `localOk=true`. Active follow-up round is R225; backend/server tracked-slice parity estimate is 99.70%, automation status is 100.0% Candidate, and real full-project accepted 1:1 remains roughly 90.0%.
 
 > Latest sync: R219-R222 completed on the frontend/global track; backend/server code is unchanged from R183. R183 left runtime interaction quest hints in the UI namespace `custom.interaction.questHint`, synchronized generated localization, and left no `sim.*` references in `apps/simulation/src/runtime.rs`. Latest backend validation remains `mir2-game-data` 22/22, focused simulation 1/1, `cargo +1.89.0 fmt --check`, and full `mir2-simulation` 664/664. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
@@ -58,8 +60,8 @@ Backend/server tracked-slice parity estimate: **99.70%**. This is a backend/serv
 
 Backend rounds:
 - Completed rounds: **R82**, **R83**, **R84**, **R85**, **R86**, **R87**, **R88**, **R89**, **R90**, **R91**, **R92**, **R93**, **R94**, **R95**, **R96**, **R97**, **R98**, **R99**, **R100**, **R101**, **R102**, **R103**, **R104**, **R105**, **R106**, **R107**, **R108**, **R109**, **R110**, **R111**, **R112**, **R113**, **R114**, **R115**, **R116**, **R117**, **R118**, **R119**, **R120**, **R121**, **R122**, **R123**, **R124**, **R125**, **R126**, **R127**, **R128**, **R129**, **R130**, **R131**, **R132**, **R133**, **R134**, **R135**, **R136**, **R137**, **R138**, **R139**, **R140**, **R141**, **R142**, **R143**, **R144**, **R145**, **R146**, **R147**, **R148**, **R149**, **R150**, **R151**, **R152**, **R153**, **R154**, **R155**, **R156**, **R157**, **R158**, **R159**, **R160**, **R161**, **R162**, **R163**, **R164**, **R165**, **R166**, **R167**, **R168**, **R169**, **R170**, **R171**, **R172**, **R173**, **R174**, **R175**, **R176**, **R177**, **R178**, **R179**, **R180**, **R181**, **R182**, **R183**
-- Active round: **R225**
-- Full-suite regression status: **664/664** passing after R223; latest `mir2-gateway` **53/53** passing after R224; `mir2-game-data` **22/22** passing after R223
+- Active round: **R226**
+- Full-suite regression status: **664/664** passing after R225; latest `mir2-gateway` **54/54** passing after R225; `mir2-game-data` **22/22** passing after R225
 - Whole-project automation status: **100.0% Candidate**
 - Whole-project real accepted 1:1 estimate: **roughly 90.0%**
 

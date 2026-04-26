@@ -13,6 +13,7 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-04-26 R225 regression refresh: `smoke:stage5-ui` still captures 88 screenshots and now writes manifest summary counts (8 compact panel bounds, 34 compact text nodes, 0 critical console errors, major flow counts). Direct `next build`, `tsc --noEmit`, map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, Rust package regressions, `fmt --check`, and `diff --check` passed. The remaining frontend rows below are Candidate/human-acceptance rows, not unverified automatable gaps on this Mac.
 - 2026-04-26 R224 integration evidence: `packet_trace --list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 TCP-traceable artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`. Frontend/global automation remains **100% Candidate**; 100% Accepted still requires human Crystal visual/feel acceptance.
 - 2026-04-26 R223 Candidate evidence: `smoke:stage5-ui` now captures 88 screenshots and records advanced Stage 5 systems state plus compact Mail/Report panel bounds. Direct `next build`, `tsc --noEmit`, map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, full Rust package regressions, `fmt --check`, and `diff --check` passed.
 - `npm.cmd run build`
@@ -71,6 +72,8 @@ Status values:
 | [~] | Scene interaction | tile buttons avoid scene pointer double-dispatch; added-stat ground drops render with server-provided Crystal Cyan name colour; selected scene targets route keyboard approach/primary actions; Blue Potion and gold ground pickup plus combat target selection are smoke-verified; deeper combat feel still needs human pass | route replay and human pass |
 | [~] | Responsive/layout | 1024x768 and 820x640 compact Stage 5 route now avoid core stage/HUD/chat/minimap viewport overflow, compact inventory/storage/character/system-menu/chat-settings/Mail/Report bounds are smoke-verified, and compact system-menu overflow is fixed; broader human mobile feel remains open | screenshot checks |
 | [~] | Language/text | Compact visible core quest/HUD/minimap/belt/chat/entity text is smoke-checked with no overflow; full language matrix and all panel states remain open | screenshot and DOM checks |
+
+Candidate note: as of R225, all rows above have automated evidence for the Mac-available route. They intentionally remain `[~]` until direct Crystal screenshots/live comparisons or human visual/feel acceptance close them; automation should not flip them to `[x]` by itself.
 
 ## Recent Frontend Fixes
 

@@ -1240,9 +1240,27 @@ async function main() {
     }
 
     const stage5State = await client.evaluate("window.__mir2Stage5?.state ?? null");
+    const summary = {
+      screenshotCount: screenshots.length,
+      compactPanelCount: compactPanelLayout.length,
+      compactTextNodeCount: compactTextLayout.checked,
+      criticalConsoleErrorCount: client.consoleErrors.length,
+      flowCounts: {
+        inventory: inventoryFlow.length,
+        storage: storageFlow.length,
+        storagePassword: storagePasswordFlow.length,
+        chat: chatFlow.length,
+        systemMenu: systemMenuFlow.length,
+        stage5Systems: stage5SystemsFlow.length,
+        login: loginFlow.length,
+        select: selectFlow.length,
+        belt: beltFlow.length,
+      },
+    };
     const manifest = {
       baseUrl: BASE_URL,
       generatedAt: new Date().toISOString(),
+      summary,
       viewports: VIEWPORTS,
       compactLayout,
       compactTextLayout,

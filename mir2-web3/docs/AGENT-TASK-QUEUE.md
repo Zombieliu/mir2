@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest sync: R225 completed. Mac-local Candidate regression is green: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots, summary counts in manifest), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54 including packet trace bin tests 7/7, `mir2-simulation` 664/664, require-local `packet_trace --matrix` wrote 9 local artifacts with 17 intended skips under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. R225 also added the Windows continuation checklist and cleaned the stale gateway README. Active follow-up round is R226 for Windows/live Crystal/human acceptance blockers; status remains **100% Candidate**, backend/server tracked slice **99.70%**, real full-project accepted 1:1 **roughly 90.0%**.
+
 > Latest sync: R224 completed. The `mir2-gateway` `packet_trace` bin target is restored, `--list-flows` works, `mir2-gateway` now passes 53/53 including packet trace bin tests 6/6, and local require-mode `packet_trace --matrix` wrote 9/9 TCP-traceable matrix artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. Truthful status split: automated evidence is **100% Candidate**, backend/server tracked slice remains **99.70%**, and real full-project accepted 1:1 remains **roughly 90.0%**. Active follow-up round is R225 for final human acceptance / external blockers; remaining non-routine gates are final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB`, and missing live `MIR2_CRYSTAL_TCP_ADDR`.
 
 > Latest sync: R219-R222 completed. Frontend/global evidence advanced across login/select lifecycle, archived map API/minimap asset smoke JSON, refreshed WS load, compact multi-panel bounds, compact system-menu overflow fix, and NPC dialog link-capable rendering. Stage 5 UI smoke now captures 85 screenshots and records `loginFlow`, `selectFlow`, expanded `compactPanelLayout`, and existing broad gameplay/system flows. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
@@ -60,13 +62,19 @@ Status values:
 - `[x]` complete and verified
 - `[!]` blocked
 
-## Active Round: 2026-04-26-R225
+## Active Round: 2026-04-26-R226
 
-Restart note: R224 restored the local packet trace harness and refreshed matrix evidence. R223 reached **100% Candidate** and R224 removed the local `packet_trace` tooling blocker. Backend remains unchanged from R183 at 99.70% and is green with package regressions. Real full-project accepted 1:1 remains roughly 90.0% until human Crystal visual/feel acceptance, live Crystal trace comparison, and blocked source-data decisions are closed. Remaining items are not routine implementation work: final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB` for blocked map-data import, and missing `MIR2_CRYSTAL_TCP_ADDR` for live Crystal comparison.
+Restart note: R225 refreshed the Mac-local Candidate regression bundle and local packet trace matrix evidence. Backend gameplay code remains unchanged from R183 at 99.70% and is green with package regressions. Real full-project accepted 1:1 remains roughly 90.0% until human Crystal visual/feel acceptance, live Crystal trace comparison, and blocked source-data decisions are closed. Remaining items are not routine Mac implementation work: final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB` for blocked map-data import, and missing `MIR2_CRYSTAL_TCP_ADDR` for live Crystal comparison.
 
 | Status | Task | Owner | Write Set | Verification |
 | --- | --- | --- | --- | --- |
-| [~] | Track final human acceptance and external blockers after `R224` packet trace closure | Coordinator | docs only unless new assets/endpoints are provided | R223 passed 88 Stage 5 screenshots, archived map/minimap evidence, WS load 64/64, web build/type checks, `mir2-game-data` 22/22, full `mir2-simulation` 664/664, `fmt --check`, and `diff --check`; R224 restored `packet_trace`, `mir2-gateway` passed 53/53, and local matrix artifacts are refreshed; automation status is 100.0% Candidate, but real full-project accepted 1:1 remains roughly 90.0%. |
+| [~] | Track Windows/live Crystal/human acceptance blockers after `R225` Mac-local refresh | Coordinator | docs only unless new assets/endpoints are provided | R225 passed 88 Stage 5 screenshots, archived map/minimap evidence, WS load 64/64, web build/type checks, `mir2-game-data` 22/22, `mir2-gateway` 54/54, full `mir2-simulation` 664/664, require-local matrix 9/9 local artifacts, `fmt --check`, and `diff --check`; `docs/WINDOWS-CONTINUATION.md` defines the Windows handoff; automation status is 100.0% Candidate, but real full-project accepted 1:1 remains roughly 90.0%. |
+
+## Completed Round: 2026-04-26-R225
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Refreshed Mac-local Candidate regression and Windows handoff | Coordinator | `apps/gateway/src/bin/packet_trace.rs`, `apps/web/scripts/smoke-stage5-ui.mjs`, `apps/gateway/README.md`, `docs/WINDOWS-CONTINUATION.md`, `docs/generated/packet-traces/r225-matrix/*`, `docs/stage5-screenshots/*`, docs | Added manifest summary counts to Stage 5 UI smoke and packet trace matrix summary counts to `latest-matrix.json`; fixed the summary field to use `compactTextLayout.checked`; refreshed Stage 5/map/minimap/WS evidence; wrote R225 packet trace matrix artifacts; cleaned stale gateway README status; and added the Windows continuation checklist. Verified by web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke, map/minimap smokes, WS load, Rust package tests, `fmt --check`, and `diff --check`. |
 
 ## Completed Round: 2026-04-26-R224
 

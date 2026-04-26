@@ -1,6 +1,23 @@
 {
   "baseUrl": "http://127.0.0.1:3002",
-  "generatedAt": "2026-04-26T09:46:15.174Z",
+  "generatedAt": "2026-04-26T10:46:24.183Z",
+  "summary": {
+    "screenshotCount": 88,
+    "compactPanelCount": 8,
+    "compactTextNodeCount": 34,
+    "criticalConsoleErrorCount": 0,
+    "flowCounts": {
+      "inventory": 4,
+      "storage": 4,
+      "storagePassword": 4,
+      "chat": 7,
+      "systemMenu": 4,
+      "stage5Systems": 3,
+      "login": 8,
+      "select": 13,
+      "belt": 4
+    }
+  },
   "viewports": {
     "desktop": {
       "width": 1024,
@@ -1161,19 +1178,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 6,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 2,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
@@ -1210,19 +1227,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 6,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 2,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
@@ -1249,19 +1266,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 7,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 4,
           "durabilityMax": 10
         },
         {
@@ -1273,7 +1290,7 @@
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 1,
           "durabilityMax": 8
         },
         {
@@ -1298,19 +1315,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 7,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 4,
           "durabilityMax": 10
         },
         {
@@ -1322,7 +1339,7 @@
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 1,
           "durabilityMax": 8
         },
         {
@@ -1349,19 +1366,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 6,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 2,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
@@ -1398,19 +1415,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 6,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 2,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
@@ -1449,19 +1466,19 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 6,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 0,
+          "durabilityCurrent": 2,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 3,
           "durabilityMax": 10
         },
         {
@@ -1806,7 +1823,7 @@
       "storageItemCards": 0,
       "storageSlots": 80,
       "statusText": "",
-      "rentalText": "Expanded storage expires on 05/26/2026, 05:45 PM",
+      "rentalText": "Expanded storage expires on 05/26/2026, 06:45 PM",
       "rect": {
         "left": 441.0199890136719,
         "top": 212.40000915527344,
@@ -1861,7 +1878,7 @@
         "Cancel"
       ],
       "chatLines": [
-        "[5:45:45 PM] Storage expanded to 160 slots."
+        "[6:45:58 PM] Storage expanded to 160 slots."
       ]
     },
     {
@@ -1888,7 +1905,7 @@
         "Cancel"
       ],
       "chatLines": [
-        "[5:45:45 PM] Storage expanded to 160 slots."
+        "[6:45:58 PM] Storage expanded to 160 slots."
       ]
     },
     {
@@ -1915,8 +1932,8 @@
         "Cancel"
       ],
       "chatLines": [
-        "[5:45:45 PM] Storage expanded to 160 slots.",
-        "[5:45:47 PM] Storage password service is not available."
+        "[6:45:58 PM] Storage expanded to 160 slots.",
+        "[6:46:00 PM] Storage password service is not available."
       ]
     },
     {
@@ -1933,7 +1950,8 @@
       "inputValues": [],
       "actionLabels": [],
       "chatLines": [
-        "[5:45:47 PM] Storage password service is not available."
+        "[6:45:58 PM] Storage expanded to 160 slots.",
+        "[6:46:00 PM] Storage password service is not available."
       ]
     }
   ],
@@ -2606,12 +2624,12 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint"
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2674,12 +2692,12 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:00 PM] loading starter scene blueprint",
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:01 PM] loading starter scene blueprint"
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:12 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2708,12 +2726,12 @@
       "settingsOpen": true,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint"
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2742,12 +2760,12 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint"
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2776,12 +2794,12 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:03 PM] loading starter scene blueprint"
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2810,12 +2828,12 @@
       "settingsOpen": false,
       "reportOpen": true,
       "visibleLineTexts": [
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:03 PM] loading starter scene blueprint",
-        "[5:46:03 PM] loading starter scene blueprint"
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2846,7 +2864,7 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:01 PM] Guild filter check"
+        "[6:46:13 PM] Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line  channel-guild"
@@ -2904,12 +2922,12 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:01 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint"
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint",
+        "[6:46:13 PM] loading starter scene blueprint"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2976,7 +2994,7 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "MIR03R4WoomyonWoods(S) [1]Safe Zone",
       "rect": {
         "left": 705.4400024414062,
         "top": 93.84001159667969,
@@ -3089,7 +3107,7 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "MIR03R4WoomyonWoods(S) [1]Safe Zone",
       "rect": {
         "left": 705.4400024414062,
         "top": 93.84001159667969,
@@ -3143,7 +3161,7 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "MIR03R4WoomyonWoods(S) [1]Safe Zone",
       "rect": {
         "left": 705.4400024414062,
         "top": 93.84001159667969,
@@ -3218,7 +3236,7 @@
         "x": 330,
         "y": 270
       },
-      "metaText": "MIR4G02BichonProvince [0]Safe Zone",
+      "metaText": "MIR03R4BichonProvince [0]Safe Zone",
       "rect": {
         "left": 705.4400024414062,
         "top": 93.84001159667969,
@@ -3438,10 +3456,10 @@
       "open": true,
       "title": "Mail",
       "rows": [
-        "[5:45:58 PM] loading starter scene blueprint",
-        "[5:45:57 PM] loading starter scene blueprint",
-        "[5:45:57 PM] loading starter scene blueprint",
-        "[5:45:57 PM] loading starter scene blueprint"
+        "[6:46:09 PM] loading starter scene blueprint",
+        "[6:46:08 PM] loading starter scene blueprint",
+        "[6:46:08 PM] loading starter scene blueprint",
+        "[6:46:08 PM] loading starter scene blueprint"
       ],
       "emptyText": "",
       "footers": [
@@ -3473,12 +3491,12 @@
       "open": true,
       "title": "Report",
       "rows": [
-        "[5:46:03 PM] loading starter scene blueprint",
-        "[5:46:03 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint",
-        "[5:46:02 PM] loading starter scene blueprint"
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint",
+        "[6:46:14 PM] loading starter scene blueprint"
       ],
       "footers": [
         "6/6"
@@ -4113,7 +4131,7 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-8517-1777196731346",
+      "accountValue": "stage5-44743-1777200346168",
       "passwordFilled": true,
       "accountPanelVisible": false,
       "accountPanelText": "",
@@ -4139,10 +4157,10 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-8517-1777196731346",
+      "accountValue": "stage5-44743-1777200346168",
       "passwordFilled": true,
       "accountPanelVisible": true,
-      "accountPanelText": "View Keystage5-8517-1777196731346Close",
+      "accountPanelText": "View Keystage5-44743-1777200346168Close",
       "feedbackText": "",
       "runtimeStampVisible": true,
       "buttons": [
@@ -4165,7 +4183,7 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-8517-1777196731346",
+      "accountValue": "stage5-44743-1777200346168",
       "passwordFilled": true,
       "accountPanelVisible": false,
       "accountPanelText": "",
@@ -4191,7 +4209,7 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-8517-1777196731346",
+      "accountValue": "stage5-44743-1777200346168",
       "passwordFilled": true,
       "accountPanelVisible": false,
       "accountPanelText": "",
@@ -4228,7 +4246,7 @@
       "label": "initial",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4301,7 +4319,7 @@
       "label": "spanishLanguage",
       "screen": "select",
       "language": "es",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4374,7 +4392,7 @@
       "label": "englishLanguageRestored",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4447,7 +4465,7 @@
       "label": "creditsPanel",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4504,7 +4522,7 @@
         }
       ],
       "creditsPanelVisible": true,
-      "creditsPanelText": "CreditsLegend of Mir 2stage5-8517-1777196731346Close",
+      "creditsPanelText": "CreditsLegend of Mir 2stage5-44743-1777200346168Close",
       "deletePanelVisible": false,
       "deletePanelText": "",
       "selectedSlotName": "Scout",
@@ -4520,7 +4538,7 @@
       "label": "creditsClosed",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4593,7 +4611,7 @@
       "label": "deleteConfirm",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4666,7 +4684,7 @@
       "label": "deleteCancelled",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -4739,7 +4757,7 @@
       "label": "afterUiNewCharacter",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 2,
       "characters": [
@@ -4752,7 +4770,7 @@
         },
         {
           "index": 1,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": 1,
           "classKey": "warrior",
           "gender": "male"
@@ -4779,7 +4797,7 @@
           "disabled": false,
           "empty": false,
           "selected": false,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": "1",
           "job": "Warrior"
         },
@@ -4819,7 +4837,7 @@
       "label": "newCharacterSlotSelected",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 1,
       "characterCount": 2,
       "characters": [
@@ -4832,7 +4850,7 @@
         },
         {
           "index": 1,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": 1,
           "classKey": "warrior",
           "gender": "male"
@@ -4859,7 +4877,7 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": "1",
           "job": "Warrior"
         },
@@ -4886,7 +4904,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "MIR3XIS",
+      "selectedSlotName": "MIRRPDY",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4899,7 +4917,7 @@
       "label": "deleteCreatedConfirm",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 1,
       "characterCount": 2,
       "characters": [
@@ -4912,7 +4930,7 @@
         },
         {
           "index": 1,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": 1,
           "classKey": "warrior",
           "gender": "male"
@@ -4939,7 +4957,7 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "MIR3XIS",
+          "name": "MIRRPDY",
           "level": "1",
           "job": "Warrior"
         },
@@ -4965,8 +4983,8 @@
       "creditsPanelVisible": false,
       "creditsPanelText": "",
       "deletePanelVisible": true,
-      "deletePanelText": "Delete CharacterMIR3XISConfirmClose",
-      "selectedSlotName": "MIR3XIS",
+      "deletePanelText": "Delete CharacterMIRRPDYConfirmClose",
+      "selectedSlotName": "MIRRPDY",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4979,7 +4997,7 @@
       "label": "afterUiDeleteCharacter",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
@@ -5052,7 +5070,7 @@
       "label": "afterUiRecreateCharacter",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 0,
       "characterCount": 2,
       "characters": [
@@ -5065,7 +5083,7 @@
         },
         {
           "index": 1,
-          "name": "MIR4G02",
+          "name": "MIR03R4",
           "level": 1,
           "classKey": "warrior",
           "gender": "male"
@@ -5092,7 +5110,7 @@
           "disabled": false,
           "empty": false,
           "selected": false,
-          "name": "MIR4G02",
+          "name": "MIR03R4",
           "level": "1",
           "job": "Warrior"
         },
@@ -5132,7 +5150,7 @@
       "label": "recreatedCharacterSlotSelected",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-8517-1777196731346",
+      "accountId": "stage5-44743-1777200346168",
       "selectedCharacterIndex": 1,
       "characterCount": 2,
       "characters": [
@@ -5145,7 +5163,7 @@
         },
         {
           "index": 1,
-          "name": "MIR4G02",
+          "name": "MIR03R4",
           "level": 1,
           "classKey": "warrior",
           "gender": "male"
@@ -5172,7 +5190,7 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "MIR4G02",
+          "name": "MIR03R4",
           "level": "1",
           "job": "Warrior"
         },
@@ -5199,7 +5217,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "MIR4G02",
+      "selectedSlotName": "MIR03R4",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -5314,16 +5332,16 @@
       "group": {
         "lootMode": "roundRobin",
         "members": [
-          "MIR4G02",
+          "MIR03R4",
           "Miner"
         ]
       },
       "guild": {
         "chatLog": [
-          "MIR4G02: Guild ready"
+          "MIR03R4: Guild ready"
         ],
         "members": [
-          "MIR4G02"
+          "MIR03R4"
         ],
         "name": "BichonGuard",
         "permissions": [
@@ -5345,7 +5363,7 @@
           "body": "Take this",
           "claimed": true,
           "deleted": false,
-          "from": "MIR4G02",
+          "from": "MIR03R4",
           "gold": 5,
           "id": 1,
           "items": [],
@@ -5463,16 +5481,16 @@
       "group": {
         "lootMode": "roundRobin",
         "members": [
-          "MIR4G02",
+          "MIR03R4",
           "Miner"
         ]
       },
       "guild": {
         "chatLog": [
-          "MIR4G02: Guild ready"
+          "MIR03R4: Guild ready"
         ],
         "members": [
-          "MIR4G02"
+          "MIR03R4"
         ],
         "name": "BichonGuard",
         "permissions": [
@@ -5494,7 +5512,7 @@
           "body": "Take this",
           "claimed": true,
           "deleted": true,
-          "from": "MIR4G02",
+          "from": "MIR03R4",
           "gold": 5,
           "id": 1,
           "items": [],
@@ -5509,7 +5527,7 @@
           "id": 1,
           "itemKey": "auction-ui-relic",
           "price": 35,
-          "seller": "MIR4G02",
+          "seller": "MIR03R4",
           "sold": true
         },
         {
@@ -5517,7 +5535,7 @@
           "id": 2,
           "itemKey": "auction-cancel-ui",
           "price": 45,
-          "seller": "MIR4G02",
+          "seller": "MIR03R4",
           "sold": false
         }
       ],
@@ -5650,7 +5668,7 @@
         "id": 1,
         "itemKey": "auction-ui-relic",
         "price": 35,
-        "seller": "MIR4G02",
+        "seller": "MIR03R4",
         "sold": true
       },
       {
@@ -5658,7 +5676,7 @@
         "id": 2,
         "itemKey": "auction-cancel-ui",
         "price": 45,
-        "seller": "MIR4G02",
+        "seller": "MIR03R4",
         "sold": false
       }
     ],
@@ -5680,17 +5698,17 @@
     "group": {
       "lootMode": "roundRobin",
       "members": [
-        "MIR4G02",
+        "MIR03R4",
         "Miner"
       ]
     },
     "guild": {
       "chatLog": [
-        "MIR4G02: Guild ready",
-        "MIR4G02: Guild filter check"
+        "MIR03R4: Guild ready",
+        "MIR03R4: Guild filter check"
       ],
       "members": [
-        "MIR4G02"
+        "MIR03R4"
       ],
       "name": "BichonGuard",
       "permissions": [
@@ -5717,7 +5735,7 @@
         "body": "Take this",
         "claimed": true,
         "deleted": true,
-        "from": "MIR4G02",
+        "from": "MIR03R4",
         "gold": 5,
         "id": 1,
         "items": [],

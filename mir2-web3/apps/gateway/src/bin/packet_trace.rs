@@ -60,8 +60,25 @@ struct MatrixArtifact {
     schema_version: u8,
     generated_at_unix_ms: u128,
     fixture: Fixture,
+    summary: MatrixSummary,
     artifacts: Vec<MatrixEntry>,
     skipped: Vec<MatrixSkip>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MatrixSummary {
+    artifact_count: usize,
+    skipped_count: usize,
+    local_ok_count: usize,
+    local_failed_count: usize,
+    crystal_ok_count: usize,
+    crystal_failed_count: usize,
+    crystal_missing_count: usize,
+    diff_clean_count: usize,
+    diff_dirty_count: usize,
+    diff_missing_count: usize,
+    accepted_live_comparison_count: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -246,6 +263,7 @@ async fn capture_matrix(fixture: &Fixture) -> Result<MatrixArtifact, Box<dyn std
         schema_version: 1,
         generated_at_unix_ms: now_unix_ms(),
         fixture: fixture.clone(),
+        summary: matrix_summary(&artifacts, &skipped),
         artifacts,
         skipped,
     };
@@ -258,6 +276,45 @@ async fn capture_matrix(fixture: &Fixture) -> Result<MatrixArtifact, Box<dyn std
         report.skipped.len()
     );
     Ok(report)
+}
+
+fn matrix_summary(artifacts: &[MatrixEntry], skipped: &[MatrixSkip]) -> MatrixSummary {
+    MatrixSummary {
+        artifact_count: artifacts.len(),
+        skipped_count: skipped.len(),
+        local_ok_count: artifacts.iter().filter(|entry| entry.local_ok).count(),
+        local_failed_count: artifacts.iter().filter(|entry| !entry.local_ok).count(),
+        crystal_ok_count: artifacts
+            .iter()
+            .filter(|entry| entry.crystal_ok == Some(true))
+            .count(),
+        crystal_failed_count: artifacts
+            .iter()
+            .filter(|entry| entry.crystal_ok == Some(false))
+            .count(),
+        crystal_missing_count: artifacts
+            .iter()
+            .filter(|entry| entry.crystal_ok.is_none())
+            .count(),
+        diff_clean_count: artifacts
+            .iter()
+            .filter(|entry| entry.diff_clean == Some(true))
+            .count(),
+        diff_dirty_count: artifacts
+            .iter()
+            .filter(|entry| entry.diff_clean == Some(false))
+            .count(),
+        diff_missing_count: artifacts
+            .iter()
+            .filter(|entry| entry.diff_clean.is_none())
+            .count(),
+        accepted_live_comparison_count: artifacts
+            .iter()
+            .filter(|entry| {
+                entry.local_ok && entry.crystal_ok == Some(true) && entry.diff_clean == Some(true)
+            })
+            .count(),
+    }
 }
 
 async fn capture_flow(
@@ -918,5 +975,52 @@ mod tests {
             sanitize_file_stem("account.version_login_start"),
             "account-version_login_start"
         );
+    }
+
+    #[test]
+    fn matrix_summary_counts_local_crystal_and_diff_statuses() {
+        let artifacts = vec![
+            MatrixEntry {
+                matrix_id: "ok".to_string(),
+                trace_flow: "core_bootstrap".to_string(),
+                path: "ok.json".to_string(),
+                local_ok: true,
+                crystal_ok: Some(true),
+                diff_clean: Some(true),
+            },
+            MatrixEntry {
+                matrix_id: "dirty".to_string(),
+                trace_flow: "core_bootstrap".to_string(),
+                path: "dirty.json".to_string(),
+                local_ok: true,
+                crystal_ok: Some(true),
+                diff_clean: Some(false),
+            },
+            MatrixEntry {
+                matrix_id: "local-failed".to_string(),
+                trace_flow: "core_bootstrap".to_string(),
+                path: "local-failed.json".to_string(),
+                local_ok: false,
+                crystal_ok: None,
+                diff_clean: None,
+            },
+        ];
+        let skipped = vec![MatrixSkip {
+            matrix_id: "ui-only".to_string(),
+            reason: "matrix entry does not declare traceFlow".to_string(),
+        }];
+
+        let summary = matrix_summary(&artifacts, &skipped);
+
+        assert_eq!(summary.artifact_count, 3);
+        assert_eq!(summary.skipped_count, 1);
+        assert_eq!(summary.local_ok_count, 2);
+        assert_eq!(summary.local_failed_count, 1);
+        assert_eq!(summary.crystal_ok_count, 2);
+        assert_eq!(summary.crystal_missing_count, 1);
+        assert_eq!(summary.diff_clean_count, 1);
+        assert_eq!(summary.diff_dirty_count, 1);
+        assert_eq!(summary.diff_missing_count, 1);
+        assert_eq!(summary.accepted_live_comparison_count, 1);
     }
 }
