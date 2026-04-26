@@ -1,6 +1,14 @@
 import { performance } from "node:perf_hooks";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 const BASE_URL = process.env.MIR2_WEB_BASE_URL ?? process.argv[2] ?? "http://127.0.0.1:3002";
+const OUTPUT_PATH = path.resolve(
+  process.cwd(),
+  "..",
+  "..",
+  process.env.MIR2_MAP_API_SMOKE_OUT ?? "docs/generated/map/latest-crystal-map-api.json",
+);
 const REQUEST_TIMEOUT_MS = Number.parseInt(process.env.MIR2_MAP_API_TIMEOUT_MS ?? "60000", 10);
 const FIRST_PASS_LIMIT_MS = Number.parseInt(process.env.MIR2_MAP_API_FIRST_PASS_LIMIT_MS ?? "60000", 10);
 const WARM_PASS_LIMIT_MS = Number.parseInt(process.env.MIR2_MAP_API_WARM_LIMIT_MS ?? "2000", 10);
@@ -47,6 +55,21 @@ for (const pass of ["first", "warm"]) {
 }
 
 console.table(results);
+
+const summary = {
+  baseUrl: BASE_URL,
+  generatedAt: new Date().toISOString(),
+  requestTimeoutMs: REQUEST_TIMEOUT_MS,
+  firstPassLimitMs: FIRST_PASS_LIMIT_MS,
+  warmPassLimitMs: WARM_PASS_LIMIT_MS,
+  targetCount: MAPS.length,
+  requestCount: results.length,
+  failures,
+  results,
+};
+await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(summary, null, 2)}\n`);
+console.log(`Wrote ${OUTPUT_PATH}`);
 
 if (failures.length > 0) {
   console.error("Crystal map API smoke failed:");

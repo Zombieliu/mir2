@@ -211,6 +211,10 @@ type GatewayNpcDialog = {
   title: string;
   body: string[];
   footer: string;
+  links?: Array<{
+    text?: unknown;
+    target?: unknown;
+  }>;
   input?: {
     target: string;
     prompt: string;
@@ -363,6 +367,10 @@ type NpcDialog = {
   title: string;
   body: string[];
   footer: string;
+  links: Array<{
+    text: string;
+    target: string;
+  }>;
   input?: {
     target: string;
     prompt: string;
@@ -632,6 +640,14 @@ export default function HomePage() {
 
     async function bootRuntime() {
       try {
+        if (!hasWebGl2Support()) {
+          const message = "Bevy runtime skipped because WebGL2 is unavailable.";
+          setRuntimePhase("dom-only");
+          setRuntimeMessage(message);
+          appendLog(message, "network");
+          return;
+        }
+
         appendLog(t("runtime.loadingModule"));
         const runtimePath = "/bevy-runtime/pkg/mir2_bevy_runtime.js";
         const runtime = (await import(
@@ -830,8 +846,31 @@ export default function HomePage() {
         send: (command: Record<string, unknown>) => boolean;
         state: {
           screen: ClientScreen;
+          language: Mir2Language;
+          accountId: string;
+          wsState: string;
+          loginBusy: boolean;
+          selectedCharacterIndex: number;
+          characters: SelectCharacterEntry[];
           mapFileName: string | null;
           mapTitle: string | null;
+          player: { x: number; y: number } | null;
+          selectedObjectId: string | null;
+          entities: WorldEntity[];
+          groundDrops: GroundDrop[];
+          beltItems: WorldItem[];
+          inventoryItems: WorldItem[];
+          storageItems: WorldItem[];
+          equipmentItems: EquipmentItem[];
+          gold: number;
+          activeInventoryTab: "bag1" | "bag2" | "quest";
+          activeCharacterTab: "char" | "stats1" | "stats2" | "spells";
+          hasExpandedStorage: boolean;
+          hasStoragePassword: boolean;
+          requireStoragePassword: boolean;
+          storageSessionUnlocked: boolean;
+          knownSkills: KnownSkill[];
+          activeBuffs: ActiveBuff[];
           stage5Systems: Stage5SystemsState;
         };
       };
@@ -840,8 +879,31 @@ export default function HomePage() {
       send: (command) => send(command),
       state: {
         screen,
+        language,
+        accountId,
+        wsState,
+        loginBusy,
+        selectedCharacterIndex,
+        characters,
         mapFileName: world.mapFileName,
         mapTitle: world.mapTitle,
+        player: self ? { x: self.x, y: self.y } : null,
+        selectedObjectId: world.selectedObjectId,
+        entities: world.entities,
+        groundDrops: world.groundDrops,
+        beltItems: world.beltItems,
+        inventoryItems: world.inventoryItems,
+        storageItems: world.storageItems,
+        equipmentItems: world.equipmentItems,
+        gold: world.gold,
+        activeInventoryTab,
+        activeCharacterTab,
+        hasExpandedStorage: world.hasExpandedStorage,
+        hasStoragePassword: world.hasStoragePassword,
+        requireStoragePassword: world.requireStoragePassword,
+        storageSessionUnlocked: world.storageSessionUnlocked,
+        knownSkills: world.knownSkills,
+        activeBuffs: world.activeBuffs,
         stage5Systems: world.stage5Systems,
       },
     };
@@ -1059,11 +1121,18 @@ export default function HomePage() {
   }
 
   function removeItem(item: EquipmentCommandRef) {
+    const occupiedBagSlots = new Set(
+      world.inventoryItems.filter((entry) => entry.container === "bag1").map((entry) => entry.slot),
+    );
+    const targetSlot =
+      Array.from({ length: Math.max(world.maxBagSlots, 1) }, (_, slot) => slot).find(
+        (slot) => !occupiedBagSlots.has(slot),
+      ) ?? 0;
     send({
       type: "removeItem",
       uniqueId: equipmentSlotIndex(item.slot),
-      grid: "equipment",
-      to: 0,
+      grid: "inventory",
+      to: targetSlot,
     });
   }
 
@@ -1553,6 +1622,40 @@ export default function HomePage() {
         appendLog(storageUnlockResultMessage(result, hasPassword), "system");
         break;
       }
+      case "UserStorage": {
+        const storageEntries = Array.isArray(payload.storage) ? payload.storage : [];
+        setWorld((current) => {
+          const currentBySlot = new Map(current.storageItems.map((item) => [item.slot, item]));
+          const storageItems = storageEntries.flatMap((entry, slot) => {
+            if (!entry || typeof entry !== "object") {
+              return [];
+            }
+
+            const currentEntry = currentBySlot.get(slot);
+            const userItem = entry as { count?: unknown; current_dura?: unknown; max_dura?: unknown };
+            return [
+              {
+                key: currentEntry?.key ?? `storage-slot-${slot}`,
+                name: currentEntry?.name ?? `Storage Item ${slot}`,
+                icon: currentEntry?.icon ?? 0,
+                slot,
+                container: currentEntry?.container ?? "storage",
+                quantity: numberOrUndefined(userItem.count) ?? currentEntry?.quantity ?? 1,
+                description: currentEntry?.description ?? "",
+                durabilityCurrent:
+                  numberOrUndefined(userItem.current_dura) ?? currentEntry?.durabilityCurrent,
+                durabilityMax: numberOrUndefined(userItem.max_dura) ?? currentEntry?.durabilityMax,
+              },
+            ];
+          });
+
+          return {
+            ...current,
+            storageItems,
+          };
+        });
+        break;
+      }
       case "StoragePasswordResult": {
         const result = numberOrZero(payload.result);
         const removing = payload.removing === true;
@@ -2005,6 +2108,18 @@ export default function HomePage() {
           title: snapshot.activeNpcDialog.title,
           body: snapshot.activeNpcDialog.body,
           footer: snapshot.activeNpcDialog.footer,
+          links: Array.isArray(snapshot.activeNpcDialog.links)
+            ? snapshot.activeNpcDialog.links.flatMap((link) => {
+                if (!link || typeof link !== "object") return [];
+                const value = link as { text?: unknown; target?: unknown };
+                return [
+                  {
+                    text: stringOrFallback(value.text, ""),
+                    target: stringOrFallback(value.target, ""),
+                  },
+                ].filter((entry) => entry.text && entry.target);
+              })
+            : [],
           input: snapshot.activeNpcDialog.input ?? null,
         }
       : null;
@@ -2231,6 +2346,7 @@ export default function HomePage() {
         if (selectedEntity.kind === "npc") return interactTarget(selectedEntity.objectId);
         send({ type: "turn", direction: directionToward(self, selectedEntity) });
       }}
+      onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
       onSubmitNpcInput={(value) => send({ type: "submitNpcInput", value })}
       onSelectCharacter={setSelectedCharacterIndex}
       onEnterWorld={startSelectedCharacter}
@@ -2258,6 +2374,15 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
   return list.some((drop) => drop.objectId === nextDrop.objectId)
     ? list.map((drop) => (drop.objectId === nextDrop.objectId ? { ...drop, ...nextDrop } : drop))
     : [...list, nextDrop];
+}
+
+function hasWebGl2Support() {
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(canvas.getContext("webgl2"));
+  } catch {
+    return false;
+  }
 }
 
 function defaultLogChannel(tone: UiLogTone): UiLogChannel {

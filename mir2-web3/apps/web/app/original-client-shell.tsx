@@ -208,6 +208,10 @@ type DisplayNpcDialog = {
   title: string;
   body: string[];
   footer: string;
+  links: Array<{
+    text: string;
+    target: string;
+  }>;
   input?: {
     target: string;
     prompt: string;
@@ -374,6 +378,7 @@ type OriginalClientShellProps = {
   onActivateEntity: (objectId: string) => void;
   onApproachTarget: () => void;
   onPrimaryTargetAction: () => void;
+  onSelectNpcDialogTarget: (target: string) => void;
   onSubmitNpcInput: (value: string) => void;
   onSelectCharacter: (index: number) => void;
   onEnterWorld: () => void;
@@ -487,6 +492,7 @@ export function OriginalClientShell({
   onActivateEntity,
   onApproachTarget,
   onPrimaryTargetAction,
+  onSelectNpcDialogTarget,
   onSubmitNpcInput,
   onSelectCharacter,
   onEnterWorld,
@@ -1233,6 +1239,7 @@ export function OriginalClientShell({
               onCloseInventory={onCloseInventory}
               onOpenCharacterTab={onOpenCharacterTab}
               onOpenInventoryTab={onOpenInventoryTab}
+              onSelectNpcDialogTarget={onSelectNpcDialogTarget}
               onSubmitNpcInput={onSubmitNpcInput}
               onUseItem={onUseItem}
               onDropItem={onDropItem}
@@ -1341,6 +1348,7 @@ type GameUiSceneProps = {
   onCloseInventory: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
+  onSelectNpcDialogTarget: (target: string) => void;
   onSubmitNpcInput: (value: string) => void;
   onUseItem: (item: ItemActionRef) => void;
   onDropItem: (item: ItemActionRef) => void;
@@ -1385,6 +1393,7 @@ function GameUiScene({
   onCloseInventory,
   onOpenCharacterTab,
   onOpenInventoryTab,
+  onSelectNpcDialogTarget,
   onSubmitNpcInput,
   onUseItem,
   onDropItem,
@@ -1536,6 +1545,7 @@ function GameUiScene({
           t={t}
           dialog={visibleDialog}
           onClose={() => setDismissedDialogKey(dialogKey)}
+          onSelectTarget={onSelectNpcDialogTarget}
           onSubmitInput={onSubmitNpcInput}
         />
       ) : null}
@@ -1929,11 +1939,13 @@ function NpcDialogPanel({
   t,
   dialog,
   onClose,
+  onSelectTarget,
   onSubmitInput,
 }: {
   t: TranslateFn;
   dialog: DisplayNpcDialog;
   onClose: () => void;
+  onSelectTarget: (target: string) => void;
   onSubmitInput: (value: string) => void;
 }) {
   const [inputValue, setInputValue] = useState("");
@@ -1954,6 +1966,20 @@ function NpcDialogPanel({
           <p key={`${dialog.npcObjectId}-${index}`}>{line}</p>
         ))}
       </div>
+      {dialog.links.length ? (
+        <div className="npc-dialog-links">
+          {dialog.links.map((link, index) => (
+            <button
+              key={`${dialog.npcObjectId}-link-${index}-${link.target}`}
+              type="button"
+              data-target={link.target}
+              onClick={() => onSelectTarget(link.target)}
+            >
+              {link.text}
+            </button>
+          ))}
+        </div>
+      ) : null}
       {dialog.input ? (
         <form
           className="npc-dialog-input-form"
@@ -1972,7 +1998,7 @@ function NpcDialogPanel({
               autoFocus
             />
           </label>
-          <button type="submit">{t("ui.confirm")}</button>
+          <button type="submit">{t("ui.confirm", [], "Confirm")}</button>
         </form>
       ) : null}
       <div className="npc-dialog-footer">{dialog.footer}</div>
@@ -2009,12 +2035,30 @@ function ChatFrame({
 }: ChatFrameProps) {
   const lines = playerFacingChatLines(logs, activeFilter);
   const [scrollOffset, setScrollOffset] = useState(0);
-  const maxScrollOffset = Math.max(lines.length - 6, 0);
-  const visibleLines = lines.slice(scrollOffset, scrollOffset + 6);
+  const previousMaxScrollOffsetRef = useRef(0);
+  const previousActiveFilterRef = useRef(activeFilter);
+  const previousExpandedRef = useRef(expanded);
+  const visibleLineCount = 6;
+  const maxScrollOffset = Math.max(lines.length - visibleLineCount, 0);
+  const visibleLines = lines.slice(scrollOffset, scrollOffset + visibleLineCount);
+  const knobTop = maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28);
 
   useEffect(() => {
-    setScrollOffset(0);
-  }, [activeFilter, expanded]);
+    setScrollOffset((current) => {
+      const previousMaxScrollOffset = previousMaxScrollOffsetRef.current;
+      const filterChanged = previousActiveFilterRef.current !== activeFilter;
+      const expandedChanged = previousExpandedRef.current !== expanded;
+      previousMaxScrollOffsetRef.current = maxScrollOffset;
+      previousActiveFilterRef.current = activeFilter;
+      previousExpandedRef.current = expanded;
+
+      if (filterChanged || expandedChanged || current >= previousMaxScrollOffset) {
+        return maxScrollOffset;
+      }
+
+      return Math.min(current, maxScrollOffset);
+    });
+  }, [activeFilter, expanded, maxScrollOffset]);
 
   return (
     <section className={`chat-frame ${expanded ? "" : "collapsed"}`}>
@@ -2026,7 +2070,7 @@ function ChatFrame({
         <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.end} label={t("ui.end")} onClick={() => setScrollOffset(maxScrollOffset)} />
       </div>
       <img className="chat-count-bar" src={ORIGINAL_UI.game.chatCountBar} alt="" draggable={false} />
-      <div className="chat-position-knob">
+      <div className="chat-position-knob" style={{ top: knobTop }}>
         <img src={ORIGINAL_UI.game.chatScrollButtons.knob.base} alt="" draggable={false} />
       </div>
       <div className={`chat-feed ${expanded ? "" : "hidden"}`}>
@@ -2240,8 +2284,11 @@ function MiniMapPanel({ t, world, player, showMailPanel, onToggleMail }: MiniMap
         <MiniMapScene world={world} player={player} />
       </div>
       {hasRasterMiniMap ? <div className="mini-map-name">
-        {world.mapTitle ?? t("content.scene.starterField.title")}
-        {world.inSafeZone ? ` - ${t("ui.safeZone", [], "Safe Zone")}` : ""}
+        <span>{world.mapTitle ?? t("content.scene.starterField.title")}</span>
+        {world.inSafeZone ? <>
+          {" "}
+          <span className="mini-map-safe-zone">{t("ui.safeZone", [], "Safe Zone")}</span>
+        </> : null}
       </div> : null}
       <div className="mini-map-coords">{player ? `${player.x}:${player.y}` : "--:--"}</div>
       <div className="mini-map-button mail">
@@ -2639,7 +2686,7 @@ function SelectOverlay({
                   setShowDeleteConfirm(false);
                 }}
               >
-                {t("ui.confirm")}
+                {t("ui.confirm", [], "Confirm")}
               </button>
               <button type="button" onClick={() => setShowDeleteConfirm(false)}>
                 {t("ui.close")}
@@ -2901,7 +2948,7 @@ export function InventoryWindow({
           ? `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name}`
           : storageStatusText;
   const storageCapacityText = `${t("ui.storageCapacity", [], "Capacity")}: ${world.storageItems.length}/${world.storageSize}`;
-  const storageProtectEnabled = storageProtectionEnabled;
+  const storageProtectEnabled = !storagePageLocked;
   const storagePasswordLastSetText = formatBinaryDateTimeLabel(
     locale,
     world.storagePasswordLastSetBinaryDatetime,
@@ -3633,7 +3680,7 @@ export function InventoryWindow({
                 setDeleteMode(false);
               }}
             >
-              {t("ui.confirm")}
+              {t("ui.confirm", [], "Confirm")}
             </button>
             <button type="button" onClick={() => setPendingDeleteItem(null)}>
               {t("ui.close")}
@@ -3670,7 +3717,7 @@ export function InventoryWindow({
                 setSellMode(false);
               }}
             >
-              {t("ui.confirm")}
+              {t("ui.confirm", [], "Confirm")}
             </button>
             <button type="button" onClick={() => setPendingSellItem(null)}>
               {t("ui.close")}
@@ -3717,7 +3764,7 @@ export function InventoryWindow({
                 setPendingSplitItem(null);
               }}
             >
-              {t("ui.confirm")}
+              {t("ui.confirm", [], "Confirm")}
             </button>
             <button type="button" onClick={() => setPendingSplitItem(null)}>
               {t("ui.close")}
@@ -3747,7 +3794,7 @@ export function InventoryWindow({
                 setPendingGoldDrop(false);
               }}
             >
-              {t("ui.confirm")}
+              {t("ui.confirm", [], "Confirm")}
             </button>
             <button type="button" onClick={() => setPendingGoldDrop(false)}>
               {t("ui.close")}
@@ -3896,6 +3943,22 @@ export function CharacterWindow({
                 : t("ui.specialRepairItem", [], "Special Repair")}
             </div>
           ) : null}
+          <div className="character-repair-actions">
+            <button
+              type="button"
+              className={repairMode === "normal" ? "active" : ""}
+              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
+            >
+              {t("ui.repairItem", [], "Repair Item")}
+            </button>
+            <button
+              type="button"
+              className={repairMode === "special" ? "active" : ""}
+              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
+            >
+              {t("ui.specialRepairItem", [], "Special Repair")}
+            </button>
+          </div>
         </>
       ) : null}
 

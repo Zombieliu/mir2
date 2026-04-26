@@ -94,6 +94,9 @@ function main() {
         mini_map: map.mini_map,
         big_map: map.big_map,
         light: map.light,
+        no_throw_item: map.no_throw_item,
+        no_drop_player: map.no_drop_player,
+        no_drop_monster: map.no_drop_monster,
         safe_zones: map.safe_zones,
         movement_count: map.movements.length,
         movements: map.movements,
@@ -231,9 +234,9 @@ function parseMaps(reader) {
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
-    reader.readBoolean();
-    reader.readBoolean();
-    reader.readBoolean();
+    const no_throw_item = reader.readBoolean();
+    const no_drop_player = reader.readBoolean();
+    const no_drop_monster = reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
@@ -277,6 +280,9 @@ function parseMaps(reader) {
       mini_map,
       big_map,
       light,
+      no_throw_item,
+      no_drop_player,
+      no_drop_monster,
       safe_zones,
       movements,
       respawns,

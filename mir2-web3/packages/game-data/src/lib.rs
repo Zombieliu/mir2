@@ -742,6 +742,12 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub light: u8,
     #[serde(default)]
+    pub no_throw_item: bool,
+    #[serde(default)]
+    pub no_drop_player: bool,
+    #[serde(default)]
+    pub no_drop_monster: bool,
+    #[serde(default)]
     pub safe_zones: Vec<CrystalSafeZoneTemplate>,
     #[serde(default)]
     pub movement_count: usize,
@@ -919,6 +925,14 @@ fn apply_localized_args(template: &str, args: &[String]) -> String {
     let mut rendered = template.to_string();
     for (index, value) in args.iter().enumerate() {
         rendered = rendered.replace(&format!("{{{index}}}"), value);
+        let format_prefix = format!("{{{index}:");
+        while let Some(start) = rendered.find(&format_prefix) {
+            let Some(end_offset) = rendered[start..].find('}') else {
+                break;
+            };
+            let end = start + end_offset + 1;
+            rendered.replace_range(start..end, value);
+        }
     }
     rendered
 }

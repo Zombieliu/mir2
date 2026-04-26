@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777198408505,
+  "flow": "account_lifecycle",
+  "fixture": {
+    "mode": "ephemeral",
+    "account": "demo",
+    "lifecycleAccount": "trace-1777198407427",
+    "lifecycleCharacter": "Trace7427",
+    "character": "Scout"
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7310",
+    "ok": true,
+    "elapsedMs": 700,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 7,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 90,
+        "direction": "client",
+        "packetId": 3,
+        "packet": "NewAccount",
+        "payloadLen": 79,
+        "payloadHash": "fnv1a64:c32f0f82265fb43f",
+        "decoded": true
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 97,
+        "direction": "server",
+        "packetId": 4,
+        "packet": "NewAccount",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63c54c8601c577",
+        "decoded": true
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 180,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 31,
+        "payloadHash": "fnv1a64:b205525da8a49945",
+        "decoded": true
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 181,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 26,
+        "payloadHash": "fnv1a64:094fe1bdf34cd7f2",
+        "decoded": true
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 263,
+        "direction": "client",
+        "packetId": 6,
+        "packet": "NewCharacter",
+        "payloadLen": 12,
+        "payloadHash": "fnv1a64:73c59268414d8a29",
+        "decoded": true
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 271,
+        "direction": "server",
+        "packetId": 11,
+        "packet": "NewCharacterSuccess",
+        "payloadLen": 26,
+        "payloadHash": "fnv1a64:301225379f8283bf",
+        "decoded": true
+      },
+      {
+        "sequence": 7,
+        "elapsedMs": 352,
+        "direction": "client",
+        "packetId": 7,
+        "packet": "DeleteCharacter",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4d25767f9dce13f5",
+        "decoded": true
+      },
+      {
+        "sequence": 8,
+        "elapsedMs": 359,
+        "direction": "server",
+        "packetId": 13,
+        "packet": "DeleteCharacterSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4d25767f9dce13f5",
+        "decoded": true
+      },
+      {
+        "sequence": 9,
+        "elapsedMs": 359,
+        "direction": "server",
+        "packetId": 30,
+        "packet": "Chat",
+        "payloadLen": 25,
+        "payloadHash": "fnv1a64:cca358cfbc57a2a1",
+        "decoded": true
+      },
+      {
+        "sequence": 10,
+        "elapsedMs": 442,
+        "direction": "client",
+        "packetId": 4,
+        "packet": "ChangePassword",
+        "payloadLen": 46,
+        "payloadHash": "fnv1a64:26aa52aaf35084e5",
+        "decoded": true
+      },
+      {
+        "sequence": 11,
+        "elapsedMs": 450,
+        "direction": "server",
+        "packetId": 5,
+        "packet": "ChangePassword",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bb4c8601b479",
+        "decoded": true
+      },
+      {
+        "sequence": 12,
+        "elapsedMs": 533,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 35,
+        "payloadHash": "fnv1a64:d37470a0e6afa7bc",
+        "decoded": true
+      },
+      {
+        "sequence": 13,
+        "elapsedMs": 533,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 30,
+        "payloadHash": "fnv1a64:1cdbfad97f7586b6",
+        "decoded": true
+      },
+      {
+        "sequence": 14,
+        "elapsedMs": 616,
+        "direction": "client",
+        "packetId": 9,
+        "packet": "LogOut",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 15,
+        "elapsedMs": 617,
+        "direction": "server",
+        "packetId": 58,
+        "packet": "LogOutSuccess",
+        "payloadLen": 30,
+        "payloadHash": "fnv1a64:1cdbfad97f7586b6",
+        "decoded": true
+      }
+    ]
+  }
+}

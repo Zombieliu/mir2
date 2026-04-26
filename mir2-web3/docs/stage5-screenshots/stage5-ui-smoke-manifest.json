@@ -1,37 +1,5674 @@
 {
   "baseUrl": "http://127.0.0.1:3002",
-  "generatedAt": "2026-04-21T18:32:17.252Z",
-  "viewport": {
-    "width": 1024,
-    "height": 768,
-    "deviceScaleFactor": 1,
-    "mobile": false
+  "generatedAt": "2026-04-26T09:46:15.174Z",
+  "viewports": {
+    "desktop": {
+      "width": 1024,
+      "height": 768,
+      "deviceScaleFactor": 1,
+      "mobile": false
+    },
+    "compact": {
+      "width": 820,
+      "height": 640,
+      "deviceScaleFactor": 1,
+      "mobile": false
+    }
   },
+  "compactLayout": [
+    {
+      "selector": ".client-stage-frame",
+      "missing": false,
+      "left": 10.6400146484375,
+      "top": 20.480010986328125,
+      "right": 809.3599853515625,
+      "bottom": 619.5200500488281,
+      "width": 798.719970703125,
+      "height": 599.0400390625
+    },
+    {
+      "selector": ".game-ui-scene",
+      "missing": false,
+      "left": 10.6400146484375,
+      "top": 20.480010986328125,
+      "right": 809.3599853515625,
+      "bottom": 619.5200500488281,
+      "width": 798.719970703125,
+      "height": 599.0400390625
+    },
+    {
+      "selector": ".main-hud-shell",
+      "missing": false,
+      "left": 10.6400146484375,
+      "top": 500.9599914550781,
+      "right": 809.3599853515625,
+      "bottom": 619.52001953125,
+      "width": 798.719970703125,
+      "height": 118.56002807617188
+    },
+    {
+      "selector": ".chat-frame",
+      "missing": false,
+      "left": 190.04000854492188,
+      "top": 543.8599853515625,
+      "right": 683,
+      "bottom": 596.9000244140625,
+      "width": 492.9599914550781,
+      "height": 53.0400390625
+    },
+    {
+      "selector": ".mini-map-panel",
+      "missing": false,
+      "left": 711.0800170898438,
+      "top": 21.260011672973633,
+      "right": 810.9199829101562,
+      "bottom": 141.38000679016113,
+      "width": 99.8399658203125,
+      "height": 120.1199951171875
+    }
+  ],
+  "compactTextLayout": {
+    "checked": 34,
+    "overflowing": []
+  },
+  "compactPanelLayout": [
+    {
+      "label": "inventory",
+      "selector": ".inventory-window",
+      "missing": false,
+      "left": 330.44000244140625,
+      "top": 87.56000518798828,
+      "right": 576.9199829101562,
+      "bottom": 271.64002227783203,
+      "width": 246.47998046875,
+      "height": 184.08001708984375
+    },
+    {
+      "label": "storage",
+      "selector": ".inventory-window",
+      "missing": false,
+      "left": 326.5400085449219,
+      "top": 84.44001007080078,
+      "right": 573.02001953125,
+      "bottom": 268.52002716064453,
+      "width": 246.48001098632812,
+      "height": 184.08001708984375
+    },
+    {
+      "label": "storage",
+      "selector": ".storage-window",
+      "missing": false,
+      "left": 339.0199890136719,
+      "top": 148.40000915527344,
+      "right": 638.5399780273438,
+      "bottom": 416.7200164794922,
+      "width": 299.5199890136719,
+      "height": 268.32000732421875
+    },
+    {
+      "label": "character",
+      "selector": ".character-window",
+      "missing": false,
+      "left": 589.3999633789062,
+      "top": 33.74000930786133,
+      "right": 795.3200073242188,
+      "bottom": 330.1400032043457,
+      "width": 205.9200439453125,
+      "height": 296.3999938964844
+    },
+    {
+      "label": "systemMenu",
+      "selector": ".system-menu-panel",
+      "missing": false,
+      "left": 603.4400024414062,
+      "top": 29.840011596679688,
+      "right": 796.8800048828125,
+      "bottom": 497.8400115966797,
+      "width": 193.44000244140625,
+      "height": 468
+    },
+    {
+      "label": "chatSettings",
+      "selector": ".chat-settings-panel",
+      "missing": false,
+      "left": 506.7200012207031,
+      "top": 440.8999938964844,
+      "right": 661.1599731445312,
+      "bottom": 540.739990234375,
+      "width": 154.43997192382812,
+      "height": 99.83999633789062
+    },
+    {
+      "label": "mail",
+      "selector": ".mail-panel",
+      "missing": false,
+      "left": 628.3999633789062,
+      "top": 142.16000366210938,
+      "right": 795.3200073242188,
+      "bottom": 331.70001220703125,
+      "width": 166.9200439453125,
+      "height": 189.54000854492188
+    },
+    {
+      "label": "report",
+      "selector": ".report-panel",
+      "missing": false,
+      "left": 194.72000122070312,
+      "top": 320.7799987792969,
+      "right": 391.2799987792969,
+      "bottom": 538.4000244140625,
+      "width": 196.55999755859375,
+      "height": 217.62002563476562
+    }
+  ],
   "screenshots": [
     "docs/stage5-screenshots/stage5-login.png",
+    "docs/stage5-screenshots/stage5-login-language-zh.png",
+    "docs/stage5-screenshots/stage5-login-view-key.png",
     "docs/stage5-screenshots/stage5-select.png",
+    "docs/stage5-screenshots/stage5-select-language-es.png",
+    "docs/stage5-screenshots/stage5-select-credits.png",
+    "docs/stage5-screenshots/stage5-select-delete-confirm.png",
+    "docs/stage5-screenshots/stage5-select-new-character-ui.png",
+    "docs/stage5-screenshots/stage5-select-slot-selected.png",
+    "docs/stage5-screenshots/stage5-select-delete-created-confirm.png",
+    "docs/stage5-screenshots/stage5-select-delete-created-result.png",
+    "docs/stage5-screenshots/stage5-select-new-character-ui-restored.png",
     "docs/stage5-screenshots/stage5-game.png",
     "docs/stage5-screenshots/stage5-inventory.png",
+    "docs/stage5-screenshots/stage5-inventory-use-red-potion.png",
+    "docs/stage5-screenshots/stage5-inventory-equip-dagger.png",
+    "docs/stage5-screenshots/stage5-inventory-drop-gold-panel.png",
+    "docs/stage5-screenshots/stage5-inventory-drop-gold.png",
+    "docs/stage5-screenshots/stage5-inventory-move-wooden-sword.png",
+    "docs/stage5-screenshots/stage5-inventory-split-red-potion-panel.png",
+    "docs/stage5-screenshots/stage5-inventory-split-red-potion.png",
+    "docs/stage5-screenshots/stage5-inventory-drop-blue-potion-panel.png",
+    "docs/stage5-screenshots/stage5-inventory-drop-blue-potion.png",
+    "docs/stage5-screenshots/stage5-ground-pickup-blue-potion.png",
+    "docs/stage5-screenshots/stage5-ground-pickup-gold.png",
+    "docs/stage5-screenshots/stage5-belt-mouse-use-red-potion.png",
+    "docs/stage5-screenshots/stage5-inventory-bag2.png",
+    "docs/stage5-screenshots/stage5-inventory-quest.png",
+    "docs/stage5-screenshots/stage5-storage-page2-locked.png",
+    "docs/stage5-screenshots/stage5-storage-page2-rented.png",
+    "docs/stage5-screenshots/stage5-storage-page1-restored.png",
+    "docs/stage5-screenshots/stage5-storage-password-panel.png",
+    "docs/stage5-screenshots/stage5-storage-password-mismatch.png",
+    "docs/stage5-screenshots/stage5-storage-password-submit-no-service.png",
+    "docs/stage5-screenshots/stage5-inventory-bag1-restored.png",
     "docs/stage5-screenshots/stage5-character.png",
+    "docs/stage5-screenshots/stage5-character-repair-mode.png",
+    "docs/stage5-screenshots/stage5-character-special-repair-mode.png",
+    "docs/stage5-screenshots/stage5-character-remove-dagger.png",
+    "docs/stage5-screenshots/stage5-inventory-sell-dagger-panel.png",
+    "docs/stage5-screenshots/stage5-inventory-sell-dagger-no-service.png",
+    "docs/stage5-screenshots/stage5-storage-store-dagger-selected.png",
+    "docs/stage5-screenshots/stage5-storage-store-dagger-result.png",
+    "docs/stage5-screenshots/stage5-storage-store-dagger-feedback.png",
+    "docs/stage5-screenshots/stage5-character-stats1.png",
+    "docs/stage5-screenshots/stage5-character-stats2.png",
+    "docs/stage5-screenshots/stage5-character-spells.png",
+    "docs/stage5-screenshots/stage5-character-char-restored.png",
     "docs/stage5-screenshots/stage5-storage.png",
+    "docs/stage5-screenshots/stage5-storage-takeback-red-potion-selected.png",
+    "docs/stage5-screenshots/stage5-storage-takeback-red-potion-result.png",
+    "docs/stage5-screenshots/stage5-storage-takeback-red-potion-feedback.png",
     "docs/stage5-screenshots/stage5-npc.png",
     "docs/stage5-screenshots/stage5-combat.png",
     "docs/stage5-screenshots/stage5-map-transfer-1.png",
-    "docs/stage5-screenshots/stage5-systems.png"
+    "docs/stage5-screenshots/stage5-minimap-collapsed.png",
+    "docs/stage5-screenshots/stage5-minimap-expanded.png",
+    "docs/stage5-screenshots/stage5-minimap-mail.png",
+    "docs/stage5-screenshots/stage5-systems.png",
+    "docs/stage5-screenshots/stage5-systems-advanced.png",
+    "docs/stage5-screenshots/stage5-chat-shout-filter.png",
+    "docs/stage5-screenshots/stage5-chat-guild-filter.png",
+    "docs/stage5-screenshots/stage5-chat-group-filter-empty.png",
+    "docs/stage5-screenshots/stage5-chat-settings.png",
+    "docs/stage5-screenshots/stage5-chat-collapsed.png",
+    "docs/stage5-screenshots/stage5-chat-report.png",
+    "docs/stage5-screenshots/stage5-system-menu.png",
+    "docs/stage5-screenshots/stage5-system-menu-character.png",
+    "docs/stage5-screenshots/stage5-system-menu-inventory.png",
+    "docs/stage5-screenshots/stage5-system-menu-quest.png",
+    "docs/stage5-screenshots/stage5-system-menu-qa-transfer.png",
+    "docs/stage5-screenshots/stage5-system-menu-qa-transfer-result.png",
+    "docs/stage5-screenshots/stage5-system-menu-transfer-list-result.png",
+    "docs/stage5-screenshots/stage5-hud-skill-spells.png",
+    "docs/stage5-screenshots/stage5-character-cast-battle-focus.png",
+    "docs/stage5-screenshots/stage5-hud-option-stats2.png",
+    "docs/stage5-screenshots/stage5-compact-game.png",
+    "docs/stage5-screenshots/stage5-compact-inventory.png",
+    "docs/stage5-screenshots/stage5-compact-storage.png",
+    "docs/stage5-screenshots/stage5-compact-character.png",
+    "docs/stage5-screenshots/stage5-compact-system-menu.png",
+    "docs/stage5-screenshots/stage5-compact-chat-settings.png",
+    "docs/stage5-screenshots/stage5-compact-mail.png",
+    "docs/stage5-screenshots/stage5-compact-report.png",
+    "docs/stage5-screenshots/stage5-belt-hotkey-use.png",
+    "docs/stage5-screenshots/stage5-belt-vertical.png",
+    "docs/stage5-screenshots/stage5-belt-horizontal.png",
+    "docs/stage5-screenshots/stage5-belt-closed.png"
+  ],
+  "inventoryFlow": [
+    {
+      "label": "bag1",
+      "activeTab": "bag1",
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": false,
+      "visibleItemCards": 6,
+      "questEntryCount": 0,
+      "items": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 5
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "rect": {
+        "left": 432.44000244140625,
+        "top": 151.55999755859375,
+        "right": 678.9199829101562,
+        "bottom": 335.6400146484375,
+        "width": 246.47998046875,
+        "height": 184.08001708984375
+      }
+    },
+    {
+      "label": "bag2",
+      "activeTab": "bag2",
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": false,
+      "visibleItemCards": 1,
+      "questEntryCount": 0,
+      "items": [
+        {
+          "key": "town-teleport",
+          "name": "Town Teleport",
+          "slot": 0,
+          "container": "bag2",
+          "quantity": 1
+        }
+      ],
+      "rect": {
+        "left": 432.44000244140625,
+        "top": 151.55999755859375,
+        "right": 678.9199829101562,
+        "bottom": 335.6400146484375,
+        "width": 246.47998046875,
+        "height": 184.08001708984375
+      }
+    },
+    {
+      "label": "quest",
+      "activeTab": "quest",
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": true,
+      "visibleItemCards": 0,
+      "questEntryCount": 1,
+      "items": [],
+      "rect": {
+        "left": 428.5400085449219,
+        "top": 148.44000244140625,
+        "right": 675.02001953125,
+        "bottom": 332.52001953125,
+        "width": 246.48001098632812,
+        "height": 184.08001708984375
+      }
+    },
+    {
+      "label": "bag1Restored",
+      "activeTab": "bag1",
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": false,
+      "visibleItemCards": 6,
+      "questEntryCount": 0,
+      "items": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "rect": {
+        "left": 432.44000244140625,
+        "top": 151.55999755859375,
+        "right": 678.9199829101562,
+        "bottom": 335.6400146484375,
+        "width": 246.47998046875,
+        "height": 184.08001708984375
+      }
+    }
+  ],
+  "inventoryUseFlow": [
+    {
+      "label": "beforeInventoryUse",
+      "activeTab": "bag1",
+      "item": {
+        "key": "red-potion",
+        "name": "Red Potion",
+        "slot": 0,
+        "container": "bag1",
+        "quantity": 5
+      }
+    },
+    {
+      "label": "afterInventoryUse",
+      "activeTab": "bag1",
+      "item": {
+        "key": "red-potion",
+        "name": "Red Potion",
+        "slot": 0,
+        "container": "bag1",
+        "quantity": 4
+      }
+    }
+  ],
+  "inventoryEquipFlow": [
+    {
+      "label": "beforeInventoryEquip",
+      "activeTab": "bag1",
+      "inventoryItem": {
+        "key": "dagger",
+        "name": "Dagger",
+        "slot": 4,
+        "container": "bag1",
+        "quantity": 1
+      },
+      "equipmentItems": [
+        {
+          "name": "Wooden Sword",
+          "slot": "weapon",
+          "durabilityCurrent": 18,
+          "durabilityMax": 20
+        },
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 12,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 8,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 9,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 5,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 6,
+          "durabilityMax": 8
+        }
+      ]
+    },
+    {
+      "label": "afterInventoryEquip",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 12,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 8,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 9,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 5,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 6,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ]
+    }
+  ],
+  "inventoryGoldFlow": [
+    {
+      "label": "beforeDropGold",
+      "gold": 1280,
+      "inventoryGoldText": "1280",
+      "dropGoldPanelOpen": false,
+      "dropGoldInputValue": "",
+      "feedbackText": "",
+      "groundDropLabels": []
+    },
+    {
+      "label": "dropGoldPanel",
+      "gold": 1280,
+      "inventoryGoldText": "1280",
+      "dropGoldPanelOpen": true,
+      "dropGoldInputValue": "100",
+      "feedbackText": "",
+      "groundDropLabels": []
+    },
+    {
+      "label": "after drop gold",
+      "gold": 1180,
+      "inventoryGoldText": "1180",
+      "dropGoldPanelOpen": false,
+      "dropGoldInputValue": "",
+      "feedbackText": "Drop Gold: 100",
+      "groundDropLabels": [
+        "100 Gold x100"
+      ]
+    }
+  ],
+  "inventoryMoveFlow": [
+    {
+      "label": "beforeInventoryMove",
+      "activeTab": "bag1",
+      "item": {
+        "key": "wooden-sword",
+        "name": "Wooden Sword",
+        "slot": 4,
+        "container": "bag1",
+        "quantity": 1
+      }
+    },
+    {
+      "label": "afterInventoryMove",
+      "activeTab": "bag1",
+      "item": {
+        "key": "wooden-sword",
+        "name": "Wooden Sword",
+        "slot": 10,
+        "container": "bag1",
+        "quantity": 1
+      }
+    }
+  ],
+  "inventorySplitFlow": [
+    {
+      "label": "beforeInventorySplit",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 4
+        }
+      ],
+      "beltItems": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 5
+        }
+      ],
+      "inventoryQuantity": 4,
+      "beltQuantity": 5,
+      "totalQuantity": 9
+    },
+    {
+      "label": "splitPanel",
+      "splitPanelOpen": true,
+      "splitItemName": "Red Potion",
+      "splitInputValue": "1",
+      "feedbackText": "Inventory: Wooden Sword -> slot-2-1"
+    },
+    {
+      "label": "afterInventorySplit",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        }
+      ],
+      "beltItems": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 5
+        },
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 2,
+          "container": "belt",
+          "quantity": 1
+        }
+      ],
+      "inventoryQuantity": 3,
+      "beltQuantity": 6,
+      "totalQuantity": 9
+    }
+  ],
+  "inventoryDropFlow": [
+    {
+      "label": "beforeInventoryDrop",
+      "activeTab": "bag1",
+      "item": {
+        "key": "blue-potion",
+        "name": "Blue Potion",
+        "slot": 1,
+        "container": "bag1",
+        "quantity": 3
+      }
+    },
+    {
+      "label": "dropItemPanel",
+      "dropItemPanelOpen": true,
+      "dropItemName": "Blue Potion",
+      "feedbackText": "",
+      "groundDropLabels": [
+        "100 Gold x100"
+      ]
+    },
+    {
+      "label": "afterInventoryDrop",
+      "activeTab": "bag1",
+      "item": {
+        "key": "blue-potion",
+        "name": "Blue Potion",
+        "slot": 1,
+        "container": "bag1",
+        "quantity": 2
+      },
+      "dropState": {
+        "label": "afterInventoryDrop",
+        "dropItemPanelOpen": false,
+        "dropItemName": "",
+        "feedbackText": "Delete item: Blue Potion",
+        "groundDropLabels": [
+          "100 Gold x100",
+          "Blue Potion"
+        ]
+      }
+    }
+  ],
+  "groundPickupFlow": [
+    {
+      "label": "beforeBluePotionPickup",
+      "activeTab": "bag1",
+      "gold": 1180,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 2
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [
+        {
+          "objectId": "5000",
+          "name": "100 Gold",
+          "x": 329,
+          "y": 269,
+          "quantity": 100,
+          "nameColourArgb": -1
+        },
+        {
+          "objectId": "5001",
+          "name": "Blue Potion",
+          "x": 330,
+          "y": 269,
+          "quantity": 1,
+          "nameColourArgb": -1
+        }
+      ],
+      "matchingLabels": [
+        "Blue Potion x1"
+      ],
+      "visibleLabels": [
+        "100 Gold x100",
+        "Blue Potion"
+      ]
+    },
+    {
+      "label": "atBluePotionDrop",
+      "activeTab": "bag1",
+      "gold": 1180,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 2
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [
+        {
+          "objectId": "5000",
+          "name": "100 Gold",
+          "x": 329,
+          "y": 269,
+          "quantity": 100,
+          "nameColourArgb": -1
+        },
+        {
+          "objectId": "5001",
+          "name": "Blue Potion",
+          "x": 330,
+          "y": 269,
+          "quantity": 1,
+          "nameColourArgb": -1
+        }
+      ],
+      "matchingLabels": [
+        "Blue Potion x1"
+      ],
+      "visibleLabels": [
+        "100 Gold x100",
+        "Blue Potion"
+      ]
+    },
+    {
+      "label": "afterBluePotionPickup",
+      "activeTab": "bag1",
+      "gold": 1180,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [
+        {
+          "objectId": "5000",
+          "name": "100 Gold",
+          "x": 329,
+          "y": 269,
+          "quantity": 100,
+          "nameColourArgb": -1
+        }
+      ],
+      "matchingLabels": [],
+      "visibleLabels": [
+        "100 Gold x100"
+      ]
+    }
+  ],
+  "groundGoldPickupFlow": [
+    {
+      "label": "beforeGoldPickup",
+      "activeTab": "bag1",
+      "gold": 1180,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [
+        {
+          "objectId": "5000",
+          "name": "100 Gold",
+          "x": 329,
+          "y": 269,
+          "quantity": 100,
+          "nameColourArgb": -1
+        }
+      ],
+      "matchingLabels": [
+        "100 Gold x100"
+      ],
+      "visibleLabels": [
+        "100 Gold x100"
+      ]
+    },
+    {
+      "label": "atGoldDrop",
+      "activeTab": "bag1",
+      "gold": 1180,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [
+        {
+          "objectId": "5000",
+          "name": "100 Gold",
+          "x": 329,
+          "y": 269,
+          "quantity": 100,
+          "nameColourArgb": -1
+        }
+      ],
+      "matchingLabels": [
+        "100 Gold x100"
+      ],
+      "visibleLabels": [
+        "100 Gold x100"
+      ]
+    },
+    {
+      "label": "afterGoldPickup",
+      "activeTab": "bag1",
+      "gold": 1280,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "groundDrops": [],
+      "matchingLabels": [],
+      "visibleLabels": []
+    }
+  ],
+  "inventorySellFlow": [
+    {
+      "item": {
+        "label": "beforeInventorySell",
+        "activeTab": "bag1",
+        "item": {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      },
+      "gold": {
+        "label": "beforeInventorySellGold",
+        "gold": 1280,
+        "inventoryGoldText": "1280",
+        "dropGoldPanelOpen": false,
+        "dropGoldInputValue": "",
+        "feedbackText": "",
+        "groundDropLabels": []
+      }
+    },
+    {
+      "label": "sellPanel",
+      "sellPanelOpen": true,
+      "sellItemName": "Dagger",
+      "feedbackText": ""
+    },
+    {
+      "item": {
+        "label": "afterInventorySell",
+        "activeTab": "bag1",
+        "item": {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      },
+      "gold": {
+        "label": "afterInventorySellGold",
+        "gold": 1280,
+        "inventoryGoldText": "1280",
+        "dropGoldPanelOpen": false,
+        "dropGoldInputValue": "",
+        "feedbackText": "Sell Item: Dagger",
+        "groundDropLabels": []
+      },
+      "sellState": {
+        "label": "afterInventorySellNoService",
+        "sellPanelOpen": false,
+        "sellItemName": "",
+        "feedbackText": "Sell Item: Dagger"
+      }
+    }
+  ],
+  "characterRemoveFlow": [
+    {
+      "label": "beforeCharacterRemove",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 4,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 0,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ]
+    },
+    {
+      "label": "afterCharacterRemove",
+      "activeTab": "bag1",
+      "inventoryItem": {
+        "key": "dagger",
+        "name": "Dagger",
+        "slot": 4,
+        "container": "bag1",
+        "quantity": 1
+      },
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 4,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 0,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        }
+      ]
+    }
+  ],
+  "characterRepairFlow": [
+    {
+      "label": "beforeCharacterRepair",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 5,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 2,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ],
+      "repairActionLabels": [
+        "Repair Item",
+        "Special Repair"
+      ],
+      "activeRepairButtons": [],
+      "activeRepairLabel": ""
+    },
+    {
+      "label": "normalRepairMode",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 5,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 2,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ],
+      "repairActionLabels": [
+        "Repair Item",
+        "Special Repair"
+      ],
+      "activeRepairButtons": [
+        "Repair Item"
+      ],
+      "activeRepairLabel": "Repair Item"
+    },
+    {
+      "label": "normalRepairSubmitted",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 4,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 0,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ],
+      "repairActionLabels": [
+        "Repair Item",
+        "Special Repair"
+      ],
+      "activeRepairButtons": [],
+      "activeRepairLabel": ""
+    },
+    {
+      "label": "specialRepairMode",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 4,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 0,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ],
+      "repairActionLabels": [
+        "Repair Item",
+        "Special Repair"
+      ],
+      "activeRepairButtons": [
+        "Special Repair"
+      ],
+      "activeRepairLabel": "Special Repair"
+    },
+    {
+      "label": "specialRepairSubmitted",
+      "activeTab": "bag1",
+      "inventoryItem": null,
+      "equipmentItems": [
+        {
+          "name": "Cloth Armour",
+          "slot": "armour",
+          "durabilityCurrent": 4,
+          "durabilityMax": 14
+        },
+        {
+          "name": "Copper Necklace",
+          "slot": "necklace",
+          "durabilityCurrent": 0,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Wood Bracelet",
+          "slot": "braceletLeft",
+          "durabilityCurrent": 1,
+          "durabilityMax": 10
+        },
+        {
+          "name": "Straw Sandals",
+          "slot": "boots",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Rope Belt",
+          "slot": "belt",
+          "durabilityCurrent": 0,
+          "durabilityMax": 8
+        },
+        {
+          "name": "Dagger",
+          "slot": "weapon",
+          "durabilityCurrent": 20,
+          "durabilityMax": 20
+        }
+      ],
+      "repairActionLabels": [
+        "Repair Item",
+        "Special Repair"
+      ],
+      "activeRepairButtons": [],
+      "activeRepairLabel": ""
+    }
+  ],
+  "characterFlow": [
+    {
+      "label": "char",
+      "activeTab": "char",
+      "characterWindowVisible": true,
+      "equipmentCardCount": 6,
+      "statsValueCount": 0,
+      "spellValueCount": 0,
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "rect": {
+        "left": 691.3999633789062,
+        "top": 97.7400131225586,
+        "right": 897.3200073242188,
+        "bottom": 394.14000701904297,
+        "width": 205.9200439453125,
+        "height": 296.3999938964844
+      }
+    },
+    {
+      "label": "stats1",
+      "activeTab": "stats1",
+      "characterWindowVisible": true,
+      "equipmentCardCount": 0,
+      "statsValueCount": 11,
+      "spellValueCount": 0,
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "rect": {
+        "left": 691.3999633789062,
+        "top": 97.7400131225586,
+        "right": 897.3200073242188,
+        "bottom": 394.14000701904297,
+        "width": 205.9200439453125,
+        "height": 296.3999938964844
+      }
+    },
+    {
+      "label": "stats2",
+      "activeTab": "stats2",
+      "characterWindowVisible": true,
+      "equipmentCardCount": 0,
+      "statsValueCount": 11,
+      "spellValueCount": 0,
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "rect": {
+        "left": 691.3999633789062,
+        "top": 97.7400131225586,
+        "right": 897.3200073242188,
+        "bottom": 394.14000701904297,
+        "width": 205.9200439453125,
+        "height": 296.3999938964844
+      }
+    },
+    {
+      "label": "spells",
+      "activeTab": "spells",
+      "characterWindowVisible": true,
+      "equipmentCardCount": 0,
+      "statsValueCount": 0,
+      "spellValueCount": 6,
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "rect": {
+        "left": 691.3999633789062,
+        "top": 97.7400131225586,
+        "right": 897.3200073242188,
+        "bottom": 394.14000701904297,
+        "width": 205.9200439453125,
+        "height": 296.3999938964844
+      }
+    },
+    {
+      "label": "charRestored",
+      "activeTab": "char",
+      "characterWindowVisible": true,
+      "equipmentCardCount": 5,
+      "statsValueCount": 0,
+      "spellValueCount": 0,
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "rect": {
+        "left": 691.3999633789062,
+        "top": 97.7400131225586,
+        "right": 897.3200073242188,
+        "bottom": 394.14000701904297,
+        "width": 205.9200439453125,
+        "height": 296.3999938964844
+      }
+    }
+  ],
+  "storageFlow": [
+    {
+      "label": "page1",
+      "storageWindowVisible": true,
+      "activePage": "1",
+      "hasExpandedStorage": false,
+      "pageLocked": false,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "statusText": "",
+      "rentalText": "",
+      "rect": {
+        "left": 441.0199890136719,
+        "top": 212.40000915527344,
+        "right": 740.5399780273438,
+        "bottom": 480.7200164794922,
+        "width": 299.5199890136719,
+        "height": 268.32000732421875
+      }
+    },
+    {
+      "label": "page2Locked",
+      "storageWindowVisible": true,
+      "activePage": "2",
+      "hasExpandedStorage": false,
+      "pageLocked": true,
+      "storageItemCards": 0,
+      "storageSlots": 80,
+      "statusText": "",
+      "rentalText": "Expanded storage is locked.",
+      "rect": {
+        "left": 441.0199890136719,
+        "top": 212.40000915527344,
+        "right": 740.5399780273438,
+        "bottom": 480.7200164794922,
+        "width": 299.5199890136719,
+        "height": 268.32000732421875
+      }
+    },
+    {
+      "label": "page2Rented",
+      "storageWindowVisible": true,
+      "activePage": "2",
+      "hasExpandedStorage": true,
+      "pageLocked": false,
+      "storageItemCards": 0,
+      "storageSlots": 80,
+      "statusText": "",
+      "rentalText": "Expanded storage expires on 05/26/2026, 05:45 PM",
+      "rect": {
+        "left": 441.0199890136719,
+        "top": 212.40000915527344,
+        "right": 740.5399780273438,
+        "bottom": 480.7200164794922,
+        "width": 299.5199890136719,
+        "height": 268.32000732421875
+      }
+    },
+    {
+      "label": "page1Restored",
+      "storageWindowVisible": true,
+      "activePage": "1",
+      "hasExpandedStorage": true,
+      "pageLocked": false,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "statusText": "",
+      "rentalText": "",
+      "rect": {
+        "left": 441.0199890136719,
+        "top": 212.40000915527344,
+        "right": 740.5399780273438,
+        "bottom": 480.7200164794922,
+        "width": 299.5199890136719,
+        "height": 268.32000732421875
+      }
+    }
+  ],
+  "storagePasswordFlow": [
+    {
+      "label": "storagePasswordPanel",
+      "panelVisible": true,
+      "panelTitle": "Set Storage Password",
+      "promptTexts": [
+        "Enter a new storage password.",
+        "Storage password is not set.",
+        "Password must be between 4 and 20 characters."
+      ],
+      "inputCount": 2,
+      "submitDisabled": true,
+      "protectDisabled": false,
+      "hasStoragePassword": false,
+      "requireStoragePassword": false,
+      "storageSessionUnlocked": true,
+      "inputValues": [
+        "",
+        ""
+      ],
+      "actionLabels": [
+        "OK",
+        "Cancel"
+      ],
+      "chatLines": [
+        "[5:45:45 PM] Storage expanded to 160 slots."
+      ]
+    },
+    {
+      "label": "storagePasswordMismatch",
+      "panelVisible": true,
+      "panelTitle": "Set Storage Password",
+      "promptTexts": [
+        "Enter a new storage password.",
+        "Storage password is not set.",
+        "Storage password confirmation does not match."
+      ],
+      "inputCount": 2,
+      "submitDisabled": true,
+      "protectDisabled": false,
+      "hasStoragePassword": false,
+      "requireStoragePassword": false,
+      "storageSessionUnlocked": true,
+      "inputValues": [
+        "Safe123",
+        "Safe124"
+      ],
+      "actionLabels": [
+        "OK",
+        "Cancel"
+      ],
+      "chatLines": [
+        "[5:45:45 PM] Storage expanded to 160 slots."
+      ]
+    },
+    {
+      "label": "storagePasswordSubmitNoService",
+      "panelVisible": true,
+      "panelTitle": "Set Storage Password",
+      "promptTexts": [
+        "Enter a new storage password.",
+        "Storage password is not set.",
+        "Password must be between 4 and 20 characters."
+      ],
+      "inputCount": 2,
+      "submitDisabled": false,
+      "protectDisabled": false,
+      "hasStoragePassword": false,
+      "requireStoragePassword": false,
+      "storageSessionUnlocked": true,
+      "inputValues": [
+        "Safe123",
+        "Safe123"
+      ],
+      "actionLabels": [
+        "OK",
+        "Cancel"
+      ],
+      "chatLines": [
+        "[5:45:45 PM] Storage expanded to 160 slots.",
+        "[5:45:47 PM] Storage password service is not available."
+      ]
+    },
+    {
+      "label": "storagePasswordPanelClosed",
+      "panelVisible": false,
+      "panelTitle": "",
+      "promptTexts": [],
+      "inputCount": 0,
+      "submitDisabled": null,
+      "protectDisabled": false,
+      "hasStoragePassword": false,
+      "requireStoragePassword": false,
+      "storageSessionUnlocked": true,
+      "inputValues": [],
+      "actionLabels": [],
+      "chatLines": [
+        "[5:45:47 PM] Storage password service is not available."
+      ]
+    }
+  ],
+  "storageStoreFlow": [
+    {
+      "item": {
+        "label": "beforeStorageStore",
+        "activeTab": "bag1",
+        "item": {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      },
+      "storage": {
+        "label": "beforeStorageStore",
+        "activeTab": "bag1",
+        "inventoryItems": [
+          {
+            "key": "red-potion",
+            "name": "Red Potion",
+            "slot": 0,
+            "container": "bag1",
+            "quantity": 3
+          },
+          {
+            "key": "blue-potion",
+            "name": "Blue Potion",
+            "slot": 1,
+            "container": "bag1",
+            "quantity": 3
+          },
+          {
+            "key": "training-manual",
+            "name": "Training Manual",
+            "slot": 2,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "bronze-helmet",
+            "name": "Bronze Helmet",
+            "slot": 3,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "leather-armour",
+            "name": "Leather Armour",
+            "slot": 5,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "wooden-sword",
+            "name": "Wooden Sword",
+            "slot": 10,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "dagger",
+            "name": "Dagger",
+            "slot": 4,
+            "container": "bag1",
+            "quantity": 1
+          }
+        ],
+        "storageItems": [
+          {
+            "key": "stored-red-potion",
+            "name": "Red Potion",
+            "slot": 0,
+            "container": "storage",
+            "quantity": 10
+          },
+          {
+            "key": "stored-bronze-helmet",
+            "name": "Bronze Helmet",
+            "slot": 1,
+            "container": "storage",
+            "quantity": 1
+          }
+        ],
+        "storageWindowVisible": false,
+        "storageItemCards": 0,
+        "storageSlots": 0,
+        "feedbackText": "Sell Item: Dagger",
+        "hintTexts": [],
+        "statusText": ""
+      }
+    },
+    {
+      "label": "storeItemSelected",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": true,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "feedbackText": "Store Item: Dagger",
+      "hintTexts": [
+        "Store Item...",
+        "Inventory: Dagger -> select target slot"
+      ],
+      "statusText": "Choose an inventory item, then click a warehouse slot."
+    },
+    {
+      "item": {
+        "label": "afterStorageStore",
+        "activeTab": "bag1",
+        "item": {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      },
+      "storage": {
+        "label": "afterStorageStore",
+        "activeTab": "bag1",
+        "inventoryItems": [
+          {
+            "key": "red-potion",
+            "name": "Red Potion",
+            "slot": 0,
+            "container": "bag1",
+            "quantity": 3
+          },
+          {
+            "key": "blue-potion",
+            "name": "Blue Potion",
+            "slot": 1,
+            "container": "bag1",
+            "quantity": 3
+          },
+          {
+            "key": "training-manual",
+            "name": "Training Manual",
+            "slot": 2,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "bronze-helmet",
+            "name": "Bronze Helmet",
+            "slot": 3,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "leather-armour",
+            "name": "Leather Armour",
+            "slot": 5,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "wooden-sword",
+            "name": "Wooden Sword",
+            "slot": 10,
+            "container": "bag1",
+            "quantity": 1
+          },
+          {
+            "key": "dagger",
+            "name": "Dagger",
+            "slot": 4,
+            "container": "bag1",
+            "quantity": 1
+          }
+        ],
+        "storageItems": [
+          {
+            "key": "stored-red-potion",
+            "name": "Red Potion",
+            "slot": 0,
+            "container": "storage",
+            "quantity": 10
+          },
+          {
+            "key": "stored-bronze-helmet",
+            "name": "Bronze Helmet",
+            "slot": 1,
+            "container": "storage",
+            "quantity": 1
+          }
+        ],
+        "storageWindowVisible": true,
+        "storageItemCards": 2,
+        "storageSlots": 80,
+        "feedbackText": "Store Item: Dagger -> 1",
+        "hintTexts": [
+          "Store Item..."
+        ],
+        "statusText": "Choose an inventory item, then click a warehouse slot."
+      },
+      "result": "preserved-without-service"
+    },
+    {
+      "label": "storageStoreFeedback",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": false,
+      "storageItemCards": 0,
+      "storageSlots": 0,
+      "feedbackText": "Store Item: Dagger -> 1",
+      "hintTexts": [],
+      "statusText": ""
+    }
+  ],
+  "storageTakeBackFlow": [
+    {
+      "label": "beforeStorageTakeBack",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": true,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "feedbackText": "",
+      "hintTexts": [
+        "Store Item..."
+      ],
+      "statusText": "Choose an inventory item, then click a warehouse slot."
+    },
+    {
+      "label": "takeBackItemSelected",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": true,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "feedbackText": "Take Back: Red Potion",
+      "hintTexts": [
+        "Take Back...",
+        "Inventory: Red Potion -> select target slot"
+      ],
+      "statusText": "Choose a warehouse item, then click an inventory slot."
+    },
+    {
+      "label": "afterStorageTakeBack",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": true,
+      "storageItemCards": 2,
+      "storageSlots": 80,
+      "feedbackText": "Take Back: Red Potion -> slot-6-0",
+      "hintTexts": [
+        "Take Back..."
+      ],
+      "statusText": "Choose a warehouse item, then click an inventory slot.",
+      "result": "preserved-without-service"
+    },
+    {
+      "label": "storageTakeBackFeedback",
+      "activeTab": "bag1",
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "bag1",
+          "quantity": 3
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "slot": 2,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 3,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "slot": 5,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "slot": 10,
+          "container": "bag1",
+          "quantity": 1
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "slot": 4,
+          "container": "bag1",
+          "quantity": 1
+        }
+      ],
+      "storageItems": [
+        {
+          "key": "stored-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "storage",
+          "quantity": 10
+        },
+        {
+          "key": "stored-bronze-helmet",
+          "name": "Bronze Helmet",
+          "slot": 1,
+          "container": "storage",
+          "quantity": 1
+        }
+      ],
+      "storageWindowVisible": false,
+      "storageItemCards": 0,
+      "storageSlots": 0,
+      "feedbackText": "Take Back: Red Potion -> slot-6-0",
+      "hintTexts": [],
+      "statusText": ""
+    }
+  ],
+  "chatFlow": [
+    {
+      "label": "allInitial",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "shoutFilter",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal"
+      ],
+      "nonEmptyLineCount": 0,
+      "knobTop": "16px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "allRestored",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:00 PM] loading starter scene blueprint",
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:01 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "settingsOpen",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": true,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "collapsed",
+      "frameVisible": true,
+      "collapsed": true,
+      "feedHidden": true,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "expandedRestored",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:03 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "reportOpen",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": true,
+      "visibleLineTexts": [
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:03 PM] loading starter scene blueprint",
+        "[5:46:03 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    }
+  ],
+  "chatChannelFlow": [
+    {
+      "label": "guildFilter",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:01 PM] Guild filter check"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line  channel-guild"
+      ],
+      "nonEmptyLineCount": 1,
+      "knobTop": "16px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "groupFilterEmpty",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal",
+        "chat-feed-line  channel-normal"
+      ],
+      "nonEmptyLineCount": 0,
+      "knobTop": "16px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    },
+    {
+      "label": "allRestoredAfterChannels",
+      "frameVisible": true,
+      "collapsed": false,
+      "feedHidden": false,
+      "settingsOpen": false,
+      "reportOpen": false,
+      "visibleLineTexts": [
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:01 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint"
+      ],
+      "visibleLineClasses": [
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system"
+      ],
+      "nonEmptyLineCount": 6,
+      "knobTop": "44px",
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 607.8599853515625,
+        "right": 785,
+        "bottom": 660.9000244140625,
+        "width": 492.9599914550781,
+        "height": 53.0400390625
+      }
+    }
+  ],
+  "systemMenuFlow": [
+    {
+      "label": "open",
+      "open": true,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "Character",
+        "Inventory",
+        "Quest",
+        "Exit"
+      ],
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "1"
+        },
+        {
+          "label": "X",
+          "value": "315"
+        },
+        {
+          "label": "Y",
+          "value": "82"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 705.4400024414062,
+        "top": 93.84001159667969,
+        "right": 898.8800048828125,
+        "bottom": 561.8399505615234,
+        "width": 193.44000244140625,
+        "height": 467.99993896484375
+      }
+    },
+    {
+      "label": "characterAction",
+      "open": false,
+      "characterWindowVisible": true,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    },
+    {
+      "label": "inventoryAction",
+      "open": false,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    },
+    {
+      "label": "questAction",
+      "open": false,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": true,
+      "storageWindowVisible": true,
+      "activeInventoryTab": "quest",
+      "actionLabels": [],
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    }
+  ],
+  "systemMenuQaTransferFlow": [
+    {
+      "label": "qaTransferPanel",
+      "open": true,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "Character",
+        "Inventory",
+        "Quest",
+        "Exit"
+      ],
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "1"
+        },
+        {
+          "label": "X",
+          "value": "315"
+        },
+        {
+          "label": "Y",
+          "value": "82"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 705.4400024414062,
+        "top": 93.84001159667969,
+        "right": 898.8800048828125,
+        "bottom": 561.8399505615234,
+        "width": 193.44000244140625,
+        "height": 467.99993896484375
+      }
+    },
+    {
+      "label": "qaTransferFilled",
+      "open": true,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "Character",
+        "Inventory",
+        "Quest",
+        "Exit"
+      ],
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "0"
+        },
+        {
+          "label": "X",
+          "value": "330"
+        },
+        {
+          "label": "Y",
+          "value": "270"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "MIR4G02WoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 705.4400024414062,
+        "top": 93.84001159667969,
+        "right": 898.8800048828125,
+        "bottom": 561.8399505615234,
+        "width": 193.44000244140625,
+        "height": 467.99993896484375
+      }
+    },
+    {
+      "label": "qaTransferSubmitted",
+      "open": false,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "0",
+      "playerPosition": {
+        "x": 330,
+        "y": 270
+      },
+      "metaText": "",
+      "rect": null
+    }
+  ],
+  "systemMenuTransferFlow": [
+    {
+      "label": "transferListOpen",
+      "open": true,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "Character",
+        "Inventory",
+        "Quest",
+        "Exit"
+      ],
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "0"
+        },
+        {
+          "label": "X",
+          "value": "330"
+        },
+        {
+          "label": "Y",
+          "value": "270"
+        }
+      ],
+      "currentMapFileName": "0",
+      "playerPosition": {
+        "x": 330,
+        "y": 270
+      },
+      "metaText": "MIR4G02BichonProvince [0]Safe Zone",
+      "rect": {
+        "left": 705.4400024414062,
+        "top": 93.84001159667969,
+        "right": 898.8800048828125,
+        "bottom": 561.8399505615234,
+        "width": 193.44000244140625,
+        "height": 467.99993896484375
+      }
+    },
+    {
+      "label": "transferListSubmitted",
+      "open": false,
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    }
+  ],
+  "hudButtonFlow": [
+    {
+      "label": "skillToSpells",
+      "characterWindowVisible": true,
+      "inventoryWindowVisible": false,
+      "activeCharacterTab": "spells",
+      "activeInventoryTab": "bag1",
+      "spellValueCount": 6,
+      "statsValueCount": 0
+    },
+    {
+      "label": "optionToStats2",
+      "characterWindowVisible": true,
+      "inventoryWindowVisible": false,
+      "activeCharacterTab": "stats2",
+      "activeInventoryTab": "bag1",
+      "spellValueCount": 0,
+      "statsValueCount": 11
+    }
+  ],
+  "spellCastFlow": [
+    {
+      "label": "beforeBattleFocus",
+      "characterWindowVisible": true,
+      "activeCharacterTab": "spells",
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "activeBuffs": [],
+      "matchingSpellText": ""
+    },
+    {
+      "label": "afterBattleFocus",
+      "characterWindowVisible": true,
+      "activeCharacterTab": "spells",
+      "knownSkills": [
+        {
+          "key": "minor-heal",
+          "name": "Minor Heal",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "cooldownRemainingTicks": 12
+        },
+        {
+          "key": "summon-shinsu",
+          "name": "Summon Shinsu",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-vampire",
+          "name": "Summon Vampire",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-toad",
+          "name": "Summon Toad",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "summon-snakes",
+          "name": "Summon Snakes",
+          "cooldownRemainingTicks": 0
+        },
+        {
+          "key": "stonetrap",
+          "name": "Stone Trap",
+          "cooldownRemainingTicks": 0
+        }
+      ],
+      "activeBuffs": [
+        {
+          "key": "battle-focus",
+          "name": "Battle Focus",
+          "attackBonus": 4,
+          "defenceBonus": 1,
+          "remainingTicks": 10
+        }
+      ],
+      "matchingSpellText": ""
+    }
+  ],
+  "minimapFlow": [
+    {
+      "label": "expanded",
+      "panelVisible": true,
+      "sceneHidden": false,
+      "mailOpen": false,
+      "nameText": "WoomyonWoods(S) Safe Zone",
+      "coordsText": "315:82",
+      "panelRect": {
+        "left": 813.0800170898438,
+        "top": 85.260009765625,
+        "right": 912.9199829101562,
+        "bottom": 205.3800048828125,
+        "width": 99.8399658203125,
+        "height": 120.1199951171875
+      }
+    },
+    {
+      "label": "collapsed",
+      "panelVisible": true,
+      "sceneHidden": true,
+      "mailOpen": false,
+      "nameText": "WoomyonWoods(S) Safe Zone",
+      "coordsText": "315:82",
+      "panelRect": {
+        "left": 813.0800170898438,
+        "top": 85.260009765625,
+        "right": 912.9199829101562,
+        "bottom": 205.3800048828125,
+        "width": 99.8399658203125,
+        "height": 120.1199951171875
+      }
+    },
+    {
+      "label": "expandedAfterBigMap",
+      "panelVisible": true,
+      "sceneHidden": false,
+      "mailOpen": false,
+      "nameText": "WoomyonWoods(S) Safe Zone",
+      "coordsText": "315:82",
+      "panelRect": {
+        "left": 813.0800170898438,
+        "top": 85.260009765625,
+        "right": 912.9199829101562,
+        "bottom": 205.3800048828125,
+        "width": 99.8399658203125,
+        "height": 120.1199951171875
+      }
+    },
+    {
+      "label": "mailOpen",
+      "panelVisible": true,
+      "sceneHidden": false,
+      "mailOpen": true,
+      "nameText": "WoomyonWoods(S) Safe Zone",
+      "coordsText": "315:82",
+      "panelRect": {
+        "left": 813.0800170898438,
+        "top": 85.260009765625,
+        "right": 912.9199829101562,
+        "bottom": 205.3800048828125,
+        "width": 99.8399658203125,
+        "height": 120.1199951171875
+      }
+    }
+  ],
+  "mailFlow": [
+    {
+      "label": "mailOpen",
+      "open": true,
+      "title": "Mail",
+      "rows": [
+        "[5:45:58 PM] loading starter scene blueprint",
+        "[5:45:57 PM] loading starter scene blueprint",
+        "[5:45:57 PM] loading starter scene blueprint",
+        "[5:45:57 PM] loading starter scene blueprint"
+      ],
+      "emptyText": "",
+      "footers": [
+        "4/4",
+        "Left click walks, right click runs, and clicking a target focuses it."
+      ],
+      "rect": {
+        "left": 730.3999633789062,
+        "top": 206.16000366210938,
+        "right": 897.3200073242188,
+        "bottom": 395.70001220703125,
+        "width": 166.9200439453125,
+        "height": 189.54000854492188
+      }
+    },
+    {
+      "label": "mailClosed",
+      "open": false,
+      "title": "",
+      "rows": [],
+      "emptyText": "",
+      "footers": [],
+      "rect": null
+    }
+  ],
+  "reportFlow": [
+    {
+      "label": "reportOpen",
+      "open": true,
+      "title": "Report",
+      "rows": [
+        "[5:46:03 PM] loading starter scene blueprint",
+        "[5:46:03 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint",
+        "[5:46:02 PM] loading starter scene blueprint"
+      ],
+      "footers": [
+        "6/6"
+      ],
+      "rect": {
+        "left": 296.7200012207031,
+        "top": 384.7799987792969,
+        "right": 493.2799987792969,
+        "bottom": 602.4000244140625,
+        "width": 196.55999755859375,
+        "height": 217.62002563476562
+      }
+    },
+    {
+      "label": "reportClosed",
+      "open": false,
+      "title": "",
+      "rows": [],
+      "footers": [],
+      "rect": null
+    }
+  ],
+  "npcDialogFlow": [
+    {
+      "label": "open",
+      "open": true,
+      "caption": "Village Guide",
+      "title": "Field Assignment",
+      "bodyLines": [
+        "Good. The road is not safe unless you can hold your own.",
+        "Go east and defeat the Field Wasp by the lanterns. Bring back proof."
+      ],
+      "links": [],
+      "footer": "Objective accepted: kill 1 Field Wasp and return.",
+      "inputVisible": false,
+      "inputPrompt": "",
+      "rect": {
+        "left": 306.08001708984375,
+        "top": 402.7200012207031,
+        "right": 586.8800048828125,
+        "bottom": 518.1600341796875,
+        "width": 280.79998779296875,
+        "height": 115.44003295898438
+      }
+    },
+    {
+      "label": "closed",
+      "open": false,
+      "caption": "",
+      "title": "",
+      "bodyLines": [],
+      "links": [],
+      "footer": "",
+      "inputVisible": false,
+      "inputPrompt": "",
+      "rect": null
+    }
+  ],
+  "combatFlow": [
+    {
+      "label": "beforeCombat",
+      "selectedObjectId": "4001",
+      "player": {
+        "x": 327,
+        "y": 270
+      },
+      "monsters": [
+        {
+          "objectId": "3001",
+          "kind": "monster",
+          "name": "Training Dummy",
+          "x": 338,
+          "y": 273,
+          "hp": 72,
+          "maxHp": 72,
+          "dead": false,
+          "attackActive": false,
+          "struckActive": false
+        },
+        {
+          "objectId": "3002",
+          "kind": "monster",
+          "name": "Field Wasp",
+          "x": 329,
+          "y": 270,
+          "hp": 60,
+          "maxHp": 60,
+          "dead": false,
+          "attackActive": false,
+          "struckActive": false
+        }
+      ],
+      "visibleMonsterLabels": [
+        "Field Wasp",
+        "Training Dummy"
+      ]
+    },
+    {
+      "label": "afterCombat",
+      "selectedObjectId": "3002",
+      "player": {
+        "x": 327,
+        "y": 270
+      },
+      "monsters": [
+        {
+          "objectId": "3001",
+          "kind": "monster",
+          "name": "Training Dummy",
+          "x": 338,
+          "y": 273,
+          "hp": 72,
+          "maxHp": 72,
+          "dead": false,
+          "attackActive": false,
+          "struckActive": false
+        },
+        {
+          "objectId": "3002",
+          "kind": "monster",
+          "name": "Field Wasp",
+          "x": 329,
+          "y": 270,
+          "hp": 60,
+          "maxHp": 60,
+          "dead": false,
+          "attackActive": false,
+          "struckActive": false
+        }
+      ],
+      "visibleMonsterLabels": [
+        "Field Wasp60/60Attack · 2 tiles",
+        "Training Dummy"
+      ]
+    }
+  ],
+  "beltFlow": [
+    {
+      "label": "horizontal",
+      "visible": true,
+      "orientation": "horizontal",
+      "slotCount": 6,
+      "itemCount": 4,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "labelRects": [
+        {
+          "text": "1",
+          "left": 307.6400146484375,
+          "top": 570.4199829101562,
+          "right": 327.9200134277344,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "2",
+          "left": 334.94000244140625,
+          "top": 570.4199829101562,
+          "right": 355.2200012207031,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "3",
+          "left": 362.239990234375,
+          "top": 570.4199829101562,
+          "right": 382.52001953125,
+          "bottom": 581.3399658203125,
+          "width": 20.280029296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "4",
+          "left": 389.5400085449219,
+          "top": 570.4199829101562,
+          "right": 409.82000732421875,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "5",
+          "left": 416.8399963378906,
+          "top": 570.4199829101562,
+          "right": 437.1199951171875,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "6",
+          "left": 444.1400146484375,
+          "top": 570.4199829101562,
+          "right": 464.4200134277344,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        }
+      ],
+      "labelsWithinDialog": true,
+      "overlapsQuestTracker": false,
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 566.52001953125,
+        "right": 479.239990234375,
+        "bottom": 596.1600341796875,
+        "width": 187.19998168945312,
+        "height": 29.6400146484375
+      }
+    },
+    {
+      "label": "vertical",
+      "visible": true,
+      "orientation": "vertical",
+      "slotCount": 6,
+      "itemCount": 4,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "labelRects": [
+        {
+          "text": "1",
+          "left": 299.84002685546875,
+          "top": 258.41998291015625,
+          "right": 320.1199951171875,
+          "bottom": 269.34002685546875,
+          "width": 20.27996826171875,
+          "height": 10.9200439453125
+        },
+        {
+          "text": "2",
+          "left": 299.84002685546875,
+          "top": 285.7200012207031,
+          "right": 320.1199951171875,
+          "bottom": 296.6400146484375,
+          "width": 20.27996826171875,
+          "height": 10.920013427734375
+        },
+        {
+          "text": "3",
+          "left": 299.84002685546875,
+          "top": 313.02001953125,
+          "right": 320.1199951171875,
+          "bottom": 323.94000244140625,
+          "width": 20.27996826171875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "4",
+          "left": 299.84002685546875,
+          "top": 340.32000732421875,
+          "right": 320.1199951171875,
+          "bottom": 351.239990234375,
+          "width": 20.27996826171875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "5",
+          "left": 299.84002685546875,
+          "top": 367.6199951171875,
+          "right": 320.1199951171875,
+          "bottom": 378.5400085449219,
+          "width": 20.27996826171875,
+          "height": 10.920013427734375
+        },
+        {
+          "text": "6",
+          "left": 299.84002685546875,
+          "top": 394.9200134277344,
+          "right": 320.1199951171875,
+          "bottom": 405.8399963378906,
+          "width": 20.27996826171875,
+          "height": 10.91998291015625
+        }
+      ],
+      "labelsWithinDialog": true,
+      "overlapsQuestTracker": false,
+      "rect": {
+        "left": 298.280029296875,
+        "top": 240.48001098632812,
+        "right": 329.4800109863281,
+        "bottom": 428.4599914550781,
+        "width": 31.199981689453125,
+        "height": 187.97998046875
+      }
+    },
+    {
+      "label": "horizontalAfterRotate",
+      "visible": true,
+      "orientation": "horizontal",
+      "slotCount": 6,
+      "itemCount": 4,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "labelRects": [
+        {
+          "text": "1",
+          "left": 307.6400146484375,
+          "top": 570.4199829101562,
+          "right": 327.9200134277344,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "2",
+          "left": 334.94000244140625,
+          "top": 570.4199829101562,
+          "right": 355.2200012207031,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "3",
+          "left": 362.239990234375,
+          "top": 570.4199829101562,
+          "right": 382.52001953125,
+          "bottom": 581.3399658203125,
+          "width": 20.280029296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "4",
+          "left": 389.5400085449219,
+          "top": 570.4199829101562,
+          "right": 409.82000732421875,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "5",
+          "left": 416.8399963378906,
+          "top": 570.4199829101562,
+          "right": 437.1199951171875,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        },
+        {
+          "text": "6",
+          "left": 444.1400146484375,
+          "top": 570.4199829101562,
+          "right": 464.4200134277344,
+          "bottom": 581.3399658203125,
+          "width": 20.279998779296875,
+          "height": 10.91998291015625
+        }
+      ],
+      "labelsWithinDialog": true,
+      "overlapsQuestTracker": false,
+      "rect": {
+        "left": 292.0400085449219,
+        "top": 566.52001953125,
+        "right": 479.239990234375,
+        "bottom": 596.1600341796875,
+        "width": 187.19998168945312,
+        "height": 29.6400146484375
+      }
+    },
+    {
+      "label": "closed",
+      "visible": false,
+      "orientation": null,
+      "slotCount": 0,
+      "itemCount": 0,
+      "labels": [],
+      "labelRects": [],
+      "labelsWithinDialog": false,
+      "overlapsQuestTracker": false,
+      "rect": null
+    }
+  ],
+  "beltUseFlow": [
+    {
+      "label": "beforeHotkey1",
+      "items": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 4
+        },
+        {
+          "key": "belt-blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "belt",
+          "quantity": 3
+        },
+        {
+          "key": "belt-lantern-oil",
+          "name": "Lantern Oil",
+          "slot": 5,
+          "container": "belt",
+          "quantity": 1
+        },
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 2,
+          "container": "belt",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "label": "afterHotkey1",
+      "items": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 3
+        },
+        {
+          "key": "belt-blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "belt",
+          "quantity": 3
+        },
+        {
+          "key": "belt-lantern-oil",
+          "name": "Lantern Oil",
+          "slot": 5,
+          "container": "belt",
+          "quantity": 1
+        },
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 2,
+          "container": "belt",
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "beltMouseUseFlow": [
+    {
+      "label": "beforeBeltMouseUse",
+      "item": {
+        "key": "belt-red-potion",
+        "name": "Red Potion",
+        "slot": 0,
+        "container": "belt",
+        "quantity": 5
+      },
+      "items": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 5
+        },
+        {
+          "key": "belt-blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "belt",
+          "quantity": 3
+        },
+        {
+          "key": "belt-lantern-oil",
+          "name": "Lantern Oil",
+          "slot": 5,
+          "container": "belt",
+          "quantity": 1
+        },
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 2,
+          "container": "belt",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "label": "afterBeltMouseUse",
+      "item": {
+        "key": "belt-red-potion",
+        "name": "Red Potion",
+        "slot": 0,
+        "container": "belt",
+        "quantity": 4
+      },
+      "items": [
+        {
+          "key": "belt-red-potion",
+          "name": "Red Potion",
+          "slot": 0,
+          "container": "belt",
+          "quantity": 4
+        },
+        {
+          "key": "belt-blue-potion",
+          "name": "Blue Potion",
+          "slot": 1,
+          "container": "belt",
+          "quantity": 3
+        },
+        {
+          "key": "belt-lantern-oil",
+          "name": "Lantern Oil",
+          "slot": 5,
+          "container": "belt",
+          "quantity": 1
+        },
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "slot": 2,
+          "container": "belt",
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "loginFlow": [
+    {
+      "label": "initial",
+      "screen": null,
+      "language": null,
+      "wsState": null,
+      "loginBusy": null,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "demo",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "zhCnLanguage",
+      "screen": "login",
+      "language": "zh-CN",
+      "wsState": "closed",
+      "loginBusy": false,
+      "activeLanguageLabel": "简体中文",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "demo",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "登录",
+        "New Account",
+        "快速进入",
+        "查看按键",
+        "关闭"
+      ]
+    },
+    {
+      "label": "englishLanguageRestored",
+      "screen": "login",
+      "language": "en",
+      "wsState": "closed",
+      "loginBusy": false,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "demo",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "credentialsFilled",
+      "screen": "login",
+      "language": "en",
+      "wsState": "closed",
+      "loginBusy": false,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "stage5-8517-1777196731346",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "viewKeyPanel",
+      "screen": "login",
+      "language": "en",
+      "wsState": "closed",
+      "loginBusy": false,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "stage5-8517-1777196731346",
+      "passwordFilled": true,
+      "accountPanelVisible": true,
+      "accountPanelText": "View Keystage5-8517-1777196731346Close",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "viewKeyClosed",
+      "screen": "login",
+      "language": "en",
+      "wsState": "closed",
+      "loginBusy": false,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "stage5-8517-1777196731346",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": true,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "accountCreated",
+      "screen": "login",
+      "language": "en",
+      "wsState": "open",
+      "loginBusy": false,
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "accountValue": "stage5-8517-1777196731346",
+      "passwordFilled": true,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": false,
+      "buttons": [
+        "Login",
+        "New Account",
+        "Quick Enter",
+        "View Key",
+        "Close"
+      ]
+    },
+    {
+      "label": "enterKeySubmitted",
+      "screen": "select",
+      "language": "en",
+      "wsState": "open",
+      "loginBusy": false,
+      "activeLanguageLabel": null,
+      "languageLabels": [],
+      "accountValue": "",
+      "passwordFilled": false,
+      "accountPanelVisible": false,
+      "accountPanelText": "",
+      "feedbackText": "",
+      "runtimeStampVisible": false,
+      "buttons": [],
+      "enterSubmitted": true
+    }
+  ],
+  "selectFlow": [
+    {
+      "label": "initial",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "spanishLanguage",
+      "screen": "select",
+      "language": "es",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "Español",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Guerrero"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Iniciar juego",
+        "Nuevo personaje",
+        "Borrar personaje",
+        "Créditos",
+        "Salir"
+      ]
+    },
+    {
+      "label": "englishLanguageRestored",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "creditsPanel",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": true,
+      "creditsPanelText": "CreditsLegend of Mir 2stage5-8517-1777196731346Close",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "creditsClosed",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "deleteConfirm",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": true,
+      "deletePanelText": "Delete CharacterScoutConfirmClose",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "deleteCancelled",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "afterUiNewCharacter",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 2,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        },
+        {
+          "index": 1,
+          "name": "MIR3XIS",
+          "level": 1,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": false,
+          "empty": false,
+          "selected": false,
+          "name": "MIR3XIS",
+          "level": "1",
+          "job": "Warrior"
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "newCharacterSlotSelected",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 1,
+      "characterCount": 2,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        },
+        {
+          "index": 1,
+          "name": "MIR3XIS",
+          "level": 1,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": false,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "MIR3XIS",
+          "level": "1",
+          "job": "Warrior"
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "MIR3XIS",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "deleteCreatedConfirm",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 1,
+      "characterCount": 2,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        },
+        {
+          "index": 1,
+          "name": "MIR3XIS",
+          "level": 1,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": false,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "MIR3XIS",
+          "level": "1",
+          "job": "Warrior"
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": true,
+      "deletePanelText": "Delete CharacterMIR3XISConfirmClose",
+      "selectedSlotName": "MIR3XIS",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "afterUiDeleteCharacter",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 1,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "afterUiRecreateCharacter",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 0,
+      "characterCount": 2,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        },
+        {
+          "index": 1,
+          "name": "MIR4G02",
+          "level": 1,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": false,
+          "empty": false,
+          "selected": false,
+          "name": "MIR4G02",
+          "level": "1",
+          "job": "Warrior"
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "Scout",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    },
+    {
+      "label": "recreatedCharacterSlotSelected",
+      "screen": "select",
+      "language": "en",
+      "accountId": "stage5-8517-1777196731346",
+      "selectedCharacterIndex": 1,
+      "characterCount": 2,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "classKey": "warrior",
+          "gender": "male"
+        },
+        {
+          "index": 1,
+          "name": "MIR4G02",
+          "level": 1,
+          "classKey": "warrior",
+          "gender": "male"
+        }
+      ],
+      "activeLanguageLabel": "English",
+      "languageLabels": [
+        "English",
+        "简体中文",
+        "Español"
+      ],
+      "slots": [
+        {
+          "index": 0,
+          "disabled": false,
+          "empty": false,
+          "selected": false,
+          "name": "Scout",
+          "level": "7",
+          "job": "Warrior"
+        },
+        {
+          "index": 1,
+          "disabled": false,
+          "empty": false,
+          "selected": true,
+          "name": "MIR4G02",
+          "level": "1",
+          "job": "Warrior"
+        },
+        {
+          "index": 2,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        },
+        {
+          "index": 3,
+          "disabled": true,
+          "empty": true,
+          "selected": false,
+          "name": "",
+          "level": "",
+          "job": ""
+        }
+      ],
+      "creditsPanelVisible": false,
+      "creditsPanelText": "",
+      "deletePanelVisible": false,
+      "deletePanelText": "",
+      "selectedSlotName": "MIR4G02",
+      "actionLabels": [
+        "Start Game",
+        "New Character",
+        "Delete Character",
+        "Credits",
+        "Exit"
+      ]
+    }
+  ],
+  "stage5SystemsFlow": [
+    {
+      "label": "beforeBroadSystems",
+      "group": {
+        "lootMode": "free",
+        "members": []
+      },
+      "guild": {
+        "chatLog": [],
+        "members": [],
+        "name": "",
+        "permissions": [],
+        "rank": ""
+      },
+      "social": {
+        "blocked": [],
+        "friends": []
+      },
+      "mail": [],
+      "trade": null,
+      "auction": [],
+      "conquest": {
+        "activeWars": [],
+        "castleOwner": "",
+        "eventLog": [],
+        "gates": [],
+        "gold": 0,
+        "guards": [],
+        "openGates": [],
+        "taxRatePercent": 0,
+        "walls": []
+      },
+      "hero": null,
+      "profession": {
+        "craftedItems": [],
+        "miningLevel": 0,
+        "ore": 0
+      },
+      "gold": 1280,
+      "credit": null,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "quantity": 3,
+          "slot": 0,
+          "container": "bag1"
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "quantity": 3,
+          "slot": 1,
+          "container": "bag1"
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "quantity": 1,
+          "slot": 2,
+          "container": "bag1"
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "quantity": 1,
+          "slot": 3,
+          "container": "bag1"
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "quantity": 1,
+          "slot": 5,
+          "container": "bag1"
+        },
+        {
+          "key": "town-teleport",
+          "name": "Town Teleport",
+          "quantity": 1,
+          "slot": 0,
+          "container": "bag2"
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "quantity": 1,
+          "slot": 10,
+          "container": "bag1"
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "quantity": 1,
+          "slot": 4,
+          "container": "bag1"
+        }
+      ],
+      "monsterCount": 0
+    },
+    {
+      "label": "afterBroadSystems",
+      "group": {
+        "lootMode": "roundRobin",
+        "members": [
+          "MIR4G02",
+          "Miner"
+        ]
+      },
+      "guild": {
+        "chatLog": [
+          "MIR4G02: Guild ready"
+        ],
+        "members": [
+          "MIR4G02"
+        ],
+        "name": "BichonGuard",
+        "permissions": [
+          "invite",
+          "rank",
+          "storage",
+          "conquest"
+        ],
+        "rank": "Sabuk Warden"
+      },
+      "social": {
+        "blocked": [],
+        "friends": [
+          "Miner"
+        ]
+      },
+      "mail": [
+        {
+          "body": "Take this",
+          "claimed": true,
+          "deleted": false,
+          "from": "MIR4G02",
+          "gold": 5,
+          "id": 1,
+          "items": [],
+          "subject": "Reward",
+          "to": "Scout"
+        }
+      ],
+      "trade": {
+        "accepted": true,
+        "completed": true,
+        "offeredGold": 1,
+        "offeredItems": [],
+        "partner": "Trader"
+      },
+      "auction": [],
+      "conquest": {
+        "activeWars": [
+          "Sabuk"
+        ],
+        "castleOwner": "BichonGuard",
+        "eventLog": [
+          "War started: Sabuk",
+          "Castle owner: BichonGuard"
+        ],
+        "gates": [],
+        "gold": 0,
+        "guards": [],
+        "openGates": [],
+        "taxRatePercent": 0,
+        "walls": []
+      },
+      "hero": {
+        "behaviour": 0,
+        "level": 1,
+        "name": "Aide"
+      },
+      "profession": {
+        "craftedItems": [
+          "crafted-blade"
+        ],
+        "miningLevel": 1,
+        "ore": 1
+      },
+      "gold": 1284,
+      "credit": null,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "quantity": 3,
+          "slot": 0,
+          "container": "bag1"
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "quantity": 3,
+          "slot": 1,
+          "container": "bag1"
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "quantity": 1,
+          "slot": 2,
+          "container": "bag1"
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "quantity": 1,
+          "slot": 3,
+          "container": "bag1"
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "quantity": 1,
+          "slot": 5,
+          "container": "bag1"
+        },
+        {
+          "key": "town-teleport",
+          "name": "Town Teleport",
+          "quantity": 1,
+          "slot": 0,
+          "container": "bag2"
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "quantity": 1,
+          "slot": 10,
+          "container": "bag1"
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "quantity": 1,
+          "slot": 4,
+          "container": "bag1"
+        },
+        {
+          "key": "crafted-blade",
+          "name": "Crafted Blade",
+          "quantity": 1,
+          "slot": 6,
+          "container": "bag1"
+        }
+      ],
+      "monsterCount": 0
+    },
+    {
+      "label": "afterAdvancedSystems",
+      "group": {
+        "lootMode": "roundRobin",
+        "members": [
+          "MIR4G02",
+          "Miner"
+        ]
+      },
+      "guild": {
+        "chatLog": [
+          "MIR4G02: Guild ready"
+        ],
+        "members": [
+          "MIR4G02"
+        ],
+        "name": "BichonGuard",
+        "permissions": [
+          "invite",
+          "rank",
+          "storage",
+          "conquest"
+        ],
+        "rank": "Sabuk Warden"
+      },
+      "social": {
+        "blocked": [],
+        "friends": [
+          "Miner"
+        ]
+      },
+      "mail": [
+        {
+          "body": "Take this",
+          "claimed": true,
+          "deleted": true,
+          "from": "MIR4G02",
+          "gold": 5,
+          "id": 1,
+          "items": [],
+          "subject": "Reward",
+          "to": "Scout"
+        }
+      ],
+      "trade": null,
+      "auction": [
+        {
+          "cancelled": false,
+          "id": 1,
+          "itemKey": "auction-ui-relic",
+          "price": 35,
+          "seller": "MIR4G02",
+          "sold": true
+        },
+        {
+          "cancelled": true,
+          "id": 2,
+          "itemKey": "auction-cancel-ui",
+          "price": 45,
+          "seller": "MIR4G02",
+          "sold": false
+        }
+      ],
+      "conquest": {
+        "activeWars": [],
+        "castleOwner": "BichonGuard",
+        "eventLog": [
+          "War started: Sabuk",
+          "Castle owner: BichonGuard",
+          "War ended: Sabuk"
+        ],
+        "gates": [],
+        "gold": 0,
+        "guards": [],
+        "openGates": [],
+        "taxRatePercent": 0,
+        "walls": []
+      },
+      "hero": {
+        "behaviour": 2,
+        "level": 1,
+        "name": "Aide"
+      },
+      "profession": {
+        "craftedItems": [
+          "crafted-blade",
+          "crafted-shield"
+        ],
+        "miningLevel": 1,
+        "ore": 2
+      },
+      "gold": 1224,
+      "credit": null,
+      "inventoryItems": [
+        {
+          "key": "red-potion",
+          "name": "Red Potion",
+          "quantity": 3,
+          "slot": 0,
+          "container": "bag1"
+        },
+        {
+          "key": "blue-potion",
+          "name": "Blue Potion",
+          "quantity": 3,
+          "slot": 1,
+          "container": "bag1"
+        },
+        {
+          "key": "training-manual",
+          "name": "Training Manual",
+          "quantity": 1,
+          "slot": 2,
+          "container": "bag1"
+        },
+        {
+          "key": "bronze-helmet",
+          "name": "Bronze Helmet",
+          "quantity": 1,
+          "slot": 3,
+          "container": "bag1"
+        },
+        {
+          "key": "leather-armour",
+          "name": "Leather Armour",
+          "quantity": 1,
+          "slot": 5,
+          "container": "bag1"
+        },
+        {
+          "key": "town-teleport",
+          "name": "Town Teleport",
+          "quantity": 1,
+          "slot": 0,
+          "container": "bag2"
+        },
+        {
+          "key": "wooden-sword",
+          "name": "Wooden Sword",
+          "quantity": 1,
+          "slot": 10,
+          "container": "bag1"
+        },
+        {
+          "key": "dagger",
+          "name": "Dagger",
+          "quantity": 1,
+          "slot": 4,
+          "container": "bag1"
+        },
+        {
+          "key": "crafted-blade",
+          "name": "Crafted Blade",
+          "quantity": 1,
+          "slot": 6,
+          "container": "bag1"
+        },
+        {
+          "key": "shop-ui-potion",
+          "name": "Shop Ui Potion",
+          "quantity": 1,
+          "slot": 7,
+          "container": "bag1"
+        },
+        {
+          "key": "auction-ui-relic",
+          "name": "Auction Ui Relic",
+          "quantity": 1,
+          "slot": 8,
+          "container": "bag1"
+        },
+        {
+          "key": "crafted-shield",
+          "name": "Crafted Shield",
+          "quantity": 1,
+          "slot": 9,
+          "container": "bag1"
+        }
+      ],
+      "monsterCount": 0
+    }
   ],
   "stage5Systems": {
     "appearance": {
       "hair": 0
     },
-    "auction": [],
+    "auction": [
+      {
+        "cancelled": false,
+        "id": 1,
+        "itemKey": "auction-ui-relic",
+        "price": 35,
+        "seller": "MIR4G02",
+        "sold": true
+      },
+      {
+        "cancelled": true,
+        "id": 2,
+        "itemKey": "auction-cancel-ui",
+        "price": 45,
+        "seller": "MIR4G02",
+        "sold": false
+      }
+    ],
     "conquest": {
-      "activeWars": [
-        "Sabuk"
-      ],
+      "activeWars": [],
       "castleOwner": "BichonGuard",
       "eventLog": [
         "War started: Sabuk",
-        "Castle owner: BichonGuard"
+        "Castle owner: BichonGuard",
+        "War ended: Sabuk"
       ],
       "gates": [],
       "gold": 0,
@@ -41,16 +5678,19 @@
       "walls": []
     },
     "group": {
-      "lootMode": "free",
+      "lootMode": "roundRobin",
       "members": [
-        "Scout",
+        "MIR4G02",
         "Miner"
       ]
     },
     "guild": {
-      "chatLog": [],
+      "chatLog": [
+        "MIR4G02: Guild ready",
+        "MIR4G02: Guild filter check"
+      ],
       "members": [
-        "Scout"
+        "MIR4G02"
       ],
       "name": "BichonGuard",
       "permissions": [
@@ -59,7 +5699,7 @@
         "storage",
         "conquest"
       ],
-      "rank": "Guild Chief"
+      "rank": "Sabuk Warden"
     },
     "guildTerritory": {
       "mapFileName": "GA0",
@@ -68,7 +5708,7 @@
       "rentalDaysLeft": 0
     },
     "hero": {
-      "behaviour": 0,
+      "behaviour": 2,
       "level": 1,
       "name": "Aide"
     },
@@ -76,10 +5716,11 @@
       {
         "body": "Take this",
         "claimed": true,
-        "deleted": false,
-        "from": "Scout",
+        "deleted": true,
+        "from": "MIR4G02",
         "gold": 5,
         "id": 1,
+        "items": [],
         "subject": "Reward",
         "to": "Scout"
       }
@@ -87,10 +5728,11 @@
     "nameLists": [],
     "profession": {
       "craftedItems": [
-        "crafted-blade"
+        "crafted-blade",
+        "crafted-shield"
       ],
       "miningLevel": 1,
-      "ore": 1
+      "ore": 2
     },
     "social": {
       "blocked": [],
@@ -98,13 +5740,7 @@
         "Miner"
       ]
     },
-    "trade": {
-      "accepted": true,
-      "completed": true,
-      "offeredGold": 1,
-      "offeredItems": [],
-      "partner": "Trader"
-    }
+    "trade": null
   },
   "criticalConsoleErrors": []
 }
