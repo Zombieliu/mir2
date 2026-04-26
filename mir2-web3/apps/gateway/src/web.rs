@@ -4,13 +4,15 @@ use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
+use axum::http::StatusCode;
 use axum::response::{Html, Response};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
     ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket, Spell,
 };
+use mir2_simulation::{deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
@@ -291,6 +293,26 @@ struct HealthResponse {
     tcp_stub: &'static str,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminSystemMailRequest {
+    target_kind: Stage5MailTargetKind,
+    target_id: String,
+    from: String,
+    subject: String,
+    body: String,
+    #[serde(default)]
+    gold: u32,
+    #[serde(default)]
+    items: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminErrorResponse {
+    error: String,
+}
+
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
     let state = WebState {
         config: Arc::new(config),
@@ -299,6 +321,7 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
     let app = Router::new()
         .route("/", get(manual_ui))
         .route("/health", get(health))
+        .route("/admin/system-mail", post(admin_system_mail))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -321,6 +344,27 @@ async fn health() -> Json<HealthResponse> {
         ws: "ready",
         tcp_stub: "ready",
     })
+}
+
+async fn admin_system_mail(
+    State(state): State<WebState>,
+    Json(request): Json<AdminSystemMailRequest>,
+) -> Result<Json<mir2_simulation::Stage5MailDeliveryReceipt>, (StatusCode, Json<AdminErrorResponse>)>
+{
+    let receipt = deliver_stage5_system_mail(
+        &state.config,
+        Stage5MailDelivery {
+            target_kind: request.target_kind,
+            target_id: request.target_id,
+            from: request.from,
+            subject: request.subject,
+            body: request.body,
+            gold: request.gold,
+            items: request.items,
+        },
+    )
+    .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    Ok(Json(receipt))
 }
 
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
@@ -1891,7 +1935,14 @@ mod tests {
         responses_require_world_snapshot, should_send_world_snapshot_for_action, BrowserCommand,
         SessionAction,
     };
+    use axum::extract::State;
+    use axum::Json;
     use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItem, UserItemStat};
+    use mir2_simulation::{
+        AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
+    };
+    use std::sync::Arc;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
@@ -1918,6 +1969,59 @@ mod tests {
             sealed_info: None,
             gm_made: false,
         }
+    }
+
+    #[tokio::test]
+    async fn admin_system_mail_endpoint_writes_live_account_store() {
+        let path = std::env::temp_dir().join(format!(
+            "mir2-gateway-admin-mail-{}-{}.json",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map(|duration| duration.as_nanos())
+                .unwrap_or_default()
+        ));
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        let default_character = config.default_character.clone();
+        let state = super::WebState {
+            config: Arc::new(config),
+        };
+
+        let Json(receipt) = super::admin_system_mail(
+            State(state),
+            Json(super::AdminSystemMailRequest {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".into(),
+                from: "GM System".into(),
+                subject: "Endpoint smoke".into(),
+                body: "Delivered through the live gateway admin endpoint.".into(),
+                gold: 5000,
+                items: vec!["red-potion".into()],
+            }),
+        )
+        .await
+        .expect("mail delivery should succeed");
+
+        assert_eq!(receipt.delivered_count, 1);
+        assert_eq!(receipt.mail_ids, vec![1]);
+
+        let store = AccountStore::load_or_new(&path, default_character);
+        let save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("demo character save should exist");
+        let systems: Stage5SystemsState = serde_json::from_str(
+            save.stage5_systems_json
+                .as_deref()
+                .expect("stage5 systems should be persisted"),
+        )
+        .expect("stage5 systems should decode");
+        assert_eq!(systems.mail[0].subject, "Endpoint smoke");
+        assert_eq!(systems.mail[0].gold, 5000);
+        assert_eq!(systems.mail[0].items, vec!["red-potion"]);
+
+        let _ = std::fs::remove_file(path);
     }
 
     #[test]

@@ -1275,6 +1275,14 @@ export default function HomePage() {
     send({ type: "transferMap", key });
   }
 
+  function claimMail(mailId: number) {
+    send({ type: "stage5Command", action: "mail.claim", args: [String(mailId)] });
+  }
+
+  function deleteMail(mailId: number) {
+    send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
+  }
+
   function transferKeyForTile(x: number, y: number) {
     return transferKeyForWorldTile(world.mapTransfers, world.mapFileName, x, y);
   }
@@ -2323,6 +2331,8 @@ export default function HomePage() {
       onSpecialRepairItem={specialRepairItem}
       onCastSkill={castSkill}
       onTransferMap={transferMap}
+      onClaimMail={claimMail}
+      onDeleteMail={deleteMail}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onToggleCharacter={() => setShowCharacter((current) => !current)}
       onToggleInventory={() => setShowInventory((current) => !current)}

@@ -1100,7 +1100,29 @@ img {
 }
 
 .overlay-panel-row {
+  display: grid;
+  gap: 3px;
   min-height: 14px;
+}
+
+.overlay-panel-row span {
+  color: #d6c6a5;
+}
+
+.overlay-panel-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.overlay-panel-actions button {
+  border: 1px solid rgba(190, 157, 99, 0.48);
+  background: rgba(52, 32, 18, 0.86);
+  color: #f4dcaf;
+  padding: 2px 7px;
+}
+
+.overlay-panel-actions button:disabled {
+  opacity: 0.45;
 }
 
 .overlay-panel-empty {
@@ -1115,7 +1137,7 @@ img {
 .mail-panel {
   right: 18px;
   top: 156px;
-  width: 214px;
+  width: 286px;
 }
 
 .report-panel {

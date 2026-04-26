@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-27-R228 completed. Admin `SendSystemMail` now reaches live game-visible state: `apps/admin-api` tries `ADMIN_GATEWAY_MAIL_URL` via a reqwest-free plain TCP HTTP POST helper and falls back to the persistent account store; `apps/gateway` exposes `POST /admin/system-mail` to deliver into the running gateway `SimulationConfig.account_store`; `apps/simulation` persists Stage 5 mail into `CharacterSaveRecord.stage5_systems_json`; and the player web Mail panel can display, claim, and delete those messages. Runtime smoke proved Admin Web `:3020` -> Admin API `:7420` -> gateway `:7110` delivered `deliveryMode: "gateway_live"` to `Scout`, then a gateway WS `stage5Command mail.claim` marked it claimed, raised gold from 1280 to 6280, and delivered one `red-potion`.
+
 > Latest product-evolution sync: 2026-04-27 Admin operations foundation advanced. `apps/admin-api` now has persistent-storage-ready command/audit repository traits, in-memory repositories, Axum HTTP routes, and a `SendSystemMail` domain outbox executor. `apps/admin-web` now has a production-shaped desktop operations UI across Dashboard, Players, Player Detail, Economy, Activities, Servers, Risk, GM Tools, and Audit, with the GM mail form wired through Next to the Rust Admin API. Verification: `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`, `cargo +1.89.0 fmt --check`, admin-web `tsc --noEmit`, admin-web `next build`, direct Rust API curl write, Next route proxy curl write, and Playwright screenshots `docs/admin-web-dashboard-smoke.png` / `docs/admin-web-gm-tools-smoke.png`.
 
 > Latest sync: R225 completed. Mac-local Candidate regression is green: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots, summary counts in manifest), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54 including packet trace bin tests 7/7, `mir2-simulation` 664/664, require-local `packet_trace --matrix` wrote 9 local artifacts with 17 intended skips under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. R225 also added the Windows continuation checklist and cleaned the stale gateway README. Active follow-up round is R226 for Windows/live Crystal/human acceptance blockers; status remains **100% Candidate**, backend/server tracked slice **99.70%**, real full-project accepted 1:1 **roughly 90.0%**.
@@ -85,6 +87,12 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | Status | Task | Owner | Files | Notes |
 | --- | --- | --- | --- | --- |
 | [x] | Land Admin API repository/HTTP foundation and Admin Web UI | Coordinator | `apps/admin-api`, `apps/admin-web`, `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`, docs/screenshots | Added `AdminCommandRepository` and `AuditRepository` traits, in-memory command/audit stores, Axum HTTP routes, `SendSystemMail` domain executor/outbox, standalone Next admin console pages, Next proxy route for GM mail, docs, and smoke screenshots. Verified by Rust locked tests/fmt, admin-web typecheck/build, direct Rust API curl write, Next proxy curl write, and Playwright screenshots. |
+
+## Product Evolution Round: 2026-04-27-R228
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Connect audited GM system mail to live game-visible Stage 5 mail | Coordinator | `apps/admin-api`, `apps/gateway`, `apps/simulation`, `apps/web`, `apps/admin-web`, `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` | Added live gateway delivery for `SendSystemMail`, persistent account-store fallback, a gateway admin mail endpoint, in-game Mail panel claim/delete actions, and a gateway endpoint unit test. Verified by focused simulation/admin-api/gateway tests, web/admin-web typecheck/build, Admin Web curl through Rust API, outbox `deliveryMode: "gateway_live"`, account-store inspection, gateway WS snapshot mail visibility, and WS `mail.claim` state mutation. |
 
 ## Completed Round: 2026-04-26-R225
 

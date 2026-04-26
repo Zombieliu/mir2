@@ -61,7 +61,7 @@ export function MailCommandForm() {
       </div>
       <div className="field">
         <label>Target ID</label>
-        <input className="control" defaultValue="AZ-1048" name="targetId" />
+        <input className="control" defaultValue="Scout" name="targetId" />
       </div>
       <div className="field">
         <label>Subject</label>
@@ -78,7 +78,7 @@ export function MailCommandForm() {
         <label>Body</label>
         <textarea
           className="control"
-          defaultValue="Thank you for reporting the instance reward issue. This mail was queued by audited GM workflow."
+          defaultValue="This mail is delivered through audited Admin API into the live gateway mail store."
           name="body"
         />
       </div>
@@ -86,7 +86,7 @@ export function MailCommandForm() {
         <label>Required Reason</label>
         <input
           className="control"
-          defaultValue="support ticket GM-1842 verified reward loss"
+          defaultValue="local GM live mail integration smoke"
           name="reason"
         />
       </div>
