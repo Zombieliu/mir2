@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "apps/admin-api",
     "apps/gateway",
     "apps/simulation",
     "packages/game-data",
