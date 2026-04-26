@@ -2,38 +2,62 @@ import { AdminShell } from "../../components/admin-shell";
 import { MailCommandForm } from "../../components/mail-command-form";
 import { StatusBadge } from "../../components/status-badge";
 import { adminGet, type SystemMailReceipt } from "../../lib/admin-api";
+import { getAdminI18n } from "../../lib/i18n";
 
 export default async function GmToolsPage() {
+  const { t } = await getAdminI18n();
   const outbox = await adminGet<SystemMailReceipt[]>("/admin/system-mail/outbox");
 
   return (
     <AdminShell active="/gm-tools">
       <div className="page-head">
         <div>
-          <p className="eyebrow">GM Tools</p>
-          <h2>Mail, announcements, and commands</h2>
-          <p className="muted">This page is wired to the Rust Admin API for SendSystemMail.</p>
+          <p className="eyebrow">{t("gm.eyebrow")}</p>
+          <h2>{t("gm.title")}</h2>
+          <p className="muted">{t("gm.subtitle")}</p>
         </div>
         <StatusBadge tone={outbox.ok ? "success" : "warn"}>
-          {outbox.ok ? "API ready" : "API offline"}
+          {outbox.ok ? t("common.apiReady") : t("common.apiOffline")}
         </StatusBadge>
       </div>
       <div className="grid two">
         <section className="card">
-          <p className="eyebrow">Audited System Mail</p>
-          <h3>Queue command</h3>
-          <MailCommandForm />
+          <p className="eyebrow">{t("gm.systemMail")}</p>
+          <h3>{t("gm.queueCommand")}</h3>
+          <MailCommandForm
+            text={{
+              idle: t("mail.idle"),
+              submitting: t("mail.submitting"),
+              rejected: t("mail.rejected"),
+              queued: t("mail.queued"),
+              targetKind: t("mail.targetKind"),
+              targetCharacter: t("mail.targetCharacter"),
+              targetAccount: t("mail.targetAccount"),
+              targetGlobal: t("mail.targetGlobal"),
+              targetId: t("mail.targetId"),
+              subject: t("mail.subject"),
+              defaultSubject: t("mail.defaultSubject"),
+              attachment: t("mail.attachment"),
+              body: t("mail.body"),
+              defaultBody: t("mail.defaultBody"),
+              reason: t("mail.reason"),
+              defaultReason: t("mail.defaultReason"),
+              queueing: t("mail.queueing"),
+              queue: t("mail.queue"),
+              preview: t("mail.preview")
+            }}
+          />
         </section>
         <section className="card">
-          <p className="eyebrow">Outbox Receipts</p>
+          <p className="eyebrow">{t("gm.outboxReceipts")}</p>
           {outbox.ok ? (
             <table className="table">
               <thead>
                 <tr>
-                  <th>Outbox</th>
-                  <th>Target</th>
-                  <th>Delivery</th>
-                  <th>Mail IDs</th>
+                  <th>{t("gm.outbox")}</th>
+                  <th>{t("gm.target")}</th>
+                  <th>{t("gm.delivery")}</th>
+                  <th>{t("gm.mailIds")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -52,7 +76,7 @@ export default async function GmToolsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4}>No queued mail in this process yet.</td>
+                    <td colSpan={4}>{t("gm.emptyOutbox")}</td>
                   </tr>
                 )}
               </tbody>
@@ -62,9 +86,9 @@ export default async function GmToolsPage() {
           )}
           <div className="rune-divider" />
           <div className="actions">
-            <button className="button secondary">Announcement</button>
-            <button className="button secondary">Sensitive Words</button>
-            <button className="button secondary">Hotfix Notice</button>
+            <button className="button secondary">{t("gm.announcement")}</button>
+            <button className="button secondary">{t("gm.sensitiveWords")}</button>
+            <button className="button secondary">{t("gm.hotfixNotice")}</button>
           </div>
         </section>
       </div>

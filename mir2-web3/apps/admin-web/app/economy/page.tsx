@@ -1,30 +1,33 @@
 import { AdminShell } from "../../components/admin-shell";
 import { Bars } from "../../components/bars";
 import { StatusBadge } from "../../components/status-badge";
+import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 import { economyRows } from "../../lib/mock-data";
 
-export default function EconomyPage() {
+export default async function EconomyPage() {
+  const { t } = await getAdminI18n();
+
   return (
     <AdminShell active="/economy">
       <div className="page-head">
         <div>
-          <p className="eyebrow">Economy Intelligence</p>
-          <h2>Currency and market health</h2>
-          <p className="muted">Gold, yuanbao, item circulation, auction prices, and inflation signals.</p>
+          <p className="eyebrow">{t("economy.eyebrow")}</p>
+          <h2>{t("economy.title")}</h2>
+          <p className="muted">{t("economy.subtitle")}</p>
         </div>
-        <StatusBadge tone="warn">Blessed Oil inflation</StatusBadge>
+        <StatusBadge tone="warn">{t("economy.inflationBadge")}</StatusBadge>
       </div>
       <div className="grid two">
         <section className="card">
-          <p className="eyebrow">Main Currencies</p>
+          <p className="eyebrow">{t("economy.mainCurrencies")}</p>
           <table className="table">
             <thead>
               <tr>
-                <th>Asset</th>
-                <th>Produced</th>
-                <th>Consumed</th>
-                <th>Net</th>
-                <th>State</th>
+                <th>{t("economy.asset")}</th>
+                <th>{t("economy.produced")}</th>
+                <th>{t("economy.consumed")}</th>
+                <th>{t("economy.net")}</th>
+                <th>{t("economy.state")}</th>
               </tr>
             </thead>
             <tbody>
@@ -36,7 +39,7 @@ export default function EconomyPage() {
                   <td>{net}</td>
                   <td>
                     <StatusBadge tone={state === "Stable" ? "success" : "warn"}>
-                      {state}
+                      {translateAdminStatus(t, state)}
                     </StatusBadge>
                   </td>
                 </tr>
@@ -45,19 +48,19 @@ export default function EconomyPage() {
           </table>
         </section>
         <section className="card">
-          <p className="eyebrow">Resource Distribution</p>
+          <p className="eyebrow">{t("economy.resourceDistribution")}</p>
           <Bars
             rows={[
-              { label: "Top 1%", value: 46 },
-              { label: "Guild Banks", value: 22 },
-              { label: "Market", value: 19 },
-              { label: "Dormant", value: 13 }
+              { label: t("economy.topOne"), value: 46 },
+              { label: t("economy.guildBanks"), value: 22 },
+              { label: t("economy.market"), value: 19 },
+              { label: t("economy.dormant"), value: 13 }
             ]}
           />
         </section>
       </div>
       <section className="card" style={{ marginTop: 16 }}>
-        <p className="eyebrow">Price Movement</p>
+        <p className="eyebrow">{t("economy.priceMovement")}</p>
         <div className="grid three">
           {["Dragon Scale", "Blessed Oil", "Wooma Horn"].map((item, index) => (
             <div className="side-card" key={item} style={{ marginTop: 0 }}>

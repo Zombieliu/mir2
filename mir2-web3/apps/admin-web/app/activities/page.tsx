@@ -1,29 +1,32 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 import { activities } from "../../lib/mock-data";
 
-export default function ActivitiesPage() {
+export default async function ActivitiesPage() {
+  const { t } = await getAdminI18n();
+
   return (
     <AdminShell active="/activities">
       <div className="page-head">
         <div>
-          <p className="eyebrow">LiveOps</p>
-          <h2>Activity configuration</h2>
-          <p className="muted">Draft, preview, target, and publish multi-realm events with audit trail.</p>
+          <p className="eyebrow">{t("activities.eyebrow")}</p>
+          <h2>{t("activities.title")}</h2>
+          <p className="muted">{t("activities.subtitle")}</p>
         </div>
-        <button className="button">Create Activity</button>
+        <button className="button">{t("activities.create")}</button>
       </div>
       <div className="grid two">
         <section className="card">
-          <p className="eyebrow">Activity List</p>
+          <p className="eyebrow">{t("activities.list")}</p>
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Start</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Signal</th>
+                <th>{t("activities.name")}</th>
+                <th>{t("activities.start")}</th>
+                <th>{t("activities.type")}</th>
+                <th>{t("table.status")}</th>
+                <th>{t("activities.signal")}</th>
               </tr>
             </thead>
             <tbody>
@@ -34,7 +37,7 @@ export default function ActivitiesPage() {
                   <td>{type}</td>
                   <td>
                     <StatusBadge tone={status === "Running" ? "success" : "warn"}>
-                      {status}
+                      {translateAdminStatus(t, status)}
                     </StatusBadge>
                   </td>
                   <td>{signal}</td>
@@ -44,29 +47,29 @@ export default function ActivitiesPage() {
           </table>
         </section>
         <section className="card">
-          <p className="eyebrow">Config Preview</p>
+          <p className="eyebrow">{t("activities.preview")}</p>
           <div className="form-grid">
             <div className="field full">
-              <label>Activity Name</label>
-              <input className="control" defaultValue="Red Moon Boss Rush" />
+              <label>{t("activities.activityName")}</label>
+              <input className="control" defaultValue={t("activities.defaultName")} />
             </div>
             <div className="field">
-              <label>Reward</label>
+              <label>{t("activities.reward")}</label>
               <input className="control" defaultValue="red-moon-token x12" />
             </div>
             <div className="field">
-              <label>Condition</label>
+              <label>{t("activities.condition")}</label>
               <input className="control" defaultValue="level >= 35" />
             </div>
             <div className="field full">
-              <label>Realms</label>
-              <input className="control" defaultValue="S1, S2, S3, EU Mirror" />
+              <label>{t("activities.realms")}</label>
+              <input className="control" defaultValue={t("activities.defaultRealms")} />
             </div>
           </div>
           <div className="rune-divider" />
           <div className="actions">
-            <button className="button secondary">Save Draft</button>
-            <button className="button">Submit Review</button>
+            <button className="button secondary">{t("activities.saveDraft")}</button>
+            <button className="button">{t("activities.submitReview")}</button>
           </div>
         </section>
       </div>

@@ -86,6 +86,7 @@ Current implementation:
 - Implemented pages: Dashboard, Player Management, Player Detail, Economy, Activities, World Monitor, Anti-Cheat, Mail/GM Tools, and Audit Log.
 - The `Mail/GM Tools` page posts `SendSystemMail` through `/api/admin/system-mail`, which forwards to the Rust Admin API with server-side operator headers.
 - The dashboard, GM tools, and audit pages read the Rust Admin API when available and show an offline state when the API is not running.
+- The admin UI has a first production-shaped i18n layer: `admin_locale` cookie selects `en` or `zh-CN`, pages render server-side from `apps/admin-web/lib/i18n.ts`, and the top bar includes a language switcher. Current coverage includes navigation, page heads, table headers, primary controls, GM mail form copy, status labels, and operational empty states.
 
 Admin Web should not contain hidden direct mutation endpoints or database credentials.
 
