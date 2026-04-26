@@ -1,0 +1,25 @@
+{
+  "name": "mir2-admin-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3020",
+    "build": "next build",
+    "start": "next start -p 3020",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.2.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

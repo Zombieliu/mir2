@@ -1,12 +1,12 @@
 # Admin Operations Architecture
 
-Last updated: 2026-04-26
+Last updated: 2026-04-27
 
-Status: discussion draft.
+Status: implementation started.
 
 Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
 
-Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives and tests. It deliberately starts below HTTP so the high-risk write model is typed and audited before Admin Web routes exist.
+Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, and a `SendSystemMail` domain outbox executor. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. This is still not connected to live account/world/mail game state.
 
 ## First Principles
 
@@ -80,6 +80,13 @@ Responsibilities:
 - content publish workflows;
 - dashboards and operational views.
 
+Current implementation:
+
+- `apps/admin-web` is a separate NextJS app from the player-facing web client.
+- Implemented pages: Dashboard, Player Management, Player Detail, Economy, Activities, World Monitor, Anti-Cheat, Mail/GM Tools, and Audit Log.
+- The `Mail/GM Tools` page posts `SendSystemMail` through `/api/admin/system-mail`, which forwards to the Rust Admin API with server-side operator headers.
+- The dashboard, GM tools, and audit pages read the Rust Admin API when available and show an offline state when the API is not running.
+
 Admin Web should not contain hidden direct mutation endpoints or database credentials.
 
 ### Admin API
@@ -102,6 +109,17 @@ Responsibilities:
 - dispatch commands to the appropriate executor;
 - expose read-only query APIs and command status APIs.
 
+Current implementation:
+
+- `GET /health`
+- `GET /admin/commands`
+- `GET /admin/audit`
+- `GET /admin/system-mail/outbox`
+- `POST /admin/commands/send-system-mail`
+- Write routes require operator headers and permissions.
+- Command and audit persistence are represented by `AdminCommandRepository` and `AuditRepository`; current local implementation is in-memory.
+- `SendSystemMail` queues into a domain outbox and writes command/audit records. It does not yet mutate live game state.
+
 ### Game Command Executors
 
 Executors convert approved admin commands into authoritative game changes.
@@ -114,6 +132,13 @@ Examples:
 - content service handles config bundle publish and rollback.
 
 Executors should be idempotent where possible. Commands should have stable command ids and dedupe behavior.
+
+Current executor boundary:
+
+- `SystemMailDomain` models the mail-service handoff.
+- `SystemMailExecutor` converts an approved `SendSystemMail` command into a domain `SystemMailRequest`.
+- `InMemorySystemMailOutbox` is a local stand-in for the future mail/account service queue.
+- This keeps the command/audit/write path real while leaving live mail delivery for the next service integration round.
 
 ### Postgres
 

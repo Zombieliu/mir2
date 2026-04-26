@@ -9,5 +9,11 @@ license = "MIT"
 name = "mir2_admin_api"
 path = "src/lib.rs"
 
+[[bin]]
+name = "mir2-admin-api"
+path = "src/main.rs"
+
 [dependencies]
+axum = "0.7"
 serde = { version = "1", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
