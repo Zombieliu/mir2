@@ -7,16 +7,38 @@ type SubmitState =
   | { kind: "ok"; message: string }
   | { kind: "error"; message: string };
 
-export function MailCommandForm() {
+type MailCommandFormText = {
+  idle: string;
+  submitting: string;
+  rejected: string;
+  queued: string;
+  targetKind: string;
+  targetCharacter: string;
+  targetAccount: string;
+  targetGlobal: string;
+  targetId: string;
+  subject: string;
+  defaultSubject: string;
+  attachment: string;
+  body: string;
+  defaultBody: string;
+  reason: string;
+  defaultReason: string;
+  queueing: string;
+  queue: string;
+  preview: string;
+};
+
+export function MailCommandForm({ text }: { text: MailCommandFormText }) {
   const [state, setState] = useState<SubmitState>({
     kind: "idle",
-    message: "Submits to Rust Admin API with operator headers from server env."
+    message: text.idle
   });
   const [isPending, startTransition] = useTransition();
 
   function submit(formData: FormData) {
     startTransition(async () => {
-      setState({ kind: "idle", message: "Submitting command..." });
+      setState({ kind: "idle", message: text.submitting });
       const response = await fetch("/api/admin/system-mail", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -38,13 +60,13 @@ export function MailCommandForm() {
       if (!response.ok) {
         setState({
           kind: "error",
-          message: payload.error ?? `Command rejected with ${response.status}`
+          message: payload.error ?? text.rejected.replace("{status}", String(response.status))
         });
         return;
       }
       setState({
         kind: "ok",
-        message: `Queued command ${payload.commandId ?? "unknown"}`
+        message: text.queued.replace("{id}", payload.commandId ?? "unknown")
       });
     });
   }
@@ -52,51 +74,51 @@ export function MailCommandForm() {
   return (
     <form action={submit} className="form-grid">
       <div className="field">
-        <label>Target Kind</label>
+        <label>{text.targetKind}</label>
         <select className="control" defaultValue="character" name="targetKind">
-          <option value="character">Character</option>
-          <option value="account">Account</option>
-          <option value="global">Global</option>
+          <option value="character">{text.targetCharacter}</option>
+          <option value="account">{text.targetAccount}</option>
+          <option value="global">{text.targetGlobal}</option>
         </select>
       </div>
       <div className="field">
-        <label>Target ID</label>
+        <label>{text.targetId}</label>
         <input className="control" defaultValue="Scout" name="targetId" />
       </div>
       <div className="field">
-        <label>Subject</label>
-        <input className="control" defaultValue="Compensation Package" name="subject" />
+        <label>{text.subject}</label>
+        <input className="control" defaultValue={text.defaultSubject} name="subject" />
       </div>
       <div className="field">
-        <label>Attachment</label>
+        <label>{text.attachment}</label>
         <div style={{ display: "grid", gap: 8, gridTemplateColumns: "1fr 90px" }}>
           <input className="control" defaultValue="gold" name="itemId" />
           <input className="control" defaultValue="5000" min="1" name="count" type="number" />
         </div>
       </div>
       <div className="field full">
-        <label>Body</label>
+        <label>{text.body}</label>
         <textarea
           className="control"
-          defaultValue="This mail is delivered through audited Admin API into the live gateway mail store."
+          defaultValue={text.defaultBody}
           name="body"
         />
       </div>
       <div className="field full">
-        <label>Required Reason</label>
+        <label>{text.reason}</label>
         <input
           className="control"
-          defaultValue="local GM live mail integration smoke"
+          defaultValue={text.defaultReason}
           name="reason"
         />
       </div>
       <div className="field full">
         <div className="actions">
           <button className="button" disabled={isPending} type="submit">
-            {isPending ? "Queueing..." : "Queue System Mail"}
+            {isPending ? text.queueing : text.queue}
           </button>
           <button className="button secondary" type="button">
-            Preview Impact
+            {text.preview}
           </button>
         </div>
       </div>

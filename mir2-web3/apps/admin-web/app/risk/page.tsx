@@ -1,31 +1,34 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 import { riskRows } from "../../lib/mock-data";
 
-export default function RiskPage() {
+export default async function RiskPage() {
+  const { t } = await getAdminI18n();
+
   return (
     <AdminShell active="/risk">
       <div className="page-head">
         <div>
-          <p className="eyebrow">Anti-Cheat</p>
-          <h2>Risk and fraud control</h2>
-          <p className="muted">Suspicious login, multi-boxing, script idle, abnormal resource growth, and trade graph review.</p>
+          <p className="eyebrow">{t("risk.eyebrow")}</p>
+          <h2>{t("risk.title")}</h2>
+          <p className="muted">{t("risk.subtitle")}</p>
         </div>
         <div className="actions">
-          <button className="button secondary">Batch Review</button>
-          <button className="button">Open Case Queue</button>
+          <button className="button secondary">{t("risk.batchReview")}</button>
+          <button className="button">{t("risk.openQueue")}</button>
         </div>
       </div>
       <div className="grid two">
         <section className="card">
-          <p className="eyebrow">Case Queue</p>
+          <p className="eyebrow">{t("risk.caseQueue")}</p>
           <table className="table">
             <thead>
               <tr>
-                <th>Player</th>
-                <th>Signal</th>
-                <th>Risk</th>
-                <th>Evidence</th>
+                <th>{t("risk.player")}</th>
+                <th>{t("risk.signal")}</th>
+                <th>{t("risk.risk")}</th>
+                <th>{t("risk.evidence")}</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +38,7 @@ export default function RiskPage() {
                   <td>{signal}</td>
                   <td>
                     <StatusBadge tone={risk === "Critical" ? "danger" : risk === "High" ? "warn" : "default"}>
-                      {risk}
+                      {translateAdminStatus(t, risk)}
                     </StatusBadge>
                   </td>
                   <td>{evidence}</td>
@@ -45,7 +48,7 @@ export default function RiskPage() {
           </table>
         </section>
         <section className="card relationship-map">
-          <p className="eyebrow">Suspicious Trade Graph</p>
+          <p className="eyebrow">{t("risk.graph")}</p>
           <div className="node hot" style={{ left: "38%", top: "34%" }}>
             SilentCart
           </div>

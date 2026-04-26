@@ -153,7 +153,7 @@ textarea {
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) 190px 178px;
+  grid-template-columns: minmax(280px, 1fr) 190px 142px 148px;
   gap: 14px;
   align-items: center;
   margin-bottom: 22px;
@@ -189,6 +189,18 @@ textarea {
   color: #d8d5ca;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.language-switcher {
+  display: grid;
+  gap: 4px;
+}
+
+.language-switcher .control {
+  min-height: 34px;
+  padding-inline: 10px;
+  border-radius: 999px;
+  font-size: 12px;
 }
 
 .badge.success {

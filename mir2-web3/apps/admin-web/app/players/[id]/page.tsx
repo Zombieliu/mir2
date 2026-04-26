@@ -1,6 +1,7 @@
 import { AdminShell } from "../../../components/admin-shell";
 import { Bars } from "../../../components/bars";
 import { StatusBadge } from "../../../components/status-badge";
+import { getAdminI18n } from "../../../lib/i18n";
 
 export default async function PlayerDetailPage({
   params
@@ -8,55 +9,56 @@ export default async function PlayerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { t } = await getAdminI18n();
 
   return (
     <AdminShell active="/players/AZ-1048">
       <div className="page-head">
         <div>
-          <p className="eyebrow">Player Detail</p>
+          <p className="eyebrow">{t("playerDetail.eyebrow")}</p>
           <h2>MoonBlade</h2>
-          <p className="muted">{id} / Warrior / S1 Dragon Gate / last seen 4 minutes ago</p>
+          <p className="muted">{t("playerDetail.lastSeen", { id })}</p>
         </div>
         <div className="actions">
-          <StatusBadge tone="success">Normal</StatusBadge>
-          <button className="button secondary">Mute</button>
-          <button className="button">Send Mail</button>
-          <button className="button secondary">Ban Review</button>
+          <StatusBadge tone="success">{t("common.status.normal")}</StatusBadge>
+          <button className="button secondary">{t("playerDetail.mute")}</button>
+          <button className="button">{t("playerDetail.sendMail")}</button>
+          <button className="button secondary">{t("playerDetail.banReview")}</button>
         </div>
       </div>
 
       <div className="grid three">
         <section className="card">
-          <p className="eyebrow">Character</p>
-          <h3>Combat profile</h3>
+          <p className="eyebrow">{t("playerDetail.character")}</p>
+          <h3>{t("playerDetail.combatProfile")}</h3>
           <Bars
             rows={[
               { label: "HP", value: 86 },
               { label: "MP", value: 52 },
-              { label: "Attack", value: 74 },
-              { label: "Defense", value: 68 }
+              { label: t("playerDetail.statAttack"), value: 74 },
+              { label: t("playerDetail.statDefense"), value: 68 }
             ]}
           />
         </section>
         <section className="card">
-          <p className="eyebrow">Inventory</p>
-          <h3>Equipment and bags</h3>
-          <p className="muted">Weapon: Dragon Slayer Replica</p>
-          <p className="muted">Warehouse: 118 / 160 slots used</p>
-          <p className="muted">Quest items: 7 active bindings</p>
+          <p className="eyebrow">{t("playerDetail.inventory")}</p>
+          <h3>{t("playerDetail.equipmentBags")}</h3>
+          <p className="muted">{t("playerDetail.weapon")}</p>
+          <p className="muted">{t("playerDetail.warehouse")}</p>
+          <p className="muted">{t("playerDetail.questItems")}</p>
         </section>
         <section className="card">
-          <p className="eyebrow">Risk Signals</p>
-          <h3>Device and IP</h3>
-          <p className="muted">2 devices, 1 ASN, 0 emulator flags</p>
-          <p className="muted">Trade graph score: 18 / 100</p>
-          <StatusBadge tone="success">Low risk</StatusBadge>
+          <p className="eyebrow">{t("playerDetail.riskSignals")}</p>
+          <h3>{t("playerDetail.deviceIp")}</h3>
+          <p className="muted">{t("playerDetail.devices")}</p>
+          <p className="muted">{t("playerDetail.tradeScore")}</p>
+          <StatusBadge tone="success">{t("common.status.lowRisk")}</StatusBadge>
         </section>
       </div>
 
       <div className="grid two" style={{ marginTop: 16 }}>
         <section className="card">
-          <p className="eyebrow">Records</p>
+          <p className="eyebrow">{t("playerDetail.records")}</p>
           <table className="table">
             <tbody>
               {[
@@ -75,12 +77,12 @@ export default async function PlayerDetailPage({
           </table>
         </section>
         <section className="card">
-          <p className="eyebrow">Action Drawer</p>
-          <h3>High-risk operation requirements</h3>
-          <p className="muted">Every write requires permission, reason, impact preview, command ID, and audit trace.</p>
+          <p className="eyebrow">{t("playerDetail.actionDrawer")}</p>
+          <h3>{t("playerDetail.requirements")}</h3>
+          <p className="muted">{t("playerDetail.requirementsBody")}</p>
           <div className="actions">
-            <StatusBadge tone="warn">Second confirm for ban</StatusBadge>
-            <StatusBadge>Rollback note required</StatusBadge>
+            <StatusBadge tone="warn">{t("playerDetail.secondConfirm")}</StatusBadge>
+            <StatusBadge>{t("playerDetail.rollbackRequired")}</StatusBadge>
           </div>
         </section>
       </div>
