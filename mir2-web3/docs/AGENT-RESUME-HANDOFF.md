@@ -66,6 +66,7 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
    - `docs/WINDOWS-CONTINUATION.md`
    - `docs/POST-1TO1-EVOLUTION-PLAN.md`
    - `docs/TECH-MODERNIZATION-RFC.md`
+   - `docs/PLATFORM-CLIENT-STRATEGY.md`
 3. Treat `docs/AGENT-TASK-QUEUE.md` as the source of truth for the active round.
 4. Continue autonomously from the active round. Do not repeat completed rounds unless tests or code inspection show a regression.
 5. Use subagents only for clearly bounded parallel work. Keep one writer per high-conflict file.
@@ -87,7 +88,7 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
 - Toolchain note: this Mac environment needs `cargo +1.89.0` for Rust verification because the default `rustc 1.87.0` fails on locked `bevy_* 0.17.3`.
 - Local asset note: `node packages/tooling/scripts/generate-crystal-respawn-manifest.mjs` currently fails here with `ENOENT` for `/Users/henryliu/obelisk/ai/numeron/mir2/Crystal/Build/Server/Debug/Server.MirDB`; do not mark the data-backed map-flag import complete until that asset and matching `Envir/Routes` are available.
 - Windows continuation note: after pulling on Windows, read `docs/WINDOWS-CONTINUATION.md`, then continue from `docs/AGENT-TASK-QUEUE.md` active round `2026-04-26-R226`. Treat `100.0% Candidate`, backend/server tracked-slice `99.70%`, and real full-project accepted 1:1 `roughly 90.0%` as separate metrics. Do not claim backend/server 100% unless live Crystal trace acceptance, the blocked `Server.MirDB` data import, or a documented acceptance decision closes the remaining 0.30%. Do not claim full-project 100% Accepted until the human acceptance script passes or the user explicitly accepts remaining differences.
-- Product evolution note: future work is expected to turn this verified Mir2-style MMORPG foundation into a custom product. Read `docs/POST-1TO1-EVOLUTION-PLAN.md` and `docs/TECH-MODERNIZATION-RFC.md` before database, cache, login UI, admin backend, global zone, or NPC script parser changes. Preserve the current Candidate baseline as a regression reference, but do not treat intentional product divergence as a Crystal parity bug.
+- Product evolution note: future work is expected to turn this verified Mir2-style MMORPG foundation into a custom product. Read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, and `docs/PLATFORM-CLIENT-STRATEGY.md` before database, cache, login UI, admin backend, global zone, client distribution, or NPC script parser changes. Preserve the current Candidate baseline as a regression reference, but do not treat intentional product divergence as a Crystal parity bug.
 
 ## Last Completed Round: R224
 
