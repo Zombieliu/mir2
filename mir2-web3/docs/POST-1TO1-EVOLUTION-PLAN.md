@@ -4,6 +4,8 @@ Last updated: 2026-04-26
 
 Purpose: define how to evolve this project after the Crystal / Mir2 1:1 Candidate baseline without confusing product changes with parity regressions.
 
+Modernization RFC: `docs/TECH-MODERNIZATION-RFC.md` captures the current first-principles architecture discussion for Postgres, Redis, global single-world zoning, Bevy + NextJS, operations backend, and NPC DSL direction.
+
 ## Current Baseline
 
 The current project state is a verified MMORPG foundation with a Crystal / Mir2 compatibility baseline:
@@ -173,8 +175,9 @@ When a future change intentionally diverges from Crystal:
 
 ## Immediate Next Planning Tasks
 
+- Finalize `docs/TECH-MODERNIZATION-RFC.md`.
 - Draft the database target schema and adapter boundary.
 - Draft the cache boundary and invalidation rules.
 - Draft the new login/select UI product requirements.
-- Draft the NPC script parser strategy: compatibility parser, new DSL, or compiler from Crystal scripts to new script IR.
+- Draft the NPC script parser strategy: compatibility parser, new developer DSL, or compiler from Crystal scripts to new script IR.
 - Decide whether the next branch should be named as a product-evolution branch rather than a parity round.
