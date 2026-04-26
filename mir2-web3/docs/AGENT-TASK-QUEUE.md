@@ -55,6 +55,8 @@ Purpose: queue autonomous tasks for reaching **100% Candidate**. The Coordinator
 
 Restart handoff: if the Codex session is reopened after shutdown or context loss, read `docs/AGENT-RESUME-HANDOFF.md` before continuing the active round. The user wants the previous subagent workflow to continue without routine confirmations.
 
+Product evolution handoff: after the 1:1 Candidate baseline, future product work should also read `docs/POST-1TO1-EVOLUTION-PLAN.md`. Database, cache, login UI, and NPC script parser changes are expected product-evolution areas, not automatic Crystal parity regressions.
+
 Status values:
 
 - `[ ]` queued
@@ -69,6 +71,7 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | Status | Task | Owner | Write Set | Verification |
 | --- | --- | --- | --- | --- |
 | [~] | Track Windows/live Crystal/human acceptance blockers after `R225` Mac-local refresh | Coordinator | docs only unless new assets/endpoints are provided | R225 passed 88 Stage 5 screenshots, archived map/minimap evidence, WS load 64/64, web build/type checks, `mir2-game-data` 22/22, `mir2-gateway` 54/54, full `mir2-simulation` 664/664, require-local matrix 9/9 local artifacts, `fmt --check`, and `diff --check`; `docs/WINDOWS-CONTINUATION.md` defines the Windows handoff; automation status is 100.0% Candidate, but real full-project accepted 1:1 remains roughly 90.0%. |
+| [~] | Plan post-1:1 product evolution boundaries | Coordinator | docs/product specs first | `docs/POST-1TO1-EVOLUTION-PLAN.md` defines the first boundary for database/cache, login UI, NPC script parser, and product gameplay changes while preserving the current Candidate baseline as a regression reference. |
 
 ## Completed Round: 2026-04-26-R225
 

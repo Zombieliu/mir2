@@ -12,6 +12,7 @@ Purpose: exact handoff steps for continuing the Crystal / Mir2 1:1 work on Windo
 - Active round: `2026-04-26-R226`.
 - Do not mark backend/server `100%` until live Crystal trace acceptance, blocked `Server.MirDB` import, or an explicit acceptance decision closes the remaining `0.30%`.
 - Do not mark full-project `100% Accepted` until `docs/PLAYER-QA-SCRIPT.md` passes or the user explicitly accepts remaining differences.
+- If continuing product evolution instead of parity closure, read `docs/POST-1TO1-EVOLUTION-PLAN.md` first. Database, cache, login UI, and NPC script parser changes are allowed evolution areas, but the current Candidate baseline should remain a regression reference.
 
 ## Files To Bring To Windows
 
