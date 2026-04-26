@@ -1,6 +1,6 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Latest sync: R224 completed. The project remains **100% Candidate** (not 100% Accepted), and the local packet trace matrix blocker is closed. `apps/gateway/src/bin/packet_trace.rs` is restored; `--list-flows` works; `mir2-gateway` passes 53/53 including packet trace bin tests 6/6; require-local `packet_trace --matrix` wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. Active follow-up round is R225; backend/server parity estimate is 99.70%, whole-project Candidate estimate is 100.0%. Remaining gates are final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB`, and missing live `MIR2_CRYSTAL_TCP_ADDR`.
+> Latest sync: R224 completed. The project remains **100% Candidate** (not 100% Accepted), and the local packet trace matrix blocker is closed. `apps/gateway/src/bin/packet_trace.rs` is restored; `--list-flows` works; `mir2-gateway` passes 53/53 including packet trace bin tests 6/6; require-local `packet_trace --matrix` wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. Active follow-up round is R225. Truthful status split: automated evidence is 100.0% Candidate, backend/server tracked slice is 99.70%, and real full-project accepted 1:1 remains roughly 90.0%. Remaining gates are final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB`, and missing live `MIR2_CRYSTAL_TCP_ADDR`.
 
 > Latest sync: R219-R222 completed. Frontend/global evidence advanced across login language/View Key/Enter submit, select language/Credits/Delete cancel/New Character/Delete confirmed/recreate/Start lifecycle, archived map API and minimap asset smoke JSON, refreshed WS load, compact inventory/storage/character/system-menu/chat-settings panel bounds, system-menu compact overflow fix, and NPC dialog link rendering support. Stage 5 UI smoke now captures 85 screenshots. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke (18/18 requests), minimap asset smoke (0 failures, known missing 450/451 warning), WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
 
@@ -48,19 +48,21 @@
 
 
 Last updated: 2026-04-26
-Backend/server parity estimate: 99.70%
+Backend/server tracked-slice parity estimate: 99.70%
 Active backend/global round: R225
 Completed backend rounds: R82, R83, R84, R85, R86, R87, R88, R89, R90, R91, R92, R93, R94, R95, R96, R97, R98, R99, R100, R101, R102, R103, R104, R105, R106, R107, R108, R109, R110, R111, R112, R113, R114, R115, R116, R117, R118, R119, R120, R121, R122, R123, R124, R125, R126, R127, R128, R129, R130, R131, R132, R133, R134, R135, R136, R137, R138, R139, R140, R141, R142, R143, R144, R145, R146, R147, R148, R149, R150, R151, R152, R153, R154, R155, R156, R157, R158, R159, R160, R161, R162, R163, R164, R165, R166, R167, R168, R169, R170, R171, R172, R173, R174, R175, R176, R177, R178, R179, R180, R181, R182, R183
-Preferred whole-project 1:1 estimate: 100.0% Candidate
-Backend full-suite status: 664/664 passing; mir2-gateway 47/47 passing
+Whole-project automation status: 100.0% Candidate
+Whole-project real accepted 1:1 estimate: roughly 90.0%
+Backend full-suite status: 664/664 passing; mir2-gateway 53/53 passing
 
 Purpose: this document is the working checklist for moving `mir2-web3` from the current migrated slice toward full Crystal / Mir2 1:1 parity across backend, frontend, assets, integration, and playable operations. It is meant to be updated continuously. When a task is completed and verified, check it off. When a stage gate passes, check the stage gate. Then loop back to the next unchecked item.
 
-This roadmap uses two meanings of completion:
+This roadmap uses four meanings of completion:
 
 - Slice completion: the currently imported gameplay slice behaves correctly and has passing regression coverage.
 - Backend/server parity completion: Rust backend and gateway behavior match Crystal server behavior for the tracked gameplay/server slice. This is tracked separately in `docs/BACKEND-1TO1-PROGRESS.md`.
-- Full 1:1 completion: the Rust/Web project matches Crystal across backend behavior, frontend/client UI and controls, assets/data fidelity, end-to-end integration, protocol-visible behavior, persistence, and operational edge cases.
+- Automation Candidate completion: local automated evidence, screenshots, traces, and regression commands are green against the current acceptance bundle.
+- Accepted full-project completion: the Rust/Web project is accepted as Crystal 1:1 across backend behavior, frontend/client UI and controls, assets/data fidelity, end-to-end integration, protocol-visible behavior, persistence, and operational edge cases.
 
 Current verified state as of 2026-04-26:
 - [x] 2026-04-26 `R224` packet trace matrix closure: restored `mir2-gateway` `packet_trace` with `--list-flows`, single-flow capture, matrix artifact writing, local/Crystal endpoint capture, diff summaries, fixture metadata, and require-mode enforcement. `mir2-gateway` passes 53/53 including packet trace bin tests 6/6. Local gateway require-mode matrix wrote 9 artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`; 17 matrix entries without TCP `traceFlow` were intentionally skipped. Live Crystal trace comparison is still blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
