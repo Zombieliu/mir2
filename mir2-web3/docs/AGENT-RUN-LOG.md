@@ -5412,3 +5412,39 @@ Outcome:
 - Backend parity tracker moved from `77.15%` to `77.16%`.
 - Full `mir2-simulation` regression passed with 466 tests.
 - R29 reopened at queue-selection stage for the next bounded parity bite.
+
+## 2026-04-27-R227
+
+Goal: begin post-1:1 product evolution by landing the first production-shaped Admin API and Admin Web foundation.
+
+Coordinator local work:
+
+- Added persistent-storage-ready `AdminCommandRepository` and `AuditRepository` traits to `apps/admin-api`.
+- Replaced the earlier in-memory-only command dedupe with command records, audit records, status updates, and repository-backed idempotency.
+- Added `SystemMailDomain`, `SystemMailExecutor`, and `InMemorySystemMailOutbox` so `SendSystemMail` has a real domain boundary without mutating live game state yet.
+- Added Axum routes for health, command records, audit records, system-mail outbox, and `SendSystemMail` writes.
+- Added `apps/admin-web` as a separate NextJS operations console with Dashboard, Player Management, Player Detail, Economy, Activities, World Monitor, Anti-Cheat, Mail/GM Tools, and Audit Log pages.
+- Wired `apps/admin-web/app/api/admin/system-mail/route.ts` to forward GM mail commands to the Rust Admin API with server-side operator headers.
+- Upgraded the new admin web app to `next@16.2.4` after `npm audit --audit-level=high` flagged the initial Next 16.2.1 high-severity advisory.
+- Captured admin UI smoke screenshots under `docs/admin-web-dashboard-smoke.png` and `docs/admin-web-gm-tools-smoke.png`.
+- Updated `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`, `docs/AGENT-TASK-QUEUE.md`, `apps/admin-api/README.md`, and `apps/admin-web/README.md`.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `cargo +1.89.0 fmt --check`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- `apps/admin-web ./node_modules/.bin/next build`
+- `apps/admin-web npm audit --audit-level=high`
+- `curl http://127.0.0.1:7420/health`
+- direct `POST /admin/commands/send-system-mail` to Rust Admin API
+- `POST /api/admin/system-mail` through Admin Web proxy
+- Playwright screenshots for Dashboard and GM Tools
+- `cargo +1.89.0 test --locked --workspace -- --test-threads=1`
+
+Outcome:
+
+- Admin API and Admin Web are now connected for the first safe write path.
+- `SendSystemMail` is command/audit/outbox-complete, but not connected to live account/world/mail delivery yet.
+- `npm audit --audit-level=high` is green after upgrading admin-web to Next 16.2.4. A remaining PostCSS moderate advisory is still reported by full audit; `npm audit fix --force` proposes a breaking downgrade to Next 9.3.3, so it was not applied.
+- Next implementation targets: Postgres command/audit repositories, real operator auth, and live mail-service delivery from the outbox boundary.

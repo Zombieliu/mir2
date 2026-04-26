@@ -1,6 +1,13 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
+use std::sync::{Arc, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
 
+use axum::extract::State;
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
+use axum::routing::{get, post};
+use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -145,6 +152,7 @@ impl AdminCommandEnvelope {
 #[serde(rename_all = "snake_case")]
 pub enum CommandStatus {
     Pending,
+    Executing,
     Succeeded,
     Failed,
     Denied,
@@ -212,6 +220,8 @@ pub enum AdminError {
     InvalidCommand(String),
     DuplicateCommand(String),
     ExecutionFailed(String),
+    Repository(String),
+    UnsupportedCommand(String),
 }
 
 impl fmt::Display for AdminError {
@@ -227,6 +237,10 @@ impl fmt::Display for AdminError {
             AdminError::ExecutionFailed(message) => {
                 write!(f, "admin command execution failed: {message}")
             }
+            AdminError::Repository(message) => write!(f, "admin repository error: {message}"),
+            AdminError::UnsupportedCommand(message) => {
+                write!(f, "unsupported admin command: {message}")
+            }
         }
     }
 }
@@ -240,36 +254,146 @@ pub trait AdminCommandExecutor {
     ) -> Result<CommandExecutionResult, AdminError>;
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminCommandRecord {
+    pub envelope: AdminCommandEnvelope,
+    pub status: CommandStatus,
+    pub result_message: Option<String>,
+    pub error_code: Option<String>,
+    pub created_at_ms: u64,
+    pub updated_at_ms: u64,
+}
+
+impl AdminCommandRecord {
+    fn pending(envelope: AdminCommandEnvelope) -> Self {
+        let created_at_ms = envelope.created_at_ms;
+        Self {
+            envelope,
+            status: CommandStatus::Pending,
+            result_message: None,
+            error_code: None,
+            created_at_ms,
+            updated_at_ms: created_at_ms,
+        }
+    }
+}
+
+pub trait AdminCommandRepository {
+    fn insert_pending(&mut self, envelope: AdminCommandEnvelope) -> Result<(), AdminError>;
+    fn mark_completed(
+        &mut self,
+        command_id: &str,
+        status: CommandStatus,
+        result_message: Option<String>,
+        error_code: Option<String>,
+        updated_at_ms: u64,
+    ) -> Result<(), AdminError>;
+    fn get(&self, command_id: &str) -> Option<AdminCommandRecord>;
+    fn list_recent(&self, limit: usize) -> Vec<AdminCommandRecord>;
+}
+
+pub trait AuditRepository {
+    fn append(&mut self, record: AuditRecord) -> Result<(), AdminError>;
+    fn list_recent(&self, limit: usize) -> Vec<AuditRecord>;
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct InMemoryCommandStore {
+    records: BTreeMap<String, AdminCommandRecord>,
+}
+
+impl AdminCommandRepository for InMemoryCommandStore {
+    fn insert_pending(&mut self, envelope: AdminCommandEnvelope) -> Result<(), AdminError> {
+        if self.records.contains_key(&envelope.command_id) {
+            return Err(AdminError::DuplicateCommand(envelope.command_id));
+        }
+        self.records.insert(
+            envelope.command_id.clone(),
+            AdminCommandRecord::pending(envelope),
+        );
+        Ok(())
+    }
+
+    fn mark_completed(
+        &mut self,
+        command_id: &str,
+        status: CommandStatus,
+        result_message: Option<String>,
+        error_code: Option<String>,
+        updated_at_ms: u64,
+    ) -> Result<(), AdminError> {
+        let record = self.records.get_mut(command_id).ok_or_else(|| {
+            AdminError::Repository(format!("command record not found: {command_id}"))
+        })?;
+        record.status = status;
+        record.result_message = result_message;
+        record.error_code = error_code;
+        record.updated_at_ms = updated_at_ms;
+        Ok(())
+    }
+
+    fn get(&self, command_id: &str) -> Option<AdminCommandRecord> {
+        self.records.get(command_id).cloned()
+    }
+
+    fn list_recent(&self, limit: usize) -> Vec<AdminCommandRecord> {
+        self.records.values().rev().take(limit).cloned().collect()
+    }
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct InMemoryAuditStore {
     records: Vec<AuditRecord>,
 }
 
-impl InMemoryAuditStore {
-    pub fn push(&mut self, record: AuditRecord) {
+impl AuditRepository for InMemoryAuditStore {
+    fn append(&mut self, record: AuditRecord) -> Result<(), AdminError> {
         self.records.push(record);
+        Ok(())
     }
 
+    fn list_recent(&self, limit: usize) -> Vec<AuditRecord> {
+        self.records.iter().rev().take(limit).cloned().collect()
+    }
+}
+
+impl InMemoryAuditStore {
     pub fn records(&self) -> &[AuditRecord] {
         &self.records
     }
 }
 
-pub struct AdminControlPlane<E> {
+pub struct AdminControlPlane<E, C = InMemoryCommandStore, A = InMemoryAuditStore> {
     executor: E,
-    audit_store: InMemoryAuditStore,
-    seen_commands: HashSet<String>,
+    command_store: C,
+    audit_store: A,
 }
 
-impl<E> AdminControlPlane<E>
+impl<E> AdminControlPlane<E, InMemoryCommandStore, InMemoryAuditStore>
 where
     E: AdminCommandExecutor,
 {
     pub fn new(executor: E) -> Self {
+        Self::with_repositories(
+            executor,
+            InMemoryCommandStore::default(),
+            InMemoryAuditStore::default(),
+        )
+    }
+}
+
+impl<E, C, A> AdminControlPlane<E, C, A>
+where
+    E: AdminCommandExecutor,
+    C: AdminCommandRepository,
+    A: AuditRepository,
+{
+    pub fn with_repositories(executor: E, command_store: C, audit_store: A) -> Self {
         Self {
             executor,
-            audit_store: InMemoryAuditStore::default(),
-            seen_commands: HashSet::new(),
+            command_store,
+            audit_store,
         }
     }
 
@@ -280,12 +404,9 @@ where
     ) -> Result<CommandExecutionResult, AdminError> {
         envelope.validate()?;
 
-        if !self.seen_commands.insert(envelope.command_id.clone()) {
-            return Err(AdminError::DuplicateCommand(envelope.command_id));
-        }
-
         let permission = envelope.command.required_permission();
         let mut audit = AuditRecord::pending(&envelope, permission.clone());
+        self.command_store.insert_pending(envelope.clone())?;
 
         if !envelope.operator.has_permission(&permission) {
             audit.complete(
@@ -293,35 +414,409 @@ where
                 Some("permission_denied".into()),
                 completed_at_ms,
             );
-            self.audit_store.push(audit);
+            self.command_store.mark_completed(
+                &envelope.command_id,
+                CommandStatus::Denied,
+                Some("permission denied".into()),
+                Some("permission_denied".into()),
+                completed_at_ms,
+            )?;
+            self.audit_store.append(audit)?;
             return Err(AdminError::PermissionDenied { permission });
         }
 
         match self.executor.execute(&envelope) {
             Ok(result) => {
                 audit.complete(result.status.clone(), None, completed_at_ms);
-                self.audit_store.push(audit);
+                self.command_store.mark_completed(
+                    &envelope.command_id,
+                    result.status.clone(),
+                    Some(result.message.clone()),
+                    None,
+                    completed_at_ms,
+                )?;
+                self.audit_store.append(audit)?;
                 Ok(result)
             }
             Err(error) => {
-                audit.complete(
+                let code = error_code(&error).to_string();
+                audit.complete(CommandStatus::Failed, Some(code.clone()), completed_at_ms);
+                self.command_store.mark_completed(
+                    &envelope.command_id,
                     CommandStatus::Failed,
-                    Some(error_code(&error).into()),
+                    Some(error.to_string()),
+                    Some(code),
                     completed_at_ms,
-                );
-                self.audit_store.push(audit);
+                )?;
+                self.audit_store.append(audit)?;
                 Err(error)
             }
         }
     }
 
-    pub fn audit_records(&self) -> &[AuditRecord] {
-        self.audit_store.records()
+    pub fn command_records(&self, limit: usize) -> Vec<AdminCommandRecord> {
+        self.command_store.list_recent(limit)
+    }
+
+    pub fn audit_records(&self, limit: usize) -> Vec<AuditRecord> {
+        self.audit_store.list_recent(limit)
     }
 
     pub fn executor(&self) -> &E {
         &self.executor
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemMailRequest {
+    pub command_id: String,
+    pub target_kind: MailTargetKind,
+    pub target_id: String,
+    pub subject: String,
+    pub body: String,
+    pub attachments: Vec<ItemGrant>,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemMailReceipt {
+    pub outbox_id: String,
+    pub target_kind: MailTargetKind,
+    pub target_id: String,
+    pub attachment_count: usize,
+    pub accepted_at_ms: u64,
+}
+
+pub trait SystemMailDomain {
+    fn enqueue_system_mail(
+        &mut self,
+        request: SystemMailRequest,
+        accepted_at_ms: u64,
+    ) -> Result<SystemMailReceipt, AdminError>;
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct InMemorySystemMailOutbox {
+    receipts: Vec<SystemMailReceipt>,
+}
+
+impl InMemorySystemMailOutbox {
+    pub fn receipts(&self) -> &[SystemMailReceipt] {
+        &self.receipts
+    }
+}
+
+impl SystemMailDomain for InMemorySystemMailOutbox {
+    fn enqueue_system_mail(
+        &mut self,
+        request: SystemMailRequest,
+        accepted_at_ms: u64,
+    ) -> Result<SystemMailReceipt, AdminError> {
+        let receipt = SystemMailReceipt {
+            outbox_id: format!("mail-{}", request.command_id),
+            target_kind: request.target_kind,
+            target_id: request.target_id,
+            attachment_count: request.attachments.len(),
+            accepted_at_ms,
+        };
+        self.receipts.push(receipt.clone());
+        Ok(receipt)
+    }
+}
+
+pub struct SystemMailExecutor<D> {
+    domain: D,
+}
+
+impl<D> SystemMailExecutor<D> {
+    pub fn new(domain: D) -> Self {
+        Self { domain }
+    }
+
+    pub fn domain(&self) -> &D {
+        &self.domain
+    }
+}
+
+impl<D> AdminCommandExecutor for SystemMailExecutor<D>
+where
+    D: SystemMailDomain,
+{
+    fn execute(
+        &mut self,
+        envelope: &AdminCommandEnvelope,
+    ) -> Result<CommandExecutionResult, AdminError> {
+        match &envelope.command {
+            AdminCommand::SendSystemMail {
+                target_kind,
+                target_id,
+                subject,
+                body,
+                attachments,
+            } => {
+                let receipt = self.domain.enqueue_system_mail(
+                    SystemMailRequest {
+                        command_id: envelope.command_id.clone(),
+                        target_kind: target_kind.clone(),
+                        target_id: target_id.clone(),
+                        subject: subject.clone(),
+                        body: body.clone(),
+                        attachments: attachments.clone(),
+                        reason: envelope.reason.clone(),
+                    },
+                    envelope.created_at_ms,
+                )?;
+                Ok(CommandExecutionResult {
+                    status: CommandStatus::Succeeded,
+                    message: format!("system mail queued as {}", receipt.outbox_id),
+                })
+            }
+            other => Err(AdminError::UnsupportedCommand(format!("{other:?}"))),
+        }
+    }
+}
+
+type HttpControlPlane = AdminControlPlane<SystemMailExecutor<InMemorySystemMailOutbox>>;
+
+#[derive(Clone)]
+pub struct AdminApiState {
+    control_plane: Arc<Mutex<HttpControlPlane>>,
+}
+
+impl Default for AdminApiState {
+    fn default() -> Self {
+        Self {
+            control_plane: Arc::new(Mutex::new(AdminControlPlane::new(SystemMailExecutor::new(
+                InMemorySystemMailOutbox::default(),
+            )))),
+        }
+    }
+}
+
+pub fn admin_router() -> Router {
+    admin_router_with_state(AdminApiState::default())
+}
+
+pub fn admin_router_with_state(state: AdminApiState) -> Router {
+    Router::new()
+        .route("/health", get(health))
+        .route("/admin/commands", get(list_commands))
+        .route("/admin/audit", get(list_audit))
+        .route("/admin/system-mail/outbox", get(list_system_mail_outbox))
+        .route("/admin/commands/send-system-mail", post(submit_system_mail))
+        .with_state(state)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthResponse {
+    pub ok: bool,
+    pub service: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitSystemMailRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub target_kind: MailTargetKind,
+    pub target_id: String,
+    pub account_id: Option<String>,
+    pub character_id: Option<String>,
+    pub subject: String,
+    pub body: String,
+    pub attachments: Vec<ItemGrant>,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitCommandResponse {
+    pub command_id: String,
+    pub result: CommandExecutionResult,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ErrorResponse {
+    error: String,
+}
+
+async fn health() -> Json<HealthResponse> {
+    Json(HealthResponse {
+        ok: true,
+        service: "mir2-admin-api".into(),
+    })
+}
+
+async fn list_commands(
+    State(state): State<AdminApiState>,
+) -> Result<Json<Vec<AdminCommandRecord>>, ApiError> {
+    let control = state.control_plane.lock().map_err(lock_error)?;
+    Ok(Json(control.command_records(100)))
+}
+
+async fn list_audit(
+    State(state): State<AdminApiState>,
+) -> Result<Json<Vec<AuditRecord>>, ApiError> {
+    let control = state.control_plane.lock().map_err(lock_error)?;
+    Ok(Json(control.audit_records(100)))
+}
+
+async fn list_system_mail_outbox(
+    State(state): State<AdminApiState>,
+) -> Result<Json<Vec<SystemMailReceipt>>, ApiError> {
+    let control = state.control_plane.lock().map_err(lock_error)?;
+    Ok(Json(control.executor().domain().receipts().to_vec()))
+}
+
+async fn submit_system_mail(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitSystemMailRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let operator = operator_from_headers(&headers)?;
+    let command_id = request
+        .command_id
+        .unwrap_or_else(|| format!("cmd-mail-{now}"));
+    let trace_id = request
+        .trace_id
+        .unwrap_or_else(|| format!("trace-admin-{now}"));
+    let target = AdminTarget {
+        target_type: match request.target_kind {
+            MailTargetKind::Account => TargetType::Account,
+            MailTargetKind::Character => TargetType::Character,
+            MailTargetKind::Global => TargetType::World,
+        },
+        target_id: request.target_id.clone(),
+        account_id: request.account_id.clone(),
+        character_id: request.character_id.clone(),
+    };
+    let envelope = AdminCommandEnvelope {
+        command_id: command_id.clone(),
+        operator,
+        target,
+        reason: request.reason,
+        command: AdminCommand::SendSystemMail {
+            target_kind: request.target_kind,
+            target_id: request.target_id,
+            subject: request.subject,
+            body: request.body,
+            attachments: request.attachments,
+        },
+        trace_id,
+        created_at_ms: now,
+    };
+
+    let mut control = state.control_plane.lock().map_err(lock_error)?;
+    let result = control.submit(envelope, now_ms()).map_err(ApiError::from)?;
+    Ok(Json(SubmitCommandResponse { command_id, result }))
+}
+
+#[derive(Debug)]
+struct ApiError {
+    status: StatusCode,
+    message: String,
+}
+
+impl From<AdminError> for ApiError {
+    fn from(error: AdminError) -> Self {
+        let status = match error {
+            AdminError::PermissionDenied { .. } => StatusCode::FORBIDDEN,
+            AdminError::InvalidCommand(_) => StatusCode::BAD_REQUEST,
+            AdminError::DuplicateCommand(_) => StatusCode::CONFLICT,
+            AdminError::UnsupportedCommand(_) => StatusCode::NOT_IMPLEMENTED,
+            AdminError::ExecutionFailed(_) | AdminError::Repository(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        };
+        Self {
+            status,
+            message: error.to_string(),
+        }
+    }
+}
+
+impl IntoResponse for ApiError {
+    fn into_response(self) -> Response {
+        (
+            self.status,
+            Json(ErrorResponse {
+                error: self.message,
+            }),
+        )
+            .into_response()
+    }
+}
+
+fn lock_error<T>(_: std::sync::PoisonError<T>) -> ApiError {
+    ApiError {
+        status: StatusCode::INTERNAL_SERVER_ERROR,
+        message: "admin control plane lock poisoned".into(),
+    }
+}
+
+fn operator_from_headers(headers: &HeaderMap) -> Result<Operator, ApiError> {
+    let id = required_header(headers, "x-operator-id")?;
+    let email = required_header(headers, "x-operator-email")?;
+    let role = required_header(headers, "x-operator-role")?;
+    let permissions = required_header(headers, "x-operator-permissions")?
+        .split(',')
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(parse_permission)
+        .collect::<Result<BTreeSet<_>, _>>()?;
+
+    Ok(Operator {
+        id,
+        email,
+        role,
+        permissions,
+    })
+}
+
+fn required_header(headers: &HeaderMap, name: &str) -> Result<String, ApiError> {
+    headers
+        .get(name)
+        .and_then(|value| value.to_str().ok())
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string)
+        .ok_or_else(|| ApiError {
+            status: StatusCode::UNAUTHORIZED,
+            message: format!("missing required operator header: {name}"),
+        })
+}
+
+fn parse_permission(value: &str) -> Result<Permission, ApiError> {
+    match value {
+        "account_read" => Ok(Permission::AccountRead),
+        "account_ban" => Ok(Permission::AccountBan),
+        "character_read" => Ok(Permission::CharacterRead),
+        "character_kick" => Ok(Permission::CharacterKick),
+        "inventory_read" => Ok(Permission::InventoryRead),
+        "inventory_grant_item" => Ok(Permission::InventoryGrantItem),
+        "currency_grant" => Ok(Permission::CurrencyGrant),
+        "mail_send_system" => Ok(Permission::MailSendSystem),
+        "content_publish" => Ok(Permission::ContentPublish),
+        "content_rollback" => Ok(Permission::ContentRollback),
+        "audit_read" => Ok(Permission::AuditRead),
+        "permission_manage" => Ok(Permission::PermissionManage),
+        _ => Err(ApiError {
+            status: StatusCode::UNAUTHORIZED,
+            message: format!("unknown operator permission: {value}"),
+        }),
+    }
+}
+
+pub fn now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
 }
 
 fn validate_command_payload(command: &AdminCommand) -> Result<(), AdminError> {
@@ -394,6 +889,8 @@ fn error_code(error: &AdminError) -> &'static str {
         AdminError::InvalidCommand(_) => "invalid_command",
         AdminError::DuplicateCommand(_) => "duplicate_command",
         AdminError::ExecutionFailed(_) => "execution_failed",
+        AdminError::Repository(_) => "repository",
+        AdminError::UnsupportedCommand(_) => "unsupported_command",
     }
 }
 
@@ -434,8 +931,9 @@ mod tests {
 
         assert_eq!(result.status, CommandStatus::Succeeded);
         assert_eq!(control.executor().executed_commands, vec!["cmd-1"]);
-        assert_eq!(control.audit_records().len(), 1);
-        let audit = &control.audit_records()[0];
+        assert_eq!(control.audit_records(10).len(), 1);
+        assert_eq!(control.command_records(10).len(), 1);
+        let audit = &control.audit_records(10)[0];
         assert_eq!(audit.status, CommandStatus::Succeeded);
         assert_eq!(audit.permission, Permission::MailSendSystem);
         assert_eq!(audit.completed_at_ms, Some(2_000));
@@ -456,12 +954,13 @@ mod tests {
             }
         ));
         assert!(control.executor().executed_commands.is_empty());
-        assert_eq!(control.audit_records().len(), 1);
-        assert_eq!(control.audit_records()[0].status, CommandStatus::Denied);
+        assert_eq!(control.audit_records(10).len(), 1);
+        assert_eq!(control.audit_records(10)[0].status, CommandStatus::Denied);
         assert_eq!(
-            control.audit_records()[0].error_code.as_deref(),
+            control.audit_records(10)[0].error_code.as_deref(),
             Some("permission_denied")
         );
+        assert_eq!(control.command_records(10)[0].status, CommandStatus::Denied);
     }
 
     #[test]
@@ -473,7 +972,8 @@ mod tests {
         let error = control.submit(envelope, 2_000).expect_err("should reject");
 
         assert!(matches!(error, AdminError::InvalidCommand(_)));
-        assert!(control.audit_records().is_empty());
+        assert!(control.audit_records(10).is_empty());
+        assert!(control.command_records(10).is_empty());
         assert!(control.executor().executed_commands.is_empty());
     }
 
@@ -491,7 +991,8 @@ mod tests {
 
         assert_eq!(error, AdminError::DuplicateCommand("cmd-1".into()));
         assert_eq!(control.executor().executed_commands, vec!["cmd-1"]);
-        assert_eq!(control.audit_records().len(), 1);
+        assert_eq!(control.audit_records(10).len(), 1);
+        assert_eq!(control.command_records(10).len(), 1);
     }
 
     #[test]
@@ -505,12 +1006,29 @@ mod tests {
         let error = control.submit(envelope, 2_000).expect_err("should fail");
 
         assert!(matches!(error, AdminError::ExecutionFailed(_)));
-        assert_eq!(control.audit_records().len(), 1);
-        assert_eq!(control.audit_records()[0].status, CommandStatus::Failed);
+        assert_eq!(control.audit_records(10).len(), 1);
+        assert_eq!(control.audit_records(10)[0].status, CommandStatus::Failed);
         assert_eq!(
-            control.audit_records()[0].error_code.as_deref(),
+            control.audit_records(10)[0].error_code.as_deref(),
             Some("execution_failed")
         );
+        assert_eq!(control.command_records(10)[0].status, CommandStatus::Failed);
+    }
+
+    #[test]
+    fn system_mail_executor_writes_domain_outbox() {
+        let executor = SystemMailExecutor::new(InMemorySystemMailOutbox::default());
+        let mut control = AdminControlPlane::new(executor);
+        let envelope = sample_envelope(operator_with([Permission::MailSendSystem]));
+
+        let result = control.submit(envelope, 2_000).expect("mail should queue");
+
+        assert_eq!(result.status, CommandStatus::Succeeded);
+        let receipts = control.executor().domain().receipts();
+        assert_eq!(receipts.len(), 1);
+        assert_eq!(receipts[0].outbox_id, "mail-cmd-1");
+        assert_eq!(receipts[0].target_id, "char-1");
+        assert_eq!(receipts[0].attachment_count, 1);
     }
 
     fn sample_envelope(operator: Operator) -> AdminCommandEnvelope {
