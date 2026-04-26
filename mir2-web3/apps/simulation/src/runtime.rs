@@ -11,10 +11,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{
     AccountRecord, BuffSnapshot, CharacterRecord, CharacterSaveRecord, EquipmentItemSnapshot,
-    EquipmentSlot, GroundDropSnapshot, ItemContainer, ItemGrade, MapTransferSnapshot,
-    MonsterSpawnSource, NpcDialogInputSnapshot, NpcDialogLinkSnapshot, NpcDialogSnapshot,
-    QuestSnapshot, QuestStage, SimulationConfig, SkillSnapshot, Stage5AuctionListing,
-    Stage5HeroState, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
+    EquipmentSlot, GroundDropSnapshot, ItemContainer, ItemGrade, MapDropRuleRecord,
+    MapTransferSnapshot, MonsterSpawnSource, NpcDialogInputSnapshot, NpcDialogLinkSnapshot,
+    NpcDialogSnapshot, QuestSnapshot, QuestStage, SimulationConfig, SkillSnapshot,
+    Stage5AuctionListing, Stage5HeroState, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
     WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
     WorldItemSnapshot, WorldSnapshot,
 };
@@ -199,16 +199,8 @@ const CRYSTAL_BIND_DONT_STORE: i16 = 0x0008;
 const CRYSTAL_BIND_DONT_REPAIR: i16 = 0x0020;
 const CRYSTAL_BIND_DONT_UPGRADE: i16 = 0x0040;
 const CRYSTAL_BIND_DESTROY_ON_DROP: i16 = 0x0080;
+const CRYSTAL_BIND_ON_EQUIP: i16 = 0x0200;
 const CRYSTAL_BIND_NO_SREPAIR: i16 = 0x0400;
-const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;
-const CRYSTAL_ITEM_TYPE_ARMOUR: u8 = 2;
-const CRYSTAL_ITEM_TYPE_HELMET: u8 = 4;
-const CRYSTAL_ITEM_TYPE_NECKLACE: u8 = 5;
-const CRYSTAL_ITEM_TYPE_BRACELET: u8 = 6;
-const CRYSTAL_ITEM_TYPE_RING: u8 = 7;
-const CRYSTAL_ITEM_TYPE_BELT: u8 = 9;
-const CRYSTAL_ITEM_TYPE_BOOTS: u8 = 10;
-
 #[cfg(windows)]
 #[repr(C)]
 struct WindowsSystemTime {
@@ -496,7 +488,59 @@ enum ResolvedDropTemplate {
 }
 
 const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
+const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;
+const CRYSTAL_ITEM_TYPE_ARMOUR: u8 = 2;
+const CRYSTAL_ITEM_TYPE_HELMET: u8 = 4;
+const CRYSTAL_ITEM_TYPE_NECKLACE: u8 = 5;
+const CRYSTAL_ITEM_TYPE_BRACELET: u8 = 6;
+const CRYSTAL_ITEM_TYPE_RING: u8 = 7;
+const CRYSTAL_ITEM_TYPE_AMULET: u8 = 8;
+const CRYSTAL_ITEM_TYPE_BELT: u8 = 9;
+const CRYSTAL_ITEM_TYPE_BOOTS: u8 = 10;
+const CRYSTAL_ITEM_TYPE_STONE: u8 = 11;
+const CRYSTAL_ITEM_TYPE_TORCH: u8 = 12;
+const CRYSTAL_ITEM_TYPE_POTION: u8 = 13;
+const CRYSTAL_ITEM_TYPE_SCROLL: u8 = 17;
+const CRYSTAL_ITEM_TYPE_MOUNT: u8 = 19;
+const CRYSTAL_ITEM_TYPE_BOOK: u8 = 20;
 const CRYSTAL_ITEM_TYPE_GEM: u8 = 18;
+const CRYSTAL_ITEM_TYPE_FOOD: u8 = 27;
+const CRYSTAL_POTION_SHAPE_NORMAL: i16 = 0;
+const CRYSTAL_POTION_SHAPE_SUN_POTION: i16 = 1;
+const CRYSTAL_POTION_SHAPE_MYSTERY_WATER: i16 = 2;
+const CRYSTAL_POTION_SHAPE_BUFF: i16 = 3;
+const CRYSTAL_POTION_SHAPE_EXP: i16 = 4;
+const CRYSTAL_POTION_SHAPE_DROP: i16 = 5;
+const CRYSTAL_SCROLL_SHAPE_DUNGEON_ESCAPE: i16 = 0;
+const CRYSTAL_SCROLL_SHAPE_TOWN_TELEPORT: i16 = 1;
+const CRYSTAL_SCROLL_SHAPE_RANDOM_TELEPORT: i16 = 2;
+const CRYSTAL_SCROLL_SHAPE_BENEDICTION_OIL: i16 = 3;
+const CRYSTAL_SCROLL_SHAPE_REPAIR_OIL: i16 = 4;
+const CRYSTAL_SCROLL_SHAPE_WAR_GOD_OIL: i16 = 5;
+const CRYSTAL_SCROLL_SHAPE_GT_INVITE: i16 = 26;
+const CRYSTAL_SCROLL_SHAPE_GT_TELEPORT: i16 = 27;
+const CRYSTAL_SCROLL_SHAPE_RESURRECTION: i16 = 6;
+const CRYSTAL_SCROLL_SHAPE_MAP_SHOUT: i16 = 8;
+const CRYSTAL_SCROLL_SHAPE_SERVER_SHOUT: i16 = 9;
+const CRYSTAL_REQUIRED_CLASS_WARRIOR: u8 = 1;
+const CRYSTAL_REQUIRED_CLASS_WIZARD: u8 = 2;
+const CRYSTAL_REQUIRED_CLASS_TAOIST: u8 = 4;
+const CRYSTAL_REQUIRED_CLASS_ASSASSIN: u8 = 8;
+const CRYSTAL_REQUIRED_CLASS_ARCHER: u8 = 16;
+const CRYSTAL_REQUIRED_GENDER_MALE: u8 = 1;
+const CRYSTAL_REQUIRED_GENDER_FEMALE: u8 = 2;
+const CRYSTAL_REQUIRED_TYPE_LEVEL: u8 = 0;
+const CRYSTAL_REQUIRED_TYPE_MAX_AC: u8 = 1;
+const CRYSTAL_REQUIRED_TYPE_MAX_MAC: u8 = 2;
+const CRYSTAL_REQUIRED_TYPE_MAX_DC: u8 = 3;
+const CRYSTAL_REQUIRED_TYPE_MAX_MC: u8 = 4;
+const CRYSTAL_REQUIRED_TYPE_MAX_SC: u8 = 5;
+const CRYSTAL_REQUIRED_TYPE_MAX_LEVEL: u8 = 6;
+const CRYSTAL_REQUIRED_TYPE_MIN_AC: u8 = 7;
+const CRYSTAL_REQUIRED_TYPE_MIN_MAC: u8 = 8;
+const CRYSTAL_REQUIRED_TYPE_MIN_DC: u8 = 9;
+const CRYSTAL_REQUIRED_TYPE_MIN_MC: u8 = 10;
+const CRYSTAL_REQUIRED_TYPE_MIN_SC: u8 = 11;
 const CRYSTAL_GEM_SHAPE_UPGRADE_GEM: i16 = 3;
 const CRYSTAL_GEM_SHAPE_UPGRADE_ORB: i16 = 4;
 const CRYSTAL_GEM_SHAPE_REPAIR_HAMMER: i16 = 1;
@@ -517,10 +561,15 @@ const CRYSTAL_SPECIAL_PROBE: i16 = 0x0100;
 const CRYSTAL_SPECIAL_SKILL: i16 = 0x0200;
 const CRYSTAL_SPECIAL_NO_DURA_LOSS: i16 = 0x0400;
 const CRYSTAL_ITEM_SEAL_DELAY_MINUTES: u64 = 60;
+const CRYSTAL_STAT_MIN_AC: u8 = 0;
 const CRYSTAL_STAT_MAX_AC: u8 = 1;
+const CRYSTAL_STAT_MIN_MAC: u8 = 2;
 const CRYSTAL_STAT_MAX_MAC: u8 = 3;
+const CRYSTAL_STAT_MIN_DC: u8 = 4;
 const CRYSTAL_STAT_MAX_DC: u8 = 5;
+const CRYSTAL_STAT_MIN_MC: u8 = 6;
 const CRYSTAL_STAT_MAX_MC: u8 = 7;
+const CRYSTAL_STAT_MIN_SC: u8 = 8;
 const CRYSTAL_STAT_MAX_SC: u8 = 9;
 const CRYSTAL_STAT_ACCURACY: u8 = 10;
 const CRYSTAL_STAT_AGILITY: u8 = 11;
@@ -558,6 +607,8 @@ struct ItemState {
     name: String,
     icon: u16,
     slot: u8,
+    #[serde(default)]
+    unique_id: u64,
     container: ItemContainer,
     quantity: u32,
     description: String,
@@ -579,6 +630,10 @@ struct ItemState {
     socket_slots: u8,
     #[serde(default)]
     gem_count: u16,
+    #[serde(default)]
+    identified: Option<bool>,
+    #[serde(default)]
+    soul_bound_id: Option<i32>,
     #[serde(default)]
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
@@ -614,6 +669,40 @@ impl ItemState {
     }
 }
 
+fn default_item_unique_id(container: ItemContainer, slot: u8) -> u64 {
+    match container {
+        ItemContainer::Bag1 => u64::from(slot),
+        ItemContainer::Bag2 => 40 + u64::from(slot),
+        _ => u64::from(slot),
+    }
+}
+
+fn item_unique_id(item: &ItemState) -> u64 {
+    if item.unique_id == 0 {
+        default_item_unique_id(item.container, item.slot)
+    } else {
+        item.unique_id
+    }
+}
+
+fn item_state_identified(item: &ItemState) -> bool {
+    item.identified
+        .unwrap_or_else(|| crystal_default_identified_for_item_key(&item.key))
+}
+
+fn item_state_soul_bound_id(item: &ItemState) -> i32 {
+    item.soul_bound_id.unwrap_or(-1)
+}
+
+fn equipment_state_identified(item: &EquipmentState) -> bool {
+    item.identified
+        .unwrap_or_else(|| crystal_default_identified_for_item_key(&item.key))
+}
+
+fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    item.soul_bound_id.unwrap_or(-1)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct EquipmentState {
     key: String,
@@ -640,6 +729,10 @@ struct EquipmentState {
     socket_slots: u8,
     #[serde(default)]
     gem_count: u16,
+    #[serde(default)]
+    identified: Option<bool>,
+    #[serde(default)]
+    soul_bound_id: Option<i32>,
     #[serde(default)]
     sealed_expiry_time_binary_datetime: i64,
     #[serde(default)]
@@ -685,6 +778,7 @@ struct BuffState {
     expires_at_tick: u64,
     attack_bonus: i32,
     defence_bonus: i32,
+    stats: Vec<UserItemStat>,
 }
 
 impl BuffState {
@@ -694,8 +788,8 @@ impl BuffState {
             name: localized_buff_name(language, &self.key, &self.name),
             description: localized_buff_description(language, &self.key, &self.description),
             remaining_ticks: self.expires_at_tick.saturating_sub(tick) as u32,
-            attack_bonus: self.attack_bonus,
-            defence_bonus: self.defence_bonus,
+            attack_bonus: buff_attack_bonus(self),
+            defence_bonus: buff_defence_bonus(self),
         }
     }
 }
@@ -704,12 +798,6 @@ impl BuffState {
 enum PendingCombatTarget {
     Player,
     Monster(Entity),
-}
-
-#[derive(Debug, Clone)]
-enum PendingCombatMessage {
-    MonsterHitPlayer { attacker_name: String, damage: i32 },
-    PlayerHitMonster { target_name: String, damage: i32 },
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -812,7 +900,6 @@ struct PendingCombatAction {
     attacker_id: u32,
     target: PendingCombatTarget,
     damage: i32,
-    message: Option<PendingCombatMessage>,
     player_status_effect: Option<PendingPlayerStatusEffect>,
     due_packet: Option<ServerPacket>,
     player_movement: Option<PendingPlayerMovement>,
@@ -1404,7 +1491,14 @@ struct SimulationResources {
     storage_size: u16,
     has_expanded_storage: bool,
     expanded_storage_expiry_time_binary_datetime: i64,
+    expanded_storage_expiry_notice_pending: bool,
+    unlock_curse: bool,
+    free_map_shout: bool,
+    free_server_shout: bool,
+    pending_pot_health_amount: i32,
+    pending_pot_mana_amount: i32,
     storage_unlocked: bool,
+    storage_sent: bool,
     storage_has_password: bool,
     storage_password_last_set_binary_datetime: i64,
     inventory_items: Vec<ItemState>,
@@ -1456,6 +1550,7 @@ struct CrystalNpcScriptDiagnostic {
 struct ActiveNpcServiceState {
     script_key: String,
     label_key: String,
+    npc_object_id: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1589,7 +1684,14 @@ impl SimulationResources {
             storage_size: BASE_STORAGE_SLOTS,
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
+            expanded_storage_expiry_notice_pending: false,
+            unlock_curse: false,
+            free_map_shout: false,
+            free_server_shout: false,
+            pending_pot_health_amount: 0,
+            pending_pot_mana_amount: 0,
             storage_unlocked: true,
+            storage_sent: false,
             storage_has_password: false,
             storage_password_last_set_binary_datetime: 0,
             inventory_items: seed_inventory_items(),
@@ -1793,10 +1895,7 @@ impl SimulationSession {
 
     fn move_to_with_mode_impl(&mut self, destination: Point, running: bool) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeMoving",
-            )];
+            return Vec::new();
         }
 
         dismiss_dialog(self.app.world_mut());
@@ -1867,18 +1966,12 @@ impl SimulationSession {
 
     fn attack_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeAttacking",
-            )];
+            return Vec::new();
         }
 
         dismiss_dialog(self.app.world_mut());
         let Some(monster_entity) = entity_by_object_id(self.app.world(), object_id) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.targetCannotBeAttackedYet",
-            )];
+            return Vec::new();
         };
 
         let player_entity = player_entity(self.app.world()).expect("player should exist");
@@ -1891,10 +1984,7 @@ impl SimulationSession {
 
         let monster_entry = self.app.world().entity(monster_entity);
         let Some(monster_agent) = monster_entry.get::<MonsterAgent>() else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.targetCannotBeAttackedYet",
-            )];
+            return Vec::new();
         };
         let monster_ai_state = monster_entry
             .get::<MonsterAiState>()
@@ -1904,21 +1994,11 @@ impl SimulationSession {
             || monster_ai_state.hidden
             || monster_is_stoned_zuma(monster_agent, &monster_ai_state)
         {
-            return vec![system_message_key(
-                self.app.world(),
-                if monster_agent.dead {
-                    "sim.monsterAlreadyDown"
-                } else {
-                    "sim.targetCannotBeAttackedYet"
-                },
-            )];
+            return Vec::new();
         }
 
         let Some(direction) = direction_toward(&player_position, &target_position) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.noValidAttackDirection",
-            )];
+            return Vec::new();
         };
 
         let mut packets = Vec::new();
@@ -1934,10 +2014,6 @@ impl SimulationSession {
         }
 
         if tile_distance(&player_position, &target_position) > 1 {
-            packets.push(system_message_key(
-                self.app.world(),
-                "sim.targetOutOfRangeApproachFirst",
-            ));
             return packets;
         }
 
@@ -2000,10 +2076,7 @@ impl SimulationSession {
 
     fn attack_in_direction(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeAttacking",
-            )];
+            return Vec::new();
         }
 
         if let Some(player) = player_entity(self.app.world()) {
@@ -2024,18 +2097,12 @@ impl SimulationSession {
 
     fn harvest_impl(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeHarvesting",
-            )];
+            return Vec::new();
         }
 
         dismiss_dialog(self.app.world_mut());
         let Some(player) = player_entity(self.app.world()) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeHarvesting",
-            )];
+            return Vec::new();
         };
 
         self.app
@@ -2087,17 +2154,11 @@ impl SimulationSession {
 
     fn interact_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeInteracting",
-            )];
+            return Vec::new();
         }
 
         let Some(npc_entity) = entity_by_object_id(self.app.world(), object_id) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.targetNoScriptedInteraction",
-            )];
+            return Vec::new();
         };
 
         let player_entity = player_entity(self.app.world()).expect("player should exist");
@@ -2121,10 +2182,7 @@ impl SimulationSession {
             .and_then(|agent| agent.script_key.clone());
 
         let Some(direction) = direction_toward(&player_position, &npc_position) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.noValidInteractionDirection",
-            )];
+            return Vec::new();
         };
 
         let mut packets = Vec::new();
@@ -2140,18 +2198,8 @@ impl SimulationSession {
         }
 
         if tile_distance(&player_position, &npc_position) > 1 {
-            packets.push(system_message_key(
-                self.app.world(),
-                "sim.moveCloserToTalkToNpc",
-            ));
             return packets;
         }
-
-        packets.push(hint_chat_key_args(
-            self.app.world(),
-            "sim.talkingToNpc",
-            [npc_name.clone()],
-        ));
 
         let context = NpcInteractionContext {
             object_id,
@@ -2176,10 +2224,7 @@ impl SimulationSession {
         input_value: Option<String>,
     ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeInteracting",
-            )];
+            return Vec::new();
         }
 
         let Some(active_dialog) = self
@@ -2189,10 +2234,7 @@ impl SimulationSession {
             .active_npc_dialog
             .clone()
         else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.npcNoMilestoneScript",
-            )];
+            return Vec::new();
         };
 
         let (normalized_target, label_args) = parse_crystal_label_target(target);
@@ -2235,16 +2277,13 @@ impl SimulationSession {
                 .as_ref()
                 .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
         {
-            return vec![system_message_key(self.app.world(), "sim.itemNoActiveUse")];
+            return Vec::new();
         }
 
         let Some(npc_entity) = entity_by_object_id(self.app.world(), active_dialog.npc_object_id)
         else {
             dismiss_dialog(self.app.world_mut());
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.targetNotGroundDrop",
-            )];
+            return Vec::new();
         };
 
         let npc_entry = self.app.world().entity(npc_entity);
@@ -2265,10 +2304,7 @@ impl SimulationSession {
 
         let Some(script_key) = context.script_key.clone() else {
             dismiss_dialog(self.app.world_mut());
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.npcNoMilestoneScript",
-            )];
+            return Vec::new();
         };
 
         let Some(result) = run_crystal_npc_script(
@@ -2309,13 +2345,10 @@ impl SimulationSession {
             .active_npc_dialog
             .clone()
         else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.npcNoMilestoneScript",
-            )];
+            return Vec::new();
         };
         let Some(input) = active_dialog.input.clone() else {
-            return vec![system_message_key(self.app.world(), "sim.itemNoActiveUse")];
+            return Vec::new();
         };
 
         self.select_npc_dialog_target_with_input_impl(&input.target, Some(value.to_string()))
@@ -2333,10 +2366,7 @@ impl SimulationSession {
 
     fn pick_up_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforePickingUpItems",
-            )];
+            return Vec::new();
         }
 
         pick_up_ground_drop(self.app.world_mut(), object_id)
@@ -2358,10 +2388,7 @@ impl SimulationSession {
 
     fn use_item_impl(&mut self, key: &str) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeUsingItems",
-            )];
+            return Vec::new();
         }
 
         use_item(self.app.world_mut(), key, None)
@@ -2369,10 +2396,7 @@ impl SimulationSession {
 
     fn drop_item_impl(&mut self, key: &str) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeUsingItems",
-            )];
+            return Vec::new();
         }
 
         let item_reference = {
@@ -2386,7 +2410,7 @@ impl SimulationSession {
                 })
                 .map(|item| {
                     (
-                        u64::from(item.slot),
+                        item_unique_id(item),
                         u16::try_from(item.quantity).unwrap_or(u16::MAX),
                     )
                 })
@@ -2396,10 +2420,7 @@ impl SimulationSession {
             Some((unique_id, count)) => {
                 drop_item_packet(self.app.world_mut(), unique_id, count, false)
             }
-            None => vec![system_message_key(
-                self.app.world(),
-                "sim.itemNotFoundInBag",
-            )],
+            None => Vec::new(),
         }
     }
 
@@ -2409,19 +2430,7 @@ impl SimulationSession {
         unique_id: u64,
         to: i32,
     ) -> Vec<ServerPacket> {
-        let key = item_key_for_client_reference(self.app.world(), unique_id, grid);
-        match key {
-            Some(key) => equip_item_by_key_impl(self.app.world_mut(), grid, unique_id, &key, to),
-            None => vec![
-                ServerPacket::EquipItem {
-                    grid,
-                    unique_id,
-                    to,
-                    success: false,
-                },
-                system_message_key(self.app.world(), "sim.itemNotFoundInBag"),
-            ],
-        }
+        equip_item_impl(self.app.world_mut(), grid, unique_id, to)
     }
 
     fn delete_character_impl(&mut self, character_index: i32) -> Vec<ServerPacket> {
@@ -2443,6 +2452,7 @@ impl SimulationSession {
                     .is_some_and(|character| character.index == character_index)
                 {
                     resources.selected_character = None;
+                    resources.unlock_curse = false;
                     resources.active_npc_dialog = None;
                     resources.storage_unlocked = !resources.storage_has_password
                         || !resources.config.require_storage_password;
@@ -2477,10 +2487,7 @@ impl SimulationSession {
 
     fn cast_skill_impl(&mut self, key: &str) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeCastingSkills",
-            )];
+            return Vec::new();
         }
 
         cast_skill(self.app.world_mut(), key)
@@ -2493,10 +2500,12 @@ impl SimulationSession {
 
     fn transfer_map_impl(&mut self, key: &str) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeMoving",
-            )];
+            let language = current_language(self.app.world());
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         }
 
         apply_map_transfer(self.app.world_mut(), key)
@@ -2542,7 +2551,14 @@ impl SimulationSession {
             "craft" => self.stage5_craft(args),
             "item.addSocket" => self.stage5_item_add_socket(args),
             "item.seal" => self.stage5_item_seal(args),
-            other => vec![system_message(&format!("Unknown Stage 5 command: {other}"))],
+            other => {
+                let language = current_language(self.app.world());
+                vec![system_message(&format_localized_text(
+                    language,
+                    "server.InvalidPacketReceived",
+                    [other.to_string()],
+                ))]
+            }
         }
     }
 
@@ -2554,7 +2570,7 @@ impl SimulationSession {
         let player_name = stage5_player_name(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         resources.stage5_systems.group.members = unique_strings([player_name, member]);
-        vec![system_message("Group created.")]
+        Vec::new()
     }
 
     fn stage5_group_loot(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2565,7 +2581,7 @@ impl SimulationSession {
             .stage5_systems
             .group
             .loot_mode = mode.clone();
-        vec![system_message(&format!("Group loot mode set to {mode}."))]
+        Vec::new()
     }
 
     fn stage5_group_leave(&mut self) -> Vec<ServerPacket> {
@@ -2574,7 +2590,7 @@ impl SimulationSession {
             .resource_mut::<SimulationResources>()
             .stage5_systems
             .group = Default::default();
-        vec![system_message("Group left.")]
+        Vec::new()
     }
 
     fn stage5_guild_create(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2582,6 +2598,7 @@ impl SimulationSession {
             .first()
             .cloned()
             .unwrap_or_else(|| "Bichon".to_string());
+        let language = current_language(self.app.world());
         let player_name = stage5_player_name(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         resources.stage5_systems.guild.name = name.clone();
@@ -2593,7 +2610,11 @@ impl SimulationSession {
             "storage".to_string(),
             "conquest".to_string(),
         ];
-        vec![system_message(&format!("Guild created: {name}."))]
+        vec![system_message(&format_localized_text(
+            language,
+            "server.SuccessfullyCreatedGuild",
+            [name],
+        ))]
     }
 
     fn stage5_guild_rank(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2607,7 +2628,7 @@ impl SimulationSession {
             .stage5_systems
             .guild
             .rank = rank.clone();
-        vec![system_message(&format!("Guild rank set to {rank}."))]
+        Vec::new()
     }
 
     fn stage5_guild_chat(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2638,7 +2659,7 @@ impl SimulationSession {
             .unwrap_or_else(|| "Friend".to_string());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         push_unique(&mut resources.stage5_systems.social.friends, name.clone());
-        vec![system_message(&format!("Friend added: {name}."))]
+        Vec::new()
     }
 
     fn stage5_social_unfriend(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2653,7 +2674,7 @@ impl SimulationSession {
             .social
             .friends
             .retain(|friend| !friend.eq_ignore_ascii_case(&name));
-        vec![system_message(&format!("Friend removed: {name}."))]
+        Vec::new()
     }
 
     fn stage5_social_block(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2668,7 +2689,7 @@ impl SimulationSession {
             .social
             .friends
             .retain(|friend| !friend.eq_ignore_ascii_case(&name));
-        vec![system_message(&format!("Blocked: {name}."))]
+        Vec::new()
     }
 
     fn stage5_social_unblock(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2683,7 +2704,7 @@ impl SimulationSession {
             .social
             .blocked
             .retain(|blocked| !blocked.eq_ignore_ascii_case(&name));
-        vec![system_message(&format!("Unblocked: {name}."))]
+        Vec::new()
     }
 
     fn stage5_mail_send(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2724,13 +2745,19 @@ impl SimulationSession {
             claimed: false,
             deleted: false,
         });
-        vec![system_message(&format!("Mail sent: {id}."))]
+        Vec::new()
     }
 
     fn stage5_mail_claim(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
         let Some(id) = parse_u32_arg(&args, 0) else {
-            return vec![system_message("Mail id is required.")];
+            let language = current_language(self.app.world());
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["mail.claim".to_string()],
+            ))];
         };
+        let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         let Some(index) = resources
             .stage5_systems
@@ -2738,16 +2765,24 @@ impl SimulationSession {
             .iter()
             .position(|mail| mail.id == id && !mail.deleted)
         else {
-            return vec![system_message("Mail was not found.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         if resources.stage5_systems.mail[index].claimed {
-            return vec![system_message(&format!("Mail claimed: {id}."))];
+            return Vec::new();
         }
         let gold = resources.stage5_systems.mail[index].gold;
         let items = resources.stage5_systems.mail[index].items.clone();
         for key in &items {
             if !can_gain_item_quantity(&resources, ItemContainer::Bag1, key, 1) {
-                return vec![system_message("No free bag slot.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                ))];
             }
         }
         resources.gold = resources.gold.saturating_add(gold);
@@ -2765,12 +2800,17 @@ impl SimulationSession {
                 1,
             );
         }
-        vec![system_message(&format!("Mail claimed: {id}."))]
+        Vec::new()
     }
 
     fn stage5_mail_delete(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
         let Some(id) = parse_u32_arg(&args, 0) else {
-            return vec![system_message("Mail id is required.")];
+            let language = current_language(self.app.world());
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["mail.delete".to_string()],
+            ))];
         };
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         if let Some(mail) = resources
@@ -2781,7 +2821,7 @@ impl SimulationSession {
         {
             mail.deleted = true;
         }
-        vec![system_message(&format!("Mail deleted: {id}."))]
+        Vec::new()
     }
 
     fn stage5_trade_start(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2800,22 +2840,36 @@ impl SimulationSession {
             accepted: false,
             completed: false,
         });
-        vec![system_message(&format!("Trade started with {partner}."))]
+        Vec::new()
     }
 
     fn stage5_trade_offer_gold(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
         let Some(amount) = parse_u32_arg(&args, 0) else {
-            return vec![system_message("Trade gold amount is required.")];
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["trade.offerGold"],
+            ))];
         };
+        let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         if resources.gold < amount {
-            return vec![system_message("Not enough gold.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.LowGold",
+                "server.LowGold",
+            ))];
         }
         let Some(trade) = resources.stage5_systems.trade.as_mut() else {
-            return vec![system_message("No active trade.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         trade.offered_gold = amount;
-        vec![system_message(&format!("Trade gold offered: {amount}."))]
+        Vec::new()
     }
 
     fn stage5_trade_offer_item(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2823,18 +2877,28 @@ impl SimulationSession {
             .first()
             .cloned()
             .unwrap_or_else(|| "red-potion".to_string());
+        let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         if !resources.inventory_items.iter().any(|item| item.key == key) {
-            return vec![system_message("Trade item was not found.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         }
         let Some(trade) = resources.stage5_systems.trade.as_mut() else {
-            return vec![system_message("No active trade.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         push_unique(&mut trade.offered_items, key.clone());
-        vec![system_message(&format!("Trade item offered: {key}."))]
+        Vec::new()
     }
 
     fn stage5_trade_accept(&mut self) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         let Some(offered_gold) = resources
             .stage5_systems
@@ -2842,17 +2906,29 @@ impl SimulationSession {
             .as_ref()
             .map(|trade| trade.offered_gold)
         else {
-            return vec![system_message("No active trade.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         if resources.gold < offered_gold {
-            return vec![system_message("Not enough gold.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.LowGold",
+                "server.LowGold",
+            ))];
         }
         resources.gold -= offered_gold;
         if let Some(trade) = resources.stage5_systems.trade.as_mut() {
             trade.accepted = true;
             trade.completed = true;
         }
-        vec![system_message("Trade completed.")]
+        vec![system_message(&localized_text_or_fallback(
+            language,
+            "server.TradeSuccessful",
+            "server.TradeSuccessful",
+        ))]
     }
 
     fn stage5_trade_cancel(&mut self) -> Vec<ServerPacket> {
@@ -2861,7 +2937,7 @@ impl SimulationSession {
             .resource_mut::<SimulationResources>()
             .stage5_systems
             .trade = None;
-        vec![system_message("Trade cancelled.")]
+        Vec::new()
     }
 
     fn stage5_shop_buy(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2873,13 +2949,22 @@ impl SimulationSession {
             .get(1)
             .and_then(|value| value.parse::<u32>().ok())
             .unwrap_or(25);
+        let language = current_language(self.app.world());
         {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             if resources.gold < price {
-                return vec![system_message("Not enough gold.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.LowGold",
+                    "server.LowGold",
+                ))];
             }
             if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, 1) {
-                return vec![system_message("No free bag slot.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                ))];
             }
             resources.gold -= price;
         }
@@ -2893,7 +2978,11 @@ impl SimulationSession {
             1,
             1,
         );
-        vec![system_message(&format!("Bought {key}."))]
+        vec![system_message(&format_localized_text(
+            language,
+            "server.BoughtItemForGold",
+            [key, price.to_string()],
+        ))]
     }
 
     fn stage5_shop_buy_credit(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -2905,12 +2994,17 @@ impl SimulationSession {
             .get(1)
             .and_then(|value| value.parse::<u32>().ok())
             .unwrap_or(1);
+        let language = current_language(self.app.world());
         let player_name = stage5_player_name(self.app.world());
         let mail_id;
         {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             if resources.credit < price {
-                return vec![system_message("Not enough credit.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouDontHaveEnoughCurrency",
+                    "server.YouDontHaveEnoughCurrency",
+                ))];
             }
             resources.credit -= price;
             mail_id = resources
@@ -2935,8 +3029,10 @@ impl SimulationSession {
         }
         vec![
             ServerPacket::LoseCredit { credit: price },
-            system_message(&format!(
-                "Bought {key} for {price} credit. Mail {mail_id} created."
+            system_message(&format_localized_text(
+                language,
+                "server.BoughtItemForCredit",
+                [key, price.to_string()],
             )),
         ]
     }
@@ -2968,13 +3064,19 @@ impl SimulationSession {
             sold: false,
             cancelled: false,
         });
-        vec![system_message(&format!("Auction listed: {id}."))]
+        Vec::new()
     }
 
     fn stage5_auction_buy(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
         let Some(id) = parse_u32_arg(&args, 0) else {
-            return vec![system_message("Auction id is required.")];
+            let language = current_language(self.app.world());
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["auction.buy".to_string()],
+            ))];
         };
+        let language = current_language(self.app.world());
         let item_key = {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             let Some(index) = resources
@@ -2983,15 +3085,27 @@ impl SimulationSession {
                 .iter()
                 .position(|listing| listing.id == id && !listing.sold && !listing.cancelled)
             else {
-                return vec![system_message("Auction listing was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             let price = resources.stage5_systems.auction[index].price;
             if resources.gold < price {
-                return vec![system_message("Not enough gold.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.LowGold",
+                    "server.LowGold",
+                ))];
             }
             let item_key = resources.stage5_systems.auction[index].item_key.clone();
             if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &item_key, 1) {
-                return vec![system_message("No free bag slot.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                ))];
             }
             resources.gold -= price;
             resources.stage5_systems.auction[index].sold = true;
@@ -3007,12 +3121,17 @@ impl SimulationSession {
             1,
             1,
         );
-        vec![system_message(&format!("Auction bought: {id}."))]
+        Vec::new()
     }
 
     fn stage5_auction_cancel(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
         let Some(id) = parse_u32_arg(&args, 0) else {
-            return vec![system_message("Auction id is required.")];
+            let language = current_language(self.app.world());
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["auction.cancel".to_string()],
+            ))];
         };
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         if let Some(listing) = resources
@@ -3023,7 +3142,7 @@ impl SimulationSession {
         {
             listing.cancelled = true;
         }
-        vec![system_message(&format!("Auction cancelled: {id}."))]
+        Vec::new()
     }
 
     fn stage5_conquest_start(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3038,7 +3157,7 @@ impl SimulationSession {
             .conquest
             .event_log
             .push(format!("War started: {castle}"));
-        vec![system_message(&format!("Conquest started: {castle}."))]
+        Vec::new()
     }
 
     fn stage5_conquest_owner(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3058,7 +3177,7 @@ impl SimulationSession {
             .conquest
             .event_log
             .push(format!("Castle owner: {owner}"));
-        vec![system_message(&format!("Castle owner set to {owner}."))]
+        Vec::new()
     }
 
     fn stage5_conquest_end(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3074,7 +3193,7 @@ impl SimulationSession {
             .conquest
             .event_log
             .push(format!("War ended: {castle}"));
-        vec![system_message(&format!("Conquest ended: {castle}."))]
+        Vec::new()
     }
 
     fn stage5_event_spawn(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3086,16 +3205,27 @@ impl SimulationSession {
             .get(1)
             .and_then(|value| value.parse::<u8>().ok())
             .unwrap_or(1);
+        let language = current_language(self.app.world());
         let Some(template) = crystal_dynamic_monster_template(&monster_name) else {
-            return vec![system_message("Event monster template was not found.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         let Some(player) = player_entity(self.app.world()) else {
-            return vec![system_message(
-                "Join the world before spawning event monsters.",
-            )];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         let Some(origin) = entity_position(self.app.world(), player) else {
-            return vec![system_message("Player position was not found.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         let mut spawned = 0_u8;
         for index in 0..count {
@@ -3126,9 +3256,7 @@ impl SimulationSession {
             .conquest
             .event_log
             .push(format!("Event spawned {spawned}x {monster_name}"));
-        vec![system_message(&format!(
-            "Event spawned {spawned} monster(s)."
-        ))]
+        Vec::new()
     }
 
     fn stage5_hero_recruit(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3142,7 +3270,7 @@ impl SimulationSession {
             level: 1,
             behaviour: 0,
         });
-        vec![system_message(&format!("Hero recruited: {name}."))]
+        Vec::new()
     }
 
     fn stage5_hero_behaviour(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3150,14 +3278,17 @@ impl SimulationSession {
             .first()
             .and_then(|value| value.parse::<u8>().ok())
             .unwrap_or(0);
+        let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
         let Some(hero) = resources.stage5_systems.hero.as_mut() else {
-            return vec![system_message("No hero has been recruited.")];
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
         };
         hero.behaviour = behaviour;
-        vec![system_message(&format!(
-            "Hero behaviour set to {behaviour}."
-        ))]
+        Vec::new()
     }
 
     fn stage5_mine(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3170,7 +3301,7 @@ impl SimulationSession {
             resources.stage5_systems.profession.ore.saturating_add(ore);
         resources.stage5_systems.profession.mining_level =
             resources.stage5_systems.profession.mining_level.max(1);
-        vec![system_message(&format!("Mined {ore} ore."))]
+        Vec::new()
     }
 
     fn stage5_craft(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3178,13 +3309,22 @@ impl SimulationSession {
             .first()
             .cloned()
             .unwrap_or_else(|| "crafted-blade".to_string());
+        let language = current_language(self.app.world());
         {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             if resources.stage5_systems.profession.ore == 0 {
-                return vec![system_message("Not enough ore.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.CraftingAttemptFailed",
+                    "server.CraftingAttemptFailed",
+                ))];
             }
             if free_bag_slots(&resources) == 0 {
-                return vec![system_message("No free bag slot.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                ))];
             }
             resources.stage5_systems.profession.ore -= 1;
             push_unique(
@@ -3202,7 +3342,7 @@ impl SimulationSession {
             1,
             1,
         );
-        vec![system_message(&format!("Crafted {item_key}."))]
+        Vec::new()
     }
 
     fn stage5_item_add_socket(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -3211,6 +3351,7 @@ impl SimulationSession {
             .and_then(|value| equipment_slot_from_stage5_arg(value))
             .unwrap_or(EquipmentSlot::Weapon);
         let source_key = args.get(1).cloned();
+        let language = current_language(self.app.world());
         let result = {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             let Some(item_index) = resources
@@ -3218,17 +3359,33 @@ impl SimulationSession {
                 .iter()
                 .position(|item| item.slot == slot)
             else {
-                return vec![system_message("Equipped item was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             let item = &resources.equipment_items[item_index];
             let Some(unique_id) = equipment_slot_unique_id(item.slot) else {
-                return vec![system_message("Equipped item was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             let Some(max_slots) = crystal_socket_slot_limit_for_item_key(&item.key) else {
-                return vec![system_message("Item socket metadata was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             if max_slots == 0 || item.socket_slots >= max_slots {
-                return vec![system_message("Item already has max sockets.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.ItemMaxSockets",
+                    "server.ItemMaxSockets",
+                ))];
             }
             let source_index = if let Some(source_key) = source_key.as_deref() {
                 let Some(source_index) = resources
@@ -3236,11 +3393,19 @@ impl SimulationSession {
                     .iter()
                     .position(|item| item.key == source_key || item.name == source_key)
                 else {
-                    return vec![system_message("Socket source item was not found.")];
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.NotFound",
+                        "server.NotFound",
+                    ))];
                 };
                 let source_item = &resources.inventory_items[source_index];
                 if !crystal_socket_source_valid_for_item(source_item, &item.key) {
-                    return vec![system_message("Invalid socket source item.")];
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.InvalidCombination",
+                        "server.InvalidCombination",
+                    ))];
                 }
                 Some(source_index)
             } else {
@@ -3269,7 +3434,11 @@ impl SimulationSession {
                 unique_id,
                 slot_size,
             },
-            system_message(&format!("Item socket slots increased to {slot_size}.")),
+            system_message(&localized_text_or_fallback(
+                language,
+                "server.ItemSocketsIncreased",
+                "server.ItemSocketsIncreased",
+            )),
         ]
     }
 
@@ -3285,6 +3454,7 @@ impl SimulationSession {
             .max(1);
         let source_key = args.get(2).cloned();
         let now_binary_datetime = current_binary_datetime();
+        let language = current_language(self.app.world());
         let result = {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             let Some(item_index) = resources
@@ -3292,23 +3462,45 @@ impl SimulationSession {
                 .iter()
                 .position(|item| item.slot == slot)
             else {
-                return vec![system_message("Equipped item was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             let item = &resources.equipment_items[item_index];
             if item.sealed_expiry_time_binary_datetime != 0
                 && binary_datetime_ticks(item.sealed_expiry_time_binary_datetime)
                     > binary_datetime_ticks(now_binary_datetime)
             {
-                return vec![system_message("Item is already sealed.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.ItemAlreadySealed",
+                    "server.ItemAlreadySealed",
+                ))];
             }
             if item.sealed_next_time_binary_datetime != 0
                 && binary_datetime_ticks(item.sealed_next_time_binary_datetime)
                     > binary_datetime_ticks(now_binary_datetime)
             {
-                return vec![system_message("Item cannot be resealed yet.")];
+                let remaining_ticks = binary_datetime_ticks(item.sealed_next_time_binary_datetime)
+                    - binary_datetime_ticks(now_binary_datetime);
+                let remaining_seconds =
+                    u64::try_from((remaining_ticks + 9_999_999) / 10_000_000).unwrap_or(1);
+                return vec![system_message(&format_localized_text(
+                    language,
+                    "server.ItemCannotBeResealedFor",
+                    [crystal_duration_label_from_seconds(
+                        remaining_seconds.max(1),
+                    )],
+                ))];
             }
             let Some(unique_id) = equipment_slot_unique_id(item.slot) else {
-                return vec![system_message("Equipped item was not found.")];
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.NotFound",
+                    "server.NotFound",
+                ))];
             };
             let source_index_and_minutes = if let Some(source_key) = source_key.as_deref() {
                 let Some(source_index) = resources
@@ -3316,13 +3508,21 @@ impl SimulationSession {
                     .iter()
                     .position(|item| item.key == source_key || item.name == source_key)
                 else {
-                    return vec![system_message("Seal source item was not found.")];
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.NotFound",
+                        "server.NotFound",
+                    ))];
                 };
                 let source_item = &resources.inventory_items[source_index];
                 let Some(minutes) =
                     crystal_seal_minutes_for_source_item(source_item, fallback_minutes)
                 else {
-                    return vec![system_message("Invalid seal source item.")];
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.InvalidCombination",
+                        "server.InvalidCombination",
+                    ))];
                 };
 
                 Some((source_index, minutes))
@@ -3358,7 +3558,13 @@ impl SimulationSession {
                 unique_id,
                 expiry_date_binary_datetime,
             },
-            system_message(&format!("Item sealed for {minutes} minutes.")),
+            system_message(&format_localized_text(
+                language,
+                "server.ItemSealedFor",
+                [crystal_duration_label_from_seconds(
+                    minutes.saturating_mul(60),
+                )],
+            )),
         ]
     }
 
@@ -3478,6 +3684,7 @@ impl SimulationSession {
                 {
                     let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
                     resources.selected_character = None;
+                    resources.unlock_curse = false;
                     resources.active_npc_dialog = None;
                     resources.pending_combat_actions = Vec::new();
                     resources.pending_monster_spawns = Vec::new();
@@ -3510,10 +3717,7 @@ impl SimulationSession {
                     packets.extend(advance_world(self.app.world_mut()));
                     packets
                 } else {
-                    vec![system_message_key(
-                        self.app.world(),
-                        "sim.joinWorldBeforeTurning",
-                    )]
+                    Vec::new()
                 }
             }
             ClientPacket::Walk { direction } => {
@@ -3553,25 +3757,37 @@ impl SimulationSession {
                 grid_to,
                 unique_id,
                 to,
-                ..
-            } => remove_equipped_slot_item_impl(self.app.world_mut(), grid, grid_to, unique_id, to),
+                from_unique_id,
+            } => remove_equipped_slot_item_impl(
+                self.app.world_mut(),
+                grid,
+                grid_to,
+                unique_id,
+                to,
+                from_unique_id,
+            ),
             ClientPacket::SplitItem {
                 grid,
                 unique_id,
                 count,
             } => split_item_impl(self.app.world_mut(), grid, unique_id, count),
             ClientPacket::UseItem { unique_id, grid } => {
+                if grid == MirGridType::HeroInventory {
+                    // Current runtime does not model hero inventory; do not fall back into player bag items.
+                    return vec![ServerPacket::UseItem {
+                        unique_id,
+                        success: false,
+                        grid,
+                    }];
+                }
                 let key = item_key_for_client_reference(self.app.world(), unique_id, grid);
                 match key {
                     Some(key) => use_item(self.app.world_mut(), &key, Some((unique_id, grid))),
-                    None => vec![
-                        ServerPacket::UseItem {
-                            unique_id,
-                            success: false,
-                            grid,
-                        },
-                        system_message_key(self.app.world(), "sim.itemNotFoundInBag"),
-                    ],
+                    None => vec![ServerPacket::UseItem {
+                        unique_id,
+                        success: false,
+                        grid,
+                    }],
                 }
             }
             ClientPacket::DropItem {
@@ -3753,10 +3969,14 @@ impl SimulationSession {
             ServerPacket::Chat {
                 message: format_localized_text(
                     current_language(self.app.world()),
-                    "sim.welcomeCharacter",
-                    [character.name.clone()],
+                    "server.Welcome",
+                    [localized_text_or_fallback(
+                        current_language(self.app.world()),
+                        "server.GameName",
+                        "Legend of Mir 2",
+                    )],
                 ),
-                chat_type: ChatType::System,
+                chat_type: ChatType::Hint,
             },
         ]);
         for bundle in visible_objects.into_values() {
@@ -3774,10 +3994,7 @@ impl SimulationSession {
         running: bool,
     ) -> Vec<ServerPacket> {
         let Some(player) = player_entity(self.app.world()) else {
-            return vec![system_message_key(
-                self.app.world(),
-                "sim.joinWorldBeforeMoving",
-            )];
+            return Vec::new();
         };
 
         let (previous_position, previous_direction) = {
@@ -4077,6 +4294,7 @@ struct StorageAccountState {
     storage_size: u16,
     has_expanded_storage: bool,
     expanded_storage_expiry_time_binary_datetime: i64,
+    expanded_storage_expiry_notice_pending: bool,
 }
 
 fn refresh_storage_password_state(world: &mut World) {
@@ -4099,7 +4317,9 @@ fn refresh_storage_password_state(world: &mut World) {
     resources.has_expanded_storage = state.has_expanded_storage;
     resources.expanded_storage_expiry_time_binary_datetime =
         state.expanded_storage_expiry_time_binary_datetime;
+    resources.expanded_storage_expiry_notice_pending = state.expanded_storage_expiry_notice_pending;
     resources.storage_unlocked = !state.has_password || !resources.config.require_storage_password;
+    resources.storage_sent = false;
 }
 
 fn storage_account_state(config: &SimulationConfig, account_id: &str) -> StorageAccountState {
@@ -4110,14 +4330,23 @@ fn storage_account_state(config: &SimulationConfig, account_id: &str) -> Storage
     store
         .accounts
         .get(account_id)
-        .map(|account| StorageAccountState {
-            has_password: !account.storage_password.is_empty(),
-            storage_password_last_set_binary_datetime: account
-                .storage_password_last_set_binary_datetime,
-            storage_size: normalized_storage_size(account.storage_size),
-            has_expanded_storage: account.has_expanded_storage,
-            expanded_storage_expiry_time_binary_datetime: account
-                .expanded_storage_expiry_time_binary_datetime,
+        .map(|account| {
+            let expanded_storage_expiry_time_binary_datetime =
+                account.expanded_storage_expiry_time_binary_datetime;
+            let has_expanded_storage = expanded_storage_is_active(
+                account.has_expanded_storage,
+                expanded_storage_expiry_time_binary_datetime,
+            );
+            StorageAccountState {
+                has_password: !account.storage_password.is_empty(),
+                storage_password_last_set_binary_datetime: account
+                    .storage_password_last_set_binary_datetime,
+                storage_size: normalized_storage_size(account.storage_size),
+                has_expanded_storage,
+                expanded_storage_expiry_time_binary_datetime,
+                expanded_storage_expiry_notice_pending: account.has_expanded_storage
+                    && !has_expanded_storage,
+            }
         })
         .unwrap_or(StorageAccountState {
             has_password: false,
@@ -4125,6 +4354,7 @@ fn storage_account_state(config: &SimulationConfig, account_id: &str) -> Storage
             storage_size: BASE_STORAGE_SLOTS,
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
+            expanded_storage_expiry_notice_pending: false,
         })
 }
 
@@ -4195,6 +4425,15 @@ fn current_binary_datetime() -> i64 {
     future_binary_datetime(0)
 }
 
+fn expanded_storage_is_active(
+    has_expanded_storage: bool,
+    expiry_time_binary_datetime: i64,
+) -> bool {
+    has_expanded_storage
+        && binary_datetime_ticks(expiry_time_binary_datetime)
+            > binary_datetime_ticks(current_binary_datetime())
+}
+
 fn extend_binary_datetime(base_binary_datetime: i64, days: u64) -> i64 {
     const TICKS_PER_DAY: i64 = 24 * 60 * 60 * 10_000_000;
 
@@ -4209,25 +4448,26 @@ fn extend_binary_datetime(base_binary_datetime: i64, days: u64) -> i64 {
 }
 
 fn handle_chat_packet(world: &mut World, message: String) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+
     if message.trim().eq_ignore_ascii_case("@ADDSTORAGE") {
         return expand_storage_rental_impl(world);
     }
 
-    vec![
-        ServerPacket::Chat {
-            message: format_localized_text(
-                current_language(world),
-                "sim.echoChat",
-                [message.clone()],
-            ),
-            chat_type: ChatType::Normal,
-        },
-        ServerPacket::ObjectChat {
-            object_id: current_player_object_id(world).unwrap_or(0),
-            text: message,
-            chat_type: ChatType::Normal,
-        },
-    ]
+    let player_name = world
+        .resource::<SimulationResources>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.name.clone())
+        .unwrap_or_else(|| "?????".to_string());
+
+    vec![ServerPacket::ObjectChat {
+        object_id: current_player_object_id(world).unwrap_or(0),
+        text: format!("{player_name}: {message}"),
+        chat_type: ChatType::Normal,
+    }]
 }
 
 fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket> {
@@ -4268,19 +4508,14 @@ fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket> {
         resources.storage_size = EXPANDED_STORAGE_SLOTS;
         resources.has_expanded_storage = true;
         resources.expanded_storage_expiry_time_binary_datetime = expiry_time_binary_datetime;
+        resources.expanded_storage_expiry_notice_pending = false;
     }
 
-    vec![
-        ServerPacket::ResizeStorage {
-            size: i32::from(EXPANDED_STORAGE_SLOTS),
-            has_expanded_storage: true,
-            expiry_time_binary_datetime,
-        },
-        ServerPacket::Chat {
-            message: "Expanded storage activated.".to_string(),
-            chat_type: ChatType::System,
-        },
-    ]
+    vec![ServerPacket::ResizeStorage {
+        size: i32::from(EXPANDED_STORAGE_SLOTS),
+        has_expanded_storage: true,
+        expiry_time_binary_datetime,
+    }]
 }
 
 fn storage_password_required(
@@ -4291,6 +4526,11 @@ fn storage_password_required(
     config.require_storage_password && has_password && !unlocked
 }
 
+fn crystal_password_is_valid(password: &str) -> bool {
+    let length = password.len();
+    (5..=15).contains(&length) && password.bytes().all(|byte| byte.is_ascii_alphanumeric())
+}
+
 fn normalized_storage_size(size: u16) -> u16 {
     if size > BASE_STORAGE_SLOTS {
         EXPANDED_STORAGE_SLOTS
@@ -4299,9 +4539,13 @@ fn normalized_storage_size(size: u16) -> u16 {
     }
 }
 
+fn storage_backing_size(resources: &SimulationResources) -> u16 {
+    normalized_storage_size(resources.storage_size)
+}
+
 fn accessible_storage_size(resources: &SimulationResources) -> u16 {
     if resources.has_expanded_storage {
-        normalized_storage_size(resources.storage_size)
+        storage_backing_size(resources)
     } else {
         BASE_STORAGE_SLOTS
     }
@@ -4322,6 +4566,18 @@ fn unlock_storage_impl(world: &mut World, password: &str) -> Vec<ServerPacket> {
                 .unwrap_or_else(|| "demo".to_string()),
         )
     };
+    let account_state = storage_account_state(&config, &account_id);
+    if !active_crystal_storage_service(world) {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        resources.storage_has_password = account_state.has_password;
+        resources.storage_password_last_set_binary_datetime =
+            account_state.storage_password_last_set_binary_datetime;
+        return vec![ServerPacket::StorageUnlockResult {
+            result: 3,
+            has_password: account_state.has_password,
+        }];
+    }
+
     let (result, has_password, last_set_binary_datetime) = {
         let mut store = config
             .account_store
@@ -4333,7 +4589,7 @@ fn unlock_storage_impl(world: &mut World, password: &str) -> Vec<ServerPacket> {
             .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
         if account.storage_password.is_empty() {
             (4, false, account.storage_password_last_set_binary_datetime)
-        } else if password.trim().is_empty() {
+        } else if !crystal_password_is_valid(password) {
             (1, true, account.storage_password_last_set_binary_datetime)
         } else if account.storage_password != password {
             (2, true, account.storage_password_last_set_binary_datetime)
@@ -4350,10 +4606,16 @@ fn unlock_storage_impl(world: &mut World, password: &str) -> Vec<ServerPacket> {
             result == 0 || !has_password || !resources.config.require_storage_password;
     }
 
-    vec![ServerPacket::StorageUnlockResult {
+    let mut packets = vec![ServerPacket::StorageUnlockResult {
         result,
         has_password,
-    }]
+    }];
+    if result == 0 {
+        if let Some(packet) = crystal_send_storage_packet(world) {
+            packets.push(packet);
+        }
+    }
+    packets
 }
 
 fn set_storage_password_impl(
@@ -4371,6 +4633,19 @@ fn set_storage_password_impl(
                 .unwrap_or_else(|| "demo".to_string()),
         )
     };
+    let account_state = storage_account_state(&config, &account_id);
+    if !active_crystal_storage_service(world) {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        resources.storage_has_password = account_state.has_password;
+        resources.storage_password_last_set_binary_datetime =
+            account_state.storage_password_last_set_binary_datetime;
+        return vec![ServerPacket::StoragePasswordResult {
+            result: 0,
+            removing: false,
+            has_password: account_state.has_password,
+            last_set_binary_datetime: account_state.storage_password_last_set_binary_datetime,
+        }];
+    }
 
     let (result, has_password, last_set_binary_datetime) = {
         let mut store = config
@@ -4381,18 +4656,21 @@ fn set_storage_password_impl(
             .accounts
             .entry(account_id)
             .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-        if !account.storage_password.is_empty() && current_password.trim().is_empty() {
-            (1, true, account.storage_password_last_set_binary_datetime)
-        } else if !account.storage_password.is_empty()
-            && account.storage_password != current_password
-        {
-            (2, true, account.storage_password_last_set_binary_datetime)
-        } else if new_password.trim().is_empty() {
+        if !crystal_password_is_valid(new_password) {
             (
                 3,
                 !account.storage_password.is_empty(),
                 account.storage_password_last_set_binary_datetime,
             )
+        } else if account.storage_password.is_empty() {
+            let last_set = storage_password_binary_datetime();
+            account.storage_password = new_password.to_string();
+            account.storage_password_last_set_binary_datetime = last_set;
+            (4, true, last_set)
+        } else if !crystal_password_is_valid(current_password) {
+            (1, true, account.storage_password_last_set_binary_datetime)
+        } else if account.storage_password != current_password {
+            (2, true, account.storage_password_last_set_binary_datetime)
         } else {
             let last_set = storage_password_binary_datetime();
             account.storage_password = new_password.to_string();
@@ -4433,6 +4711,19 @@ fn remove_storage_password_impl(world: &mut World, current_password: &str) -> Ve
                 .unwrap_or_else(|| "demo".to_string()),
         )
     };
+    let account_state = storage_account_state(&config, &account_id);
+    if !active_crystal_storage_service(world) {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        resources.storage_has_password = account_state.has_password;
+        resources.storage_password_last_set_binary_datetime =
+            account_state.storage_password_last_set_binary_datetime;
+        return vec![ServerPacket::StoragePasswordResult {
+            result: 0,
+            removing: true,
+            has_password: account_state.has_password,
+            last_set_binary_datetime: account_state.storage_password_last_set_binary_datetime,
+        }];
+    }
 
     let (result, has_password, last_set_binary_datetime) = {
         let mut store = config
@@ -4444,14 +4735,15 @@ fn remove_storage_password_impl(world: &mut World, current_password: &str) -> Ve
             .entry(account_id)
             .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
         if account.storage_password.is_empty() {
-            (5, false, account.storage_password_last_set_binary_datetime)
-        } else if current_password.trim().is_empty() {
+            (5, false, 0)
+        } else if !crystal_password_is_valid(current_password) {
             (1, true, account.storage_password_last_set_binary_datetime)
         } else if account.storage_password != current_password {
             (2, true, account.storage_password_last_set_binary_datetime)
         } else {
             account.storage_password.clear();
-            (4, false, account.storage_password_last_set_binary_datetime)
+            account.storage_password_last_set_binary_datetime = 0;
+            (4, false, 0)
         }
     };
 
@@ -4726,6 +5018,9 @@ fn apply_character_save(resources: &mut SimulationResources, save: &CharacterSav
         .as_deref()
         .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
         .unwrap_or_default();
+    resources.unlock_curse = false;
+    resources.free_map_shout = false;
+    resources.free_server_shout = false;
     resources.npc_variables = Vec::new();
     resources.buffs = Vec::new();
     resources.active_npc_dialog = None;
@@ -5605,6 +5900,78 @@ fn is_safe_zone_point(resources: &SimulationResources, point: &Point) -> bool {
         .unwrap_or(false)
 }
 
+fn current_map_drop_rule<'a>(resources: &'a SimulationResources) -> Option<&'a MapDropRuleRecord> {
+    let current_map = normalize_map_file_name(&resources.current_map.file_name);
+    resources
+        .config
+        .map_drop_rules
+        .iter()
+        .find(|rule| normalize_map_file_name(&rule.map_file_name) == current_map)
+}
+
+fn current_map_disallows_town_teleport(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_drop_rule(&resources)
+        .map(|rule| rule.no_town_teleport)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_escape(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_drop_rule(&resources)
+        .map(|rule| rule.no_escape)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_random_teleport(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_drop_rule(&resources)
+        .map(|rule| rule.no_random)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_drug(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_drop_rule(&resources)
+        .map(|rule| rule.no_drug)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_reincarnation(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_drop_rule(&resources)
+        .map(|rule| rule.no_reincarnation)
+        .unwrap_or(false)
+}
+
+fn current_map_manifest_disallows_throw_item(resources: &SimulationResources) -> bool {
+    crystal_map_respawns_by_file_name(&resources.current_map.file_name)
+        .map(|map| map.no_throw_item)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_throw_item(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_manifest_disallows_throw_item(&resources)
+        || current_map_drop_rule(&resources)
+            .map(|rule| rule.no_throw_item)
+            .unwrap_or(false)
+}
+
+fn current_map_manifest_disallows_monster_drop(resources: &SimulationResources) -> bool {
+    crystal_map_respawns_by_file_name(&resources.current_map.file_name)
+        .map(|map| map.no_drop_monster)
+        .unwrap_or(false)
+}
+
+fn current_map_disallows_monster_drop(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    current_map_manifest_disallows_monster_drop(&resources)
+        || current_map_drop_rule(&resources)
+            .map(|rule| rule.no_drop_monster)
+            .unwrap_or(false)
+}
+
 fn transfer_for_key(
     resources: &SimulationResources,
     key: &str,
@@ -5673,21 +6040,25 @@ fn crystal_movement_transfer_key(
 fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPacket> {
     if let Some((map_file_name, position)) = parse_debug_crystal_transfer_key(key) {
         let map_info = crystal_npc_move_map_information(world, &map_file_name);
-        return relocate_player_to_map(
-            world,
-            map_info,
-            position,
-            MirDirection::Down,
-            Some(format!("Transferred to Crystal map {map_file_name}.")),
-        );
+        return relocate_player_to_map(world, map_info, position, MirDirection::Down, None);
     }
 
     let Some(transfer) = transfer_for_key(world.resource::<SimulationResources>(), key) else {
-        return vec![system_message(&format!("Unknown map transfer: {key}"))];
+        let language = current_language(world);
+        return vec![system_message(&localized_text_or_fallback(
+            language,
+            "server.NotFound",
+            "server.NotFound",
+        ))];
     };
 
     let Some(player) = player_entity(world) else {
-        return vec![system_message_key(world, "sim.playerNotInWorld")];
+        let language = current_language(world);
+        return vec![system_message(&localized_text_or_fallback(
+            language,
+            "server.NotFound",
+            "server.NotFound",
+        ))];
     };
     let current_position = entity_position(world, player).expect("player position");
     let current_map_file_name = world
@@ -5699,7 +6070,12 @@ fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPacket> {
         != normalize_map_file_name(&transfer.from_map_file_name)
         || !point_in_bounds(&transfer.from_bounds, &current_position)
     {
-        return vec![system_message("You are not standing on this map transfer.")];
+        let language = current_language(world);
+        return vec![system_message(&localized_text_or_fallback(
+            language,
+            "server.CannotPositionMoveOnMap",
+            "server.CannotPositionMoveOnMap",
+        ))];
     }
 
     let current_map = world.resource::<SimulationResources>().current_map.clone();
@@ -5712,7 +6088,7 @@ fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPacket> {
         },
         transfer.to_position,
         transfer.to_direction,
-        Some(format!("Transferred to {}.", transfer.to_map_title)),
+        None,
     )
 }
 
@@ -5724,7 +6100,12 @@ fn relocate_player_to_map(
     system_message_text: Option<String>,
 ) -> Vec<ServerPacket> {
     let Some(player) = player_entity(world) else {
-        return vec![system_message_key(world, "sim.playerNotInWorld")];
+        let language = current_language(world);
+        return vec![system_message(&localized_text_or_fallback(
+            language,
+            "server.NotFound",
+            "server.NotFound",
+        ))];
     };
 
     {
@@ -6601,7 +6982,7 @@ fn build_interaction_hints(resources: &SimulationResources) -> Vec<String> {
     if let Some(quest) = resources.quests.first() {
         hints.push(format_localized_text(
             language,
-            "sim.questHint",
+            "custom.interaction.questHint",
             [quest.tracker(language)],
         ));
     }
@@ -6636,6 +7017,14 @@ fn current_player_object_id(world: &World) -> Option<u32> {
         .and_then(|entity| world.entity(entity).get::<ObjectId>().map(|value| value.0))
 }
 
+fn current_character_index(world: &World) -> Option<i32> {
+    world
+        .resource::<SimulationResources>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.index)
+}
+
 fn entity_object_id(world: &World, entity: Entity) -> Option<u32> {
     world.entity(entity).get::<ObjectId>().map(|value| value.0)
 }
@@ -6662,50 +7051,67 @@ fn entity_player_vitals(world: &World, entity: Entity) -> Option<PlayerVitals> {
     world.entity(entity).get::<PlayerVitals>().copied()
 }
 
+fn current_player_is_dead(world: &World) -> bool {
+    player_entity(world)
+        .and_then(|entity| entity_player_vitals(world, entity))
+        .is_some_and(|vitals| vitals.hp <= 0)
+}
+
+fn item_matches_client_reference(item: &ItemState, grid: MirGridType, unique_id: u64) -> bool {
+    match grid {
+        MirGridType::Belt => {
+            item.container == ItemContainer::Belt && item_unique_id(item) == unique_id
+        }
+        MirGridType::QuestInventory => {
+            item.container == ItemContainer::Quest && item_unique_id(item) == unique_id
+        }
+        MirGridType::Storage => {
+            item.container == ItemContainer::Storage && item_unique_id(item) == unique_id
+        }
+        _ => {
+            matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                && item_unique_id(item) == unique_id
+        }
+    }
+}
+
+fn item_matches_inventory_unique_id(item: &ItemState, unique_id: u64) -> bool {
+    matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        && item_unique_id(item) == unique_id
+}
+
+fn item_index_for_client_reference(
+    items: &[ItemState],
+    grid: MirGridType,
+    unique_id: u64,
+) -> Option<usize> {
+    items
+        .iter()
+        .position(|item| item_matches_client_reference(item, grid, unique_id))
+}
+
 fn item_key_for_client_reference(
     world: &World,
     unique_id: u64,
     grid: MirGridType,
 ) -> Option<String> {
-    let slot = u8::try_from(unique_id).ok()?;
     let resources = world.resource::<SimulationResources>();
 
     match grid {
-        MirGridType::Belt => resources
-            .belt_items
-            .iter()
-            .find(|item| item.slot == slot && item.container == ItemContainer::Belt)
-            .map(|item| item.key.clone()),
-        MirGridType::QuestInventory => resources
-            .inventory_items
-            .iter()
-            .find(|item| item.slot == slot && item.container == ItemContainer::Quest)
-            .map(|item| item.key.clone()),
-        _ => resources
-            .inventory_items
-            .iter()
-            .find(|item| {
-                item.slot == slot
-                    && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            })
+        MirGridType::Belt => {
+            item_index_for_client_reference(&resources.belt_items, grid, unique_id)
+                .and_then(|index| resources.belt_items.get(index))
+                .map(|item| item.key.clone())
+        }
+        MirGridType::QuestInventory => {
+            item_index_for_client_reference(&resources.inventory_items, grid, unique_id)
+                .and_then(|index| resources.inventory_items.get(index))
+                .map(|item| item.key.clone())
+        }
+        _ => item_index_for_client_reference(&resources.inventory_items, grid, unique_id)
+            .and_then(|index| resources.inventory_items.get(index))
             .map(|item| item.key.clone()),
     }
-}
-
-fn item_key_for_equipment_reference(world: &World, unique_id: u64) -> Option<String> {
-    let slot_index = usize::try_from(unique_id).ok()?;
-    let resources = world.resource::<SimulationResources>();
-    resources
-        .equipment_items
-        .get(slot_index)
-        .map(|item| item.key.clone())
-        .or_else(|| {
-            resources
-                .equipment_items
-                .iter()
-                .find(|item| equipment_slot_index(item.slot) == Some(slot_index))
-                .map(|item| item.key.clone())
-        })
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -11715,6 +12121,8 @@ fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     process_crystal_npc_goods_expiry(world);
     let tick = world.resource::<SimulationResources>().tick;
     let mut packets = Vec::new();
+    sync_expired_expanded_storage(world, &mut packets);
+    tick_crystal_normal_potion_restore(world, &mut packets);
     tick_ground_drop_expiry(world, tick);
     resolve_pending_combat_actions(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
@@ -13764,6 +14172,64 @@ fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     packets
 }
 
+fn sync_expired_expanded_storage(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    let (config, account_id, storage_size, expiry_time_binary_datetime, notice_pending) = {
+        let resources = world.resource::<SimulationResources>();
+        (
+            resources.config.clone(),
+            resources
+                .account_id
+                .clone()
+                .unwrap_or_else(|| "demo".to_string()),
+            resources.storage_size,
+            resources.expanded_storage_expiry_time_binary_datetime,
+            resources.expanded_storage_expiry_notice_pending,
+        )
+    };
+    if !notice_pending {
+        return;
+    }
+
+    {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        resources.has_expanded_storage = false;
+        resources.expanded_storage_expiry_notice_pending = false;
+    }
+
+    let changed = {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let Some(account) = store.accounts.get_mut(&account_id) else {
+            return;
+        };
+        if !account.has_expanded_storage {
+            false
+        } else {
+            account.has_expanded_storage = false;
+            true
+        }
+    };
+
+    if changed {
+        if let Err(error) = config.save_account_store() {
+            eprintln!("failed to persist account store: {error}");
+        }
+    }
+
+    packets.push(system_message(&localized_text_or_fallback(
+        current_language(world),
+        "server.ExpandedStorageExpired",
+        "server.ExpandedStorageExpired",
+    )));
+    packets.push(ServerPacket::ResizeStorage {
+        size: i32::from(normalized_storage_size(storage_size)),
+        has_expanded_storage: false,
+        expiry_time_binary_datetime,
+    });
+}
+
 fn object_movement(world: &World, entity: Entity) -> Option<ObjectMovement> {
     let entry = world.entity(entity);
     Some(ObjectMovement {
@@ -14544,7 +15010,6 @@ fn queue_due_packet(world: &mut World, due_tick: u64, packet: ServerPacket) {
             attacker_id: 0,
             target: PendingCombatTarget::Player,
             damage: 0,
-            message: None,
             player_status_effect: None,
             due_packet: Some(packet),
             player_movement: None,
@@ -14614,7 +15079,7 @@ fn schedule_damage_to_player_with_effect_due_packet_and_movement(
     world: &mut World,
     due_tick: u64,
     attacker_id: u32,
-    attacker_name: String,
+    _attacker_name: String,
     damage: i32,
     player_status_effect: Option<PendingPlayerStatusEffect>,
     due_packet: Option<ServerPacket>,
@@ -14627,10 +15092,6 @@ fn schedule_damage_to_player_with_effect_due_packet_and_movement(
             attacker_id,
             target: PendingCombatTarget::Player,
             damage,
-            message: Some(PendingCombatMessage::MonsterHitPlayer {
-                attacker_name,
-                damage,
-            }),
             player_status_effect,
             due_packet,
             player_movement,
@@ -14652,7 +15113,6 @@ fn schedule_player_status_effect(
             attacker_id,
             target: PendingCombatTarget::Player,
             damage: 0,
-            message: None,
             player_status_effect: Some(player_status_effect),
             due_packet: None,
             player_movement: None,
@@ -14688,7 +15148,7 @@ fn schedule_damage_to_monster_with_due_packet(
     attacker_id: u32,
     target_entity: Entity,
     damage: i32,
-    target_name: Option<String>,
+    _target_name: Option<String>,
     defeat_action: Option<PendingMonsterDefeatAction>,
     due_packet: Option<ServerPacket>,
 ) {
@@ -14699,10 +15159,6 @@ fn schedule_damage_to_monster_with_due_packet(
             attacker_id,
             target: PendingCombatTarget::Monster(target_entity),
             damage,
-            message: target_name.map(|target_name| PendingCombatMessage::PlayerHitMonster {
-                target_name,
-                damage,
-            }),
             player_status_effect: None,
             due_packet,
             player_movement: None,
@@ -14813,6 +15269,7 @@ fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: 
             expires_at_tick: current_tick + duration_ticks,
             attack_bonus: 0,
             defence_bonus: 0,
+            stats: Vec::new(),
         },
     );
 }
@@ -14827,6 +15284,7 @@ fn apply_player_red_poison(world: &mut World, current_tick: u64, duration_ticks:
             expires_at_tick: current_tick + duration_ticks,
             attack_bonus: 0,
             defence_bonus: 0,
+            stats: Vec::new(),
         },
     );
 }
@@ -14858,6 +15316,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -14879,6 +15338,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -14905,6 +15365,7 @@ fn apply_pending_player_status_effect(
                         expires_at_tick: current_tick + slow_duration_ticks,
                         attack_bonus: 0,
                         defence_bonus: 0,
+                        stats: Vec::new(),
                     },
                 );
             }
@@ -14924,6 +15385,7 @@ fn apply_pending_player_status_effect(
                         expires_at_tick: current_tick + frozen_duration_ticks,
                         attack_bonus: 0,
                         defence_bonus: 0,
+                        stats: Vec::new(),
                     },
                 );
             }
@@ -14951,6 +15413,7 @@ fn apply_pending_player_status_effect(
                         expires_at_tick: current_tick + slow_duration_ticks,
                         attack_bonus: 0,
                         defence_bonus: 0,
+                        stats: Vec::new(),
                     },
                 );
             }
@@ -14982,6 +15445,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15003,6 +15467,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15046,6 +15511,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15067,6 +15533,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15088,6 +15555,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15108,6 +15576,7 @@ fn apply_pending_player_status_effect(
                     expires_at_tick: current_tick + duration_ticks,
                     attack_bonus: 0,
                     defence_bonus: 0,
+                    stats: Vec::new(),
                 },
             );
         }
@@ -15134,6 +15603,7 @@ fn apply_pending_player_status_effect(
                         expires_at_tick: current_tick + green_duration_ticks,
                         attack_bonus: 0,
                         defence_bonus: 0,
+                        stats: Vec::new(),
                     },
                 );
             }
@@ -15193,19 +15663,6 @@ fn resolve_pending_combat_actions(
                         effect,
                     );
                 }
-                if action.damage > 0 {
-                    if let Some(PendingCombatMessage::MonsterHitPlayer {
-                        attacker_name,
-                        damage,
-                    }) = action.message
-                    {
-                        packets.push(system_message_key_args(
-                            world,
-                            "sim.monsterPressuresYouForDamage",
-                            [attacker_name, damage.to_string()],
-                        ));
-                    }
-                }
                 if let Some(packet) = action.due_packet {
                     packets.push(packet);
                 }
@@ -15241,24 +15698,6 @@ fn resolve_pending_combat_actions(
                     current_tick,
                     packets,
                 );
-                if let Some(PendingCombatMessage::PlayerHitMonster {
-                    target_name,
-                    damage,
-                }) = action.message
-                {
-                    packets.push(system_message_key_args(
-                        world,
-                        "sim.youHitTargetForDamage",
-                        [target_name.clone(), damage.to_string()],
-                    ));
-                    if monster_dead {
-                        packets.push(system_message_key_args(
-                            world,
-                            "sim.targetDefeated",
-                            [target_name],
-                        ));
-                    }
-                }
                 if monster_dead {
                     if let Some(defeat_action) = action.on_monster_defeat {
                         handle_monster_defeat(
@@ -15279,15 +15718,26 @@ fn trainer_dps(total_damage: i32, start_tick: u64, end_tick: u64) -> f64 {
     f64::from(total_damage) / elapsed_ticks as f64
 }
 
-fn trainer_damage_chat(damage: i32, state: &TrainerDamageState) -> ServerPacket {
+fn trainer_damage_chat(world: &World, damage: i32, state: &TrainerDamageState) -> ServerPacket {
     let dps = trainer_dps(state.total_damage, state.start_tick, state.last_attack_tick);
+    let language = current_language(world);
+    let actor = localized_text_or_fallback(language, "server.You", "You");
     ServerPacket::Chat {
-        message: format!("You inflicted {damage} Physical Agility Damage, Dps: {dps:.2}."),
+        message: format_localized_text(
+            language,
+            "server.PetInflictedDamageDps",
+            [
+                damage.to_string(),
+                "Physical Agility".to_string(),
+                format!("{dps:.2}"),
+                actor,
+            ],
+        ),
         chat_type: ChatType::Trainer,
     }
 }
 
-fn trainer_average_chat(state: &TrainerDamageState) -> Option<ServerPacket> {
+fn trainer_average_chat(world: &World, state: &TrainerDamageState) -> Option<ServerPacket> {
     if state.hit_count == 0 {
         return None;
     }
@@ -15295,8 +15745,10 @@ fn trainer_average_chat(state: &TrainerDamageState) -> Option<ServerPacket> {
     let average_damage = state.total_damage / i32::try_from(state.hit_count).ok()?.max(1);
     let dps = trainer_dps(state.total_damage, state.start_tick, state.last_attack_tick);
     Some(ServerPacket::Chat {
-        message: format!(
-            "{average_damage} Average Damage inflicted on the trainer, Dps: {dps:.2}."
+        message: format_localized_text(
+            current_language(world),
+            "server.AverageDamageOnTrainer",
+            [average_damage.to_string(), format!("{dps:.2}")],
         ),
         chat_type: ChatType::Trainer,
     })
@@ -15327,7 +15779,7 @@ fn record_trainer_damage(
     state.last_attack_tick = current_tick;
 
     world.entity_mut(monster_entity).insert(state);
-    packets.push(trainer_damage_chat(damage, &state));
+    packets.push(trainer_damage_chat(world, damage, &state));
 }
 
 fn emit_due_trainer_average_chats(
@@ -15349,7 +15801,7 @@ fn emit_due_trainer_average_chats(
     }
 
     for (entity, state) in due {
-        if let Some(packet) = trainer_average_chat(&state) {
+        if let Some(packet) = trainer_average_chat(world, &state) {
             packets.push(packet);
         }
         world
@@ -15898,7 +16350,7 @@ fn explode_vampire_spider(
     monster_entity: Entity,
     position: &Point,
     current_tick: u64,
-    packets: &mut Vec<ServerPacket>,
+    _packets: &mut Vec<ServerPacket>,
 ) {
     let Some(attacker_id) = entity_object_id(world, monster_entity) else {
         return;
@@ -15980,7 +16432,6 @@ fn explode_vampire_spider(
                 .unwrap_or(current_tick + 1),
         );
     }
-    packets.push(system_message_key(world, "sim.targetDefeated"));
 }
 
 fn explode_charmed_snake(
@@ -16172,11 +16623,11 @@ fn handle_npc_interaction(
     }
 
     if npc_script_for_object_id(context.object_id).is_none() {
-        return handle_idle_npc_interaction(world, context, packets);
+        return packets;
     }
 
     let Some(dialog) = resolve_npc_quest_dialog(world, &context) else {
-        return handle_idle_npc_interaction(world, context, packets);
+        return packets;
     };
 
     set_dialog(
@@ -16199,47 +16650,6 @@ fn handle_npc_interaction(
     packets.push(ServerPacket::ObjectChat {
         object_id: context.object_id,
         text: dialog.object_chat,
-        chat_type: ChatType::Hint,
-    });
-    packets
-}
-
-fn handle_idle_npc_interaction(
-    world: &mut World,
-    context: NpcInteractionContext,
-    mut packets: Vec<ServerPacket>,
-) -> Vec<ServerPacket> {
-    let language = current_language(world);
-    let idle_title = localized_text_or_fallback(language, "sim.npcIdleTitle", "Idle");
-    let idle_body = localized_text_or_fallback(
-        language,
-        "sim.npcNoMilestoneScript",
-        "This NPC has no milestone script attached yet.",
-    );
-    let idle_footer = localized_text_or_fallback(
-        language,
-        "sim.npcMoreBranchesNextMilestone",
-        "More branches will land in the next milestone.",
-    );
-    set_dialog(
-        world,
-        ActiveNpcDialogState {
-            npc_object_id: context.object_id,
-            npc_name: context.name,
-            npc_name_key: context.name_key,
-            stage: None,
-            current: 0,
-            required: 0,
-            title: idle_title,
-            body: vec![idle_body.clone()],
-            footer: idle_footer,
-            links: Vec::new(),
-            input: None,
-        },
-    );
-    packets.push(ServerPacket::ObjectChat {
-        object_id: context.object_id,
-        text: idle_body,
         chat_type: ChatType::Hint,
     });
     packets
@@ -16291,8 +16701,19 @@ fn run_crystal_npc_script_impl(
             &buy_back_items,
             &used_goods_items,
         ) {
-            record_crystal_npc_service_context(world, script, &section.label, &service_packets);
-            packets.extend(service_packets);
+            let label_key = crystal_npc_service_label_key(&section.label);
+            record_crystal_npc_service_context(
+                world,
+                context.object_id,
+                script,
+                &section.label,
+                &service_packets,
+            );
+            if label_key == "STORAGE" {
+                packets.extend(crystal_npc_storage_open_packets(world));
+            } else {
+                packets.extend(service_packets);
+            }
             return Some(CrystalNpcRunResult {
                 dialog: None,
                 packets,
@@ -16480,8 +16901,60 @@ fn crystal_npc_service_packets_for_label_with_markets(
     }
 }
 
+fn current_player_storage_packet(world: &World) -> ServerPacket {
+    let resources = world.resource::<SimulationResources>();
+    let mut storage = vec![None; usize::from(storage_backing_size(&resources))];
+
+    for item in &resources.storage_items {
+        let slot = usize::from(item.slot);
+        if let Some(storage_slot) = storage.get_mut(slot) {
+            *storage_slot = Some(user_item_from_item_state(item));
+        }
+    }
+
+    ServerPacket::UserStorage {
+        storage: Some(storage),
+    }
+}
+
+fn crystal_send_storage_packet(world: &mut World) -> Option<ServerPacket> {
+    let (password_required, storage_sent) = {
+        let resources = world.resource::<SimulationResources>();
+        (
+            storage_password_required(
+                &resources.config,
+                resources.storage_has_password,
+                resources.storage_unlocked,
+            ),
+            resources.storage_sent,
+        )
+    };
+
+    if password_required {
+        world.resource_mut::<SimulationResources>().storage_sent = false;
+        return None;
+    }
+
+    if storage_sent {
+        return None;
+    }
+
+    world.resource_mut::<SimulationResources>().storage_sent = true;
+    Some(current_player_storage_packet(world))
+}
+
+fn crystal_npc_storage_open_packets(world: &mut World) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    if let Some(packet) = crystal_send_storage_packet(world) {
+        packets.push(packet);
+    }
+    packets.push(ServerPacket::NPCStorage);
+    packets
+}
+
 fn record_crystal_npc_service_context(
     world: &mut World,
+    npc_object_id: u32,
     script: &CrystalNpcScript,
     label: &str,
     packets: &[ServerPacket],
@@ -16499,12 +16972,16 @@ fn record_crystal_npc_service_context(
         return;
     }
 
-    world
-        .resource_mut::<SimulationResources>()
-        .active_npc_service = Some(ActiveNpcServiceState {
+    let label_key = crystal_npc_service_label_key(label);
+    let mut resources = world.resource_mut::<SimulationResources>();
+    resources.active_npc_service = Some(ActiveNpcServiceState {
         script_key: script.script_key.clone(),
-        label_key: crystal_npc_service_label_key(label),
+        label_key: label_key.clone(),
+        npc_object_id,
     });
+    if label_key == "STORAGE" {
+        resources.storage_unlocked = false;
+    }
 }
 
 fn crystal_npc_buy_back_items_for_script(world: &World, script_key: &str) -> Vec<UserItem> {
@@ -19214,6 +19691,7 @@ fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) {
             expires_at_tick: tick.saturating_add(duration_ticks),
             attack_bonus: 0,
             defence_bonus: 0,
+            stats: Vec::new(),
         },
     );
 }
@@ -19568,13 +20046,8 @@ fn set_quest_stage(world: &mut World, quest_id: i32, stage: QuestStage) {
 #[derive(Debug, Clone)]
 enum HarvestDropTransfer {
     NoDrops,
-    Blocked {
-        packets: Vec<ServerPacket>,
-    },
-    Transferred {
-        names: Vec<String>,
-        packets: Vec<ServerPacket>,
-    },
+    Blocked { packets: Vec<ServerPacket> },
+    Transferred { packets: Vec<ServerPacket> },
 }
 
 fn harvest_monster_entity(world: &mut World, entity: Entity) -> Vec<ServerPacket> {
@@ -19611,19 +20084,17 @@ fn harvest_monster_entity(world: &mut World, entity: Entity) -> Vec<ServerPacket
                 packets: gained_packets,
             } => {
                 packets.extend(gained_packets);
-                packets.push(system_message("You cannot carry anymore."));
+                packets.push(system_message_key(world, "server.YouCannotCarryAnymore"));
                 world.entity_mut(entity).insert(state);
             }
             HarvestDropTransfer::NoDrops => {
-                packets.push(system_message("Nothing was found."));
+                packets.push(system_message_key(world, "server.NothingWasFound"));
                 mark_harvest_monster_harvested(world, entity, &mut state, &mut packets);
             }
             HarvestDropTransfer::Transferred {
-                names,
                 packets: gained_packets,
             } => {
                 packets.extend(gained_packets);
-                packets.push(system_message(&format!("Harvested {}.", names.join(", "))));
                 mark_harvest_monster_harvested(world, entity, &mut state, &mut packets);
             }
         }
@@ -19644,7 +20115,7 @@ fn harvest_monster_entity(world: &mut World, entity: Entity) -> Vec<ServerPacket
             drops: pending_drops,
         });
     } else {
-        packets.push(system_message("Nothing was found."));
+        packets.push(system_message_key(world, "server.NothingWasFound"));
         mark_harvest_monster_harvested(world, entity, &mut state, &mut packets);
     }
 
@@ -19681,6 +20152,10 @@ fn prepare_harvest_drops(
     monster_object_id: u32,
     monster_name: &str,
 ) -> Vec<ResolvedDropTemplate> {
+    if current_map_disallows_monster_drop(world) {
+        return Vec::new();
+    }
+
     resolved_monster_drop_templates(world, monster_object_id, monster_name)
         .into_iter()
         .filter(|drop| match drop {
@@ -19732,8 +20207,6 @@ fn transfer_harvest_drops_to_player(
     }
 
     let pending_drops = pending.drops.clone();
-    let language = current_language(world);
-    let mut names = Vec::new();
     let mut packets = Vec::new();
     let mut remaining = Vec::new();
     let harvest_quality = crystal_harvest_quality(world, monster_object_id);
@@ -19770,7 +20243,6 @@ fn transfer_harvest_drops_to_player(
                 durability_max,
                 &mut packets,
             ) {
-                names.push(localized_item_name(language, &key, &name));
                 continue;
             }
         }
@@ -19781,7 +20253,6 @@ fn transfer_harvest_drops_to_player(
             &key,
             quantity,
         ) {
-            names.push(localized_item_name(language, &key, &name));
             let gained_item = add_or_increment_item_with_random_metadata(
                 world,
                 ItemContainer::Bag1,
@@ -19832,10 +20303,10 @@ fn transfer_harvest_drops_to_player(
     remaining.reverse();
     if remaining.is_empty() {
         world.entity_mut(entity).remove::<PendingHarvestDrops>();
-        if names.is_empty() {
+        if packets.is_empty() {
             HarvestDropTransfer::NoDrops
         } else {
-            HarvestDropTransfer::Transferred { names, packets }
+            HarvestDropTransfer::Transferred { packets }
         }
     } else {
         world
@@ -19899,14 +20370,11 @@ fn handle_monster_defeat(
     packets: &mut Vec<ServerPacket>,
 ) {
     let Some(entity) = entity_by_object_id(world, monster_object_id) else {
-        packets.push(system_message_key(
-            world,
-            "sim.defeatedMonsterEntityMissing",
-        ));
         return;
     };
     let harvests_drops = monster_uses_harvest_drops(world, entity);
     let suppress_drops = yimoogi_has_living_sister(world, entity);
+    let map_disallows_monster_drop = current_map_disallows_monster_drop(world);
     let position = entity_position(world, entity).expect("monster position");
 
     if harvests_drops {
@@ -19921,15 +20389,17 @@ fn handle_monster_defeat(
 
     if monster_object_id == FIELD_WASP_ID {
         let quest = guide_quest_template();
-        let _ = try_gain_crystal_quest_drop(
-            world,
-            &quest.quest_item.key,
-            &quest.quest_item.name,
-            quest.quest_item.quantity,
-            None,
-            None,
-            packets,
-        );
+        if !map_disallows_monster_drop {
+            let _ = try_gain_crystal_quest_drop(
+                world,
+                &quest.quest_item.key,
+                &quest.quest_item.name,
+                quest.quest_item.quantity,
+                None,
+                None,
+                packets,
+            );
+        }
 
         if !harvests_drops && !suppress_drops {
             spawn_configured_monster_drops(
@@ -20091,6 +20561,8 @@ fn equipment_template_to_state(template: &EquipmentTemplate) -> EquipmentState {
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
+        identified: None,
+        soul_bound_id: None,
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
         rental_binding_flags: 0,
@@ -20134,13 +20606,13 @@ fn user_item_from_item_state(item: &ItemState) -> UserItem {
     );
 
     UserItem {
-        unique_id: u64::from(item.slot),
+        unique_id: item_unique_id(item),
         item_index: crystal_item_index_for_item_state(item),
         current_dura: item.durability_current.unwrap_or(0),
         max_dura: item.durability_max.unwrap_or(0),
         count: item.quantity.min(u32::from(u16::MAX)) as u16,
-        soul_bound_id: -1,
-        identified: crystal_default_identified_for_item_key(&item.key),
+        soul_bound_id: item_state_soul_bound_id(item),
+        identified: item_state_identified(item),
         cursed: item.cursed,
         slots: vec![None; usize::from(item.socket_slots)],
         gem_count: item.gem_count,
@@ -20197,6 +20669,24 @@ fn merged_user_item_stats(
     stats
 }
 
+fn user_item_stat_total(stats: &[UserItemStat], stat: u8) -> i32 {
+    stats
+        .iter()
+        .filter(|entry| entry.stat == stat)
+        .map(|entry| entry.value)
+        .sum()
+}
+
+fn buff_attack_bonus(buff: &BuffState) -> i32 {
+    buff.attack_bonus
+        .max(user_item_stat_total(&buff.stats, CRYSTAL_STAT_MAX_DC))
+}
+
+fn buff_defence_bonus(buff: &BuffState) -> i32 {
+    buff.defence_bonus
+        .max(user_item_stat_total(&buff.stats, CRYSTAL_STAT_MAX_AC))
+}
+
 fn user_item_added_attack_defence(item: &UserItem) -> (i32, i32) {
     let mut added_attack = 0;
     let mut added_defence = 0;
@@ -20235,8 +20725,8 @@ fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
         current_dura: item.durability_current,
         max_dura: item.durability_max,
         count: 1,
-        soul_bound_id: -1,
-        identified: crystal_default_identified_for_item_key(&item.key),
+        soul_bound_id: equipment_state_soul_bound_id(item),
+        identified: equipment_state_identified(item),
         cursed: item.cursed,
         slots: vec![None; usize::from(item.socket_slots)],
         gem_count: item.gem_count,
@@ -20263,8 +20753,10 @@ fn request_item_info_impl(item_index: i32) -> Vec<ServerPacket> {
         Some(template) => vec![ServerPacket::NewItemInfo {
             info: item_info_from_crystal_template(template),
         }],
-        None => vec![system_message(&format!(
-            "Crystal item info {item_index} was not found."
+        None => vec![system_message(&localized_text_or_fallback(
+            LanguageCode::English,
+            "server.NotFound",
+            "server.NotFound",
         ))],
     }
 }
@@ -20387,6 +20879,12 @@ fn crystal_default_identified_for_item_key(key: &str) -> bool {
         .unwrap_or(false)
 }
 
+fn crystal_item_needs_identify(key: &str) -> bool {
+    crystal_item_template_for_item_key(key)
+        .map(|template| template.need_identify)
+        .unwrap_or(false)
+}
+
 fn crystal_socket_slot_limit_for_item_key(key: &str) -> Option<u8> {
     crystal_item_template_for_item_key(key).map(|template| template.slots)
 }
@@ -20481,7 +20979,32 @@ fn crystal_item_added_stat_value(item: &ItemState, stat: u8) -> i32 {
     }
 }
 
+fn crystal_equipment_added_stat_total(resources: &SimulationResources, stat: u8) -> i32 {
+    resources
+        .equipment_items
+        .iter()
+        .filter(|item| !item.is_broken())
+        .map(|item| {
+            item.added_stats
+                .iter()
+                .filter(|entry| entry.stat == stat)
+                .map(|entry| entry.value)
+                .sum::<i32>()
+        })
+        .sum()
+}
+
+fn current_player_gem_rate_bonus(world: &World) -> i32 {
+    crystal_equipment_added_stat_total(
+        world.resource::<SimulationResources>(),
+        CRYSTAL_STAT_GEM_RATE_PERCENT,
+    )
+}
+
 fn crystal_upgrade_target_stat(source_template: &CrystalItemTemplate) -> Option<u8> {
+    // Current Crystal gem/orb data uses HPDrainRatePercent as the max-added-stats
+    // control field, not as the applied upgrade stat. Durability gems must fall
+    // through to the MaxDura path below instead of being treated as stat-48 upgrades.
     [
         CRYSTAL_STAT_MAX_DC,
         CRYSTAL_STAT_MAX_MC,
@@ -20502,7 +21025,6 @@ fn crystal_upgrade_target_stat(source_template: &CrystalItemTemplate) -> Option<
         CRYSTAL_STAT_HEALTH_RECOVERY,
         CRYSTAL_STAT_SPELL_RECOVERY,
         CRYSTAL_STAT_STRONG,
-        CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT,
     ]
     .into_iter()
     .find(|stat| crystal_item_stat_value(source_template, *stat) > 0)
@@ -20538,9 +21060,18 @@ fn crystal_upgrade_current_stat_count(
     }
 }
 
+#[cfg(test)]
 fn crystal_upgrade_success_chance(
     source_template: &CrystalItemTemplate,
     target_item: &ItemState,
+) -> i32 {
+    crystal_upgrade_success_chance_with_player_bonus(source_template, target_item, 0)
+}
+
+fn crystal_upgrade_success_chance_with_player_bonus(
+    source_template: &CrystalItemTemplate,
+    target_item: &ItemState,
+    player_gem_rate_bonus: i32,
 ) -> i32 {
     let reflect = crystal_item_stat_value(source_template, CRYSTAL_STAT_REFLECT).max(0);
     let multiplier = crystal_upgrade_target_stat(source_template)
@@ -20548,9 +21079,6 @@ fn crystal_upgrade_success_chance(
         .unwrap_or(i32::from(target_item.gem_count));
     let adjusted = reflect.saturating_mul(multiplier);
     let critical_rate = crystal_item_stat_value(source_template, CRYSTAL_STAT_CRITICAL_RATE).max(0);
-    let player_gem_rate_bonus = match CRYSTAL_STAT_GEM_RATE_PERCENT {
-        _ => 0,
-    };
 
     if adjusted >= critical_rate {
         0
@@ -20649,6 +21177,63 @@ fn crystal_item_key_for_template(template: &CrystalItemTemplate) -> String {
     format!("crystal-item-{}", template.item_index)
 }
 
+fn crystal_equipment_slot_for_template(template: &CrystalItemTemplate) -> Option<EquipmentSlot> {
+    match template.item_type {
+        CRYSTAL_ITEM_TYPE_WEAPON => Some(EquipmentSlot::Weapon),
+        CRYSTAL_ITEM_TYPE_ARMOUR => Some(EquipmentSlot::Armour),
+        CRYSTAL_ITEM_TYPE_HELMET => Some(EquipmentSlot::Helmet),
+        CRYSTAL_ITEM_TYPE_NECKLACE => Some(EquipmentSlot::Necklace),
+        CRYSTAL_ITEM_TYPE_BRACELET => Some(EquipmentSlot::BraceletLeft),
+        CRYSTAL_ITEM_TYPE_RING => Some(EquipmentSlot::RingLeft),
+        CRYSTAL_ITEM_TYPE_AMULET => Some(EquipmentSlot::Amulet),
+        CRYSTAL_ITEM_TYPE_BELT => Some(EquipmentSlot::Belt),
+        CRYSTAL_ITEM_TYPE_BOOTS => Some(EquipmentSlot::Boots),
+        CRYSTAL_ITEM_TYPE_STONE => Some(EquipmentSlot::Stone),
+        CRYSTAL_ITEM_TYPE_TORCH => Some(EquipmentSlot::Torch),
+        CRYSTAL_ITEM_TYPE_MOUNT => Some(EquipmentSlot::Mount),
+        _ => None,
+    }
+}
+
+fn crystal_template_can_equip_to_slot(
+    template: &CrystalItemTemplate,
+    target_slot: EquipmentSlot,
+) -> bool {
+    match target_slot {
+        EquipmentSlot::Weapon => template.item_type == CRYSTAL_ITEM_TYPE_WEAPON,
+        EquipmentSlot::Armour => template.item_type == CRYSTAL_ITEM_TYPE_ARMOUR,
+        EquipmentSlot::Helmet => template.item_type == CRYSTAL_ITEM_TYPE_HELMET,
+        EquipmentSlot::Torch => template.item_type == CRYSTAL_ITEM_TYPE_TORCH,
+        EquipmentSlot::Necklace => template.item_type == CRYSTAL_ITEM_TYPE_NECKLACE,
+        EquipmentSlot::BraceletLeft => template.item_type == CRYSTAL_ITEM_TYPE_BRACELET,
+        EquipmentSlot::BraceletRight => {
+            template.item_type == CRYSTAL_ITEM_TYPE_BRACELET
+                || template.item_type == CRYSTAL_ITEM_TYPE_AMULET
+        }
+        EquipmentSlot::RingLeft | EquipmentSlot::RingRight => {
+            template.item_type == CRYSTAL_ITEM_TYPE_RING
+        }
+        EquipmentSlot::Amulet => template.item_type == CRYSTAL_ITEM_TYPE_AMULET,
+        EquipmentSlot::Belt => template.item_type == CRYSTAL_ITEM_TYPE_BELT,
+        EquipmentSlot::Boots => template.item_type == CRYSTAL_ITEM_TYPE_BOOTS,
+        EquipmentSlot::Stone => template.item_type == CRYSTAL_ITEM_TYPE_STONE,
+        EquipmentSlot::Mount => template.item_type == CRYSTAL_ITEM_TYPE_MOUNT,
+    }
+}
+
+fn item_state_can_equip_to_slot(item: &ItemState, target_slot: EquipmentSlot) -> bool {
+    if let Some(template) = crystal_item_template_for_item_key(&item.key) {
+        return crystal_template_can_equip_to_slot(&template, target_slot);
+    }
+
+    item.equip_slot.is_some_and(|slot| slot == target_slot)
+}
+
+fn crystal_equipment_slot_for_item_key(key: &str) -> Option<EquipmentSlot> {
+    crystal_item_template_for_item_key(key)
+        .and_then(|template| crystal_equipment_slot_for_template(&template))
+}
+
 fn crystal_stack_size_for_item_key(key: &str) -> u32 {
     crystal_item_template_for_item_key(key)
         .map(|template| u32::from(template.stack_size.max(1)))
@@ -20681,6 +21266,14 @@ fn item_has_rental_bind_flag(item: &ItemState, flag: i16) -> bool {
 
 fn item_has_crystal_or_rental_bind_flag(item: &ItemState, flag: i16) -> bool {
     crystal_item_has_bind_flag(&item.key, flag) || item_has_rental_bind_flag(item, flag)
+}
+
+fn equipment_has_rental_bind_flag(item: &EquipmentState, flag: i16) -> bool {
+    item.rental_binding_flags & flag != 0
+}
+
+fn equipment_has_crystal_or_rental_bind_flag(item: &EquipmentState, flag: i16) -> bool {
+    crystal_item_has_bind_flag(&item.key, flag) || equipment_has_rental_bind_flag(item, flag)
 }
 
 fn crystal_credit_value_for_item(item: &ItemState) -> Option<u32> {
@@ -20949,13 +21542,14 @@ fn add_or_increment_item_with_random_metadata(
             name: name.to_string(),
             icon: item_icon_for_key(key),
             slot,
+            unique_id: default_item_unique_id(item_container, slot),
             container: item_container,
             quantity: stack_quantity,
             description: description.to_string(),
             durability_current,
             durability_max,
             weight,
-            equip_slot: None,
+            equip_slot: crystal_equipment_slot_for_item_key(key),
             grade: ItemGrade::None,
             added_attack,
             added_defence,
@@ -20963,6 +21557,8 @@ fn add_or_increment_item_with_random_metadata(
             cursed,
             socket_slots,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -21959,7 +22555,7 @@ fn try_gain_crystal_quest_drop(
     });
     packets.push(system_message_key_args(
         world,
-        "sim.youSecuredQuestItem",
+        "server.YouFound",
         [localized_item_name(
             current_language(world),
             &quest_template.quest_item.key,
@@ -21967,7 +22563,6 @@ fn try_gain_crystal_quest_drop(
         )],
     ));
 
-    let mut progress_update = None;
     {
         let mut resources = world.resource_mut::<SimulationResources>();
         if let Some(quest) = resources
@@ -21978,22 +22573,7 @@ fn try_gain_crystal_quest_drop(
             quest.current = quest.current.saturating_add(quantity).min(quest.required);
             if quest.current >= quest.required {
                 quest.stage = QuestStage::ReadyToTurnIn;
-                progress_update = Some((true, quest.current, quest.required));
-            } else {
-                progress_update = Some((false, quest.current, quest.required));
             }
-        }
-    }
-
-    if let Some((ready, current, required)) = progress_update {
-        if ready {
-            packets.push(system_message_key(world, "sim.questReturnForReward"));
-        } else if quest_template.quest_id == GUIDE_QUEST_ID {
-            packets.push(system_message_key_args(
-                world,
-                "sim.questProgressWasps",
-                [current.to_string(), required.to_string()],
-            ));
         }
     }
 
@@ -22017,6 +22597,10 @@ fn spawn_configured_monster_drops(
     monster_name: &str,
     packets: &mut Vec<ServerPacket>,
 ) {
+    if current_map_disallows_monster_drop(world) {
+        return;
+    }
+
     let drops = resolved_monster_drop_templates(world, monster_object_id, monster_name);
     if drops.is_empty() {
         return;
@@ -22030,9 +22614,8 @@ fn spawn_configured_monster_drops(
                 amount,
                 quantity,
             } => {
-                let mut dropped_any = false;
                 for gold_chunk in crystal_ground_gold_chunks(amount) {
-                    if drop_ground_drop_with_ownership(
+                    let _ = drop_ground_drop_with_ownership(
                         world,
                         position.clone(),
                         CRYSTAL_DROP_RANGE,
@@ -22042,25 +22625,7 @@ fn spawn_configured_monster_drops(
                         quantity,
                         name.clone(),
                         ownership,
-                    )
-                    .is_some()
-                    {
-                        dropped_any = true;
-                    }
-                }
-                if dropped_any {
-                    packets.push(system_message_key_args(
-                        world,
-                        "sim.monsterDroppedGoldOnGround",
-                        [
-                            monster_name.to_string(),
-                            localized_drop_name_key(&name)
-                                .map(|key| {
-                                    localized_text_or_fallback(current_language(world), key, &name)
-                                })
-                                .unwrap_or_else(|| name.clone()),
-                        ],
-                    ));
+                    );
                 }
             }
             ResolvedDropTemplate::Item {
@@ -22120,14 +22685,6 @@ fn spawn_configured_monster_drops(
                 {
                     return;
                 }
-                packets.push(system_message_key_args(
-                    world,
-                    "sim.monsterDroppedItem",
-                    [
-                        monster_name.to_string(),
-                        localized_item_name(current_language(world), &key, &name),
-                    ],
-                ));
             }
         }
     }
@@ -22156,17 +22713,11 @@ fn can_gain_gold(resources: &SimulationResources, gold: u32) -> bool {
 
 fn pick_up_current_cell_ground_drop(world: &mut World) -> Vec<ServerPacket> {
     if !is_in_world(world) {
-        return vec![system_message_key(
-            world,
-            "sim.joinWorldBeforePickingUpItems",
-        )];
+        return Vec::new();
     }
 
     let Some(player) = player_entity(world) else {
-        return vec![system_message_key(
-            world,
-            "sim.joinWorldBeforePickingUpItems",
-        )];
+        return Vec::new();
     };
     let picker_object_id = entity_object_id(world, player).expect("player object id");
     let candidates = current_cell_ground_drop_candidates(world);
@@ -22184,9 +22735,7 @@ fn pick_up_current_cell_ground_drop(world: &mut World) -> Vec<ServerPacket> {
     }
 
     if owner_blocked {
-        return vec![system_message(
-            "You cannot pickup items belonging to another player.",
-        )];
+        return vec![system_message_key(world, "server.CannotPickupNotOwner")];
     }
 
     match fallback_status {
@@ -22200,11 +22749,11 @@ fn pick_up_current_cell_ground_drop(world: &mut World) -> Vec<ServerPacket> {
 
 fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<ServerPacket> {
     let Some(drop_entity) = entity_by_object_id(world, object_id) else {
-        return vec![system_message_key(world, "sim.itemNoLongerOnGround")];
+        return Vec::new();
     };
 
     if world.entity(drop_entity).get::<GroundDrop>().is_none() {
-        return vec![system_message_key(world, "sim.targetNotGroundDrop")];
+        return Vec::new();
     }
 
     let player = player_entity(world).expect("player should exist");
@@ -22212,12 +22761,10 @@ fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<ServerPacket> {
     let player_position = entity_position(world, player).expect("player position");
     let drop_position = entity_position(world, drop_entity).expect("drop position");
     if player_position != drop_position {
-        return vec![system_message_key(world, "sim.moveCloserToPickItem")];
+        return Vec::new();
     }
     if !drop_ownership_allows_pickup(world, drop_entity, player_object_id) {
-        return vec![system_message(
-            "You cannot pickup items belonging to another player.",
-        )];
+        return vec![system_message_key(world, "server.CannotPickupNotOwner")];
     }
 
     let (display_name, payload) = {
@@ -22243,10 +22790,7 @@ fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<ServerPacket> {
             }
             world.resource_mut::<SimulationResources>().gold += amount;
             let _ = world.despawn(drop_entity);
-            vec![
-                ServerPacket::GainedGold { gold: amount },
-                system_message_key_args(world, "sim.pickedUpItem", [display_name]),
-            ]
+            vec![ServerPacket::GainedGold { gold: amount }]
         }
         DropLoot::InventoryItem {
             key,
@@ -22266,7 +22810,7 @@ fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<ServerPacket> {
                 let resources = world.resource::<SimulationResources>();
                 if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, payload.quantity)
                 {
-                    return vec![system_message("No free bag slot.")];
+                    return vec![system_message_key(world, "server.YouCannotCarryAnymore")];
                 }
             }
             let gained_item = add_or_increment_item_with_random_metadata(
@@ -22296,35 +22840,19 @@ fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<ServerPacket> {
                     .group_member_object_ids
                     .is_empty()
             {
+                let message = format_localized_text(
+                    current_language(world),
+                    "server.FriendlyPickedUpItem",
+                    [player_name.as_str(), display_name.as_str()],
+                );
                 packets.push(ServerPacket::Chat {
-                    message: format!("{player_name} Picked up: {{{display_name}}}"),
+                    message,
                     chat_type: ChatType::System,
                 });
             }
-            packets.push(system_message_key_args(
-                world,
-                "sim.pickedUpItem",
-                [display_name],
-            ));
             packets
         }
     }
-}
-
-fn find_empty_slot(items: &[ItemState], container: ItemContainer) -> Option<u8> {
-    let max_slots = match container {
-        ItemContainer::Bag1 | ItemContainer::Bag2 | ItemContainer::Quest => 40,
-        ItemContainer::Storage => BASE_STORAGE_SLOTS,
-        ItemContainer::Belt => 6,
-    };
-
-    (0..max_slots)
-        .map(|slot| u8::try_from(slot).expect("slot count should fit in u8"))
-        .find(|slot| {
-            !items
-                .iter()
-                .any(|item| item.container == container && item.slot == *slot)
-        })
 }
 
 fn find_empty_storage_slot(items: &[ItemState], max_slots: u16) -> Option<u8> {
@@ -22342,15 +22870,78 @@ fn storage_locked(world: &World) -> bool {
     )
 }
 
-fn active_crystal_storage_service(resources: &SimulationResources) -> bool {
-    resources
-        .active_npc_service
-        .as_ref()
+fn crystal_npc_service_object_in_range(world: &World, npc_object_id: u32) -> bool {
+    let Some(npc_entity) = entity_by_object_id(world, npc_object_id) else {
+        return false;
+    };
+    if !world.entity(npc_entity).contains::<Npc>() {
+        return false;
+    }
+
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return false;
+    };
+    let Some(npc_position) = entity_position(world, npc_entity) else {
+        return false;
+    };
+
+    tile_distance(&player_position, &npc_position) <= CRYSTAL_DATA_RANGE
+}
+
+fn current_crystal_npc_service_in_range(world: &World) -> Option<ActiveNpcServiceState> {
+    let service = {
+        world
+            .resource::<SimulationResources>()
+            .active_npc_service
+            .clone()
+    }?;
+    crystal_npc_service_object_in_range(world, service.npc_object_id).then_some(service)
+}
+
+fn active_crystal_storage_service(world: &World) -> bool {
+    current_crystal_npc_service_in_range(world)
         .is_some_and(|service| service.label_key == "STORAGE")
 }
 
+fn inventory_container_and_slot_for_index(index: u8) -> Option<(ItemContainer, u8)> {
+    match index {
+        0..=39 => Some((ItemContainer::Bag1, index)),
+        40..=79 => Some((ItemContainer::Bag2, index - 40)),
+        _ => None,
+    }
+}
+
+fn inventory_index_for_item(item: &ItemState) -> Option<u8> {
+    match item.container {
+        ItemContainer::Bag1 => Some(item.slot),
+        ItemContainer::Bag2 => Some(40u8.saturating_add(item.slot)),
+        _ => None,
+    }
+}
+
+fn inventory_item_matches_index(item: &ItemState, index: u8) -> bool {
+    inventory_index_for_item(item).is_some_and(|item_index| item_index == index)
+}
+
 fn is_valid_inventory_slot(slot: u8) -> bool {
-    slot < 40
+    inventory_container_and_slot_for_index(slot).is_some()
+}
+
+fn move_item_slot_matches_grid(item: &ItemState, grid: MirGridType, slot: u8) -> bool {
+    if item.slot != slot {
+        if !matches!(grid, MirGridType::Inventory) {
+            return false;
+        }
+    }
+
+    match grid {
+        MirGridType::Inventory => inventory_item_matches_index(item, slot),
+        MirGridType::Storage => item.container == ItemContainer::Storage,
+        _ => false,
+    }
 }
 
 fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
@@ -22360,11 +22951,8 @@ fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
         success: false,
     };
 
-    {
-        let resources = world.resource::<SimulationResources>();
-        if !active_crystal_storage_service(&resources) {
-            return vec![failed_packet];
-        }
+    if !active_crystal_storage_service(world) {
+        return vec![failed_packet];
     }
 
     if storage_locked(world) {
@@ -22382,10 +22970,11 @@ fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
         if !is_valid_inventory_slot(from_slot) || !is_valid_storage_slot(&resources, to_slot) {
             return vec![failed_packet];
         }
-        let Some(index) = resources.inventory_items.iter().position(|item| {
-            item.slot == from_slot
-                && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-        }) else {
+        let Some(index) = resources
+            .inventory_items
+            .iter()
+            .position(|item| inventory_item_matches_index(item, from_slot))
+        else {
             return vec![failed_packet];
         };
 
@@ -22427,11 +23016,8 @@ fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacke
         success: false,
     };
 
-    {
-        let resources = world.resource::<SimulationResources>();
-        if !active_crystal_storage_service(&resources) {
-            return vec![failed_packet];
-        }
+    if !active_crystal_storage_service(world) {
+        return vec![failed_packet];
     }
 
     if storage_locked(world) {
@@ -22449,6 +23035,11 @@ fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacke
         if !is_valid_storage_slot(&resources, from_slot) || !is_valid_inventory_slot(to_slot) {
             return vec![failed_packet];
         }
+        let Some((to_container, to_inventory_slot)) =
+            inventory_container_and_slot_for_index(to_slot)
+        else {
+            return vec![failed_packet];
+        };
         let Some(index) = resources
             .storage_items
             .iter()
@@ -22460,14 +23051,14 @@ fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacke
         if resources
             .inventory_items
             .iter()
-            .any(|item| item.slot == to_slot && item.container == ItemContainer::Bag1)
+            .any(|item| inventory_item_matches_index(item, to_slot))
         {
             return vec![failed_packet];
         }
 
         let mut item = resources.storage_items.remove(index);
-        item.slot = to_slot;
-        item.container = ItemContainer::Bag1;
+        item.slot = to_inventory_slot;
+        item.container = to_container;
         resources.inventory_items.push(item);
     }
 
@@ -22559,28 +23150,25 @@ fn combine_item_impl(
     if grid != MirGridType::Inventory {
         return vec![failed_packet];
     }
-
-    let Some(from_slot) = u8::try_from(id_from).ok() else {
+    if current_player_is_dead(world) {
         return vec![failed_packet];
-    };
-    let Some(to_slot) = u8::try_from(id_to).ok() else {
-        return vec![failed_packet];
-    };
+    }
 
     let now_binary_datetime = current_binary_datetime();
     let now_ticks = binary_datetime_ticks(now_binary_datetime);
     let current_tick = world.resource::<SimulationResources>().tick;
     let player_object_id = current_player_object_id(world).unwrap_or(0);
+    let player_gem_rate_bonus = current_player_gem_rate_bonus(world);
     let outcome = {
         let mut resources = world.resource_mut::<SimulationResources>();
         let Some(from_index) = resources.inventory_items.iter().position(|item| {
-            item.slot == from_slot
+            item_unique_id(item) == id_from
                 && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
         }) else {
             return vec![failed_packet];
         };
         let Some(to_index) = resources.inventory_items.iter().position(|item| {
-            item.slot == to_slot
+            item_unique_id(item) == id_to
                 && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
         }) else {
             return vec![failed_packet];
@@ -22590,6 +23178,9 @@ fn combine_item_impl(
         }
 
         let source_item = resources.inventory_items[from_index].clone();
+        let from_slot = source_item.slot;
+        let to_slot = resources.inventory_items[to_index].slot;
+        let target_unique_id = item_unique_id(&resources.inventory_items[to_index]);
         let target_key = resources.inventory_items[to_index].key.clone();
         let Some(target_template) = crystal_item_template_for_item_key(&target_key) else {
             return vec![failed_packet];
@@ -22661,9 +23252,10 @@ fn combine_item_impl(
                             args: Vec::new(),
                         }
                     } else {
-                        let success_chance = crystal_upgrade_success_chance(
+                        let success_chance = crystal_upgrade_success_chance_with_player_bonus(
                             &source_template,
                             &resources.inventory_items[to_index],
+                            player_gem_rate_bonus,
                         );
                         let succeeded = crystal_upgrade_roll_succeeds(
                             current_tick,
@@ -22783,7 +23375,7 @@ fn combine_item_impl(
                             resources.inventory_items.remove(from_index);
                         }
                         CombineItemOutcome::RepairSuccess {
-                            unique_id: u64::from(to_slot),
+                            unique_id: target_unique_id,
                             max_dura: next_max_dura,
                             current_dura: next_max_dura,
                         }
@@ -22814,7 +23406,7 @@ fn combine_item_impl(
                         [to_index]
                         .socket_slots
                         .saturating_add(1);
-                    let unique_id = u64::from(resources.inventory_items[to_index].slot);
+                    let unique_id = target_unique_id;
                     let slot_size = i32::from(resources.inventory_items[to_index].socket_slots);
                     if resources.inventory_items[from_index].quantity > 1 {
                         resources.inventory_items[from_index].quantity -= 1;
@@ -22872,7 +23464,7 @@ fn combine_item_impl(
                         expiry_date_binary_datetime;
                     resources.inventory_items[to_index].sealed_next_time_binary_datetime =
                         next_seal_binary_datetime;
-                    let unique_id = u64::from(resources.inventory_items[to_index].slot);
+                    let unique_id = target_unique_id;
                     if resources.inventory_items[from_index].quantity > 1 {
                         resources.inventory_items[from_index].quantity -= 1;
                     } else {
@@ -22984,16 +23576,21 @@ fn combine_item_impl(
     }
 }
 
-fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, preferred_slot: u8) {
-    let mut resources = world.resource_mut::<SimulationResources>();
-    let slot =
-        find_empty_slot(&resources.inventory_items, ItemContainer::Bag1).unwrap_or(preferred_slot);
-    resources.inventory_items.push(ItemState {
+fn item_state_from_equipment_state(
+    equipment: EquipmentState,
+    container: ItemContainer,
+    slot: u8,
+) -> ItemState {
+    let mut added_stats = equipment.added_stats;
+    upsert_user_item_stat(&mut added_stats, 15, equipment.added_luck);
+
+    ItemState {
         key: equipment.key,
         name: equipment.name,
         icon: equipment.icon,
         slot,
-        container: ItemContainer::Bag1,
+        unique_id: default_item_unique_id(container, slot),
+        container,
         quantity: 1,
         description: equipment.description,
         durability_current: Some(equipment.durability_current),
@@ -23003,10 +23600,12 @@ fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, prefe
         grade: equipment.grade,
         added_attack: equipment.added_attack,
         added_defence: equipment.added_defence,
-        added_stats: equipment.added_stats,
+        added_stats,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,
         gem_count: equipment.gem_count,
+        identified: equipment.identified,
+        soul_bound_id: equipment.soul_bound_id,
         sealed_expiry_time_binary_datetime: equipment.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: equipment.sealed_next_time_binary_datetime,
         rental_binding_flags: equipment.rental_binding_flags,
@@ -23014,7 +23613,37 @@ fn add_equipment_back_to_bag(world: &mut World, equipment: EquipmentState, prefe
         defence: equipment.defence,
         heal_hp: 0,
         heal_mp: 0,
-    });
+    }
+}
+
+fn equipment_state_from_item_state(item: &ItemState, slot: EquipmentSlot) -> EquipmentState {
+    let durability_current = item.durability_current.unwrap_or(10);
+    let durability_max = item.durability_max.unwrap_or(durability_current);
+    EquipmentState {
+        key: item.key.clone(),
+        slot,
+        name: item.name.clone(),
+        icon: item.icon,
+        shape: equipment_shape_for_slot_and_name(slot, &item.name),
+        description: item.description.clone(),
+        durability_current,
+        durability_max,
+        grade: item.grade,
+        added_attack: item.added_attack,
+        added_defence: item.added_defence,
+        added_luck: 0,
+        added_stats: item.added_stats.clone(),
+        cursed: item.cursed,
+        socket_slots: item.socket_slots,
+        gem_count: item.gem_count,
+        identified: item.identified,
+        soul_bound_id: item.soul_bound_id,
+        sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
+        sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
+        rental_binding_flags: item.rental_binding_flags,
+        attack: item.attack,
+        defence: item.defence,
+    }
 }
 
 fn equipment_slot_key(slot: EquipmentSlot) -> &'static str {
@@ -23131,13 +23760,16 @@ fn find_use_item_location(
     key: &str,
     packet_ack: Option<(u64, MirGridType)>,
 ) -> Option<UseItemLocation> {
-    match packet_ack.map(|(_, grid)| grid) {
-        Some(MirGridType::Belt) => resources
-            .belt_items
-            .iter()
-            .position(|item| item.key == key)
-            .map(UseItemLocation::Belt),
-        _ => resources
+    match packet_ack {
+        Some((unique_id, MirGridType::Belt)) => {
+            item_index_for_client_reference(&resources.belt_items, MirGridType::Belt, unique_id)
+                .map(UseItemLocation::Belt)
+        }
+        Some((unique_id, grid)) => {
+            item_index_for_client_reference(&resources.inventory_items, grid, unique_id)
+                .map(UseItemLocation::Inventory)
+        }
+        None => resources
             .inventory_items
             .iter()
             .position(|item| item.key == key)
@@ -23174,6 +23806,756 @@ fn consume_item_at_use_location(world: &mut World, location: UseItemLocation) {
     }
 }
 
+fn revive_current_player_from_resurrection_scroll(world: &mut World) -> Vec<ServerPacket> {
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+
+    let revived_vitals = {
+        let mut entry = world.entity_mut(player);
+        let mut vitals = entry.get_mut::<PlayerVitals>().expect("player vitals");
+        vitals.hp = vitals.max_hp.max(1);
+        vitals.mp = 100;
+        *vitals
+    };
+
+    world.resource_mut::<SimulationResources>().player_vitals = revived_vitals;
+
+    let mut packets = Vec::new();
+    if let Some(info) = object_revived_info_for_entity(world, player, true) {
+        packets.push(ServerPacket::ObjectRevived { info });
+    }
+    if let Some(info) = object_health_info_for_entity(world, player, 0) {
+        packets.push(ServerPacket::ObjectHealth { info });
+    }
+    packets
+}
+
+fn restore_current_player_vitals(world: &mut World, heal_hp: i32, heal_mp: i32) {
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+
+    let restored_vitals = {
+        let mut entity = world.entity_mut(player);
+        let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
+        vitals.hp = (vitals.hp + heal_hp.max(0)).min(vitals.max_hp);
+        vitals.mp = (vitals.mp + heal_mp.max(0)).min(100);
+        *vitals
+    };
+
+    world.resource_mut::<SimulationResources>().player_vitals = restored_vitals;
+}
+
+fn queue_crystal_normal_potion_restore(world: &mut World, template: &CrystalItemTemplate) -> bool {
+    let hp = crystal_item_stat_value(template, CRYSTAL_STAT_HP).max(0);
+    let mp = crystal_item_stat_value(template, CRYSTAL_STAT_MP).max(0);
+    queue_crystal_normal_potion_restore_amounts(world, hp, mp)
+}
+
+fn queue_crystal_normal_potion_restore_amounts(world: &mut World, hp: i32, mp: i32) -> bool {
+    if hp == 0 && mp == 0 {
+        return false;
+    }
+
+    let mut resources = world.resource_mut::<SimulationResources>();
+    resources.pending_pot_health_amount = resources
+        .pending_pot_health_amount
+        .saturating_add(hp)
+        .min(i32::from(u16::MAX));
+    resources.pending_pot_mana_amount = resources
+        .pending_pot_mana_amount
+        .saturating_add(mp)
+        .min(i32::from(u16::MAX));
+    true
+}
+
+fn tick_crystal_normal_potion_restore(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    let (hp_tick, mp_tick) = {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        let hp_tick = resources.pending_pot_health_amount.min(10);
+        let mp_tick = resources.pending_pot_mana_amount.min(10);
+        resources.pending_pot_health_amount -= hp_tick;
+        resources.pending_pot_mana_amount -= mp_tick;
+        (hp_tick, mp_tick)
+    };
+
+    if hp_tick <= 0 && mp_tick <= 0 {
+        return;
+    }
+
+    restore_current_player_vitals(world, hp_tick, mp_tick);
+    if let Some(player) = player_entity(world) {
+        if let Some(info) = object_health_info_for_entity(world, player, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+    }
+}
+
+fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
+    if let Some(player) = player_entity(world) {
+        let spawn = world.resource::<SimulationResources>().config.spawn.clone();
+        world
+            .entity_mut(player)
+            .insert((Position(spawn), Facing(MirDirection::Down)));
+    }
+
+    vec![ServerPacket::UserLocation {
+        location: current_location(world),
+    }]
+}
+
+fn crystal_random_same_map_teleport_packets(
+    world: &mut World,
+    max_radius: i32,
+) -> Option<Vec<ServerPacket>> {
+    let player = player_entity(world)?;
+    let start = entity_position(world, player)?;
+    let direction = world.resource::<SimulationResources>().player_direction;
+    let map_info = world.resource::<SimulationResources>().current_map.clone();
+
+    for radius in 1..=max_radius.max(1) {
+        for dx in -radius..=radius {
+            for dy in -radius..=radius {
+                if dx.abs().max(dy.abs()) != radius {
+                    continue;
+                }
+                let candidate = Point {
+                    x: start.x.saturating_add(dx),
+                    y: start.y.saturating_add(dy),
+                };
+                if candidate == start {
+                    continue;
+                }
+                if can_occupy(world, candidate.clone(), Some(player)) {
+                    return Some(relocate_player_to_map(
+                        world, map_info, candidate, direction, None,
+                    ));
+                }
+            }
+        }
+    }
+
+    None
+}
+
+fn crystal_consumable_buff(
+    key: &str,
+    name: &str,
+    description: &str,
+    expires_at_tick: u64,
+    stats: Vec<UserItemStat>,
+) -> Option<BuffState> {
+    if stats.is_empty() {
+        return None;
+    }
+
+    Some(BuffState {
+        key: key.to_string(),
+        name: name.to_string(),
+        description: description.to_string(),
+        expires_at_tick,
+        attack_bonus: user_item_stat_total(&stats, CRYSTAL_STAT_MAX_DC),
+        defence_bonus: user_item_stat_total(&stats, CRYSTAL_STAT_MAX_AC),
+        stats,
+    })
+}
+
+fn crystal_template_consumable_buffs(
+    template: &CrystalItemTemplate,
+    current_tick: u64,
+) -> Vec<BuffState> {
+    let duration_ticks = u64::from(template.durability).saturating_mul(60);
+    if duration_ticks == 0 {
+        return Vec::new();
+    }
+
+    let expires_at_tick = current_tick.saturating_add(duration_ticks);
+    let buff_from_stat = |key: &str, name: &str, description: &str, stat: u8| {
+        crystal_consumable_buff(
+            key,
+            name,
+            description,
+            expires_at_tick,
+            (crystal_item_stat_value(template, stat) > 0)
+                .then(|| {
+                    vec![UserItemStat {
+                        stat,
+                        value: crystal_item_stat_value(template, stat),
+                    }]
+                })
+                .unwrap_or_default(),
+        )
+    };
+
+    match template.shape {
+        CRYSTAL_POTION_SHAPE_BUFF => [
+            buff_from_stat(
+                "impact",
+                "Impact",
+                "Crystal impact potion buff is active.",
+                CRYSTAL_STAT_MAX_DC,
+            ),
+            buff_from_stat(
+                "magic",
+                "Magic",
+                "Crystal magic potion buff is active.",
+                CRYSTAL_STAT_MAX_MC,
+            ),
+            buff_from_stat(
+                "taoist",
+                "Taoist",
+                "Crystal taoist potion buff is active.",
+                CRYSTAL_STAT_MAX_SC,
+            ),
+            buff_from_stat(
+                "storm",
+                "Storm",
+                "Crystal storm potion buff is active.",
+                CRYSTAL_STAT_ATTACK_SPEED,
+            ),
+            buff_from_stat(
+                "health-aid",
+                "Health Aid",
+                "Crystal health-aid potion buff is active.",
+                CRYSTAL_STAT_HP,
+            ),
+            buff_from_stat(
+                "mana-aid",
+                "Mana Aid",
+                "Crystal mana-aid potion buff is active.",
+                CRYSTAL_STAT_MP,
+            ),
+            buff_from_stat(
+                "defence",
+                "Defence",
+                "Crystal defence potion buff is active.",
+                CRYSTAL_STAT_MAX_AC,
+            ),
+            buff_from_stat(
+                "magic-defence",
+                "Magic Defence",
+                "Crystal magic-defence potion buff is active.",
+                CRYSTAL_STAT_MAX_MAC,
+            ),
+        ]
+        .into_iter()
+        .flatten()
+        .collect(),
+        CRYSTAL_POTION_SHAPE_EXP => buff_from_stat(
+            "exp",
+            "EXP",
+            "Crystal experience potion buff is active.",
+            CRYSTAL_STAT_LUCK,
+        )
+        .into_iter()
+        .collect(),
+        CRYSTAL_POTION_SHAPE_DROP => buff_from_stat(
+            "drop",
+            "Drop",
+            "Crystal drop-rate potion buff is active.",
+            CRYSTAL_STAT_LUCK,
+        )
+        .into_iter()
+        .collect(),
+        _ => Vec::new(),
+    }
+}
+
+fn apply_or_stack_duration_buff(world: &mut World, next: BuffState) {
+    let mut resources = world.resource_mut::<SimulationResources>();
+    let current_tick = resources.tick;
+    let duration_ticks = next.expires_at_tick.saturating_sub(current_tick);
+    if let Some(existing) = resources.buffs.iter_mut().find(|buff| buff.key == next.key) {
+        existing.expires_at_tick = existing
+            .expires_at_tick
+            .max(current_tick)
+            .saturating_add(duration_ticks);
+    } else {
+        resources.buffs.push(next);
+    }
+}
+
+fn apply_crystal_template_consumable_buffs(
+    world: &mut World,
+    template: &CrystalItemTemplate,
+) -> bool {
+    let tick = world.resource::<SimulationResources>().tick;
+    let buffs = crystal_template_consumable_buffs(template, tick);
+    if buffs.is_empty() {
+        return false;
+    }
+
+    for buff in buffs {
+        apply_or_stack_duration_buff(world, buff);
+    }
+    true
+}
+
+fn feed_mount_with_crystal_food(
+    world: &mut World,
+    template: &CrystalItemTemplate,
+    item: &ItemState,
+) -> Option<ServerPacket> {
+    let mut resources = world.resource_mut::<SimulationResources>();
+    let mount = resources
+        .equipment_items
+        .iter_mut()
+        .find(|equipment| equipment.slot == EquipmentSlot::Mount)?;
+    if mount.durability_current == mount.durability_max {
+        return None;
+    }
+
+    if template.shape == 0 {
+        let loss = 1000_u16.min(
+            mount
+                .durability_max
+                .saturating_sub(mount.durability_current / 30),
+        );
+        mount.durability_max = mount.durability_max.saturating_sub(loss);
+    }
+    let feed_amount = item
+        .durability_current
+        .unwrap_or(template.durability)
+        .max(1);
+    mount.durability_current = mount
+        .durability_current
+        .saturating_add(feed_amount)
+        .min(mount.durability_max);
+
+    Some(ServerPacket::ItemRepaired {
+        unique_id: equipment_slot_unique_id(EquipmentSlot::Mount).unwrap_or(13),
+        max_dura: mount.durability_max,
+        current_dura: mount.durability_current,
+    })
+}
+
+enum CrystalUseItemEligibility {
+    Allowed,
+    Rejected(Option<ServerPacket>),
+}
+
+fn crystal_required_class_flag(class: MirClass) -> u8 {
+    match class {
+        MirClass::Warrior => CRYSTAL_REQUIRED_CLASS_WARRIOR,
+        MirClass::Wizard => CRYSTAL_REQUIRED_CLASS_WIZARD,
+        MirClass::Taoist => CRYSTAL_REQUIRED_CLASS_TAOIST,
+        MirClass::Assassin => CRYSTAL_REQUIRED_CLASS_ASSASSIN,
+        MirClass::Archer => CRYSTAL_REQUIRED_CLASS_ARCHER,
+    }
+}
+
+fn crystal_required_gender_flag(gender: MirGender) -> u8 {
+    match gender {
+        MirGender::Male => CRYSTAL_REQUIRED_GENDER_MALE,
+        MirGender::Female => CRYSTAL_REQUIRED_GENDER_FEMALE,
+    }
+}
+
+fn current_equipment_required_stat(item: &EquipmentState, stat: u8) -> i32 {
+    if item.is_broken() {
+        return 0;
+    }
+
+    match stat {
+        CRYSTAL_STAT_MAX_AC => item.total_defence(),
+        CRYSTAL_STAT_MAX_DC => item.total_attack(),
+        _ => user_item_stat_total(&item.added_stats, stat),
+    }
+}
+
+fn current_buff_required_stat(buff: &BuffState, stat: u8) -> i32 {
+    match stat {
+        CRYSTAL_STAT_MAX_AC => buff_defence_bonus(buff),
+        CRYSTAL_STAT_MAX_DC => buff_attack_bonus(buff),
+        _ => user_item_stat_total(&buff.stats, stat),
+    }
+}
+
+fn current_player_required_stat_total(resources: &SimulationResources, stat: u8) -> i32 {
+    resources
+        .equipment_items
+        .iter()
+        .map(|item| current_equipment_required_stat(item, stat))
+        .sum::<i32>()
+        + resources
+            .buffs
+            .iter()
+            .map(|buff| current_buff_required_stat(buff, stat))
+            .sum::<i32>()
+}
+
+fn crystal_item_requirement_rejection_key(
+    resources: &SimulationResources,
+    template: &CrystalItemTemplate,
+) -> Option<&'static str> {
+    let character = resources.selected_character.as_ref()?;
+
+    if template.required_gender & crystal_required_gender_flag(character.gender) == 0 {
+        return Some(match character.gender {
+            MirGender::Male => "server.NotFemale",
+            MirGender::Female => "server.NotMale",
+        });
+    }
+
+    if template.required_class & crystal_required_class_flag(character.class) == 0 {
+        return Some(match character.class {
+            MirClass::Warrior => "server.WarriorsCannotUseItem",
+            MirClass::Wizard => "server.WizardsCannotUseItem",
+            MirClass::Taoist => "server.TaoistsCannotUseItem",
+            MirClass::Assassin => "server.AssassinsCannotUseItem",
+            MirClass::Archer => "server.ArchersCannotUseItem",
+        });
+    }
+
+    let required_amount = i32::from(template.required_amount);
+    match template.required_type {
+        CRYSTAL_REQUIRED_TYPE_LEVEL if character.level < u16::from(template.required_amount) => {
+            Some("server.LowLevel")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_AC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MAX_AC)
+                < required_amount =>
+        {
+            Some("server.YouNotEnoughAC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_MAC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MAX_MAC)
+                < required_amount =>
+        {
+            Some("server.YouNotEnoughMAC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_DC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MAX_DC)
+                < required_amount =>
+        {
+            Some("server.LowDC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_MC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MAX_MC)
+                < required_amount =>
+        {
+            Some("server.LowMC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_SC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MAX_SC)
+                < required_amount =>
+        {
+            Some("server.LowSC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_LEVEL
+            if character.level > u16::from(template.required_amount) =>
+        {
+            Some("server.YouExceededMaxLevel")
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_AC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MIN_AC)
+                < required_amount =>
+        {
+            Some("server.YouNoBaseAC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_MAC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MIN_MAC)
+                < required_amount =>
+        {
+            Some("server.YouNoBaseMAC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_DC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MIN_DC)
+                < required_amount =>
+        {
+            Some("server.YouNoBaseDC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_MC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MIN_MC)
+                < required_amount =>
+        {
+            Some("server.YouNoBaseMC")
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_SC
+            if current_player_required_stat_total(resources, CRYSTAL_STAT_MIN_SC)
+                < required_amount =>
+        {
+            Some("server.YouNoBaseSC")
+        }
+        _ => None,
+    }
+}
+
+fn crystal_book_skill_state(template: &CrystalItemTemplate) -> Option<SkillState> {
+    crystal_skill_state(&template.name, 0)
+}
+
+fn crystal_skill_is_known(resources: &SimulationResources, skill_key: &str) -> bool {
+    resources
+        .skills
+        .iter()
+        .any(|known| known.key.eq_ignore_ascii_case(skill_key))
+}
+
+fn crystal_use_item_eligibility(
+    world: &World,
+    template: &CrystalItemTemplate,
+) -> CrystalUseItemEligibility {
+    let resources = world.resource::<SimulationResources>();
+    if let Some(key) = crystal_item_requirement_rejection_key(resources, template) {
+        return CrystalUseItemEligibility::Rejected(Some(system_message_key(world, key)));
+    }
+
+    if template.item_type == CRYSTAL_ITEM_TYPE_BOOK
+        && crystal_book_skill_state(template)
+            .as_ref()
+            .is_some_and(|skill| crystal_skill_is_known(&resources, &skill.key))
+    {
+        return CrystalUseItemEligibility::Rejected(None);
+    }
+
+    if template.item_type == CRYSTAL_ITEM_TYPE_POTION && current_map_disallows_drug(world) {
+        return CrystalUseItemEligibility::Rejected(Some(system_message_key(
+            world,
+            "server.YouCannotUsePotionsHere",
+        )));
+    }
+
+    CrystalUseItemEligibility::Allowed
+}
+
+fn crystal_learn_book_skill(world: &mut World, template: &CrystalItemTemplate) -> bool {
+    let Some(skill) = crystal_book_skill_state(template) else {
+        return false;
+    };
+
+    let mut resources = world.resource_mut::<SimulationResources>();
+    if crystal_skill_is_known(&resources, &skill.key) {
+        return false;
+    }
+    resources.skills.push(skill);
+    true
+}
+
+fn use_dynamic_crystal_template_item(
+    world: &mut World,
+    template: &CrystalItemTemplate,
+    location: UseItemLocation,
+    packet_ack: Option<(u64, MirGridType)>,
+) -> Option<Vec<ServerPacket>> {
+    let mut packets = Vec::new();
+
+    match (template.item_type, template.shape) {
+        (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_SUN_POTION) => {
+            restore_current_player_vitals(
+                world,
+                crystal_item_stat_value(template, CRYSTAL_STAT_HP),
+                crystal_item_stat_value(template, CRYSTAL_STAT_MP),
+            );
+            consume_item_at_use_location(world, location);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_BUFF)
+        | (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_EXP)
+        | (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_DROP) => {
+            if !apply_crystal_template_consumable_buffs(world, template) {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            }
+            consume_item_at_use_location(world, location);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_FOOD, _) => {
+            let Some(food_item) = ({
+                let resources = world.resource::<SimulationResources>();
+                item_at_use_location(resources, location)
+            }) else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+            let Some(repair_packet) = feed_mount_with_crystal_food(world, template, &food_item)
+            else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+            consume_item_at_use_location(world, location);
+            packets.push(hint_chat_key(world, "server.MountFed"));
+            packets.push(repair_packet);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_TOWN_TELEPORT) => {
+            if current_map_disallows_town_teleport(world) {
+                packets.push(system_message_key(world, "server.NoTownTeleport"));
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            }
+            consume_item_at_use_location(world, location);
+            packets.extend(town_teleport_packets(world));
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_DUNGEON_ESCAPE)
+            if !template.name.ends_with("WarGodOil") =>
+        {
+            if current_map_disallows_escape(world) {
+                packets.push(system_message_key(world, "server.CanNotDungeon"));
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            }
+            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 20) else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+            consume_item_at_use_location(world, location);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                teleport_packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_RANDOM_TELEPORT) => {
+            if current_map_disallows_random_teleport(world) {
+                packets.push(system_message_key(world, "server.CanNotRandom"));
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            }
+            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 200)
+            else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+            consume_item_at_use_location(world, location);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                teleport_packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, shape)
+            if shape == CRYSTAL_SCROLL_SHAPE_GT_INVITE
+                || shape == CRYSTAL_SCROLL_SHAPE_GT_TELEPORT =>
+        {
+            consume_item_at_use_location(world, location);
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_BENEDICTION_OIL) => {
+            let Some(outcome) = try_luck_weapon(world) else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+
+            consume_item_at_use_location(world, location);
+            match outcome {
+                CrystalLuckWeaponOutcome::Changed {
+                    refresh_packet,
+                    message_key,
+                    chat_type,
+                } => {
+                    packets.push(refresh_packet);
+                    packets.push(ServerPacket::Chat {
+                        message: localized_text_or_fallback(
+                            current_language(world),
+                            message_key,
+                            message_key,
+                        ),
+                        chat_type,
+                    });
+                }
+                CrystalLuckWeaponOutcome::NoEffect { message_key } => {
+                    packets.push(ServerPacket::Chat {
+                        message: localized_text_or_fallback(
+                            current_language(world),
+                            message_key,
+                            message_key,
+                        ),
+                        chat_type: ChatType::Hint,
+                    });
+                }
+            }
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, shape)
+            if shape == CRYSTAL_SCROLL_SHAPE_REPAIR_OIL
+                || shape == CRYSTAL_SCROLL_SHAPE_WAR_GOD_OIL
+                || template.name.ends_with("WarGodOil") =>
+        {
+            let full_repair =
+                shape == CRYSTAL_SCROLL_SHAPE_WAR_GOD_OIL || template.name.ends_with("WarGodOil");
+            let Some(repair_packet) = repair_equipped_weapon_with_oil(world, full_repair) else {
+                return Some(prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packets,
+                ));
+            };
+
+            consume_item_at_use_location(world, location);
+            packets.push(repair_packet);
+            packets.push(hint_chat_key(
+                world,
+                if full_repair {
+                    "server.WeaponCompletelyRepaired"
+                } else {
+                    "server.WeaponPartiallyRepaired"
+                },
+            ));
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_MAP_SHOUT) => {
+            world.resource_mut::<SimulationResources>().free_map_shout = true;
+            consume_item_at_use_location(world, location);
+            packets.push(hint_chat_key(world, "server.FreeMapShout"));
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        (CRYSTAL_ITEM_TYPE_SCROLL, CRYSTAL_SCROLL_SHAPE_SERVER_SHOUT) => {
+            world
+                .resource_mut::<SimulationResources>()
+                .free_server_shout = true;
+            consume_item_at_use_location(world, location);
+            packets.push(hint_chat_key(world, "server.FreeServerShout"));
+            Some(prepend_optional_packet(
+                use_item_ack(packet_ack, true),
+                packets,
+            ))
+        }
+        _ => None,
+    }
+}
+
 fn use_item(
     world: &mut World,
     key: &str,
@@ -23185,64 +24567,122 @@ fn use_item(
     };
 
     let Some(location) = location else {
-        return prepend_optional_packet(
-            use_item_ack(packet_ack, false),
-            vec![system_message_key(world, "sim.itemNotFoundInBag")],
-        );
+        return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
 
     let Some(item) = item_at_use_location(world.resource::<SimulationResources>(), location) else {
-        return prepend_optional_packet(
-            use_item_ack(packet_ack, false),
-            vec![system_message_key(world, "sim.itemNotFoundInBag")],
-        );
+        return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
     let mut packets = Vec::new();
+    let item_template = crystal_item_template_for_item_key(&item.key);
+    let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);
+    let is_resurrection_scroll = item_template.as_ref().is_some_and(|template| {
+        template.item_type == CRYSTAL_ITEM_TYPE_SCROLL
+            && template.shape == CRYSTAL_SCROLL_SHAPE_RESURRECTION
+    });
+    let is_mystery_water = item_template.as_ref().is_some_and(|template| {
+        template.item_type == CRYSTAL_ITEM_TYPE_POTION
+            && template.shape == CRYSTAL_POTION_SHAPE_MYSTERY_WATER
+    });
 
-    if let Some(slot) = item.equip_slot {
-        let UseItemLocation::Inventory(index) = location else {
-            packets.push(system_message(
-                "That item cannot be equipped from this grid.",
-            ));
+    if let Some(template) = item_template.as_ref() {
+        match crystal_use_item_eligibility(world, template) {
+            CrystalUseItemEligibility::Allowed => {}
+            CrystalUseItemEligibility::Rejected(packet) => {
+                return prepend_optional_packet(
+                    use_item_ack(packet_ack, false),
+                    packet.into_iter().collect(),
+                );
+            }
+        }
+    }
+
+    if current_player_is_dead(world) && !is_resurrection_scroll {
+        return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+    }
+
+    if is_resurrection_scroll {
+        if !current_player_is_dead(world) {
+            packets.push(hint_chat_key(world, "server.CannotResurrection"));
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+        }
+        if current_map_disallows_reincarnation(world) {
+            packets.push(system_message_key(world, "server.CannotUseOnMap"));
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+        }
+
+        consume_item_at_use_location(world, location);
+        packets.extend(revive_current_player_from_resurrection_scroll(world));
+        return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
+    }
+
+    if is_mystery_water {
+        if world.resource::<SimulationResources>().unlock_curse {
+            packets.push(hint_chat_key(world, "server.CanAlreadyUnequipCursedItem"));
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+        }
+
+        world.resource_mut::<SimulationResources>().unlock_curse = true;
+        consume_item_at_use_location(world, location);
+        packets.push(hint_chat_key(world, "server.CanNowUnequipCursedItem"));
+        return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
+    }
+
+    if let Some(template) = dynamic_item_template.as_ref() {
+        if template.item_type == CRYSTAL_ITEM_TYPE_POTION
+            && template.shape == CRYSTAL_POTION_SHAPE_NORMAL
+        {
+            if !queue_crystal_normal_potion_restore(world, template) {
+                return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+            }
+            consume_item_at_use_location(world, location);
+            return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
+        }
+        if let Some(result) =
+            use_dynamic_crystal_template_item(world, template, location, packet_ack)
+        {
+            return result;
+        }
+    }
+
+    if let Some(template) = item_template.as_ref() {
+        if template.item_type == CRYSTAL_ITEM_TYPE_BOOK {
+            if !crystal_learn_book_skill(world, template) {
+                return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+            }
+            consume_item_at_use_location(world, location);
+            return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
+        }
+    }
+
+    let equip_slot = item.equip_slot.or_else(|| {
+        item_template
+            .as_ref()
+            .and_then(crystal_equipment_slot_for_template)
+    });
+    if let Some(slot) = equip_slot {
+        let UseItemLocation::Inventory(_) = location else {
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
         };
-        let replaced = equip_inventory_item(world, index, slot, &item);
-        if replaced {
-            packets.push(system_message_key_args(
-                world,
-                "sim.equippedItemAndReturnedPrevious",
-                [localized_item_name(
-                    current_language(world),
-                    &item.key,
-                    &item.name,
-                )],
-            ));
-        } else {
-            packets.push(system_message_key_args(
-                world,
-                "sim.equippedItem",
-                [localized_item_name(
-                    current_language(world),
-                    &item.key,
-                    &item.name,
-                )],
-            ));
-        }
+        let to = match equipment_slot_index(slot).and_then(|index| i32::try_from(index).ok()) {
+            Some(index) => index,
+            None => return prepend_optional_packet(use_item_ack(packet_ack, false), packets),
+        };
+        let Some(result) = try_equip_item(world, MirGridType::Inventory, item_unique_id(&item), to)
+        else {
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+        };
+        packets.extend(result.refresh_packets);
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
     if item.key == "town-teleport" {
-        if let Some(player) = player_entity(world) {
-            let spawn = world.resource::<SimulationResources>().config.spawn.clone();
-            world
-                .entity_mut(player)
-                .insert((Position(spawn), Facing(MirDirection::Down)));
+        if current_map_disallows_town_teleport(world) {
+            packets.push(system_message_key(world, "server.NoTownTeleport"));
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
         }
         consume_item_at_use_location(world, location);
-        packets.push(ServerPacket::UserLocation {
-            location: current_location(world),
-        });
-        packets.push(system_message_key(world, "sim.townTeleportReturnedToSpawn"));
+        packets.extend(town_teleport_packets(world));
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
@@ -23250,23 +24690,16 @@ fn use_item(
         let repair_packets = repair_equipped_durability(world);
         let repaired_count = repair_packets.len();
         if repaired_count == 0 {
-            packets.push(system_message_key(world, "sim.noEquipmentNeedsRepair"));
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
         }
 
         consume_item_at_use_location(world, location);
         packets.extend(repair_packets);
-        packets.push(system_message_key_args(
-            world,
-            "sim.repairedEquippedItems",
-            [repaired_count.to_string()],
-        ));
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
     if item.key == "benediction-oil" {
         let Some(outcome) = try_luck_weapon(world) else {
-            packets.push(system_message("No equipped weapon can be blessed."));
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
         };
 
@@ -23274,18 +24707,26 @@ fn use_item(
         match outcome {
             CrystalLuckWeaponOutcome::Changed {
                 refresh_packet,
-                message,
+                message_key,
                 chat_type,
             } => {
                 packets.push(refresh_packet);
                 packets.push(ServerPacket::Chat {
-                    message: message.to_string(),
+                    message: localized_text_or_fallback(
+                        current_language(world),
+                        message_key,
+                        message_key,
+                    ),
                     chat_type,
                 });
             }
-            CrystalLuckWeaponOutcome::NoEffect { message } => {
+            CrystalLuckWeaponOutcome::NoEffect { message_key } => {
                 packets.push(ServerPacket::Chat {
-                    message: message.to_string(),
+                    message: localized_text_or_fallback(
+                        current_language(world),
+                        message_key,
+                        message_key,
+                    ),
                     chat_type: ChatType::Hint,
                 });
             }
@@ -23296,13 +24737,19 @@ fn use_item(
     if item.key == "repair-oil" || item.key == "war-god-oil" {
         let full_repair = item.key == "war-god-oil";
         let Some(repair_packet) = repair_equipped_weapon_with_oil(world, full_repair) else {
-            packets.push(system_message("Your equipped weapon does not need repair."));
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
         };
 
         consume_item_at_use_location(world, location);
         packets.push(repair_packet);
-        packets.push(system_message("Your weapon has been repaired."));
+        packets.push(hint_chat_key(
+            world,
+            if full_repair {
+                "server.WeaponCompletelyRepaired"
+            } else {
+                "server.WeaponPartiallyRepaired"
+            },
+        ));
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
@@ -23311,34 +24758,28 @@ fn use_item(
         if let Some(packet) = gain_credit(world, credit) {
             packets.push(packet);
         }
-        packets.push(system_message(&format!(
-            "{credit} Credits have been added to your Account."
-        )));
-        return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
-    }
-
-    if item.heal_hp > 0 || item.heal_mp > 0 {
-        if let Some(player) = player_entity(world) {
-            let mut entity = world.entity_mut(player);
-            let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
-            vitals.hp = (vitals.hp + item.heal_hp).min(vitals.max_hp);
-            vitals.mp = (vitals.mp + item.heal_mp).min(100);
-        }
-
-        consume_item_at_use_location(world, location);
-        packets.push(system_message_key_args(
+        packets.push(hint_chat_key_args(
             world,
-            "sim.usedItem",
-            [localized_item_name(
-                current_language(world),
-                &item.key,
-                &item.name,
-            )],
+            "server.CreditsAddedToAccount",
+            [credit.to_string()],
         ));
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
-    packets.push(system_message_key(world, "sim.itemNoActiveUse"));
+    if item.heal_hp > 0 || item.heal_mp > 0 {
+        if current_map_disallows_drug(world) {
+            packets.push(system_message_key(world, "server.YouCannotUsePotionsHere"));
+            return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+        }
+        queue_crystal_normal_potion_restore_amounts(
+            world,
+            item.heal_hp.max(0),
+            item.heal_mp.max(0),
+        );
+        consume_item_at_use_location(world, location);
+        return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
+    }
+
     prepend_optional_packet(use_item_ack(packet_ack, false), packets)
 }
 
@@ -23368,104 +24809,108 @@ fn use_item_ack(packet_ack: Option<(u64, MirGridType)>, success: bool) -> Option
 }
 
 fn move_item_impl(world: &mut World, grid: MirGridType, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failed_packet = ServerPacket::MoveItem {
+        grid,
+        from,
+        to,
+        success: false,
+    };
+    if !matches!(
+        grid,
+        MirGridType::Inventory
+            | MirGridType::Storage
+            | MirGridType::Trade
+            | MirGridType::Refine
+            | MirGridType::HeroInventory
+    ) {
+        return vec![failed_packet];
+    }
+    if matches!(grid, MirGridType::Storage) && !active_crystal_storage_service(world) {
+        return vec![failed_packet];
+    }
     if matches!(grid, MirGridType::Storage) && storage_locked(world) {
-        return vec![
-            ServerPacket::MoveItem {
-                grid,
-                from,
-                to,
-                success: false,
-            },
-            system_message("Storage is locked."),
-        ];
+        return vec![failed_packet];
     }
     let Some(to_slot) = u8::try_from(to).ok() else {
-        return vec![
-            ServerPacket::MoveItem {
-                grid,
-                from,
-                to,
-                success: false,
-            },
-            system_message("Invalid target item slot."),
-        ];
+        return vec![failed_packet];
     };
     let Some(from_slot) = u8::try_from(from).ok() else {
-        return vec![
-            ServerPacket::MoveItem {
-                grid,
-                from,
-                to,
-                success: false,
-            },
-            system_message("Invalid source item slot."),
-        ];
+        return vec![failed_packet];
     };
+
+    if matches!(grid, MirGridType::Inventory)
+        && (!is_valid_inventory_slot(from_slot) || !is_valid_inventory_slot(to_slot))
+    {
+        return vec![failed_packet];
+    }
 
     if matches!(grid, MirGridType::Storage) {
         let resources = world.resource::<SimulationResources>();
         if !is_valid_storage_slot(&resources, from_slot)
             || !is_valid_storage_slot(&resources, to_slot)
         {
-            return vec![
-                ServerPacket::MoveItem {
-                    grid,
-                    from,
-                    to,
-                    success: false,
-                },
-                system_message("Invalid target item slot."),
-            ];
+            return vec![failed_packet];
         }
     }
 
     let mut resources = world.resource_mut::<SimulationResources>();
     let items = match grid {
-        MirGridType::Belt => &mut resources.belt_items,
-        MirGridType::Inventory | MirGridType::QuestInventory => &mut resources.inventory_items,
+        MirGridType::Inventory => &mut resources.inventory_items,
         MirGridType::Storage => &mut resources.storage_items,
-        _ => {
-            return vec![
-                ServerPacket::MoveItem {
-                    grid,
-                    from,
-                    to,
-                    success: false,
-                },
-                system_message("That item grid cannot be moved yet."),
-            ];
-        }
+        _ => return vec![failed_packet],
     };
 
-    let Some(index) = items.iter().position(|item| item.slot == from_slot) else {
-        return vec![
-            ServerPacket::MoveItem {
-                grid,
-                from,
-                to,
-                success: false,
-            },
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
-    };
-
-    if let Some(other_index) = items
+    let Some(index) = items
         .iter()
-        .position(|item| item.slot == to_slot && item.container == items[index].container)
-    {
-        items[other_index].slot = from_slot;
-    }
-    items[index].slot = to_slot;
+        .position(|item| move_item_slot_matches_grid(item, grid, from_slot))
+    else {
+        return match grid {
+            MirGridType::Inventory | MirGridType::Storage => vec![
+                system_message_key(world, "server.ItemMoveErrorReport"),
+                failed_packet,
+            ],
+            _ => vec![failed_packet],
+        };
+    };
 
-    vec![
-        ServerPacket::MoveItem {
-            grid,
-            from,
-            to,
-            success: true,
-        },
-        system_message("Item slot updated."),
-    ]
+    match grid {
+        MirGridType::Inventory => {
+            let Some((from_container, from_inventory_slot)) =
+                inventory_container_and_slot_for_index(from_slot)
+            else {
+                return vec![failed_packet];
+            };
+            let Some((to_container, to_inventory_slot)) =
+                inventory_container_and_slot_for_index(to_slot)
+            else {
+                return vec![failed_packet];
+            };
+
+            if let Some(other_index) = items
+                .iter()
+                .position(|item| inventory_item_matches_index(item, to_slot))
+            {
+                items[other_index].slot = from_inventory_slot;
+                items[other_index].container = from_container;
+            }
+            items[index].slot = to_inventory_slot;
+            items[index].container = to_container;
+        }
+        MirGridType::Storage => {
+            if let Some(other_index) = items.iter().position(|item| item.slot == to_slot) {
+                items[other_index].slot = from_slot;
+            }
+            items[index].slot = to_slot;
+        }
+        _ => return vec![failed_packet],
+    }
+
+    vec![ServerPacket::MoveItem {
+        grid,
+        from,
+        to,
+        success: true,
+    }]
 }
 
 fn merge_item_impl(
@@ -23475,141 +24920,227 @@ fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
-    if matches!(grid_from, MirGridType::Storage) && storage_locked(world) {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Storage is locked."),
-        ];
-    }
-    if grid_from != grid_to {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Cross-grid item merge is not available yet."),
-        ];
-    }
-
-    let Some(from_slot) = u8::try_from(id_from).ok() else {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Invalid source item slot."),
-        ];
+    let failed_packet = ServerPacket::MergeItem {
+        grid_from,
+        grid_to,
+        id_from,
+        id_to,
+        success: false,
     };
-    let Some(to_slot) = u8::try_from(id_to).ok() else {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Invalid target item slot."),
-        ];
-    };
-
-    if matches!(grid_from, MirGridType::Storage) {
-        let resources = world.resource::<SimulationResources>();
-        if !is_valid_storage_slot(&resources, from_slot)
-            || !is_valid_storage_slot(&resources, to_slot)
-        {
-            return vec![
-                ServerPacket::MergeItem {
-                    grid_from,
-                    grid_to,
-                    id_from,
-                    id_to,
-                    success: false,
-                },
-                system_message("Invalid target item slot."),
-            ];
+    if matches!(
+        grid_from,
+        MirGridType::HeroInventory
+            | MirGridType::HeroEquipment
+            | MirGridType::Equipment
+            | MirGridType::Fishing
+            | MirGridType::QuestInventory
+            | MirGridType::Trade
+            | MirGridType::Refine
+    ) || matches!(
+        grid_to,
+        MirGridType::HeroInventory
+            | MirGridType::HeroEquipment
+            | MirGridType::Equipment
+            | MirGridType::Fishing
+            | MirGridType::QuestInventory
+            | MirGridType::Trade
+            | MirGridType::Refine
+    ) {
+        return vec![failed_packet];
+    }
+    if (matches!(grid_from, MirGridType::Storage) || matches!(grid_to, MirGridType::Storage))
+        && !active_crystal_storage_service(world)
+    {
+        return vec![failed_packet];
+    }
+    if matches!(grid_from, MirGridType::Storage) || matches!(grid_to, MirGridType::Storage) {
+        if storage_locked(world) {
+            return vec![failed_packet];
         }
     }
 
     let mut resources = world.resource_mut::<SimulationResources>();
-    let items = match grid_from {
-        MirGridType::Belt => &mut resources.belt_items,
-        MirGridType::Inventory | MirGridType::QuestInventory => &mut resources.inventory_items,
-        MirGridType::Storage => &mut resources.storage_items,
-        _ => {
-            return vec![
-                ServerPacket::MergeItem {
-                    grid_from,
-                    grid_to,
-                    id_from,
-                    id_to,
-                    success: false,
-                },
-                system_message("That item grid cannot be merged yet."),
-            ];
+    let storage_slot_limit = accessible_storage_size(&resources);
+    let success = match (grid_from, grid_to) {
+        (MirGridType::Belt, MirGridType::Belt) => {
+            merge_item_within_collection(&mut resources.belt_items, grid_from, id_from, id_to, None)
         }
+        (MirGridType::Inventory, MirGridType::Inventory)
+        | (MirGridType::QuestInventory, MirGridType::QuestInventory) => {
+            merge_item_within_collection(
+                &mut resources.inventory_items,
+                grid_from,
+                id_from,
+                id_to,
+                None,
+            )
+        }
+        (MirGridType::Storage, MirGridType::Storage) => merge_item_within_collection(
+            &mut resources.storage_items,
+            grid_from,
+            id_from,
+            id_to,
+            Some(storage_slot_limit),
+        ),
+        (MirGridType::Inventory, MirGridType::Storage) => {
+            let SimulationResources {
+                inventory_items,
+                storage_items,
+                ..
+            } = &mut *resources;
+            merge_item_across_collections(
+                inventory_items,
+                grid_from,
+                id_from,
+                storage_items,
+                grid_to,
+                id_to,
+                Some(storage_slot_limit),
+            )
+        }
+        (MirGridType::Storage, MirGridType::Inventory) => {
+            let SimulationResources {
+                inventory_items,
+                storage_items,
+                ..
+            } = &mut *resources;
+            merge_item_across_collections(
+                storage_items,
+                grid_from,
+                id_from,
+                inventory_items,
+                grid_to,
+                id_to,
+                Some(storage_slot_limit),
+            )
+        }
+        (MirGridType::Inventory, MirGridType::Belt) => {
+            if !belt_merge_item_pair_supported(
+                &resources.inventory_items,
+                grid_from,
+                id_from,
+                &resources.belt_items,
+                grid_to,
+                id_to,
+            ) {
+                false
+            } else {
+                let SimulationResources {
+                    inventory_items,
+                    belt_items,
+                    ..
+                } = &mut *resources;
+                merge_item_across_collections(
+                    inventory_items,
+                    grid_from,
+                    id_from,
+                    belt_items,
+                    grid_to,
+                    id_to,
+                    None,
+                )
+            }
+        }
+        (MirGridType::Belt, MirGridType::Inventory) => {
+            if !belt_merge_item_pair_supported(
+                &resources.belt_items,
+                grid_from,
+                id_from,
+                &resources.inventory_items,
+                grid_to,
+                id_to,
+            ) {
+                false
+            } else {
+                let SimulationResources {
+                    inventory_items,
+                    belt_items,
+                    ..
+                } = &mut *resources;
+                merge_item_across_collections(
+                    belt_items,
+                    grid_from,
+                    id_from,
+                    inventory_items,
+                    grid_to,
+                    id_to,
+                    None,
+                )
+            }
+        }
+        _ if grid_from != grid_to => return vec![failed_packet],
+        _ => return vec![failed_packet],
+    };
+    if !success {
+        return vec![failed_packet];
+    }
+
+    vec![ServerPacket::MergeItem {
+        grid_from,
+        grid_to,
+        id_from,
+        id_to,
+        success: true,
+    }]
+}
+
+fn storage_slot_within_limit(slot: u8, storage_slot_limit: u16) -> bool {
+    u16::from(slot) < storage_slot_limit
+}
+
+fn crystal_item_can_merge_between_inventory_and_belt(key: &str) -> bool {
+    crystal_belt_slot_range_for_item_key(key).is_some()
+}
+
+fn belt_merge_item_pair_supported(
+    from_items: &[ItemState],
+    grid_from: MirGridType,
+    id_from: u64,
+    to_items: &[ItemState],
+    grid_to: MirGridType,
+    id_to: u64,
+) -> bool {
+    let Some(from_index) = item_index_for_client_reference(from_items, grid_from, id_from) else {
+        return false;
+    };
+    let Some(to_index) = item_index_for_client_reference(to_items, grid_to, id_to) else {
+        return false;
     };
 
-    let Some(from_index) = items.iter().position(|item| item.slot == from_slot) else {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
+    from_items[from_index].key == to_items[to_index].key
+        && crystal_item_can_merge_between_inventory_and_belt(&from_items[from_index].key)
+}
+
+fn merge_item_within_collection(
+    items: &mut Vec<ItemState>,
+    grid: MirGridType,
+    id_from: u64,
+    id_to: u64,
+    storage_slot_limit: Option<u16>,
+) -> bool {
+    let Some(from_index) = item_index_for_client_reference(items, grid, id_from) else {
+        return false;
     };
-    let Some(to_index) = items.iter().position(|item| item.slot == to_slot) else {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
+    let Some(to_index) = item_index_for_client_reference(items, grid, id_to) else {
+        return false;
     };
-    if from_index == to_index || items[from_index].key != items[to_index].key {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Only matching item stacks can be merged."),
-        ];
+    if from_index == to_index {
+        return false;
     }
+    if let Some(limit) = storage_slot_limit {
+        if !storage_slot_within_limit(items[from_index].slot, limit)
+            || !storage_slot_within_limit(items[to_index].slot, limit)
+        {
+            return false;
+        }
+    }
+    if items[from_index].key != items[to_index].key {
+        return false;
+    }
+
     let max_stack = crystal_stack_size_for_item_key(&items[to_index].key);
     if max_stack <= 1 || items[to_index].quantity >= max_stack {
-        return vec![
-            ServerPacket::MergeItem {
-                grid_from,
-                grid_to,
-                id_from,
-                id_to,
-                success: false,
-            },
-            system_message("Only matching item stacks can be merged."),
-        ];
+        return false;
     }
 
     let quantity = items[from_index].quantity;
@@ -23622,16 +25153,56 @@ fn merge_item_impl(
         items[to_index].quantity = max_stack;
     }
 
-    vec![
-        ServerPacket::MergeItem {
-            grid_from,
-            grid_to,
-            id_from,
-            id_to,
-            success: true,
-        },
-        system_message("Item stacks merged."),
-    ]
+    true
+}
+
+fn merge_item_across_collections(
+    from_items: &mut Vec<ItemState>,
+    grid_from: MirGridType,
+    id_from: u64,
+    to_items: &mut Vec<ItemState>,
+    grid_to: MirGridType,
+    id_to: u64,
+    storage_slot_limit: Option<u16>,
+) -> bool {
+    let Some(from_index) = item_index_for_client_reference(from_items, grid_from, id_from) else {
+        return false;
+    };
+    let Some(to_index) = item_index_for_client_reference(to_items, grid_to, id_to) else {
+        return false;
+    };
+    if let Some(limit) = storage_slot_limit {
+        if matches!(grid_from, MirGridType::Storage)
+            && !storage_slot_within_limit(from_items[from_index].slot, limit)
+        {
+            return false;
+        }
+        if matches!(grid_to, MirGridType::Storage)
+            && !storage_slot_within_limit(to_items[to_index].slot, limit)
+        {
+            return false;
+        }
+    }
+    if from_items[from_index].key != to_items[to_index].key {
+        return false;
+    }
+
+    let max_stack = crystal_stack_size_for_item_key(&to_items[to_index].key);
+    if max_stack <= 1 || to_items[to_index].quantity >= max_stack {
+        return false;
+    }
+
+    let quantity = from_items[from_index].quantity;
+    let available_space = max_stack - to_items[to_index].quantity;
+    if quantity <= available_space {
+        to_items[to_index].quantity += quantity;
+        from_items.remove(from_index);
+    } else {
+        from_items[from_index].quantity -= available_space;
+        to_items[to_index].quantity = max_stack;
+    }
+
+    true
 }
 
 fn split_item_impl(
@@ -23640,112 +25211,93 @@ fn split_item_impl(
     unique_id: u64,
     count: u16,
 ) -> Vec<ServerPacket> {
+    let failed_packet = ServerPacket::SplitItem1 {
+        grid,
+        unique_id,
+        count,
+        success: false,
+    };
+
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage) {
+        return vec![failed_packet];
+    }
+
+    if matches!(grid, MirGridType::Storage) && !active_crystal_storage_service(world) {
+        return vec![failed_packet];
+    }
+
     if matches!(grid, MirGridType::Storage) && storage_locked(world) {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("Storage is locked."),
-        ];
+        return vec![failed_packet];
     }
     if count == 0 {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("Split count must be greater than zero."),
-        ];
+        return vec![failed_packet];
     }
-    let Some(slot) = u8::try_from(unique_id).ok() else {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("Invalid item slot."),
-        ];
-    };
 
-    let container = match grid {
-        MirGridType::Belt => ItemContainer::Belt,
-        MirGridType::QuestInventory => ItemContainer::Quest,
-        MirGridType::Storage => ItemContainer::Storage,
-        _ => ItemContainer::Bag1,
-    };
     let mut resources = world.resource_mut::<SimulationResources>();
-    if matches!(grid, MirGridType::Storage) && !is_valid_storage_slot(&resources, slot) {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("Invalid item slot."),
-        ];
-    }
-    let storage_slot_limit = accessible_storage_size(&resources);
-    let items = match grid {
-        MirGridType::Belt => &mut resources.belt_items,
-        MirGridType::Storage => &mut resources.storage_items,
-        _ => &mut resources.inventory_items,
-    };
-    let Some(index) = items
-        .iter()
-        .position(|item| item.slot == slot && item.container == container)
-    else {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
-    };
-    if items[index].quantity <= u32::from(count) {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("Not enough items in that stack."),
-        ];
-    }
-    let next_slot = if matches!(grid, MirGridType::Storage) {
-        find_empty_storage_slot(items, storage_slot_limit)
-    } else {
-        find_empty_slot(items, container)
-    };
-    let Some(next_slot) = next_slot else {
-        return vec![
-            ServerPacket::SplitItem1 {
-                grid,
-                unique_id,
-                count,
-                success: false,
-            },
-            system_message("No free slot for split stack."),
-        ];
-    };
+    let split_packet_item = match grid {
+        MirGridType::Storage => {
+            let Some(index) = resources
+                .storage_items
+                .iter()
+                .position(|item| item_matches_client_reference(item, grid, unique_id))
+            else {
+                return vec![failed_packet];
+            };
+            if resources.storage_items[index].quantity <= u32::from(count) {
+                return vec![failed_packet];
+            }
+            let storage_slot_limit = accessible_storage_size(&resources);
+            let Some(next_slot) =
+                find_empty_storage_slot(&resources.storage_items, storage_slot_limit)
+            else {
+                return vec![failed_packet];
+            };
 
-    items[index].quantity -= u32::from(count);
-    let mut split = items[index].clone();
-    split.slot = next_slot;
-    split.quantity = u32::from(count);
-    let split_packet_item = user_item_from_item_state(&split);
-    items.push(split);
+            resources.storage_items[index].quantity -= u32::from(count);
+            let mut split = resources.storage_items[index].clone();
+            split.slot = next_slot;
+            split.unique_id = default_item_unique_id(split.container, next_slot);
+            split.quantity = u32::from(count);
+            let split_packet_item = user_item_from_item_state(&split);
+            resources.storage_items.push(split);
+            split_packet_item
+        }
+        MirGridType::Inventory => {
+            let Some(index) = resources
+                .inventory_items
+                .iter()
+                .position(|item| item_matches_client_reference(item, grid, unique_id))
+            else {
+                return vec![failed_packet];
+            };
+            if resources.inventory_items[index].quantity <= u32::from(count) {
+                return vec![failed_packet];
+            }
+            let source_container = resources.inventory_items[index].container;
+            let source_key = resources.inventory_items[index].key.clone();
+            let Some((next_container, next_slot)) =
+                crystal_empty_add_item_slots(&resources, source_container, &source_key)
+                    .into_iter()
+                    .next()
+            else {
+                return vec![failed_packet];
+            };
+
+            resources.inventory_items[index].quantity -= u32::from(count);
+            let mut split = resources.inventory_items[index].clone();
+            split.container = next_container;
+            split.slot = next_slot;
+            split.unique_id = default_item_unique_id(split.container, next_slot);
+            split.quantity = u32::from(count);
+            let split_packet_item = user_item_from_item_state(&split);
+            match split.container {
+                ItemContainer::Belt => resources.belt_items.push(split),
+                _ => resources.inventory_items.push(split),
+            }
+            split_packet_item
+        }
+        _ => unreachable!("unsupported SplitItem grids return early"),
+    };
 
     vec![
         ServerPacket::SplitItem1 {
@@ -23758,114 +25310,214 @@ fn split_item_impl(
             item: Some(split_packet_item),
             grid,
         },
-        system_message("Item stack split."),
     ]
 }
 
-fn equip_item_by_key_impl(
-    world: &mut World,
-    grid: MirGridType,
-    unique_id: u64,
-    key: &str,
-    to: i32,
-) -> Vec<ServerPacket> {
-    let item_index = {
-        let resources = world.resource::<SimulationResources>();
-        resources
+fn collection_slot_occupied(
+    resources: &SimulationResources,
+    container: ItemContainer,
+    slot: u8,
+) -> bool {
+    match container {
+        ItemContainer::Bag1 | ItemContainer::Bag2 => resources
             .inventory_items
             .iter()
-            .position(|item| item.key == key)
-    };
-    let Some(index) = item_index else {
-        return vec![
-            ServerPacket::EquipItem {
-                grid,
-                unique_id,
-                to,
-                success: false,
-            },
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
-    };
-
-    let item = world.resource::<SimulationResources>().inventory_items[index].clone();
-    let Some(slot) = item.equip_slot.or_else(|| equipment_slot_from_index(to)) else {
-        return vec![
-            ServerPacket::EquipItem {
-                grid,
-                unique_id,
-                to,
-                success: false,
-            },
-            system_message("That item cannot be equipped."),
-        ];
-    };
-
-    let replaced = equip_inventory_item(world, index, slot, &item);
-    if replaced {
-        vec![
-            ServerPacket::EquipItem {
-                grid,
-                unique_id,
-                to,
-                success: true,
-            },
-            system_message_key_args(
-                world,
-                "sim.equippedItemAndReturnedPrevious",
-                [localized_item_name(
-                    current_language(world),
-                    &item.key,
-                    &item.name,
-                )],
-            ),
-        ]
-    } else {
-        vec![
-            ServerPacket::EquipItem {
-                grid,
-                unique_id,
-                to,
-                success: true,
-            },
-            system_message_key_args(
-                world,
-                "sim.equippedItem",
-                [localized_item_name(
-                    current_language(world),
-                    &item.key,
-                    &item.name,
-                )],
-            ),
-        ]
+            .any(|item| item.container == container && item.slot == slot),
+        ItemContainer::Storage => resources.storage_items.iter().any(|item| item.slot == slot),
+        _ => false,
     }
 }
 
-fn remove_equipped_item_state(
+fn equipment_index_for_client_reference(
+    resources: &SimulationResources,
+    unique_id: u64,
+) -> Option<usize> {
+    resources
+        .equipment_items
+        .iter()
+        .position(|item| equipment_slot_unique_id(item.slot) == Some(unique_id))
+}
+
+fn remove_item_destination(
+    resources: &SimulationResources,
+    grid: MirGridType,
+    to: i32,
+) -> Option<(ItemContainer, u8)> {
+    let slot = u8::try_from(to).ok()?;
+    match grid {
+        MirGridType::Inventory => inventory_container_and_slot_for_index(slot),
+        MirGridType::Storage => {
+            is_valid_storage_slot(resources, slot).then_some((ItemContainer::Storage, slot))
+        }
+        _ => None,
+    }
+}
+
+struct EquipItemMutationResult {
+    refresh_packets: Vec<ServerPacket>,
+}
+
+fn try_equip_item(
     world: &mut World,
+    grid: MirGridType,
     unique_id: u64,
     to: i32,
-) -> Result<String, ServerPacket> {
-    let Some(key) = item_key_for_equipment_reference(world, unique_id) else {
-        return Err(system_message("Equipped item was not found."));
-    };
-    let preferred_slot = u8::try_from(to).unwrap_or(0);
+) -> Option<EquipItemMutationResult> {
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage) {
+        return None;
+    }
+    if matches!(grid, MirGridType::Storage) && !active_crystal_storage_service(world) {
+        return None;
+    }
+    if matches!(grid, MirGridType::Storage) && storage_locked(world) {
+        return None;
+    }
 
-    let equipment = {
-        let mut resources = world.resource_mut::<SimulationResources>();
-        let Some(index) = resources
+    let target_slot = equipment_slot_from_index(to)?;
+    let player_character_index = current_character_index(world).unwrap_or(-1);
+
+    let (
+        source_index,
+        source_slot,
+        source_container,
+        source_item,
+        replaced_cursed,
+        refresh_packets,
+    ) = {
+        let resources = world.resource::<SimulationResources>();
+        let source_items = match grid {
+            MirGridType::Inventory => &resources.inventory_items,
+            MirGridType::Storage => &resources.storage_items,
+            _ => unreachable!("unsupported grids return early"),
+        };
+        let index = item_index_for_client_reference(source_items, grid, unique_id)?;
+        let mut item = source_items[index].clone();
+        if !item_state_can_equip_to_slot(&item, target_slot) {
+            return None;
+        }
+        if crystal_item_template_for_dynamic_key(&item.key)
+            .as_ref()
+            .is_some_and(|template| {
+                crystal_item_requirement_rejection_key(resources, template).is_some()
+            })
+        {
+            return None;
+        }
+        let soul_bound_id = item_state_soul_bound_id(&item);
+        if soul_bound_id != -1 && soul_bound_id != player_character_index {
+            return None;
+        }
+
+        let replaced = resources
             .equipment_items
             .iter()
-            .position(|item| item.key == key)
-        else {
-            return Err(system_message("Equipped item was not found."));
-        };
-        resources.equipment_items.remove(index)
-    };
-    let name = localized_item_name(current_language(world), &equipment.key, &equipment.name);
-    add_equipment_back_to_bag(world, equipment, preferred_slot);
+            .find(|item| item.slot == target_slot);
+        if replaced.is_some_and(|item| item.cursed && !resources.unlock_curse) {
+            return None;
+        }
+        if matches!(grid, MirGridType::Storage)
+            && replaced.is_some_and(|item| {
+                equipment_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_STORE)
+            })
+        {
+            return None;
+        }
 
-    Ok(name)
+        let mut refresh_packets = Vec::new();
+        if crystal_item_needs_identify(&item.key) && !item_state_identified(&item) {
+            item.identified = Some(true);
+            refresh_packets.push(ServerPacket::RefreshItem {
+                item: user_item_from_item_state(&item),
+            });
+        }
+        if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_ON_EQUIP)
+            && item_state_soul_bound_id(&item) == -1
+            && player_character_index >= 0
+        {
+            item.soul_bound_id = Some(player_character_index);
+            refresh_packets.push(ServerPacket::RefreshItem {
+                item: user_item_from_item_state(&item),
+            });
+        }
+
+        (
+            index,
+            item.slot,
+            item.container,
+            item,
+            replaced.is_some_and(|item| item.cursed),
+            refresh_packets,
+        )
+    };
+
+    {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        let next_equipment = equipment_state_from_item_state(&source_item, target_slot);
+        match grid {
+            MirGridType::Inventory => {
+                resources.inventory_items.remove(source_index);
+            }
+            MirGridType::Storage => {
+                if !is_valid_storage_slot(&resources, source_slot) {
+                    return None;
+                }
+                resources.storage_items.remove(source_index);
+            }
+            _ => unreachable!("unsupported grids return early"),
+        }
+
+        let replaced = resources
+            .equipment_items
+            .iter()
+            .position(|item| item.slot == target_slot)
+            .map(|index| resources.equipment_items.remove(index));
+        resources.equipment_items.push(next_equipment);
+
+        if let Some(existing) = replaced {
+            let returned = item_state_from_equipment_state(existing, source_container, source_slot);
+            match source_container {
+                ItemContainer::Bag1 | ItemContainer::Bag2 => {
+                    resources.inventory_items.push(returned)
+                }
+                ItemContainer::Storage => resources.storage_items.push(returned),
+                _ => {}
+            }
+        }
+        if replaced_cursed {
+            resources.unlock_curse = false;
+        }
+    }
+
+    Some(EquipItemMutationResult { refresh_packets })
+}
+
+fn equip_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    unique_id: u64,
+    to: i32,
+) -> Vec<ServerPacket> {
+    let failed_packet = ServerPacket::EquipItem {
+        grid,
+        unique_id,
+        to,
+        success: false,
+    };
+    if matches!(grid, MirGridType::HeroInventory) {
+        return vec![failed_packet];
+    }
+    let Some(result) = try_equip_item(world, grid, unique_id, to) else {
+        return vec![failed_packet];
+    };
+
+    let mut packets = result.refresh_packets;
+    packets.push(ServerPacket::EquipItem {
+        grid,
+        unique_id,
+        to,
+        success: true,
+    });
+    packets
 }
 
 fn remove_equipped_item_impl(
@@ -23874,26 +25526,72 @@ fn remove_equipped_item_impl(
     unique_id: u64,
     to: i32,
 ) -> Vec<ServerPacket> {
-    match remove_equipped_item_state(world, unique_id, to) {
-        Ok(name) => vec![
-            ServerPacket::RemoveItem {
-                grid,
-                unique_id,
-                to,
-                success: true,
-            },
-            system_message(&format!("Removed {name}.")),
-        ],
-        Err(message) => vec![
-            ServerPacket::RemoveItem {
-                grid,
-                unique_id,
-                to,
-                success: false,
-            },
-            message,
-        ],
+    let failed_packet = ServerPacket::RemoveItem {
+        grid,
+        unique_id,
+        to,
+        success: false,
+    };
+    if matches!(grid, MirGridType::HeroInventory) {
+        return vec![failed_packet];
     }
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage) {
+        return vec![failed_packet];
+    }
+    if matches!(grid, MirGridType::Storage) && !active_crystal_storage_service(world) {
+        return vec![failed_packet];
+    }
+    if matches!(grid, MirGridType::Storage) && storage_locked(world) {
+        return vec![failed_packet];
+    }
+
+    let (destination_container, destination_slot) = {
+        let resources = world.resource::<SimulationResources>();
+        let Some(destination) = remove_item_destination(&resources, grid, to) else {
+            return vec![failed_packet];
+        };
+        if collection_slot_occupied(&resources, destination.0, destination.1) {
+            return vec![failed_packet];
+        }
+        let Some(index) = equipment_index_for_client_reference(&resources, unique_id) else {
+            return vec![failed_packet];
+        };
+        let equipment = &resources.equipment_items[index];
+        if equipment.cursed && !resources.unlock_curse {
+            return vec![failed_packet];
+        }
+        if matches!(grid, MirGridType::Storage)
+            && equipment_has_crystal_or_rental_bind_flag(equipment, CRYSTAL_BIND_DONT_STORE)
+        {
+            return vec![failed_packet];
+        }
+        destination
+    };
+
+    {
+        let mut resources = world.resource_mut::<SimulationResources>();
+        let Some(index) = equipment_index_for_client_reference(&resources, unique_id) else {
+            return vec![failed_packet];
+        };
+        let equipment = resources.equipment_items.remove(index);
+        if equipment.cursed {
+            resources.unlock_curse = false;
+        }
+        let item =
+            item_state_from_equipment_state(equipment, destination_container, destination_slot);
+        match destination_container {
+            ItemContainer::Bag1 | ItemContainer::Bag2 => resources.inventory_items.push(item),
+            ItemContainer::Storage => resources.storage_items.push(item),
+            _ => {}
+        }
+    }
+
+    vec![ServerPacket::RemoveItem {
+        grid,
+        unique_id,
+        to,
+        success: true,
+    }]
 }
 
 fn remove_equipped_slot_item_impl(
@@ -23902,29 +25600,39 @@ fn remove_equipped_slot_item_impl(
     grid_to: MirGridType,
     unique_id: u64,
     to: i32,
+    _from_unique_id: u64,
 ) -> Vec<ServerPacket> {
-    match remove_equipped_item_state(world, unique_id, to) {
-        Ok(name) => vec![
-            ServerPacket::RemoveSlotItem {
-                grid,
-                grid_to,
-                unique_id,
-                to,
-                success: true,
-            },
-            system_message(&format!("Removed {name}.")),
-        ],
-        Err(message) => vec![
-            ServerPacket::RemoveSlotItem {
-                grid,
-                grid_to,
-                unique_id,
-                to,
-                success: false,
-            },
-            message,
-        ],
+    let _ = world;
+    let failed_packet = ServerPacket::RemoveSlotItem {
+        grid,
+        grid_to,
+        unique_id,
+        to,
+        success: false,
+    };
+    if matches!(
+        grid,
+        MirGridType::HeroEquipment | MirGridType::HeroInventory
+    ) || matches!(
+        grid_to,
+        MirGridType::HeroEquipment | MirGridType::HeroInventory
+    ) {
+        return vec![failed_packet];
     }
+    if !matches!(
+        grid,
+        MirGridType::Mount | MirGridType::Fishing | MirGridType::Socket
+    ) {
+        return vec![failed_packet];
+    }
+    if !matches!(grid_to, MirGridType::Inventory | MirGridType::Storage) {
+        return vec![failed_packet];
+    }
+
+    // Current runtime does not model embedded mount/fishing/socket slot items yet.
+    // Keep Crystal's RemoveSlotItem source-grid envelope, but do not fall through
+    // into whole-equipment RemoveItem semantics for unmodeled slot-item requests.
+    vec![failed_packet]
 }
 
 fn drop_gold_impl(world: &mut World, amount: u32) -> Vec<ServerPacket> {
@@ -23990,17 +25698,15 @@ fn buy_item_impl(
     if count == 0 || panel_type != CRYSTAL_PANEL_BUY {
         return Vec::new();
     }
+    if current_player_is_dead(world) {
+        return Vec::new();
+    }
 
-    let Some(service) = world
-        .resource::<SimulationResources>()
-        .active_npc_service
-        .clone()
+    let Some(service) =
+        current_crystal_npc_service_in_range(world).filter(active_crystal_buy_service)
     else {
         return Vec::new();
     };
-    if !active_crystal_buy_service(&service) {
-        return Vec::new();
-    }
 
     process_crystal_npc_goods_expiry(world);
     let rate = crystal_npc_info_by_script_key(&service.script_key)
@@ -24201,11 +25907,8 @@ fn remove_crystal_npc_used_good_item(
     }
 }
 
-fn active_crystal_sell_service(resources: &SimulationResources) -> bool {
-    resources
-        .active_npc_service
-        .as_ref()
-        .is_some_and(|service| matches!(service.label_key.as_str(), "SELL" | "BUYSELL"))
+fn active_crystal_sell_service(service: &ActiveNpcServiceState) -> bool {
+    matches!(service.label_key.as_str(), "SELL" | "BUYSELL")
 }
 
 fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> Vec<ServerPacket> {
@@ -24215,19 +25918,23 @@ fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> Vec<ServerPa
         success: false,
     };
 
-    if count == 0 {
+    if current_player_is_dead(world) || count == 0 {
         return vec![failed_packet];
     }
 
+    let Some(service) =
+        current_crystal_npc_service_in_range(world).filter(active_crystal_sell_service)
+    else {
+        return vec![failed_packet];
+    };
+
     let sold = {
         let mut resources = world.resource_mut::<SimulationResources>();
-        if !active_crystal_sell_service(&resources) {
-            return vec![failed_packet];
-        }
-        let Some(index) = resources.inventory_items.iter().position(|item| {
-            u64::from(item.slot) == unique_id
-                && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-        }) else {
+        let Some(index) = resources
+            .inventory_items
+            .iter()
+            .position(|item| item_matches_inventory_unique_id(item, unique_id))
+        else {
             return vec![failed_packet];
         };
         let requested = u32::from(count);
@@ -24247,11 +25954,7 @@ fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> Vec<ServerPa
             return vec![failed_packet];
         }
 
-        let service = resources.active_npc_service.clone();
-        if let Some(script) = service
-            .as_ref()
-            .and_then(|service| crystal_npc_script_by_key(&service.script_key))
-        {
+        if let Some(script) = crystal_npc_script_by_key(&service.script_key) {
             let sell_types = crystal_npc_script_item_types(&script);
             if !sell_types.is_empty()
                 && !template
@@ -24282,21 +25985,12 @@ fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> Vec<ServerPa
 
         let gained_gold = value.min(u32::MAX.saturating_sub(resources.gold));
         resources.gold = resources.gold.saturating_add(gained_gold);
-        if let Some(service) =
-            service.filter(|service| matches!(service.label_key.as_str(), "SELL" | "BUYSELL"))
-        {
-            let player_name = resources
-                .selected_character
-                .as_ref()
-                .map(|character| character.name.clone())
-                .unwrap_or_default();
-            push_crystal_npc_buy_back_item(
-                &mut resources,
-                &service.script_key,
-                &player_name,
-                &item,
-            );
-        }
+        let player_name = resources
+            .selected_character
+            .as_ref()
+            .map(|character| character.name.clone())
+            .unwrap_or_default();
+        push_crystal_npc_buy_back_item(&mut resources, &service.script_key, &player_name, &item);
         (gained_gold, value != 0)
     };
 
@@ -24403,11 +26097,17 @@ fn delete_item_impl(
     count: u16,
     _hero_inventory: bool,
 ) -> Vec<ServerPacket> {
-    if let Some(slot) = u8::try_from(unique_id).ok() {
+    if current_player_is_dead(world) {
+        return vec![ServerPacket::DeleteItem { unique_id, count }];
+    }
+
+    {
         let mut resources = world.resource_mut::<SimulationResources>();
-        if let Some(index) = resources.inventory_items.iter().position(|item| {
-            item.slot == slot && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-        }) {
+        if let Some(index) = resources
+            .inventory_items
+            .iter()
+            .position(|item| item_matches_inventory_unique_id(item, unique_id))
+        {
             let item_count = resources.inventory_items[index].quantity;
             let requested = u32::from(count);
             let delete_count = if requested == 0 || requested > item_count {
@@ -24435,16 +26135,15 @@ fn active_crystal_repair_service(service: &ActiveNpcServiceState, special: bool)
 }
 
 fn repair_item_impl(world: &mut World, unique_id: u64, special: bool) -> Vec<ServerPacket> {
-    let Some(service) = world
-        .resource::<SimulationResources>()
-        .active_npc_service
-        .clone()
+    if current_player_is_dead(world) {
+        return Vec::new();
+    }
+
+    let Some(service) = current_crystal_npc_service_in_range(world)
+        .filter(|service| active_crystal_repair_service(service, special))
     else {
         return Vec::new();
     };
-    if !active_crystal_repair_service(&service, special) {
-        return Vec::new();
-    }
 
     let Some(script) = crystal_npc_script_by_key(&service.script_key) else {
         return Vec::new();
@@ -24452,10 +26151,10 @@ fn repair_item_impl(world: &mut World, unique_id: u64, special: bool) -> Vec<Ser
 
     let item_index = {
         let resources = world.resource::<SimulationResources>();
-        resources.inventory_items.iter().position(|item| {
-            matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                && u64::from(item.slot) == unique_id
-        })
+        resources
+            .inventory_items
+            .iter()
+            .position(|item| item_matches_inventory_unique_id(item, unique_id))
     };
     let Some(item_index) = item_index else {
         return Vec::new();
@@ -24602,26 +26301,31 @@ fn drop_item_packet(
         success: false,
     };
 
+    if current_player_is_dead(world) {
+        return vec![failed_packet];
+    }
+
+    if current_map_disallows_throw_item(world) {
+        return vec![
+            system_message_key(world, "server.CanNotDrop"),
+            failed_packet,
+        ];
+    }
+
     if hero_inventory {
         return vec![failed_packet];
     }
 
-    let Some(slot) = u8::try_from(unique_id).ok() else {
-        return vec![failed_packet];
-    };
-
     let item_index = {
         let resources = world.resource::<SimulationResources>();
-        resources.inventory_items.iter().position(|item| {
-            item.slot == slot && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-        })
+        resources
+            .inventory_items
+            .iter()
+            .position(|item| item_matches_inventory_unique_id(item, unique_id))
     };
 
     let Some(index) = item_index else {
-        return vec![
-            failed_packet,
-            system_message_key(world, "sim.itemNotFoundInBag"),
-        ];
+        return vec![failed_packet];
     };
 
     let item = world.resource::<SimulationResources>().inventory_items[index].clone();
@@ -24630,14 +26334,13 @@ fn drop_item_packet(
         return vec![failed_packet];
     }
 
-    if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DONT_DROP) {
+    if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
         return vec![failed_packet];
     }
 
     let destroy_on_drop = crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP);
     let player = player_entity(world).expect("player should exist");
     let player_position = entity_position(world, player).expect("player position");
-    let display_name = localized_item_name(current_language(world), &item.key, &item.name);
 
     if !destroy_on_drop {
         if drop_ground_drop(
@@ -24680,23 +26383,12 @@ fn drop_item_packet(
         }
     }
 
-    let mut packets = vec![ServerPacket::DropItem {
+    vec![ServerPacket::DropItem {
         unique_id,
         count,
         hero_inventory,
         success: true,
-    }];
-    if !destroy_on_drop {
-        packets.push(ServerPacket::Chat {
-            message: format_localized_text(
-                current_language(world),
-                "custom.itemDropped",
-                [display_name],
-            ),
-            chat_type: ChatType::System,
-        });
-    }
-    packets
+    }]
 }
 
 fn equipment_uses_durability(item: &EquipmentState) -> bool {
@@ -24800,6 +26492,12 @@ fn repair_equipped_weapon_with_oil(world: &mut World, full_repair: bool) -> Opti
     if !equipment_uses_durability(weapon) || weapon.durability_current >= weapon.durability_max {
         return None;
     }
+    if equipment_has_crystal_or_rental_bind_flag(weapon, CRYSTAL_BIND_DONT_REPAIR)
+        || (full_repair
+            && equipment_has_crystal_or_rental_bind_flag(weapon, CRYSTAL_BIND_NO_SREPAIR))
+    {
+        return None;
+    }
 
     if full_repair {
         weapon.durability_current = weapon.durability_max;
@@ -24820,11 +26518,11 @@ fn repair_equipped_weapon_with_oil(world: &mut World, full_repair: bool) -> Opti
 enum CrystalLuckWeaponOutcome {
     Changed {
         refresh_packet: ServerPacket,
-        message: &'static str,
+        message_key: &'static str,
         chat_type: ChatType,
     },
     NoEffect {
-        message: &'static str,
+        message_key: &'static str,
     },
 }
 
@@ -24847,7 +26545,7 @@ fn try_luck_weapon(world: &mut World) -> Option<CrystalLuckWeaponOutcome> {
             refresh_packet: ServerPacket::RefreshItem {
                 item: user_item_from_equipment_state(weapon)?,
             },
-            message: "Curse dwells within your weapon.",
+            message_key: "server.WeaponCurse",
             chat_type: ChatType::System,
         });
     }
@@ -24865,71 +26563,14 @@ fn try_luck_weapon(world: &mut World) -> Option<CrystalLuckWeaponOutcome> {
             refresh_packet: ServerPacket::RefreshItem {
                 item: user_item_from_equipment_state(weapon)?,
             },
-            message: "Luck dwells within your weapon.",
+            message_key: "server.WeaponLuck",
             chat_type: ChatType::Hint,
         });
     }
 
     Some(CrystalLuckWeaponOutcome::NoEffect {
-        message: "No effect.",
+        message_key: "server.WeaponNoEffect",
     })
-}
-
-fn equip_inventory_item(
-    world: &mut World,
-    index: usize,
-    slot: EquipmentSlot,
-    item: &ItemState,
-) -> bool {
-    let durability_current = item.durability_current.unwrap_or(10);
-    let durability_max = item.durability_max.unwrap_or(durability_current);
-    let next_equipment = EquipmentState {
-        key: item.key.clone(),
-        slot,
-        name: item.name.clone(),
-        icon: item.icon,
-        shape: equipment_shape_for_slot_and_name(slot, &item.name),
-        description: item.description.clone(),
-        durability_current,
-        durability_max,
-        grade: item.grade,
-        added_attack: item.added_attack,
-        added_defence: item.added_defence,
-        added_luck: 0,
-        added_stats: item.added_stats.clone(),
-        cursed: item.cursed,
-        socket_slots: item.socket_slots,
-        gem_count: item.gem_count,
-        sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
-        sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
-        rental_binding_flags: item.rental_binding_flags,
-        attack: item.attack,
-        defence: item.defence,
-    };
-    let bag_slot = item.slot;
-    let replaced = {
-        let mut resources = world.resource_mut::<SimulationResources>();
-        resources.inventory_items.remove(index);
-        if let Some(existing_index) = resources
-            .equipment_items
-            .iter()
-            .position(|equipped| equipped.slot == slot)
-        {
-            let existing = resources.equipment_items.remove(existing_index);
-            resources.equipment_items.push(next_equipment);
-            Some(existing)
-        } else {
-            resources.equipment_items.push(next_equipment);
-            None
-        }
-    };
-
-    if let Some(existing) = replaced {
-        add_equipment_back_to_bag(world, existing, bag_slot);
-        true
-    } else {
-        false
-    }
 }
 
 fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
@@ -24939,24 +26580,24 @@ fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
         resources.skills.iter().position(|skill| skill.key == key)
     };
     let Some(index) = skill_index else {
-        return vec![system_message_key(world, "sim.skillNotKnown")];
+        return Vec::new();
     };
 
     let skill = world.resource::<SimulationResources>().skills[index].clone();
     if skill.cooldown_ends_at > tick {
-        return vec![system_message_key(world, "sim.skillCooldown")];
+        return Vec::new();
     }
     let Some(definition) = skill_definition(skill.key.as_str()) else {
-        return vec![system_message_key(world, "sim.skillLogicNotWired")];
+        return Vec::new();
     };
     let Some(player) = player_entity(world) else {
-        return vec![system_message_key(world, "sim.playerNotInWorld")];
+        return Vec::new();
     };
     let current_mp = entity_player_vitals(world, player)
         .map(|vitals| vitals.mp)
         .unwrap_or_default();
     if current_mp < definition.mana_cost {
-        return vec![system_message_key(world, "sim.notEnoughMp")];
+        return Vec::new();
     }
 
     let mut packets = Vec::new();
@@ -24967,15 +26608,6 @@ fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
         match &definition.effect {
             SkillEffectTemplate::Heal { hp } => {
                 vitals.hp = (vitals.hp + *hp).min(vitals.max_hp);
-                packets.push(system_message_key_args(
-                    world,
-                    "sim.castSkill",
-                    [localized_skill_name(
-                        current_language(world),
-                        &definition.key,
-                        &definition.name,
-                    )],
-                ));
             }
             SkillEffectTemplate::Buff {
                 buff_key,
@@ -24998,17 +26630,9 @@ fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
                         expires_at_tick: tick + *duration_ticks,
                         attack_bonus: *attack_bonus,
                         defence_bonus: *defence_bonus,
+                        stats: merged_user_item_stats(&[], *defence_bonus, *attack_bonus, None),
                     },
                 );
-                packets.push(system_message_key_args(
-                    world,
-                    "sim.castSkill",
-                    [localized_skill_name(
-                        current_language(world),
-                        &definition.key,
-                        &definition.name,
-                    )],
-                ));
             }
             SkillEffectTemplate::Summon { spell } => {
                 drop(vitals);
@@ -25034,21 +26658,13 @@ fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
 fn cast_summon_skill(
     world: &mut World,
     player: Entity,
-    skill_key: &str,
-    skill_name: &str,
+    _skill_key: &str,
+    _skill_name: &str,
     spell: &str,
     skill_level: u8,
     tick: u64,
 ) -> Vec<ServerPacket> {
-    let packets = vec![system_message_key_args(
-        world,
-        "sim.castSkill",
-        [localized_skill_name(
-            current_language(world),
-            skill_key,
-            skill_name,
-        )],
-    )];
+    let packets = Vec::new();
 
     let Some(player_object_id) = current_player_object_id(world) else {
         return packets;
@@ -25155,7 +26771,7 @@ fn cast_summon_skill(
                 1,
                 false,
             ),
-            _ => return vec![system_message_key(world, "sim.skillLogicNotWired")],
+            _ => return Vec::new(),
         };
 
     if recall_existing_summon(
@@ -25173,7 +26789,7 @@ fn cast_summon_skill(
     }
 
     let Some(template) = crystal_dynamic_monster_template(monster_name) else {
-        return vec![system_message_key(world, "sim.skillLogicNotWired")];
+        return Vec::new();
     };
 
     queue_pending_monster_spawn(
@@ -25403,11 +27019,7 @@ fn total_attack_bonus(resources: &SimulationResources) -> i32 {
         .filter(|item| !item.is_broken())
         .map(EquipmentState::total_attack)
         .sum::<i32>()
-        + resources
-            .buffs
-            .iter()
-            .map(|buff| buff.attack_bonus)
-            .sum::<i32>()
+        + resources.buffs.iter().map(buff_attack_bonus).sum::<i32>()
 }
 
 fn total_defence_bonus(resources: &SimulationResources) -> i32 {
@@ -25417,11 +27029,7 @@ fn total_defence_bonus(resources: &SimulationResources) -> i32 {
         .filter(|item| !item.is_broken())
         .map(EquipmentState::total_defence)
         .sum::<i32>()
-        + resources
-            .buffs
-            .iter()
-            .map(|buff| buff.defence_bonus)
-            .sum::<i32>()
+        + resources.buffs.iter().map(buff_defence_bonus).sum::<i32>()
 }
 
 fn monster_route_target(agent: &mut MonsterAgent, position: &Point, tick: u64) -> Option<Point> {
@@ -25549,6 +27157,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Red Potion".to_string(),
             icon: item_icon_for_key("red-potion"),
             slot: 0,
+            unique_id: 0,
             container: ItemContainer::Bag1,
             quantity: 5,
             description: "Basic healing potion for starter field testing.".to_string(),
@@ -25563,6 +27172,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25576,6 +27187,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Blue Potion".to_string(),
             icon: item_icon_for_key("blue-potion"),
             slot: 1,
+            unique_id: 1,
             container: ItemContainer::Bag1,
             quantity: 3,
             description: "Starter mana potion reserved for belt wiring.".to_string(),
@@ -25590,6 +27202,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25603,6 +27217,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Training Manual".to_string(),
             icon: item_icon_for_key("training-manual"),
             slot: 2,
+            unique_id: 2,
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Reminds the tester to open inventory, belt, and character panes."
@@ -25618,6 +27233,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25631,6 +27248,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Bronze Helmet".to_string(),
             icon: item_icon_for_key("bronze-helmet"),
             slot: 3,
+            unique_id: 3,
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Starter equippable helmet used to validate the equip pipeline."
@@ -25646,6 +27264,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25659,6 +27279,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Dagger".to_string(),
             icon: item_icon_for_key("dagger"),
             slot: 4,
+            unique_id: 4,
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Standard shape-01 weapon sample for visible equipment rendering."
@@ -25674,6 +27295,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25687,6 +27310,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Leather Armour".to_string(),
             icon: item_icon_for_key("leather-armour"),
             slot: 5,
+            unique_id: 5,
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Standard shape-01 armour sample for visible equipment rendering."
@@ -25702,6 +27326,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25715,6 +27341,7 @@ fn seed_inventory_items() -> Vec<ItemState> {
             name: "Town Teleport".to_string(),
             icon: item_icon_for_key("town-teleport"),
             slot: 0,
+            unique_id: 0,
             container: ItemContainer::Bag2,
             quantity: 1,
             description: "Reserved slot for future travel skill and safe-zone routing.".to_string(),
@@ -25729,6 +27356,8 @@ fn seed_inventory_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25747,6 +27376,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             name: "Red Potion".to_string(),
             icon: item_icon_for_key("belt-red-potion"),
             slot: 0,
+            unique_id: 0,
             container: ItemContainer::Belt,
             quantity: 5,
             description: "Hotkey potion wired into slot 1.".to_string(),
@@ -25761,6 +27391,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25774,6 +27406,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             name: "Blue Potion".to_string(),
             icon: item_icon_for_key("belt-blue-potion"),
             slot: 1,
+            unique_id: 1,
             container: ItemContainer::Belt,
             quantity: 3,
             description: "Hotkey potion wired into slot 2.".to_string(),
@@ -25788,6 +27421,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25801,6 +27436,7 @@ fn seed_belt_items() -> Vec<ItemState> {
             name: "Lantern Oil".to_string(),
             icon: item_icon_for_key("belt-lantern-oil"),
             slot: 5,
+            unique_id: 5,
             container: ItemContainer::Belt,
             quantity: 1,
             description: "Placeholder consumable for later shortcut actions.".to_string(),
@@ -25815,6 +27451,8 @@ fn seed_belt_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25833,6 +27471,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             name: "Red Potion".to_string(),
             icon: item_icon_for_key("stored-red-potion"),
             slot: 0,
+            unique_id: 0,
             container: ItemContainer::Storage,
             quantity: 10,
             description: "Warehouse starter stack used to validate storage flows.".to_string(),
@@ -25847,6 +27486,8 @@ fn seed_storage_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25860,6 +27501,7 @@ fn seed_storage_items() -> Vec<ItemState> {
             name: "Bronze Helmet".to_string(),
             icon: item_icon_for_key("stored-bronze-helmet"),
             slot: 1,
+            unique_id: 1,
             container: ItemContainer::Storage,
             quantity: 1,
             description: "Warehouse equipment sample for store/take-back validation.".to_string(),
@@ -25874,6 +27516,8 @@ fn seed_storage_items() -> Vec<ItemState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25904,6 +27548,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25928,6 +27574,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25951,6 +27599,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25974,6 +27624,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -25997,6 +27649,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26020,6 +27674,8 @@ fn seed_equipment_items() -> Vec<EquipmentState> {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26315,7 +27971,7 @@ mod tests {
         SimulationResources, SimulationSession, SpawnSlotRef, SummonedMonster, WoomaTaurusState,
         WorldObject, YimoogiState, BASE_STORAGE_SLOTS, EXPANDED_STORAGE_SLOTS,
     };
-    use crate::config::{ItemGrade, MonsterSpawnSource};
+    use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
     use crate::{
         EquipmentSlot, ItemContainer, QuestStage, SimulationConfig, WorldEntityDisposition,
     };
@@ -26325,7 +27981,7 @@ mod tests {
     };
     use mir2_protocol::{
         trace_server_packets, ChatType, ClientPacket, MirClass, MirDirection, MirGender,
-        MirGridType, Point, ServerPacket, Spell,
+        MirGridType, Point, ServerPacket, Spell, UserItemStat,
     };
 
     fn default_npc_condition_context() -> super::CrystalNpcContextState {
@@ -26394,6 +28050,7 @@ mod tests {
             name: "Repair Powder".to_string(),
             icon: super::item_icon_for_key("repair-powder"),
             slot: 11,
+            unique_id: 11,
             container: ItemContainer::Bag1,
             quantity,
             description: "Starter maintenance powder issued by Village Guide.".to_string(),
@@ -26408,6 +28065,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26429,6 +28088,7 @@ mod tests {
             name: format!("Credit Token {token_number}"),
             icon: super::item_icon_for_key("credit-token-1"),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Crystal credit scroll test token.".to_string(),
@@ -26443,6 +28103,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26463,6 +28125,7 @@ mod tests {
             name: "Benediction Oil".to_string(),
             icon: super::item_icon_for_key("benediction-oil"),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Crystal weapon luck test oil.".to_string(),
@@ -26477,6 +28140,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26497,6 +28162,7 @@ mod tests {
             name: name.to_string(),
             icon: super::item_icon_for_key(key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Crystal weapon repair oil test item.".to_string(),
@@ -26511,6 +28177,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26538,6 +28206,7 @@ mod tests {
             name: name.to_string(),
             icon: super::item_icon_for_key(key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: "Crystal NPC repair test item.".to_string(),
@@ -26552,6 +28221,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26578,6 +28249,7 @@ mod tests {
             name: name.to_string(),
             icon: super::item_icon_for_key(key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity,
             description: "Crystal inventory edge-case test item.".to_string(),
@@ -26592,6 +28264,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26602,7 +28276,48 @@ mod tests {
         });
     }
 
+    fn set_active_character_class_gender_level(
+        session: &mut SimulationSession,
+        class: MirClass,
+        gender: MirGender,
+        level: u16,
+    ) {
+        let mut resources = session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>();
+        let character = resources
+            .selected_character
+            .as_mut()
+            .expect("character should be active");
+        character.class = class;
+        character.gender = gender;
+        character.level = level;
+    }
+
     fn activate_storage_service(session: &mut SimulationSession) {
+        const STORAGE_NPC_OBJECT_ID: u32 = 4_991;
+
+        if super::entity_by_object_id(session.app.world(), STORAGE_NPC_OBJECT_ID).is_none() {
+            let player = super::player_entity(session.app.world()).expect("player entity");
+            let player_position =
+                super::entity_position(session.app.world(), player).expect("player position");
+            session.app.world_mut().spawn((
+                WorldObject,
+                super::Npc,
+                ObjectId(STORAGE_NPC_OBJECT_ID),
+                DisplayName::literal("Warehouse Keeper".to_string()),
+                Position(player_position),
+                Facing(MirDirection::Left),
+                super::NpcAgent {
+                    image: 5,
+                    colour_argb: -1,
+                    quest_ids: Vec::new(),
+                    script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+                },
+            ));
+        }
+
         session
             .app
             .world_mut()
@@ -26610,7 +28325,18 @@ mod tests {
             .active_npc_service = Some(super::ActiveNpcServiceState {
             script_key: "00Default".to_string(),
             label_key: "STORAGE".to_string(),
+            npc_object_id: STORAGE_NPC_OBJECT_ID,
         });
+        sync_visible_objects(session);
+    }
+
+    fn assert_unlocked_storage_open_packets(packets: &[ServerPacket]) {
+        assert!(matches!(
+            packets,
+            [ServerPacket::UserStorage { storage: Some(storage) }, ServerPacket::NPCStorage]
+                if storage.len() == usize::from(super::BASE_STORAGE_SLOTS)
+                    && matches!(storage.first(), Some(Some(item)) if item.item_index == 658 && item.count == 10)
+        ));
     }
 
     fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity: u32) {
@@ -26623,6 +28349,7 @@ mod tests {
             name: "Stage 5 Seal Source".to_string(),
             icon: super::item_icon_for_key("stage5-seal-source"),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity,
             description: "Stage 5 Crystal seal-source test item.".to_string(),
@@ -26637,6 +28364,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26657,6 +28386,7 @@ mod tests {
             name: "Stage 5 Socket Source".to_string(),
             icon: super::item_icon_for_key("stage5-socket-source"),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity,
             description: "Stage 5 Crystal socket-source test item.".to_string(),
@@ -26671,6 +28401,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26734,13 +28466,14 @@ mod tests {
             name: template.name.clone(),
             icon: super::item_icon_for_key(&key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: template.tooltip.clone().unwrap_or_default(),
             durability_current: (template.durability > 0).then_some(template.durability),
             durability_max: (template.durability > 0).then_some(template.durability),
             weight: u16::from(template.weight),
-            equip_slot: None,
+            equip_slot: super::crystal_equipment_slot_for_template(&template),
             grade: ItemGrade::None,
             added_attack,
             added_defence,
@@ -26748,6 +28481,8 @@ mod tests {
             cursed: false,
             socket_slots,
             gem_count,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26792,6 +28527,38 @@ mod tests {
         panic!("no matching combine upgrade tick found");
     }
 
+    fn run_successful_combine_upgrade(
+        source_template_name: &str,
+        target_template_name: &str,
+    ) -> (SimulationSession, Vec<ServerPacket>) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, source_template_name, 31);
+        add_inventory_crystal_item(&mut session, target_template_name, 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name(source_template_name)
+            .expect("source template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, true, None);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        (session, packets)
+    }
+
     fn equip_bengal_tiger_with_socket_slots(session: &mut SimulationSession, socket_slots: u8) {
         let template = mir2_game_data::crystal_item_by_name("BengalTiger")
             .expect("BengalTiger should be in Crystal item manifest");
@@ -26820,6 +28587,7 @@ mod tests {
             name: name.to_string(),
             icon: super::item_icon_for_key(key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Belt,
             quantity: 1,
             description: "Crystal belt edge-case test item.".to_string(),
@@ -26834,6 +28602,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26842,6 +28612,39 @@ mod tests {
             heal_hp: 0,
             heal_mp: 0,
         });
+    }
+
+    fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
+        ItemState {
+            key: "quest-wasp-stinger".to_string(),
+            name: "Wasp Stinger".to_string(),
+            icon: super::item_icon_for_key("quest-wasp-stinger"),
+            slot,
+            unique_id,
+            container: ItemContainer::Quest,
+            quantity: 1,
+            description: "Quest inventory move parity regression item.".to_string(),
+            durability_current: None,
+            durability_max: None,
+            weight: 0,
+            equip_slot: None,
+            grade: ItemGrade::None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: 0,
+            gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
+            attack: 0,
+            defence: 0,
+            heal_hp: 0,
+            heal_mp: 0,
+        }
     }
 
     fn fill_all_bag_slots(session: &mut SimulationSession) {
@@ -26861,6 +28664,7 @@ mod tests {
                 name: format!("Full Slot {index}"),
                 icon: super::item_icon_for_key("training-manual"),
                 slot: index % 40,
+                unique_id: super::default_item_unique_id(container, index % 40),
                 container,
                 quantity: 1,
                 description: "Fills bag capacity for transaction rollback tests.".to_string(),
@@ -26875,6 +28679,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -26904,6 +28710,7 @@ mod tests {
             name: name.to_string(),
             icon: super::item_icon_for_key(key),
             slot,
+            unique_id: u64::from(slot),
             container: ItemContainer::Bag1,
             quantity: 1,
             description: format!("Test equipment sample for {name}."),
@@ -26918,6 +28725,8 @@ mod tests {
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -26969,6 +28778,50 @@ mod tests {
             .world_mut()
             .entity_mut(player)
             .insert(Position(position));
+    }
+
+    fn set_current_player_hp(session: &mut SimulationSession, hp: i32) {
+        let player = player_entity(session.app.world()).expect("player entity");
+        let current = session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .copied()
+            .expect("player vitals");
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(PlayerVitals { hp, ..current });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .player_vitals
+            .hp = hp;
+    }
+
+    fn set_current_player_mp(session: &mut SimulationSession, mp: i32) {
+        let player = player_entity(session.app.world()).expect("player entity");
+        let current = session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .copied()
+            .expect("player vitals");
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(PlayerVitals { mp, ..current });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .player_vitals
+            .mp = mp;
     }
 
     fn set_entity_position(session: &mut SimulationSession, entity: Entity, position: Point) {
@@ -27133,11 +28986,12 @@ mod tests {
         assert!(matches!(packets[2], ServerPacket::UserInformation { .. }));
         assert!(matches!(packets[3], ServerPacket::UserLocation { .. }));
         assert!(matches!(
-            packets[4],
+            &packets[4],
             ServerPacket::Chat {
-                chat_type: ChatType::System,
+                chat_type: ChatType::Hint,
+                message,
                 ..
-            }
+            } if message == "Welcome to the Legend of Mir 2 Server."
         ));
     }
 
@@ -27668,6 +29522,290 @@ mod tests {
     }
 
     #[test]
+    fn movement_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let direct_packets = session.move_to(Point { x: 331, y: 270 });
+        let walk_packets = session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        });
+        let run_packets = session.handle_packet(ClientPacket::Run {
+            direction: MirDirection::Right,
+        });
+        let turn_packets = session.handle_packet(ClientPacket::Turn {
+            direction: MirDirection::Right,
+        });
+
+        assert!(direct_packets.is_empty());
+        assert!(walk_packets.is_empty());
+        assert!(run_packets.is_empty());
+        assert!(turn_packets.is_empty());
+    }
+
+    #[test]
+    fn attack_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let direct_packets = session.attack(3001);
+        let attack_packets = session.handle_packet(ClientPacket::Attack {
+            direction: MirDirection::Right,
+            spell: Spell::None,
+        });
+        let range_attack_packets = session.handle_packet(ClientPacket::RangeAttack {
+            direction: MirDirection::Right,
+            location: Point { x: 0, y: 0 },
+            target_id: 3001,
+            target_location: Point { x: 1, y: 0 },
+        });
+
+        assert!(direct_packets.is_empty());
+        assert!(attack_packets.is_empty());
+        assert!(range_attack_packets.is_empty());
+    }
+
+    #[test]
+    fn direct_attack_missing_target_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.attack(98_999);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn direct_attack_non_monster_target_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.attack(4001);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn direct_attack_out_of_range_rejects_without_runtime_chat_or_attack_packet() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.attack(super::FIELD_WASP_ID);
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
+    }
+
+    #[test]
+    fn direct_attack_dead_monster_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 333, y: 267 });
+        let _ = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 5);
+
+        let packets = session.attack(super::FIELD_WASP_ID);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn harvest_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let direct_packets = session.harvest(MirDirection::Right);
+        let harvest_packets = session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Right,
+        });
+
+        assert!(direct_packets.is_empty());
+        assert!(harvest_packets.is_empty());
+    }
+
+    #[test]
+    fn interact_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let direct_packets = session.interact(1001);
+        let dialog_packets = session.select_npc_dialog_target("@Main");
+
+        assert!(direct_packets.is_empty());
+        assert!(dialog_packets.is_empty());
+    }
+
+    #[test]
+    fn direct_interact_missing_target_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.interact(98_999);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn direct_interact_same_tile_rejects_without_runtime_chat_or_dialog() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let npc_entity = super::entity_by_object_id(session.app.world(), 4001)
+            .expect("starter NPC should exist");
+        let npc_position =
+            super::entity_position(session.app.world(), npc_entity).expect("NPC position");
+        set_player_position(&mut session, npc_position);
+
+        let packets = session.interact(4001);
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot.active_npc_dialog.is_none());
+    }
+
+    #[test]
+    fn direct_interact_out_of_range_rejects_without_runtime_chat_or_dialog() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.interact(4001);
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+        assert!(snapshot.active_npc_dialog.is_none());
+    }
+
+    #[test]
+    fn npc_dialog_target_without_active_dialog_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.select_npc_dialog_target("@Main");
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn npc_dialog_invalid_target_rejects_without_runtime_chat_and_preserves_dialog() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 326, y: 270 });
+        let _ = session.interact(4001);
+
+        let packets = session.select_npc_dialog_target("@missing");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot.active_npc_dialog.is_some());
+    }
+
+    #[test]
+    fn npc_input_submit_without_input_rejects_without_runtime_chat_and_preserves_dialog() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 326, y: 270 });
+        let _ = session.interact(4001);
+
+        let packets = session.submit_npc_input("Scout");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot
+            .active_npc_dialog
+            .as_ref()
+            .is_some_and(|dialog| dialog.input.is_none()));
+    }
+
+    #[test]
+    fn npc_dialog_target_missing_npc_rejects_without_runtime_chat_and_dismisses_dialog() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .active_npc_dialog = Some(super::ActiveNpcDialogState {
+            npc_object_id: 98_999,
+            npc_name: "Missing NPC".to_string(),
+            npc_name_key: None,
+            stage: None,
+            current: 0,
+            required: 0,
+            title: "Missing NPC".to_string(),
+            body: vec!["Missing NPC".to_string()],
+            footer: "Missing NPC".to_string(),
+            links: vec![super::NpcDialogLinkState {
+                text: "Next".to_string(),
+                target: "@Next".to_string(),
+            }],
+            input: None,
+        });
+
+        let packets = session.select_npc_dialog_target("@Next");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot.active_npc_dialog.is_none());
+    }
+
+    #[test]
+    fn npc_dialog_target_npc_without_script_rejects_without_runtime_chat_and_dismisses_dialog() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4999,
+            name: "Quiet Trader".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: None,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .active_npc_dialog = Some(super::ActiveNpcDialogState {
+            npc_object_id: 4999,
+            npc_name: "Quiet Trader".to_string(),
+            npc_name_key: None,
+            stage: None,
+            current: 0,
+            required: 0,
+            title: "Quiet Trader".to_string(),
+            body: vec!["Quiet Trader".to_string()],
+            footer: "Quiet Trader".to_string(),
+            links: vec![super::NpcDialogLinkState {
+                text: "Next".to_string(),
+                target: "@Next".to_string(),
+            }],
+            input: None,
+        });
+
+        let packets = session.select_npc_dialog_target("@Next");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot.active_npc_dialog.is_none());
+    }
+
+    #[test]
+    fn cast_skill_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let packets = session.cast_skill("battle-focus");
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
     fn walk_updates_self_location() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -27758,8 +29896,40 @@ mod tests {
 
     #[test]
     fn transfer_map_requires_player_on_transfer_bounds() {
+        let mut unstarted_session = SimulationSession::new(SimulationConfig::default());
+        let not_found_message = super::localized_text_or_fallback(
+            super::LanguageCode::English,
+            "server.NotFound",
+            "server.NotFound",
+        );
+        let missing_player_packets = unstarted_session.transfer_map("starter-east-field-gate");
+        assert!(missing_player_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                message,
+                chat_type: ChatType::System,
+            } if message == &not_found_message
+        )));
+        let missing_debug_player_packets = unstarted_session.transfer_map("crystal:HF1:200:200");
+        assert!(missing_debug_player_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                message,
+                chat_type: ChatType::System,
+            } if message == &not_found_message
+        )));
+
         let mut session = SimulationSession::new(SimulationConfig::default());
         let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let unknown_packets = session.transfer_map("missing-transfer");
+        assert!(unknown_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                message,
+                chat_type: ChatType::System,
+            } if message == &not_found_message
+        )));
 
         let packets = session.transfer_map("starter-east-field-gate");
 
@@ -27768,7 +29938,12 @@ mod tests {
             ServerPacket::Chat {
                 message,
                 chat_type: ChatType::System,
-            } if message.contains("not standing")
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.CannotPositionMoveOnMap",
+                    "server.CannotPositionMoveOnMap",
+                )
         )));
         assert_eq!(player_position(&session), Point { x: 330, y: 270 });
     }
@@ -27815,6 +29990,13 @@ mod tests {
                 if location.position == (Point { x: 330, y: 270 })
                     && location.direction == MirDirection::Down
         )));
+        assert!(!packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                ..
+            }
+        )));
         assert_eq!(snapshot.map_title.as_deref(), Some("BichonProvince"));
         assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
         assert!(snapshot.in_safe_zone);
@@ -27844,7 +30026,7 @@ mod tests {
                 if location.position == (Point { x: 200, y: 200 })
                     && location.direction == MirDirection::Down
         )));
-        assert!(packets.iter().any(|packet| matches!(
+        assert!(!packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::Chat {
                 message,
@@ -28726,7 +30908,7 @@ mod tests {
     }
 
     #[test]
-    fn player_attack_emits_damage_message_on_hit_resolution() {
+    fn player_attack_hit_resolution_has_no_runtime_damage_chat() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
@@ -28779,6 +30961,10 @@ mod tests {
 
         let hit_packets = session.tick();
         assert!(hit_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == monster_object_id
+        )));
+        assert!(!hit_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::Chat { message, .. } if message.contains("Struck Test Wasp")
         )));
@@ -29503,7 +31689,7 @@ mod tests {
 
         assert!(!session.visible_objects.contains(&monster_object_id));
         let attack_packets = session.attack(monster_object_id);
-        assert!(attack_packets
+        assert!(!attack_packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         assert!(!attack_packets.iter().any(|packet| matches!(
@@ -30091,6 +32277,9 @@ mod tests {
         assert!(third_harvest.iter().any(
             |packet| matches!(packet, ServerPacket::GainedItem { item } if item.item_index == 6)
         ));
+        assert!(!third_harvest
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         assert!(session
             .world_snapshot()
             .inventory_items
@@ -30105,6 +32294,86 @@ mod tests {
                 .expect("harvest state")
                 .harvested
         );
+    }
+
+    #[test]
+    fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: true,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let training_dummy_object_id = 3001_u32;
+        let dummy = entity_by_object_id(session.app.world(), training_dummy_object_id)
+            .expect("training dummy entity");
+        {
+            let mut entry = session.app.world_mut().entity_mut(dummy);
+            let mut agent = entry.get_mut::<MonsterAgent>().expect("dummy agent");
+            agent.ai = 9;
+            agent.can_wander = false;
+            agent.hostile_to_player = false;
+            agent.tracking_player = false;
+            drop(agent);
+            entry.insert(super::initial_harvest_monster_state(9).expect("harvest state"));
+        }
+
+        set_player_position(&mut session, Point { x: 337, y: 273 });
+        let death_packets = attack_until_monster_dies(&mut session, training_dummy_object_id, 10);
+        assert!(packet_has_object_died(
+            &death_packets,
+            training_dummy_object_id
+        ));
+
+        let first_harvest = session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Right,
+        });
+        assert!(first_harvest.iter().any(
+            |packet| matches!(packet, ServerPacket::ObjectHarvest { movement } if movement.object_id == 1000)
+        ));
+        assert!(!first_harvest.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHarvested { movement }
+                if movement.object_id == training_dummy_object_id
+        )));
+
+        let second_harvest = session.handle_packet(ClientPacket::Harvest {
+            direction: MirDirection::Right,
+        });
+        assert!(second_harvest.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHarvested { movement }
+                if movement.object_id == training_dummy_object_id
+        )));
+        assert!(second_harvest.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NothingWasFound",
+                    "server.NothingWasFound",
+                )
+        )));
+        assert!(!second_harvest
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .all(|item| item.key != "training-splinter"));
     }
 
     #[test]
@@ -30518,7 +32787,15 @@ mod tests {
         });
         assert!(blocked_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("cannot carry")
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                )
         )));
         assert!(!blocked_packets
             .iter()
@@ -31102,13 +33379,26 @@ mod tests {
             tick,
             &mut packets,
         ));
+        let expected_damage_message = super::format_localized_text(
+            super::current_language(session.app.world()),
+            "server.PetInflictedDamageDps",
+            [
+                "120".to_string(),
+                "Physical Agility".to_string(),
+                "120.00".to_string(),
+                super::localized_text_or_fallback(
+                    super::current_language(session.app.world()),
+                    "server.You",
+                    "You",
+                ),
+            ],
+        );
         assert!(packets.iter().any(|packet| {
             matches!(
                 packet,
                 ServerPacket::Chat { message, chat_type }
                     if *chat_type == ChatType::Trainer
-                        && message.contains("You inflicted 120 Physical Agility Damage")
-                        && message.contains("Dps: 120.00")
+                        && message == &expected_damage_message
             )
         }));
         assert_eq!(
@@ -31127,13 +33417,17 @@ mod tests {
         for _ in 0..=super::TRAINER_DAMAGE_REPORT_IDLE_TICKS {
             idle_packets = session.tick();
         }
+        let expected_average_message = super::format_localized_text(
+            super::current_language(session.app.world()),
+            "server.AverageDamageOnTrainer",
+            ["120".to_string(), "120.00".to_string()],
+        );
         assert!(idle_packets.iter().any(|packet| {
             matches!(
                 packet,
                 ServerPacket::Chat { message, chat_type }
                     if *chat_type == ChatType::Trainer
-                        && message.contains("120 Average Damage inflicted on the trainer")
-                        && message.contains("Dps: 120.00")
+                        && message == &expected_average_message
             )
         }));
     }
@@ -32438,9 +34732,13 @@ mod tests {
         sync_visible_objects(&mut session);
 
         let blocked_packets = session.attack(monster_object_id);
-        assert!(blocked_packets
+        assert!(!blocked_packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!blocked_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )));
 
         let wake_packets = session.tick();
         assert!(wake_packets.iter().any(|packet| matches!(
@@ -46090,14 +48388,36 @@ mod tests {
     }
 
     #[test]
-    fn chat_echoes_back_to_client_and_world() {
+    fn chat_before_start_game_rejects_without_runtime_chat() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         let packets = session.handle_packet(ClientPacket::Chat {
             message: "hi".to_string(),
         });
 
-        assert!(matches!(packets[0], ServerPacket::Chat { .. }));
-        assert!(matches!(packets[1], ServerPacket::ObjectChat { .. }));
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn chat_normal_message_emits_crystal_object_chat_only() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::Chat {
+            message: "hi".to_string(),
+        });
+
+        assert_eq!(packets.len(), 1);
+        assert!(matches!(
+            &packets[0],
+            ServerPacket::ObjectChat {
+                text,
+                chat_type: ChatType::Normal,
+                ..
+            } if text == "Scout: hi"
+        ));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -46234,6 +48554,9 @@ mod tests {
                 ..
             }
         )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 
         let snapshot = session.world_snapshot();
         assert_eq!(snapshot.quest_log[0].stage, QuestStage::InProgress);
@@ -46266,7 +48589,7 @@ mod tests {
     }
 
     #[test]
-    fn npc_without_script_uses_idle_dialog_fallback() {
+    fn npc_without_script_rejects_without_runtime_idle_dialog() {
         let mut config = SimulationConfig::default();
         config.visible_npcs.push(crate::VisibleNpcRecord {
             object_id: 4999,
@@ -46283,20 +48606,14 @@ mod tests {
         let packets = session.interact(4999);
         let snapshot = session.world_snapshot();
 
-        assert!(packets.iter().any(|packet| matches!(
+        assert!(packets.iter().all(|packet| !matches!(
             packet,
             ServerPacket::ObjectChat {
                 object_id: 4999,
                 ..
             }
         )));
-        assert_eq!(
-            snapshot
-                .active_npc_dialog
-                .as_ref()
-                .map(|dialog| dialog.title.as_str()),
-            Some("Idle")
-        );
+        assert!(snapshot.active_npc_dialog.is_none());
         assert_eq!(snapshot.quest_log[0].stage, QuestStage::Available);
     }
 
@@ -46599,10 +48916,7 @@ mod tests {
 
         let _ = session.interact(4991);
         let storage_packets = session.select_npc_dialog_target("@Storage");
-        assert!(matches!(
-            storage_packets.as_slice(),
-            [ServerPacket::NPCStorage]
-        ));
+        assert_unlocked_storage_open_packets(&storage_packets);
         assert!(session.world_snapshot().active_npc_dialog.is_none());
         assert!(session
             .app
@@ -46610,7 +48924,9 @@ mod tests {
             .resource::<SimulationResources>()
             .active_npc_service
             .as_ref()
-            .is_some_and(|service| service.label_key == "STORAGE"));
+            .is_some_and(|service| {
+                service.label_key == "STORAGE" && service.npc_object_id == 4991
+            }));
 
         let _ = session.interact(4990);
         let buy_sell_packets = session.select_npc_dialog_target("@BuySell");
@@ -46692,10 +49008,7 @@ mod tests {
 
         let _ = session.interact(4991);
         let storage_packets = session.select_npc_dialog_target("@Storage");
-        assert!(matches!(
-            storage_packets.as_slice(),
-            [ServerPacket::NPCStorage]
-        ));
+        assert_unlocked_storage_open_packets(&storage_packets);
         assert!(session
             .app
             .world()
@@ -46743,6 +49056,258 @@ mod tests {
             .any(|item| item.key == bag_item.key && item.slot == 4));
     }
 
+    #[test]
+    fn crystal_npc_storage_reopen_without_state_change_only_emits_npc_storage_after_first_open() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4991,
+            name: "Warehouse Keeper".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let _ = session.interact(4991);
+        let first_open_packets = session.select_npc_dialog_target("@Storage");
+        assert_unlocked_storage_open_packets(&first_open_packets);
+
+        let _ = session.interact(4991);
+        let reopen_packets = session.select_npc_dialog_target("@Storage");
+        assert_eq!(reopen_packets, vec![ServerPacket::NPCStorage]);
+    }
+
+    #[test]
+    fn crystal_npc_storage_service_reopen_resets_session_unlock() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4991,
+            name: "Warehouse Keeper".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+        });
+        let mut session = SimulationSession::new(config);
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "storage-reopen-reset".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        activate_storage_service(&mut session);
+        let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "Vault123".to_string(),
+        });
+        assert!(set_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::StoragePasswordResult {
+                result: 4,
+                removing: false,
+                has_password: true,
+                ..
+            }
+        )));
+        assert!(!session.world_snapshot().require_storage_password);
+
+        let _ = session.interact(4991);
+        let reopen_packets = session.select_npc_dialog_target("@Storage");
+        assert_eq!(reopen_packets, vec![ServerPacket::NPCStorage]);
+        assert!(session.world_snapshot().require_storage_password);
+
+        let blocked_store = session.handle_packet(ClientPacket::StoreItem { from: 3, to: 4 });
+        assert_eq!(
+            blocked_store,
+            vec![ServerPacket::StoreItem {
+                from: 3,
+                to: 4,
+                success: false,
+            }]
+        );
+    }
+
+    #[test]
+    fn crystal_npc_storage_service_context_rejects_storage_actions_when_player_leaves_data_range() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4991,
+            name: "Warehouse Keeper".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut stored_duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            stored_duplicate.slot = 2;
+            stored_duplicate.container = ItemContainer::Storage;
+            stored_duplicate.unique_id = 9_002;
+            stored_duplicate.quantity = 4;
+            let bag_item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag red potion should exist");
+            bag_item.unique_id = 9_001;
+            resources.storage_items.push(stored_duplicate);
+        }
+
+        let _ = session.interact(4991);
+        let storage_packets = session.select_npc_dialog_target("@Storage");
+        assert_unlocked_storage_open_packets(&storage_packets);
+        assert!(session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .active_npc_service
+            .as_ref()
+            .is_some_and(|service| {
+                service.label_key == "STORAGE" && service.npc_object_id == 4991
+            }));
+
+        set_player_position(&mut session, Point { x: 348, y: 270 });
+        assert!(super::tile_distance(&player_position(&session), &Point { x: 331, y: 270 }) > 16);
+
+        let blocked_store = session.handle_packet(ClientPacket::StoreItem { from: 3, to: 4 });
+        assert!(blocked_store.contains(&ServerPacket::StoreItem {
+            from: 3,
+            to: 4,
+            success: false,
+        }));
+
+        let blocked_take_back =
+            session.handle_packet(ClientPacket::TakeBackItem { from: 0, to: 6 });
+        assert!(blocked_take_back.contains(&ServerPacket::TakeBackItem {
+            from: 0,
+            to: 6,
+            success: false,
+        }));
+
+        let blocked_move = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 3,
+        });
+        assert!(blocked_move.contains(&ServerPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 3,
+            success: false,
+        }));
+
+        let blocked_split = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Storage,
+            unique_id: 0,
+            count: 4,
+        });
+        assert!(blocked_split.contains(&ServerPacket::SplitItem1 {
+            grid: MirGridType::Storage,
+            unique_id: 0,
+            count: 4,
+            success: false,
+        }));
+
+        let blocked_merge = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Storage,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+        assert!(blocked_merge.contains(&ServerPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Storage,
+            id_from: 9_001,
+            id_to: 9_002,
+            success: false,
+        }));
+
+        let snapshot = session.world_snapshot();
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_001
+                && item.slot == 0
+                && item.container == ItemContainer::Bag1
+                && item.quantity == 5
+        }));
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+                && item.quantity == 10
+        }));
+        assert!(resources.storage_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.container == ItemContainer::Storage
+                && item.quantity == 4
+        }));
+    }
+
+    #[test]
+    fn storage_service_context_requires_live_npc_object() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let storage_npc = super::entity_by_object_id(session.app.world(), 4_991)
+            .expect("storage npc should exist");
+        let _ = session.app.world_mut().despawn(storage_npc);
+
+        let blocked_store = session.handle_packet(ClientPacket::StoreItem { from: 3, to: 4 });
+        assert!(blocked_store.contains(&ServerPacket::StoreItem {
+            from: 3,
+            to: 4,
+            success: false,
+        }));
+
+        let blocked_move = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 3,
+        });
+        assert!(blocked_move.contains(&ServerPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 3,
+            success: false,
+        }));
+
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+        }));
+    }
+
     fn wicked_trader_config() -> SimulationConfig {
         let mut config = SimulationConfig::default();
         config.visible_npcs.push(crate::VisibleNpcRecord {
@@ -46754,6 +49319,21 @@ mod tests {
             direction: MirDirection::Left,
             quest_ids: Vec::new(),
             script_key: Some("BichonProvince/NaturalCave/WickedTrader".to_string()),
+        });
+        config
+    }
+
+    fn blacksmith_config() -> SimulationConfig {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4988,
+            name: "Bill".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 271 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/BichonWall/Blacksmith-0".to_string()),
         });
         config
     }
@@ -47008,6 +49588,53 @@ mod tests {
     }
 
     #[test]
+    fn crystal_npc_buy_item_dead_player_is_silent_and_preserves_state() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let _ = session.interact(4990);
+        let buy_sell_packets = session.select_npc_dialog_target("@BuySell");
+        let ServerPacket::NPCGoods { list, .. } = &buy_sell_packets[0] else {
+            panic!("first buy/sell packet should be NPCGoods");
+        };
+        let hp_drug = list
+            .iter()
+            .find(|item| item.item_index == 658 && item.count == 1)
+            .expect("Wicked Trader should sell one-count HP drug");
+        let item_index = hp_drug.unique_id;
+        let state_before = {
+            let resources = session.app.world().resource::<SimulationResources>();
+            (
+                resources.gold,
+                resources
+                    .inventory_items
+                    .iter()
+                    .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        set_current_player_hp(&mut session, 0);
+
+        let buy_packets = session.handle_packet(ClientPacket::BuyItem {
+            item_index,
+            count: 2,
+            panel_type: 0,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+
+        assert!(buy_packets.is_empty());
+        assert_eq!(resources.gold, state_before.0);
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                .collect::<Vec<_>>(),
+            state_before.1
+        );
+    }
+
+    #[test]
     fn crystal_npc_buy_item_invalid_contexts_are_silent_and_preserve_state() {
         let mut session = SimulationSession::new(wicked_trader_config());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -47063,6 +49690,55 @@ mod tests {
         assert!(zero_count_packets.is_empty());
         assert!(oversized_count_packets.is_empty());
         assert!(repair_service_packets.is_empty());
+        assert_eq!(resources.gold, state_before.0);
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                .collect::<Vec<_>>(),
+            state_before.1
+        );
+    }
+
+    #[test]
+    fn crystal_npc_buy_item_service_context_rejects_when_player_leaves_data_range() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let _ = session.interact(4990);
+        let buy_sell_packets = session.select_npc_dialog_target("@BuySell");
+        let ServerPacket::NPCGoods { list, .. } = &buy_sell_packets[0] else {
+            panic!("first buy/sell packet should be NPCGoods");
+        };
+        let hp_drug = list
+            .iter()
+            .find(|item| item.item_index == 658 && item.count == 1)
+            .expect("Wicked Trader should sell one-count HP drug");
+        let state_before = {
+            let resources = session.app.world().resource::<SimulationResources>();
+            (
+                resources.gold,
+                resources
+                    .inventory_items
+                    .iter()
+                    .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                    .collect::<Vec<_>>(),
+            )
+        };
+
+        set_player_position(&mut session, Point { x: 348, y: 271 });
+        assert!(super::tile_distance(&player_position(&session), &Point { x: 331, y: 271 }) > 16);
+        sync_visible_objects(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::BuyItem {
+            item_index: hp_drug.unique_id,
+            count: 1,
+            panel_type: 0,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+
+        assert!(packets.is_empty());
         assert_eq!(resources.gold, state_before.0);
         assert_eq!(
             resources
@@ -47301,6 +49977,7 @@ mod tests {
                 name: "Time Stone Piece".to_string(),
                 icon: super::item_icon_for_key("time-stone-piece"),
                 slot: 9,
+                unique_id: 9,
                 container: ItemContainer::Bag1,
                 quantity: 1,
                 description: "Temporal fragment required by the time stone.".to_string(),
@@ -47315,6 +49992,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -47372,6 +50051,7 @@ mod tests {
                 name: "PremiumPass[1d]".to_string(),
                 icon: super::item_icon_for_key("premiumpass-1d"),
                 slot: 10,
+                unique_id: 10,
                 container: ItemContainer::Bag1,
                 quantity: 1,
                 description: "Temporary premium cave pass for NPC script validation.".to_string(),
@@ -47386,6 +50066,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -48800,6 +51482,7 @@ mod tests {
                 name: "Wasp Stinger".to_string(),
                 icon: super::item_icon_for_key("quest-wasp-stinger"),
                 slot: 0,
+                unique_id: 0,
                 container: ItemContainer::Quest,
                 quantity: 1,
                 description: "Quest turn-in full-bag regression item.".to_string(),
@@ -48814,6 +51497,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -48915,6 +51600,9 @@ mod tests {
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 45 })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -48997,6 +51685,9 @@ mod tests {
             "OmaFighter",
             &mut packets,
         );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 
         let expected_gold =
             super::crystal_drop_gold_amount(2000, current_tick, monster_object_id, 0);
@@ -49035,6 +51726,48 @@ mod tests {
         }
         assert_eq!(picked_gold, expected_chunks);
         assert_eq!(picked_gold.into_iter().sum::<u32>(), expected_gold);
+    }
+
+    #[test]
+    fn starter_monster_item_drop_has_no_runtime_success_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let drop_origin = Point { x: 337, y: 273 };
+        let mut packets = Vec::new();
+        super::spawn_configured_monster_drops(
+            session.app.world_mut(),
+            3001,
+            &drop_origin,
+            "Training Dummy",
+            &mut packets,
+        );
+
+        assert!(session
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .any(|drop| drop.name == "Training Splinter"));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn missing_defeated_monster_entity_is_silent() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let mut packets = Vec::new();
+        super::handle_monster_defeat(
+            session.app.world_mut(),
+            98_999,
+            "MissingMonster",
+            &mut packets,
+        );
+
+        assert!(packets.is_empty());
     }
 
     fn crystal_test_drop_entry(
@@ -49368,7 +52101,12 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
+            ServerPacket::Chat { message, .. } if message == "You found Wasp Stinger."
+        )));
+        assert!(packets.iter().all(|packet| !matches!(
+            packet,
             ServerPacket::Chat { message, .. } if message.contains("Quest updated")
+                || message.contains("Quest progress")
         )));
     }
 
@@ -49587,6 +52325,10 @@ mod tests {
     #[test]
     fn dropped_inventory_item_can_be_removed_from_bag_and_spawned_on_ground() {
         let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let before_start_packets = session.drop_item("red-potion");
+        assert!(before_start_packets.is_empty());
+
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
         let before = session.world_snapshot();
@@ -49633,6 +52375,12 @@ mod tests {
                 success: true
             }
         )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+
+        let missing_packets = session.drop_item("missing-red-potion");
+        assert!(missing_packets.is_empty());
     }
 
     #[test]
@@ -49668,6 +52416,1349 @@ mod tests {
             .ground_drops
             .iter()
             .any(|drop| drop.name.contains("Potion") && drop.quantity == 2));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn inventory_unique_ids_distinguish_bag_pages_for_same_slot() {
+        let session = SimulationSession::new(SimulationConfig::default());
+        let resources = session.app.world().resource::<SimulationResources>();
+        let bag1 = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+            .expect("bag1 potion should exist");
+        let bag2 = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "town-teleport" && item.container == ItemContainer::Bag2)
+            .expect("bag2 teleport should exist");
+
+        assert_eq!(bag1.slot, 0);
+        assert_eq!(bag2.slot, 0);
+        assert_eq!(super::item_unique_id(bag1), 0);
+        assert_eq!(super::item_unique_id(bag2), 40);
+        assert_ne!(super::item_unique_id(bag1), super::item_unique_id(bag2));
+        assert_eq!(super::user_item_from_item_state(bag2).unique_id, 40);
+    }
+
+    #[test]
+    fn drop_item_packet_uses_unique_id_when_it_differs_from_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("red potion should exist");
+            item.unique_id = 9_100;
+        }
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 9_100,
+            count: 2,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DropItem {
+                unique_id: 9_100,
+                count: 2,
+                hero_inventory: false,
+                success: true
+            }
+        )));
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(3)
+        );
+    }
+
+    #[test]
+    fn drop_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 98_765,
+            count: 1,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DropItem {
+                unique_id: 98_765,
+                count: 1,
+                hero_inventory: false,
+                success: false,
+            }]
+        );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot.ground_drops.is_empty());
+    }
+
+    #[test]
+    fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: true,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 0,
+            count: 2,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![
+                ServerPacket::Chat {
+                    message: super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.CanNotDrop",
+                        "server.CanNotDrop",
+                    ),
+                    chat_type: ChatType::System,
+                },
+                ServerPacket::DropItem {
+                    unique_id: 0,
+                    count: 2,
+                    hero_inventory: false,
+                    success: false,
+                },
+            ]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+        assert!(!snapshot
+            .ground_drops
+            .iter()
+            .any(|drop| drop.name.contains("Potion")));
+    }
+
+    #[test]
+    fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: true,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 0,
+            count: 2,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DropItem {
+                unique_id: 0,
+                count: 2,
+                hero_inventory: false,
+                success: false,
+            }]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+        assert!(snapshot.ground_drops.is_empty());
+    }
+
+    #[test]
+    fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: true,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        super::set_quest_stage(
+            session.app.world_mut(),
+            super::GUIDE_QUEST_ID,
+            QuestStage::InProgress,
+        );
+        set_player_position(&mut session, Point { x: 333, y: 267 });
+
+        let packets = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 5);
+        let snapshot = session.world_snapshot();
+        let quest = super::guide_quest_template();
+
+        assert!(packet_has_object_died(&packets, super::FIELD_WASP_ID));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+        assert_eq!(snapshot.quest_log[0].stage, QuestStage::InProgress);
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.container == ItemContainer::Quest && item.key == quest.quest_item.key
+        }));
+        assert!(snapshot.ground_drops.is_empty());
+    }
+
+    #[test]
+    fn drop_item_packet_hero_inventory_flag_does_not_mutate_matching_player_inventory_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("red potion should exist");
+            item.unique_id = 9_100;
+        }
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 9_100,
+            count: 2,
+            hero_inventory: true,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DropItem {
+                unique_id: 9_100,
+                count: 2,
+                hero_inventory: true,
+                success: false,
+            }]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+        assert!(!snapshot
+            .ground_drops
+            .iter()
+            .any(|drop| drop.name.contains("Potion")));
+    }
+
+    #[test]
+    fn use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "town-teleport" && item.container == ItemContainer::Bag2)
+                .expect("bag2 teleport should exist")
+                .clone();
+            let mut bag1_duplicate = duplicate;
+            bag1_duplicate.slot = 7;
+            bag1_duplicate.container = ItemContainer::Bag1;
+            bag1_duplicate.unique_id = 7_007;
+            resources.inventory_items.insert(0, bag1_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 40,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 40,
+                success: true,
+                grid: MirGridType::Inventory
+            }
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "town-teleport"
+                && item.container == ItemContainer::Bag1
+                && item.slot == 7
+                && item.unique_id == 7_007
+        }));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| { item.key == "town-teleport" && item.container == ItemContainer::Bag2 }));
+    }
+
+    #[test]
+    fn equip_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "bronze-helmet" && item.container == ItemContainer::Bag1)
+                .expect("starter bronze helmet should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 1;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 9_002;
+            bag2_duplicate.added_defence = 5;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 9_002,
+            to: 2,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 9_002,
+                to: 2,
+                success: true
+            }
+        )));
+        assert_eq!(
+            snapshot
+                .equipment_items
+                .iter()
+                .find(|item| item.slot == EquipmentSlot::Helmet)
+                .map(|item| item.added_defence),
+            Some(5)
+        );
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.container == ItemContainer::Bag1 && item.slot == 3
+        }));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_uses_inventory_unique_ids_instead_of_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 2;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 0;
+            bag2_duplicate.quantity = 4;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Inventory,
+            id_from: super::default_item_unique_id(ItemContainer::Bag2, 2),
+            id_to: 0,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Inventory,
+                id_from,
+                id_to: 0,
+                success: true
+            } if *id_from == super::default_item_unique_id(ItemContainer::Bag2, 2)
+        )));
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(9)
+        );
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "red-potion" && item.container == ItemContainer::Bag2 && item.slot == 2
+        }));
+    }
+
+    fn add_duplicate_inventory_merge_test_stacks(
+        session: &mut SimulationSession,
+        bag1_unique_id: u64,
+        bag2_unique_id: u64,
+    ) {
+        let mut resources = session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>();
+        let duplicate = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+            .expect("starter red potion should exist")
+            .clone();
+        let mut bag2_duplicate = duplicate;
+        bag2_duplicate.slot = 2;
+        bag2_duplicate.container = ItemContainer::Bag2;
+        bag2_duplicate.unique_id = bag2_unique_id;
+        bag2_duplicate.quantity = 4;
+        let bag1_duplicate = resources
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+            .expect("bag1 red potion should exist");
+        bag1_duplicate.unique_id = bag1_unique_id;
+        resources.inventory_items.push(bag2_duplicate);
+    }
+
+    fn assert_duplicate_inventory_merge_test_stacks_unchanged(
+        session: &SimulationSession,
+        bag1_unique_id: u64,
+        bag2_unique_id: u64,
+    ) {
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == bag1_unique_id
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == bag2_unique_id
+                && item.slot == 2
+                && item.quantity == 4
+        }));
+    }
+
+    fn add_duplicate_inventory_and_belt_merge_test_stacks(
+        session: &mut SimulationSession,
+        bag_unique_id: u64,
+        belt_unique_id: u64,
+    ) {
+        let mut resources = session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>();
+        let duplicate = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+            .expect("starter red potion should exist")
+            .clone();
+        let bag_item = resources
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+            .expect("bag red potion should exist");
+        bag_item.unique_id = bag_unique_id;
+        resources.belt_items.retain(|item| item.slot != 3);
+        let mut belt_duplicate = duplicate;
+        belt_duplicate.slot = 3;
+        belt_duplicate.container = ItemContainer::Belt;
+        belt_duplicate.unique_id = belt_unique_id;
+        belt_duplicate.quantity = 4;
+        resources.belt_items.push(belt_duplicate);
+    }
+
+    #[test]
+    fn merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 2;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 9_002;
+            bag2_duplicate.quantity = 4;
+            let bag1_duplicate = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag1 red potion should exist");
+            bag1_duplicate.unique_id = 9_001;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::HeroInventory,
+            grid_to: MirGridType::HeroInventory,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::HeroInventory,
+                grid_to: MirGridType::HeroInventory,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 4
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 2;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 9_002;
+            bag2_duplicate.quantity = 4;
+            let bag1_duplicate = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag1 red potion should exist");
+            bag1_duplicate.unique_id = 9_001;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::HeroInventory,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::HeroInventory,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 4
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 2;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 9_002;
+            bag2_duplicate.quantity = 4;
+            let bag1_duplicate = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag1 red potion should exist");
+            bag1_duplicate.unique_id = 9_001;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Equipment,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Equipment,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 4
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Trade,
+            grid_to: MirGridType::Trade,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Trade,
+                grid_to: MirGridType::Trade,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        assert_duplicate_inventory_merge_test_stacks_unchanged(&session, 9_001, 9_002);
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Trade,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Trade,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        assert_duplicate_inventory_merge_test_stacks_unchanged(&session, 9_001, 9_002);
+    }
+
+    #[test]
+    fn merge_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Refine,
+            grid_to: MirGridType::Refine,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Refine,
+                grid_to: MirGridType::Refine,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        assert_duplicate_inventory_merge_test_stacks_unchanged(&session, 9_001, 9_002);
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Refine,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Refine,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        assert_duplicate_inventory_merge_test_stacks_unchanged(&session, 9_001, 9_002);
+    }
+
+    #[test]
+    fn merge_item_packet_missing_source_is_ack_only_and_preserves_matching_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Inventory,
+            id_from: 9_999,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Inventory,
+                id_from: 9_999,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        assert_duplicate_inventory_merge_test_stacks_unchanged(&session, 9_001, 9_002);
+    }
+
+    #[test]
+    fn merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let potion = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("red potion should exist");
+            potion.unique_id = 9_001;
+            let helmet = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "bronze-helmet" && item.container == ItemContainer::Bag1)
+                .expect("bronze helmet should exist");
+            helmet.unique_id = 9_003;
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Inventory,
+            id_from: 9_001,
+            id_to: 9_003,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Inventory,
+                id_from: 9_001,
+                id_to: 9_003,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_003
+                && item.slot == 3
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_full_target_stack_is_ack_only_and_preserves_matching_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_merge_test_stacks(&mut session, 9_001, 9_002);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let target = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.unique_id == 9_002)
+                .expect("target potion should exist");
+            target.quantity = 20;
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Inventory,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Inventory,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 20
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            let mut bag2_duplicate = duplicate;
+            bag2_duplicate.slot = 2;
+            bag2_duplicate.container = ItemContainer::Bag2;
+            bag2_duplicate.unique_id = 9_002;
+            bag2_duplicate.quantity = 4;
+            let bag1_duplicate = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag1 red potion should exist");
+            bag1_duplicate.unique_id = 9_001;
+            resources.inventory_items.push(bag2_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Fishing,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Fishing,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.quantity == 5
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 4
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt_stackables() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_and_belt_merge_test_stacks(&mut session, 9_001, 25_003);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Belt,
+            id_from: 9_001,
+            id_to: 25_003,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Belt,
+                id_from: 9_001,
+                id_to: 25_003,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == 9_001));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Belt
+                && item.unique_id == 25_003
+                && item.slot == 3
+                && item.quantity == 9
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt_stackables() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_duplicate_inventory_and_belt_merge_test_stacks(&mut session, 9_001, 25_003);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Belt,
+            grid_to: MirGridType::Inventory,
+            id_from: 25_003,
+            id_to: 9_001,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Belt,
+                grid_to: MirGridType::Inventory,
+                id_from: 25_003,
+                id_to: 9_001,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources
+            .belt_items
+            .iter()
+            .any(|item| item.unique_id == 25_003));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.unique_id == 9_001
+                && item.slot == 0
+                && item.quantity == 9
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "FishBait", 31);
+        {
+            let template = mir2_game_data::crystal_item_by_name("FishBait")
+                .expect("FishBait template should exist");
+            let key = super::crystal_item_key_for_template(&template);
+            add_belt_test_item(&mut session, &key, &template.name, 3);
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let bag_bait = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("inventory bait should exist");
+            bag_bait.unique_id = 9_031;
+            bag_bait.quantity = 5;
+            let belt_bait = resources
+                .belt_items
+                .iter_mut()
+                .find(|item| item.slot == 3 && item.key == key)
+                .expect("belt bait should exist");
+            belt_bait.unique_id = 25_003;
+            belt_bait.quantity = 4;
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Belt,
+            id_from: 9_031,
+            id_to: 25_003,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Belt,
+                id_from: 9_031,
+                id_to: 25_003,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "crystal-item-798"
+                && item.unique_id == 9_031
+                && item.slot == 31
+                && item.quantity == 5
+        }));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.key == "crystal-item-798"
+                && item.unique_id == 25_003
+                && item.slot == 3
+                && item.quantity == 4
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut quest_stack = quest_test_item(12, 9_912);
+            quest_stack.quantity = 2;
+            resources.inventory_items.push(quest_stack);
+            resources.inventory_items.push(quest_test_item(13, 9_913));
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::QuestInventory,
+            grid_to: MirGridType::QuestInventory,
+            id_from: 9_912,
+            id_to: 9_913,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::QuestInventory,
+                grid_to: MirGridType::QuestInventory,
+                id_from: 9_912,
+                id_to: 9_913,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.container == ItemContainer::Quest
+                && item.slot == 12
+                && item.quantity == 2
+        }));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.container == ItemContainer::Quest
+                && item.slot == 13
+                && item.quantity == 1
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_items(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.inventory_items.push(quest_test_item(12, 9_912));
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::QuestInventory,
+            id_from: 0,
+            id_to: 9_912,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::QuestInventory,
+                id_from: 0,
+                id_to: 9_912,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "red-potion" && item.container == ItemContainer::Bag1 && item.quantity == 5
+        }));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.container == ItemContainer::Quest
+                && item.slot == 12
+                && item.quantity == 1
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_storage_to_belt_grid_does_not_emit_extra_chat_or_mutate_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Storage,
+            grid_to: MirGridType::Belt,
+            id_from: 0,
+            id_to: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Storage,
+                grid_to: MirGridType::Belt,
+                id_from: 0,
+                id_to: 0,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.container == ItemContainer::Storage
+                && item.slot == 0
+                && item.quantity == 10
+        }));
+        assert!(snapshot.belt_items.iter().any(|item| {
+            item.key == "belt-red-potion"
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+                && item.quantity == 5
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn merge_item_packet_belt_to_storage_grid_does_not_emit_extra_chat_or_mutate_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Belt,
+            grid_to: MirGridType::Storage,
+            id_from: 0,
+            id_to: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Belt,
+                grid_to: MirGridType::Storage,
+                id_from: 0,
+                id_to: 0,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.belt_items.iter().any(|item| {
+            item.key == "belt-red-potion"
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+                && item.quantity == 5
+        }));
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.container == ItemContainer::Storage
+                && item.slot == 0
+                && item.quantity == 10
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -49700,6 +53791,53 @@ mod tests {
             .ground_drops
             .iter()
             .any(|drop| drop.name.contains("CraftRing1")));
+    }
+
+    #[test]
+    fn drop_item_packet_rejects_rental_dont_drop_bind() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "Dagger", 10);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 10)
+                .expect("dagger should exist");
+            dagger.rental_binding_flags = super::CRYSTAL_BIND_DONT_DROP;
+        }
+
+        let packets = session.handle_packet(ClientPacket::DropItem {
+            unique_id: 10,
+            count: 1,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DropItem {
+                unique_id: 10,
+                count: 1,
+                hero_inventory: false,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 10)
+            .expect("dagger should remain");
+        assert_eq!(dagger.rental_binding_flags, super::CRYSTAL_BIND_DONT_DROP);
+        assert!(!snapshot
+            .ground_drops
+            .iter()
+            .any(|drop| drop.name.contains("Dagger")));
     }
 
     #[test]
@@ -49790,6 +53928,94 @@ mod tests {
     }
 
     #[test]
+    fn delete_item_packet_hero_inventory_flag_still_deletes_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::DeleteItem {
+            unique_id: 0,
+            count: 2,
+            hero_inventory: true,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DeleteItem {
+                unique_id: 0,
+                count: 2,
+            }]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(3)
+        );
+    }
+
+    #[test]
+    fn delete_item_packet_hero_inventory_flag_acknowledges_missing_item_without_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::DeleteItem {
+            unique_id: 9_999,
+            count: 2,
+            hero_inventory: true,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DeleteItem {
+                unique_id: 9_999,
+                count: 2,
+            }]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+    }
+
+    #[test]
+    fn delete_item_packet_dead_player_acknowledges_without_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::DeleteItem {
+            unique_id: 0,
+            count: 2,
+            hero_inventory: false,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::DeleteItem {
+                unique_id: 0,
+                count: 2,
+            }]
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+    }
+
+    #[test]
     fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
         let mut session = SimulationSession::new(wicked_trader_config());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -49849,6 +54075,55 @@ mod tests {
                 && item.slot == slot
                 && item.quantity == quantity_before - 1));
         }
+    }
+
+    #[test]
+    fn sell_item_packet_uses_unique_id_when_it_differs_from_slot() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@BuySell");
+        let (sell_unique_id, expected_gold) = {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "bronze-helmet")
+                .expect("bronze helmet should exist");
+            item.unique_id = 9_003;
+            let expected_gold = super::crystal_sell_value_for_item(&ItemState {
+                quantity: 1,
+                ..item.clone()
+            });
+            (item.unique_id, expected_gold)
+        };
+        let gold_before = session.app.world().resource::<SimulationResources>().gold;
+
+        let packets = session.handle_packet(ClientPacket::SellItem {
+            unique_id: sell_unique_id,
+            count: 1,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::SellItem {
+                unique_id: 9_003,
+                count: 1,
+                success: true
+            }
+        )));
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::GainedGold { gold } if *gold == expected_gold)
+        ));
+        assert_eq!(resources.gold, gold_before + expected_gold);
+        assert!(!resources
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == sell_unique_id));
     }
 
     #[test]
@@ -49955,6 +54230,56 @@ mod tests {
                 .collect::<Vec<_>>(),
             items_before
         );
+    }
+
+    #[test]
+    fn sell_item_service_context_requires_live_npc_object() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@BuySell");
+        let state_before = {
+            let resources = session.app.world().resource::<SimulationResources>();
+            (
+                resources.gold,
+                resources
+                    .inventory_items
+                    .iter()
+                    .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                    .collect::<Vec<_>>(),
+                resources.npc_buy_back_items.clone(),
+            )
+        };
+
+        let trader_npc = super::entity_by_object_id(session.app.world(), 4_990)
+            .expect("trader npc should exist");
+        let _ = session.app.world_mut().despawn(trader_npc);
+        sync_visible_objects(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::SellItem {
+            unique_id: 4,
+            count: 1,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SellItem {
+                unique_id: 4,
+                count: 1,
+                success: false,
+            }]
+        );
+        assert_eq!(resources.gold, state_before.0);
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                .collect::<Vec<_>>(),
+            state_before.1
+        );
+        assert_eq!(resources.npc_buy_back_items, state_before.2);
     }
 
     #[test]
@@ -50095,6 +54420,50 @@ mod tests {
     }
 
     #[test]
+    fn sell_item_dead_player_only_acks_and_preserves_inventory_and_gold() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@BuySell");
+        let (gold_before, items_before) = {
+            let resources = session.app.world().resource::<SimulationResources>();
+            (
+                resources.gold,
+                resources
+                    .inventory_items
+                    .iter()
+                    .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::SellItem {
+            unique_id: 3,
+            count: 1,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SellItem {
+                unique_id: 3,
+                count: 1,
+                success: false,
+            }]
+        );
+        assert_eq!(resources.gold, gold_before);
+        assert_eq!(
+            resources
+                .inventory_items
+                .iter()
+                .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                .collect::<Vec<_>>(),
+            items_before
+        );
+    }
+
+    #[test]
     fn sell_item_partial_stack_rejects_when_gold_cap_would_overflow() {
         let mut session = SimulationSession::new(wicked_trader_config());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -50107,6 +54476,7 @@ mod tests {
             resources.active_npc_service = Some(super::ActiveNpcServiceState {
                 script_key: "00Default".to_string(),
                 label_key: "SELL".to_string(),
+                npc_object_id: 0,
             });
         }
         let quantity_before = session
@@ -50330,6 +54700,9 @@ mod tests {
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectItem { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -50396,6 +54769,87 @@ mod tests {
     }
 
     #[test]
+    fn pickup_before_start_game_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let direct_packets = session.pick_up(1);
+        let packet_packets = session.handle_packet(ClientPacket::PickUp);
+
+        assert!(direct_packets.is_empty());
+        assert!(packet_packets.is_empty());
+    }
+
+    #[test]
+    fn direct_pickup_missing_drop_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.pick_up(98_999);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn direct_pickup_non_ground_target_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.pick_up(super::FIELD_WASP_ID);
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn direct_pickup_out_of_cell_rejects_without_runtime_chat_or_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        super::spawn_ground_drop(
+            session.app.world_mut(),
+            Point { x: 331, y: 270 },
+            "",
+            None,
+            super::DropLoot::InventoryItem {
+                key: "out-of-cell-pickup-test-item".to_string(),
+                name: "Out Of Cell Pickup Test Item".to_string(),
+                description: "Out-of-cell direct pickup parity test item.".to_string(),
+                weight: 4,
+                durability_current: None,
+                durability_max: None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                show_group_pickup: false,
+            },
+            1,
+            "Out Of Cell Pickup Test Item".to_string(),
+        );
+        let drop_object_id = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .next_drop_object_id
+            .saturating_sub(1);
+        let _ = session.tick();
+
+        let packets = session.pick_up(drop_object_id);
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert!(snapshot
+            .ground_drops
+            .iter()
+            .any(|drop| drop.object_id == drop_object_id));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "out-of-cell-pickup-test-item"));
+    }
+
+    #[test]
     fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -50436,6 +54890,9 @@ mod tests {
             packet,
             ServerPacket::ObjectRemove { object_id } if *object_id == drop_object_id
         )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -50605,6 +55062,25 @@ mod tests {
         assert!(!packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+
+        let full_bag_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.YouCannotCarryAnymore",
+            "server.YouCannotCarryAnymore",
+        );
+        let direct_packets = session.pick_up(drop_object_id);
+        let after_direct = session.world_snapshot();
+        assert!(direct_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &full_bag_message
+        )));
+        assert!(after_direct
+            .ground_drops
+            .iter()
+            .any(|drop| drop.object_id == drop_object_id));
+        assert!(!direct_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
     }
 
     #[test]
@@ -50622,6 +55098,7 @@ mod tests {
                 name: "Weight Stone".to_string(),
                 icon: 1,
                 slot: 0,
+                unique_id: 0,
                 container: ItemContainer::Bag1,
                 quantity: 1,
                 description: "Bag weight cap test ballast.".to_string(),
@@ -50636,6 +55113,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -50741,7 +55220,15 @@ mod tests {
         let blocked_packets = session.handle_packet(ClientPacket::PickUp);
         assert!(blocked_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("another player")
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.CannotPickupNotOwner",
+                    "server.CannotPickupNotOwner",
+                )
         )));
         assert!(session
             .world_snapshot()
@@ -50988,12 +55475,16 @@ mod tests {
         );
 
         let packets = session.handle_packet(ClientPacket::PickUp);
+        let expected_message = super::format_localized_text(
+            super::current_language(session.app.world()),
+            "server.FriendlyPickedUpItem",
+            ["Scout", template.name.as_str()],
+        );
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::Chat { message, chat_type }
                 if *chat_type == ChatType::System
-                    && message.contains("Scout Picked up")
-                    && message.contains("SpiritBlade")
+                    && message == &expected_message
         )));
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -51247,6 +55738,21 @@ mod tests {
                     && info.name == "(HP)DrugSmall"
                     && info.stack_size == 20
                     && info.stats.iter().any(|stat| stat.stat == 12 && stat.value == 30)
+        )));
+
+        let missing_packets =
+            session.handle_packet(ClientPacket::RequestItemInfo { item_index: -1 });
+        assert!(missing_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                message,
+                chat_type: ChatType::System,
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
         )));
     }
 
@@ -51529,16 +56035,29 @@ mod tests {
     #[test]
     fn consumable_item_restores_hp() {
         let mut session = SimulationSession::new(SimulationConfig::default());
+
+        let before_start_packets = session.use_item("red-potion");
+        assert!(before_start_packets.is_empty());
+
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        set_player_position(&mut session, Point { x: 333, y: 267 });
-        let _ = session.attack(3002);
-        let _ = session.tick();
+        set_current_player_hp(&mut session, 10);
         let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
 
-        let _ = session.use_item("red-potion");
+        let packets = session.use_item("red-potion");
+        let immediate_hp = session.world_snapshot().player_hp.expect("player hp");
+
+        assert_eq!(immediate_hp, damaged_hp);
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+
+        let tick_packets = session.tick();
         let healed_hp = session.world_snapshot().player_hp.expect("player hp");
 
         assert!(healed_hp > damaged_hp);
+        assert!(tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
     }
 
     #[test]
@@ -51631,6 +56150,11 @@ mod tests {
 
         let packets = session.use_item("benediction-oil");
         let snapshot = session.world_snapshot();
+        let expected_message = super::localized_text_or_fallback(
+            super::current_language(session.app.world()),
+            "server.WeaponNoEffect",
+            "server.WeaponNoEffect",
+        );
 
         assert!(!packets
             .iter()
@@ -51638,7 +56162,7 @@ mod tests {
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::Chat { message, chat_type }
-                if message == "No effect." && *chat_type == ChatType::Hint
+                if message == &expected_message && *chat_type == ChatType::Hint
         )));
         assert!(snapshot
             .equipment_items
@@ -51663,6 +56187,11 @@ mod tests {
 
         let packets = session.use_item("benediction-oil");
         let snapshot = session.world_snapshot();
+        let expected_message = super::localized_text_or_fallback(
+            super::current_language(session.app.world()),
+            "server.WeaponCurse",
+            "server.WeaponCurse",
+        );
 
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -51676,12 +56205,40 @@ mod tests {
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::Chat { message, chat_type }
-                if message == "Curse dwells within your weapon." && *chat_type == ChatType::System
+                if message == &expected_message && *chat_type == ChatType::System
         )));
         assert!(snapshot
             .equipment_items
             .iter()
             .any(|item| { item.slot == EquipmentSlot::Weapon && item.added_luck == -1 }));
+    }
+
+    #[test]
+    fn benediction_oil_no_weapon_failure_has_no_runtime_chat_or_consume() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_benediction_oil(&mut session, 12);
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .equipment_items
+            .retain(|item| item.slot != EquipmentSlot::Weapon);
+
+        let packets = session.use_item("benediction-oil");
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "benediction-oil"));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
     }
 
     #[test]
@@ -51714,6 +56271,22 @@ mod tests {
                 current_dura: 15,
             }
         )));
+        assert!(repair_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.WeaponPartiallyRepaired",
+                        "server.WeaponPartiallyRepaired",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+        assert!(!repair_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message == "Your weapon has been repaired." && *chat_type == ChatType::System
+        )));
         assert!(after_repair
             .inventory_items
             .iter()
@@ -51745,6 +56318,22 @@ mod tests {
                 current_dura: 20,
             }
         )));
+        assert!(war_god_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.WeaponCompletelyRepaired",
+                        "server.WeaponCompletelyRepaired",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+        assert!(!war_god_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message == "Your weapon has been repaired." && *chat_type == ChatType::System
+        )));
         assert!(after_war_god
             .inventory_items
             .iter()
@@ -51752,25 +56341,55 @@ mod tests {
     }
 
     #[test]
+    fn repair_oil_failure_has_no_runtime_chat_or_consume() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.durability_current = weapon.durability_max;
+        }
+        add_weapon_oil(&mut session, "repair-oil", "Repair Oil", 12);
+
+        let packets = session.use_item("repair-oil");
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "repair-oil"));
+    }
+
+    #[test]
     fn crystal_use_item_packet_consumes_inventory_slot() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        set_player_position(&mut session, Point { x: 333, y: 267 });
-        let _ = session.attack(3002);
-        let _ = session.tick();
+        set_current_player_hp(&mut session, 10);
         let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
 
         let packets = session.handle_packet(ClientPacket::UseItem {
             unique_id: 0,
             grid: MirGridType::Inventory,
         });
-        let healed_hp = session.world_snapshot().player_hp.expect("player hp");
+        let immediate_snapshot = session.world_snapshot();
 
-        assert!(healed_hp > damaged_hp);
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Red Potion")
-        )));
+        assert_eq!(immediate_snapshot.player_hp, Some(damaged_hp));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::UseItem {
@@ -51779,36 +56398,52 @@ mod tests {
                 grid: MirGridType::Inventory
             }
         )));
+        assert_eq!(
+            immediate_snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.slot == 0)
+                .map(|item| item.quantity),
+            Some(4)
+        );
+
+        let tick_packets = session.tick();
+        let tick_snapshot = session.world_snapshot();
+
+        assert!(tick_snapshot.player_hp.expect("player hp") > damaged_hp);
+        assert!(tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
     }
 
     #[test]
     fn crystal_use_item_packet_consumes_belt_slot() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        set_player_position(&mut session, Point { x: 333, y: 267 });
-        let _ = session.attack(3002);
-        let _ = session.tick();
+        set_current_player_hp(&mut session, 10);
         let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
 
         let packets = session.handle_packet(ClientPacket::UseItem {
             unique_id: 0,
             grid: MirGridType::Belt,
         });
-        let snapshot = session.world_snapshot();
+        let immediate_snapshot = session.world_snapshot();
 
-        assert!(snapshot.player_hp.expect("player hp") > damaged_hp);
+        assert_eq!(immediate_snapshot.player_hp, Some(damaged_hp));
         assert_eq!(
-            snapshot
+            immediate_snapshot
                 .belt_items
                 .iter()
                 .find(|item| item.key == "belt-red-potion" && item.slot == 0)
                 .map(|item| item.quantity),
             Some(4)
         );
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Red Potion")
-        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::UseItem {
@@ -51817,12 +56452,1397 @@ mod tests {
                 grid: MirGridType::Belt
             }
         )));
+
+        let tick_packets = session.tick();
+        let tick_snapshot = session.world_snapshot();
+
+        assert!(tick_snapshot.player_hp.expect("player hp") > damaged_hp);
+        assert!(tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+    }
+
+    #[test]
+    fn use_item_packet_static_potion_rejects_on_no_drug_map() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: true,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_current_player_hp(&mut session, 10);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 0,
+            grid: MirGridType::Inventory,
+        });
+        let immediate_snapshot = session.world_snapshot();
+        let tick_packets = session.tick();
+        let tick_snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 0,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.YouCannotUsePotionsHere",
+                    "server.YouCannotUsePotionsHere",
+                )
+        )));
+        assert_eq!(immediate_snapshot.player_hp, Some(10));
+        assert_eq!(tick_snapshot.player_hp, Some(10));
+        assert!(immediate_snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "red-potion" && item.slot == 0 && item.quantity == 5));
+        assert!(!tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+    }
+
+    #[test]
+    fn use_item_packet_belt_equipment_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_belt_test_item(&mut session, "belt-test-helmet", "Belt Test Helmet", 3);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let item = resources
+                .belt_items
+                .iter_mut()
+                .find(|item| item.key == "belt-test-helmet")
+                .expect("belt equipment test item should exist");
+            item.equip_slot = Some(EquipmentSlot::Helmet);
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 3,
+            grid: MirGridType::Belt,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 3,
+                success: false,
+                grid: MirGridType::Belt,
+            })
+        );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot
+            .belt_items
+            .iter()
+            .any(|item| item.key == "belt-test-helmet" && item.slot == 3));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.name == "Belt Test Helmet"));
+    }
+
+    #[test]
+    fn use_item_packet_unusable_inventory_item_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_test_item(
+            &mut session,
+            "unusable-test-item",
+            "Unusable Test Item",
+            31,
+            1,
+        );
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "unusable-test-item" && item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 98_765,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 98_765,
+                success: false,
+                grid: MirGridType::Inventory,
+            }]
+        );
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "SunPotion", 31);
+        set_current_player_hp(&mut session, 10);
+        set_current_player_mp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(snapshot.player_hp, Some(80));
+        assert_eq!(snapshot.player_mp, Some(100));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!snapshot.inventory_items.iter().any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "(HP)DrugSmall", 31);
+        set_current_player_hp(&mut session, 10);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let immediate_snapshot = session.world_snapshot();
+
+        assert_eq!(immediate_snapshot.player_hp, Some(10));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+        assert!(!immediate_snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+
+        let tick_packets = session.tick();
+        let tick_snapshot = session.world_snapshot();
+
+        assert_eq!(tick_snapshot.player_hp, Some(20));
+        assert!(tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: true,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "(HP)DrugSmall", 31);
+        set_current_player_hp(&mut session, 10);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let immediate_snapshot = session.world_snapshot();
+        let tick_packets = session.tick();
+        let tick_snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.YouCannotUsePotionsHere",
+                    "server.YouCannotUsePotionsHere",
+                )
+        )));
+        assert_eq!(immediate_snapshot.player_hp, Some(10));
+        assert_eq!(tick_snapshot.player_hp, Some(10));
+        assert!(immediate_snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+        assert!(!tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "ImpactDrug(S)", 31);
+
+        let first_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let first_snapshot = session.world_snapshot();
+        let first_buff = first_snapshot
+            .active_buffs
+            .iter()
+            .find(|buff| buff.key == "impact")
+            .expect("impact buff after first use");
+
+        assert_eq!(first_buff.attack_bonus, 5);
+        assert_eq!(first_buff.remaining_ticks, 300);
+        assert!(!first_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        {
+            let resources = session.app.world().resource::<SimulationResources>();
+            assert_eq!(super::total_attack_bonus(&resources), 12);
+        }
+
+        add_inventory_crystal_item(&mut session, "ImpactDrug(M)", 32);
+        let second_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 32,
+            grid: MirGridType::Inventory,
+        });
+        let second_snapshot = session.world_snapshot();
+        let second_buff = second_snapshot
+            .active_buffs
+            .iter()
+            .find(|buff| buff.key == "impact")
+            .expect("impact buff after second use");
+
+        assert_eq!(second_buff.attack_bonus, 5);
+        assert_eq!(second_buff.remaining_ticks, 600);
+        assert!(second_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 32,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        {
+            let resources = session.app.world().resource::<SimulationResources>();
+            assert_eq!(super::total_attack_bonus(&resources), 12);
+        }
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "Apple", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+        let active_keys = snapshot
+            .active_buffs
+            .iter()
+            .map(|buff| buff.key.as_str())
+            .collect::<Vec<_>>();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(active_keys.contains(&"impact"));
+        assert!(active_keys.contains(&"magic"));
+        assert!(active_keys.contains(&"taoist"));
+        assert!(active_keys.contains(&"storm"));
+        assert!(active_keys.contains(&"health-aid"));
+        assert!(active_keys.contains(&"mana-aid"));
+        assert_eq!(
+            snapshot
+                .active_buffs
+                .iter()
+                .find(|buff| buff.key == "impact")
+                .map(|buff| buff.attack_bonus),
+            Some(2)
+        );
+        {
+            let resources = session.app.world().resource::<SimulationResources>();
+            assert_eq!(super::total_attack_bonus(&resources), 9);
+        }
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "TownTeleport", 31);
+        let spawn = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .config
+            .spawn
+            .clone();
+        set_player_position(
+            &mut session,
+            Point {
+                x: spawn.x.saturating_add(3),
+                y: spawn.y.saturating_add(2),
+            },
+        );
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(player_position(&session), spawn);
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location } if location.position == spawn
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "DungeonEscape", 31);
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let next_position = player_position(&session);
+
+        assert_ne!(next_position, Point { x: 330, y: 270 });
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location } if location.position == next_position
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: true,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "DungeonEscape", 31);
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.CanNotDungeon",
+                    "server.CanNotDungeon",
+                )
+        )));
+        assert_eq!(player_position(&session), Point { x: 330, y: 270 });
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_random_teleport_teleports_same_map() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "RandomTeleport", 31);
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let next_position = player_position(&session);
+
+        assert_ne!(next_position, Point { x: 330, y: 270 });
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location } if location.position == next_position
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: true,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "RandomTeleport", 31);
+        set_player_position(&mut session, Point { x: 330, y: 270 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.CanNotRandom",
+                    "server.CanNotRandom",
+                )
+        )));
+        assert_eq!(player_position(&session), Point { x: 330, y: 270 });
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            11,
+        );
+        add_inventory_crystal_item(&mut session, "GtInvite", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_gt_teleport_consumes_without_teleporting() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            11,
+        );
+        add_inventory_crystal_item(&mut session, "GTTeleport", 31);
+        set_player_position(&mut session, Point { x: 330, y: 260 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.stage5_systems.guild_territory.owned = true;
+            resources.stage5_systems.guild_territory.map_file_name = "GT0".to_string();
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert_eq!(player_position(&session), Point { x: 330, y: 260 });
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_repair_oils_use_template_scroll_shapes() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.durability_current = 10;
+            weapon.durability_max = 20;
+        }
+        add_inventory_crystal_item(&mut session, "RepairOil", 31);
+
+        let repair_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(repair_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRepaired {
+                unique_id: 0,
+                max_dura: 20,
+                current_dura: 15,
+            }
+        )));
+        assert!(repair_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.WeaponPartiallyRepaired",
+                        "server.WeaponPartiallyRepaired",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.durability_current = 5;
+            weapon.durability_max = 20;
+        }
+        add_inventory_crystal_item(&mut session, "WarGodOil", 32);
+
+        let war_god_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 32,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(war_god_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRepaired {
+                unique_id: 0,
+                max_dura: 20,
+                current_dura: 20,
+            }
+        )));
+        assert!(war_god_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.WeaponCompletelyRepaired",
+                        "server.WeaponCompletelyRepaired",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_repair_oils_respect_weapon_repair_binds() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.durability_current = 5;
+            weapon.durability_max = 20;
+            weapon.rental_binding_flags = super::CRYSTAL_BIND_DONT_REPAIR;
+        }
+        add_inventory_crystal_item(&mut session, "RepairOil", 31);
+
+        let repair_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            repair_packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            }]
+        );
+        {
+            let snapshot = session.world_snapshot();
+            let weapon = snapshot
+                .equipment_items
+                .iter()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon snapshot");
+            assert_eq!(weapon.durability_current, 5);
+            assert!(snapshot
+                .inventory_items
+                .iter()
+                .any(|item| item.slot == 31 && item.name == "RepairOil"));
+        }
+
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.rental_binding_flags = super::CRYSTAL_BIND_NO_SREPAIR;
+        }
+        add_inventory_crystal_item(&mut session, "WarGodOil", 32);
+
+        let war_god_packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 32,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            war_god_packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 32,
+                success: false,
+                grid: MirGridType::Inventory,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        let weapon = snapshot
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("starter weapon snapshot");
+        assert_eq!(weapon.durability_current, 5);
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.name == "WarGodOil"));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_food_requires_equipped_mount() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "RawMeat", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            }]
+        );
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "RawMeat", 31);
+        {
+            session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>()
+                .equipment_items
+                .push(super::EquipmentState {
+                    key: "test-mount".to_string(),
+                    slot: EquipmentSlot::Mount,
+                    name: "Test Mount".to_string(),
+                    icon: super::equipment_icon_for_slot_and_name(
+                        EquipmentSlot::Mount,
+                        "Test Mount",
+                    ),
+                    shape: None,
+                    description: "Mount used by Crystal food tests.".to_string(),
+                    durability_current: 1000,
+                    durability_max: 5000,
+                    grade: ItemGrade::None,
+                    added_attack: 0,
+                    added_defence: 0,
+                    added_luck: 0,
+                    added_stats: Vec::new(),
+                    cursed: false,
+                    socket_slots: 0,
+                    gem_count: 0,
+                    identified: None,
+                    soul_bound_id: None,
+                    sealed_expiry_time_binary_datetime: 0,
+                    sealed_next_time_binary_datetime: 0,
+                    rental_binding_flags: 0,
+                    attack: 0,
+                    defence: 0,
+                });
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.MountFed",
+                    "server.MountFed",
+                )
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRepaired {
+                unique_id: 13,
+                max_dura: 4000,
+                current_dura: 2000,
+            }
+        )));
+        assert!(snapshot.equipment_items.iter().any(|item| {
+            item.slot == EquipmentSlot::Mount
+                && item.durability_current == 2000
+                && item.durability_max == 4000
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryWater", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.cursed = true;
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.CanNowUnequipCursedItem",
+                        "server.CanNowUnequipCursedItem",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+        assert!(
+            session
+                .app
+                .world()
+                .resource::<SimulationResources>()
+                .unlock_curse
+        );
+        assert!(!session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot id");
+        let remove_packets = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id: weapon_unique_id,
+            to: 20,
+        });
+
+        assert_eq!(
+            remove_packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
+                unique_id: weapon_unique_id,
+                to: 20,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.unlock_curse);
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 20 && item.key == "wooden-sword" && item.cursed));
+    }
+
+    #[test]
+    fn use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryWater", 31);
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .unlock_curse = true;
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if message
+                    == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.CanAlreadyUnequipCursedItem",
+                        "server.CanAlreadyUnequipCursedItem",
+                    )
+                    && *chat_type == ChatType::Hint
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.unlock_curse);
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.name == "MysteryWater"));
+    }
+
+    #[test]
+    fn mystery_water_unlock_does_not_survive_logout() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryWater", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.cursed = true;
+        }
+
+        let _ = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        assert!(
+            session
+                .app
+                .world()
+                .resource::<SimulationResources>()
+                .unlock_curse
+        );
+
+        let _ = session.handle_packet(ClientPacket::LogOut);
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot id");
+        let remove_packets = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id: weapon_unique_id,
+            to: 20,
+        });
+
+        assert_eq!(
+            remove_packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
+                unique_id: weapon_unique_id,
+                to: 20,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.unlock_curse);
+        assert!(resources
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.cursed));
+    }
+
+    #[test]
+    fn use_item_packet_dead_player_ack_fails_without_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 0,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 0,
+                success: false,
+                grid: MirGridType::Inventory,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, Some(0));
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+    }
+
+    #[test]
+    fn use_item_packet_resurrection_scroll_while_alive_hint_chats_and_preserves_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
+        let alive_hp = session.world_snapshot().player_hp.expect("player hp");
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message == "You cannot use Resurrection Scrolls whilst alive"
+        )));
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, Some(alive_hp));
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.container == ItemContainer::Bag1));
+    }
+
+    #[test]
+    fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
+        set_current_player_hp(&mut session, 0);
+        set_current_player_mp(&mut session, 0);
+
+        let player_entity = player_entity(session.app.world()).expect("player entity");
+        let max_hp = session
+            .app
+            .world()
+            .entity(player_entity)
+            .get::<PlayerVitals>()
+            .map(|vitals| vitals.max_hp)
+            .expect("player vitals");
+        let player_object_id =
+            super::current_player_object_id(session.app.world()).expect("player object id");
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info }
+                if info.object_id == player_object_id && info.effect
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info }
+                if info.object_id == player_object_id && info.percent == 100
+        )));
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, Some(max_hp));
+        assert_eq!(snapshot.player_mp, Some(100));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| { item.slot == 31 && item.container == ItemContainer::Bag1 }));
+    }
+
+    #[test]
+    fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_map() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: false,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: true,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "ResurrectionScroll", 31);
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.CannotUseOnMap",
+                    "server.CannotUseOnMap",
+                )
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectRevived { .. })));
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, Some(0));
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.container == ItemContainer::Bag1));
+    }
+
+    #[test]
+    fn use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let starting_hp = session.world_snapshot().player_hp;
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let potion = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("red potion should exist");
+            potion.unique_id = 9_101;
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 9_101,
+            grid: MirGridType::HeroInventory,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::UseItem {
+                unique_id: 9_101,
+                success: false,
+                grid: MirGridType::HeroInventory,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, starting_hp);
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
     }
 
     #[test]
     fn equippable_item_moves_into_equipment() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            10,
+        );
 
         let _ = session.use_item("bronze-helmet");
         let snapshot = session.world_snapshot();
@@ -51846,6 +57866,394 @@ mod tests {
     }
 
     #[test]
+    fn use_item_packet_equipping_need_identify_item_emits_refresh_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let helmet = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("mystery helmet should exist");
+            helmet.equip_slot = Some(EquipmentSlot::Helmet);
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RefreshItem { item }
+                if item.unique_id == 31 && item.item_index == 120 && item.identified
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let helmet = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet")
+            .expect("mystery helmet should be equipped");
+        assert_eq!(helmet.identified, Some(true));
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn split_item_packet_hero_inventory_grid_does_not_mutate_matching_player_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let potion = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("red potion should exist");
+            potion.unique_id = 9_201;
+        }
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::HeroInventory,
+            unique_id: 9_201,
+            count: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SplitItem1 {
+                grid: MirGridType::HeroInventory,
+                unique_id: 9_201,
+                count: 2,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .filter(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .count(),
+            1
+        );
+        assert_eq!(
+            snapshot
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .map(|item| item.quantity),
+            Some(5)
+        );
+    }
+
+    fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) {
+        let mut resources = session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>();
+        for slot in 0..40u8 {
+            if slot == excluded_slot
+                || resources
+                    .inventory_items
+                    .iter()
+                    .any(|item| item.container == ItemContainer::Bag1 && item.slot == slot)
+            {
+                continue;
+            }
+            resources.inventory_items.push(ItemState {
+                key: format!("split-fill-{slot}"),
+                name: format!("Split Fill {slot}"),
+                icon: super::item_icon_for_key("training-manual"),
+                slot,
+                unique_id: u64::from(slot),
+                container: ItemContainer::Bag1,
+                quantity: 1,
+                description: "Crystal split inventory filler.".to_string(),
+                durability_current: None,
+                durability_max: None,
+                weight: 1,
+                equip_slot: None,
+                grade: ItemGrade::None,
+                added_attack: 0,
+                added_defence: 0,
+                added_stats: Vec::new(),
+                cursed: false,
+                socket_slots: 0,
+                gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
+                sealed_expiry_time_binary_datetime: 0,
+                sealed_next_time_binary_datetime: 0,
+                rental_binding_flags: 0,
+                attack: 0,
+                defence: 0,
+                heal_hp: 0,
+                heal_mp: 0,
+            });
+        }
+    }
+
+    #[test]
+    fn split_item_packet_inventory_uses_crystal_inventory_slots_across_bag_pages() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let bait_key = super::crystal_item_key_for_template(
+            &mir2_game_data::crystal_item_by_name("FishBait")
+                .expect("FishBait template should exist"),
+        );
+        add_inventory_crystal_item(&mut session, "FishBait", 31);
+        fill_bag1_for_split_test(&mut session, 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let bait = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == bait_key && item.container == ItemContainer::Bag1)
+                .expect("bag1 fish bait should exist");
+            bait.quantity = 5;
+        }
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            count: 2,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::SplitItem1 {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                count: 2,
+                success: true,
+            }
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == bait_key
+                && item.container == ItemContainer::Bag1
+                && item.slot == 31
+                && item.quantity == 3
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == bait_key
+                && item.container == ItemContainer::Bag2
+                && item.slot == 1
+                && item.quantity == 2
+        }));
+        assert!(!resources
+            .belt_items
+            .iter()
+            .any(|item| { item.key == bait_key && item.slot <= 5 }));
+    }
+
+    #[test]
+    fn split_item_packet_inventory_can_place_bag2_split_into_earlier_bag1_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let bait_key = super::crystal_item_key_for_template(
+            &mir2_game_data::crystal_item_by_name("FishBait")
+                .expect("FishBait template should exist"),
+        );
+        add_inventory_crystal_item(&mut session, "FishBait", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let bait = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == bait_key && item.container == ItemContainer::Bag1)
+                .expect("fish bait should exist");
+            bait.container = ItemContainer::Bag2;
+            bait.slot = 2;
+            bait.unique_id = 0;
+            bait.quantity = 5;
+        }
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Inventory,
+            unique_id: super::default_item_unique_id(ItemContainer::Bag2, 2),
+            count: 2,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::SplitItem1 {
+                grid: MirGridType::Inventory,
+                unique_id,
+                count: 2,
+                success: true,
+            } if *unique_id == super::default_item_unique_id(ItemContainer::Bag2, 2)
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == bait_key
+                && item.container == ItemContainer::Bag2
+                && item.slot == 2
+                && item.quantity == 3
+        }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == bait_key
+                && item.container == ItemContainer::Bag1
+                && item.slot == 6
+                && item.quantity == 2
+        }));
+    }
+
+    #[test]
+    fn split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Inventory,
+            unique_id: 0,
+            count: 2,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::SplitItem1 {
+                grid: MirGridType::Inventory,
+                unique_id: 0,
+                count: 2,
+                success: true,
+            }
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.slot == 0
+                && item.quantity == 3
+        }));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Belt
+                && item.slot == 2
+                && item.quantity == 2
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn split_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_matching_belt_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Belt,
+            unique_id: 0,
+            count: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SplitItem1 {
+                grid: MirGridType::Belt,
+                unique_id: 0,
+                count: 2,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.belt_items.iter().any(|item| {
+            item.key == "belt-red-potion"
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+                && item.quantity == 5
+        }));
+    }
+
+    #[test]
+    fn split_item_packet_zero_count_is_ack_only_and_preserves_matching_stack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Inventory,
+            unique_id: 0,
+            count: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SplitItem1 {
+                grid: MirGridType::Inventory,
+                unique_id: 0,
+                count: 0,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.container == ItemContainer::Bag1
+                && item.slot == 0
+                && item.quantity == 5
+        }));
+    }
+
+    #[test]
+    fn split_item_packet_storage_requires_active_storage_service_and_preserves_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::SplitItem {
+            grid: MirGridType::Storage,
+            unique_id: 0,
+            count: 4,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::SplitItem1 {
+                grid: MirGridType::Storage,
+                unique_id: 0,
+                count: 4,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.quantity == 10
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
     fn equip_and_remove_item_packets_emit_crystal_acks() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -51863,31 +58271,864 @@ mod tests {
             to: 2,
         });
 
-        assert!(equip_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::EquipItem {
+        assert_eq!(
+            equip_packets,
+            vec![ServerPacket::EquipItem {
                 grid: MirGridType::Inventory,
-                unique_id,
+                unique_id: u64::from(helmet_slot),
                 to: 2,
-                success: true
-            } if *unique_id == u64::from(helmet_slot)
-        )));
+                success: true,
+            }]
+        );
 
         let remove_packets = session.handle_packet(ClientPacket::RemoveItem {
-            grid: MirGridType::Equipment,
+            grid: MirGridType::Inventory,
             unique_id: 2,
             to: 9,
         });
 
-        assert!(remove_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::RemoveItem {
-                grid: MirGridType::Equipment,
+        assert_eq!(
+            remove_packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
                 unique_id: 2,
                 to: 9,
-                success: true
+                success: true,
+            }]
+        );
+    }
+
+    #[test]
+    fn equip_item_packet_manifest_ring_and_bracelet_can_target_right_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryCircle", 31);
+        add_inventory_crystal_item(&mut session, "MysteryWheel", 32);
+
+        let ring_packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 8,
+        });
+        let bracelet_packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 32,
+            to: 6,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(ring_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 8,
+                success: true,
             }
         )));
+        assert!(bracelet_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 32,
+                to: 6,
+                success: true,
+            }
+        )));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "MysteryCircle"));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::BraceletRight && item.name == "MysteryWheel"));
+    }
+
+    #[test]
+    fn equip_item_packet_manifest_amulet_can_target_right_bracelet_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Taoist,
+            MirGender::Male,
+            50,
+        );
+        add_inventory_crystal_item(&mut session, "GreenPoison", 31);
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 6,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 6,
+                success: true,
+            }
+        )));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::BraceletRight && item.name == "GreenPoison"));
+    }
+
+    #[test]
+    fn equip_item_packet_manifest_equipment_rejects_unmet_requirements_silently() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "SpiritRing", 31);
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 8,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 8,
+                success: false,
+            }]
+        );
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.name == "SpiritRing"));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "SpiritRing"));
+    }
+
+    #[test]
+    fn equip_item_packet_manifest_equipment_allows_when_requirements_are_met() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            15,
+        );
+        add_inventory_crystal_item(&mut session, "SpiritRing", 31);
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 8,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 8,
+                success: true,
+            }
+        )));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "SpiritRing"));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.name == "SpiritRing"));
+    }
+
+    #[test]
+    fn equip_item_packet_storage_manifest_equipment_rejects_unmet_requirements_silently() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        add_inventory_crystal_item(&mut session, "SpiritRing", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let index = resources
+                .inventory_items
+                .iter()
+                .position(|item| item.slot == 31)
+                .expect("spirit ring should exist");
+            let mut ring = resources.inventory_items.remove(index);
+            ring.container = ItemContainer::Storage;
+            ring.slot = 4;
+            ring.unique_id = 4;
+            resources.storage_items.push(ring);
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 4,
+            to: 8,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 4,
+                to: 8,
+                success: false,
+            }]
+        );
+        assert!(snapshot
+            .storage_items
+            .iter()
+            .any(|item| item.slot == 4 && item.name == "SpiritRing"));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::RingRight && item.name == "SpiritRing"));
+    }
+
+    #[test]
+    fn equip_item_packet_identifies_need_identify_item_and_emits_refresh_before_ack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 2,
+        });
+
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::RefreshItem { item })
+                if item.unique_id == 31 && item.item_index == 120 && item.identified
+        ));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 2,
+                success: true,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let helmet = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet")
+            .expect("mystery helmet should be equipped");
+        assert_eq!(helmet.identified, Some(true));
+        assert!(!resources.inventory_items.iter().any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn equip_item_packet_storage_identifies_need_identify_item_and_emits_refresh_before_ack() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let index = resources
+                .inventory_items
+                .iter()
+                .position(|item| item.slot == 31)
+                .expect("mystery helmet should exist");
+            let mut helmet = resources.inventory_items.remove(index);
+            helmet.container = ItemContainer::Storage;
+            helmet.slot = 4;
+            helmet.unique_id = 4;
+            resources.storage_items.push(helmet);
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 4,
+            to: 2,
+        });
+
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::RefreshItem { item })
+                if item.unique_id == 4 && item.item_index == 120 && item.identified
+        ));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 4,
+                to: 2,
+                success: true,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let helmet = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet")
+            .expect("mystery helmet should be equipped");
+        assert_eq!(helmet.identified, Some(true));
+        assert!(!resources.storage_items.iter().any(|item| item.slot == 4));
+    }
+
+    #[test]
+    fn equip_item_packet_rejects_item_soul_bound_to_other_character() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let helmet = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("mystery helmet should exist");
+            helmet.soul_bound_id = Some(99);
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 31,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Inventory,
+                unique_id: 31,
+                to: 2,
+                success: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(!resources
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "MysteryHelmet"));
+    }
+
+    #[test]
+    fn equip_item_packet_storage_grid_equips_item_when_storage_service_is_active() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 1,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 1,
+                to: 2,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Bronze Helmet"));
+        assert!(!snapshot
+            .storage_items
+            .iter()
+            .any(|item| item.key == "stored-bronze-helmet" && item.slot == 1));
+    }
+
+    #[test]
+    fn remove_item_packet_storage_grid_moves_equipment_into_requested_storage_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
+        let packets = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Storage,
+            unique_id: weapon_unique_id,
+            to: 4,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Storage,
+                unique_id: weapon_unique_id,
+                to: 4,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "wooden-sword" && item.container == ItemContainer::Storage && item.slot == 4
+        }));
+    }
+
+    #[test]
+    fn remove_item_packet_inventory_requires_requested_slot_to_be_empty() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let _ = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: 3,
+            to: 2,
+        });
+
+        let packets = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id: 2,
+            to: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
+                unique_id: 2,
+                to: 0,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Bronze Helmet"));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "red-potion" && item.container == ItemContainer::Bag1 && item.slot == 0
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.container == ItemContainer::Bag1 && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn remove_item_packet_cursed_equipment_consumes_unlock_after_success() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let helmet_slot = session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "bronze-helmet")
+            .expect("bronze helmet")
+            .slot;
+        let _ = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: u64::from(helmet_slot),
+            to: 2,
+        });
+        add_inventory_crystal_item(&mut session, "MysteryWater", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            for item in &mut resources.equipment_items {
+                if matches!(item.slot, EquipmentSlot::Weapon | EquipmentSlot::Helmet) {
+                    item.cursed = true;
+                }
+            }
+        }
+
+        let _ = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot id");
+        let first_remove = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id: weapon_unique_id,
+            to: 20,
+        });
+
+        assert_eq!(
+            first_remove,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
+                unique_id: weapon_unique_id,
+                to: 20,
+                success: true,
+            }]
+        );
+        assert!(
+            !session
+                .app
+                .world()
+                .resource::<SimulationResources>()
+                .unlock_curse
+        );
+
+        let helmet_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Helmet).expect("helmet slot id");
+        let second_remove = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::Inventory,
+            unique_id: helmet_unique_id,
+            to: 21,
+        });
+
+        assert_eq!(
+            second_remove,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::Inventory,
+                unique_id: helmet_unique_id,
+                to: 21,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "wooden-sword" && item.container == ItemContainer::Bag1 && item.slot == 20
+        }));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.cursed));
+    }
+
+    #[test]
+    fn equip_item_packet_storage_replacing_cursed_equipment_requires_unlock() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let helmet_slot = session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "bronze-helmet")
+            .expect("bronze helmet")
+            .slot;
+        let _ = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: u64::from(helmet_slot),
+            to: 2,
+        });
+        activate_storage_service(&mut session);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let helmet = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Helmet)
+                .expect("equipped helmet");
+            helmet.cursed = true;
+        }
+
+        let blocked_packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 1,
+            to: 2,
+        });
+        assert_eq!(
+            blocked_packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 1,
+                to: 2,
+                success: false,
+            }]
+        );
+
+        add_inventory_crystal_item(&mut session, "MysteryWater", 31);
+        let _ = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let success_packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 1,
+            to: 2,
+        });
+
+        assert_eq!(
+            success_packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 1,
+                to: 2,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.unlock_curse);
+        assert!(resources
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Bronze Helmet"));
+        assert!(resources.storage_items.iter().any(|item| {
+            item.slot == 1
+                && item.name == "Bronze Helmet"
+                && item.container == ItemContainer::Storage
+                && item.cursed
+        }));
+    }
+
+    #[test]
+    fn equip_item_packet_storage_rejects_replaced_equipment_with_dont_store_binding() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let helmet_slot = session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "bronze-helmet")
+            .expect("bronze helmet")
+            .slot;
+        let _ = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: u64::from(helmet_slot),
+            to: 2,
+        });
+        activate_storage_service(&mut session);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let helmet = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Helmet)
+                .expect("equipped helmet");
+            helmet.rental_binding_flags = super::CRYSTAL_BIND_DONT_STORE;
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Storage,
+            unique_id: 1,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::Storage,
+                unique_id: 1,
+                to: 2,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.equipment_items.iter().any(|item| {
+            item.slot == EquipmentSlot::Helmet
+                && item.rental_binding_flags == super::CRYSTAL_BIND_DONT_STORE
+        }));
+        assert!(resources
+            .storage_items
+            .iter()
+            .any(|item| item.slot == 1 && item.name == "Bronze Helmet"));
+    }
+
+    #[test]
+    fn equip_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let helmet = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "bronze-helmet" && item.container == ItemContainer::Bag1)
+                .expect("bronze helmet should exist");
+            helmet.unique_id = 9_301;
+        }
+
+        let packets = session.handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::HeroInventory,
+            unique_id: 9_301,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::EquipItem {
+                grid: MirGridType::HeroInventory,
+                unique_id: 9_301,
+                to: 2,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "bronze-helmet" && item.container == ItemContainer::Bag1));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Helmet && item.name == "Bronze Helmet"));
+    }
+
+    #[test]
+    fn remove_item_packet_hero_inventory_grid_does_not_mutate_matching_player_equipment() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
+
+        let packets = session.handle_packet(ClientPacket::RemoveItem {
+            grid: MirGridType::HeroInventory,
+            unique_id: weapon_unique_id,
+            to: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveItem {
+                grid: MirGridType::HeroInventory,
+                unique_id: weapon_unique_id,
+                to: 0,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
+    }
+
+    #[test]
+    fn remove_slot_item_packet_hero_equipment_grid_does_not_mutate_matching_player_equipment() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
+
+        let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+            grid: MirGridType::HeroEquipment,
+            grid_to: MirGridType::HeroInventory,
+            unique_id: weapon_unique_id,
+            to: 0,
+            from_unique_id: 0,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveSlotItem {
+                grid: MirGridType::HeroEquipment,
+                grid_to: MirGridType::HeroInventory,
+                unique_id: weapon_unique_id,
+                to: 0,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
+    }
+
+    #[test]
+    fn remove_slot_item_packet_equipment_grid_does_not_mutate_matching_player_equipment() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
+
+        let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+            grid: MirGridType::Equipment,
+            grid_to: MirGridType::Inventory,
+            unique_id: weapon_unique_id,
+            to: 20,
+            from_unique_id: weapon_unique_id,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveSlotItem {
+                grid: MirGridType::Equipment,
+                grid_to: MirGridType::Inventory,
+                unique_id: weapon_unique_id,
+                to: 20,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.name == "Wooden Sword"));
+    }
+
+    #[test]
+    fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let weapon_unique_id =
+            super::equipment_slot_unique_id(EquipmentSlot::Weapon).expect("weapon slot index");
+
+        let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+            grid: MirGridType::Socket,
+            grid_to: MirGridType::Inventory,
+            unique_id: weapon_unique_id,
+            to: 21,
+            from_unique_id: weapon_unique_id,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::RemoveSlotItem {
+                grid: MirGridType::Socket,
+                grid_to: MirGridType::Inventory,
+                unique_id: weapon_unique_id,
+                to: 21,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.name == "Wooden Sword"));
     }
 
     #[test]
@@ -51904,6 +59145,7 @@ mod tests {
                 name: "Iron Helmet".to_string(),
                 icon: super::item_icon_for_key("iron-helmet"),
                 slot: 9,
+                unique_id: 9,
                 container: ItemContainer::Bag1,
                 quantity: 1,
                 description: "Heavier helmet used to validate equipment swapping.".to_string(),
@@ -51918,6 +59160,8 @@ mod tests {
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
+                identified: None,
+                soul_bound_id: None,
                 sealed_expiry_time_binary_datetime: 0,
                 sealed_next_time_binary_datetime: 0,
                 rental_binding_flags: 0,
@@ -51977,9 +59221,27 @@ mod tests {
     fn standard_shape_equipment_updates_self_player_sprite_libraries() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_equippable_test_item(
+            &mut session,
+            "shape-dagger",
+            "Dagger",
+            12,
+            EquipmentSlot::Weapon,
+            6,
+            0,
+        );
+        add_equippable_test_item(
+            &mut session,
+            "shape-armour",
+            "Leather Armour",
+            13,
+            EquipmentSlot::Armour,
+            0,
+            2,
+        );
 
-        let _ = session.use_item("dagger");
-        let _ = session.use_item("leather-armour");
+        let _ = session.use_item("shape-dagger");
+        let _ = session.use_item("shape-armour");
         let snapshot = session.world_snapshot();
         let player = snapshot
             .entities
@@ -52137,7 +59399,14 @@ mod tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            10,
+        );
         let _ = session.use_item("bronze-helmet");
+        add_inventory_crystal_item(&mut session, "MysteryHelmet", 31);
 
         {
             let mut resources = session
@@ -52169,6 +59438,14 @@ mod tests {
             });
             potion.cursed = true;
             potion.socket_slots = 1;
+
+            let mystery_helmet = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("mystery helmet");
+            mystery_helmet.identified = Some(true);
+            mystery_helmet.soul_bound_id = Some(77);
         }
 
         session.save_active_character();
@@ -52232,6 +59509,13 @@ mod tests {
             .added_stats
             .iter()
             .any(|stat| { stat.stat == super::CRYSTAL_STAT_ACCURACY && stat.value == 2 }));
+        let mystery_helmet = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 31)
+            .expect("reloaded mystery helmet");
+        assert_eq!(mystery_helmet.identified, Some(true));
+        assert_eq!(mystery_helmet.soul_bound_id, Some(77));
     }
 
     #[test]
@@ -52277,6 +59561,33 @@ mod tests {
     }
 
     #[test]
+    fn storing_item_uses_crystal_inventory_index_for_bag2_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::StoreItem { from: 40, to: 4 });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::StoreItem {
+                from: 40,
+                to: 4,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "town-teleport" && item.container == ItemContainer::Bag2 && item.slot == 0
+        }));
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "town-teleport"
+                && item.container == ItemContainer::Storage
+                && item.slot == 4
+        }));
+    }
+
+    #[test]
     fn taking_back_item_moves_storage_item_into_inventory_snapshot() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -52313,6 +59624,42 @@ mod tests {
             .any(|item| item.key == stored_item.key
                 && item.slot == 6
                 && item.container == ItemContainer::Bag1));
+    }
+
+    #[test]
+    fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources
+                .inventory_items
+                .retain(|item| !(item.container == ItemContainer::Bag2 && item.slot == 0));
+        }
+
+        let packets = session.handle_packet(ClientPacket::TakeBackItem { from: 0, to: 40 });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::TakeBackItem {
+                from: 0,
+                to: 40,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(!snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion" && item.container == ItemContainer::Storage
+        }));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.container == ItemContainer::Bag2
+                && item.slot == 0
+        }));
     }
 
     #[test]
@@ -52442,24 +59789,22 @@ mod tests {
     fn storage_move_item_reorders_storage_slots() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
 
         let packets = session.handle_packet(ClientPacket::MoveItem {
             grid: MirGridType::Storage,
             from: 0,
             to: 3,
         });
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::MoveItem {
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
                 grid: MirGridType::Storage,
                 from: 0,
                 to: 3,
                 success: true
-            }
-        )));
-        assert!(packets.iter().any(|packet| {
-            matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Item slot updated"))
-        }));
+            }]
+        );
 
         let snapshot = session.world_snapshot();
         assert!(snapshot.storage_items.iter().any(|item| {
@@ -52470,9 +59815,694 @@ mod tests {
     }
 
     #[test]
+    fn move_item_packet_inventory_success_is_ack_only_and_reorders_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 3,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 3,
+                to: 6,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_inventory_uses_crystal_inventory_index_for_bag2_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 3,
+            to: 40,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 3,
+                to: 40,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.container == ItemContainer::Bag2 && item.slot == 0
+        }));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "town-teleport" && item.container == ItemContainer::Bag1 && item.slot == 3
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_inventory_invalid_target_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 3,
+            to: 80,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 3,
+                to: 80,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 0 && item.container == ItemContainer::Bag2
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_inventory_invalid_source_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 80,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 80,
+                to: 6,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_inventory_ignores_matching_quest_inventory_slot() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources
+                .inventory_items
+                .insert(0, quest_test_item(3, 9_903));
+        }
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 3,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 3,
+                to: 6,
+                success: true,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.slot == 3
+                && item.container == ItemContainer::Quest
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_inventory_missing_source_uses_crystal_move_error_report() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 12,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message: super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ItemMoveErrorReport",
+                    "server.ItemMoveErrorReport",
+                ),
+            })
+        );
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 12,
+                to: 6,
+                success: false,
+            })
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_storage_missing_source_uses_crystal_move_error_report() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 2,
+            to: 4,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message: super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ItemMoveErrorReport",
+                    "server.ItemMoveErrorReport",
+                ),
+            })
+        );
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::MoveItem {
+                grid: MirGridType::Storage,
+                from: 2,
+                to: 4,
+                success: false,
+            })
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 4
+                && item.container == ItemContainer::Storage
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_storage_requires_active_storage_service_and_preserves_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 3,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Storage,
+                from: 0,
+                to: 3,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 3
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_negative_target_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 3,
+            to: -1,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 3,
+                to: -1,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_negative_source_slot_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: -1,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: -1,
+                to: 6,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_storage_invalid_target_slot_does_not_emit_extra_chat_or_mutate_storage_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 0,
+            to: 200,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Storage,
+                from: 0,
+                to: 200,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 200
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_storage_invalid_source_slot_does_not_emit_extra_chat_or_mutate_storage_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Storage,
+            from: 200,
+            to: 3,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Storage,
+                from: 200,
+                to: 3,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 0
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!snapshot.storage_items.iter().any(|item| {
+            item.key == "stored-red-potion"
+                && item.slot == 3
+                && item.container == ItemContainer::Storage
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_belt_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Belt,
+            from: 0,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Belt,
+                from: 0,
+                to: 2,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .belt_items
+            .iter()
+            .any(|item| item.key == "belt-red-potion" && item.slot == 0));
+        assert!(!snapshot
+            .belt_items
+            .iter()
+            .any(|item| item.key == "belt-red-potion" && item.slot == 2));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources
+                .inventory_items
+                .insert(0, quest_test_item(12, 9_912));
+        }
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::QuestInventory,
+            from: 12,
+            to: 2,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::QuestInventory,
+                from: 12,
+                to: 2,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.slot == 12
+                && item.container == ItemContainer::Quest
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "quest-wasp-stinger"
+                && item.slot == 2
+                && item.container == ItemContainer::Quest
+        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::HeroInventory,
+            from: 3,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::HeroInventory,
+                from: 3,
+                to: 6,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Trade,
+            from: 3,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Trade,
+                from: 3,
+                to: 6,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Refine,
+            from: 3,
+            to: 6,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Refine,
+                from: 3,
+                to: 6,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 3 && item.container == ItemContainer::Bag1
+        }));
+        assert!(!snapshot.inventory_items.iter().any(|item| {
+            item.key == "bronze-helmet" && item.slot == 6 && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_hero_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_item(
+    ) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::HeroEquipment,
+            from: 0,
+            to: 4,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::HeroEquipment,
+                from: 0,
+                to: 4,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Equipment,
+            from: 0,
+            to: 4,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Equipment,
+                from: 0,
+                to: 4,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn move_item_packet_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Fishing,
+            from: 0,
+            to: 1,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Fishing,
+                from: 0,
+                to: 1,
+                success: false,
+            }]
+        );
+        let snapshot = session.world_snapshot();
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "Wooden Sword"));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
     fn storage_split_item_stack_creates_new_storage_slot() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
 
         let packets = session.handle_packet(ClientPacket::SplitItem {
             grid: MirGridType::Storage,
@@ -52495,9 +60525,9 @@ mod tests {
                 item: Some(item)
             } if item.unique_id == 2 && item.count == 4 && item.item_index == 658
         )));
-        assert!(packets.iter().any(|packet| {
-            matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Item stack split"))
-        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 
         let snapshot = session.world_snapshot();
         assert!(snapshot.storage_items.iter().any(|item| {
@@ -52518,6 +60548,7 @@ mod tests {
     fn storage_merge_item_stack_combines_quantities() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
         {
             let mut resources = session
                 .app
@@ -52550,9 +60581,9 @@ mod tests {
                 success: true
             }
         )));
-        assert!(packets.iter().any(|packet| {
-            matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Item stacks merged"))
-        }));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 
         let snapshot = session.world_snapshot();
         assert!(snapshot.storage_items.iter().any(|item| {
@@ -52571,6 +60602,7 @@ mod tests {
     fn storage_merge_item_stack_caps_at_crystal_stack_size() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
         {
             let mut resources = session
                 .app
@@ -52628,6 +60660,189 @@ mod tests {
     }
 
     #[test]
+    fn merge_item_packet_inventory_to_storage_combines_quantities_when_storage_service_is_active() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut stored_duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            stored_duplicate.slot = 2;
+            stored_duplicate.container = ItemContainer::Storage;
+            stored_duplicate.unique_id = 9_002;
+            stored_duplicate.quantity = 4;
+            let bag_item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag red potion should exist");
+            bag_item.unique_id = 9_001;
+            resources.storage_items.push(stored_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Storage,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Storage,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == 9_001));
+        assert!(resources.storage_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 9
+                && item.container == ItemContainer::Storage
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_storage_to_inventory_combines_quantities_when_storage_service_is_active() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut stored_duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            stored_duplicate.slot = 2;
+            stored_duplicate.container = ItemContainer::Storage;
+            stored_duplicate.unique_id = 9_002;
+            stored_duplicate.quantity = 4;
+            let bag_item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag red potion should exist");
+            bag_item.unique_id = 9_001;
+            resources.storage_items.push(stored_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Storage,
+            grid_to: MirGridType::Inventory,
+            id_from: 9_002,
+            id_to: 9_001,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Storage,
+                grid_to: MirGridType::Inventory,
+                id_from: 9_002,
+                id_to: 9_001,
+                success: true,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources
+            .storage_items
+            .iter()
+            .any(|item| item.unique_id == 9_002));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_001
+                && item.slot == 0
+                && item.quantity == 9
+                && item.container == ItemContainer::Bag1
+        }));
+    }
+
+    #[test]
+    fn merge_item_packet_inventory_to_storage_requires_active_storage_service_and_preserves_items()
+    {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut stored_duplicate = resources
+                .inventory_items
+                .iter()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("starter red potion should exist")
+                .clone();
+            stored_duplicate.slot = 2;
+            stored_duplicate.container = ItemContainer::Storage;
+            stored_duplicate.unique_id = 9_002;
+            stored_duplicate.quantity = 4;
+            let bag_item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.key == "red-potion" && item.container == ItemContainer::Bag1)
+                .expect("bag red potion should exist");
+            bag_item.unique_id = 9_001;
+            resources.storage_items.push(stored_duplicate);
+        }
+
+        let packets = session.handle_packet(ClientPacket::MergeItem {
+            grid_from: MirGridType::Inventory,
+            grid_to: MirGridType::Storage,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Storage,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_001
+                && item.slot == 0
+                && item.quantity == 5
+                && item.container == ItemContainer::Bag1
+        }));
+        assert!(resources.storage_items.iter().any(|item| {
+            item.key == "red-potion"
+                && item.unique_id == 9_002
+                && item.slot == 2
+                && item.quantity == 4
+                && item.container == ItemContainer::Storage
+        }));
+    }
+
+    #[test]
     fn locked_storage_blocks_store_and_take_back_until_unlock() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         let _ = session.handle_packet(ClientPacket::Login {
@@ -52648,6 +60863,7 @@ mod tests {
             .find(|item| item.slot == 0)
             .expect("stored item");
 
+        activate_storage_service(&mut session);
         let _ = session.handle_packet(ClientPacket::SetStoragePassword {
             current_password: String::new(),
             new_password: "vault".to_string(),
@@ -52746,32 +60962,44 @@ mod tests {
             duplicate.quantity = 4;
             resources.storage_items.push(duplicate);
         }
+        activate_storage_service(&mut session);
         let _ = session.handle_packet(ClientPacket::SetStoragePassword {
             current_password: String::new(),
             new_password: "vault".to_string(),
         });
         session.handle_packet(ClientPacket::LogOut);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
 
         let blocked_move = session.handle_packet(ClientPacket::MoveItem {
             grid: MirGridType::Storage,
             from: 0,
             to: 3,
         });
-        assert!(blocked_move.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Storage is locked")
-        )));
+        assert_eq!(
+            blocked_move,
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Storage,
+                from: 0,
+                to: 3,
+                success: false,
+            }]
+        );
 
         let blocked_split = session.handle_packet(ClientPacket::SplitItem {
             grid: MirGridType::Storage,
             unique_id: 0,
             count: 4,
         });
-        assert!(blocked_split.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Storage is locked")
-        )));
+        assert_eq!(
+            blocked_split,
+            vec![ServerPacket::SplitItem1 {
+                grid: MirGridType::Storage,
+                unique_id: 0,
+                count: 4,
+                success: false,
+            }]
+        );
 
         let blocked_merge = session.handle_packet(ClientPacket::MergeItem {
             grid_from: MirGridType::Storage,
@@ -52779,10 +61007,16 @@ mod tests {
             id_from: 2,
             id_to: 0,
         });
-        assert!(blocked_merge.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Storage is locked")
-        )));
+        assert_eq!(
+            blocked_merge,
+            vec![ServerPacket::MergeItem {
+                grid_from: MirGridType::Storage,
+                grid_to: MirGridType::Storage,
+                id_from: 2,
+                id_to: 0,
+                success: false,
+            }]
+        );
 
         let snapshot = session.world_snapshot();
         assert!(snapshot.storage_items.iter().any(|item| {
@@ -52810,6 +61044,7 @@ mod tests {
         });
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
+        activate_storage_service(&mut session);
         let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
             current_password: String::new(),
             new_password: "vault".to_string(),
@@ -52875,6 +61110,7 @@ mod tests {
             } if !info.has_storage_password && !info.require_storage_password
         )));
 
+        activate_storage_service(&mut session);
         let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
             current_password: String::new(),
             new_password: "vault".to_string(),
@@ -52915,6 +61151,7 @@ mod tests {
             last_set
         );
 
+        activate_storage_service(&mut session);
         let wrong_packets = session.handle_packet(ClientPacket::UnlockStorage {
             password: "wrong".to_string(),
         });
@@ -52929,13 +61166,17 @@ mod tests {
         let unlock_packets = session.handle_packet(ClientPacket::UnlockStorage {
             password: "vault".to_string(),
         });
-        assert!(unlock_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::StorageUnlockResult {
-                result: 0,
-                has_password: true
-            }
-        )));
+        assert!(matches!(
+            unlock_packets.as_slice(),
+            [
+                ServerPacket::StorageUnlockResult {
+                    result: 0,
+                    has_password: true
+                },
+                ServerPacket::UserStorage { storage: Some(storage) }
+            ] if storage.len() == usize::from(super::BASE_STORAGE_SLOTS)
+                && matches!(storage.first(), Some(Some(item)) if item.item_index == 658 && item.count == 10)
+        ));
         let unlocked_snapshot = session.world_snapshot();
         assert!(unlocked_snapshot.has_storage_password);
         assert!(!unlocked_snapshot.require_storage_password);
@@ -52953,7 +61194,7 @@ mod tests {
                 result: 4,
                 removing: true,
                 has_password: false,
-                ..
+                last_set_binary_datetime: 0,
             }
         )));
         session.handle_packet(ClientPacket::LogOut);
@@ -52965,11 +61206,312 @@ mod tests {
                 info
             } if !info.has_storage_password && !info.require_storage_password
         )));
+        let final_snapshot = session.world_snapshot();
+        assert_eq!(final_snapshot.storage_password_last_set_binary_datetime, 0);
+    }
+
+    #[test]
+    fn storage_password_actions_require_active_storage_service_and_data_range() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "storage-password-service".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let blocked_set = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "vault".to_string(),
+        });
+        assert_eq!(
+            blocked_set,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 0,
+                removing: false,
+                has_password: false,
+                last_set_binary_datetime: 0,
+            }]
+        );
+        let initial_snapshot = session.world_snapshot();
+        assert!(!initial_snapshot.has_storage_password);
+        assert_eq!(
+            initial_snapshot.storage_password_last_set_binary_datetime,
+            0
+        );
+
+        activate_storage_service(&mut session);
+        let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "vault".to_string(),
+        });
+        let last_set = set_packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::StoragePasswordResult {
+                    result: 4,
+                    removing: false,
+                    has_password: true,
+                    last_set_binary_datetime,
+                } => Some(*last_set_binary_datetime),
+                _ => None,
+            })
+            .expect("set password should succeed with active storage service");
+
+        session.handle_packet(ClientPacket::LogOut);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+        set_player_position(&mut session, Point { x: 348, y: 270 });
+        assert!(super::tile_distance(&player_position(&session), &Point { x: 331, y: 270 }) > 16);
+
+        let blocked_update = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: "vault".to_string(),
+            new_password: "vault2".to_string(),
+        });
+        assert!(
+            blocked_update.contains(&ServerPacket::StoragePasswordResult {
+                result: 0,
+                removing: false,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            })
+        );
+
+        let blocked_unlock = session.handle_packet(ClientPacket::UnlockStorage {
+            password: "vault".to_string(),
+        });
+        assert!(blocked_unlock.contains(&ServerPacket::StorageUnlockResult {
+            result: 3,
+            has_password: true,
+        }));
+
+        let blocked_remove = session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "vault".to_string(),
+        });
+        assert!(
+            blocked_remove.contains(&ServerPacket::StoragePasswordResult {
+                result: 0,
+                removing: true,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            })
+        );
+
+        let locked_snapshot = session.world_snapshot();
+        assert!(locked_snapshot.has_storage_password);
+        assert!(locked_snapshot.require_storage_password);
+        assert_eq!(
+            locked_snapshot.storage_password_last_set_binary_datetime,
+            last_set
+        );
+
+        set_player_position(&mut session, Point { x: 331, y: 270 });
+        let unlock_packets = session.handle_packet(ClientPacket::UnlockStorage {
+            password: "vault".to_string(),
+        });
+        assert!(unlock_packets.contains(&ServerPacket::StorageUnlockResult {
+            result: 0,
+            has_password: true,
+        }));
+    }
+
+    #[test]
+    fn storage_password_set_enforces_crystal_password_format() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "storage-password-format-set".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let short_new_password = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "abcd".to_string(),
+        });
+        assert_eq!(
+            short_new_password,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 3,
+                removing: false,
+                has_password: false,
+                last_set_binary_datetime: 0,
+            }]
+        );
+
+        let valid_password = "Vault1234567890".to_string();
+        let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: valid_password.clone(),
+        });
+        let last_set = set_packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::StoragePasswordResult {
+                    result: 4,
+                    removing: false,
+                    has_password: true,
+                    last_set_binary_datetime,
+                } => Some(*last_set_binary_datetime),
+                _ => None,
+            })
+            .expect("valid storage password should be accepted");
+        assert_ne!(last_set, 0);
+
+        let invalid_current_password = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: "abc d".to_string(),
+            new_password: "Change12345".to_string(),
+        });
+        assert_eq!(
+            invalid_current_password,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 1,
+                removing: false,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            }]
+        );
+
+        let wrong_current_password = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: "Wrong1".to_string(),
+            new_password: "Change12345".to_string(),
+        });
+        assert_eq!(
+            wrong_current_password,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 2,
+                removing: false,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            }]
+        );
+
+        let invalid_replacement_password =
+            session.handle_packet(ClientPacket::SetStoragePassword {
+                current_password: valid_password,
+                new_password: "bad!".to_string(),
+            });
+        assert_eq!(
+            invalid_replacement_password,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 3,
+                removing: false,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            }]
+        );
+    }
+
+    #[test]
+    fn storage_password_unlock_and_remove_enforce_crystal_password_format() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "storage-password-format-unlock".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let password = "Vault123".to_string();
+        let set_packets = session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: password.clone(),
+        });
+        let last_set = set_packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::StoragePasswordResult {
+                    result: 4,
+                    removing: false,
+                    has_password: true,
+                    last_set_binary_datetime,
+                } => Some(*last_set_binary_datetime),
+                _ => None,
+            })
+            .expect("valid storage password should be accepted");
+
+        session.handle_packet(ClientPacket::LogOut);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        activate_storage_service(&mut session);
+
+        let invalid_unlock = session.handle_packet(ClientPacket::UnlockStorage {
+            password: "abc d".to_string(),
+        });
+        assert_eq!(
+            invalid_unlock,
+            vec![ServerPacket::StorageUnlockResult {
+                result: 1,
+                has_password: true,
+            }]
+        );
+
+        let wrong_unlock = session.handle_packet(ClientPacket::UnlockStorage {
+            password: "Wrong1".to_string(),
+        });
+        assert_eq!(
+            wrong_unlock,
+            vec![ServerPacket::StorageUnlockResult {
+                result: 2,
+                has_password: true,
+            }]
+        );
+
+        let invalid_remove = session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "abc d".to_string(),
+        });
+        assert_eq!(
+            invalid_remove,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 1,
+                removing: true,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            }]
+        );
+
+        let wrong_remove = session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "Wrong1".to_string(),
+        });
+        assert_eq!(
+            wrong_remove,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 2,
+                removing: true,
+                has_password: true,
+                last_set_binary_datetime: last_set,
+            }]
+        );
+
+        let remove_packets = session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: password,
+        });
+        assert_eq!(
+            remove_packets,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 4,
+                removing: true,
+                has_password: false,
+                last_set_binary_datetime: 0,
+            }]
+        );
+
+        let no_password_remove = session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "Wrong1".to_string(),
+        });
+        assert_eq!(
+            no_password_remove,
+            vec![ServerPacket::StoragePasswordResult {
+                result: 5,
+                removing: true,
+                has_password: false,
+                last_set_binary_datetime: 0,
+            }]
+        );
     }
 
     #[test]
     fn expanded_storage_state_flows_through_user_information_resize_packet_and_snapshot() {
         let config = SimulationConfig::default();
+        let expiry = super::future_binary_datetime(30);
         {
             let mut store = config
                 .account_store
@@ -52978,7 +61520,7 @@ mod tests {
             let account = store.accounts.get_mut("demo").expect("demo account");
             account.storage_size = EXPANDED_STORAGE_SLOTS;
             account.has_expanded_storage = true;
-            account.expanded_storage_expiry_time_binary_datetime = 638000000000000000;
+            account.expanded_storage_expiry_time_binary_datetime = expiry;
         }
 
         let mut session = SimulationSession::new(config);
@@ -52989,7 +61531,7 @@ mod tests {
             ServerPacket::UserInformation {
                 info
             } if info.has_expanded_storage
-                && info.expanded_storage_expiry_time_binary_datetime == 638000000000000000
+                && info.expanded_storage_expiry_time_binary_datetime == expiry
         )));
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -52999,7 +61541,7 @@ mod tests {
                 expiry_time_binary_datetime
             } if *size == i32::from(EXPANDED_STORAGE_SLOTS)
                 && *has_expanded_storage
-                && *expiry_time_binary_datetime == 638000000000000000
+                && *expiry_time_binary_datetime == expiry
         )));
 
         let snapshot = session.world_snapshot();
@@ -53007,7 +61549,7 @@ mod tests {
         assert!(snapshot.has_expanded_storage);
         assert_eq!(
             snapshot.expanded_storage_expiry_time_binary_datetime,
-            638000000000000000
+            expiry
         );
     }
 
@@ -53030,12 +61572,9 @@ mod tests {
                 && *has_expanded_storage
                 && *expiry_time_binary_datetime != 0
         )));
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, chat_type }
-                if *chat_type == ChatType::System
-                    && message.contains("Expanded storage activated")
-        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 
         let snapshot = session.world_snapshot();
         assert_eq!(snapshot.storage_size, EXPANDED_STORAGE_SLOTS);
@@ -53080,6 +61619,116 @@ mod tests {
     }
 
     #[test]
+    fn expired_expanded_storage_is_inactive_on_start_game_but_keeps_backing_size() {
+        let config = SimulationConfig::default();
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store.accounts.get_mut("demo").expect("demo account");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime = 1;
+        }
+
+        let mut session = SimulationSession::new(config);
+        let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UserInformation { info }
+                if !info.has_expanded_storage
+                    && info.expanded_storage_expiry_time_binary_datetime == 1
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ResizeStorage {
+                size,
+                has_expanded_storage,
+                expiry_time_binary_datetime
+            } if *size == i32::from(EXPANDED_STORAGE_SLOTS)
+                && !*has_expanded_storage
+                && *expiry_time_binary_datetime == 1
+        )));
+
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.storage_size, EXPANDED_STORAGE_SLOTS);
+        assert!(!snapshot.has_expanded_storage);
+        assert_eq!(snapshot.expanded_storage_expiry_time_binary_datetime, 1);
+    }
+
+    #[test]
+    fn expired_expanded_storage_tick_emits_resize_notice_once_and_persists_flag() {
+        let config = SimulationConfig::default();
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store.accounts.get_mut("demo").expect("demo account");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime = 1;
+        }
+
+        let mut session = SimulationSession::new(config.clone());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let first_tick_packets = session.tick();
+        assert!(first_tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, chat_type }
+                if *chat_type == ChatType::System
+                    && message == &super::localized_text_or_fallback(
+                        super::LanguageCode::English,
+                        "server.ExpandedStorageExpired",
+                        "server.ExpandedStorageExpired",
+                    )
+        )));
+        assert!(first_tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ResizeStorage {
+                size,
+                has_expanded_storage,
+                expiry_time_binary_datetime
+            } if *size == i32::from(EXPANDED_STORAGE_SLOTS)
+                && !*has_expanded_storage
+                && *expiry_time_binary_datetime == 1
+        )));
+
+        let second_tick_packets = session.tick();
+        assert!(!second_tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. }
+                if message == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ExpandedStorageExpired",
+                    "server.ExpandedStorageExpired",
+                )
+        )));
+        assert!(!second_tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ResizeStorage {
+                size,
+                has_expanded_storage,
+                expiry_time_binary_datetime
+            } if *size == i32::from(EXPANDED_STORAGE_SLOTS)
+                && !*has_expanded_storage
+                && *expiry_time_binary_datetime == 1
+        )));
+
+        let store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let account = store.accounts.get("demo").expect("demo account");
+        assert!(!account.has_expanded_storage);
+        assert_eq!(account.storage_size, EXPANDED_STORAGE_SLOTS);
+        assert_eq!(account.expanded_storage_expiry_time_binary_datetime, 1);
+    }
+
+    #[test]
     fn storage_rejects_slots_outside_accessible_capacity() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -53114,6 +61763,8 @@ mod tests {
             let account = store.accounts.get_mut("demo").expect("demo account");
             account.storage_size = EXPANDED_STORAGE_SLOTS;
             account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime =
+                super::future_binary_datetime(30);
         }
         let mut expanded_session = SimulationSession::new(expanded_config);
         expanded_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -53147,6 +61798,82 @@ mod tests {
                     == u8::try_from(EXPANDED_STORAGE_SLOTS - 1)
                         .expect("expanded slot should fit in u8")
             }));
+    }
+
+    #[test]
+    fn crystal_npc_storage_open_sends_full_backing_storage_even_when_expansion_inactive() {
+        let mut config = SimulationConfig::default();
+        config.visible_npcs.push(crate::VisibleNpcRecord {
+            object_id: 4991,
+            name: "Warehouse Keeper".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/Warehouse-D002".to_string()),
+        });
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store.accounts.get_mut("demo").expect("demo account");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = false;
+        }
+
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let mut high_slot_item = resources
+                .storage_items
+                .iter()
+                .find(|item| item.slot == 0)
+                .expect("seed storage item")
+                .clone();
+            high_slot_item.slot =
+                u8::try_from(super::BASE_STORAGE_SLOTS + 20).expect("high slot should fit in u8");
+            high_slot_item.unique_id =
+                super::default_item_unique_id(ItemContainer::Storage, high_slot_item.slot);
+            resources.storage_items.push(high_slot_item);
+        }
+
+        let _ = session.interact(4991);
+        let storage_packets = session.select_npc_dialog_target("@Storage");
+        assert!(matches!(
+            storage_packets.as_slice(),
+            [ServerPacket::UserStorage { storage: Some(storage) }, ServerPacket::NPCStorage]
+                if storage.len() == usize::from(super::EXPANDED_STORAGE_SLOTS)
+                    && matches!(storage.first(), Some(Some(item)) if item.item_index == 658 && item.count == 10)
+                    && matches!(
+                        storage.get(usize::from(super::BASE_STORAGE_SLOTS + 20)),
+                        Some(Some(item)) if item.item_index == 658 && item.count == 10
+                    )
+        ));
+
+        let bag_item = session
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .find(|item| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
+            .expect("bag item");
+        let blocked_store = session.handle_packet(ClientPacket::StoreItem {
+            from: i32::from(bag_item.slot),
+            to: i32::from(BASE_STORAGE_SLOTS),
+        });
+        assert_eq!(
+            blocked_store,
+            vec![ServerPacket::StoreItem {
+                from: i32::from(bag_item.slot),
+                to: i32::from(BASE_STORAGE_SLOTS),
+                success: false,
+            }]
+        );
     }
 
     #[test]
@@ -53377,9 +62104,9 @@ mod tests {
         let packets = session.use_item("repair-powder");
         let snapshot = session.world_snapshot();
 
-        assert!(packets
+        assert!(!packets
             .iter()
-            .any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Repaired") || message.contains("sim.repairedEquippedItems"))));
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ItemRepaired {
@@ -53440,12 +62167,9 @@ mod tests {
         let packets = session.use_item("repair-powder");
         let snapshot = session.world_snapshot();
 
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. }
-                if message.contains("No equipped items need repair")
-                    || message.contains("sim.noEquipmentNeedsRepair")
-        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         assert_eq!(
             snapshot
                 .inventory_items
@@ -53497,6 +62221,96 @@ mod tests {
         assert!(!packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ItemRepaired { .. })));
+        assert_eq!(resources.gold, 50_000);
+        assert_eq!(
+            (item.durability_current, item.durability_max),
+            (Some(current_dura), Some(max_dura))
+        );
+    }
+
+    #[test]
+    fn repair_item_service_context_requires_live_npc_object() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let template = super::crystal_item_template_for_item_key("wooden-sword")
+            .expect("wooden sword template");
+        let max_dura = template.durability;
+        let current_dura = max_dura / 2;
+        add_repairable_inventory_item(
+            &mut session,
+            "wooden-sword",
+            "Wooden Sword",
+            30,
+            current_dura,
+            max_dura,
+        );
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.gold = 50_000;
+        }
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@Repair");
+
+        let trader_npc = super::entity_by_object_id(session.app.world(), 4_990)
+            .expect("trader npc should exist");
+        let _ = session.app.world_mut().despawn(trader_npc);
+        sync_visible_objects(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::RepairItem { unique_id: 30 });
+        let resources = session.app.world().resource::<SimulationResources>();
+        let item = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 30)
+            .expect("repair item should remain");
+
+        assert_eq!(packets, vec![ServerPacket::RepairItem { unique_id: 30 }]);
+        assert_eq!(resources.gold, 50_000);
+        assert_eq!(
+            (item.durability_current, item.durability_max),
+            (Some(current_dura), Some(max_dura))
+        );
+    }
+
+    #[test]
+    fn repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let template = super::crystal_item_template_for_item_key("wooden-sword")
+            .expect("wooden sword template");
+        let max_dura = template.durability;
+        let current_dura = max_dura / 2;
+        add_repairable_inventory_item(
+            &mut session,
+            "wooden-sword",
+            "Wooden Sword",
+            30,
+            current_dura,
+            max_dura,
+        );
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.gold = 50_000;
+        }
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@Repair");
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::RepairItem { unique_id: 30 });
+        let resources = session.app.world().resource::<SimulationResources>();
+        let item = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 30)
+            .expect("repair item should remain");
+
+        assert_eq!(packets, vec![ServerPacket::RepairItem { unique_id: 30 }]);
         assert_eq!(resources.gold, 50_000);
         assert_eq!(
             (item.durability_current, item.durability_max),
@@ -53564,6 +62378,72 @@ mod tests {
             } if *packet_max == expected_max && *packet_current == expected_max
         )));
         assert_eq!(resources.gold, 50_000 - expected_cost);
+        assert_eq!(
+            (item.durability_current, item.durability_max),
+            (Some(expected_max), Some(expected_max))
+        );
+    }
+
+    #[test]
+    fn repair_item_packet_uses_unique_id_when_it_differs_from_slot() {
+        let mut session = SimulationSession::new(wicked_trader_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let template = super::crystal_item_template_for_item_key("wooden-sword")
+            .expect("wooden sword template");
+        let max_dura = template.durability;
+        let current_dura = max_dura / 2;
+        add_repairable_inventory_item(
+            &mut session,
+            "wooden-sword",
+            "Wooden Sword",
+            30,
+            current_dura,
+            max_dura,
+        );
+        let (repair_unique_id, expected_cost, expected_max) = {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.gold = 50_000;
+            let item = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 30)
+                .expect("repair item");
+            item.unique_id = 9_030;
+            let expected_cost =
+                super::crystal_npc_repair_cost(&item.clone(), &template, 2.0, false);
+            let expected_max = max_dura - ((max_dura - current_dura) / 30);
+            (item.unique_id, expected_cost, expected_max)
+        };
+
+        let _ = session.interact(4990);
+        let _ = session.select_npc_dialog_target("@Repair");
+        let packets = session.handle_packet(ClientPacket::RepairItem {
+            unique_id: repair_unique_id,
+        });
+        let resources = session.app.world().resource::<SimulationResources>();
+        let item = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.unique_id == repair_unique_id)
+            .expect("repaired item should remain");
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::RepairItem { unique_id: 9_030 })));
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_cost)
+        ));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRepaired {
+                unique_id: 9_030,
+                max_dura,
+                current_dura
+            } if *max_dura == expected_max && *current_dura == expected_max
+        )));
         assert_eq!(
             (item.durability_current, item.durability_max),
             (Some(expected_max), Some(expected_max))
@@ -53679,18 +62559,7 @@ mod tests {
 
     #[test]
     fn srepair_item_packet_uses_triple_cost_without_max_dura_loss() {
-        let mut config = SimulationConfig::default();
-        config.visible_npcs.push(crate::VisibleNpcRecord {
-            object_id: 4988,
-            name: "Bill".to_string(),
-            image: 5,
-            colour_argb: -1,
-            position: Point { x: 331, y: 271 },
-            direction: MirDirection::Left,
-            quest_ids: Vec::new(),
-            script_key: Some("BichonProvince/BichonWall/Blacksmith-0".to_string()),
-        });
-        let mut session = SimulationSession::new(config);
+        let mut session = SimulationSession::new(blacksmith_config());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         let template = super::crystal_item_template_for_item_key("wooden-sword")
             .expect("wooden sword template");
@@ -53757,12 +62626,58 @@ mod tests {
     }
 
     #[test]
+    fn srepair_item_service_context_rejects_when_player_leaves_data_range() {
+        let mut session = SimulationSession::new(blacksmith_config());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let template = super::crystal_item_template_for_item_key("wooden-sword")
+            .expect("wooden sword template");
+        let max_dura = template.durability;
+        let current_dura = max_dura / 2;
+        add_repairable_inventory_item(
+            &mut session,
+            "wooden-sword",
+            "Wooden Sword",
+            30,
+            current_dura,
+            max_dura,
+        );
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.gold = 50_000;
+        }
+
+        let _ = session.interact(4988);
+        let _ = session.select_npc_dialog_target("@SRepair");
+        set_player_position(&mut session, Point { x: 348, y: 271 });
+        assert!(super::tile_distance(&player_position(&session), &Point { x: 331, y: 271 }) > 16);
+        sync_visible_objects(&mut session);
+
+        let packets = session.handle_packet(ClientPacket::SRepairItem { unique_id: 30 });
+        let resources = session.app.world().resource::<SimulationResources>();
+        let item = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 30)
+            .expect("repair item should remain");
+
+        assert_eq!(packets, vec![ServerPacket::RepairItem { unique_id: 30 }]);
+        assert_eq!(resources.gold, 50_000);
+        assert_eq!(
+            (item.durability_current, item.durability_max),
+            (Some(current_dura), Some(max_dura))
+        );
+    }
+
+    #[test]
     fn town_teleport_returns_player_to_spawn() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         session.move_to(Point { x: 338, y: 276 });
 
-        let _ = session.use_item("town-teleport");
+        let packets = session.use_item("town-teleport");
         let player = session
             .world_snapshot()
             .entities
@@ -53773,6 +62688,545 @@ mod tests {
         assert_eq!(player.x, 330);
         assert_eq!(player.y, 270);
         assert_eq!(player.direction, MirDirection::Down);
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    }
+
+    #[test]
+    fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
+        let mut config = SimulationConfig::default();
+        config.map_drop_rules.push(MapDropRuleRecord {
+            map_file_name: "0.map".to_string(),
+            no_town_teleport: true,
+            no_escape: false,
+            no_random: false,
+            no_drug: false,
+            no_reincarnation: false,
+            no_throw_item: false,
+            no_drop_player: false,
+            no_drop_monster: false,
+        });
+        let mut session = SimulationSession::new(config);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_player_position(&mut session, Point { x: 338, y: 276 });
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 40,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 40,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NoTownTeleport",
+                    "server.NoTownTeleport",
+                )
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        let player = session
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)
+            .expect("self player");
+        assert_eq!(player.x, 338);
+        assert_eq!(player.y, 276);
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "town-teleport" && item.container == ItemContainer::Bag2));
+    }
+
+    #[test]
+    fn use_item_packet_rejects_gender_locked_equipment_with_crystal_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BaseDress(F)", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dress = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("dress should exist");
+            dress.equip_slot = Some(EquipmentSlot::Armour);
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFemale",
+                    "server.NotFemale",
+                )
+        )));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_book_learns_skill_when_eligible() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
+        add_inventory_crystal_item(&mut session, "FireBall", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let fireball_key = super::crystal_skill_state("FireBall", 0)
+            .expect("FireBall should map to a runtime skill")
+            .key;
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(session
+            .world_snapshot()
+            .known_skills
+            .iter()
+            .any(|skill| skill.key == fireball_key));
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_book_rejects_wrong_class_with_localized_message() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "FireBall", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let fireball_key = super::crystal_skill_state("FireBall", 0)
+            .expect("FireBall should map to a runtime skill")
+            .key;
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.WarriorsCannotUseItem",
+                    "server.WarriorsCannotUseItem",
+                )
+        )));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+        assert!(!session
+            .world_snapshot()
+            .known_skills
+            .iter()
+            .any(|skill| skill.key == fireball_key));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_book_rejects_low_level_with_localized_message() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 6);
+        add_inventory_crystal_item(&mut session, "FireBall", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.LowLevel",
+                    "server.LowLevel",
+                )
+        )));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_equipment_rejects_low_max_dc_requirement() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            60,
+        );
+        add_inventory_crystal_item(&mut session, "DragonSword", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.LowDC",
+                    "server.LowDC",
+                )
+        )));
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_equipment_allows_modeled_max_mc_requirement() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(
+            &mut session,
+            MirClass::Warrior,
+            MirGender::Male,
+            60,
+        );
+        add_inventory_crystal_item(&mut session, "BloodStealerSword", 31);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon");
+            weapon.added_stats.push(super::UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_MC,
+                value: 27,
+            });
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            }
+        )));
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert!(snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon && item.name == "BloodStealerSword"));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.name == "BloodStealerSword"));
+    }
+
+    #[test]
+    fn use_item_packet_crystal_book_rejects_duplicate_known_skill() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
+        add_inventory_crystal_item(&mut session, "FireBall", 31);
+        let fireball = super::crystal_skill_state("FireBall", 0)
+            .expect("FireBall should map to a runtime skill");
+        let fireball_key = fireball.key.clone();
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            resources.skills.push(fireball);
+        }
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let known_skill_count = session
+            .world_snapshot()
+            .known_skills
+            .iter()
+            .filter(|skill| skill.key == fireball_key)
+            .count();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: false,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        assert_eq!(known_skill_count, 1);
+        assert!(session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_credit_token_emits_localized_hint_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_credit_token(&mut session, 3, 12);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 12,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 12,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedCredit { credit: 10 })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message
+                == &super::format_localized_text(
+                    super::LanguageCode::English,
+                    "server.CreditsAddedToAccount",
+                    ["10"],
+                )
+        )));
+    }
+
+    #[test]
+    fn use_item_packet_dynamic_crystal_credit_token_emits_localized_hint_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "CreditToken3", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert_eq!(snapshot.credit, 10);
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedCredit { credit: 10 })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message
+                == &super::format_localized_text(
+                    super::LanguageCode::English,
+                    "server.CreditsAddedToAccount",
+                    ["10"],
+                )
+        )));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.name == "CreditToken3"));
+    }
+
+    #[test]
+    fn use_item_packet_ancient_banga_green_grants_free_map_shout() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "AncientBanga[Green]", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.FreeMapShout",
+                    "server.FreeMapShout",
+                )
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.free_map_shout);
+        assert!(!resources.free_server_shout);
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
+    }
+
+    #[test]
+    fn use_item_packet_ancient_banga_purple_grants_free_server_shout() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "AncientBanga[Purple]", 31);
+
+        let packets = session.handle_packet(ClientPacket::UseItem {
+            unique_id: 31,
+            grid: MirGridType::Inventory,
+        });
+
+        assert_eq!(
+            packets.first(),
+            Some(&ServerPacket::UseItem {
+                unique_id: 31,
+                success: true,
+                grid: MirGridType::Inventory,
+            })
+        );
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.FreeServerShout",
+                    "server.FreeServerShout",
+                )
+        )));
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources.free_map_shout);
+        assert!(resources.free_server_shout);
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31));
     }
 
     #[test]
@@ -53780,9 +63234,12 @@ mod tests {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-        let _ = session.cast_skill("battle-focus");
+        let packets = session.cast_skill("battle-focus");
         let snapshot = session.world_snapshot();
 
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Cast"))));
         assert!(snapshot
             .active_buffs
             .iter()
@@ -53793,6 +63250,59 @@ mod tests {
             .find(|skill| skill.key == "battle-focus")
             .map(|skill| skill.cooldown_remaining_ticks > 0)
             .unwrap_or(false));
+    }
+
+    #[test]
+    fn casting_unknown_skill_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.cast_skill("unknown-skill");
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn casting_skill_cooldown_rejects_without_runtime_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let _ = session.cast_skill("battle-focus");
+
+        let packets = session.cast_skill("battle-focus");
+
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn casting_unwired_skill_rejects_without_runtime_chat_or_cooldown() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .skills
+            .push(super::SkillState {
+                key: "unwired-skill".to_string(),
+                name: "Unwired Skill".to_string(),
+                description: String::new(),
+                level: 1,
+                cooldown_ticks: 10,
+                cooldown_ends_at: 0,
+            });
+
+        let packets = session.cast_skill("unwired-skill");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.is_empty());
+        assert_eq!(
+            snapshot
+                .known_skills
+                .iter()
+                .find(|skill| skill.key == "unwired-skill")
+                .map(|skill| skill.cooldown_remaining_ticks),
+            Some(0)
+        );
     }
 
     #[test]
@@ -53811,9 +63321,7 @@ mod tests {
         let packets = session.cast_skill("battle-focus");
         let snapshot = session.world_snapshot();
 
-        assert!(packets
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Not enough MP"))));
+        assert!(packets.is_empty());
         assert!(!snapshot
             .active_buffs
             .iter()
@@ -53836,10 +63344,9 @@ mod tests {
         set_player_position(&mut session, Point { x: 333, y: 267 });
 
         let cast_packets = session.cast_skill("summon-shinsu");
-        assert!(cast_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::Chat { message, .. } if message.contains("Summon")
-        )));
+        assert!(!cast_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Summon"))));
 
         let spawn_packets = session.tick();
         assert!(spawn_packets.iter().any(|packet| matches!(
@@ -54275,7 +63782,8 @@ mod tests {
     }
 
     #[test]
-    fn friendly_vampire_spider_death_explosion_hits_nearby_hostile_monster() {
+    fn friendly_vampire_spider_death_explosion_has_no_runtime_defeat_chat_and_hits_nearby_hostile_monster(
+    ) {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         let player_origin = Point { x: 333, y: 267 };
@@ -54312,11 +63820,17 @@ mod tests {
             current_tick,
             &mut packets,
         );
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
         let next_packets = session.tick();
         assert!(next_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectHealth { info } if info.object_id == 3002 && info.percent < 100
         )));
+        assert!(!next_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
     }
 
     #[test]
@@ -54776,7 +64290,17 @@ mod tests {
 
         session.stage5_command("group.create", vec!["Miner".to_string()]);
         session.stage5_command("group.loot", vec!["roundRobin".to_string()]);
-        session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
+        let guild_created_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.SuccessfullyCreatedGuild",
+            "server.SuccessfullyCreatedGuild",
+        )
+        .replace("{0}", "BichonGuard");
+        let guild_packets = session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
+        assert!(guild_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &guild_created_message
+        )));
         session.stage5_command("guild.chat", vec!["ready".to_string()]);
         session.stage5_command("social.friend", vec!["Miner".to_string()]);
         session.stage5_command("social.friend", vec!["Temp".to_string()]);
@@ -54793,7 +64317,27 @@ mod tests {
                 "33".to_string(),
             ],
         );
+        let invalid_mail_claim_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["mail.claim".to_string()],
+        );
+        let invalid_mail_claim_packets = session.stage5_command("mail.claim", Vec::new());
+        assert!(invalid_mail_claim_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_mail_claim_message
+        )));
         session.stage5_command("mail.claim", vec!["1".to_string()]);
+        let invalid_mail_delete_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["mail.delete".to_string()],
+        );
+        let invalid_mail_delete_packets = session.stage5_command("mail.delete", Vec::new());
+        assert!(invalid_mail_delete_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_mail_delete_message
+        )));
         session.save_active_character();
 
         let mut reloaded =
@@ -54829,13 +64373,22 @@ mod tests {
     fn stage5_trade_shop_and_auction_are_transactional() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let trade_successful_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.TradeSuccessful",
+            "server.TradeSuccessful",
+        );
         let starting_gold = session.world_snapshot().gold;
 
         session.stage5_command("trade.start", vec!["Trader".to_string()]);
         session.stage5_command("trade.offerItem", vec!["red-potion".to_string()]);
         session.stage5_command("trade.offerGold", vec!["10".to_string()]);
-        session.stage5_command("trade.accept", Vec::new());
+        let trade_packets = session.stage5_command("trade.accept", Vec::new());
         let after_trade = session.world_snapshot();
+        assert!(trade_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &trade_successful_message
+        )));
         assert!(after_trade
             .stage5_systems
             .trade
@@ -54845,8 +64398,18 @@ mod tests {
             }));
         assert_eq!(after_trade.gold, starting_gold - 10);
 
-        session.stage5_command("shop.buy", vec!["red-potion".to_string(), "25".to_string()]);
+        let shop_packets =
+            session.stage5_command("shop.buy", vec!["red-potion".to_string(), "25".to_string()]);
         let after_shop = session.world_snapshot();
+        let bought_for_gold_message = super::format_localized_text(
+            super::LanguageCode::English,
+            "server.BoughtItemForGold",
+            ["red-potion".to_string(), "25".to_string()],
+        );
+        assert!(shop_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &bought_for_gold_message
+        )));
         assert!(after_shop
             .inventory_items
             .iter()
@@ -54901,6 +64464,11 @@ mod tests {
     fn stage5_credit_shop_mails_purchase_and_claim_transfers_attachment() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let bought_for_credit_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.BoughtItemForCredit",
+            ["mail-credit-item".to_string(), "5".to_string()],
+        );
         session
             .app
             .world_mut()
@@ -54916,6 +64484,10 @@ mod tests {
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 5 })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &bought_for_credit_message
+        )));
         assert_eq!(after_buy.credit, 5);
         assert!(after_buy.stage5_systems.mail.iter().any(|mail| mail.id == 1
             && mail.from == "Gameshop"
@@ -54944,20 +64516,104 @@ mod tests {
     fn stage5_trade_shop_and_auction_cancel_error_paths_preserve_gold() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let low_gold_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.LowGold",
+            "server.LowGold",
+        );
+        let enough_currency_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.YouDontHaveEnoughCurrency",
+            "server.YouDontHaveEnoughCurrency",
+        );
+        let invalid_trade_gold_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["trade.offerGold".to_string()],
+        );
+        let invalid_auction_buy_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["auction.buy".to_string()],
+        );
+        let invalid_auction_cancel_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["auction.cancel".to_string()],
+        );
+        let invalid_stage5_message = super::format_localized_text(
+            mir2_game_data::LanguageCode::English,
+            "server.InvalidPacketReceived",
+            ["stage5.invalid".to_string()],
+        );
+        let not_found_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.NotFound",
+            "server.NotFound",
+        );
         let starting_gold = session.world_snapshot().gold;
 
+        let invalid_stage5_packets = session.stage5_command("stage5.invalid", Vec::new());
+        assert!(invalid_stage5_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_stage5_message
+        )));
+
+        let inactive_trade_gold_packets =
+            session.stage5_command("trade.offerGold", vec!["1".to_string()]);
+        assert!(inactive_trade_gold_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+        let inactive_trade_item_packets =
+            session.stage5_command("trade.offerItem", vec!["red-potion".to_string()]);
+        assert!(inactive_trade_item_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+        let inactive_trade_accept_packets = session.stage5_command("trade.accept", Vec::new());
+        assert!(inactive_trade_accept_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+        let after_inactive_trade = session.world_snapshot();
+        assert_eq!(after_inactive_trade.gold, starting_gold);
+        assert!(after_inactive_trade.stage5_systems.trade.is_none());
+
         session.stage5_command("trade.start", vec!["Trader".to_string()]);
+        let missing_trade_gold_packets = session.stage5_command("trade.offerGold", Vec::new());
+        assert!(missing_trade_gold_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_trade_gold_message
+        )));
+        let failed_trade_packets =
+            session.stage5_command("trade.offerGold", vec!["999999".to_string()]);
+        let after_failed_trade = session.world_snapshot();
+        assert!(failed_trade_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &low_gold_message
+        )));
+        assert_eq!(after_failed_trade.gold, starting_gold);
+        assert!(after_failed_trade
+            .stage5_systems
+            .trade
+            .as_ref()
+            .is_some_and(|trade| trade.offered_gold == 0 && !trade.completed));
         session.stage5_command("trade.offerGold", vec!["50".to_string()]);
         session.stage5_command("trade.cancel", Vec::new());
         let after_cancel = session.world_snapshot();
         assert!(after_cancel.stage5_systems.trade.is_none());
         assert_eq!(after_cancel.gold, starting_gold);
 
-        session.stage5_command(
+        let failed_shop_packets = session.stage5_command(
             "shop.buy",
             vec!["expensive-relic".to_string(), "999999".to_string()],
         );
         let after_failed_shop = session.world_snapshot();
+        assert!(failed_shop_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &low_gold_message
+        )));
         assert_eq!(after_failed_shop.gold, starting_gold);
         assert!(!after_failed_shop
             .inventory_items
@@ -54974,6 +64630,10 @@ mod tests {
             vec!["credit-relic".to_string(), "5".to_string()],
         );
         let after_failed_credit_shop = session.world_snapshot();
+        assert!(failed_credit_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &enough_currency_message
+        )));
         assert_eq!(after_failed_credit_shop.credit, 3);
         assert!(failed_credit_packets
             .iter()
@@ -54986,23 +64646,100 @@ mod tests {
 
         session.stage5_command(
             "auction.list",
+            vec!["expensive-auction".to_string(), "999999".to_string()],
+        );
+        let missing_auction_buy_packets = session.stage5_command("auction.buy", Vec::new());
+        assert!(missing_auction_buy_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_auction_buy_message
+        )));
+        let failed_auction_packets = session.stage5_command("auction.buy", vec!["1".to_string()]);
+        let after_failed_auction = session.world_snapshot();
+        assert!(failed_auction_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &low_gold_message
+        )));
+        assert_eq!(after_failed_auction.gold, starting_gold);
+        assert!(after_failed_auction
+            .stage5_systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == 1 && !listing.sold && !listing.cancelled));
+        assert!(!after_failed_auction
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "expensive-auction"));
+
+        session.stage5_command(
+            "auction.list",
             vec!["training-splinter".to_string(), "50".to_string()],
         );
-        session.stage5_command("auction.cancel", vec!["1".to_string()]);
-        session.stage5_command("auction.buy", vec!["1".to_string()]);
+        let missing_auction_cancel_packets = session.stage5_command("auction.cancel", Vec::new());
+        assert!(missing_auction_cancel_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &invalid_auction_cancel_message
+        )));
+        session.stage5_command("auction.cancel", vec!["2".to_string()]);
+        session.stage5_command("auction.buy", vec!["2".to_string()]);
         let after_cancelled_auction = session.world_snapshot();
         assert_eq!(after_cancelled_auction.gold, starting_gold);
         assert!(after_cancelled_auction
             .stage5_systems
             .auction
             .iter()
-            .any(|listing| listing.id == 1 && listing.cancelled && !listing.sold));
+            .any(|listing| listing.id == 2 && listing.cancelled && !listing.sold));
+    }
+
+    #[test]
+    fn stage5_missing_mail_trade_item_and_auction_use_not_found() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let not_found_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.NotFound",
+            "server.NotFound",
+        );
+        let starting_gold = session.world_snapshot().gold;
+
+        let mail_packets = session.stage5_command("mail.claim", vec!["999".to_string()]);
+        assert!(mail_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+
+        let trade_packets =
+            session.stage5_command("trade.offerItem", vec!["missing-relic".to_string()]);
+        assert!(trade_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+
+        let auction_packets = session.stage5_command("auction.buy", vec!["999".to_string()]);
+        assert!(auction_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.gold, starting_gold);
+        assert!(snapshot.stage5_systems.mail.is_empty());
+        assert!(snapshot.stage5_systems.trade.is_none());
+        assert!(snapshot.stage5_systems.auction.is_empty());
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "missing-relic"));
     }
 
     #[test]
     fn stage5_shop_and_auction_full_bag_preserve_gold_and_items() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let full_bag_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.YouCannotCarryAnymore",
+            "server.YouCannotCarryAnymore",
+        );
         session
             .app
             .world_mut()
@@ -55012,11 +64749,15 @@ mod tests {
         let starting_gold = session.world_snapshot().gold;
         let starting_credit = session.world_snapshot().credit;
 
-        session.stage5_command(
+        let shop_packets = session.stage5_command(
             "shop.buy",
             vec!["full-bag-shop".to_string(), "25".to_string()],
         );
         let after_shop = session.world_snapshot();
+        assert!(shop_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &full_bag_message
+        )));
         assert_eq!(after_shop.free_bag_slots, 0);
         assert_eq!(after_shop.gold, starting_gold);
         assert!(!after_shop
@@ -55049,7 +64790,7 @@ mod tests {
         let after_full_bag_claim = session.world_snapshot();
         assert!(claim_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("No free bag slot")
+            ServerPacket::Chat { message, .. } if message == &full_bag_message
         )));
         assert!(after_full_bag_claim
             .stage5_systems
@@ -55065,8 +64806,12 @@ mod tests {
             "auction.list",
             vec!["full-bag-auction".to_string(), "50".to_string()],
         );
-        session.stage5_command("auction.buy", vec!["1".to_string()]);
+        let auction_packets = session.stage5_command("auction.buy", vec!["1".to_string()]);
         let after_auction = session.world_snapshot();
+        assert!(auction_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &full_bag_message
+        )));
         assert_eq!(after_auction.gold, starting_gold);
         assert!(!after_auction
             .inventory_items
@@ -55077,6 +64822,25 @@ mod tests {
             .auction
             .iter()
             .any(|listing| listing.id == 1 && !listing.sold && !listing.cancelled));
+
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .stage5_systems
+            .profession
+            .ore = 1;
+        let craft_packets = session.stage5_command("craft", vec!["full-bag-craft".to_string()]);
+        let after_craft = session.world_snapshot();
+        assert!(craft_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &full_bag_message
+        )));
+        assert_eq!(after_craft.stage5_systems.profession.ore, 1);
+        assert!(!after_craft
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "full-bag-craft"));
     }
 
     #[test]
@@ -55132,6 +64896,18 @@ mod tests {
                 slot_size: 5
             }
         )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ItemSocketsIncreased",
+                    "server.ItemSocketsIncreased",
+                )
+        )));
         assert!(snapshot.equipment_items.iter().any(|item| {
             item.slot == EquipmentSlot::Weapon
                 && item.name == "BengalTiger"
@@ -55156,13 +64932,50 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("source item was not found")
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
         )));
         assert!(snapshot.equipment_items.iter().any(|item| {
             item.slot == EquipmentSlot::Weapon
                 && item.name == "BengalTiger"
                 && item.socket_slots == 4
         }));
+    }
+
+    #[test]
+    fn stage5_item_add_socket_rejects_without_equipped_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .equipment_items
+            .retain(|item| item.slot != EquipmentSlot::Weapon);
+
+        let packets = session.stage5_command("item.addSocket", vec!["weapon".to_string()]);
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
+        )));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
     }
 
     #[test]
@@ -55183,7 +64996,12 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("Invalid socket source")
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.InvalidCombination",
+                    "server.InvalidCombination",
+                )
         )));
         assert!(snapshot.inventory_items.iter().any(|item| {
             item.key == "crystal-item-739" && item.name == "DurabilityGem" && item.quantity == 1
@@ -55239,7 +65057,51 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("max sockets")
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ItemMaxSockets",
+                    "server.ItemMaxSockets",
+                )
+        )));
+        assert!(snapshot.equipment_items.iter().any(|item| {
+            item.slot == EquipmentSlot::Weapon
+                && item.name == "Wooden Sword"
+                && item.socket_slots == 0
+        }));
+    }
+
+    #[test]
+    fn stage5_item_add_socket_rejects_unknown_socket_metadata() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("weapon should be equipped")
+            .key = "stage5-unknown-weapon".to_string();
+
+        let packets = session.stage5_command("item.addSocket", vec!["weapon".to_string()]);
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSlotSizeChanged { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
         )));
         assert!(snapshot.equipment_items.iter().any(|item| {
             item.slot == EquipmentSlot::Weapon
@@ -55307,6 +65169,235 @@ mod tests {
         assert_eq!(current_dura, max_dura);
         assert!(current_dura >= 1_000);
         assert!(current_dura <= 5_000);
+    }
+
+    #[test]
+    fn combine_item_packet_uses_inventory_unique_ids_instead_of_slots() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let hammer = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("hammer should exist");
+            hammer.unique_id = 9_001;
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.unique_id = 9_002;
+            dagger.durability_current = Some(1_000);
+            dagger.durability_max = Some(5_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRepaired {
+                unique_id: 9_002,
+                ..
+            }
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(!resources
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == 9_001));
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.unique_id == 9_002)
+            .expect("dagger should remain by unique id");
+        assert_eq!(dagger.slot, 32);
+        assert_eq!(super::item_unique_id(dagger), 9_002);
+        assert_eq!(super::user_item_from_item_state(dagger).unique_id, 9_002);
+        assert_eq!(dagger.durability_current, dagger.durability_max);
+    }
+
+    #[test]
+    fn combine_item_packet_rejects_slot_numbers_when_unique_ids_differ() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let hammer = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("hammer should exist");
+            hammer.unique_id = 9_001;
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.unique_id = 9_002;
+            dagger.durability_current = Some(1_000);
+            dagger.durability_max = Some(5_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 9_002,
+                success: false,
+                destroy: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.unique_id == 9_001));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.unique_id == 9_002
+                && item.slot == 32
+                && item.durability_current == Some(1_000)
+                && item.durability_max == Some(5_000)
+        }));
+    }
+
+    #[test]
+    fn combine_item_packet_hero_inventory_grid_does_not_mutate_matching_player_items() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let hammer = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 31)
+                .expect("hammer should exist");
+            hammer.unique_id = 9_001;
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.unique_id = 9_002;
+            dagger.durability_current = Some(1_000);
+            dagger.durability_max = Some(5_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::HeroInventory,
+            id_from: 9_001,
+            id_to: 9_002,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::HeroInventory,
+                id_from: 9_001,
+                id_to: 9_002,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| { item.unique_id == 9_001 && item.slot == 31 && item.quantity == 1 }));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.unique_id == 9_002
+                && item.slot == 32
+                && item.durability_current == Some(1_000)
+                && item.durability_max == Some(5_000)
+        }));
+    }
+
+    #[test]
+    fn combine_item_packet_dead_player_ack_fails_without_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BoneHammer", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.durability_current = Some(1_000);
+            dagger.durability_max = Some(5_000);
+        }
+        set_current_player_hp(&mut session, 0);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            }]
+        );
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.quantity == 1));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.slot == 32
+                && item.durability_current == Some(1_000)
+                && item.durability_max == Some(5_000)
+        }));
     }
 
     #[test]
@@ -55676,6 +65767,563 @@ mod tests {
     }
 
     #[test]
+    fn combine_item_packet_upgrade_branch_applies_player_gem_rate_percent_bonus() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "BraveryOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.added_attack = 1;
+
+            let weapon = resources
+                .equipment_items
+                .iter_mut()
+                .find(|item| item.slot == EquipmentSlot::Weapon)
+                .expect("starter weapon should exist");
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_GEM_RATE_PERCENT,
+                value: 100,
+            });
+        }
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("BraveryOrb")
+            .expect("BraveryOrb template should exist");
+        let base_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        let boosted_chance =
+            super::crystal_upgrade_success_chance_with_player_bonus(&source_template, &target, 100);
+        assert!(boosted_chance > base_chance);
+
+        let player_object_id =
+            super::current_player_object_id(session.app.world()).expect("player object id");
+        let start_tick = session.app.world().resource::<SimulationResources>().tick;
+        let boosted_tick = (start_tick..start_tick + 10_000)
+            .find(|tick| {
+                !super::crystal_upgrade_roll_succeeds(*tick, player_object_id, 31, 32, base_chance)
+                    && super::crystal_upgrade_roll_succeeds(
+                        *tick,
+                        player_object_id,
+                        31,
+                        32,
+                        boosted_chance,
+                    )
+            })
+            .expect("boosted success tick should exist");
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .tick = boosted_tick;
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item.added_stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_DC && stat.value == 2)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert_eq!(dagger.added_attack, 2);
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_durability_orb_max_dura_bonus() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "DurabilityOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("DurabilityOrb")
+            .expect("DurabilityOrb template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, true, None);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32 && item.gem_count == 1 && item.max_dura == 7_000
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert_eq!(dagger.durability_current, Some(5_000));
+        assert_eq!(dagger.durability_max, Some(7_000));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_rejects_durability_orb_at_max_added_stats() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "DurabilityOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+        {
+            let mut resources = session
+                .app
+                .world_mut()
+                .resource_mut::<SimulationResources>();
+            let dagger = resources
+                .inventory_items
+                .iter_mut()
+                .find(|item| item.slot == 32)
+                .expect("dagger should exist");
+            dagger.durability_current = Some(5_000);
+            dagger.durability_max = Some(10_000);
+        }
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemUpgraded { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat {
+                chat_type: ChatType::Hint,
+                ..
+            }
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources.inventory_items.iter().any(|item| item.slot == 31));
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.slot == 32
+                && item.durability_current == Some(5_000)
+                && item.durability_max == Some(10_000)
+        }));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_attack_speed_bonus() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "StormOrb", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("StormOrb")
+            .expect("StormOrb template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, true, None);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_ATTACK_SPEED && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert!(dagger
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_ATTACK_SPEED && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_magic_resist_bonus_for_armour() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "DisillusionGem", 31);
+        add_inventory_crystal_item(&mut session, "MirArmour(M)", 32);
+
+        let target = session
+            .app
+            .world()
+            .resource::<SimulationResources>()
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("target item")
+            .clone();
+        let source_template = mir2_game_data::crystal_item_by_name("DisillusionGem")
+            .expect("DisillusionGem template should exist");
+        let success_chance = super::crystal_upgrade_success_chance(&source_template, &target);
+        set_combine_upgrade_tick(&mut session, 31, 32, success_chance, true, None);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_MAGIC_RESIST && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let armour = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded armour should remain");
+        assert_eq!(armour.gem_count, 1);
+        assert!(armour
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_MAGIC_RESIST && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_agility_bonus_for_armour() {
+        let (session, packets) = run_successful_combine_upgrade("AgilityOrb", "MirArmour(M)");
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_AGILITY && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let armour = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded armour should remain");
+        assert_eq!(armour.gem_count, 1);
+        assert!(armour
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_AGILITY && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_accuracy_bonus_for_helmet() {
+        let (session, packets) = run_successful_combine_upgrade("AccuracyOrb", "BronzeHelmet");
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_ACCURACY && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let helmet = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded helmet should remain");
+        assert_eq!(helmet.gem_count, 1);
+        assert!(helmet
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_ACCURACY && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_poison_attack_bonus() {
+        let (session, packets) = run_successful_combine_upgrade("PoisonOrb", "Dagger");
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_POISON_ATTACK && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert!(dagger
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_POISON_ATTACK && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_freezing_bonus() {
+        let (session, packets) = run_successful_combine_upgrade("FreezingGem", "Dagger");
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_FREEZING && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let dagger = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded dagger should remain");
+        assert_eq!(dagger.gem_count, 1);
+        assert!(dagger
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_FREEZING && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_upgrade_branch_applies_poison_resist_bonus_for_armour() {
+        let (session, packets) = run_successful_combine_upgrade("EnduranceGem", "MirArmour(M)");
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemUpgraded { item }
+                if item.unique_id == 32
+                    && item.gem_count == 1
+                    && item
+                        .added_stats
+                        .iter()
+                        .any(|stat| stat.stat == super::CRYSTAL_STAT_POISON_RESIST && stat.value == 1)
+        )));
+        assert_eq!(
+            packets.last(),
+            Some(&ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: true,
+                destroy: false,
+            })
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        let armour = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 32)
+            .expect("upgraded armour should remain");
+        assert_eq!(armour.gem_count, 1);
+        assert!(armour
+            .added_stats
+            .iter()
+            .any(|stat| stat.stat == super::CRYSTAL_STAT_POISON_RESIST && stat.value == 1));
+    }
+
+    #[test]
+    fn combine_item_packet_shape_zero_gem_source_ack_fails_without_mutation() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        add_inventory_crystal_item(&mut session, "Hyeoncheon Maseok", 31);
+        add_inventory_crystal_item(&mut session, "Dagger", 32);
+
+        let packets = session.handle_packet(ClientPacket::CombineItem {
+            grid: MirGridType::Inventory,
+            id_from: 31,
+            id_to: 32,
+        });
+
+        assert_eq!(
+            packets,
+            vec![ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            }]
+        );
+
+        let resources = session.app.world().resource::<SimulationResources>();
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 31 && item.name == "Hyeoncheon Maseok"));
+        assert!(resources
+            .inventory_items
+            .iter()
+            .any(|item| item.slot == 32 && item.name == "Dagger" && item.gem_count == 0));
+    }
+
+    #[test]
     fn combine_item_packet_upgrade_branch_rejects_max_added_stats() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -55944,7 +66592,15 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
         assert!(second.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("already sealed")
+            ServerPacket::Chat {
+                chat_type: ChatType::System,
+                message
+            } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.ItemAlreadySealed",
+                    "server.ItemAlreadySealed",
+                )
         )));
         assert_eq!(
             snapshot
@@ -55982,9 +66638,14 @@ mod tests {
         assert!(!packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
+        let reseal_message = super::format_localized_text(
+            super::LanguageCode::English,
+            "server.ItemCannotBeResealedFor",
+            ["30 minutes".to_string()],
+        );
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("cannot be resealed")
+            ServerPacket::Chat { message, .. } if message == &reseal_message
         )));
         assert!(snapshot.equipment_items.iter().any(|item| {
             item.slot == EquipmentSlot::Weapon
@@ -56076,13 +66737,50 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("source item was not found")
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
         )));
         assert!(snapshot.equipment_items.iter().any(|item| {
             item.slot == EquipmentSlot::Weapon
                 && item.name == "Wooden Sword"
                 && item.sealed_expiry_time_binary_datetime == 0
         }));
+    }
+
+    #[test]
+    fn stage5_item_seal_rejects_without_equipped_item() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .equipment_items
+            .retain(|item| item.slot != EquipmentSlot::Weapon);
+
+        let packets = session.stage5_command("item.seal", vec!["weapon".to_string()]);
+        let snapshot = session.world_snapshot();
+
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.NotFound",
+                    "server.NotFound",
+                )
+        )));
+        assert!(!snapshot
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon));
     }
 
     #[test]
@@ -56106,7 +66804,12 @@ mod tests {
             .any(|packet| matches!(packet, ServerPacket::ItemSealChanged { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("Invalid seal source")
+            ServerPacket::Chat { message, .. } if message
+                == &super::localized_text_or_fallback(
+                    super::LanguageCode::English,
+                    "server.InvalidCombination",
+                    "server.InvalidCombination",
+                )
         )));
         assert!(snapshot.inventory_items.iter().any(|item| {
             item.key == "crystal-item-739" && item.name == "DurabilityGem" && item.quantity == 1
@@ -56145,9 +66848,14 @@ mod tests {
         let expiry = expiry.expect("seal packet should be emitted");
         let snapshot = session.world_snapshot();
 
+        let seal_message = super::format_localized_text(
+            super::LanguageCode::English,
+            "server.ItemSealedFor",
+            ["45 minutes".to_string()],
+        );
         assert!(packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::Chat { message, .. } if message.contains("45 minutes")
+            ServerPacket::Chat { message, .. } if message == &seal_message
         )));
         assert!(snapshot
             .inventory_items
@@ -56162,15 +66870,63 @@ mod tests {
 
     #[test]
     fn stage5_conquest_event_hero_mining_and_crafting_flow() {
+        let mut unstarted_session = SimulationSession::new(SimulationConfig::default());
+        let not_found_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.NotFound",
+            "server.NotFound",
+        );
+        let missing_player_packets =
+            unstarted_session.stage5_command("event.spawn", vec!["BugBat".to_string()]);
+        assert!(missing_player_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let crafting_failed_message = mir2_game_data::localized_text_or_fallback(
+            mir2_game_data::LanguageCode::English,
+            "server.CraftingAttemptFailed",
+            "server.CraftingAttemptFailed",
+        );
 
         session.stage5_command("guild.create", vec!["BichonGuard".to_string()]);
         session.stage5_command("conquest.start", vec!["Sabuk".to_string()]);
         session.stage5_command("conquest.owner", Vec::new());
-        session.stage5_command("event.spawn", vec!["BugBat".to_string(), "1".to_string()]);
+        let missing_event_packets =
+            session.stage5_command("event.spawn", vec!["MissingMonster".to_string()]);
+        assert!(missing_event_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
+        let event_packets =
+            session.stage5_command("event.spawn", vec!["BugBat".to_string(), "1".to_string()]);
+        assert!(!event_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        let missing_hero_packets = session.stage5_command("hero.behaviour", vec!["2".to_string()]);
+        assert!(missing_hero_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &not_found_message
+        )));
         session.stage5_command("hero.recruit", vec!["Aide".to_string()]);
-        session.stage5_command("hero.behaviour", vec!["2".to_string()]);
+        let hero_behaviour_packets =
+            session.stage5_command("hero.behaviour", vec!["2".to_string()]);
+        assert!(!hero_behaviour_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+        let failed_craft_packets =
+            session.stage5_command("craft", vec!["crafted-blade".to_string()]);
+        assert!(failed_craft_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Chat { message, .. } if message == &crafting_failed_message
+        )));
+        assert!(!session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "crafted-blade"));
         session.stage5_command("mine", vec!["3".to_string()]);
         session.stage5_command("craft", vec!["crafted-blade".to_string()]);
 

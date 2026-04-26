@@ -22,6 +22,14 @@ const RESPAWN_MANIFEST_PATH = path.join(
   "generated",
   "crystal_respawn_manifest.json",
 );
+const PACKAGED_STARTER_MAP_REGION_PATH = path.join(
+  REPO_ROOT,
+  "packages",
+  "game-data",
+  "data",
+  "generated",
+  "crystal_starter_map_region.json",
+);
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const CELL_WIDTH = 48;
 const CELL_HEIGHT = 32;
@@ -44,6 +52,7 @@ type ParsedMap = {
   height: number;
   type: number;
   cells: ParsedMapCell[] | null;
+  fallbackOriginalMapRegion?: OriginalMapRegion | null;
 };
 
 type ParsedMapCell = {
@@ -122,11 +131,13 @@ function loadParsedMap(mapFileName: string): ParsedMap {
 
   const mapPath = path.join(MAP_DIR, `${normalized}.map`);
   if (!existsSync(mapPath)) {
-    const fallback = mapCache.get("0") ?? loadParsedMap("0");
-    return {
+    const fallback = normalized === "0" ? loadPackagedFallbackMap("0") : mapCache.get("0") ?? loadParsedMap("0");
+    const parsed = {
       ...fallback,
       fileName: normalized,
     };
+    mapCache.set(normalized, parsed);
+    return parsed;
   }
 
   const bytes = readFileSync(mapPath);
@@ -504,6 +515,13 @@ async function exportMapRegion(
   parsedMap: ParsedMap,
   sceneView: { center: { x: number; y: number }; width: number; height: number },
 ): Promise<OriginalMapRegion | null> {
+  if (parsedMap.fallbackOriginalMapRegion) {
+    return {
+      ...parsedMap.fallbackOriginalMapRegion,
+      mapFileName: parsedMap.fileName,
+    };
+  }
+
   if (!parsedMap.cells) {
     return fallbackMapRegion(parsedMap, sceneView);
   }
@@ -627,6 +645,39 @@ function fallbackMapRegion(
     sprites: {},
     cells: [],
   };
+}
+
+function loadPackagedFallbackMap(fileName: string): ParsedMap {
+  const region = loadPackagedStarterMapRegion();
+  return {
+    fileName,
+    width: region?.mapWidth ?? 400,
+    height: region?.mapHeight ?? 400,
+    type: -1,
+    cells: null,
+    fallbackOriginalMapRegion: region,
+  };
+}
+
+function loadPackagedStarterMapRegion(): OriginalMapRegion | null {
+  try {
+    const source = JSON.parse(readFileSync(PACKAGED_STARTER_MAP_REGION_PATH, "utf8")) as Partial<OriginalMapRegion>;
+    const maxCellX = Math.max(...(source.cells ?? []).map((cell) => cell.x), source.regionBounds?.maxX ?? 0);
+    const maxCellY = Math.max(...(source.cells ?? []).map((cell) => cell.y), source.regionBounds?.maxY ?? 0);
+    return {
+      mapFileName: source.mapFileName ?? "0",
+      mapWidth: source.mapWidth ?? maxCellX + 1,
+      mapHeight: source.mapHeight ?? maxCellY + 1,
+      cellWidth: source.cellWidth ?? CELL_WIDTH,
+      cellHeight: source.cellHeight ?? CELL_HEIGHT,
+      regionBounds: source.regionBounds ?? { minX: 0, maxX: maxCellX, minY: 0, maxY: maxCellY },
+      playBounds: source.playBounds ?? { minX: 0, maxX: maxCellX, minY: 0, maxY: maxCellY },
+      sprites: source.sprites ?? {},
+      cells: source.cells ?? [],
+    };
+  } catch {
+    return null;
+  }
 }
 
 function backLayerForCell(cell: ParsedMapCell) {

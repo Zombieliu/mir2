@@ -117,10 +117,10 @@ export const ORIGINAL_UI = {
         horizontalY: 3,
         verticalX: 3,
         verticalY: index * 35 + 12,
-        labelX: index * 35 + 8,
+        labelX: 8,
         labelY: 2,
         verticalLabelX: -1,
-        verticalLabelY: 11 + index * 35,
+        verticalLabelY: 11,
       })),
     },
     duraIcons: {

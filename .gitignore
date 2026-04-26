@@ -21,6 +21,8 @@ tools/procmon/
 
 # .NET build output
 **/bin/
+!mir2-web3/apps/gateway/src/bin/
+!mir2-web3/apps/gateway/src/bin/**
 **/obj/
 
 # Browser automation profiles and transient UI captures

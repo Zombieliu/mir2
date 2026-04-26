@@ -180,11 +180,12 @@ mod tests {
         assert!(matches!(packets[2], ServerPacket::UserInformation { .. }));
         assert!(matches!(packets[3], ServerPacket::UserLocation { .. }));
         assert!(matches!(
-            packets[4],
+            &packets[4],
             ServerPacket::Chat {
-                chat_type: ChatType::System,
+                chat_type: ChatType::Hint,
+                message,
                 ..
-            }
+            } if message == "Welcome to the Legend of Mir 2 Server."
         ));
         assert!(packets
             .iter()
@@ -215,14 +216,33 @@ mod tests {
     }
 
     #[test]
-    fn chat_echoes_back_to_client_and_world() {
+    fn chat_before_start_game_rejects_without_packets() {
         let mut session = GatewaySession::new(GatewayConfig::default());
         let packets = session.handle_packet(ClientPacket::Chat {
             message: "hi".to_string(),
         });
 
-        assert!(matches!(packets[0], ServerPacket::Chat { .. }));
-        assert!(matches!(packets[1], ServerPacket::ObjectChat { .. }));
+        assert!(packets.is_empty());
+    }
+
+    #[test]
+    fn chat_normal_message_emits_crystal_object_chat_only() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.handle_packet(ClientPacket::Chat {
+            message: "hi".to_string(),
+        });
+
+        assert_eq!(packets.len(), 1);
+        assert!(matches!(
+            &packets[0],
+            ServerPacket::ObjectChat {
+                text,
+                chat_type: ChatType::Normal,
+                ..
+            } if text == "Scout: hi"
+        ));
     }
 
     #[test]

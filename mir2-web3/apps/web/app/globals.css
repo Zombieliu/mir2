@@ -973,7 +973,7 @@ img {
 }
 
 .belt-dialog.vertical {
-  left: 0;
+  left: 238px;
   top: 200px;
   width: 40px;
   height: 241px;
@@ -1128,6 +1128,8 @@ img {
   right: 16px;
   bottom: 156px;
   width: 248px;
+  max-height: 600px;
+  overflow: auto;
 }
 
 .system-menu-actions {
@@ -1340,6 +1342,33 @@ img {
   inset: 0;
   background: transparent;
   overflow: visible;
+}
+
+.character-repair-actions {
+  position: absolute;
+  left: 17px;
+  top: 326px;
+  z-index: 8;
+  display: flex;
+  gap: 6px;
+}
+
+.character-repair-actions button {
+  min-width: 72px;
+  border: 1px solid rgba(219, 179, 100, 0.62);
+  background: linear-gradient(180deg, rgba(91, 51, 21, 0.92), rgba(37, 22, 12, 0.95));
+  color: #f5d99b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 6px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.character-repair-actions button.active {
+  border-color: #ffd97d;
+  color: #fff5c8;
+  box-shadow: 0 0 8px rgba(255, 204, 99, 0.35);
 }
 
 .original-item-icon {
@@ -1824,13 +1853,23 @@ button.character-spell-value:hover {
 .mini-map-name {
   position: absolute;
   left: 2px;
-  top: 2px;
+  top: 1px;
   width: 120px;
-  height: 18px;
-  line-height: 18px;
+  height: 20px;
+  line-height: 10px;
   text-align: center;
-  font-size: 12px;
+  font-size: 10px;
+  overflow: hidden;
   text-shadow: 1px 1px 0 #000;
+}
+
+.mini-map-name span {
+  display: block;
+  white-space: nowrap;
+}
+
+.mini-map-safe-zone {
+  color: #f9e4a8;
 }
 
 .mini-map-coords {
@@ -2063,6 +2102,20 @@ button.character-spell-value:hover {
 
 .npc-dialog-body p {
   margin: 0;
+}
+
+.npc-dialog-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.npc-dialog-links button {
+  border: 1px solid rgba(190, 157, 99, 0.56);
+  background: linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95));
+  color: #f4dcaf;
+  padding: 5px 8px;
+  text-align: left;
 }
 
 .npc-dialog-input-form {

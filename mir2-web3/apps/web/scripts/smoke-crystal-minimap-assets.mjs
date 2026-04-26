@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
@@ -12,6 +12,10 @@ const RESPAWN_MANIFEST_PATH = path.join(
   "crystal_respawn_manifest.json",
 );
 const MMAP_META_PATH = path.join(WORKSPACE_ROOT, "public", "original-ui", "MMap", "meta.json");
+const OUTPUT_PATH = path.resolve(
+  REPO_ROOT,
+  process.env.MIR2_MINIMAP_SMOKE_OUT ?? "docs/generated/assets/latest-minimap-assets.json",
+);
 
 const REPRESENTATIVE_MAPS = ["0", "1", "2", "HF1", "HF2", "HF3", "HKR"];
 const NO_MINI_MAPS = ["D1801"];
@@ -61,19 +65,20 @@ const neededMiniMaps = [
 ].sort((left, right) => left - right);
 const missing = neededMiniMaps.filter((index) => !exportedByIndex.has(index));
 
-console.log(
-  JSON.stringify(
-    {
-      representativeMaps: REPRESENTATIVE_MAPS,
-      noMiniMaps: NO_MINI_MAPS,
-      neededMiniMapCount: neededMiniMaps.length,
-      exportedMiniMapCount: mmapMeta.frames?.length ?? 0,
-      missingMiniMapIndices: missing,
-    },
-    null,
-    2,
-  ),
-);
+const summary = {
+  generatedAt: new Date().toISOString(),
+  representativeMaps: REPRESENTATIVE_MAPS,
+  noMiniMaps: NO_MINI_MAPS,
+  neededMiniMapCount: neededMiniMaps.length,
+  exportedMiniMapCount: mmapMeta.frames?.length ?? 0,
+  missingMiniMapIndices: missing,
+  failures,
+};
+
+console.log(JSON.stringify(summary, null, 2));
+await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+await writeFile(OUTPUT_PATH, `${JSON.stringify(summary, null, 2)}\n`);
+console.log(`Wrote ${OUTPUT_PATH}`);
 
 if (missing.length > 0) {
   console.warn(`Warning: ${missing.length} Crystal mini-map indices are not exported: ${missing.join(", ")}`);

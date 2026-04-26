@@ -607,6 +607,12 @@ fn npc_service_server_packets_use_crystal_ids() {
         ),
         (ServerPacket::NPCStorage, ServerPacketId::NPCStorage),
         (
+            ServerPacket::UserStorage {
+                storage: Some(vec![Some(sample_user_item(62, 3)), None]),
+            },
+            ServerPacketId::UserStorage,
+        ),
+        (
             ServerPacket::CraftItem { success: false },
             ServerPacketId::CraftItem,
         ),

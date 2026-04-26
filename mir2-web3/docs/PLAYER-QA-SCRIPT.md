@@ -1,6 +1,6 @@
 # Player QA Script
 
-Last updated: 2026-04-22
+Last updated: 2026-04-26
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
@@ -34,6 +34,42 @@ Existing frontend evidence sources:
 - `docs/stage5-screenshots/stage5-ui-smoke-manifest.json`
 - `docs/generated/load/latest-ws.json`
 - `docs/generated/load/latest-tcp.json`
+- `docs/generated/map/latest-crystal-map-api.json`
+- `docs/generated/assets/latest-minimap-assets.json`
+
+Latest automated frontend evidence:
+
+- 2026-04-26 R224: Local packet trace matrix evidence restored. `packet_trace --list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 TCP-traceable artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`. Live Crystal trace comparison remains blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
+- 2026-04-26 R223: **100% Candidate** automated gate passed. Stage 5 UI smoke captured 88 screenshots with advanced Stage 5 systems state and compact Mail/Report bounds. Direct `next build`, `tsc --noEmit`, map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 47/47, full `mir2-simulation` 664/664, `fmt --check`, and `diff --check` passed. Human Crystal visual/feel acceptance remains required for 100% Accepted.
+- 2026-04-26 R184: direct `next build`, Crystal minimap smoke, Crystal map API smoke, Stage 5 UI smoke with 10 screenshots, gateway health on `127.0.0.1:7110`, and websocket load 64/64 ready passed. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R185: Stage 5 UI smoke passed with 11 screenshots, named desktop 1024x768 and compact 820x640 viewport metadata, compact layout bounds assertions, and `stage5-compact-game.png`. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R186: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with compact visible-text overflow checks for 33 core text nodes. The compact minimap title/Safe Zone header is fixed. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R187: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 14 screenshots and minimap collapse, BigMap re-expand, and Mail open flow evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R188: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 17 screenshots and belt horizontal, vertical, rotate-back, and close evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R189: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 18 screenshots and belt hotkey `1` Red Potion use evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R190: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 21 screenshots and inventory bag1/bag2/quest tab evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R191: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 25 screenshots and character char/stats1/stats2/spells tab evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R192: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 27 screenshots and storage page1/page2-locked/page1 evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R193: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 31 screenshots and chat Shout filter, All restore, Settings, collapse/restore, and Report evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R194: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 35 screenshots and system menu open plus Character/Inventory/Quest action evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R195: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 36 screenshots and expanded storage rent/unlock evidence from storage page 2. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R196: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 37 screenshots and inventory Red Potion use evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R197: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 38 screenshots and inventory Dagger equip evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R198: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 40 screenshots and HUD Skill/Option character-panel routing evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R199: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 42 screenshots and inventory Drop Gold evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R200: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 43 screenshots and inventory Wooden Sword move evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R201: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 45 screenshots and inventory Red Potion Split Item evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R202: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 47 screenshots and inventory Blue Potion item-drop evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R203: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 48 screenshots and Character Dagger remove evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R204: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 49 screenshots and belt mouse-use Red Potion evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R205: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 51 screenshots and Sell Item no-service preservation evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R206: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 54 screenshots and Store Item no-service preservation evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R207: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 57 screenshots and Take Back no-service preservation evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R208: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 58 screenshots and Set Storage Password panel evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R209: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 60 screenshots and Set Storage Password mismatch/no-service submit evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R210-R218: web `tsc --noEmit`, direct `next build`, and Stage 5 UI smoke passed with 71 screenshots and Mail/Report/NPC panel state, broad Stage 5 systems state, guild/group chat filters, Character repair/special-repair, ground item/gold pickup, combat target state, system-menu QA/transfer routes, Battle Focus spell casting, and compact inventory panel bounds evidence. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R219-R222: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke passed with 85 screenshots, map API smoke archived 18/18 successful requests, minimap asset smoke archived 0 failures with the known 450/451 warning, and WS load refreshed at 64/64 ready with 0 errors. Login/select lifecycle, confirmed character delete/recreate, compact multi-panel bounds, compact system-menu overflow fix, and NPC dialog link-capable rendering are covered. Human Crystal visual/feel acceptance remains required.
+- 2026-04-26 R223: Stage 5 UI smoke passed with 88 screenshots, adding advanced systems state and compact Mail/Report bounds. This is the automated Candidate gate; human Crystal visual/feel acceptance remains required.
 
 ## Phase 1: Smoke Acceptance
 

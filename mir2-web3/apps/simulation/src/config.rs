@@ -600,6 +600,19 @@ pub struct SafeZoneRecord {
     pub bounds: MapBounds,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MapDropRuleRecord {
+    pub map_file_name: String,
+    pub no_town_teleport: bool,
+    pub no_escape: bool,
+    pub no_random: bool,
+    pub no_drug: bool,
+    pub no_reincarnation: bool,
+    pub no_throw_item: bool,
+    pub no_drop_player: bool,
+    pub no_drop_monster: bool,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MonsterSpawnSource {
     StarterScenario,
@@ -626,6 +639,7 @@ pub struct SimulationConfig {
     pub conquest_wars: BTreeMap<i32, bool>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
+    pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
 }
@@ -709,6 +723,7 @@ impl SimulationConfig {
             conquest_wars: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
+            map_drop_rules: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
         }

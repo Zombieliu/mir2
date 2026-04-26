@@ -1122,6 +1122,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "NPCStorage",
             "payload": {}
         }),
+        ServerPacket::UserStorage { storage } => json!({
+            "type": "packet",
+            "packet": "UserStorage",
+            "payload": {
+                "storage": storage
+            }
+        }),
         ServerPacket::CombineItem {
             grid,
             id_from,
@@ -2080,6 +2087,14 @@ mod tests {
             password["payload"]["lastSetBinaryDatetime"],
             638000000000000000_i64
         );
+
+        let user_storage = super::server_packet_to_event(&ServerPacket::UserStorage {
+            storage: Some(vec![Some(sample_user_item(90, 2)), None]),
+        });
+        assert_eq!(user_storage["packet"], "UserStorage");
+        assert_eq!(user_storage["payload"]["storage"][0]["unique_id"], 90);
+        assert_eq!(user_storage["payload"]["storage"][0]["count"], 2);
+        assert!(user_storage["payload"]["storage"][1].is_null());
     }
 
     #[test]

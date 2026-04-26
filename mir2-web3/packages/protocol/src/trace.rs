@@ -164,6 +164,7 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::NPCCollectRefine { .. } => "NPCCollectRefine",
         ServerPacket::NPCReplaceWedRing { .. } => "NPCReplaceWedRing",
         ServerPacket::NPCStorage => "NPCStorage",
+        ServerPacket::UserStorage { .. } => "UserStorage",
         ServerPacket::SellItem { .. } => "SellItem",
         ServerPacket::RepairItem { .. } => "RepairItem",
         ServerPacket::CraftItem { .. } => "CraftItem",

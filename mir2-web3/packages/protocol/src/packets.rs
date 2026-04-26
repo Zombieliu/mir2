@@ -858,6 +858,9 @@ pub enum ServerPacket {
         rate: f32,
     },
     NPCStorage,
+    UserStorage {
+        storage: Option<Vec<Option<UserItem>>>,
+    },
     ItemRepaired {
         unique_id: u64,
         max_dura: u16,
@@ -1000,6 +1003,7 @@ impl ServerPacket {
             Self::NPCCollectRefine { .. } => ServerPacketId::NPCCollectRefine,
             Self::NPCReplaceWedRing { .. } => ServerPacketId::NPCReplaceWedRing,
             Self::NPCStorage => ServerPacketId::NPCStorage,
+            Self::UserStorage { .. } => ServerPacketId::UserStorage,
             Self::SellItem { .. } => ServerPacketId::SellItem,
             Self::RepairItem { .. } => ServerPacketId::RepairItem,
             Self::CraftItem { .. } => ServerPacketId::CraftItem,
@@ -1078,6 +1082,20 @@ impl ServerPacket {
                 writer.write_u8(*effect_type);
             }
             Self::TeleportIn | Self::NPCSell | Self::NPCCheckRefine | Self::NPCStorage => {}
+            Self::UserStorage { storage } => {
+                writer.write_bool(storage.is_some());
+                let Some(storage) = storage else {
+                    return Ok(());
+                };
+
+                writer.write_i32(storage.len() as i32);
+                for item in storage {
+                    writer.write_bool(item.is_some());
+                    if let Some(item) = item {
+                        item.encode(writer)?;
+                    }
+                }
+            }
             Self::NPCGoods {
                 list,
                 rate,
@@ -1630,6 +1648,31 @@ impl ServerPacket {
                 rate: reader.read_f32()?,
             },
             ServerPacketId::NPCStorage => Self::NPCStorage,
+            ServerPacketId::UserStorage => {
+                let storage = if reader.read_bool()? {
+                    let count = reader.read_i32()?;
+                    if count < 0 {
+                        return Err(PacketCodecError::NegativeLength {
+                            field: "user_storage_count",
+                            value: count,
+                        });
+                    }
+
+                    let mut storage = Vec::with_capacity(count as usize);
+                    for _ in 0..count {
+                        if reader.read_bool()? {
+                            storage.push(Some(UserItem::decode(reader)?));
+                        } else {
+                            storage.push(None);
+                        }
+                    }
+                    Some(storage)
+                } else {
+                    None
+                };
+
+                Self::UserStorage { storage }
+            }
             ServerPacketId::ItemRepaired => Self::ItemRepaired {
                 unique_id: reader.read_u64()?,
                 max_dura: reader.read_u16()?,
