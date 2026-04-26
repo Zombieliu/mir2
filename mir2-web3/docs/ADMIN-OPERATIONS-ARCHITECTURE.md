@@ -1,0 +1,409 @@
+# Admin Operations Architecture
+
+Last updated: 2026-04-26
+
+Status: discussion draft.
+
+Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
+
+## First Principles
+
+The operations backend is a production control plane, not a database CRUD screen.
+
+Core principles:
+
+- Admin tools must not bypass authoritative game logic.
+- High-value state changes must be represented as audited commands.
+- Every write must have actor, target, reason, request id, before/after where practical, and result.
+- Read paths may use query models, replicas, or projections; write paths must go through Admin API and command execution.
+- Permissions must be explicit and least-privilege.
+- Dangerous operations need confirmation, optional approval, and rollback or compensation strategy.
+- Admin tools must be safe when the target player is online, offline, reconnecting, or moving between zones.
+- Content/config changes must be versioned and publishable/rollbackable.
+
+## Target Shape
+
+```text
+Admin Web (NextJS)
+        |
+Admin API / Control Plane (Rust)
+        |
+Auth + RBAC + Audit + Approval
+        |
+Admin Command Model
+        |
+Command Bus / Outbox / Queue
+        |
+Game, World, Account, Content Services
+        |
+Postgres + Redis
+```
+
+The first implementation can be modular inside the existing workspace. The boundaries should still be designed as if the admin control plane, game services, and frontend are separable.
+
+## Recommended Packages And Apps
+
+Future target layout:
+
+```text
+apps/admin-web
+apps/admin-api
+apps/gateway
+apps/simulation
+packages/admin-types
+packages/content
+packages/db
+```
+
+Initial implementation may be smaller, but avoid coupling admin UI directly to game tables.
+
+## Components
+
+### Admin Web
+
+Recommended stack:
+
+- NextJS.
+- Separate app from the player-facing web client when the surface becomes production-grade.
+- Shared design tokens are fine; shared auth/session state with the player app is not.
+
+Responsibilities:
+
+- login through approved operator identity provider;
+- account and character search;
+- character profile inspection;
+- inventory/storage/equipment/mail inspection;
+- admin command forms;
+- command status and audit views;
+- content publish workflows;
+- dashboards and operational views.
+
+Admin Web should not contain hidden direct mutation endpoints or database credentials.
+
+### Admin API
+
+Recommended stack:
+
+- Rust service in the same workspace.
+- Strong typed request/response models.
+- Server-side validation for every command.
+- Structured logs and trace ids.
+
+Responsibilities:
+
+- authenticate operator identity;
+- evaluate RBAC/permissions;
+- validate request parameters;
+- enforce rate limits and confirmation requirements;
+- create command records;
+- write audit records;
+- dispatch commands to the appropriate executor;
+- expose read-only query APIs and command status APIs.
+
+### Game Command Executors
+
+Executors convert approved admin commands into authoritative game changes.
+
+Examples:
+
+- account service handles ban/unban/account notes;
+- character service handles offline grants or profile edits;
+- world/zone service handles online kick, teleport, live stat updates, and online item grant events;
+- content service handles config bundle publish and rollback.
+
+Executors should be idempotent where possible. Commands should have stable command ids and dedupe behavior.
+
+### Postgres
+
+Postgres stores:
+
+- operator audit logs;
+- admin command records;
+- command results;
+- approval records;
+- account/character authoritative state;
+- content bundle metadata;
+- support notes;
+- risk flags.
+
+Use normal game tables only through approved service code or migrations. Do not make admin UI write game state tables directly.
+
+### Redis
+
+Redis may store:
+
+- short-lived admin session cache;
+- command status cache;
+- online player routing;
+- rate limits;
+- locks for command execution;
+- queue/stream state for early command dispatch.
+
+Redis is not authoritative for admin command history or valuable game state.
+
+## Auth And Permissions
+
+Use external identity where possible:
+
+- Google Workspace;
+- Auth0;
+- Clerk;
+- Keycloak;
+- another OIDC/OAuth2 provider.
+
+Minimum roles:
+
+- `viewer`: read-only dashboards and account/character lookup.
+- `support`: support notes, safe read-only investigation, limited kick if needed.
+- `gm`: grant items/currency through approved forms, send mail, teleport/kick, event support.
+- `ops_admin`: content publish, high-risk account actions, economy interventions.
+- `super_admin`: permission management and emergency operations.
+
+Permissions should be action-based, not only role-name based.
+
+Examples:
+
+```text
+account.read
+account.ban
+character.read
+character.kick
+inventory.read
+inventory.grant_item
+currency.grant
+mail.send_system
+content.publish
+content.rollback
+audit.read
+permission.manage
+```
+
+## Audit Model
+
+Every admin write should produce an immutable audit record.
+
+Suggested fields:
+
+```text
+audit_id
+command_id
+operator_id
+operator_email
+operator_role_snapshot
+permission
+target_type
+target_id
+target_account_id
+target_character_id
+reason
+request_payload_hash
+request_payload_redacted
+before_snapshot_ref
+after_snapshot_ref
+status
+error_code
+created_at
+completed_at
+client_ip
+user_agent
+trace_id
+approval_id
+```
+
+Sensitive values such as passwords, private tokens, and payment data must be redacted.
+
+## Admin Command Model
+
+Commands should be explicit and typed.
+
+Example command categories:
+
+- `BanAccount`
+- `UnbanAccount`
+- `KickPlayer`
+- `SendSystemMail`
+- `GrantItem`
+- `GrantCurrency`
+- `GrantExperience`
+- `TeleportCharacter`
+- `SetCharacterFlag`
+- `PublishContentBundle`
+- `RollbackContentBundle`
+- `AddSupportNote`
+
+Example execution flow:
+
+```text
+Admin Web
+  -> POST /admin/commands/grant-item
+Admin API
+  -> authenticate operator
+  -> authorize inventory.grant_item
+  -> validate item id/count/target
+  -> require reason
+  -> create admin_command row
+  -> create audit pending row
+  -> dispatch command
+Executor
+  -> route to online zone or offline character service
+  -> apply through authoritative game/state code
+  -> write result
+  -> finalize audit
+Admin Web
+  -> displays command result and audit id
+```
+
+Avoid:
+
+```text
+Admin Web -> direct SQL update inventory/equipment/currency
+```
+
+## Online And Offline Targets
+
+Commands must handle both player states.
+
+Online player:
+
+- resolve current gateway/world/zone route;
+- dispatch command to the owning service;
+- mutate through live authoritative state;
+- persist result;
+- push client event if needed.
+
+Offline player:
+
+- load or lock authoritative saved state;
+- apply command through the same domain rules where practical;
+- persist result;
+- mark pending notifications for next login where needed.
+
+Player moving between zones:
+
+- command should use route versioning or retry on stale route;
+- duplicate command execution must be prevented by command id.
+
+## Content And Config Publishing
+
+Content changes should not be ad hoc DB edits.
+
+Recommended flow:
+
+```text
+source config / DSL
+  -> compiler / validator
+  -> content bundle
+  -> staging validation
+  -> admin approval
+  -> publish version
+  -> world/zone reload or rolling update
+```
+
+Content bundles should include:
+
+- version id;
+- source commit or artifact hash;
+- validation result;
+- publish operator;
+- rollback pointer;
+- affected systems.
+
+This should eventually cover:
+
+- NPC DSL scripts;
+- quest data;
+- item data;
+- monster data;
+- drop tables;
+- shop data;
+- events;
+- localization.
+
+## MVP Scope
+
+Phase 1 admin MVP:
+
+- operator login;
+- RBAC skeleton;
+- account lookup;
+- character lookup;
+- inventory/equipment/storage read-only views;
+- online state view;
+- kick player;
+- ban/unban account;
+- send system mail;
+- grant item;
+- grant currency;
+- immutable audit log;
+- command status view.
+
+Defer:
+
+- full content publishing;
+- advanced economy analytics;
+- fraud/risk engine;
+- multi-step approvals;
+- support ticket integration;
+- live event scheduler.
+
+## Later Scope
+
+Phase 2:
+
+- content bundle publish/rollback;
+- NPC/quest/drop/shop config management;
+- auction/trade/mail audit views;
+- economy dashboards;
+- map population dashboards;
+- command approval workflows;
+- support notes and case history.
+
+Phase 3:
+
+- anomaly detection;
+- automated rollback triggers;
+- event scheduler;
+- GM live tools;
+- region/zone management;
+- moderation queues;
+- payment/refund correlation where applicable.
+
+## Safety Requirements
+
+Before production use:
+
+- all admin routes require auth;
+- all write routes require permissions;
+- all write routes require reason text;
+- all writes create audit records;
+- dangerous writes require confirmation;
+- command idempotency is tested;
+- offline and online target paths are tested;
+- audit logs cannot be modified through normal admin UI;
+- production database credentials are not present in Admin Web;
+- rate limits protect high-risk routes.
+
+## Suggested First Engineering Task
+
+Do not start with UI.
+
+Start with the command and audit model:
+
+1. Define admin command types.
+2. Define audit schema.
+3. Define permission names.
+4. Define command execution states.
+5. Implement a small fake executor for tests.
+6. Add one safe end-to-end command such as `SendSystemMail`.
+
+Only after that should the Admin Web form be built.
+
+## Open Questions
+
+- Which OIDC provider should operators use?
+- Should `apps/admin-api` be a separate binary immediately or share an initial crate with gateway?
+- Should command dispatch start with Postgres outbox or Redis Streams?
+- Should high-risk commands require approval from another operator in MVP?
+- How should support notes relate to player-visible account notes?
+- What retention policy should audit logs use?
+- Which admin commands must be available for launch day?
