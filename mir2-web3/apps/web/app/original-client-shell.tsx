@@ -1538,7 +1538,6 @@ function GameUiScene({
         <MailPanel
           t={t}
           mail={world.stage5Systems?.mail ?? []}
-          hints={world.interactionHints}
           onClaim={onClaimMail}
           onDelete={onDeleteMail}
           onClose={() => setShowMailPanel(false)}
@@ -1784,14 +1783,12 @@ function QuestTrackerPanel({
 function MailPanel({
   t,
   mail,
-  hints,
   onClaim,
   onDelete,
   onClose,
 }: {
   t: TranslateFn;
   mail: DisplayMailMessage[];
-  hints: string[];
   onClaim: (mailId: number) => void;
   onDelete: (mailId: number) => void;
   onClose: () => void;
@@ -1845,7 +1842,6 @@ function MailPanel({
         )}
       </div>
       <div className="overlay-panel-foot">{`${entries.length}/${mail.length}`}</div>
-      <div className="overlay-panel-foot">{hints[0] ?? t("ui.map")}</div>
     </section>
   );
 }
