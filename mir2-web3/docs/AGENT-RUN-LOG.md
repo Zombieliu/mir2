@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest sync: R225 completed. Mac-local Candidate regression is green again: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local `packet_trace --matrix` wrote 9 artifacts and 17 intended skips under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active follow-up round is R226 for Windows continuation / external blockers.
+
 > Latest sync: R224 completed. Restored the `mir2-gateway` `packet_trace` bin target and refreshed local matrix evidence: `--list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 artifacts with `localOk=true` plus 17 intentionally skipped non-TCP entries. The automated gate remains **100% Candidate** (not 100% Accepted). Active follow-up round is R225 for human acceptance / external blockers.
 
 > Latest sync: R219-R222 completed. Frontend/global evidence advanced across login/select lifecycle, archived map API/minimap asset smoke JSON, refreshed WS load, compact multi-panel bounds, compact system-menu overflow fix, and NPC dialog link-capable rendering. Stage 5 UI smoke now captures 85 screenshots. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
@@ -50,6 +52,39 @@
 Last updated: 2026-04-26
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
+
+## 2026-04-26-R225
+
+Scope:
+
+- Added Stage 5 UI smoke manifest summary counts for screenshots, compact panel bounds, compact text nodes, critical console errors, and major flow counts.
+- Added packet trace matrix summary counts to `latest-matrix.json`, including local/Crystal/diff status buckets and accepted live comparison count.
+- Refreshed Stage 5 screenshots/manifest, map API evidence, minimap asset evidence, WS load evidence, and local packet trace matrix artifacts.
+- Added `docs/WINDOWS-CONTINUATION.md` and rewrote stale `apps/gateway/README.md` status so Windows continuation does not inherit old stub language.
+
+Validation:
+
+- `node --check apps/web/scripts/smoke-stage5-ui.mjs`
+- `./node_modules/.bin/tsc --noEmit` in `apps/web`
+- `./node_modules/.bin/next build` in `apps/web`
+- `npm run smoke:stage5-ui` in `apps/web` (88 screenshots)
+- `npm run smoke:crystal-map-api` in `apps/web` (18/18 requests)
+- `npm run smoke:crystal-minimap-assets` in `apps/web` (0 failures; known 450/451 warning)
+- `npm run load:gateway-ws` in `apps/web` (64/64 ready, 0 errors, 1320 messages)
+- `cargo +1.89.0 test --locked -p mir2-game-data -- --test-threads=1` (22/22)
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1` (54/54)
+- `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` (664/664)
+- `MIR2_GATEWAY_TCP_ADDR=127.0.0.1:7310 MIR2_PACKET_TRACE_MATRIX_OUT_DIR=docs/generated/packet-traces/r225-matrix MIR2_PACKET_TRACE_REQUIRE_LOCAL=1 cargo +1.89.0 run --locked -p mir2-gateway --bin packet_trace -- --matrix` (9 artifacts, 17 skipped)
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+
+Result:
+
+- R225 complete.
+- Automated evidence remains **100% Candidate**.
+- Backend/server tracked-slice parity remains **99.70%**.
+- Real full-project accepted 1:1 remains **roughly 90.0%** until human Crystal visual/feel acceptance, live Crystal trace comparison, and blocked source-data decisions are closed.
+- R226 opened for Windows continuation / external blocker tracking.
 
 ## 2026-04-26-R224
 

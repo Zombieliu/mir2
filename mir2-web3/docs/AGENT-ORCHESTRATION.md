@@ -1,5 +1,7 @@
 # Agent Orchestration
 
+> Latest sync: R225 completed. Mac-local Candidate regression is green again: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots, 8 compact panel bounds, 34 compact text nodes, 0 critical console errors), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local `packet_trace --matrix` wrote 9/9 local TCP artifacts under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active follow-up round is R226 for Windows continuation, live Crystal trace comparison, missing `Server.MirDB`, and human acceptance. Truthful status remains: automated evidence **100% Candidate**, backend/server tracked slice **99.70%**, real full-project accepted 1:1 **roughly 90.0%**.
+
 > Latest sync: R224 completed. Automated evidence remains **100% Candidate** and the local packet trace blocker is closed. `packet_trace --list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. R225 is open for human acceptance / external blockers. Remaining non-routine gates: final human visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB`, and missing live `MIR2_CRYSTAL_TCP_ADDR`.
 
 > Latest sync: R219-R222 completed. Frontend/global evidence advanced across login/select lifecycle, archived map API/minimap asset smoke JSON, refreshed WS load, compact multi-panel bounds, compact system-menu overflow fix, and NPC dialog link-capable rendering. Stage 5 UI smoke now captures 85 screenshots. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
@@ -157,13 +159,15 @@ The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file a
 
 Current checkpoint:
 
-- Active round: `2026-04-26-R225`.
-- Active task: final human acceptance / external blocker tracking after `R224` packet trace closure.
-- Active round state: R223 completed automated Candidate evidence with 88 Stage 5 screenshots, refreshed map/minimap/WS evidence, direct web build/type checks, and full Rust package regressions. R224 restored the local packet trace matrix harness and wrote 9 require-local artifacts. R39 manifest-backed map-flag import is still blocked on missing `Crystal/Build/Server/Debug/Server.MirDB`; live Crystal trace comparison is blocked until `MIR2_CRYSTAL_TCP_ADDR` is configured.
-- Last completed round: `2026-04-26-R224`; last completed backend round remains `2026-04-26-R183`.
-- Backend/server parity estimate: `99.70%`.
-- Whole-project 1:1 estimate: `100.0% Candidate`.
+- Active round: `2026-04-26-R226`.
+- Active task: Windows continuation / live Crystal acceptance blockers after `R225` Mac-local regression refresh.
+- Active round state: R225 refreshed Mac-local Candidate evidence, Stage 5 manifest summary, map/minimap/load outputs, local packet trace matrix artifacts, Windows continuation docs, and stale gateway README status. R39 manifest-backed map-flag import is still blocked on missing `Crystal/Build/Server/Debug/Server.MirDB`; live Crystal trace comparison is blocked until `MIR2_CRYSTAL_TCP_ADDR` is configured.
+- Last completed round: `2026-04-26-R225`; last completed backend round remains `2026-04-26-R183`.
+- Backend/server tracked-slice parity estimate: `99.70%`.
+- Whole-project automation status: `100.0% Candidate`.
+- Whole-project real accepted 1:1 estimate: `roughly 90.0%`.
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
+- Windows continuation checklist: `docs/WINDOWS-CONTINUATION.md`.
 
 Latest completed rounds:
 

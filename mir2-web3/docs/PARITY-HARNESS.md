@@ -1,6 +1,6 @@
 # Parity Harness
 
-Last updated: 2026-04-22
+Last updated: 2026-04-26
 
 This file documents the repeatable local-vs-Crystal packet and behavior harness used by `docs/CRYSTAL-1TO1-ROADMAP.md`.
 
@@ -82,6 +82,15 @@ cargo run -p mir2-gateway --bin packet_trace -- --matrix
 
 Matrix mode reads `docs/parity-matrix.json` and writes one JSON file per matrix entry that declares a `traceFlow`. Flows without `traceFlow` are intentionally left to WebSocket/UI smoke or simulation harnesses until packet-level protocol coverage exists for those systems.
 
+The matrix summary in `latest-matrix.json` includes:
+
+- `artifactCount`: TCP-traceable matrix entries attempted.
+- `skippedCount`: matrix entries without an accepted TCP trace flow.
+- `localOkCount` / `localFailedCount`: local Rust gateway capture status.
+- `crystalOkCount` / `crystalFailedCount` / `crystalMissingCount`: live Crystal endpoint status.
+- `diffCleanCount` / `diffDirtyCount` / `diffMissingCount`: local-vs-Crystal diff status.
+- `acceptedLiveComparisonCount`: entries with local success, Crystal success, and clean diff.
+
 Use require mode for local/CI checks:
 
 ```powershell
@@ -104,6 +113,8 @@ cargo run -p mir2-gateway --bin packet_trace -- --matrix
 ```
 
 `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1` implies diff-clean mode. The command exits non-zero when a required endpoint is unavailable, a required diff is missing, or a comparable diff has mismatches.
+
+For a fully accepted live matrix, `latest-matrix.json` should have `localOkCount == artifactCount`, `crystalMissingCount == 0`, `diffDirtyCount == 0`, and `acceptedLiveComparisonCount == artifactCount`.
 
 ## Fixture Modes
 
