@@ -6,7 +6,7 @@ Status: implementation started.
 
 Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
 
-Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, and a `SendSystemMail` domain outbox executor. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. This is still not connected to live account/world/mail game state.
+Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, and a `SendSystemMail` domain executor. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. `SendSystemMail` now attempts live gateway delivery through `POST /admin/system-mail` before falling back to the persistent account store, so the default local flow is visible in the in-game Stage 5 mail panel and claimable through gameplay.
 
 ## First Principles
 
@@ -118,7 +118,8 @@ Current implementation:
 - `POST /admin/commands/send-system-mail`
 - Write routes require operator headers and permissions.
 - Command and audit persistence are represented by `AdminCommandRepository` and `AuditRepository`; current local implementation is in-memory.
-- `SendSystemMail` queues into a domain outbox and writes command/audit records. It does not yet mutate live game state.
+- `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
+- If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 
 ### Game Command Executors
 
@@ -138,7 +139,44 @@ Current executor boundary:
 - `SystemMailDomain` models the mail-service handoff.
 - `SystemMailExecutor` converts an approved `SendSystemMail` command into a domain `SystemMailRequest`.
 - `InMemorySystemMailOutbox` is a local stand-in for the future mail/account service queue.
-- This keeps the command/audit/write path real while leaving live mail delivery for the next service integration round.
+- `AccountStoreSystemMailDomain` is the first real game-state executor: it maps `gold` attachments into mail gold, repeats item attachments by count, posts to the live gateway when available, and records whether delivery used `gateway_live` or `account_store_fallback`.
+- This keeps the command/audit/write path real while deferring Postgres-backed repositories, real auth, approvals, and broader game-state commands.
+
+### Live Gateway Mail Flow
+
+Local smoke topology:
+
+```text
+Admin Web :3020
+        |
+Next /api/admin/system-mail
+        |
+Admin API :7420
+        |
+POST /admin/commands/send-system-mail
+        |
+Gateway live mail endpoint :7110/admin/system-mail
+        |
+SimulationConfig.account_store / Stage5SystemsState.mail
+        |
+Player WebSocket world snapshot / Mail panel / mail.claim
+```
+
+Required local environment:
+
+```bash
+MIR2_ACCOUNT_STORE_PATH=.mir2-data/admin-live-smoke.json
+ADMIN_ACCOUNT_STORE_PATH=.mir2-data/admin-live-smoke.json
+ADMIN_GATEWAY_MAIL_URL=http://127.0.0.1:7110/admin/system-mail
+ADMIN_API_BASE_URL=http://127.0.0.1:7420
+```
+
+Verified local behavior:
+
+- Admin Web POST to `/api/admin/system-mail` returns a command id from Rust Admin API.
+- `GET /admin/system-mail/outbox` reports `deliveryMode: "gateway_live"`, `deliveredCount: 1`, and the generated mail id.
+- Gateway WebSocket world snapshots expose the mail at `payload.stage5Systems.mail`.
+- Sending `stage5Command` `mail.claim` through the game socket marks the mail claimed and transfers attachments into player state.
 
 ### Postgres
 

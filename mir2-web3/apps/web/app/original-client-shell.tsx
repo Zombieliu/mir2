@@ -295,8 +295,23 @@ type DisplayWorld = {
   activeNpcDialog: DisplayNpcDialog | null;
   knownSkills: DisplayKnownSkill[];
   activeBuffs: DisplayActiveBuff[];
+  stage5Systems?: {
+    mail?: DisplayMailMessage[];
+  };
   interactionHints: string[];
   projectiles: DisplayProjectile[];
+};
+
+type DisplayMailMessage = {
+  id?: number;
+  from?: string;
+  to?: string;
+  subject?: string;
+  body?: string;
+  gold?: number;
+  items?: string[];
+  claimed?: boolean;
+  deleted?: boolean;
 };
 
 type SelectCharacterEntry = {
@@ -364,6 +379,8 @@ type OriginalClientShellProps = {
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
   onTransferMap: (transferKey: string) => void;
+  onClaimMail: (mailId: number) => void;
+  onDeleteMail: (mailId: number) => void;
   transferOptions: SystemMenuTransferOption[];
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
@@ -478,6 +495,8 @@ export function OriginalClientShell({
   onSpecialRepairItem,
   onCastSkill,
   onTransferMap,
+  onClaimMail,
+  onDeleteMail,
   transferOptions,
   onToggleCharacter,
   onToggleInventory,
@@ -1259,6 +1278,8 @@ export function OriginalClientShell({
               onSpecialRepairItem={onSpecialRepairItem}
               onCastSkill={onCastSkill}
               onTransferMap={onTransferMap}
+              onClaimMail={onClaimMail}
+              onDeleteMail={onDeleteMail}
               transferOptions={transferOptions}
             />
           ) : null}
@@ -1368,6 +1389,8 @@ type GameUiSceneProps = {
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
   onTransferMap: (transferKey: string) => void;
+  onClaimMail: (mailId: number) => void;
+  onDeleteMail: (mailId: number) => void;
   transferOptions: SystemMenuTransferOption[];
 };
 
@@ -1413,6 +1436,8 @@ function GameUiScene({
   onSpecialRepairItem,
   onCastSkill,
   onTransferMap,
+  onClaimMail,
+  onDeleteMail,
   transferOptions,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(true);
@@ -1509,7 +1534,16 @@ function GameUiScene({
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
       />
-      {showMailPanel ? <MailPanel t={t} logs={logs} hints={world.interactionHints} onClose={() => setShowMailPanel(false)} /> : null}
+      {showMailPanel ? (
+        <MailPanel
+          t={t}
+          mail={world.stage5Systems?.mail ?? []}
+          hints={world.interactionHints}
+          onClaim={onClaimMail}
+          onDelete={onDeleteMail}
+          onClose={() => setShowMailPanel(false)}
+        />
+      ) : null}
       {showReportPanel ? <ReportPanel t={t} logs={logs} onClose={() => setShowReportPanel(false)} /> : null}
       {showSystemMenu ? (
         <SystemMenuPanel
@@ -1749,16 +1783,20 @@ function QuestTrackerPanel({
 
 function MailPanel({
   t,
-  logs,
+  mail,
   hints,
+  onClaim,
+  onDelete,
   onClose,
 }: {
   t: TranslateFn;
-  logs: DisplayLogLine[];
+  mail: DisplayMailMessage[];
   hints: string[];
+  onClaim: (mailId: number) => void;
+  onDelete: (mailId: number) => void;
   onClose: () => void;
 }) {
-  const entries = logs.filter((line) => line.tone !== "network").slice(0, 4);
+  const entries = mail.filter((message) => !message.deleted).slice(0, 5);
 
   return (
     <section className="overlay-panel mail-panel">
@@ -1771,15 +1809,42 @@ function MailPanel({
       <div className="overlay-panel-list">
         {entries.length ? (
           entries.map((entry, index) => (
-            <div key={`mail-${index}`} className="overlay-panel-row">
-              {trimLogTimestamp(entry.text)}
+            <div key={`mail-${entry.id ?? index}`} className="overlay-panel-row">
+              <strong>{entry.subject ?? t("client.Mail", [], "Mail")}</strong>
+              <span>{`${entry.from ?? "System"} -> ${entry.to ?? "You"}`}</span>
+              <span>{entry.body ?? ""}</span>
+              <span>
+                {[
+                  entry.gold ? `${entry.gold} Gold` : null,
+                  entry.items?.length ? `${entry.items.join(", ")}` : null,
+                  entry.claimed ? "Claimed" : "Unclaimed",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+              <div className="overlay-panel-actions">
+                <button
+                  type="button"
+                  disabled={entry.claimed || entry.id === undefined}
+                  onClick={() => entry.id !== undefined && onClaim(entry.id)}
+                >
+                  Claim
+                </button>
+                <button
+                  type="button"
+                  disabled={entry.id === undefined}
+                  onClick={() => entry.id !== undefined && onDelete(entry.id)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))
         ) : (
-          <div className="overlay-panel-empty">{t("ui.noActiveQuest")}</div>
+          <div className="overlay-panel-empty">No mail</div>
         )}
       </div>
-      <div className="overlay-panel-foot">{`${entries.length}/4`}</div>
+      <div className="overlay-panel-foot">{`${entries.length}/${mail.length}`}</div>
       <div className="overlay-panel-foot">{hints[0] ?? t("ui.map")}</div>
     </section>
   );

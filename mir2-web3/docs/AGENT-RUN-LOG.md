@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: R228 completed. Admin `SendSystemMail` now reaches live game-visible Stage 5 mail through Admin Web -> Admin API -> gateway, with account-store fallback. Runtime smoke delivered mail to `Scout` using `deliveryMode: "gateway_live"` and claimed it through gateway WS `stage5Command mail.claim`.
+
 > Latest sync: R225 completed. Mac-local Candidate regression is green again: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local `packet_trace --matrix` wrote 9 artifacts and 17 intended skips under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active follow-up round is R226 for Windows continuation / external blockers.
 
 > Latest sync: R224 completed. Restored the `mir2-gateway` `packet_trace` bin target and refreshed local matrix evidence: `--list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 artifacts with `localOk=true` plus 17 intentionally skipped non-TCP entries. The automated gate remains **100% Candidate** (not 100% Accepted). Active follow-up round is R225 for human acceptance / external blockers.
@@ -52,6 +54,35 @@
 Last updated: 2026-04-26
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
+
+## 2026-04-27-R228
+
+Scope:
+
+- Connected audited `SendSystemMail` execution to live game-visible Stage 5 mail.
+- Added `apps/gateway` `POST /admin/system-mail` to write into the running gateway `SimulationConfig.account_store`.
+- Added `apps/admin-api` gateway delivery through `ADMIN_GATEWAY_MAIL_URL`, plus persistent account-store fallback through `ADMIN_ACCOUNT_STORE_PATH` / `MIR2_ACCOUNT_STORE_PATH`.
+- Added `apps/simulation` mail delivery helper that persists Stage 5 mail into `CharacterSaveRecord.stage5_systems_json`.
+- Added player web Mail panel claim/delete actions for the delivered messages.
+- Updated admin architecture docs to describe the live gateway mail flow and local env.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-simulation stage5_system_mail_delivery_persists_to_character_save -- --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (7/7)
+- `cargo +1.89.0 test --locked -p mir2-gateway admin_system_mail_endpoint_writes_live_account_store -- --nocapture`
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1` (54/54)
+- `./node_modules/.bin/tsc --noEmit` in `apps/web`
+- `./node_modules/.bin/next build` in `apps/web`
+- `./node_modules/.bin/tsc --noEmit` in `apps/admin-web`
+- `./node_modules/.bin/next build` in `apps/admin-web`
+- Runtime smoke with gateway `127.0.0.1:7110`, Admin API `127.0.0.1:7420`, and Admin Web `127.0.0.1:3020`: Admin Web POST returned a Rust command id; Admin API outbox showed `deliveryMode: "gateway_live"`, `deliveredCount: 1`, `mailIds: [1]`; account-store inspection showed the mail under `stage5_systems_json`; gateway WS world snapshot exposed it at `payload.stage5Systems.mail`; WS `stage5Command mail.claim` marked it claimed, raised gold from 1280 to 6280, and added one `red-potion`.
+
+Result:
+
+- R228 complete.
+- Admin system mail is now a real game-visible API path for the local gateway/account-store runtime.
+- Remaining admin production gaps: Postgres command/audit repositories, real operator auth/session, approval workflows, gateway admin endpoint hardening, and broader live command executors.
 
 ## 2026-04-26-R225
 

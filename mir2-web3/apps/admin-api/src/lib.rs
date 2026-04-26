@@ -1,13 +1,21 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::env;
 use std::fmt;
+use std::io::{Read, Write};
+use std::net::TcpStream;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use mir2_simulation::{
+    deliver_stage5_system_mail, SimulationConfig, Stage5MailDelivery, Stage5MailDeliveryReceipt,
+    Stage5MailTargetKind,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -487,6 +495,9 @@ pub struct SystemMailReceipt {
     pub target_id: String,
     pub attachment_count: usize,
     pub accepted_at_ms: u64,
+    pub delivery_mode: String,
+    pub delivered_count: usize,
+    pub mail_ids: Vec<u32>,
 }
 
 pub trait SystemMailDomain {
@@ -520,10 +531,162 @@ impl SystemMailDomain for InMemorySystemMailOutbox {
             target_id: request.target_id,
             attachment_count: request.attachments.len(),
             accepted_at_ms,
+            delivery_mode: "memory_outbox".to_string(),
+            delivered_count: 0,
+            mail_ids: Vec::new(),
         };
         self.receipts.push(receipt.clone());
         Ok(receipt)
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct AccountStoreSystemMailDomain {
+    gateway_mail_url: String,
+    fallback_config: SimulationConfig,
+    receipts: Vec<SystemMailReceipt>,
+}
+
+impl AccountStoreSystemMailDomain {
+    pub fn from_env() -> Self {
+        let gateway_mail_url = env::var("ADMIN_GATEWAY_MAIL_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/system-mail".to_string());
+        let account_store_path = env::var("ADMIN_ACCOUNT_STORE_PATH")
+            .or_else(|_| env::var("MIR2_ACCOUNT_STORE_PATH"))
+            .unwrap_or_else(|_| ".mir2-data/accounts.json".to_string());
+        Self {
+            gateway_mail_url,
+            fallback_config: SimulationConfig::default()
+                .with_account_store_path(PathBuf::from(account_store_path)),
+            receipts: Vec::new(),
+        }
+    }
+
+    pub fn with_gateway_and_fallback(
+        gateway_mail_url: String,
+        fallback_config: SimulationConfig,
+    ) -> Self {
+        Self {
+            gateway_mail_url,
+            fallback_config,
+            receipts: Vec::new(),
+        }
+    }
+
+    pub fn receipts(&self) -> &[SystemMailReceipt] {
+        &self.receipts
+    }
+}
+
+impl SystemMailDomain for AccountStoreSystemMailDomain {
+    fn enqueue_system_mail(
+        &mut self,
+        request: SystemMailRequest,
+        accepted_at_ms: u64,
+    ) -> Result<SystemMailReceipt, AdminError> {
+        let delivery = delivery_from_system_mail(&request);
+        let (delivery_mode, delivered) =
+            match post_system_mail_to_gateway(&self.gateway_mail_url, &delivery) {
+                Ok(receipt) => ("gateway_live".to_string(), receipt),
+                Err(_) => (
+                    "account_store_fallback".to_string(),
+                    deliver_stage5_system_mail(&self.fallback_config, delivery)
+                        .map_err(AdminError::ExecutionFailed)?,
+                ),
+            };
+        let receipt = SystemMailReceipt {
+            outbox_id: format!("mail-{}", request.command_id),
+            target_kind: request.target_kind,
+            target_id: request.target_id,
+            attachment_count: request.attachments.len(),
+            accepted_at_ms,
+            delivery_mode,
+            delivered_count: delivered.delivered_count,
+            mail_ids: delivered.mail_ids,
+        };
+        self.receipts.push(receipt.clone());
+        Ok(receipt)
+    }
+}
+
+fn delivery_from_system_mail(request: &SystemMailRequest) -> Stage5MailDelivery {
+    let mut gold = 0u32;
+    let mut items = Vec::new();
+    for attachment in &request.attachments {
+        if attachment.item_id.eq_ignore_ascii_case("gold") {
+            gold = gold.saturating_add(attachment.count);
+        } else {
+            for _ in 0..attachment.count {
+                items.push(attachment.item_id.clone());
+            }
+        }
+    }
+    Stage5MailDelivery {
+        target_kind: match request.target_kind {
+            MailTargetKind::Account => Stage5MailTargetKind::Account,
+            MailTargetKind::Character => Stage5MailTargetKind::Character,
+            MailTargetKind::Global => Stage5MailTargetKind::Global,
+        },
+        target_id: request.target_id.clone(),
+        from: "GM System".to_string(),
+        subject: request.subject.clone(),
+        body: request.body.clone(),
+        gold,
+        items,
+    }
+}
+
+fn post_system_mail_to_gateway(
+    gateway_mail_url: &str,
+    delivery: &Stage5MailDelivery,
+) -> Result<Stage5MailDeliveryReceipt, String> {
+    let (host, path) = parse_http_url(gateway_mail_url)?;
+    let body = serde_json::to_string(delivery)
+        .map_err(|error| format!("gateway mail request encode failed: {error}"))?;
+    let mut stream = TcpStream::connect(&host)
+        .map_err(|error| format!("gateway mail endpoint unavailable: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway mail read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway mail write timeout setup failed: {error}"))?;
+    write!(
+        stream,
+        "POST {path} HTTP/1.1\r\nHost: {host}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    )
+    .map_err(|error| format!("gateway mail request write failed: {error}"))?;
+
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .map_err(|error| format!("gateway mail response read failed: {error}"))?;
+    let (head, response_body) = response
+        .split_once("\r\n\r\n")
+        .ok_or_else(|| "gateway mail response was not valid HTTP".to_string())?;
+    let status_line = head.lines().next().unwrap_or_default();
+    if !status_line.contains(" 2") {
+        return Err(format!(
+            "gateway mail endpoint rejected request: {status_line} {response_body}"
+        ));
+    }
+    serde_json::from_str::<Stage5MailDeliveryReceipt>(response_body)
+        .map_err(|error| format!("gateway mail response decode failed: {error}"))
+}
+
+fn parse_http_url(url: &str) -> Result<(String, String), String> {
+    let rest = url
+        .strip_prefix("http://")
+        .ok_or_else(|| "gateway mail url must start with http://".to_string())?;
+    let (host, path) = rest
+        .split_once('/')
+        .map(|(host, path)| (host, format!("/{path}")))
+        .unwrap_or((rest, "/".to_string()));
+    if host.trim().is_empty() {
+        return Err("gateway mail url host is required".to_string());
+    }
+    Ok((host.to_string(), path))
 }
 
 pub struct SystemMailExecutor<D> {
@@ -578,7 +741,7 @@ where
     }
 }
 
-type HttpControlPlane = AdminControlPlane<SystemMailExecutor<InMemorySystemMailOutbox>>;
+type HttpControlPlane = AdminControlPlane<SystemMailExecutor<AccountStoreSystemMailDomain>>;
 
 #[derive(Clone)]
 pub struct AdminApiState {
@@ -589,7 +752,7 @@ impl Default for AdminApiState {
     fn default() -> Self {
         Self {
             control_plane: Arc::new(Mutex::new(AdminControlPlane::new(SystemMailExecutor::new(
-                InMemorySystemMailOutbox::default(),
+                AccountStoreSystemMailDomain::from_env(),
             )))),
         }
     }
@@ -1029,6 +1192,69 @@ mod tests {
         assert_eq!(receipts[0].outbox_id, "mail-cmd-1");
         assert_eq!(receipts[0].target_id, "char-1");
         assert_eq!(receipts[0].attachment_count, 1);
+    }
+
+    #[test]
+    fn account_store_system_mail_domain_falls_back_to_persistent_game_mail() {
+        let path = std::env::temp_dir().join(format!(
+            "mir2-admin-mail-{}-{}.json",
+            std::process::id(),
+            now_ms()
+        ));
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        let executor =
+            SystemMailExecutor::new(AccountStoreSystemMailDomain::with_gateway_and_fallback(
+                "http://127.0.0.1:1/admin/system-mail".to_string(),
+                config,
+            ));
+        let mut control = AdminControlPlane::new(executor);
+        let mut envelope = sample_envelope(operator_with([Permission::MailSendSystem]));
+        envelope.command = AdminCommand::SendSystemMail {
+            target_kind: MailTargetKind::Character,
+            target_id: "Scout".into(),
+            subject: "Admin mail".into(),
+            body: "Persisted into game mail.".into(),
+            attachments: vec![
+                ItemGrant {
+                    item_id: "gold".into(),
+                    count: 99,
+                },
+                ItemGrant {
+                    item_id: "red-potion".into(),
+                    count: 1,
+                },
+            ],
+        };
+
+        let result = control
+            .submit(envelope, 2_000)
+            .expect("fallback delivery should succeed");
+
+        assert_eq!(result.status, CommandStatus::Succeeded);
+        let receipts = control.executor().domain().receipts();
+        assert_eq!(receipts[0].delivery_mode, "account_store_fallback");
+        assert_eq!(receipts[0].delivered_count, 1);
+        assert_eq!(receipts[0].mail_ids, vec![1]);
+
+        let store = mir2_simulation::AccountStore::load_or_new(
+            &path,
+            SimulationConfig::default().default_character,
+        );
+        let save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("demo save should exist");
+        let systems: mir2_simulation::Stage5SystemsState = serde_json::from_str(
+            save.stage5_systems_json
+                .as_deref()
+                .expect("stage5 systems should be persisted"),
+        )
+        .expect("stage5 systems should decode");
+        assert_eq!(systems.mail[0].gold, 99);
+        assert_eq!(systems.mail[0].items, vec!["red-potion"]);
+
+        let _ = std::fs::remove_file(path);
     }
 
     fn sample_envelope(operator: Operator) -> AdminCommandEnvelope {

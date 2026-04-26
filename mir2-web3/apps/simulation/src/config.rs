@@ -547,6 +547,53 @@ mod tests {
 
         let _ = fs::remove_dir_all(dir);
     }
+
+    #[test]
+    fn stage5_system_mail_delivery_persists_to_character_save() {
+        let dir = unique_temp_dir("system-mail-delivery");
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+
+        let receipt = deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "GM".to_string(),
+                subject: "Compensation".to_string(),
+                body: "Thanks for testing.".to_string(),
+                gold: 250,
+                items: vec!["red-potion".to_string()],
+            },
+        )
+        .expect("mail should deliver");
+
+        assert_eq!(receipt.delivered_count, 1);
+        assert_eq!(receipt.mail_ids, vec![1]);
+
+        let saved = AccountStore::load_or_new(&path, default_character());
+        let save = saved
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&0))
+            .expect("demo character save should exist");
+        let systems: Stage5SystemsState = serde_json::from_str(
+            save.stage5_systems_json
+                .as_deref()
+                .expect("stage5 systems should be persisted"),
+        )
+        .expect("stage5 systems should decode");
+
+        assert_eq!(systems.mail.len(), 1);
+        assert_eq!(systems.mail[0].from, "GM");
+        assert_eq!(systems.mail[0].to, "Scout");
+        assert_eq!(systems.mail[0].subject, "Compensation");
+        assert_eq!(systems.mail[0].gold, 250);
+        assert_eq!(systems.mail[0].items, vec!["red-potion"]);
+        assert!(!systems.mail[0].claimed);
+
+        let _ = fs::remove_dir_all(dir);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1109,6 +1156,171 @@ pub struct Stage5MailMessage {
     pub items: Vec<String>,
     pub claimed: bool,
     pub deleted: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Stage5MailTargetKind {
+    Account,
+    Character,
+    Global,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5MailDelivery {
+    pub target_kind: Stage5MailTargetKind,
+    pub target_id: String,
+    pub from: String,
+    pub subject: String,
+    pub body: String,
+    pub gold: u32,
+    pub items: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5MailDeliveryReceipt {
+    pub delivered_count: usize,
+    pub mail_ids: Vec<u32>,
+}
+
+pub fn deliver_stage5_system_mail(
+    config: &SimulationConfig,
+    delivery: Stage5MailDelivery,
+) -> Result<Stage5MailDeliveryReceipt, String> {
+    let mut store = config
+        .account_store
+        .lock()
+        .map_err(|_| "account store mutex poisoned".to_string())?;
+
+    if store.accounts.is_empty() {
+        store.accounts.insert(
+            "demo".to_string(),
+            AccountRecord::new(config.default_character.clone()),
+        );
+    }
+
+    let targets = resolve_stage5_mail_targets(&store, &delivery, &config.default_character)?;
+    let mut mail_ids = Vec::new();
+
+    for (account_id, character_index) in targets {
+        let account = store
+            .accounts
+            .entry(account_id.clone())
+            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+        let character = account
+            .characters
+            .iter()
+            .find(|character| character.index == character_index)
+            .cloned()
+            .unwrap_or_else(|| config.default_character.clone());
+        let save = account
+            .saves
+            .entry(character_index)
+            .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
+        let mut systems = save
+            .stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+            .unwrap_or_default();
+        let id = systems
+            .mail
+            .iter()
+            .map(|mail| mail.id)
+            .max()
+            .unwrap_or(0)
+            .saturating_add(1);
+        systems.mail.push(Stage5MailMessage {
+            id,
+            from: delivery.from.clone(),
+            to: character.name,
+            subject: delivery.subject.clone(),
+            body: delivery.body.clone(),
+            gold: delivery.gold,
+            items: delivery.items.clone(),
+            claimed: false,
+            deleted: false,
+        });
+        save.stage5_systems_json = Some(
+            serde_json::to_string(&systems)
+                .map_err(|error| format!("failed to encode stage5 systems: {error}"))?,
+        );
+        mail_ids.push(id);
+    }
+
+    let delivered_count = mail_ids.len();
+    drop(store);
+    config.save_account_store()?;
+
+    Ok(Stage5MailDeliveryReceipt {
+        delivered_count,
+        mail_ids,
+    })
+}
+
+fn resolve_stage5_mail_targets(
+    store: &AccountStore,
+    delivery: &Stage5MailDelivery,
+    default_character: &CharacterRecord,
+) -> Result<Vec<(String, i32)>, String> {
+    match delivery.target_kind {
+        Stage5MailTargetKind::Account => {
+            let account = store
+                .accounts
+                .get(&delivery.target_id)
+                .ok_or_else(|| format!("account not found: {}", delivery.target_id))?;
+            Ok(account
+                .characters
+                .iter()
+                .map(|character| (delivery.target_id.clone(), character.index))
+                .collect())
+        }
+        Stage5MailTargetKind::Character => {
+            let mut targets = Vec::new();
+            for (account_id, account) in &store.accounts {
+                for character in &account.characters {
+                    if stage5_mail_character_matches(&delivery.target_id, account_id, character) {
+                        targets.push((account_id.clone(), character.index));
+                    }
+                }
+            }
+            if targets.is_empty()
+                && delivery
+                    .target_id
+                    .eq_ignore_ascii_case(&default_character.name)
+                && store.accounts.contains_key("demo")
+            {
+                targets.push(("demo".to_string(), default_character.index));
+            }
+            if targets.is_empty() {
+                Err(format!("character not found: {}", delivery.target_id))
+            } else {
+                Ok(targets)
+            }
+        }
+        Stage5MailTargetKind::Global => Ok(store
+            .accounts
+            .iter()
+            .flat_map(|(account_id, account)| {
+                account
+                    .characters
+                    .iter()
+                    .map(|character| (account_id.clone(), character.index))
+                    .collect::<Vec<_>>()
+            })
+            .collect()),
+    }
+}
+
+fn stage5_mail_character_matches(
+    target_id: &str,
+    account_id: &str,
+    character: &CharacterRecord,
+) -> bool {
+    target_id.eq_ignore_ascii_case(&character.name)
+        || target_id == character.index.to_string()
+        || target_id == format!("{account_id}:{}", character.index)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

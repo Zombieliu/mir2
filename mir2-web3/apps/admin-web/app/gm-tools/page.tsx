@@ -32,7 +32,8 @@ export default async function GmToolsPage() {
                 <tr>
                   <th>Outbox</th>
                   <th>Target</th>
-                  <th>Items</th>
+                  <th>Delivery</th>
+                  <th>Mail IDs</th>
                 </tr>
               </thead>
               <tbody>
@@ -43,12 +44,15 @@ export default async function GmToolsPage() {
                       <td>
                         {receipt.targetKind} / {receipt.targetId}
                       </td>
-                      <td>{receipt.attachmentCount}</td>
+                      <td>
+                        {receipt.deliveryMode} / {receipt.deliveredCount}
+                      </td>
+                      <td>{receipt.mailIds.length ? receipt.mailIds.join(", ") : "-"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3}>No queued mail in this process yet.</td>
+                    <td colSpan={4}>No queued mail in this process yet.</td>
                   </tr>
                 )}
               </tbody>

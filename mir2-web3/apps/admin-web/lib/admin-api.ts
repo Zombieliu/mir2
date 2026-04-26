@@ -35,6 +35,9 @@ export type SystemMailReceipt = {
   targetId: string;
   attachmentCount: number;
   acceptedAtMs: number;
+  deliveryMode: string;
+  deliveredCount: number;
+  mailIds: number[];
 };
 
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
