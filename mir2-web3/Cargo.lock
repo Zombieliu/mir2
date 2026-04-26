@@ -928,6 +928,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-admin-api"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "mir2-game-data"
 version = "0.1.0"
 dependencies = [

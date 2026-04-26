@@ -6,6 +6,8 @@ Status: discussion draft.
 
 Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
 
+Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives and tests. It deliberately starts below HTTP so the high-risk write model is typed and audited before Admin Web routes exist.
+
 ## First Principles
 
 The operations backend is a production control plane, not a database CRUD screen.

@@ -1,0 +1,13 @@
+[package]
+name = "mir2-admin-api"
+version = "0.1.0"
+edition = "2021"
+description = "Audited admin control-plane primitives for the Mir2 web3 rewrite"
+license = "MIT"
+
+[lib]
+name = "mir2_admin_api"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
