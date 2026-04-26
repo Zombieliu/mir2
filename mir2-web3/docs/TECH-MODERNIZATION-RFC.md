@@ -8,6 +8,8 @@ Purpose: capture the technical modernization direction discussed after the Cryst
 
 Platform strategy: `docs/PLATFORM-CLIENT-STRATEGY.md` captures the current Web, Tauri desktop, mobile, and console stance.
 
+Admin operations strategy: `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` captures the control-plane, RBAC, audit, and admin command architecture.
+
 ## Context
 
 The project currently has a strong Mir2-style MMORPG foundation:
@@ -49,7 +51,7 @@ Core rules:
 - Global architecture target: perceived global single world, implemented as global account/economy/social services plus distributed zone/channel runtime.
 - Frontend target: Bevy + NextJS full-end adaptation.
 - Platform target: Web first, Windows/macOS through a near-term Tauri shell, iOS/Android after validation, consoles deferred to a separate strategy.
-- Admin/operations: a dedicated operations backend is required.
+- Admin/operations: a dedicated audited operations backend is required; see `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`.
 - NPC and quest scripting: move toward a new developer-oriented DSL compiled to Rust IR.
 - Sui Move: not the main NPC/quest DSL; possible future boundary for rare assets or trusted asset movement only.
 - Cloud production and horizontal scaling are priority goals.

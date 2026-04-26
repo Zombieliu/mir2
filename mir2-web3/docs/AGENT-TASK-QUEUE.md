@@ -55,7 +55,7 @@ Purpose: queue autonomous tasks for reaching **100% Candidate**. The Coordinator
 
 Restart handoff: if the Codex session is reopened after shutdown or context loss, read `docs/AGENT-RESUME-HANDOFF.md` before continuing the active round. The user wants the previous subagent workflow to continue without routine confirmations.
 
-Product evolution handoff: after the 1:1 Candidate baseline, future product work should also read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, and `docs/PLATFORM-CLIENT-STRATEGY.md`. Database, cache, login UI, admin backend, global zone, client distribution, and NPC script parser changes are expected product-evolution areas, not automatic Crystal parity regressions.
+Product evolution handoff: after the 1:1 Candidate baseline, future product work should also read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, `docs/PLATFORM-CLIENT-STRATEGY.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`. Database, cache, login UI, admin backend, global zone, client distribution, and NPC script parser changes are expected product-evolution areas, not automatic Crystal parity regressions.
 
 Status values:
 
@@ -74,6 +74,7 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | [~] | Plan post-1:1 product evolution boundaries | Coordinator | docs/product specs first | `docs/POST-1TO1-EVOLUTION-PLAN.md` defines the first boundary for database/cache, login UI, NPC script parser, and product gameplay changes while preserving the current Candidate baseline as a regression reference. |
 | [~] | Finalize technical modernization RFC | Coordinator | docs only until approved | `docs/TECH-MODERNIZATION-RFC.md` captures the current first-principles direction: Rust simulation authority, Postgres authoritative persistence, Redis non-authoritative cache/session/routing, global services plus zone/channel runtime, Bevy + NextJS frontend split, audited admin backend, and developer-oriented NPC DSL compiled to Rust IR. |
 | [~] | Validate platform/client distribution strategy | Coordinator | docs and prototypes only until approved | `docs/PLATFORM-CLIENT-STRATEGY.md` records Web as first-class, Tauri shell for near-term Windows/macOS, mobile after validation, Bevy native desktop as a performance escape hatch, and consoles as a deferred separate platform project. |
+| [~] | Finalize admin operations architecture | Coordinator | docs first, then admin command/audit model | `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` defines Admin Web, Admin API/control plane, RBAC, audit records, typed admin commands, command execution, online/offline target handling, content publishing, and MVP scope. |
 
 ## Completed Round: 2026-04-26-R225
 
