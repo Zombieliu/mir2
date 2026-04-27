@@ -12,10 +12,10 @@ Read `docs/PARITY-TRUTH-AUDIT.md` first if you are about to change any status pe
 - Backend/server tracked-slice parity: `99.70%`.
 - Real full-project accepted 1:1: `roughly 90.0%`.
 - Active round: `2026-04-26-R226`.
-- Latest product-evolution rounds completed on Mac: `R227` Admin Web/API foundation, `R228` live game-visible GM system mail, `R229` Docker-verified Postgres command/audit/outbox plus NATS dispatch, `R230` Postgres mirror for gameplay JSON account-store saves, `R231` explicit Postgres account-store source-of-truth mode behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`, `R249` Gateway/Redis online presence read models, and `R250` Postgres-backed Admin Activity/Economy/Risk projections.
+- Latest product-evolution rounds completed on Mac: `R227` Admin Web/API foundation, `R228` live game-visible GM system mail, `R229` Docker-verified Postgres command/audit/outbox plus NATS dispatch, `R230` Postgres mirror for gameplay JSON account-store saves, `R231` explicit Postgres account-store source-of-truth mode behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`, `R249` Gateway/Redis online presence read models, `R250` Postgres-backed Admin Activity/Economy/Risk projections, and `R251-R253` Postgres zone runtime plus operator/RBAC records.
 - Do not mark backend/server `100%` until live Crystal trace acceptance, blocked `Server.MirDB` import, or an explicit acceptance decision closes the remaining `0.30%`.
 - Do not mark full-project `100% Accepted` until `docs/PLAYER-QA-SCRIPT.md` passes or the user explicitly accepts remaining differences.
-- Synthetic map terrain, local JSON stores, remaining Admin gaps such as deeper zone telemetry, and local-only smoke results are Candidate/product-evolution evidence only. They must not be counted as final accepted Crystal 1:1.
+- Synthetic map terrain, local JSON stores, local Admin control-plane smoke results, and production-only Admin gaps such as external identity/provider workflows are Candidate/product-evolution evidence only. They must not be counted as final accepted Crystal 1:1.
 - If continuing product evolution instead of parity closure, read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, `docs/PLATFORM-CLIENT-STRATEGY.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` first. Database, cache, login UI, admin backend, global zone, client distribution, and NPC script parser changes are allowed evolution areas, but the current Candidate baseline should remain a regression reference.
 
 ## Files To Bring To Windows

@@ -237,3 +237,42 @@ CREATE TABLE IF NOT EXISTS admin_trade_graph_edges (
 
 CREATE INDEX IF NOT EXISTS idx_admin_trade_graph_edges_updated
     ON admin_trade_graph_edges(updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_zone_runtime_records (
+    zone_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL,
+    host TEXT NOT NULL DEFAULT '',
+    process_id TEXT NOT NULL DEFAULT '',
+    map_count INTEGER NOT NULL DEFAULT 0,
+    player_count INTEGER NOT NULL DEFAULT 0,
+    tick_rate INTEGER NOT NULL DEFAULT 0,
+    uptime_seconds BIGINT NOT NULL DEFAULT 0,
+    source TEXT NOT NULL DEFAULT '',
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_zone_runtime_status
+    ON admin_zone_runtime_records(status, updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_operators (
+    operator_id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL,
+    status TEXT NOT NULL,
+    permissions_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_by TEXT NOT NULL DEFAULT '',
+    created_at_ms BIGINT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_admin_operators_role
+    ON admin_operators(role, status);

@@ -1,5 +1,7 @@
 # Agent Orchestration
 
+> Latest product-evolution sync: 2026-04-28-R253 completed. Admin production read models now include Postgres-backed server zone runtime telemetry and operator/RBAC records, with Admin Web write/read pages for `/servers` and `/operators`; local smokes passed through the Rust Admin API and Admin Web.
+
 > Latest product-evolution sync: 2026-04-28-R246 completed. Admin-delivered Stage 5 mail/gold now refreshes into already-online Gateway sessions before snapshots and saves, preventing keepalive from overwriting live admin mail and making the Player Web Mail panel update without logout/relogin.
 
 > Latest product-evolution sync: 2026-04-28-R245 completed. The local admin backend is now browser-testable on `http://127.0.0.1:3020` with Player Web on `http://127.0.0.1:3010`, Gateway `:7110`, Admin API `:7420`, Postgres source mode, Redis routing cache, ClickHouse event reads, bearer auth, and GM forms for mail/grants/kick/ban. Admin API now supports policy-file operator auth via `ADMIN_OPERATOR_POLICY_PATH` and blocks requester self-approval by default.
@@ -75,7 +77,7 @@
 > Latest sync: R159 completed. Trainer immediate damage reporting now routes through Crystal `server.PetInflictedDamageDps` with localized `server.You` actor; modeled `Physical Agility` damage type and DPS value are preserved. Validation: focused trainer test 1/1, `cargo +1.89.0 fmt --check`, and full `mir2-simulation` 638/638. Active backend round is R160; backend/server parity estimate is 99.70%.
 
 
-Last updated: 2026-04-26
+Last updated: 2026-04-28
 
 Purpose: define the autonomous multi-agent workflow for driving `mir2-web3` to a full Crystal / Mir2 1:1 Candidate build without requiring routine human confirmation.
 

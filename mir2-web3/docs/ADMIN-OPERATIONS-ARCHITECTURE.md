@@ -152,15 +152,14 @@ Current implementation:
   HP/gold/map, dashboard online totals, and server zones-online source from the
   same in-memory/Redis session cache used for kick routing. Service health is
   checked from real local/configured endpoints. Activity config, market price
-  feeds, and trade graph edges use Postgres projection tables when
-  `ADMIN_DATABASE_URL` is configured. Deeper zone process telemetry
-  intentionally returns empty/unwired state until an authoritative projection
-  exists.
+  feeds, trade graph edges, zone runtime telemetry, and operator/RBAC records
+  use Postgres projection/config tables when `ADMIN_DATABASE_URL` is configured.
 - `POST /admin/activities`, `POST /admin/economy/price-feeds`, and
-  `POST /admin/risk/trade-edges` let operators write those projections through
-  the Rust Admin API. These routes require `content_publish` or
-  `permission_manage` and are product-evolution control-plane data, not Crystal
-  parity evidence.
+  `POST /admin/risk/trade-edges`, `POST /admin/servers/zones`, and
+  `POST /admin/operators` let operators write those projections through the Rust
+  Admin API. Projection writes require `content_publish`; operator writes
+  require `permission_manage`. These routes are product-evolution control-plane
+  data, not Crystal parity evidence.
 - `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
 - If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 

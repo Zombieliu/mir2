@@ -232,7 +232,35 @@ export type AdminServersReadModel = {
   characterCount: number;
   zonesOnline: number;
   zonesSource: string;
+  zoneRuntimeConfigured: boolean;
+  zones: Array<{
+    zoneId: string;
+    name: string;
+    status: string;
+    host: string;
+    processId: string;
+    mapCount: number;
+    playerCount: number;
+    tickRate: number;
+    uptimeSeconds: number;
+    source: string;
+    updatedAtMs: number;
+  }>;
   services: AdminServiceStatus[];
+};
+
+export type AdminOperatorsReadModel = {
+  source: string;
+  generatedAtMs: number;
+  configured: boolean;
+  operators: Array<{
+    operatorId: string;
+    email: string;
+    role: string;
+    status: string;
+    permissions: string[];
+    updatedAtMs: number;
+  }>;
 };
 
 export type AdminRiskReadModel = {
@@ -267,7 +295,7 @@ export function operatorHeaders() {
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage"
+      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage"
   };
   if (process.env.ADMIN_OPERATOR_TOKEN) {
     headers.authorization = `Bearer ${process.env.ADMIN_OPERATOR_TOKEN}`;

@@ -11,8 +11,9 @@ const navItems = [
   { href: "/risk", labelKey: "shell.nav.risk", count: "Bans" },
   { href: "/gm-tools", labelKey: "shell.nav.gmTools", count: "API" },
   { href: "/approvals", labelKey: "shell.nav.approvals", count: "Gate" },
+  { href: "/operators", labelKey: "shell.nav.operators", count: "RBAC" },
   { href: "/timeline", labelKey: "shell.nav.timeline", count: "Read" },
-  { href: "/audit", labelKey: "shell.nav.audit", count: "RBAC" }
+  { href: "/audit", labelKey: "shell.nav.audit", count: "Audit" }
 ];
 
 export async function AdminShell({
