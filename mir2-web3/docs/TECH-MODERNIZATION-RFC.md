@@ -6,6 +6,8 @@ Status: discussion draft.
 
 Purpose: capture the technical modernization direction discussed after the Crystal / Mir2 1:1 Candidate baseline. This is not an implementation plan yet; it records architecture principles, confirmed decisions, recommended boundaries, and open questions before large code changes.
 
+Architecture adoption plan: `docs/ARCHITECTURE-ADOPTION-PLAN.md` defines what to add now, what to add behind interfaces, and what to defer.
+
 Platform strategy: `docs/PLATFORM-CLIENT-STRATEGY.md` captures the current Web, Tauri desktop, mobile, and console stance.
 
 Admin operations strategy: `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` captures the control-plane, RBAC, audit, and admin command architecture.
@@ -407,7 +409,8 @@ Start with architecture and persistence boundaries, not UI or NPC parser impleme
 Recommended immediate sequence:
 
 1. Finalize this RFC.
-2. Draft persistence adapter and Postgres schema.
-3. Add migration strategy from current JSON store.
-4. Add Redis scope and invalidation rules.
-5. Draft NPC DSL syntax and IR, but do not implement it until persistence boundaries are stable.
+2. Follow `docs/ARCHITECTURE-ADOPTION-PLAN.md`: add local Postgres/Redis/NATS dev infra and keep Redpanda/ClickHouse/Meilisearch/Loki optional.
+3. Draft persistence adapter and Postgres schema.
+4. Add migration strategy from current JSON store.
+5. Add Redis scope and invalidation rules.
+6. Draft NPC DSL syntax and IR, but do not implement it until persistence boundaries are stable.

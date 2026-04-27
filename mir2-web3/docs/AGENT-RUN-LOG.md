@@ -1,5 +1,15 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-27-R229 completed. Admin API now has the first live-verified Postgres/NATS persistence slice: `infra/postgres/migrations/0001_core.sql`, Postgres-backed `AdminCommandRepository` / `AuditRepository` adapters selected by `ADMIN_DATABASE_URL`, an `AdminOutboxRepository` boundary with in-memory and Postgres implementations, `import-account-store` for importing `.mir2-data/accounts.json` into `accounts`, `characters`, and `character_saves`, and `dispatch-admin-outbox` for publishing pending outbox rows to NATS. Docker integration smoke passed after Docker Desktop started: core compose services are healthy, `.mir2-data/admin-live-smoke.json` imported demo/Scout at `0103 WeaponStore (6,12)`, Admin API on `127.0.0.1:7421` wrote command/audit/outbox rows to Postgres, and the outbox worker published `admin.command.succeeded` to NATS before marking the row `dispatched`. Verification also passed: `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8), `cargo +1.89.0 fmt --check`, compose config, and `git diff --check`.
+
+> Latest product-evolution sync: 2026-04-27-R230 completed. Gameplay account-store persistence now has an optional Postgres mirror: `SimulationConfig::with_account_store_database_url`, `MIR2_ACCOUNT_STORE_DATABASE_URL` wiring in gateway and Admin API fallback mail, and blocking-thread Postgres upserts for accounts/characters/character_saves after JSON saves. Docker smoke verified fallback GM mail wrote `stage5_systems_json` into Postgres, then the DB was restored to the `admin-live-smoke` demo/Scout `0103 WeaponStore (6,12)` state. Verification passed: `mir2-simulation config` 11/11, `mir2-admin-api` 8/8, `mir2-gateway` 55/55, `cargo +1.89.0 fmt --check`, `git diff --check`, and Docker core services healthy.
+
+> Latest product-evolution sync: 2026-04-27-R231 completed. Gameplay account-store Postgres source-of-truth mode is now explicit opt-in through `MIR2_ACCOUNT_STORE_BACKEND=postgres`. `SimulationConfig::with_postgres_account_store` loads from Postgres `accounts.raw_json`, initializes a default account if empty, and saves through transactions with account row locks plus `store_version` / `save_version` increments. Gateway and Admin API fallback mail both support the mode. Docker smoke verified a Postgres-source fallback GM mail kept Scout at `0103 WeaponStore`, added mail in DB, and incremented versions from 0 to 1. Verification passed: `mir2-simulation config` 11/11, `mir2-admin-api` 8/8, `mir2-gateway` 55/55, `cargo +1.89.0 fmt --check`, compose config/healthy services, and `git diff --check`.
+
+> Latest architecture sync: 2026-04-27. Added `docs/ARCHITECTURE-ADOPTION-PLAN.md` and `infra/docker-compose.dev.yml`. Immediate architecture additions are Postgres, Redis, NATS, local Docker Compose, storage/cache/command-bus/event-envelope boundaries, and continuing Rust Axum for Admin API. Redpanda, ClickHouse, Meilisearch, Loki, and Grafana are optional Compose profiles. KCP/QUIC, Kubernetes, Temporal, Flink, Spark/Data Lake, OpenSearch, and Sui Move gameplay integration are deferred.
+
+> Latest truth-audit sync: 2026-04-27. Added `docs/PARITY-TRUTH-AUDIT.md` and linked it from the handoff/queue/roadmap/Windows docs. Authoritative wording is now: automated parity evidence **100% Candidate**, backend/server tracked slice **99.70% Candidate**, whole-project accepted Crystal 1:1 **roughly 90%**. Fallbacks and blockers such as synthetic map terrain, missing `Server.MirDB`, missing `MIR2_CRYSTAL_TCP_ADDR`, Admin mock read models, in-memory/local JSON persistence, and human visual/feel acceptance must not be counted as final Accepted 1:1.
+
 > Latest product-evolution sync: R228 completed. Admin `SendSystemMail` now reaches live game-visible Stage 5 mail through Admin Web -> Admin API -> gateway, with account-store fallback. Runtime smoke delivered mail to `Scout` using `deliveryMode: "gateway_live"` and claimed it through gateway WS `stage5Command mail.claim`.
 
 > Latest product-evolution sync: 2026-04-27 admin-web i18n completed for the current operations console. Added cookie-based `en` / `zh-CN` server-rendered dictionaries, a top-bar language switcher, and translations across navigation, page headers, tables, primary controls, GM mail form copy, status labels, and empty states. Verification: admin-web `tsc --noEmit`, admin-web `next build`, and curl smoke with `Cookie: admin_locale=zh-CN` on `/` and `/gm-tools`.
@@ -85,6 +95,97 @@ Result:
 - R228 complete.
 - Admin system mail is now a real game-visible API path for the local gateway/account-store runtime.
 - Remaining admin production gaps: Postgres command/audit repositories, real operator auth/session, approval workflows, gateway admin endpoint hardening, and broader live command executors.
+
+## 2026-04-27-R229
+
+Scope:
+
+- Added Postgres command/audit repositories behind `ADMIN_DATABASE_URL`.
+- Added `infra/postgres/migrations/0001_core.sql` for accounts, characters, character saves, admin commands, admin audit records, and admin outbox.
+- Added `AdminOutboxRepository`, Postgres outbox persistence, and automatic `admin.command.succeeded` outbox enqueue for successful Postgres-backed commands.
+- Added `import-account-store` to import the JSON account store into Postgres-shaped account/character/save tables.
+- Added `dispatch-admin-outbox` to publish pending outbox rows to NATS and mark them `dispatched`.
+- Fixed Postgres-backed Admin API runtime startup and request handling by initializing sync Postgres state before Tokio runtime start and running repository calls inside `spawn_blocking`.
+- Fixed the NATS compose healthcheck to use the NATS TCP protocol through `nc`, making `mir2-nats` report healthy.
+
+Validation:
+
+- `docker compose -f infra/docker-compose.dev.yml up -d postgres redis nats`
+- `ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 cargo +1.89.0 run --locked -p mir2-admin-api --bin import-account-store -- .mir2-data/admin-live-smoke.json`
+- Postgres query confirmed `1` account, `1` character, `1` save, and `demo / Scout / 0103 / WeaponStore / 6 / 12`.
+- Postgres-backed Admin API on `127.0.0.1:7421` accepted `POST /admin/commands/send-system-mail` and wrote matching `admin_commands`, `admin_audit_records`, and pending `admin_outbox` rows.
+- Raw NATS subscriber received `MSG admin.command.succeeded`; `dispatch-admin-outbox -- --once` marked the row `dispatched`.
+- `docker compose -f infra/docker-compose.dev.yml ps nats` now reports `healthy`.
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8)
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+
+Result:
+
+- R229 complete.
+- Admin command/audit/outbox persistence is now live-verified against local Docker Postgres and NATS.
+- Gameplay runtime persistence still defaults to JSON account store; moving authoritative gameplay saves to Postgres is the next storage slice.
+
+## 2026-04-27-R230
+
+Scope:
+
+- Added optional Postgres mirror persistence for gameplay account-store saves through `SimulationConfig::with_account_store_database_url`.
+- Wired `MIR2_ACCOUNT_STORE_DATABASE_URL` into gateway startup and Admin API account-store fallback mail.
+- Kept JSON as the runtime source of truth; Postgres receives mirrored `accounts`, `characters`, and `character_saves` rows after JSON saves.
+- Runs the Postgres mirror on a blocking thread so gateway/Admin API Tokio workers do not hit nested-runtime panics.
+
+Validation:
+
+- Docker smoke with `ADMIN_API_ADDR=127.0.0.1:7422`, invalid `ADMIN_GATEWAY_MAIL_URL`, `ADMIN_ACCOUNT_STORE_PATH=.mir2-data/postgres-mirror-smoke.json`, and `MIR2_ACCOUNT_STORE_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2`.
+- `POST /admin/commands/send-system-mail` succeeded through account-store fallback.
+- Postgres query confirmed `character_saves.stage5_systems_json` contained latest mail subject `Gameplay Mirror Smoke`.
+- Re-imported `.mir2-data/admin-live-smoke.json` afterward so Docker DB demo/Scout returned to `0103 WeaponStore (6,12)`.
+- `cargo +1.89.0 test --locked -p mir2-simulation config -- --test-threads=1` (11/11)
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8)
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1` (55/55)
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+- `docker compose -f infra/docker-compose.dev.yml ps` shows Postgres, Redis, and NATS healthy.
+
+Result:
+
+- R230 complete.
+- The project has a verified bridge from JSON gameplay persistence to Postgres.
+- Next storage slice is a true Postgres source-of-truth account-store backend with locking/versioning, not just mirroring.
+
+## 2026-04-27-R231
+
+Scope:
+
+- Added explicit Postgres account-store source-of-truth mode through `MIR2_ACCOUNT_STORE_BACKEND=postgres`.
+- `SimulationConfig::with_postgres_account_store` now loads account state from Postgres `accounts.raw_json`, initializes a default account when the DB is empty, and disables JSON file writes for that config.
+- Account-store source writes run in a transaction, lock each account row with `FOR UPDATE`, and increment `accounts.store_version` / `character_saves.save_version`.
+- Gateway and Admin API fallback mail now honor `MIR2_ACCOUNT_STORE_BACKEND=postgres`.
+
+Validation:
+
+- Re-imported `.mir2-data/admin-live-smoke.json` into Docker Postgres before smoke.
+- Ran Admin API on `127.0.0.1:7423` with `MIR2_ACCOUNT_STORE_BACKEND=postgres` and fallback gateway URL disabled.
+- `POST /admin/commands/send-system-mail` succeeded through Postgres source mode.
+- Postgres query confirmed `store_version = 1`, `save_version = 1`, `map_file_name = 0103`, `map_title = WeaponStore`, latest mail subject `Postgres Source Smoke`, and matching admin command status `succeeded`.
+- Re-imported `.mir2-data/admin-live-smoke.json` after the smoke to restore demo/Scout map/position state.
+
+Validation continued:
+
+- `cargo +1.89.0 test --locked -p mir2-simulation config -- --test-threads=1` (11/11)
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8)
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1` (55/55)
+- `cargo +1.89.0 fmt --check`
+- `docker compose -f infra/docker-compose.dev.yml config`
+- `docker compose -f infra/docker-compose.dev.yml ps` shows Postgres, Redis, and NATS healthy.
+- `git diff --check`
+
+Result:
+
+- R231 complete.
+- Postgres source-of-truth account-store mode is available but explicit opt-in; JSON remains the default backend.
+- Remaining work: add automated integration tests for conflict handling and decide whether to make Postgres backend the default for non-parity development.
 
 ## 2026-04-26-R225
 

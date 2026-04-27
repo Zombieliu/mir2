@@ -16,7 +16,10 @@ use mir2_simulation::{
     deliver_stage5_system_mail, SimulationConfig, Stage5MailDelivery, Stage5MailDeliveryReceipt,
     Stage5MailTargetKind,
 };
+use postgres::error::SqlState;
+use postgres::{Client, NoTls, Row};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -306,6 +309,48 @@ pub trait AuditRepository {
     fn list_recent(&self, limit: usize) -> Vec<AuditRecord>;
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminOutboxMessage {
+    pub outbox_id: String,
+    pub command_id: String,
+    pub topic: String,
+    pub payload: Value,
+    pub status: String,
+    pub attempts: u32,
+    pub next_attempt_at_ms: Option<u64>,
+    pub created_at_ms: u64,
+    pub updated_at_ms: u64,
+}
+
+impl AdminOutboxMessage {
+    pub fn pending(
+        outbox_id: String,
+        command_id: String,
+        topic: String,
+        payload: Value,
+        created_at_ms: u64,
+    ) -> Self {
+        Self {
+            outbox_id,
+            command_id,
+            topic,
+            payload,
+            status: "pending".into(),
+            attempts: 0,
+            next_attempt_at_ms: None,
+            created_at_ms,
+            updated_at_ms: created_at_ms,
+        }
+    }
+}
+
+pub trait AdminOutboxRepository {
+    fn insert_pending(&mut self, message: AdminOutboxMessage) -> Result<(), AdminError>;
+    fn mark_dispatched(&mut self, outbox_id: &str, updated_at_ms: u64) -> Result<(), AdminError>;
+    fn list_pending(&self, limit: usize) -> Vec<AdminOutboxMessage>;
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct InMemoryCommandStore {
     records: BTreeMap<String, AdminCommandRecord>,
@@ -369,6 +414,480 @@ impl AuditRepository for InMemoryAuditStore {
 impl InMemoryAuditStore {
     pub fn records(&self) -> &[AuditRecord] {
         &self.records
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct InMemoryAdminOutboxStore {
+    records: BTreeMap<String, AdminOutboxMessage>,
+}
+
+impl AdminOutboxRepository for InMemoryAdminOutboxStore {
+    fn insert_pending(&mut self, message: AdminOutboxMessage) -> Result<(), AdminError> {
+        if self.records.contains_key(&message.outbox_id) {
+            return Err(AdminError::Repository(format!(
+                "admin outbox message already exists: {}",
+                message.outbox_id
+            )));
+        }
+        self.records.insert(message.outbox_id.clone(), message);
+        Ok(())
+    }
+
+    fn mark_dispatched(&mut self, outbox_id: &str, updated_at_ms: u64) -> Result<(), AdminError> {
+        let record = self.records.get_mut(outbox_id).ok_or_else(|| {
+            AdminError::Repository(format!("admin outbox message not found: {outbox_id}"))
+        })?;
+        record.status = "dispatched".into();
+        record.updated_at_ms = updated_at_ms;
+        Ok(())
+    }
+
+    fn list_pending(&self, limit: usize) -> Vec<AdminOutboxMessage> {
+        self.records
+            .values()
+            .filter(|record| record.status == "pending")
+            .take(limit)
+            .cloned()
+            .collect()
+    }
+}
+
+#[derive(Clone)]
+pub struct PostgresAdminRepository {
+    client: Arc<Mutex<Client>>,
+}
+
+impl fmt::Debug for PostgresAdminRepository {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("PostgresAdminRepository")
+            .finish_non_exhaustive()
+    }
+}
+
+impl PostgresAdminRepository {
+    pub fn connect(database_url: &str) -> Result<Self, AdminError> {
+        let client = Client::connect(database_url, NoTls)
+            .map_err(|error| AdminError::Repository(format!("postgres connect failed: {error}")))?;
+        Ok(Self {
+            client: Arc::new(Mutex::new(client)),
+        })
+    }
+
+    pub fn ensure_schema(&self) -> Result<(), AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .batch_execute(include_str!(
+                "../../../infra/postgres/migrations/0001_core.sql"
+            ))
+            .map_err(|error| AdminError::Repository(format!("postgres migration failed: {error}")))
+    }
+
+    pub fn from_env() -> Result<Option<Self>, AdminError> {
+        match env::var("ADMIN_DATABASE_URL") {
+            Ok(database_url) if !database_url.trim().is_empty() => {
+                let repository = Self::connect(database_url.trim())?;
+                repository.ensure_schema()?;
+                Ok(Some(repository))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+impl AdminCommandRepository for PostgresAdminRepository {
+    fn insert_pending(&mut self, envelope: AdminCommandEnvelope) -> Result<(), AdminError> {
+        let envelope_json = serde_json::to_value(&envelope)
+            .map_err(|error| AdminError::Repository(format!("encode command failed: {error}")))?;
+        let command_type = command_type(&envelope.command);
+        let status = status_text(&CommandStatus::Pending);
+        let target_type = target_type_text(&envelope.target.target_type);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .execute(
+                "INSERT INTO admin_commands (
+                    command_id,
+                    command_type,
+                    status,
+                    operator_id,
+                    target_type,
+                    target_id,
+                    trace_id,
+                    envelope_json,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+                &[
+                    &envelope.command_id,
+                    &command_type,
+                    &status,
+                    &envelope.operator.id,
+                    &target_type,
+                    &envelope.target.target_id,
+                    &envelope.trace_id,
+                    &envelope_json,
+                    &(envelope.created_at_ms as i64),
+                    &(envelope.created_at_ms as i64),
+                ],
+            )
+            .map_err(map_command_insert_error)?;
+        Ok(())
+    }
+
+    fn mark_completed(
+        &mut self,
+        command_id: &str,
+        status: CommandStatus,
+        result_message: Option<String>,
+        error_code: Option<String>,
+        updated_at_ms: u64,
+    ) -> Result<(), AdminError> {
+        let should_enqueue_outbox = status == CommandStatus::Succeeded;
+        let status = status_text(&status);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let updated = client
+            .execute(
+                "UPDATE admin_commands
+                 SET status = $2,
+                     result_message = $3,
+                     error_code = $4,
+                     updated_at_ms = $5,
+                     updated_at = now()
+                 WHERE command_id = $1",
+                &[
+                    &command_id,
+                    &status,
+                    &result_message,
+                    &error_code,
+                    &(updated_at_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres command update failed: {error}"))
+            })?;
+        if updated == 0 {
+            return Err(AdminError::Repository(format!(
+                "command record not found: {command_id}"
+            )));
+        }
+        if should_enqueue_outbox {
+            let outbox_id = format!("outbox-{command_id}");
+            let payload = serde_json::json!({
+                "commandId": command_id,
+                "status": status,
+                "resultMessage": result_message,
+                "errorCode": error_code,
+                "updatedAtMs": updated_at_ms
+            });
+            client
+                .execute(
+                    "INSERT INTO admin_outbox (
+                        outbox_id,
+                        command_id,
+                        topic,
+                        payload_json,
+                        status,
+                        attempts,
+                        created_at_ms,
+                        updated_at_ms
+                    ) VALUES ($1,$2,'admin.command.succeeded',$3,'pending',0,$4,$5)
+                    ON CONFLICT (outbox_id) DO NOTHING",
+                    &[
+                        &outbox_id,
+                        &command_id,
+                        &payload,
+                        &(updated_at_ms as i64),
+                        &(updated_at_ms as i64),
+                    ],
+                )
+                .map_err(|error| {
+                    AdminError::Repository(format!("postgres outbox enqueue failed: {error}"))
+                })?;
+        }
+        Ok(())
+    }
+
+    fn get(&self, command_id: &str) -> Option<AdminCommandRecord> {
+        let mut client = self.client.lock().ok()?;
+        client
+            .query_opt(
+                "SELECT envelope_json, status, result_message, error_code, created_at_ms, updated_at_ms
+                 FROM admin_commands
+                 WHERE command_id = $1",
+                &[&command_id],
+            )
+            .ok()
+            .flatten()
+            .and_then(|row| row_to_command_record(&row).ok())
+    }
+
+    fn list_recent(&self, limit: usize) -> Vec<AdminCommandRecord> {
+        let mut client = match self.client.lock() {
+            Ok(client) => client,
+            Err(_) => return Vec::new(),
+        };
+        client
+            .query(
+                "SELECT envelope_json, status, result_message, error_code, created_at_ms, updated_at_ms
+                 FROM admin_commands
+                 ORDER BY updated_at_ms DESC, created_at_ms DESC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map(|rows| {
+                rows.iter()
+                    .filter_map(|row| row_to_command_record(row).ok())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+}
+
+impl AuditRepository for PostgresAdminRepository {
+    fn append(&mut self, record: AuditRecord) -> Result<(), AdminError> {
+        let target_json = serde_json::to_value(&record.target).map_err(|error| {
+            AdminError::Repository(format!("encode audit target failed: {error}"))
+        })?;
+        let permission = permission_text(&record.permission);
+        let status = status_text(&record.status);
+        let target_type = target_type_text(&record.target.target_type);
+        let completed_at_ms = record.completed_at_ms.map(|value| value as i64);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .execute(
+                "INSERT INTO admin_audit_records (
+                    audit_id,
+                    command_id,
+                    operator_id,
+                    operator_email,
+                    operator_role_snapshot,
+                    permission,
+                    target_json,
+                    target_type,
+                    target_id,
+                    reason,
+                    status,
+                    error_code,
+                    trace_id,
+                    created_at_ms,
+                    completed_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)",
+                &[
+                    &record.audit_id,
+                    &record.command_id,
+                    &record.operator_id,
+                    &record.operator_email,
+                    &record.operator_role_snapshot,
+                    &permission,
+                    &target_json,
+                    &target_type,
+                    &record.target.target_id,
+                    &record.reason,
+                    &status,
+                    &record.error_code,
+                    &record.trace_id,
+                    &(record.created_at_ms as i64),
+                    &completed_at_ms,
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres audit insert failed: {error}"))
+            })?;
+        Ok(())
+    }
+
+    fn list_recent(&self, limit: usize) -> Vec<AuditRecord> {
+        let mut client = match self.client.lock() {
+            Ok(client) => client,
+            Err(_) => return Vec::new(),
+        };
+        client
+            .query(
+                "SELECT audit_id, command_id, operator_id, operator_email, operator_role_snapshot,
+                        permission, target_json, reason, status, error_code, trace_id,
+                        created_at_ms, completed_at_ms
+                 FROM admin_audit_records
+                 ORDER BY created_at_ms DESC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map(|rows| {
+                rows.iter()
+                    .filter_map(|row| row_to_audit_record(row).ok())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+}
+
+impl AdminOutboxRepository for PostgresAdminRepository {
+    fn insert_pending(&mut self, message: AdminOutboxMessage) -> Result<(), AdminError> {
+        let status = message.status;
+        let next_attempt_at_ms = message.next_attempt_at_ms.map(|value| value as i64);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .execute(
+                "INSERT INTO admin_outbox (
+                    outbox_id,
+                    command_id,
+                    topic,
+                    payload_json,
+                    status,
+                    attempts,
+                    next_attempt_at_ms,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+                &[
+                    &message.outbox_id,
+                    &message.command_id,
+                    &message.topic,
+                    &message.payload,
+                    &status,
+                    &(message.attempts as i32),
+                    &next_attempt_at_ms,
+                    &(message.created_at_ms as i64),
+                    &(message.updated_at_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres outbox insert failed: {error}"))
+            })?;
+        Ok(())
+    }
+
+    fn mark_dispatched(&mut self, outbox_id: &str, updated_at_ms: u64) -> Result<(), AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let updated = client
+            .execute(
+                "UPDATE admin_outbox
+                 SET status = 'dispatched',
+                     updated_at_ms = $2,
+                     updated_at = now()
+                 WHERE outbox_id = $1",
+                &[&outbox_id, &(updated_at_ms as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres outbox update failed: {error}"))
+            })?;
+        if updated == 0 {
+            return Err(AdminError::Repository(format!(
+                "admin outbox message not found: {outbox_id}"
+            )));
+        }
+        Ok(())
+    }
+
+    fn list_pending(&self, limit: usize) -> Vec<AdminOutboxMessage> {
+        let mut client = match self.client.lock() {
+            Ok(client) => client,
+            Err(_) => return Vec::new(),
+        };
+        client
+            .query(
+                "SELECT outbox_id, command_id, topic, payload_json, status, attempts,
+                        next_attempt_at_ms, created_at_ms, updated_at_ms
+                 FROM admin_outbox
+                 WHERE status = 'pending'
+                 ORDER BY created_at_ms ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map(|rows| {
+                rows.iter()
+                    .filter_map(|row| row_to_outbox_message(row).ok())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum CommandRepositoryBackend {
+    Memory(InMemoryCommandStore),
+    Postgres(PostgresAdminRepository),
+}
+
+impl Default for CommandRepositoryBackend {
+    fn default() -> Self {
+        Self::Memory(InMemoryCommandStore::default())
+    }
+}
+
+impl AdminCommandRepository for CommandRepositoryBackend {
+    fn insert_pending(&mut self, envelope: AdminCommandEnvelope) -> Result<(), AdminError> {
+        match self {
+            Self::Memory(store) => store.insert_pending(envelope),
+            Self::Postgres(store) => AdminCommandRepository::insert_pending(store, envelope),
+        }
+    }
+
+    fn mark_completed(
+        &mut self,
+        command_id: &str,
+        status: CommandStatus,
+        result_message: Option<String>,
+        error_code: Option<String>,
+        updated_at_ms: u64,
+    ) -> Result<(), AdminError> {
+        match self {
+            Self::Memory(store) => store.mark_completed(
+                command_id,
+                status,
+                result_message,
+                error_code,
+                updated_at_ms,
+            ),
+            Self::Postgres(store) => store.mark_completed(
+                command_id,
+                status,
+                result_message,
+                error_code,
+                updated_at_ms,
+            ),
+        }
+    }
+
+    fn get(&self, command_id: &str) -> Option<AdminCommandRecord> {
+        match self {
+            Self::Memory(store) => store.get(command_id),
+            Self::Postgres(store) => store.get(command_id),
+        }
+    }
+
+    fn list_recent(&self, limit: usize) -> Vec<AdminCommandRecord> {
+        match self {
+            Self::Memory(store) => store.list_recent(limit),
+            Self::Postgres(store) => AdminCommandRepository::list_recent(store, limit),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum AuditRepositoryBackend {
+    Memory(InMemoryAuditStore),
+    Postgres(PostgresAdminRepository),
+}
+
+impl Default for AuditRepositoryBackend {
+    fn default() -> Self {
+        Self::Memory(InMemoryAuditStore::default())
+    }
+}
+
+impl AuditRepository for AuditRepositoryBackend {
+    fn append(&mut self, record: AuditRecord) -> Result<(), AdminError> {
+        match self {
+            Self::Memory(store) => store.append(record),
+            Self::Postgres(store) => store.append(record),
+        }
+    }
+
+    fn list_recent(&self, limit: usize) -> Vec<AuditRecord> {
+        match self {
+            Self::Memory(store) => store.list_recent(limit),
+            Self::Postgres(store) => AuditRepository::list_recent(store, limit),
+        }
     }
 }
 
@@ -551,13 +1070,25 @@ impl AccountStoreSystemMailDomain {
     pub fn from_env() -> Self {
         let gateway_mail_url = env::var("ADMIN_GATEWAY_MAIL_URL")
             .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/system-mail".to_string());
-        let account_store_path = env::var("ADMIN_ACCOUNT_STORE_PATH")
-            .or_else(|_| env::var("MIR2_ACCOUNT_STORE_PATH"))
-            .unwrap_or_else(|_| ".mir2-data/accounts.json".to_string());
+        let database_backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
+        let fallback_config = if database_backend.eq_ignore_ascii_case("postgres") {
+            let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
+                .expect("MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store");
+            SimulationConfig::default().with_postgres_account_store(database_url)
+        } else {
+            let account_store_path = env::var("ADMIN_ACCOUNT_STORE_PATH")
+                .or_else(|_| env::var("MIR2_ACCOUNT_STORE_PATH"))
+                .unwrap_or_else(|_| ".mir2-data/accounts.json".to_string());
+            let mut fallback_config = SimulationConfig::default()
+                .with_account_store_path(PathBuf::from(account_store_path));
+            if let Ok(database_url) = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL") {
+                fallback_config = fallback_config.with_account_store_database_url(database_url);
+            }
+            fallback_config
+        };
         Self {
             gateway_mail_url,
-            fallback_config: SimulationConfig::default()
-                .with_account_store_path(PathBuf::from(account_store_path)),
+            fallback_config,
             receipts: Vec::new(),
         }
     }
@@ -741,7 +1272,11 @@ where
     }
 }
 
-type HttpControlPlane = AdminControlPlane<SystemMailExecutor<AccountStoreSystemMailDomain>>;
+type HttpControlPlane = AdminControlPlane<
+    SystemMailExecutor<AccountStoreSystemMailDomain>,
+    CommandRepositoryBackend,
+    AuditRepositoryBackend,
+>;
 
 #[derive(Clone)]
 pub struct AdminApiState {
@@ -750,11 +1285,29 @@ pub struct AdminApiState {
 
 impl Default for AdminApiState {
     fn default() -> Self {
-        Self {
-            control_plane: Arc::new(Mutex::new(AdminControlPlane::new(SystemMailExecutor::new(
-                AccountStoreSystemMailDomain::from_env(),
-            )))),
-        }
+        Self::from_env().expect("admin api state should initialize")
+    }
+}
+
+impl AdminApiState {
+    pub fn from_env() -> Result<Self, AdminError> {
+        let (command_store, audit_store) = match PostgresAdminRepository::from_env()? {
+            Some(repository) => (
+                CommandRepositoryBackend::Postgres(repository.clone()),
+                AuditRepositoryBackend::Postgres(repository),
+            ),
+            None => (
+                CommandRepositoryBackend::default(),
+                AuditRepositoryBackend::default(),
+            ),
+        };
+        Ok(Self {
+            control_plane: Arc::new(Mutex::new(AdminControlPlane::with_repositories(
+                SystemMailExecutor::new(AccountStoreSystemMailDomain::from_env()),
+                command_store,
+                audit_store,
+            ))),
+        })
     }
 }
 
@@ -817,22 +1370,37 @@ async fn health() -> Json<HealthResponse> {
 async fn list_commands(
     State(state): State<AdminApiState>,
 ) -> Result<Json<Vec<AdminCommandRecord>>, ApiError> {
-    let control = state.control_plane.lock().map_err(lock_error)?;
-    Ok(Json(control.command_records(100)))
+    let records = tokio::task::spawn_blocking(move || {
+        let control = state.control_plane.lock().map_err(lock_error)?;
+        Ok::<_, ApiError>(control.command_records(100))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(records))
 }
 
 async fn list_audit(
     State(state): State<AdminApiState>,
 ) -> Result<Json<Vec<AuditRecord>>, ApiError> {
-    let control = state.control_plane.lock().map_err(lock_error)?;
-    Ok(Json(control.audit_records(100)))
+    let records = tokio::task::spawn_blocking(move || {
+        let control = state.control_plane.lock().map_err(lock_error)?;
+        Ok::<_, ApiError>(control.audit_records(100))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(records))
 }
 
 async fn list_system_mail_outbox(
     State(state): State<AdminApiState>,
 ) -> Result<Json<Vec<SystemMailReceipt>>, ApiError> {
-    let control = state.control_plane.lock().map_err(lock_error)?;
-    Ok(Json(control.executor().domain().receipts().to_vec()))
+    let receipts = tokio::task::spawn_blocking(move || {
+        let control = state.control_plane.lock().map_err(lock_error)?;
+        Ok::<_, ApiError>(control.executor().domain().receipts().to_vec())
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(receipts))
 }
 
 async fn submit_system_mail(
@@ -874,8 +1442,12 @@ async fn submit_system_mail(
         created_at_ms: now,
     };
 
-    let mut control = state.control_plane.lock().map_err(lock_error)?;
-    let result = control.submit(envelope, now_ms()).map_err(ApiError::from)?;
+    let result = tokio::task::spawn_blocking(move || {
+        let mut control = state.control_plane.lock().map_err(lock_error)?;
+        control.submit(envelope, now_ms()).map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
     Ok(Json(SubmitCommandResponse { command_id, result }))
 }
 
@@ -919,6 +1491,13 @@ fn lock_error<T>(_: std::sync::PoisonError<T>) -> ApiError {
     ApiError {
         status: StatusCode::INTERNAL_SERVER_ERROR,
         message: "admin control plane lock poisoned".into(),
+    }
+}
+
+fn join_error(error: tokio::task::JoinError) -> ApiError {
+    ApiError {
+        status: StatusCode::INTERNAL_SERVER_ERROR,
+        message: format!("admin blocking task failed: {error}"),
     }
 }
 
@@ -1057,6 +1636,123 @@ fn error_code(error: &AdminError) -> &'static str {
     }
 }
 
+fn repository_lock_error<T>(_: std::sync::PoisonError<T>) -> AdminError {
+    AdminError::Repository("postgres repository lock poisoned".into())
+}
+
+fn map_command_insert_error(error: postgres::Error) -> AdminError {
+    if error
+        .as_db_error()
+        .map(|db_error| db_error.code() == &SqlState::UNIQUE_VIOLATION)
+        .unwrap_or(false)
+    {
+        return AdminError::DuplicateCommand("duplicate postgres command_id".into());
+    }
+    AdminError::Repository(format!("postgres command insert failed: {error}"))
+}
+
+fn row_to_command_record(row: &Row) -> Result<AdminCommandRecord, AdminError> {
+    let envelope_json: Value = row.get("envelope_json");
+    let envelope = serde_json::from_value::<AdminCommandEnvelope>(envelope_json)
+        .map_err(|error| AdminError::Repository(format!("decode command failed: {error}")))?;
+    let status: String = row.get("status");
+    let created_at_ms: i64 = row.get("created_at_ms");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminCommandRecord {
+        envelope,
+        status: parse_status(&status)?,
+        result_message: row.get("result_message"),
+        error_code: row.get("error_code"),
+        created_at_ms: created_at_ms.max(0) as u64,
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_audit_record(row: &Row) -> Result<AuditRecord, AdminError> {
+    let target_json: Value = row.get("target_json");
+    let target = serde_json::from_value::<AdminTarget>(target_json)
+        .map_err(|error| AdminError::Repository(format!("decode audit target failed: {error}")))?;
+    let permission: String = row.get("permission");
+    let status: String = row.get("status");
+    let created_at_ms: i64 = row.get("created_at_ms");
+    let completed_at_ms: Option<i64> = row.get("completed_at_ms");
+    Ok(AuditRecord {
+        audit_id: row.get("audit_id"),
+        command_id: row.get("command_id"),
+        operator_id: row.get("operator_id"),
+        operator_email: row.get("operator_email"),
+        operator_role_snapshot: row.get("operator_role_snapshot"),
+        permission: parse_permission_text(&permission)?,
+        target,
+        reason: row.get("reason"),
+        status: parse_status(&status)?,
+        error_code: row.get("error_code"),
+        trace_id: row.get("trace_id"),
+        created_at_ms: created_at_ms.max(0) as u64,
+        completed_at_ms: completed_at_ms.map(|value| value.max(0) as u64),
+    })
+}
+
+fn row_to_outbox_message(row: &Row) -> Result<AdminOutboxMessage, AdminError> {
+    let attempts: i32 = row.get("attempts");
+    let next_attempt_at_ms: Option<i64> = row.get("next_attempt_at_ms");
+    let created_at_ms: i64 = row.get("created_at_ms");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminOutboxMessage {
+        outbox_id: row.get("outbox_id"),
+        command_id: row.get("command_id"),
+        topic: row.get("topic"),
+        payload: row.get("payload_json"),
+        status: row.get("status"),
+        attempts: attempts.max(0) as u32,
+        next_attempt_at_ms: next_attempt_at_ms.map(|value| value.max(0) as u64),
+        created_at_ms: created_at_ms.max(0) as u64,
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn status_text(status: &CommandStatus) -> String {
+    serde_json::to_value(status)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_string))
+        .unwrap_or_else(|| format!("{status:?}").to_lowercase())
+}
+
+fn parse_status(value: &str) -> Result<CommandStatus, AdminError> {
+    serde_json::from_value(Value::String(value.to_string()))
+        .map_err(|error| AdminError::Repository(format!("decode status failed: {error}")))
+}
+
+fn permission_text(permission: &Permission) -> String {
+    serde_json::to_value(permission)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_string))
+        .unwrap_or_else(|| format!("{permission:?}").to_lowercase())
+}
+
+fn parse_permission_text(value: &str) -> Result<Permission, AdminError> {
+    serde_json::from_value(Value::String(value.to_string()))
+        .map_err(|error| AdminError::Repository(format!("decode permission failed: {error}")))
+}
+
+fn target_type_text(target_type: &TargetType) -> String {
+    serde_json::to_value(target_type)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_string))
+        .unwrap_or_else(|| format!("{target_type:?}").to_lowercase())
+}
+
+fn command_type(command: &AdminCommand) -> String {
+    match command {
+        AdminCommand::SendSystemMail { .. } => "send_system_mail",
+        AdminCommand::GrantItem { .. } => "grant_item",
+        AdminCommand::GrantCurrency { .. } => "grant_currency",
+        AdminCommand::KickPlayer { .. } => "kick_player",
+        AdminCommand::BanAccount { .. } => "ban_account",
+    }
+    .to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1192,6 +1888,28 @@ mod tests {
         assert_eq!(receipts[0].outbox_id, "mail-cmd-1");
         assert_eq!(receipts[0].target_id, "char-1");
         assert_eq!(receipts[0].attachment_count, 1);
+    }
+
+    #[test]
+    fn admin_outbox_store_tracks_pending_and_dispatched_messages() {
+        let mut store = InMemoryAdminOutboxStore::default();
+        store
+            .insert_pending(AdminOutboxMessage::pending(
+                "outbox-1".into(),
+                "cmd-1".into(),
+                "admin.command.send_system_mail".into(),
+                serde_json::json!({"targetId":"Scout"}),
+                1_000,
+            ))
+            .expect("outbox insert should pass");
+
+        assert_eq!(store.list_pending(10).len(), 1);
+
+        store
+            .mark_dispatched("outbox-1", 2_000)
+            .expect("outbox dispatch should pass");
+
+        assert!(store.list_pending(10).is_empty());
     }
 
     #[test]

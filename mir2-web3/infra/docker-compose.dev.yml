@@ -1,0 +1,136 @@
+name: mir2-web3-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mir2-postgres
+    environment:
+      POSTGRES_DB: mir2
+      POSTGRES_USER: mir2
+      POSTGRES_PASSWORD: mir2_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mir2 -d mir2"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: mir2-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  nats:
+    image: nats:2-alpine
+    container_name: mir2-nats
+    command: ["-js", "-sd", "/data"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'PING\\r\\n' | nc -w 1 127.0.0.1 4222 | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: mir2-redpanda
+    profiles: ["events"]
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 1G
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://127.0.0.1:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: mir2-clickhouse
+    profiles: ["analytics"]
+    environment:
+      CLICKHOUSE_DB: mir2_events
+      CLICKHOUSE_USER: mir2
+      CLICKHOUSE_PASSWORD: mir2_dev_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: mir2-meilisearch
+    profiles: ["search"]
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: mir2_dev_master_key
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+
+  loki:
+    image: grafana/loki:latest
+    container_name: mir2-loki
+    profiles: ["observability"]
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mir2-grafana
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+
+volumes:
+  postgres-data:
+  redis-data:
+  nats-data:
+  redpanda-data:
+  clickhouse-data:
+  meilisearch-data:
+  loki-data:
+  grafana-data:

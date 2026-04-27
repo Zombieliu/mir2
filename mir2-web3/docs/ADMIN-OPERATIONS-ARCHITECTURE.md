@@ -6,7 +6,7 @@ Status: implementation started.
 
 Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
 
-Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, and a `SendSystemMail` domain executor. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. `SendSystemMail` now attempts live gateway delivery through `POST /admin/system-mail` before falling back to the persistent account store, so the default local flow is visible in the in-game Stage 5 mail panel and claimable through gameplay.
+Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, a `SendSystemMail` domain executor, Postgres command/audit/outbox adapters, and a JSON account-store import utility. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. `SendSystemMail` now attempts live gateway delivery through `POST /admin/system-mail` before falling back to the persistent account store, so the default local flow is visible in the in-game Stage 5 mail panel and claimable through gameplay.
 
 ## First Principles
 
@@ -118,7 +118,8 @@ Current implementation:
 - `GET /admin/system-mail/outbox`
 - `POST /admin/commands/send-system-mail`
 - Write routes require operator headers and permissions.
-- Command and audit persistence are represented by `AdminCommandRepository` and `AuditRepository`; current local implementation is in-memory.
+- Command and audit persistence are represented by `AdminCommandRepository` and `AuditRepository`. The default local implementation is in-memory; setting `ADMIN_DATABASE_URL` switches the Admin API to Postgres and applies `infra/postgres/migrations/0001_core.sql` at startup.
+- `AdminOutboxRepository` now models the durable outbox. Successful Postgres-backed commands enqueue an `admin.command.succeeded` outbox event; `dispatch-admin-outbox` reads pending Postgres rows, publishes them to NATS subjects, and marks them dispatched. It is intentionally minimal; a JetStream client with retries/dead-letter handling is still needed before production.
 - `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
 - If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 
@@ -193,6 +194,29 @@ Postgres stores:
 - risk flags.
 
 Use normal game tables only through approved service code or migrations. Do not make admin UI write game state tables directly.
+
+Current implementation:
+
+- `infra/postgres/migrations/0001_core.sql` defines the first core tables:
+  `accounts`, `characters`, `character_saves`, `admin_commands`,
+  `admin_audit_records`, and `admin_outbox`.
+- `apps/admin-api` writes `admin_commands` and `admin_audit_records` when
+  `ADMIN_DATABASE_URL` is configured.
+- `apps/admin-api/src/bin/import-account-store.rs` imports the current JSON
+  account store into `accounts`, `characters`, and `character_saves`.
+- `apps/admin-api/src/bin/dispatch-admin-outbox.rs` dispatches pending
+  `admin_outbox` rows to NATS using `NATS_ADDR`.
+- Docker integration smoke has verified the full first slice: account-store JSON
+  import into Postgres, HTTP Admin API command submission writing
+  command/audit/outbox rows, NATS publication of `admin.command.succeeded`, and
+  outbox transition to `dispatched`.
+- `apps/simulation` now supports `MIR2_ACCOUNT_STORE_DATABASE_URL` as a
+  Postgres mirror for JSON account-store saves. The mirror runs on a blocking
+  thread to avoid Tokio nested-runtime panics in gateway/Admin API processes.
+- `MIR2_ACCOUNT_STORE_BACKEND=postgres` is now an explicit opt-in source-of-truth
+  mode for account-store load/save. It loads `accounts.raw_json`, writes through
+  a Postgres transaction, locks account rows, and increments `store_version` /
+  `save_version` on source writes. JSON remains the default runtime backend.
 
 ### Redis
 

@@ -83,11 +83,27 @@ The Rust crate currently covers:
 
 That is intentional for the first landing. It keeps the crate usable for handshake and map-entry work while we extract the large nested bootstrap payload carefully from Crystal.
 
+## Service Contract Direction
+
+Post-1:1 modernization should keep two protocol layers separate:
+
+1. External client protocols:
+   - Web stays WebSocket first.
+   - Crystal compatibility stays TCP trace/codec harness.
+   - Future native/desktop/mobile can add TCP/KCP/QUIC after gateway/session routing is stable.
+
+2. Internal service contracts:
+   - Short term: typed Rust traits and in-process calls.
+   - Medium term: gRPC + Protobuf for account, character, mail, admin command, and zone-routing boundaries.
+   - Event stream: explicit event envelopes before Redpanda becomes required.
+
+Do not turn every module into a network service before in-process boundaries are clean. Start by defining stable request/response and event shapes, then split transport when scale or ownership requires it.
+
 ## Next Step
 
-The next concrete task after this crate is:
+The next concrete protocol modernization task is:
 
-1. start `apps/gateway` as a Rust crate
-2. depend on `mir2-protocol`
-3. implement a local Crystal-wire TCP listener for login/start-game smoke
-4. add a scripted smoke client that proves the first end-to-end handshake
+1. keep Crystal TCP packet trace compatibility green
+2. define internal service boundary names and request/response shapes
+3. add Protobuf contracts only after those shapes stabilize
+4. keep JSON/debug surfaces for smoke tests and admin tooling

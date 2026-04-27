@@ -41,9 +41,16 @@ type CrystalMapManifest = {
 };
 
 type CrystalMapManifestEntry = {
+  light?: number;
   map_file_name?: string;
   map_title?: string;
   mini_map?: number;
+  movements?: Array<{
+    source?: { x?: number; y?: number };
+    destination?: { x?: number; y?: number };
+  }>;
+  respawns?: Array<{ location?: { x?: number; y?: number } }>;
+  safe_zones?: Array<{ location?: { x?: number; y?: number } }>;
 };
 
 type ParsedMap = {
@@ -118,7 +125,7 @@ export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {
     mapTitle: mapInfo?.map_title ?? null,
     miniMapIndex: miniMapIndexForMapFileName(mapFileName, mapInfo),
     sceneView,
-    terrainPatches: terrainPatchesForMap(mapFileName, parsedMap),
+    terrainPatches: terrainPatchesForMap(mapFileName, parsedMap, mapInfo),
     decorObjects: [],
     originalMapRegion: await exportMapRegion(parsedMap, sceneView),
   };
@@ -131,11 +138,7 @@ function loadParsedMap(mapFileName: string): ParsedMap {
 
   const mapPath = path.join(MAP_DIR, `${normalized}.map`);
   if (!existsSync(mapPath)) {
-    const fallback = normalized === "0" ? loadPackagedFallbackMap("0") : mapCache.get("0") ?? loadParsedMap("0");
-    const parsed = {
-      ...fallback,
-      fileName: normalized,
-    };
+    const parsed = normalized === "0" ? loadPackagedFallbackMap("0") : loadMissingMapFallback(normalized);
     mapCache.set(normalized, parsed);
     return parsed;
   }
@@ -659,6 +662,41 @@ function loadPackagedFallbackMap(fileName: string): ParsedMap {
   };
 }
 
+function loadMissingMapFallback(fileName: string): ParsedMap {
+  const dimensions = missingMapDimensionsForMap(fileName);
+  return {
+    fileName,
+    width: dimensions.width,
+    height: dimensions.height,
+    type: -1,
+    cells: null,
+    fallbackOriginalMapRegion: null,
+  };
+}
+
+function missingMapDimensionsForMap(fileName: string) {
+  const mapInfo = mapManifestEntry(fileName);
+  const points: Array<{ x?: number; y?: number }> = [];
+
+  for (const zone of mapInfo?.safe_zones ?? []) {
+    if (zone.location) points.push(zone.location);
+  }
+  for (const respawn of mapInfo?.respawns ?? []) {
+    if (respawn.location) points.push(respawn.location);
+  }
+  for (const movement of mapInfo?.movements ?? []) {
+    if (movement.source) points.push(movement.source);
+    if (movement.destination) points.push(movement.destination);
+  }
+
+  const maxX = Math.max(0, ...points.map((point) => Math.trunc(point.x ?? 0)));
+  const maxY = Math.max(0, ...points.map((point) => Math.trunc(point.y ?? 0)));
+  return {
+    width: Math.max(96, maxX + 64),
+    height: Math.max(96, maxY + 64),
+  };
+}
+
 function loadPackagedStarterMapRegion(): OriginalMapRegion | null {
   try {
     const source = JSON.parse(readFileSync(PACKAGED_STARTER_MAP_REGION_PATH, "utf8")) as Partial<OriginalMapRegion>;
@@ -836,20 +874,31 @@ function fallbackCenterForMap(mapFileName: string, parsedMap: ParsedMap) {
   };
 }
 
-function terrainPatchesForMap(mapFileName: string, parsedMap: ParsedMap) {
+function terrainPatchesForMap(
+  mapFileName: string,
+  parsedMap: ParsedMap,
+  mapInfo: CrystalMapManifestEntry | null,
+) {
   return [
     {
       x: 0,
       y: 0,
       width: Math.min(parsedMap.width, 2000),
       height: Math.min(parsedMap.height, 2000),
-      kind: terrainKindForMap(mapFileName),
+      kind: terrainKindForMap(mapFileName, mapInfo),
     },
   ];
 }
 
-function terrainKindForMap(mapFileName: string): "grass" | "dirt" | "road" | "water" | "stone" {
+function terrainKindForMap(
+  mapFileName: string,
+  mapInfo: CrystalMapManifestEntry | null,
+): "grass" | "dirt" | "road" | "water" | "stone" {
   const normalized = normalizeMapFileName(mapFileName);
+  const title = mapInfo?.map_title?.toLowerCase() ?? "";
+  if (mapInfo?.light === 2 || /store|shop|house|room|inn|guild|palace|temple|weapon|armor/i.test(title)) {
+    return "stone";
+  }
   if (/^d|mine|cave|b\d/i.test(normalized)) return "stone";
   if (/desert|sand|3$|^3/i.test(normalized)) return "dirt";
   if (/river|water|sea/i.test(normalized)) return "water";

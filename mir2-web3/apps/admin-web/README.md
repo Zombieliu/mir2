@@ -18,7 +18,11 @@ Implemented desktop-first pages:
 
 The GM tools page is connected to the Rust Admin API through
 `/api/admin/system-mail`. The Next route adds local operator headers server-side
-and forwards `SendSystemMail` commands to `apps/admin-api`.
+and forwards `SendSystemMail` commands to `apps/admin-api`. With
+`ADMIN_GATEWAY_MAIL_URL` configured, the command reaches the running gateway and
+the player Mail panel can display, claim, and delete the delivered mail. Other
+dashboard pages still use mock read data until real read models/projections are
+implemented.
 
 ## Local Run
 
@@ -63,4 +67,4 @@ Latest smoke screenshots:
 - Add approval and second-confirmation flows for dangerous commands.
 - Back command/audit repositories with Postgres.
 - Wire read models to real account, player, economy, server, and risk projections.
-- Connect the mail outbox to the real mail/account service boundary.
+- Extend real command executors beyond system mail.
