@@ -6,6 +6,8 @@ Purpose: define how to evolve this project after the Crystal / Mir2 1:1 Candidat
 
 Modernization RFC: `docs/TECH-MODERNIZATION-RFC.md` captures the current first-principles architecture discussion for Postgres, Redis, global single-world zoning, Bevy + NextJS, operations backend, and NPC DSL direction.
 
+Architecture adoption plan: `docs/ARCHITECTURE-ADOPTION-PLAN.md` defines which stack components are added now, which are optional profile services, and which are deferred.
+
 ## Current Baseline
 
 The current project state is a verified MMORPG foundation with a Crystal / Mir2 compatibility baseline:
@@ -176,6 +178,7 @@ When a future change intentionally diverges from Crystal:
 ## Immediate Next Planning Tasks
 
 - Finalize `docs/TECH-MODERNIZATION-RFC.md`.
+- Keep `docs/ARCHITECTURE-ADOPTION-PLAN.md` current as infrastructure and service boundaries land.
 - Draft the database target schema and adapter boundary.
 - Draft the cache boundary and invalidation rules.
 - Draft the new login/select UI product requirements.

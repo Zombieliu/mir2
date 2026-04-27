@@ -555,6 +555,7 @@ export default function HomePage() {
   const pendingNpcInteractRef = useRef<string | null>(null);
   const movementPlanRef = useRef<MovementPlan | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
+  const loadingSceneKeyRef = useRef<string | null>(null);
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
@@ -690,6 +691,9 @@ export default function HomePage() {
     const sceneKey = `${normalizedMapFileName}:${Math.floor(center.x / SCENE_CHUNK_WIDTH)}:${Math.floor(
       center.y / SCENE_CHUNK_HEIGHT,
     )}`;
+    if (loadingSceneKeyRef.current === sceneKey) {
+      return;
+    }
     if (!shouldReloadCrystalScene(world.originalMapRegion, normalizedMapFileName, center, sceneKey, loadedSceneKeyRef.current)) {
       return;
     }
@@ -698,6 +702,7 @@ export default function HomePage() {
 
     async function loadSceneBlueprint() {
       try {
+        loadingSceneKeyRef.current = sceneKey;
         appendLog(t("log.loadingSceneBlueprint"));
         const params = new URLSearchParams({
           map: normalizedMapFileName,
@@ -713,6 +718,7 @@ export default function HomePage() {
         if (disposed) return;
 
         loadedSceneKeyRef.current = sceneKey;
+        loadingSceneKeyRef.current = null;
         setWorld((current) => ({
           ...current,
           mapTitle: blueprint.mapTitle ?? current.mapTitle,
@@ -726,14 +732,20 @@ export default function HomePage() {
         if (!disposed) {
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
         }
+        if (loadingSceneKeyRef.current === sceneKey) {
+          loadingSceneKeyRef.current = null;
+        }
       }
     }
 
     void loadSceneBlueprint();
     return () => {
       disposed = true;
+      if (loadingSceneKeyRef.current === sceneKey) {
+        loadingSceneKeyRef.current = null;
+      }
     };
-  }, [self?.x, self?.y, world.mapFileName, world.originalMapRegion]);
+  }, [self?.x, self?.y, world.mapFileName]);
 
   useEffect(() => {
     runtimeRef.current?.setMir2WorldState?.(JSON.stringify(world));
@@ -855,6 +867,14 @@ export default function HomePage() {
           mapFileName: string | null;
           mapTitle: string | null;
           player: { x: number; y: number } | null;
+          sceneTerrainKinds: string[];
+          originalMapRegionSummary: {
+            mapFileName: string;
+            cellCount: number;
+            spriteCount: number;
+            regionBounds: OriginalMapRegion["regionBounds"];
+            playBounds: OriginalMapRegion["playBounds"];
+          } | null;
           selectedObjectId: string | null;
           entities: WorldEntity[];
           groundDrops: GroundDrop[];
@@ -888,6 +908,16 @@ export default function HomePage() {
         mapFileName: world.mapFileName,
         mapTitle: world.mapTitle,
         player: self ? { x: self.x, y: self.y } : null,
+        sceneTerrainKinds: world.terrainPatches.map((patch) => patch.kind),
+        originalMapRegionSummary: world.originalMapRegion
+          ? {
+              mapFileName: world.originalMapRegion.mapFileName,
+              cellCount: world.originalMapRegion.cells.length,
+              spriteCount: Object.keys(world.originalMapRegion.sprites).length,
+              regionBounds: world.originalMapRegion.regionBounds,
+              playBounds: world.originalMapRegion.playBounds,
+            }
+          : null,
         selectedObjectId: world.selectedObjectId,
         entities: world.entities,
         groundDrops: world.groundDrops,
@@ -2197,11 +2227,15 @@ export default function HomePage() {
         };
       });
       const selfEntity = mergedEntities.find((entity) => entity.objectId === playerObjectId) ?? null;
+      const snapshotMapFileName = snapshot.mapFileName ?? current.mapFileName;
+      const hasCurrentSceneForSnapshot =
+        current.originalMapRegion !== null &&
+        normalizeMapFileName(current.originalMapRegion.mapFileName) === normalizeMapFileName(snapshotMapFileName);
 
       return {
         ...current,
         mapTitle: snapshot.mapTitle ?? current.mapTitle,
-        mapFileName: snapshot.mapFileName ?? current.mapFileName,
+        mapFileName: snapshotMapFileName,
         inSafeZone: snapshot.inSafeZone ?? current.inSafeZone,
         playerObjectId,
         playerName: selfEntity?.name ?? current.playerName,
@@ -2230,8 +2264,18 @@ export default function HomePage() {
           current.expandedStorageExpiryTimeBinaryDatetime,
         worldTick: snapshot.tick,
         sceneView: snapshot.sceneView ?? current.sceneView,
-        terrainPatches: snapshot.terrainPatches.length ? snapshot.terrainPatches : current.terrainPatches,
-        decorObjects: snapshot.decorObjects.length ? snapshot.decorObjects : current.decorObjects,
+        terrainPatches:
+          hasCurrentSceneForSnapshot && current.terrainPatches.length
+            ? current.terrainPatches
+            : snapshot.terrainPatches.length
+              ? snapshot.terrainPatches
+              : current.terrainPatches,
+        decorObjects:
+          hasCurrentSceneForSnapshot && current.decorObjects.length
+            ? current.decorObjects
+            : snapshot.decorObjects.length
+              ? snapshot.decorObjects
+              : current.decorObjects,
         originalMapRegion: current.originalMapRegion,
         entities: mergedEntities,
         groundDrops,

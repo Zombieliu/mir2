@@ -1,5 +1,7 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest truth-audit sync: 2026-04-27. `docs/PARITY-TRUTH-AUDIT.md` is now the authoritative status split for Accepted vs Candidate vs Fallback vs Blocked. The project remains **100% Candidate** for automated evidence, backend/server tracked slice remains **99.70% Candidate**, and real full-project accepted Crystal 1:1 remains **roughly 90%** until live Crystal trace, source-data, and human visual/feel gates close.
+
 > Latest sync: R225 completed. Mac-local Candidate evidence was refreshed and remains green: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots with manifest summary counts), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local packet trace matrix 9/9 local artifacts under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. The project remains **100% Candidate** (not **100% Accepted**), backend/server tracked slice remains **99.70%**, and real full-project accepted 1:1 remains **roughly 90.0%**.
 
 > Latest sync: R224 completed. The project remains **100% Candidate** (not 100% Accepted), and the local packet trace matrix blocker is closed. `apps/gateway/src/bin/packet_trace.rs` is restored; `--list-flows` works; `mir2-gateway` passes 53/53 including packet trace bin tests 6/6; require-local `packet_trace --matrix` wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. Active follow-up round is R225. Truthful status split: automated evidence is 100.0% Candidate, backend/server tracked slice is 99.70%, and real full-project accepted 1:1 remains roughly 90.0%. Remaining gates are final human Crystal visual/feel acceptance, missing local `Crystal/Build/Server/Debug/Server.MirDB`, and missing live `MIR2_CRYSTAL_TCP_ADDR`.
@@ -58,6 +60,8 @@ Whole-project real accepted 1:1 estimate: roughly 90.0%
 Backend full-suite status: 664/664 passing; mir2-gateway 54/54 passing
 
 Purpose: this document is the working checklist for moving `mir2-web3` from the current migrated slice toward full Crystal / Mir2 1:1 parity across backend, frontend, assets, integration, and playable operations. It is meant to be updated continuously. When a task is completed and verified, check it off. When a stage gate passes, check the stage gate. Then loop back to the next unchecked item.
+
+Truth source: `docs/PARITY-TRUTH-AUDIT.md` controls status wording. Do not convert Candidate, fallback, or blocked rows into Accepted 1:1 based only on local automation.
 
 This roadmap uses four meanings of completion:
 

@@ -1,5 +1,13 @@
 # Agent Resume Handoff
 
+> Latest product-evolution sync: 2026-04-27-R229 completed. Admin API now supports Postgres command/audit persistence when `ADMIN_DATABASE_URL` is set, applies `infra/postgres/migrations/0001_core.sql`, has an admin outbox repository boundary plus `dispatch-admin-outbox` for NATS publish, and includes `import-account-store` to import `.mir2-data/accounts.json` into Postgres-shaped `accounts`, `characters`, and `character_saves`. Docker integration smoke passed: `.mir2-data/admin-live-smoke.json` imported demo/Scout into Postgres, Postgres-backed Admin API wrote command/audit/outbox rows, `dispatch-admin-outbox` published `admin.command.succeeded` to NATS, and the outbox row became `dispatched`. Focused validation passed with `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8), `cargo +1.89.0 fmt --check`, compose config, and `git diff --check`.
+
+> Latest product-evolution sync: 2026-04-27-R230 completed. Gameplay JSON account-store saves can now mirror into Postgres when `MIR2_ACCOUNT_STORE_DATABASE_URL` is set. `SimulationConfig::save_account_store()` still writes JSON first, then mirrors accounts/characters/character_saves to Postgres on a blocking thread. Gateway and Admin API fallback mail pass the env var into `SimulationConfig`. Docker smoke verified fallback GM mail mirrored Stage 5 mail to `character_saves.stage5_systems_json`; the shared Docker DB was then restored to `.mir2-data/admin-live-smoke.json` demo/Scout `0103 WeaponStore (6,12)`. Verification passed: simulation config 11/11, admin-api 8/8, gateway 55/55, fmt, diff check, and healthy Docker core services.
+
+> Latest product-evolution sync: 2026-04-27-R231 completed. Explicit Postgres account-store source-of-truth mode now exists behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`. It loads from Postgres `accounts.raw_json`, saves transactionally with account row locks, increments `store_version` / `save_version`, and is wired through gateway plus Admin API fallback mail. Docker smoke verified source-mode GM mail kept Scout at `0103 WeaponStore`, added mail in DB, and incremented versions from 0 to 1. Verification passed: simulation config 11/11, admin-api 8/8, gateway 55/55, fmt, compose config/healthy services, and diff check.
+
+> Latest truth-audit sync: 2026-04-27. Read `docs/PARITY-TRUTH-AUDIT.md` before using any percent-complete wording. Current honest status is **100% Candidate** for automated evidence, **99.70% Candidate** for the backend/server tracked slice, and **roughly 90%** for whole-project accepted Crystal 1:1. Do not call the project 100% Accepted until live Crystal trace, source-data, and human visual/feel gates are closed or explicitly accepted.
+
 > Latest product-evolution sync: 2026-04-27-R228 completed. GM system mail is now game-visible and claimable. Admin Web posts to Next `/api/admin/system-mail`, Rust Admin API writes command/audit records, then `AccountStoreSystemMailDomain` posts to gateway `POST /admin/system-mail` at `ADMIN_GATEWAY_MAIL_URL` and falls back to persistent account-store delivery if the gateway is down. Local smoke delivered mail to `Scout` with `deliveryMode: "gateway_live"`, observed it in the gateway WS world snapshot at `payload.stage5Systems.mail`, and claimed it via `stage5Command mail.claim`, raising gold from 1280 to 6280 and adding one `red-potion`.
 
 > Latest product-evolution sync: 2026-04-27-R227 completed. Admin operations now has a working Rust API + Next Admin Web slice: `apps/admin-api` includes command/audit repository traits, in-memory command/audit stores, Axum routes, and `SendSystemMail` domain outbox execution; `apps/admin-web` includes Dashboard, Players, Player Detail, Economy, Activities, Servers, Risk, GM Tools, and Audit pages. GM mail writes are wired through Next `/api/admin/system-mail` to Rust `/admin/commands/send-system-mail`. Verification passed: `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`, `cargo +1.89.0 fmt --check`, admin-web `tsc --noEmit`, admin-web `next build`, direct Rust API curl write, Next proxy curl write, and Playwright screenshots `docs/admin-web-dashboard-smoke.png` / `docs/admin-web-gm-tools-smoke.png`.
@@ -67,9 +75,11 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
    - `docs/AGENT-RUN-LOG.md`
    - `docs/CRYSTAL-1TO1-ROADMAP.md`
    - `docs/BACKEND-1TO1-PROGRESS.md`
+   - `docs/PARITY-TRUTH-AUDIT.md`
    - `docs/WINDOWS-CONTINUATION.md`
    - `docs/POST-1TO1-EVOLUTION-PLAN.md`
    - `docs/TECH-MODERNIZATION-RFC.md`
+   - `docs/ARCHITECTURE-ADOPTION-PLAN.md`
    - `docs/PLATFORM-CLIENT-STRATEGY.md`
    - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
 3. Treat `docs/AGENT-TASK-QUEUE.md` as the source of truth for the active round.
@@ -78,10 +88,11 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
 
 ## Current Checkpoint
 
-- Active round: `2026-04-26-R226`
-- Active task: Windows continuation / human acceptance / external-blocker follow-up after `R225` Mac-local regression refresh.
-- Active round state: R39 manifest-backed map-flag import is still blocked because this Mac lacks `Crystal/Build/Server/Debug/Server.MirDB`; live Crystal trace comparison is blocked until `MIR2_CRYSTAL_TCP_ADDR` is configured. Automated Candidate evidence is refreshed through R225 with 88 Stage 5 screenshots, archived map/minimap JSON, WS load 64/64, web build/type checks, full Rust package regression, and local packet trace matrix evidence under `docs/generated/packet-traces/r225-matrix`.
-- Last completed round: `2026-04-26-R225`
+- Active parity round: `2026-04-26-R226`
+- Active product-evolution continuation: after `2026-04-27-R231`.
+- Active parity state: R39 manifest-backed map-flag import is still blocked because this Mac lacks `Crystal/Build/Server/Debug/Server.MirDB`; live Crystal trace comparison is blocked until `MIR2_CRYSTAL_TCP_ADDR` is configured. Automated Candidate evidence is refreshed through R225 with 88 Stage 5 screenshots, archived map/minimap JSON, WS load 64/64, web build/type checks, full Rust package regression, and local packet trace matrix evidence under `docs/generated/packet-traces/r225-matrix`.
+- Last completed product-evolution round: `2026-04-27-R231`.
+- Last completed parity evidence round: `2026-04-26-R225`.
 - Backend/server parity estimate: `99.70%`
 - Whole-project automation status: `100.0% Candidate`
 - Whole-project real accepted 1:1 estimate: `roughly 90.0%` until final human Crystal visual/feel acceptance, live Crystal trace comparison, and blocked source-data decisions are closed.
@@ -94,7 +105,9 @@ Purpose: this file is the restart-safe handoff for continuing the autonomous Cry
 - Local asset note: `node packages/tooling/scripts/generate-crystal-respawn-manifest.mjs` currently fails here with `ENOENT` for `/Users/henryliu/obelisk/ai/numeron/mir2/Crystal/Build/Server/Debug/Server.MirDB`; do not mark the data-backed map-flag import complete until that asset and matching `Envir/Routes` are available.
 - Windows continuation note: after pulling on Windows, read `docs/WINDOWS-CONTINUATION.md`, then continue from `docs/AGENT-TASK-QUEUE.md` active round `2026-04-26-R226`. Treat `100.0% Candidate`, backend/server tracked-slice `99.70%`, and real full-project accepted 1:1 `roughly 90.0%` as separate metrics. Do not claim backend/server 100% unless live Crystal trace acceptance, the blocked `Server.MirDB` data import, or a documented acceptance decision closes the remaining 0.30%. Do not claim full-project 100% Accepted until the human acceptance script passes or the user explicitly accepts remaining differences.
 - Product evolution note: future work is expected to turn this verified Mir2-style MMORPG foundation into a custom product. Read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, `docs/PLATFORM-CLIENT-STRATEGY.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` before database, cache, login UI, admin backend, global zone, client distribution, or NPC script parser changes. Preserve the current Candidate baseline as a regression reference, but do not treat intentional product divergence as a Crystal parity bug.
-- Admin implementation note: `apps/admin-api` is now an HTTP-capable operations-backend slice with repository traits, in-memory command/audit stores, Axum routes, and a `SendSystemMail` executor. `apps/admin-web` is a separate NextJS operations console with the first desktop UI pages and a Next proxy route wired to Rust for GM system mail. GM system mail is connected to live gateway/account-store Stage 5 mail and is visible/claimable in-game. It is still not backed by Postgres repositories, real operator auth, approvals, or broader live game commands.
+- Truth audit note: `docs/PARITY-TRUTH-AUDIT.md` is the authoritative status split for Accepted vs Candidate vs Fallback vs Blocked. In particular, Mac-local synthetic map rendering, Admin mock read models, JSON account store persistence, missing `Server.MirDB`, missing `MIR2_CRYSTAL_TCP_ADDR`, and missing human visual/feel acceptance must not be counted as final accepted Crystal 1:1.
+- Admin implementation note: `apps/admin-api` is now an HTTP-capable operations-backend slice with repository traits, in-memory command/audit stores, Postgres command/audit adapters, an admin outbox boundary, `dispatch-admin-outbox` NATS publisher, Axum routes, and a `SendSystemMail` executor. `apps/admin-web` is a separate NextJS operations console with the first desktop UI pages and a Next proxy route wired to Rust for GM system mail. GM system mail is connected to live gateway/account-store Stage 5 mail and is visible/claimable in-game.
+- Persistence implementation note: default gameplay account persistence is still JSON for parity/local safety. `MIR2_ACCOUNT_STORE_DATABASE_URL` mirrors JSON saves into Postgres. `MIR2_ACCOUNT_STORE_BACKEND=postgres` opts into Postgres source-of-truth mode with account row locks and `store_version` / `save_version` increments. It still needs real operator auth, approvals, production JetStream retry/dead-letter behavior, broader live game commands, and automated conflict/stale-writer integration tests.
 
 ## Last Completed Round: R224
 

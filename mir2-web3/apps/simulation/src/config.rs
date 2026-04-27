@@ -14,7 +14,9 @@ use mir2_game_data::{
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point, SelectInfo};
+use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -666,6 +668,12 @@ pub enum MonsterSpawnSource {
     CrystalStarterRegion,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AccountStoreDatabaseMode {
+    Mirror,
+    SourceOfTruth,
+}
+
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
     pub map: MapInformation,
@@ -689,6 +697,8 @@ pub struct SimulationConfig {
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
+    pub account_store_database_url: Option<String>,
+    pub account_store_database_mode: AccountStoreDatabaseMode,
 }
 
 impl Default for SimulationConfig {
@@ -773,6 +783,8 @@ impl SimulationConfig {
             map_drop_rules: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
+            account_store_database_url: None,
+            account_store_database_mode: AccountStoreDatabaseMode::Mirror,
         }
     }
 
@@ -786,15 +798,57 @@ impl SimulationConfig {
         self
     }
 
+    pub fn with_account_store_database_url(mut self, database_url: impl Into<String>) -> Self {
+        let database_url = database_url.into();
+        if !database_url.trim().is_empty() {
+            self.account_store_database_url = Some(database_url);
+            self.account_store_database_mode = AccountStoreDatabaseMode::Mirror;
+        }
+        self
+    }
+
+    pub fn with_postgres_account_store(mut self, database_url: impl Into<String>) -> Self {
+        let database_url = database_url.into();
+        if !database_url.trim().is_empty() {
+            let store = load_account_store_from_postgres(
+                database_url.clone(),
+                self.default_character.clone(),
+            )
+            .unwrap_or_else(|error| {
+                eprintln!("failed to load postgres account store, using default: {error}");
+                AccountStore::new(self.default_character.clone())
+            });
+            self.account_store = Arc::new(Mutex::new(store));
+            self.account_store_path = None;
+            self.account_store_database_url = Some(database_url);
+            self.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
+        }
+        self
+    }
+
     pub fn save_account_store(&self) -> Result<(), String> {
-        let Some(path) = self.account_store_path.as_deref() else {
-            return Ok(());
+        let store = {
+            let store = self
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            store.clone()
         };
-        let store = self
-            .account_store
-            .lock()
-            .expect("account store mutex should not be poisoned");
-        store.save_to_path(path)
+        if self.account_store_database_mode == AccountStoreDatabaseMode::Mirror {
+            if let Some(path) = self.account_store_path.as_deref() {
+                store.save_to_path(path)?;
+            }
+        }
+        if let Some(database_url) = self.account_store_database_url.as_deref() {
+            save_account_store_to_postgres(
+                database_url.to_string(),
+                store,
+                self.account_store_database_mode,
+            )?;
+        } else if let Some(path) = self.account_store_path.as_deref() {
+            store.save_to_path(path)?;
+        }
+        Ok(())
     }
 
     pub fn backup_account_store(&self, backup_path: impl AsRef<Path>) -> Result<(), String> {
@@ -835,6 +889,306 @@ impl SimulationConfig {
         }
 
         self.save_account_store()
+    }
+}
+
+fn load_account_store_from_postgres(
+    database_url: String,
+    default_character: CharacterRecord,
+) -> Result<AccountStore, String> {
+    std::thread::spawn(move || {
+        let mut client = Client::connect(&database_url, NoTls)
+            .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
+        client
+            .batch_execute(include_str!(
+                "../../../infra/postgres/migrations/0001_core.sql"
+            ))
+            .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        let rows = client
+            .query(
+                "SELECT account_id, raw_json FROM accounts ORDER BY account_id",
+                &[],
+            )
+            .map_err(|error| format!("postgres account-store load failed: {error}"))?;
+        if rows.is_empty() {
+            let store = AccountStore::new(default_character);
+            upsert_account_store_to_postgres(
+                &mut client,
+                &store,
+                AccountStoreDatabaseMode::SourceOfTruth,
+            )?;
+            return Ok(store);
+        }
+        let mut accounts = BTreeMap::new();
+        for row in rows {
+            let account_id: String = row.get("account_id");
+            let raw_json: Value = row.get("raw_json");
+            let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
+                format!("postgres account raw_json decode failed for {account_id}: {error}")
+            })?;
+            accounts.insert(account_id, account);
+        }
+        Ok(AccountStore {
+            schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+            accounts,
+        }
+        .with_default_account(default_character)
+        .migrate_to_current_schema())
+    })
+    .join()
+    .map_err(|_| "postgres account-store load thread panicked".to_string())?
+}
+
+fn save_account_store_to_postgres(
+    database_url: String,
+    store: AccountStore,
+    mode: AccountStoreDatabaseMode,
+) -> Result<(), String> {
+    std::thread::spawn(move || {
+        let mut client = Client::connect(&database_url, NoTls)
+            .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
+        client
+            .batch_execute(include_str!(
+                "../../../infra/postgres/migrations/0001_core.sql"
+            ))
+            .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        upsert_account_store_to_postgres(&mut client, &store, mode)
+    })
+    .join()
+    .map_err(|_| "postgres account-store mirror thread panicked".to_string())?
+}
+
+fn upsert_account_store_to_postgres(
+    client: &mut Client,
+    store: &AccountStore,
+    mode: AccountStoreDatabaseMode,
+) -> Result<(), String> {
+    let mut transaction = client
+        .transaction()
+        .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
+    for (account_id, account) in &store.accounts {
+        transaction
+            .execute(
+                "SELECT account_id FROM accounts WHERE account_id = $1 FOR UPDATE",
+                &[&account_id],
+            )
+            .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?;
+        upsert_account_record(&mut transaction, account_id, account, mode)?;
+        let mut characters = account.characters.clone();
+        for save in account.saves.values() {
+            if !characters
+                .iter()
+                .any(|character| character.index == save.character.index)
+            {
+                characters.push(save.character.clone());
+            }
+        }
+        characters.sort_by_key(|character| character.index);
+        characters.dedup_by_key(|character| character.index);
+        for character in &characters {
+            upsert_character_record(&mut transaction, account_id, character)?;
+        }
+        for (character_index, save) in &account.saves {
+            upsert_character_save_record(
+                &mut transaction,
+                account_id,
+                *character_index,
+                save,
+                mode,
+            )?;
+        }
+    }
+    transaction
+        .commit()
+        .map_err(|error| format!("postgres account-store commit failed: {error}"))?;
+    Ok(())
+}
+
+fn upsert_account_record(
+    client: &mut Transaction<'_>,
+    account_id: &str,
+    account: &AccountRecord,
+    mode: AccountStoreDatabaseMode,
+) -> Result<(), String> {
+    let raw_json = to_json(account)?;
+    let account_id = account_id.to_string();
+    let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
+    client
+        .execute(
+            "INSERT INTO accounts (
+                account_id,
+                password_snapshot,
+                storage_size,
+                has_expanded_storage,
+                expanded_storage_expiry_time_binary_datetime,
+                storage_password_snapshot,
+                storage_password_last_set_binary_datetime,
+                store_version,
+                raw_json,
+                updated_at
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,1,$8,now())
+            ON CONFLICT (account_id) DO UPDATE SET
+                password_snapshot = EXCLUDED.password_snapshot,
+                storage_size = EXCLUDED.storage_size,
+                has_expanded_storage = EXCLUDED.has_expanded_storage,
+                expanded_storage_expiry_time_binary_datetime = EXCLUDED.expanded_storage_expiry_time_binary_datetime,
+                storage_password_snapshot = EXCLUDED.storage_password_snapshot,
+                storage_password_last_set_binary_datetime = EXCLUDED.storage_password_last_set_binary_datetime,
+                store_version = CASE WHEN $9 THEN accounts.store_version + 1 ELSE accounts.store_version END,
+                raw_json = EXCLUDED.raw_json,
+                updated_at = now()",
+            &[
+                &account_id,
+                &account.password,
+                &(account.storage_size as i32),
+                &account.has_expanded_storage,
+                &account.expanded_storage_expiry_time_binary_datetime,
+                &account.storage_password,
+                &account.storage_password_last_set_binary_datetime,
+                &raw_json,
+                &should_increment_version,
+            ],
+        )
+        .map_err(|error| format!("postgres account upsert failed for {account_id}: {error}"))?;
+    Ok(())
+}
+
+fn upsert_character_record(
+    client: &mut Transaction<'_>,
+    account_id: &str,
+    character: &CharacterRecord,
+) -> Result<(), String> {
+    let raw_json = to_json(character)?;
+    client
+        .execute(
+            "INSERT INTO characters (
+                account_id,
+                character_index,
+                character_name,
+                class,
+                gender,
+                level,
+                raw_json,
+                updated_at
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,now())
+            ON CONFLICT (account_id, character_index) DO UPDATE SET
+                character_name = EXCLUDED.character_name,
+                class = EXCLUDED.class,
+                gender = EXCLUDED.gender,
+                level = EXCLUDED.level,
+                raw_json = EXCLUDED.raw_json,
+                updated_at = now()",
+            &[
+                &account_id,
+                &character.index,
+                &character.name,
+                &enum_text(&character.class)?,
+                &enum_text(&character.gender)?,
+                &(character.level as i32),
+                &raw_json,
+            ],
+        )
+        .map_err(|error| {
+            format!(
+                "postgres character upsert failed for {account_id}/{}: {error}",
+                character.index
+            )
+        })?;
+    Ok(())
+}
+
+fn upsert_character_save_record(
+    client: &mut Transaction<'_>,
+    account_id: &str,
+    character_index: i32,
+    save: &CharacterSaveRecord,
+    mode: AccountStoreDatabaseMode,
+) -> Result<(), String> {
+    let snapshot_json = to_json(save)?;
+    let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
+    let stage5_systems_json = save
+        .stage5_systems_json
+        .as_deref()
+        .map(serde_json::from_str::<Value>)
+        .transpose()
+        .map_err(|error| {
+            format!("stage5 systems json decode failed for {account_id}/{character_index}: {error}")
+        })?;
+    client
+        .execute(
+            "INSERT INTO character_saves (
+                account_id,
+                character_index,
+                map_file_name,
+                map_title,
+                position_x,
+                position_y,
+                direction,
+                hp,
+                max_hp,
+                mp,
+                gold,
+                credit,
+                snapshot_json,
+                stage5_systems_json,
+                save_version,
+                updated_at
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,1,now())
+            ON CONFLICT (account_id, character_index) DO UPDATE SET
+                map_file_name = EXCLUDED.map_file_name,
+                map_title = EXCLUDED.map_title,
+                position_x = EXCLUDED.position_x,
+                position_y = EXCLUDED.position_y,
+                direction = EXCLUDED.direction,
+                hp = EXCLUDED.hp,
+                max_hp = EXCLUDED.max_hp,
+                mp = EXCLUDED.mp,
+                gold = EXCLUDED.gold,
+                credit = EXCLUDED.credit,
+                snapshot_json = EXCLUDED.snapshot_json,
+                stage5_systems_json = EXCLUDED.stage5_systems_json,
+                save_version = CASE WHEN $15 THEN character_saves.save_version + 1 ELSE character_saves.save_version END,
+                updated_at = now()",
+            &[
+                &account_id,
+                &character_index,
+                &save.map_file_name,
+                &save.map_title,
+                &(save.position.x as i32),
+                &(save.position.y as i32),
+                &enum_text(&save.direction)?,
+                &save.hp,
+                &save.max_hp,
+                &save.mp,
+                &(save.gold as i64),
+                &(save.credit as i64),
+                &snapshot_json,
+                &stage5_systems_json,
+                &should_increment_version,
+            ],
+        )
+        .map_err(|error| {
+            format!(
+                "postgres character save upsert failed for {account_id}/{character_index}: {error}"
+            )
+        })?;
+    Ok(())
+}
+
+fn to_json<T>(value: &T) -> Result<Value, String>
+where
+    T: Serialize,
+{
+    serde_json::to_value(value).map_err(|error| format!("json encode failed: {error}"))
+}
+
+fn enum_text<T>(value: &T) -> Result<String, String>
+where
+    T: Serialize,
+{
+    match serde_json::to_value(value).map_err(|error| format!("enum encode failed: {error}"))? {
+        Value::String(value) => Ok(value),
+        other => Ok(other.to_string()),
     }
 }
 

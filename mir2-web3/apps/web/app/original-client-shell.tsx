@@ -5166,7 +5166,7 @@ function terrainKindAt(
     }
   }
 
-  return "grass";
+  return patches[0]?.kind ?? "grass";
 }
 
 function sceneTextureForTerrain(terrain: string, variation: number) {
