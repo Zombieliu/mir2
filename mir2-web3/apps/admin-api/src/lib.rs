@@ -1022,6 +1022,181 @@ impl PostgresAdminRepository {
             .map(row_to_trade_graph_edge)
             .collect()
     }
+
+    pub fn upsert_zone_runtime(
+        &self,
+        request: UpsertZoneRuntimeRequest,
+        now_ms: u64,
+    ) -> Result<AdminZoneRuntimeRecord, AdminError> {
+        let name = required_string("name", &request.name)?;
+        let zone_id = request
+            .zone_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| normalized_id("zone", &name, now_ms));
+        let status = optional_string(request.status).unwrap_or_else(|| "Healthy".to_string());
+        let host = optional_string(request.host).unwrap_or_default();
+        let process_id = optional_string(request.process_id).unwrap_or_default();
+        let map_count = request.map_count.unwrap_or_default().min(i32::MAX as usize) as i32;
+        let player_count = request
+            .player_count
+            .unwrap_or_default()
+            .min(i32::MAX as usize) as i32;
+        let tick_rate = request.tick_rate.unwrap_or_default().min(i32::MAX as u32) as i32;
+        let uptime_seconds = request
+            .uptime_seconds
+            .unwrap_or_default()
+            .min(i64::MAX as u64) as i64;
+        let source =
+            optional_string(request.source).unwrap_or_else(|| "operator_projection".into());
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_zone_runtime_records (
+                    zone_id,
+                    name,
+                    status,
+                    host,
+                    process_id,
+                    map_count,
+                    player_count,
+                    tick_rate,
+                    uptime_seconds,
+                    source,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                ON CONFLICT (zone_id) DO UPDATE
+                SET name = EXCLUDED.name,
+                    status = EXCLUDED.status,
+                    host = EXCLUDED.host,
+                    process_id = EXCLUDED.process_id,
+                    map_count = EXCLUDED.map_count,
+                    player_count = EXCLUDED.player_count,
+                    tick_rate = EXCLUDED.tick_rate,
+                    uptime_seconds = EXCLUDED.uptime_seconds,
+                    source = EXCLUDED.source,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING zone_id, name, status, host, process_id, map_count, player_count,
+                          tick_rate, uptime_seconds, source, updated_at_ms",
+                &[
+                    &zone_id,
+                    &name,
+                    &status,
+                    &host,
+                    &process_id,
+                    &map_count,
+                    &player_count,
+                    &tick_rate,
+                    &uptime_seconds,
+                    &source,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres zone runtime upsert failed: {error}"))
+            })?;
+        row_to_zone_runtime_record(&row)
+    }
+
+    pub fn list_zone_runtime(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<AdminZoneRuntimeRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT zone_id, name, status, host, process_id, map_count, player_count,
+                        tick_rate, uptime_seconds, source, updated_at_ms
+                 FROM admin_zone_runtime_records
+                 ORDER BY updated_at_ms DESC, zone_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres zone runtime list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_zone_runtime_record)
+            .collect()
+    }
+
+    pub fn upsert_operator(
+        &self,
+        request: UpsertAdminOperatorRequest,
+        actor_id: &str,
+        now_ms: u64,
+    ) -> Result<AdminOperatorRecord, AdminError> {
+        let email = required_string("email", &request.email)?;
+        let role = required_string("role", &request.role)?;
+        let operator_id = request
+            .operator_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| email.clone());
+        let status = optional_string(request.status).unwrap_or_else(|| "Active".to_string());
+        let permissions = canonical_permissions(request.permissions)?;
+        let permissions_json = serde_json::to_value(&permissions).map_err(|error| {
+            AdminError::Repository(format!("encode operator permissions failed: {error}"))
+        })?;
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_operators (
+                    operator_id,
+                    email,
+                    role,
+                    status,
+                    permissions_json,
+                    created_by,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$7)
+                ON CONFLICT (operator_id) DO UPDATE
+                SET email = EXCLUDED.email,
+                    role = EXCLUDED.role,
+                    status = EXCLUDED.status,
+                    permissions_json = EXCLUDED.permissions_json,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING operator_id, email, role, status, permissions_json, updated_at_ms",
+                &[
+                    &operator_id,
+                    &email,
+                    &role,
+                    &status,
+                    &permissions_json,
+                    &actor_id,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator upsert failed: {error}"))
+            })?;
+        row_to_operator_record(&row)
+    }
+
+    pub fn list_operators(&self, limit: usize) -> Result<Vec<AdminOperatorRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT operator_id, email, role, status, permissions_json, updated_at_ms
+                 FROM admin_operators
+                 ORDER BY updated_at_ms DESC, operator_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_operator_record)
+            .collect()
+    }
 }
 
 impl AdminCommandRepository for PostgresAdminRepository {
@@ -2511,9 +2686,12 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         .route("/admin/read/activities", get(read_activities))
         .route("/admin/read/servers", get(read_servers))
         .route("/admin/read/risk", get(read_risk))
+        .route("/admin/read/operators", get(read_operators))
         .route("/admin/activities", post(upsert_activity))
         .route("/admin/economy/price-feeds", post(upsert_price_feed))
         .route("/admin/risk/trade-edges", post(upsert_trade_graph_edge))
+        .route("/admin/servers/zones", post(upsert_zone_runtime))
+        .route("/admin/operators", post(upsert_operator))
         .route("/admin/commands/send-system-mail", post(submit_system_mail))
         .route("/admin/commands/grant-item", post(submit_grant_item))
         .route(
@@ -2625,6 +2803,32 @@ pub struct UpsertTradeGraphEdgeRequest {
     pub signal: String,
     pub risk: String,
     pub evidence: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertZoneRuntimeRequest {
+    pub zone_id: Option<String>,
+    pub name: String,
+    pub status: Option<String>,
+    pub host: Option<String>,
+    pub process_id: Option<String>,
+    pub map_count: Option<usize>,
+    pub player_count: Option<usize>,
+    pub tick_rate: Option<u32>,
+    pub uptime_seconds: Option<u64>,
+    pub source: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertAdminOperatorRequest {
+    pub operator_id: Option<String>,
+    pub email: String,
+    pub role: String,
+    pub status: Option<String>,
+    #[serde(default)]
+    pub permissions: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2874,7 +3078,45 @@ pub struct AdminServersReadModel {
     pub character_count: usize,
     pub zones_online: usize,
     pub zones_source: String,
+    pub zone_runtime_configured: bool,
+    pub zones: Vec<AdminZoneRuntimeRecord>,
     pub services: Vec<AdminServiceStatus>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminZoneRuntimeRecord {
+    pub zone_id: String,
+    pub name: String,
+    pub status: String,
+    pub host: String,
+    pub process_id: String,
+    pub map_count: usize,
+    pub player_count: usize,
+    pub tick_rate: u32,
+    pub uptime_seconds: u64,
+    pub source: String,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminOperatorsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub operators: Vec<AdminOperatorRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminOperatorRecord {
+    pub operator_id: String,
+    pub email: String,
+    pub role: String,
+    pub status: String,
+    pub permissions: Vec<String>,
+    pub updated_at_ms: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3364,7 +3606,34 @@ async fn read_servers(
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
         let presence = load_gateway_presence();
-        Ok::<_, ApiError>(build_servers_read_model(&snapshot, &presence))
+        let zones = match state.admin_store.as_ref() {
+            Some(repository) => repository.list_zone_runtime(128).map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_servers_read_model(
+            &snapshot,
+            &presence,
+            zones,
+            state.admin_store.is_some(),
+        ))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_zone_runtime(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertZoneRuntimeRequest>,
+) -> Result<Json<AdminZoneRuntimeRecord>, ApiError> {
+    let operator = operator_from_headers(&headers)?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_zone_runtime(request, now_ms())
+            .map_err(ApiError::from)
     })
     .await
     .map_err(join_error)??;
@@ -3404,6 +3673,36 @@ async fn upsert_trade_graph_edge(
     let response = tokio::task::spawn_blocking(move || {
         repository
             .upsert_trade_graph_edge(request, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_operators(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminOperatorsReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        build_operators_read_model(state.admin_store.as_ref()).map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_operator(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertAdminOperatorRequest>,
+) -> Result<Json<AdminOperatorRecord>, ApiError> {
+    let operator = operator_from_headers(&headers)?;
+    require_operator_permission(&operator, Permission::PermissionManage)?;
+    let repository = configured_admin_store(&state)?;
+    let actor_id = operator.id.clone();
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_operator(request, &actor_id, now_ms())
             .map_err(ApiError::from)
     })
     .await
@@ -4210,23 +4509,56 @@ fn build_gold_distribution(players: &[AdminPlayerSummary]) -> Vec<AdminDistribut
 fn build_servers_read_model(
     snapshot: &AccountReadSnapshot,
     presence: &GatewayPresenceSnapshot,
+    zones: Vec<AdminZoneRuntimeRecord>,
+    zone_runtime_configured: bool,
 ) -> AdminServersReadModel {
     let players = build_player_summaries(snapshot, Some(presence));
-    let zones_online = presence
+    let session_zones_online = presence
         .sessions
         .iter()
         .filter_map(|session| session.map_file_name.as_deref())
         .filter(|map| !map.trim().is_empty())
         .collect::<BTreeSet<_>>()
         .len();
+    let runtime_zones_online = zones
+        .iter()
+        .filter(|zone| zone.status.eq_ignore_ascii_case("healthy"))
+        .count();
+    let zones_online = runtime_zones_online.max(session_zones_online);
+    let zones_source = if zone_runtime_configured {
+        "postgres_admin_zone_runtime + gateway_session_cache".into()
+    } else {
+        presence.source.clone()
+    };
     AdminServersReadModel {
         generated_at_ms: now_ms(),
         account_store_source: snapshot.source.clone(),
         account_count: snapshot.accounts.len(),
         character_count: players.len(),
         zones_online,
-        zones_source: presence.source.clone(),
+        zones_source,
+        zone_runtime_configured,
+        zones,
         services: build_service_statuses(snapshot, Some(presence)),
+    }
+}
+
+fn build_operators_read_model(
+    repository: Option<&PostgresAdminRepository>,
+) -> Result<AdminOperatorsReadModel, AdminError> {
+    match repository {
+        Some(repository) => Ok(AdminOperatorsReadModel {
+            source: "postgres_admin_operators".into(),
+            generated_at_ms: now_ms(),
+            configured: true,
+            operators: repository.list_operators(128)?,
+        }),
+        None => Ok(AdminOperatorsReadModel {
+            source: "operator_store_unwired".into(),
+            generated_at_ms: now_ms(),
+            configured: false,
+            operators: Vec::new(),
+        }),
     }
 }
 
@@ -5123,6 +5455,38 @@ fn clean_string_list(values: Vec<String>) -> Vec<String> {
         .collect()
 }
 
+fn canonical_permissions(values: Vec<String>) -> Result<Vec<String>, AdminError> {
+    let mut permissions = BTreeSet::new();
+    for value in clean_string_list(values) {
+        let permission = serde_json::from_value::<Permission>(Value::String(value.clone()))
+            .map_err(|_| AdminError::InvalidCommand(format!("unknown permission: {value}")))?;
+        permissions.insert(permission_text(&permission));
+    }
+    Ok(permissions.into_iter().collect())
+}
+
+fn normalized_id(prefix: &str, name: &str, now_ms: u64) -> String {
+    let mut slug = name
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() {
+                ch.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>();
+    while slug.contains("--") {
+        slug = slug.replace("--", "-");
+    }
+    let slug = slug.trim_matches('-');
+    if slug.is_empty() {
+        format!("{prefix}-{now_ms}")
+    } else {
+        format!("{prefix}-{slug}")
+    }
+}
+
 fn error_code(error: &AdminError) -> &'static str {
     match error {
         AdminError::PermissionDenied { .. } => "permission_denied",
@@ -5336,6 +5700,43 @@ fn row_to_trade_graph_edge(row: &Row) -> Result<AdminRiskGraphEdge, AdminError> 
         signal: row.get("signal"),
         risk: row.get("risk"),
         evidence: row.get("evidence"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_zone_runtime_record(row: &Row) -> Result<AdminZoneRuntimeRecord, AdminError> {
+    let map_count: i32 = row.get("map_count");
+    let player_count: i32 = row.get("player_count");
+    let tick_rate: i32 = row.get("tick_rate");
+    let uptime_seconds: i64 = row.get("uptime_seconds");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminZoneRuntimeRecord {
+        zone_id: row.get("zone_id"),
+        name: row.get("name"),
+        status: row.get("status"),
+        host: row.get("host"),
+        process_id: row.get("process_id"),
+        map_count: map_count.max(0) as usize,
+        player_count: player_count.max(0) as usize,
+        tick_rate: tick_rate.max(0) as u32,
+        uptime_seconds: uptime_seconds.max(0) as u64,
+        source: row.get("source"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_operator_record(row: &Row) -> Result<AdminOperatorRecord, AdminError> {
+    let permissions_json: Value = row.get("permissions_json");
+    let permissions = serde_json::from_value::<Vec<String>>(permissions_json).map_err(|error| {
+        AdminError::Repository(format!("decode operator permissions failed: {error}"))
+    })?;
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminOperatorRecord {
+        operator_id: row.get("operator_id"),
+        email: row.get("email"),
+        role: row.get("role"),
+        status: row.get("status"),
+        permissions,
         updated_at_ms: updated_at_ms.max(0) as u64,
     })
 }
@@ -5889,7 +6290,7 @@ mod tests {
         assert_eq!(players[0].gold, 9_999);
         assert_eq!(players[0].runtime_tick, Some(42));
 
-        let servers = build_servers_read_model(&snapshot, &presence);
+        let servers = build_servers_read_model(&snapshot, &presence, Vec::new(), false);
         assert_eq!(servers.zones_online, 1);
         assert_eq!(servers.zones_source, "gateway_session_cache");
         assert!(servers

@@ -18,7 +18,8 @@ The crate now contains:
 - in-memory command/audit repositories for local tests and smoke runs;
 - Postgres schema migration for accounts, characters, character saves, admin
   command records, audit records, admin outbox records, activity config,
-  market price feeds, and trade graph edges;
+  market price feeds, trade graph edges, zone runtime telemetry, and operator
+  records;
 - account-store JSON import utility for migrating `.mir2-data/accounts.json`
   into Postgres-shaped tables;
 - command idempotency guard through `AdminCommandRepository::insert_pending`;
@@ -34,8 +35,8 @@ The crate now contains:
   account store or explicit Postgres account-store source, then overlay Gateway
   online presence from `ADMIN_GATEWAY_SESSIONS_URL` /
   `http://127.0.0.1:7110/admin/sessions`. When `ADMIN_DATABASE_URL` is set,
-  Activities, Economy price feeds, and Risk trade graph also read/write
-  Postgres projection tables;
+  Activities, Economy price feeds, Risk trade graph, Servers zone runtime, and
+  Operators/RBAC also read/write Postgres projection/config tables;
 - optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
 - optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
   to fixed operator identities and permissions.
@@ -120,9 +121,12 @@ Routes:
 - `GET /admin/read/activities`
 - `GET /admin/read/servers`
 - `GET /admin/read/risk`
+- `GET /admin/read/operators`
 - `POST /admin/activities`
 - `POST /admin/economy/price-feeds`
 - `POST /admin/risk/trade-edges`
+- `POST /admin/servers/zones`
+- `POST /admin/operators`
 - `POST /admin/commands/send-system-mail`
 - `POST /admin/commands/grant-item`
 - `POST /admin/commands/grant-currency`
@@ -142,8 +146,9 @@ x-operator-permissions
 ```
 
 For local GM mail smoke, include `mail_send_system` in
-`x-operator-permissions`. Activity, market price, and trade graph projection
-writes require `content_publish`.
+`x-operator-permissions`. Activity, market price, trade graph, and zone runtime
+projection writes require `content_publish`; operator/RBAC writes require
+`permission_manage`.
 
 If `ADMIN_OPERATOR_TOKEN` is set, requests must also include
 `Authorization: Bearer <token>`. If `ADMIN_OPERATOR_POLICY_PATH` is set, the

@@ -1,6 +1,6 @@
 # Architecture Adoption Plan
 
-Last updated: 2026-04-27
+Last updated: 2026-04-28
 
 Purpose: define what parts of the target MMORPG architecture should be added now, what should be introduced behind interfaces, and what should remain documented until scale or product need justifies it.
 
@@ -27,7 +27,7 @@ Add boundaries before adding infrastructure. The project should become cloud-rea
 | NATS | Add as early internal command/notification bus candidate | Fits lightweight GM command dispatch, service notifications, online/offline fanout | Add local dev service and command-bus abstraction; avoid making it the source of truth |
 | Redpanda + ClickHouse | Add local event-stream and analytics stack | Gives admin/gameplay events an append-only path and a queryable projection target without making it gameplay authority | Add Compose services plus a ClickHouse Kafka-engine projection for `admin.command.succeeded` |
 | Admin API | Keep Rust Axum for now | It already exists, shares domain types, and avoids a second backend stack too early | Continue building typed command/audit/repository layers in `apps/admin-api` |
-| Admin Web | Keep NextJS | Fastest path for high-quality operations UI | Continue replacing remaining empty projections with real read models; dashboard/player/economy/activity/risk/server reads are now Rust-backed, with deeper zone telemetry still open |
+| Admin Web | Keep NextJS | Fastest path for high-quality operations UI | Continue replacing remaining empty projections with real read models; dashboard/player/economy/activity/risk/server/operator reads are now Rust-backed, and server zone telemetry has a Postgres-backed write/read path |
 | Docker Compose | Add local dev infra | Lets Windows/Mac run the same Postgres/Redis/NATS/Redpanda/ClickHouse baseline | Add `infra/docker-compose.dev.yml` with optional search/observability profiles |
 | Observability contract | Document metrics/log/tracing now | Easy to wire later if route names, request ids, and command ids are consistent from the start | Use trace ids and structured logs in new service boundaries |
 

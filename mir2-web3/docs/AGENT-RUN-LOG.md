@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-28-R251-R253 completed. Admin Servers now has real Postgres zone runtime telemetry, Admin Operators/RBAC has real Postgres operator records and a new Operators page, and the console-wide HTTP smoke is green across 11 pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live API write/read smoke for zone telemetry and operator RBAC, all Admin Web pages HTTP 200, fmt/diff checks.
+
 > Latest product-evolution sync: 2026-04-28-R250 completed. Admin Activities, Economy price feeds, and Risk trade graph are now real Postgres-backed projections instead of unwired empty states. Admin API has write routes for `/admin/activities`, `/admin/economy/price-feeds`, and `/admin/risk/trade-edges`; Admin Web has server-action forms on the corresponding pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API write/read smoke, Admin Web page HTTP smoke 200s, fmt/diff checks.
 
 > Latest product-evolution sync: 2026-04-28-R249 completed. Gateway now exposes `GET /admin/sessions` from the real session cache, including Redis SCAN/list support with TTL/remove coverage. Admin API overlays Gateway presence onto `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, and `/admin/read/servers`, so online totals, player online status, runtime HP/gold/map, and zones-online source are true Gateway/Redis data. Verification passed: focused gateway session-cache tests 8/8, gateway `/admin/sessions` endpoint test, admin-api presence overlay test, admin-web `tsc --noEmit`, and `git diff --check`.
@@ -5897,3 +5899,29 @@ Verification:
 Outcome:
 
 - Activity config, market price feeds, and trade graph no longer rely on mock or unwired empty states in the local Postgres-backed admin system. Deeper zone process telemetry remains the main Admin read-model gap.
+
+## 2026-04-28-R251-R253
+
+Goal: finish the remaining local Admin real-data route from zone telemetry through operator/RBAC records and page-level QA.
+
+Coordinator local work:
+
+- Added `admin_zone_runtime_records` to the Postgres migration.
+- Added `POST /admin/servers/zones` and changed `/admin/read/servers` to include Postgres zone runtime records alongside Gateway session presence.
+- Updated Admin Web Servers with a zone runtime table and server-action form.
+- Added `admin_operators` to the Postgres migration.
+- Added `/admin/read/operators`, `POST /admin/operators`, and a new Admin Web `/operators` page with RBAC record creation.
+- Added Operators to the Admin Web navigation and local dev `permission_manage` default for RBAC smoke.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- Live API smoke wrote and read back `zone-r251-smoke` and `ops-r252-smoke`.
+- Admin Web HTTP smoke returned 200 for `/`, `/players`, `/economy`, `/activities`, `/servers`, `/risk`, `/gm-tools`, `/approvals`, `/operators`, `/timeline`, and `/audit`.
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+
+Outcome:
+
+- The local Admin backend now has real Postgres data for dashboard/player/economy/activity/server-zone/risk/operator/audit/timeline surfaces. Remaining production gaps are external identity provider/session auth, production multi-approver policy, broader support workflows, and additional GM executors.

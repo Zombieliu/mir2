@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-28-R251-R253 completed. The remaining Admin real-data gaps called out after R250 are now covered for local Postgres: Servers has `admin_zone_runtime_records` plus `/admin/servers/zones` writes and real zone runtime tables; Operators/RBAC has `admin_operators`, `/admin/read/operators`, `/admin/operators`, and a new Admin Web Operators page. Page smoke covered `/`, `/players`, `/economy`, `/activities`, `/servers`, `/risk`, `/gm-tools`, `/approvals`, `/operators`, `/timeline`, and `/audit` returning 200. Verification: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API smoke for `zone-r251-smoke` and `ops-r252-smoke`, fmt/diff checks.
+
 > Latest product-evolution sync: 2026-04-28-R250 completed. Admin read-model gaps for Activity config, Economy price feeds, and Risk trade graph now have real Postgres-backed projections and write routes. Admin API applies `admin_activities`, `admin_market_price_feeds`, and `admin_trade_graph_edges`; Admin Web Activities/Economy/Risk pages can create records through server actions and read them back from `/admin/read/*`. Verification: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API smoke for all three projections, Admin Web page HTTP smoke 200/200/200, fmt/diff checks.
 
 > Latest product-evolution sync: 2026-04-28-R249 completed. Gateway session cache now has a real list/read boundary: `GET /admin/sessions` returns current online session records from the in-memory or Redis cache, and Redis list coverage proves SETEX/SCAN/TTL/remove semantics. Admin API overlays that Gateway presence onto `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, and `/admin/read/servers`, so online counts, player online status, runtime HP/gold/map, and zones-online source are true Gateway/Redis data instead of unwired placeholders. Verification: focused gateway session-cache tests 8/8, gateway `/admin/sessions` endpoint test, admin-api presence overlay test, and admin-web `tsc --noEmit` passed.
@@ -198,6 +200,14 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | Status | Task | Owner | Files | Notes |
 | --- | --- | --- | --- | --- |
 | [x] | Replace remaining Admin projection gaps with Postgres-backed real data | Coordinator | `apps/admin-api`, `apps/admin-web`, `infra/postgres/migrations/0001_core.sql`, docs | Added Activity config, market price feed, and risk trade graph Postgres tables plus Admin API write/read routes and Admin Web server-action forms. Live smoke wrote `activity-r250-smoke`, `GoldBar`, and `trade-r250-smoke`, then read them back from `/admin/read/activities`, `/admin/read/economy`, and `/admin/read/risk`. |
+
+## Product Evolution Round: 2026-04-28-R251-R253
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Add real zone runtime telemetry projection | Coordinator | `apps/admin-api`, `apps/admin-web`, `infra/postgres/migrations/0001_core.sql`, docs | Added `admin_zone_runtime_records`, `POST /admin/servers/zones`, and Servers-page form/table rendering. `/admin/read/servers` now combines Gateway session presence with Postgres zone runtime records. |
+| [x] | Add real operator/RBAC records | Coordinator | `apps/admin-api`, `apps/admin-web`, `infra/postgres/migrations/0001_core.sql`, docs | Added `admin_operators`, `/admin/read/operators`, `/admin/operators`, and the Admin Web Operators page. Local writes require `permission_manage`; operator permissions are canonicalized to known permission strings. |
+| [x] | Run Admin Web page smoke across the backend console | Coordinator | `apps/admin-web`, docs | Live local smoke returned HTTP 200 for `/`, `/players`, `/economy`, `/activities`, `/servers`, `/risk`, `/gm-tools`, `/approvals`, `/operators`, `/timeline`, and `/audit`. |
 
 ## Product Evolution Round: 2026-04-27-R227
 
