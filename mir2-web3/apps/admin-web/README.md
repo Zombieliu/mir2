@@ -14,15 +14,20 @@ Implemented desktop-first pages:
 - World/server monitor
 - Anti-cheat and risk
 - Mail and GM tools
+- Approvals
 - Audit log
+- Timeline
 
-The GM tools page is connected to the Rust Admin API through
-`/api/admin/system-mail`. The Next route adds local operator headers server-side
-and forwards `SendSystemMail` commands to `apps/admin-api`. With
-`ADMIN_GATEWAY_MAIL_URL` configured, the command reaches the running gateway and
-the player Mail panel can display, claim, and delete the delivered mail. Other
-dashboard pages still use mock read data until real read models/projections are
-implemented.
+The GM tools page is connected to the Rust Admin API through server actions that
+add local operator headers server-side. `SendSystemMail` submits to the Rust API,
+redirects with `commandId`, and reloads command status plus the matching mail
+outbox receipt. With `ADMIN_GATEWAY_MAIL_URL` configured, the command reaches the
+running gateway and the player Mail panel can display, claim, and delete the
+delivered mail. The GM tools page also posts grant item, grant gold, kick player,
+and ban account commands directly to the Rust Admin API through server actions.
+Approvals, Audit, and Timeline read from the Rust API and ClickHouse-backed event
+projection when available. Other dashboard pages still use mock read data until
+real read models/projections are implemented.
 
 ## Local Run
 
@@ -35,7 +40,13 @@ ADMIN_API_ADDR=127.0.0.1:7420 cargo +1.89.0 run --locked -p mir2-admin-api --bin
 Start the admin web:
 
 ```bash
-ADMIN_API_BASE_URL=http://127.0.0.1:7420 ./node_modules/.bin/next start -p 3020
+ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
+ADMIN_OPERATOR_TOKEN=local-dev-token \
+ADMIN_OPERATOR_ID=local-gm \
+ADMIN_OPERATOR_EMAIL=gm.local@mir2.dev \
+ADMIN_OPERATOR_ROLE=ops_admin \
+ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage \
+./node_modules/.bin/next dev -p 3020
 ```
 
 For development:
@@ -64,7 +75,6 @@ Latest smoke screenshots:
 ## Production Gaps
 
 - Replace local env operator headers with real operator auth.
-- Add approval and second-confirmation flows for dangerous commands.
-- Back command/audit repositories with Postgres.
+- Replace local self-approval smoke mode with real multi-operator approval policy.
 - Wire read models to real account, player, economy, server, and risk projections.
-- Extend real command executors beyond system mail.
+- Extend real command executors beyond mail/grant/kick/ban.

@@ -10,13 +10,13 @@ use bevy_ecs::prelude::{Resource, World};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    AccountRecord, BuffSnapshot, CharacterRecord, CharacterSaveRecord, EquipmentItemSnapshot,
-    EquipmentSlot, GroundDropSnapshot, ItemContainer, ItemGrade, MapDropRuleRecord,
-    MapTransferSnapshot, MonsterSpawnSource, NpcDialogInputSnapshot, NpcDialogLinkSnapshot,
-    NpcDialogSnapshot, QuestSnapshot, QuestStage, SimulationConfig, SkillSnapshot,
-    Stage5AuctionListing, Stage5HeroState, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
-    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
-    WorldItemSnapshot, WorldSnapshot,
+    AccountBanStatus, AccountRecord, BuffSnapshot, CharacterRecord, CharacterSaveRecord,
+    EquipmentItemSnapshot, EquipmentSlot, GroundDropSnapshot, ItemContainer, ItemGrade,
+    MapDropRuleRecord, MapTransferSnapshot, MonsterSpawnSource, NpcDialogInputSnapshot,
+    NpcDialogLinkSnapshot, NpcDialogSnapshot, QuestSnapshot, QuestStage, SimulationConfig,
+    SkillSnapshot, Stage5AuctionListing, Stage5HeroState, Stage5MailMessage, Stage5SystemsState,
+    Stage5TradeState, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldSnapshot,
 };
 use mir2_game_data::{
     crystal_drop_table_for_monster_name, crystal_item_by_index, crystal_item_by_name,
@@ -1845,6 +1845,13 @@ pub struct SimulationSession {
     visible_objects: BTreeSet<u32>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ActiveSessionIdentity {
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+}
+
 impl SimulationSession {
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
@@ -1876,12 +1883,27 @@ impl SimulationSession {
         persist_active_character_save(self.app.world());
     }
 
+    pub fn refresh_active_external_mail(&mut self) -> bool {
+        refresh_active_external_mail(self.app.world_mut())
+    }
+
     pub fn on_connect(&self) -> Vec<ServerPacket> {
         vec![ServerPacket::Connected]
     }
 
     pub fn world_snapshot(&self) -> WorldSnapshot {
         build_world_snapshot(self.app.world())
+    }
+
+    pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
+        let resources = self.app.world().resource::<SimulationResources>();
+        let account_id = resources.account_id.clone()?;
+        let character = resources.selected_character.as_ref()?;
+        Some(ActiveSessionIdentity {
+            account_id,
+            character_index: character.index,
+            character_name: character.name.clone(),
+        })
     }
 
     pub fn move_to(&mut self, destination: Point) -> Vec<ServerPacket> {
@@ -3635,9 +3657,17 @@ impl SimulationSession {
                 password,
             } => {
                 let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
-                let Some(characters) = login_account(&resources.config, &account_id, &password)
-                else {
-                    return vec![ServerPacket::Login { result: 4 }];
+                let characters = match login_account(&resources.config, &account_id, &password) {
+                    AccountLoginResult::Success(characters) => characters,
+                    AccountLoginResult::Banned(ban) => {
+                        return vec![ServerPacket::LoginBanned {
+                            reason: ban.reason,
+                            expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+                        }];
+                    }
+                    AccountLoginResult::InvalidCredentials => {
+                        return vec![ServerPacket::Login { result: 4 }];
+                    }
                 };
                 resources.account_id = Some(account_id);
                 resources.characters = characters;
@@ -3874,6 +3904,12 @@ impl SimulationSession {
                 .account_id
                 .clone()
                 .unwrap_or_else(|| "demo".to_string());
+            if let Some(ban) = active_account_ban(&resources.config, &account_id) {
+                return vec![ServerPacket::StartGameBanned {
+                    reason: ban.reason,
+                    expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+                }];
+            }
             character_save_for_start(resources, &account_id, character_index)
         };
 
@@ -4244,6 +4280,68 @@ fn persist_active_character_save(world: &World) {
         .clone()
         .unwrap_or_else(|| "demo".to_string());
     persist_character_save(world, &account_id, save);
+}
+
+fn refresh_active_external_mail(world: &mut World) -> bool {
+    let (config, account_id, character_index) = {
+        let resources = world.resource::<SimulationResources>();
+        let Some(account_id) = resources.account_id.clone() else {
+            return false;
+        };
+        let Some(character) = resources.selected_character.as_ref() else {
+            return false;
+        };
+        (resources.config.clone(), account_id, character.index)
+    };
+
+    let external_mail = {
+        let Ok(store) = config.account_store.lock() else {
+            return false;
+        };
+        let Some(save) = store
+            .accounts
+            .get(&account_id)
+            .and_then(|account| account.saves.get(&character_index))
+        else {
+            return false;
+        };
+        save.stage5_systems_json
+            .as_deref()
+            .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+            .map(|systems| systems.mail)
+            .unwrap_or_default()
+    };
+
+    if external_mail.is_empty() {
+        return false;
+    }
+
+    let mut resources = world.resource_mut::<SimulationResources>();
+    merge_external_stage5_mail(&mut resources.stage5_systems.mail, external_mail)
+}
+
+fn merge_external_stage5_mail(
+    local_mail: &mut Vec<Stage5MailMessage>,
+    external_mail: Vec<Stage5MailMessage>,
+) -> bool {
+    let mut changed = false;
+    for external in external_mail {
+        if let Some(local) = local_mail.iter_mut().find(|mail| mail.id == external.id) {
+            let merged = Stage5MailMessage {
+                claimed: local.claimed || external.claimed,
+                deleted: local.deleted || external.deleted,
+                ..external
+            };
+            if local != &merged {
+                *local = merged;
+                changed = true;
+            }
+        } else {
+            local_mail.push(external);
+            changed = true;
+        }
+    }
+    changed
 }
 
 fn persist_character_save(world: &World, account_id: &str, save: CharacterSaveRecord) {
@@ -4789,11 +4887,17 @@ fn ensure_account_with_password(
     characters
 }
 
+enum AccountLoginResult {
+    Success(Vec<CharacterRecord>),
+    Banned(AccountBanStatus),
+    InvalidCredentials,
+}
+
 fn login_account(
     config: &SimulationConfig,
     account_id: &str,
     password: &str,
-) -> Option<Vec<CharacterRecord>> {
+) -> AccountLoginResult {
     let mut store = config
         .account_store
         .lock()
@@ -4802,7 +4906,33 @@ fn login_account(
         .accounts
         .entry(account_id.to_string())
         .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-    (account.password == password).then(|| account.characters.clone())
+    let now_ms = unix_now_ms();
+    if let Some(ban) = account.active_ban(now_ms) {
+        return AccountLoginResult::Banned(ban);
+    }
+    if account.password == password {
+        AccountLoginResult::Success(account.characters.clone())
+    } else {
+        AccountLoginResult::InvalidCredentials
+    }
+}
+
+fn active_account_ban(config: &SimulationConfig, account_id: &str) -> Option<AccountBanStatus> {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store
+        .accounts
+        .get(account_id)
+        .and_then(|account| account.active_ban(unix_now_ms()))
+}
+
+fn unix_now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
 }
 
 fn change_account_password(
@@ -27973,7 +28103,8 @@ mod tests {
     };
     use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
     use crate::{
-        EquipmentSlot, ItemContainer, QuestStage, SimulationConfig, WorldEntityDisposition,
+        deliver_stage5_system_mail, EquipmentSlot, ItemContainer, QuestStage, SimulationConfig,
+        Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition,
     };
     use bevy_ecs::entity::Entity;
     use mir2_game_data::{
@@ -28974,6 +29105,29 @@ mod tests {
     }
 
     #[test]
+    fn banned_account_is_rejected_on_login_and_start_game() {
+        let config = SimulationConfig::default();
+        crate::config::ban_account_in_store(&config, "demo", Some(60), "test ban")
+            .expect("account ban should persist");
+
+        let mut session = SimulationSession::new(config);
+        let login_packets = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(matches!(
+            &login_packets[0],
+            ServerPacket::LoginBanned { reason, .. } if reason == "test ban"
+        ));
+
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(matches!(
+            &start_packets[0],
+            ServerPacket::StartGameBanned { reason, .. } if reason == "test ban"
+        ));
+    }
+
+    #[test]
     fn start_game_emits_bootstrap_sequence() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -29221,6 +29375,52 @@ mod tests {
         assert_eq!(restored_player.y, 267);
         assert_eq!(restored_weapon_dura, saved_weapon_dura);
         assert!(restored_weapon_dura < 18);
+    }
+
+    #[test]
+    fn online_session_refreshes_admin_delivered_mail_before_save() {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(session.world_snapshot().stage5_systems.mail.is_empty());
+
+        deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "GM System".to_string(),
+                subject: "Online Grant".to_string(),
+                body: "Refresh into the active session.".to_string(),
+                gold: 777,
+                items: Vec::new(),
+            },
+        )
+        .expect("admin mail should deliver to account store");
+
+        assert!(session.refresh_active_external_mail());
+        let snapshot = session.world_snapshot();
+        assert!(snapshot.stage5_systems.mail.iter().any(|mail| {
+            mail.subject == "Online Grant" && mail.gold == 777 && !mail.claimed && !mail.deleted
+        }));
+        session.save_active_character();
+
+        let mut reloaded = SimulationSession::new(config);
+        let _ = reloaded.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        let _ = reloaded.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(reloaded
+            .world_snapshot()
+            .stage5_systems
+            .mail
+            .iter()
+            .any(|mail| mail.subject == "Online Grant" && mail.gold == 777));
     }
 
     #[test]

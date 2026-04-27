@@ -1,5 +1,21 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-27-R238 completed. Admin command analytics now include `admin.command.succeeded`, `admin.command.failed`, and `admin.command.denied`; ClickHouse consumes all three Redpanda topics through `clickhouse-admin-events-v2`, and `/admin/events` filter smoke passed for denied and failed events.
+
+> Latest product-evolution sync: 2026-04-27-R237 completed. Admin outbox now records per-publisher delivery state (`nats_status`, `redpanda_status`, `last_error`, `dispatched_at_ms`), `dispatch-admin-outbox` retries instead of marking dispatched when either configured publisher fails, and Admin API/Admin Web now expose filtered/degraded ClickHouse event reads.
+
+> Latest product-evolution sync: 2026-04-27-R236 completed. Admin outbox now has a stable event envelope, `dispatch-admin-outbox` can publish to Redpanda Pandaproxy through `ADMIN_OUTBOX_REDPANDA_URL` while preserving NATS, ClickHouse projects the events into `admin_events` plus `admin_command_events`, Admin API exposes `/admin/events`, and Admin Web Audit shows the event stream.
+
+> Latest product-evolution sync: 2026-04-27-R235 completed. Local event analytics infrastructure now includes Redpanda and ClickHouse in the default dev Compose stack. Redpanda exposes internal/external Kafka listeners; ClickHouse initializes a Kafka-engine table plus materialized view for `admin.command.succeeded` into `mir2_events.admin_command_events`. NATS remains the current admin outbox command/notification dispatcher; Redpanda/ClickHouse are non-authoritative analytics infrastructure.
+
+> Latest product-evolution sync: 2026-04-27-R234 completed. Admin production boundary hardening now includes optional `ADMIN_OPERATOR_TOKEN` Bearer validation, `approvalId` validation for high-risk commands, `GrantItem` and gold `GrantCurrency` execution through audited system-mail delivery, plus admin outbox retry/dead-letter state. Verification passed: `mir2-admin-api` 11/11.
+
+> Latest product-evolution sync: 2026-04-27-R233 completed. Postgres source-of-truth account-store mode now tracks loaded account/save versions and rejects stale source writers instead of overwriting newer DB state. Successful saves refresh in-memory source-version metadata. Docker Postgres tests cover stale writer rejection and reload-then-save success.
+
+> Latest product-evolution sync: 2026-04-27-R232 expanded. Gateway session cache now has an optional Redis adapter selected by `MIR2_GATEWAY_REDIS_CACHE_URL`, TTL via `MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS`, and Redis roundtrip/remove/expiry coverage. The default path remains in-memory when Redis env is unset.
+
+> Latest product-evolution sync: 2026-04-27-R232 completed. Added the first non-authoritative gateway session-cache boundary: `ActiveSessionIdentity` in simulation, `GatewaySessionCache` / `InMemoryGatewaySessionCache` in gateway, web-gateway cache refresh after authoritative saves, and disconnect cleanup. Focused verification passed with gateway cache tests 4/4 and `cargo +1.89.0 fmt --check`. Redis remains the external cache/session/routing target and needs a real adapter in a later slice.
+
 > Latest product-evolution sync: 2026-04-27-R229 completed. Admin API now has the first live-verified Postgres/NATS persistence slice: `infra/postgres/migrations/0001_core.sql`, Postgres-backed `AdminCommandRepository` / `AuditRepository` adapters selected by `ADMIN_DATABASE_URL`, an `AdminOutboxRepository` boundary with in-memory and Postgres implementations, `import-account-store` for importing `.mir2-data/accounts.json` into `accounts`, `characters`, and `character_saves`, and `dispatch-admin-outbox` for publishing pending outbox rows to NATS. Docker integration smoke passed after Docker Desktop started: core compose services are healthy, `.mir2-data/admin-live-smoke.json` imported demo/Scout at `0103 WeaponStore (6,12)`, Admin API on `127.0.0.1:7421` wrote command/audit/outbox rows to Postgres, and the outbox worker published `admin.command.succeeded` to NATS before marking the row `dispatched`. Verification also passed: `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (8/8), `cargo +1.89.0 fmt --check`, compose config, and `git diff --check`.
 
 > Latest product-evolution sync: 2026-04-27-R230 completed. Gameplay account-store persistence now has an optional Postgres mirror: `SimulationConfig::with_account_store_database_url`, `MIR2_ACCOUNT_STORE_DATABASE_URL` wiring in gateway and Admin API fallback mail, and blocking-thread Postgres upserts for accounts/characters/character_saves after JSON saves. Docker smoke verified fallback GM mail wrote `stage5_systems_json` into Postgres, then the DB was restored to the `admin-live-smoke` demo/Scout `0103 WeaponStore (6,12)` state. Verification passed: `mir2-simulation config` 11/11, `mir2-admin-api` 8/8, `mir2-gateway` 55/55, `cargo +1.89.0 fmt --check`, `git diff --check`, and Docker core services healthy.
@@ -66,6 +82,112 @@
 Last updated: 2026-04-26
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
+
+## 2026-04-27-R238
+
+Scope:
+
+- Changed Postgres-backed command completion to emit terminal command analytics events for success, failure, and permission denial.
+- Added the `command_event_type` mapping for `admin.command.succeeded`, `admin.command.failed`, and `admin.command.denied`.
+- Updated ClickHouse init SQL to rebuild the Kafka source and materialized views while preserving MergeTree target tables, subscribe to all three command topics, and use the `clickhouse-admin-events-v2` group.
+- Added Admin Web Audit denied status filtering.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (16 lib tests + 4 dispatcher tests)
+- `./node_modules/.bin/tsc --noEmit` in `apps/admin-web`
+- Applied `infra/clickhouse/initdb/001_admin_events.sql` to the running ClickHouse container.
+- Created Redpanda topics `admin.command.failed` and `admin.command.denied`.
+- Submitted real Admin API command `r238-denied` without `mail_send_system`; API returned 403 and Postgres outbox contained `admin.command.denied`.
+- Published and projected `r238-failed` as `admin.command.failed`.
+- `dispatch-admin-outbox -- --once` delivered both denied and failed events through NATS and Redpanda.
+- ClickHouse returned `outbox-r238-denied admin.command.denied r238-denied denied` and `outbox-r238-failed admin.command.failed r238-failed failed`.
+- Admin API `/admin/events?eventType=admin.command.denied&status=denied&limit=5` and `/admin/events?eventType=admin.command.failed&status=failed&limit=5` returned `degraded: false` with the expected records.
+
+Result:
+
+- R238 makes the Admin event stream useful for negative operational outcomes, not just successful commands.
+- Retry/dead-letter remain outbox delivery state for now; they should become first-class lifecycle analytics in a later slice without recursively depending on the same outbox path.
+
+## 2026-04-27-R237
+
+Scope:
+
+- Added `nats_status`, `redpanda_status`, `last_error`, and `dispatched_at_ms` to `admin_outbox`.
+- Updated in-memory and Postgres outbox repositories to record delivery attempts, retry with backoff, dead-letter exhausted rows, and keep `dispatched_at_ms` only for complete success.
+- Changed `dispatch-admin-outbox` to attempt NATS and Redpanda independently, record each result, and avoid `dispatched` when any configured publisher fails.
+- Hardened `GET /admin/events` with `limit`, `commandId`, `eventType`, and `status` filters plus a degraded response shape for ClickHouse outages.
+- Added Admin Web Audit filters and a separate event-stream status badge so ClickHouse read-side degradation does not collapse command/audit visibility.
+
+Validation:
+
+- Docker services Postgres, Redis, NATS, Redpanda, and ClickHouse were healthy.
+- Applied `infra/postgres/migrations/0001_core.sql` to the local Postgres container.
+- Redpanda success plus NATS failure left `outbox-r237-nats-fail` at `retry|failed|succeeded|1|last_error set|dispatched_at_ms null`.
+- NATS success plus Redpanda failure left `outbox-r237-redpanda-fail` at `retry|succeeded|failed|1|last_error set|dispatched_at_ms null`.
+- NATS plus Redpanda success dispatched `outbox-r237-success` with both publisher statuses `succeeded` and `dispatched_at_ms` set; ClickHouse `mir2_events.admin_events` returned `outbox-r237-success admin.command.succeeded r237-success succeeded`.
+- Admin API `/admin/events?commandId=r237-success&eventType=admin.command.succeeded&status=succeeded&limit=5` returned the filtered record with `degraded: false`.
+- Admin API with an unreachable ClickHouse URL returned HTTP 200 with `degraded: true`, an error string, and empty records.
+- `cargo +1.89.0 test --locked -p mir2-simulation config -- --test-threads=1` (13/13)
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (15 lib tests + 4 dispatcher tests)
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1` (53 gateway tests + 7 packet trace tests)
+- `./node_modules/.bin/tsc --noEmit` in `apps/web`
+- `./node_modules/.bin/tsc --noEmit` in `apps/admin-web`
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+
+Result:
+
+- R237 closes the first multi-publisher delivery correctness gap for the Admin outbox and makes ClickHouse event reads operationally degradable.
+- NATS remains the lightweight command/notification path; Redpanda/ClickHouse remain non-authoritative analytics/read-side infrastructure.
+
+## 2026-04-27-R236
+
+Scope:
+
+- Added stable admin event envelopes with `eventId`, `eventType`, `schemaVersion`, `commandId`, `operatorId`, `status`, `occurredAtMs`, `payload`, and `payloadJson`.
+- Updated Postgres-backed Admin command completion to enqueue envelope-shaped `admin.command.succeeded` outbox payloads.
+- Extended `dispatch-admin-outbox` to publish configured Redpanda events through Pandaproxy via `ADMIN_OUTBOX_REDPANDA_URL`, while preserving NATS publication and only marking outbox rows dispatched after configured publishers succeed.
+- Expanded ClickHouse init SQL with `admin_events`, `admin_events_kafka`, and materialized views into both `admin_events` and the compatibility `admin_command_events` projection.
+- Added Admin API `GET /admin/events` to read recent ClickHouse-projected admin events and added the event stream to the Admin Web Audit page.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (14 lib tests + 2 dispatcher tests)
+- Redpanda restarted with Pandaproxy exposed at `127.0.0.1:8082`; Redpanda and ClickHouse healthy.
+- Applied `infra/clickhouse/initdb/001_admin_events.sql` to the local ClickHouse volume.
+- Submitted real Admin API `SendSystemMail` command `r236-redpanda-clickhouse-smoke`, which wrote a pending Postgres `admin_outbox` row with envelope fields.
+- Ran `dispatch-admin-outbox -- --once` with `ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082`; the outbox row became `dispatched`.
+- ClickHouse `admin_events` returned `outbox-r236-redpanda-clickhouse-smoke admin.command.succeeded r236-redpanda-clickhouse-smoke r236-operator succeeded`.
+- ClickHouse `admin_command_events` returned `r236-redpanda-clickhouse-smoke succeeded system mail queued as mail-r236-redpanda-clickhouse-smoke`.
+- Admin API `GET /admin/events` returned the projected event stream from ClickHouse.
+
+Result:
+
+- R236 completes the first real Admin outbox -> Redpanda -> ClickHouse read-side pipeline.
+- NATS remains the lightweight command/notification bus; Redpanda/ClickHouse remain non-authoritative analytics/read-side infrastructure.
+
+## 2026-04-27-R235
+
+Scope:
+
+- Added Redpanda and ClickHouse to the default local Compose event/analytics stack.
+- Configured Redpanda with separate internal and external Kafka listeners so ClickHouse can use `redpanda:9092` while host tools use `127.0.0.1:9092`.
+- Added `infra/clickhouse/initdb/001_admin_events.sql` to create `mir2_events.admin_command_events`, a Kafka-engine source table for `admin.command.succeeded`, and a materialized view into the MergeTree table.
+- Updated infra/architecture/admin docs to keep NATS as the current command/notification dispatcher and mark Redpanda/ClickHouse as non-authoritative analytics infrastructure.
+
+Validation:
+
+- `docker compose -f infra/docker-compose.dev.yml config`
+- `docker compose -f infra/docker-compose.dev.yml up -d postgres redis nats redpanda clickhouse`
+- `docker compose -f infra/docker-compose.dev.yml ps` showed Postgres, Redis, NATS, Redpanda, and ClickHouse healthy.
+- `docker exec mir2-redpanda rpk topic create admin.command.succeeded`
+- Produced one JSONEachRow event to Redpanda topic `admin.command.succeeded`.
+- ClickHouse query returned `smoke-redpanda succeeded ok 123` from `mir2_events.admin_command_events`.
+
+Result:
+
+- R235 introduces the local event analytics baseline without making Redpanda or ClickHouse part of gameplay authority.
 
 ## 2026-04-27-R228
 
@@ -186,6 +308,62 @@ Result:
 - R231 complete.
 - Postgres source-of-truth account-store mode is available but explicit opt-in; JSON remains the default backend.
 - Remaining work: add automated integration tests for conflict handling and decide whether to make Postgres backend the default for non-parity development.
+
+## 2026-04-27-R232
+
+Scope:
+
+- Added `ActiveSessionIdentity` to `apps/simulation` so gateway/cache boundaries can identify authenticated active characters without reading simulation internals.
+- Added `apps/gateway/src/cache.rs` with `GatewaySessionCacheKey`, `GatewaySessionCacheRecord`, `GatewaySessionCache`, `InMemoryGatewaySessionCache`, `RedisGatewaySessionCache`, and refresh/read/remove helpers.
+- Wired the web gateway to refresh the cache after each authoritative character save and remove the online session record on disconnect.
+- Kept the cache non-authoritative; gameplay state still comes from simulation/account-store persistence.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-gateway session_cache -- --test-threads=1` (5/5)
+- `cargo +1.89.0 fmt --check`
+
+Result:
+
+- R232 complete.
+- The first Redis-boundary contract is in place with deterministic in-memory tests and a local Redis adapter smoke.
+- Remaining cache work: broader reconnect/route-cache semantics and cache-hit/cache-miss equivalence at gateway load-test scale.
+
+## 2026-04-27-R233
+
+Scope:
+
+- Added source-version metadata to `AccountStore` for Postgres source-of-truth loads.
+- Source-mode saves now compare expected loaded `accounts.store_version` and `character_saves.save_version` against the locked DB rows before writing.
+- Successful source-mode saves return and refresh the in-memory version metadata so the same process can continue saving.
+- Added Docker Postgres tests for stale writer rejection and reload-save version refresh.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-simulation postgres_source_mode -- --test-threads=1` (2/2)
+
+Result:
+
+- R233 complete.
+- Postgres source mode no longer silently permits stale local writers to overwrite newer account/save rows.
+
+## 2026-04-27-R234
+
+Scope:
+
+- Added optional `ADMIN_OPERATOR_TOKEN` Bearer validation to Admin API operator header parsing.
+- Added `approvalId` validation for high-risk commands: global system mail, item/currency grants, and account bans.
+- Added `GrantItem` and gold `GrantCurrency` execution through the existing audited system-mail delivery boundary.
+- Added admin outbox retry/dead-letter transitions and dispatcher retry/dead-letter handling.
+
+Validation:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1` (11/11)
+
+Result:
+
+- R234 complete.
+- Admin writes remain audited command executions; the new grant paths still avoid direct Admin UI/table mutation of gameplay state.
 
 ## 2026-04-26-R225
 
@@ -5582,3 +5760,112 @@ Outcome:
 - `SendSystemMail` is command/audit/outbox-complete, but not connected to live account/world/mail delivery yet.
 - `npm audit --audit-level=high` is green after upgrading admin-web to Next 16.2.4. A remaining PostCSS moderate advisory is still reported by full audit; `npm audit fix --force` proposes a breaking downgrade to Next 9.3.3, so it was not applied.
 - Next implementation targets: Postgres command/audit repositories, real operator auth, and live mail-service delivery from the outbox boundary.
+
+## 2026-04-27-R239-R244
+
+Goal: complete the seven-phase production-control-plane route from approval workflow through outbox lifecycle, GM executors, Postgres source hardening, Redis routing, read models, and runbook updates.
+
+Coordinator local work:
+
+- Added persistent `admin_approvals`, approval API routes, approval gates for high-risk commands, Admin Web Approvals, and approval requested/approved/rejected events.
+- Added `dispatch-admin-outbox` JetStream mode plus Redpanda lifecycle events for retry and dead-letter transitions.
+- Added Admin API routes and executors for grant item, grant gold, kick player, and ban account. Kick removes gateway session cache records by character routing; ban persists on account records and simulation rejects login/start-game.
+- Added Postgres account ban columns and a focused source-mode stale `save_version` writer test after account-version refresh.
+- Extended Redis `GatewaySessionCache` with a character-name routing index using the same TTL as the session record.
+- Added Admin API `/admin/timeline` merging command, audit, approval, and ClickHouse event records, plus Admin Web Timeline.
+- Updated infra/admin/orchestration handoff docs for Redpanda/ClickHouse topics, JetStream mode, approvals, Redis routing, and timeline read models.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-simulation banned_account_is_rejected_on_login_and_start_game -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-simulation config::tests::postgres_source_mode_rejects_stale_character_save_writer -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-gateway session_cache -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-admin-api kick_and_ban_commands_execute_with_expected_permissions -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-admin-api admin_timeline_merges_local_command_audit_and_approval_records -- --test-threads=1`
+- `cargo +1.89.0 fmt --check`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+
+Outcome:
+
+- Phase 1-7 implementation is code-complete locally and ready for full requested baseline verification.
+
+## 2026-04-28-R245
+
+Goal: make the local admin backend immediately browser-testable while tightening the operator and approval boundaries for the next production-control-plane slice.
+
+Coordinator local work:
+
+- Added optional `ADMIN_OPERATOR_POLICY_PATH` auth to Admin API. When configured, the Bearer token maps to a fixed operator identity and permission set from JSON policy instead of trusting spoofable operator headers.
+- Added default requester self-approval blocking for approval decisions, with `ADMIN_APPROVAL_ALLOW_SELF=true` reserved for local single-operator smoke runs.
+- Added Admin Web GM Tools server-action forms for `GrantItem`, `GrantCurrency`, `KickPlayer`, and `BanAccount`, including optional command/trace/approval IDs and command result notices.
+- Started the local browser-testable stack: Docker Postgres/Redis/NATS/Redpanda/ClickHouse, Gateway in explicit Postgres source mode with Redis routing cache, Admin API with Postgres/ClickHouse/gateway integrations, and Admin Web on port 3020.
+- Updated admin architecture, infra, app README, orchestration, task queue, and handoff docs with the local testing path and auth/approval notes.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api operator_policy -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-admin-api approval_decision_blocks_self_approval_by_default -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `cargo +1.89.0 fmt --check`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- `apps/web ./node_modules/.bin/tsc --noEmit`
+- Docker services healthy: Postgres, Redis, NATS, Redpanda, ClickHouse
+- `curl -fsS http://127.0.0.1:7420/health`
+- `curl -fsS http://127.0.0.1:7110/health`
+- `curl -fsS http://127.0.0.1:3020/gm-tools`
+- `curl -fsS http://127.0.0.1:3010`
+
+Outcome:
+
+- Local admin testing is ready at `http://127.0.0.1:3020`.
+- Admin API is ready at `http://127.0.0.1:7420`.
+- Gateway web/admin endpoints are ready at `http://127.0.0.1:7110`.
+- Player Web is ready at `http://127.0.0.1:3010` for end-to-end mail/grant visibility checks.
+- Production gaps remain: real OIDC/session auth, real multi-operator approval policy, rate limits, support-case workflows, and broader GM executor coverage.
+
+## 2026-04-28-R246
+
+Goal: fix the reported local backend smoke gap where a successful Admin gold grant did not light up mail in an already-online player frontend.
+
+Coordinator local work:
+
+- Reproduced the direct Admin API approval -> grant gold path and confirmed `gateway_live` delivery into the account store.
+- Identified the missing online-session bridge: `POST /admin/system-mail` updated the shared account store, but an already-running `GatewaySession` kept its stale Stage 5 mail state and could overwrite the delivered mail on keepalive/save before the player reloaded.
+- Added `SimulationSession::refresh_active_external_mail()` and `GatewaySession::refresh_active_external_mail()` to merge externally delivered Stage 5 mail into the active session.
+- Gateway Web now refreshes external mail before initial snapshots, before each action save, and before disconnect save. If the refresh changed state, it sends a world snapshot, so the player UI sees the mail on the next keepalive/tick.
+- Restarted the local Gateway on `127.0.0.1:7110` / `127.0.0.1:7000` with the fix.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-simulation online_session_refreshes_admin_delivered_mail_before_save -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-gateway session_cache -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-gateway admin_system_mail_endpoint_writes_live_account_store -- --test-threads=1`
+- Playwright browser smoke: Player Web Quick Enter -> Admin API approval/grant `888` gold -> Player Web Mail panel shows `GM Currency Grant`, `Operator local-gm granted 888 gold.`, and `888 Gold · Unclaimed`.
+
+Outcome:
+
+- Backend gold/mail grants now become visible to an already-online local player session without requiring logout/relogin.
+
+## 2026-04-28-R247
+
+Goal: fix the reported Admin Web system-mail submit dead path and add complete post-submit status loading for the local backend smoke flow.
+
+Coordinator local work:
+
+- Identified the Admin Web submit issue as an unstable client-only/hydration path in local dev, then moved the system-mail form to a Next server action with `useFormStatus` pending UI.
+- Added `GET /admin/commands/:command_id/status` to the Rust Admin API so the UI can load one command's status directly instead of inferring from a broad command list.
+- Updated GM Tools to render a post-submit command status card for `commandId`, including status, result, trace id, operator, and matching `mail-{commandId}` outbox delivery receipt.
+- Restarted Admin API on `127.0.0.1:7420` and Admin Web on `http://127.0.0.1:3020` with the new code.
+
+Verification:
+
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- `cargo +1.89.0 test --locked -p mir2-admin-api get_command_status_returns_one_command_record -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-simulation online_session_refreshes_admin_delivered_mail_before_save -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-gateway admin_system_mail_endpoint_writes_live_account_store -- --test-threads=1`
+- Playwright browser smoke: Admin Web `/gm-tools` -> `Queue System Mail` -> `/gm-tools?commandId=cmd-mail-1777313734223` shows `succeeded`, `system mail queued as mail-cmd-mail-1777313734223`, `gateway_live / 1`, and mail id `4`; Player Web Quick Enter -> Mail shows `Compensation Package`, `5000 Gold · Unclaimed`, and Claim/Delete controls.
+
+Outcome:
+
+- Local backend testing now has visible submit, result, and delivery states for system mail. The player-facing mail panel updates with the delivered gold mail while the player remains online.

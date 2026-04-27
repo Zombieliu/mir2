@@ -1,5 +1,27 @@
 # Agent Orchestration
 
+> Latest product-evolution sync: 2026-04-28-R246 completed. Admin-delivered Stage 5 mail/gold now refreshes into already-online Gateway sessions before snapshots and saves, preventing keepalive from overwriting live admin mail and making the Player Web Mail panel update without logout/relogin.
+
+> Latest product-evolution sync: 2026-04-28-R245 completed. The local admin backend is now browser-testable on `http://127.0.0.1:3020` with Player Web on `http://127.0.0.1:3010`, Gateway `:7110`, Admin API `:7420`, Postgres source mode, Redis routing cache, ClickHouse event reads, bearer auth, and GM forms for mail/grants/kick/ban. Admin API now supports policy-file operator auth via `ADMIN_OPERATOR_POLICY_PATH` and blocks requester self-approval by default.
+
+> Latest product-evolution sync: 2026-04-27-R244 completed. Phase 1-7 production-control-plane route landed: persistent approvals, approval/outbox lifecycle events, JetStream outbox mode, grant/kick/ban GM routes, account ban enforcement, Postgres `save_version` stale-writer coverage, Redis character routing cache, Admin timeline read model, and Admin Web operator-token forwarding.
+
+> Latest product-evolution sync: 2026-04-27-R238 completed. Admin command analytics now emit terminal outcome events for succeeded, failed, and denied commands. ClickHouse consumes `admin.command.succeeded`, `admin.command.failed`, and `admin.command.denied` through the v2 admin event consumer group, and Admin Web Audit can filter denied event status.
+
+> Latest product-evolution sync: 2026-04-27-R237 completed. Admin outbox delivery state is split across NATS and Redpanda with `last_error` and `dispatched_at_ms`; partial publisher failure now retries/dead-letters instead of being marked dispatched. Admin API `/admin/events` supports filters and degraded ClickHouse responses, and Admin Web Audit exposes event filters plus independent event-stream health.
+
+> Latest product-evolution sync: 2026-04-27-R236 completed. Admin outbox now publishes stable event envelopes to Redpanda through Pandaproxy when `ADMIN_OUTBOX_REDPANDA_URL` is set, while keeping NATS dispatch. ClickHouse projects the envelopes into `admin_events` and `admin_command_events`; Admin API exposes `/admin/events`; Admin Web Audit displays the event stream. End-to-end smoke passed from real Admin API command through Postgres outbox, dispatcher, Redpanda, ClickHouse, and Admin API event readback.
+
+> Latest product-evolution sync: 2026-04-27-R235 completed. Redpanda and ClickHouse are now in the default local dev Compose stack for non-authoritative event analytics. Redpanda has separate internal/external Kafka listeners; ClickHouse initializes a Kafka-engine projection from `admin.command.succeeded` into `mir2_events.admin_command_events`. Existing NATS admin outbox dispatch remains the lightweight command/notification path.
+
+> Latest product-evolution sync: 2026-04-27-R234 completed. Admin API production boundary advanced with optional bearer operator token validation, high-risk command approval IDs, item/gold grant command execution through audited system-mail delivery, and outbox retry/dead-letter state. Admin tests pass 11/11.
+
+> Latest product-evolution sync: 2026-04-27-R233 completed. Postgres source-of-truth account store now tracks loaded source versions, rejects stale writers, and has Docker Postgres tests for stale writer rejection plus reload-save success.
+
+> Latest product-evolution sync: 2026-04-27-R232 expanded. Gateway session cache now includes optional Redis support with TTL, while default startup remains in-memory unless `MIR2_GATEWAY_REDIS_CACHE_URL` is set.
+
+> Latest product-evolution sync: 2026-04-27-R232 completed. Gateway online-session caching now has a non-authoritative boundary: simulation exposes active account/character identity, gateway has a `GatewaySessionCache` contract plus in-memory implementation, and the web gateway refreshes after authoritative saves and removes the record on disconnect. Focused gateway cache tests passed 4/4 with `cargo +1.89.0 fmt --check`; a real Redis adapter remains the next cache slice.
+
 > Latest product-evolution sync: 2026-04-27-R228 completed. Audited GM system mail now mutates game-visible state. `apps/admin-api` posts `SendSystemMail` to the live gateway at `ADMIN_GATEWAY_MAIL_URL` and falls back to persistent account-store delivery; `apps/gateway` exposes `POST /admin/system-mail`; `apps/simulation` persists the mail into Stage 5 character systems; and the player Mail panel can claim/delete it. Verification included Rust focused/package tests, web/admin-web typecheck/build, Admin Web -> Admin API -> gateway curl smoke, outbox `deliveryMode: "gateway_live"`, account-store inspection, gateway WS mail visibility, and WS `mail.claim` attachment transfer.
 
 > Latest product-evolution sync: 2026-04-27-R227 completed. Admin operations now has a working Rust API + Next Admin Web slice: `apps/admin-api` command/audit repository traits, in-memory repositories, Axum routes, `SendSystemMail` domain outbox executor, and `apps/admin-web` desktop UI pages wired through Next `/api/admin/system-mail` to Rust `/admin/commands/send-system-mail`. Verification passed: admin-api locked tests/fmt, admin-web typecheck/build, direct Rust API curl write, Next proxy curl write, and Playwright admin UI screenshots.

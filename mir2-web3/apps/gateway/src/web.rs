@@ -17,12 +17,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
 
+use crate::cache::{
+    default_gateway_session_cache_from_env, refresh_session_cache, remove_session_cache,
+    SharedGatewaySessionCache,
+};
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession};
 
 #[derive(Clone)]
 struct WebState {
     config: Arc<GatewayConfig>,
+    session_cache: SharedGatewaySessionCache,
 }
 
 #[derive(Debug, Deserialize)]
@@ -307,6 +312,21 @@ struct AdminSystemMailRequest {
     items: Vec<String>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminKickPlayerRequest {
+    character_id: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminKickPlayerReceipt {
+    character_id: String,
+    removed: bool,
+    account_id: Option<String>,
+    character_index: Option<i32>,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AdminErrorResponse {
@@ -316,12 +336,14 @@ struct AdminErrorResponse {
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
     let state = WebState {
         config: Arc::new(config),
+        session_cache: default_gateway_session_cache_from_env(),
     };
 
     let app = Router::new()
         .route("/", get(manual_ui))
         .route("/health", get(health))
         .route("/admin/system-mail", post(admin_system_mail))
+        .route("/admin/kick-player", post(admin_kick_player))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -367,19 +389,50 @@ async fn admin_system_mail(
     Ok(Json(receipt))
 }
 
+async fn admin_kick_player(
+    State(state): State<WebState>,
+    Json(request): Json<AdminKickPlayerRequest>,
+) -> Result<Json<AdminKickPlayerReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    if request.character_id.trim().is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(AdminErrorResponse {
+                error: "character_id is required".to_string(),
+            }),
+        ));
+    }
+    let removed = state
+        .session_cache
+        .remove_character(request.character_id.trim());
+    Ok(Json(AdminKickPlayerReceipt {
+        character_id: request.character_id,
+        removed: removed.is_some(),
+        account_id: removed.as_ref().map(|record| record.key.account_id.clone()),
+        character_index: removed.as_ref().map(|record| record.key.character_index),
+    }))
+}
+
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
     let mut session = GatewaySession::new((*state.config).clone());
-    handle_socket_inner(socket, &mut session).await;
+    handle_socket_inner(socket, &mut session, Arc::clone(&state.session_cache)).await;
+    let _ = catch_gateway_panic("web refresh_active_external_mail", || {
+        session.refresh_active_external_mail()
+    });
     let _ = catch_gateway_panic("web save_active_character", || {
         session.save_active_character()
     });
+    let _ = remove_session_cache(state.session_cache.as_ref(), &session);
 }
 
-async fn handle_socket_inner(socket: WebSocket, session: &mut GatewaySession) {
+async fn handle_socket_inner(
+    socket: WebSocket,
+    session: &mut GatewaySession,
+    session_cache: SharedGatewaySessionCache,
+) {
     let (mut sender, mut receiver) = socket.split();
 
     let connect_packets = match catch_gateway_panic("web on_connect", || session.on_connect()) {
@@ -394,6 +447,10 @@ async fn handle_socket_inner(socket: WebSocket, session: &mut GatewaySession) {
         if send_server_packet(&mut sender, &packet).await.is_err() {
             return;
         }
+    }
+    if let Err(error) = refresh_external_session_state(session) {
+        let _ = send_error_message(&mut sender, &error).await;
+        return;
     }
     if send_world_snapshot(&mut sender, &session).await.is_err() {
         return;
@@ -437,8 +494,16 @@ async fn handle_socket_inner(socket: WebSocket, session: &mut GatewaySession) {
                 return;
             }
         };
-        let should_send_snapshot =
-            should_send_snapshot_by_action || responses_require_world_snapshot(&responses);
+        let external_state_changed = match refresh_external_session_state(session) {
+            Ok(changed) => changed,
+            Err(error) => {
+                let _ = send_error_message(&mut sender, &error).await;
+                return;
+            }
+        };
+        let should_send_snapshot = should_send_snapshot_by_action
+            || responses_require_world_snapshot(&responses)
+            || external_state_changed;
 
         for response in responses {
             if send_server_packet(&mut sender, &response).await.is_err() {
@@ -455,7 +520,14 @@ async fn handle_socket_inner(socket: WebSocket, session: &mut GatewaySession) {
             let _ = send_error_message(&mut sender, &error).await;
             return;
         }
+        let _ = refresh_session_cache(session_cache.as_ref(), session);
     }
+}
+
+fn refresh_external_session_state(session: &mut GatewaySession) -> Result<bool, String> {
+    catch_gateway_panic("web refresh_active_external_mail", || {
+        session.refresh_active_external_mail()
+    })
 }
 
 fn execute_session_action(
@@ -1985,6 +2057,7 @@ mod tests {
         let default_character = config.default_character.clone();
         let state = super::WebState {
             config: Arc::new(config),
+            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
         };
 
         let Json(receipt) = super::admin_system_mail(

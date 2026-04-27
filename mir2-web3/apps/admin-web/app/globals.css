@@ -236,6 +236,14 @@ textarea {
   letter-spacing: -0.04em;
 }
 
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
 .eyebrow {
   margin: 0;
   color: var(--gold);
@@ -359,6 +367,11 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.form-stack {
+  display: grid;
+  gap: 12px;
 }
 
 .field {

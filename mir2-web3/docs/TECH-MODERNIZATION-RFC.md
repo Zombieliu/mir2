@@ -162,6 +162,16 @@ Redis should be used for:
 
 Redis must not be the source of truth for valuable gameplay state. Cache misses and cache hits must produce the same gameplay-visible state.
 
+NATS is the current lightweight command/notification bus for admin outbox
+dispatch. Redpanda plus ClickHouse are the local event-stream and analytics
+read-side path: Admin outbox events use stable envelopes, publish to Redpanda
+through Pandaproxy when configured, and project terminal command outcomes into
+ClickHouse. The outbox tracks NATS and Redpanda delivery independently and is
+marked dispatched only after every configured publisher succeeds.
+Redpanda/ClickHouse must remain non-authoritative for gameplay state unless a
+future service boundary explicitly promotes a derived read model into a
+validated command source.
+
 ### Operations Backend
 
 The admin/operations backend should support:
@@ -286,7 +296,8 @@ Medium term:
 Long term:
 
 - edge gateway routes players to zone services;
-- internal event/messaging layer may use Redis Streams first, or a dedicated bus such as NATS if scale/operational complexity justifies it;
+- NATS remains a lightweight command/notification bus for local admin dispatch;
+- Redpanda is the local append-only event-stream target for analytics-grade gameplay/economy/audit events;
 - packet trace and replay remain regression tools.
 
 ## Modernization Phases
@@ -354,6 +365,7 @@ Long term:
 - Add observability: metrics, logs, traces, health, readiness.
 - Add backup/restore and migration procedures.
 - Add load tests for gateway, zone, Postgres, and Redis.
+- Promote Redpanda/ClickHouse only after event envelopes, replay semantics, retention, and consumer ownership are stable.
 
 ## Expected Change Size
 
@@ -395,7 +407,7 @@ Highest-risk areas:
 
 - What exact Postgres schema versioning/migration tool should be used?
 - Should persistence use a repository trait per aggregate or one account-store-like adapter first?
-- Should Redis Streams be enough for early async operations, or should NATS be introduced later?
+- Which admin/gameplay events should publish to Redpanda first, and which should remain NATS-only command notifications?
 - Should the NPC DSL use custom `.npc` syntax, RON, or another structured format?
 - How much Crystal script compatibility should remain after the product DSL exists?
 - Should the admin frontend live inside the existing Next app or a separate app package?
@@ -409,8 +421,9 @@ Start with architecture and persistence boundaries, not UI or NPC parser impleme
 Recommended immediate sequence:
 
 1. Finalize this RFC.
-2. Follow `docs/ARCHITECTURE-ADOPTION-PLAN.md`: add local Postgres/Redis/NATS dev infra and keep Redpanda/ClickHouse/Meilisearch/Loki optional.
+2. Follow `docs/ARCHITECTURE-ADOPTION-PLAN.md`: add local Postgres/Redis/NATS/Redpanda/ClickHouse dev infra, while keeping Meilisearch/Loki/Grafana optional.
 3. Draft persistence adapter and Postgres schema.
 4. Add migration strategy from current JSON store.
-5. Add Redis scope and invalidation rules.
-6. Draft NPC DSL syntax and IR, but do not implement it until persistence boundaries are stable.
+5. Add Redis scope and invalidation rules. The gateway session-cache contract now exists with in-memory and Redis adapters, TTL tests, and a character-name routing index for Admin kick-player removal; next step is broader reconnect invalidation semantics.
+6. Add proper app-level Redpanda producers only after the event envelope is settled. The first bounded producer now exists for Admin outbox events through Redpanda Pandaproxy, with ClickHouse readback through Admin API `/admin/events` and `/admin/timeline`; gameplay authority still does not depend on Redpanda/ClickHouse.
+7. Draft NPC DSL syntax and IR, but do not implement it until persistence boundaries are stable.

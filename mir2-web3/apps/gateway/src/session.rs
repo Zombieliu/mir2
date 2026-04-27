@@ -2,7 +2,7 @@ use std::any::Any;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use mir2_protocol::{ClientPacket, Point, ServerPacket};
-use mir2_simulation::{SimulationConfig, SimulationSession, WorldSnapshot};
+use mir2_simulation::{ActiveSessionIdentity, SimulationConfig, SimulationSession, WorldSnapshot};
 
 pub type GatewayConfig = SimulationConfig;
 
@@ -111,8 +111,16 @@ impl GatewaySession {
         self.simulation.world_snapshot()
     }
 
+    pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
+        self.simulation.active_identity()
+    }
+
     pub fn save_active_character(&self) {
         self.simulation.save_active_character();
+    }
+
+    pub fn refresh_active_external_mail(&mut self) -> bool {
+        self.simulation.refresh_active_external_mail()
     }
 }
 

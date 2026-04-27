@@ -1,12 +1,12 @@
 # Admin Operations Architecture
 
-Last updated: 2026-04-27
+Last updated: 2026-04-28
 
 Status: implementation started.
 
 Purpose: define the technical architecture for the MMORPG operations backend. This document complements `docs/TECH-MODERNIZATION-RFC.md` and should be read before implementing admin APIs, GM tools, content publishing, or direct production support workflows.
 
-Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, a `SendSystemMail` domain executor, Postgres command/audit/outbox adapters, and a JSON account-store import utility. `apps/admin-web` now contains the first desktop operations UI and connects the GM mail form to the Rust API through a Next route. `SendSystemMail` now attempts live gateway delivery through `POST /admin/system-mail` before falling back to the persistent account store, so the default local flow is visible in the in-game Stage 5 mail panel and claimable through gameplay.
+Implementation note: `apps/admin-api` now contains the first command/audit/RBAC primitives, repository traits, Axum HTTP routes, approval records, a `SendSystemMail` domain executor, item/gold grant executors routed through audited system-mail delivery, kick/ban GM executors, Postgres command/audit/approval/outbox adapters, retry/dead-letter outbox state, optional `ADMIN_OPERATOR_TOKEN` bearer validation, optional `ADMIN_OPERATOR_POLICY_PATH` bearer-to-operator policy loading, self-approval protection for approvals by default, and a JSON account-store import utility. `apps/admin-web` now contains the first desktop operations UI and connects GM tools, approvals, audit, and timeline read models to the Rust API. GM Tools system mail submits through a server action and reloads command status from `GET /admin/commands/:command_id/status`, then joins that with `mail-{commandId}` outbox receipts so operators can see submitted, succeeded/failed, and delivery states. `SendSystemMail` now attempts live gateway delivery through `POST /admin/system-mail` before falling back to the persistent account store, so the default local flow is visible in the in-game Stage 5 mail panel and claimable through gameplay. Online Gateway sessions merge externally delivered Stage 5 mail before snapshots and saves, so admin-delivered mail/gold appears without logout/relogin. `BanAccount` persists into the account store and is enforced by simulation login/start-game checks; `KickPlayer` calls the gateway session-routing endpoint.
 
 ## First Principles
 
@@ -83,9 +83,9 @@ Responsibilities:
 Current implementation:
 
 - `apps/admin-web` is a separate NextJS app from the player-facing web client.
-- Implemented pages: Dashboard, Player Management, Player Detail, Economy, Activities, World Monitor, Anti-Cheat, Mail/GM Tools, and Audit Log.
-- The `Mail/GM Tools` page posts `SendSystemMail` through `/api/admin/system-mail`, which forwards to the Rust Admin API with server-side operator headers.
-- The dashboard, GM tools, and audit pages read the Rust Admin API when available and show an offline state when the API is not running.
+- Implemented pages: Dashboard, Player Management, Player Detail, Economy, Activities, World Monitor, Anti-Cheat, Mail/GM Tools, Approvals, Audit Log, and Timeline.
+- The `Mail/GM Tools` page posts `SendSystemMail` through a server action that calls the Rust Admin API with server-side operator headers, shows a pending submit state, redirects with `commandId`, and reloads the matching command status plus outbox delivery receipt. It also has server-action forms for `GrantItem`, `GrantCurrency`, `KickPlayer`, and `BanAccount`.
+- The dashboard, GM tools, approvals, audit, and timeline pages read the Rust Admin API when available and show an offline state when the API is not running.
 - The admin UI has a first production-shaped i18n layer: `admin_locale` cookie selects `en` or `zh-CN`, pages render server-side from `apps/admin-web/lib/i18n.ts`, and the top bar includes a language switcher. Current coverage includes navigation, page heads, table headers, primary controls, GM mail form copy, status labels, and operational empty states.
 
 Admin Web should not contain hidden direct mutation endpoints or database credentials.
@@ -114,12 +114,29 @@ Current implementation:
 
 - `GET /health`
 - `GET /admin/commands`
+- `GET /admin/commands/:command_id/status`
 - `GET /admin/audit`
+- `GET /admin/approvals`
+- `GET /admin/events`
+- `GET /admin/timeline`
 - `GET /admin/system-mail/outbox`
 - `POST /admin/commands/send-system-mail`
+- `POST /admin/commands/grant-item`
+- `POST /admin/commands/grant-currency`
+- `POST /admin/commands/kick-player`
+- `POST /admin/commands/ban-account`
+- `POST /admin/approvals`
+- `POST /admin/approvals/:approval_id/approve`
+- `POST /admin/approvals/:approval_id/reject`
 - Write routes require operator headers and permissions.
+- `ADMIN_OPERATOR_TOKEN` can require a static Bearer token for local/dev deployments.
+- `ADMIN_OPERATOR_POLICY_PATH` can map Bearer tokens to fixed operator identities and permissions, so callers cannot spoof operator headers when the policy file is enabled.
+- Approval decisions reject requester self-approval by default. Local smoke environments may set `ADMIN_APPROVAL_ALLOW_SELF=true`; production should leave it unset and use separate approvers.
 - Command and audit persistence are represented by `AdminCommandRepository` and `AuditRepository`. The default local implementation is in-memory; setting `ADMIN_DATABASE_URL` switches the Admin API to Postgres and applies `infra/postgres/migrations/0001_core.sql` at startup.
-- `AdminOutboxRepository` now models the durable outbox. Successful Postgres-backed commands enqueue an `admin.command.succeeded` outbox event; `dispatch-admin-outbox` reads pending Postgres rows, publishes them to NATS subjects, and marks them dispatched. It is intentionally minimal; a JetStream client with retries/dead-letter handling is still needed before production.
+- `AdminOutboxRepository` now models the durable outbox. Successful Postgres-backed commands enqueue an `admin.command.succeeded` outbox event; `dispatch-admin-outbox` reads due Postgres rows, publishes them to configured NATS and Redpanda/Pandaproxy targets, records per-publisher delivery state, and marks rows dispatched only after all configured publishers succeed. Retry/dead-letter state exists, but a production JetStream/Kafka producer boundary is still needed before production.
+- Local Redpanda and ClickHouse now provide the first event analytics path. `dispatch-admin-outbox` publishes stable admin event envelopes to Redpanda through Pandaproxy when `ADMIN_OUTBOX_REDPANDA_URL` is set; ClickHouse subscribes to the Redpanda `admin.command.succeeded`, `admin.command.failed`, and `admin.command.denied` topics and projects JSON events into `mir2_events.admin_events` plus `mir2_events.admin_command_events`. This is an analytics/read-side projection, not gameplay authority.
+- `GET /admin/events` reads the ClickHouse admin event projection for operations UI audit views. It supports `limit`, `commandId`, `eventType`, and `status` filters and returns a degraded response with empty records if ClickHouse is unavailable.
+- `GET /admin/commands/:command_id/status` returns one command record for post-submit UI status loading and 404s when the command id is unknown.
 - `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
 - If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 
@@ -177,7 +194,7 @@ Verified local behavior:
 
 - Admin Web POST to `/api/admin/system-mail` returns a command id from Rust Admin API.
 - `GET /admin/system-mail/outbox` reports `deliveryMode: "gateway_live"`, `deliveredCount: 1`, and the generated mail id.
-- Gateway WebSocket world snapshots expose the mail at `payload.stage5Systems.mail`.
+- Gateway WebSocket world snapshots expose the mail at `payload.stage5Systems.mail`; already-online sessions refresh externally delivered mail before keepalive/tick saves.
 - Sending `stage5Command` `mail.claim` through the game socket marks the mail claimed and transfers attachments into player state.
 
 ### Postgres
@@ -204,12 +221,22 @@ Current implementation:
   `ADMIN_DATABASE_URL` is configured.
 - `apps/admin-api/src/bin/import-account-store.rs` imports the current JSON
   account store into `accounts`, `characters`, and `character_saves`.
-- `apps/admin-api/src/bin/dispatch-admin-outbox.rs` dispatches pending
-  `admin_outbox` rows to NATS using `NATS_ADDR`.
+- `apps/admin-api/src/bin/dispatch-admin-outbox.rs` dispatches due
+  `admin_outbox` rows to NATS using `NATS_ADDR` and to Redpanda Pandaproxy when
+  `ADMIN_OUTBOX_REDPANDA_URL` is set. It records `nats_status`,
+  `redpanda_status`, `last_error`, and `dispatched_at_ms` for operational
+  diagnosis.
+- `infra/clickhouse/initdb/001_admin_events.sql` defines the first local
+  Redpanda-to-ClickHouse projection for envelope-shaped terminal command events:
+  `admin.command.succeeded`, `admin.command.failed`, and
+  `admin.command.denied`.
 - Docker integration smoke has verified the full first slice: account-store JSON
   import into Postgres, HTTP Admin API command submission writing
   command/audit/outbox rows, NATS publication of `admin.command.succeeded`, and
   outbox transition to `dispatched`.
+- Docker integration smoke also verifies partial publisher failure semantics:
+  NATS failure after Redpanda success and Redpanda failure after NATS success
+  both keep the row in retry flow with `dispatched_at_ms` unset.
 - `apps/simulation` now supports `MIR2_ACCOUNT_STORE_DATABASE_URL` as a
   Postgres mirror for JSON account-store saves. The mirror runs on a blocking
   thread to avoid Tokio nested-runtime panics in gateway/Admin API processes.
