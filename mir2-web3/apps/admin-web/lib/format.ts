@@ -18,7 +18,7 @@ export function formatMap(mapTitle: string, mapFileName: string) {
 
 export function statusTone(status: string): "default" | "success" | "warn" | "danger" {
   const normalized = status.toLowerCase();
-  if (normalized === "healthy" || normalized === "normal" || normalized === "tracked") {
+  if (normalized === "healthy" || normalized === "normal" || normalized === "tracked" || normalized === "online") {
     return "success";
   }
   if (normalized === "banned" || normalized === "critical" || normalized === "unavailable") {

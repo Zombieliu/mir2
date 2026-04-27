@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-28-R249 completed. Gateway session cache now has a real list/read boundary: `GET /admin/sessions` returns current online session records from the in-memory or Redis cache, and Redis list coverage proves SETEX/SCAN/TTL/remove semantics. Admin API overlays that Gateway presence onto `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, and `/admin/read/servers`, so online counts, player online status, runtime HP/gold/map, and zones-online source are true Gateway/Redis data instead of unwired placeholders. Verification: focused gateway session-cache tests 8/8, gateway `/admin/sessions` endpoint test, admin-api presence overlay test, and admin-web `tsc --noEmit` passed.
+
 > Latest product-evolution sync: 2026-04-28-R248 completed. Admin Web mock read data has been removed. Dashboard, Players, Player Detail, Economy, Activities, Servers, and Risk now consume Rust `/admin/read/*` routes backed by JSON account-store or explicit Postgres source mode. Unwired domains return honest empty/unconfigured states instead of sample rows. Verification: admin-api full test suite 23+6 passed, focused read-model test passed, and admin-web `tsc --noEmit` passed.
 
 > Latest product-evolution sync: 2026-04-28-R247 completed. Fixed the Admin Web mail-submit dead path and added explicit command status loading: GM Tools system mail now submits through a server action with pending state, Admin API exposes `GET /admin/commands/:command_id/status`, and the post-submit page shows command status, result, trace, operator, delivery mode, and mail ids. Browser smoke verified `Queue System Mail` -> `succeeded` / `gateway_live / 1` / mail id, and Player Web Mail shows `Compensation Package` with `5000 Gold · Unclaimed`.
@@ -97,7 +99,7 @@ Restart handoff: if the Codex session is reopened after shutdown or context loss
 
 Product evolution handoff: after the 1:1 Candidate baseline, future product work should also read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, `docs/ARCHITECTURE-ADOPTION-PLAN.md`, `docs/PLATFORM-CLIENT-STRATEGY.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`. Database, cache, login UI, admin backend, global zone, client distribution, and NPC script parser changes are expected product-evolution areas, not automatic Crystal parity regressions.
 
-Truth audit handoff: read `docs/PARITY-TRUTH-AUDIT.md` before changing progress percentages or handoff wording. Fallbacks such as synthetic map terrain, Admin read-model gaps/unwired projections, in-memory command/audit stores, JSON account-store persistence, and modeled Stage 5 systems are useful Candidate evidence, but are not final accepted Crystal 1:1.
+Truth audit handoff: read `docs/PARITY-TRUTH-AUDIT.md` before changing progress percentages or handoff wording. Fallbacks such as synthetic map terrain, remaining Admin read-model gaps/unwired projections, in-memory command/audit stores, JSON account-store persistence, and modeled Stage 5 systems are useful Candidate evidence, but are not final accepted Crystal 1:1.
 
 Status values:
 

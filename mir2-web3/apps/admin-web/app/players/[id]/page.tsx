@@ -90,6 +90,12 @@ export default async function PlayerDetailPage({
                 [t("players.gold"), formatNumber(summary?.gold)],
                 [t("players.credit"), formatNumber(summary?.credit)],
                 [t("playerDetail.mail"), `${formatNumber(player?.unclaimedMailCount)} / ${formatNumber(player?.mailCount)}`],
+                [
+                  t("playerDetail.runtime"),
+                  summary?.online
+                    ? `${summary.onlineSource ?? "gateway_session_cache"} / tick ${formatVersion(summary.runtimeTick)}`
+                    : "-"
+                ],
                 [t("playerDetail.versions"), `${formatVersion(summary?.storeVersion)} / ${formatVersion(summary?.saveVersion)}`]
               ].map(([label, value]) => (
                 <tr key={label}>
