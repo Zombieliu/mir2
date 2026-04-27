@@ -1,10 +1,12 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { adminGet, type AdminActivitiesReadModel } from "../../lib/admin-api";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
-import { activities } from "../../lib/mock-data";
 
 export default async function ActivitiesPage() {
   const { t } = await getAdminI18n();
+  const activities = await adminGet<AdminActivitiesReadModel>("/admin/read/activities");
+  const data = activities.ok ? activities.data : undefined;
 
   return (
     <AdminShell active="/activities">
@@ -14,8 +16,11 @@ export default async function ActivitiesPage() {
           <h2>{t("activities.title")}</h2>
           <p className="muted">{t("activities.subtitle")}</p>
         </div>
-        <button className="button">{t("activities.create")}</button>
+        <StatusBadge tone={data?.configured ? "success" : "warn"}>
+          {data?.configured ? t("common.connected") : t("common.unconfigured")}
+        </StatusBadge>
       </div>
+      {!activities.ok ? <p className="notice">{activities.error}</p> : null}
       <div className="grid two">
         <section className="card">
           <p className="eyebrow">{t("activities.list")}</p>
@@ -30,47 +35,33 @@ export default async function ActivitiesPage() {
               </tr>
             </thead>
             <tbody>
-              {activities.map(([name, start, type, status, signal]) => (
-                <tr key={name}>
-                  <td>{name}</td>
-                  <td>{start}</td>
-                  <td>{type}</td>
+              {(data?.activities ?? []).map((activity) => (
+                <tr key={activity.activityId}>
+                  <td>{activity.name}</td>
+                  <td>{activity.startAtMs ?? "-"}</td>
+                  <td>{activity.activityType}</td>
                   <td>
-                    <StatusBadge tone={status === "Running" ? "success" : "warn"}>
-                      {translateAdminStatus(t, status)}
+                    <StatusBadge tone={activity.status === "Running" ? "success" : "warn"}>
+                      {translateAdminStatus(t, activity.status)}
                     </StatusBadge>
                   </td>
-                  <td>{signal}</td>
+                  <td>{activity.signal}</td>
                 </tr>
               ))}
+              {!data?.activities.length ? (
+                <tr>
+                  <td colSpan={5}>
+                    <p className="notice">{t("activities.empty")}</p>
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </section>
         <section className="card">
-          <p className="eyebrow">{t("activities.preview")}</p>
-          <div className="form-grid">
-            <div className="field full">
-              <label>{t("activities.activityName")}</label>
-              <input className="control" defaultValue={t("activities.defaultName")} />
-            </div>
-            <div className="field">
-              <label>{t("activities.reward")}</label>
-              <input className="control" defaultValue="red-moon-token x12" />
-            </div>
-            <div className="field">
-              <label>{t("activities.condition")}</label>
-              <input className="control" defaultValue="level >= 35" />
-            </div>
-            <div className="field full">
-              <label>{t("activities.realms")}</label>
-              <input className="control" defaultValue={t("activities.defaultRealms")} />
-            </div>
-          </div>
-          <div className="rune-divider" />
-          <div className="actions">
-            <button className="button secondary">{t("activities.saveDraft")}</button>
-            <button className="button">{t("activities.submitReview")}</button>
-          </div>
+          <p className="eyebrow">{t("activities.source")}</p>
+          <h3>{data?.source ?? t("common.unavailable")}</h3>
+          <p className="notice">{t("activities.noConfigStore")}</p>
         </section>
       </div>
     </AdminShell>

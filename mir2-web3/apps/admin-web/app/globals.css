@@ -153,9 +153,10 @@ textarea {
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) 190px 142px 148px;
+  grid-template-columns: 142px 148px;
   gap: 14px;
   align-items: center;
+  justify-content: end;
   margin-bottom: 22px;
 }
 
@@ -343,7 +344,7 @@ textarea {
 
 .bar-row {
   display: grid;
-  grid-template-columns: 108px 1fr 54px;
+  grid-template-columns: minmax(108px, 160px) 1fr minmax(54px, max-content);
   gap: 11px;
   align-items: center;
   color: #d7d3c7;

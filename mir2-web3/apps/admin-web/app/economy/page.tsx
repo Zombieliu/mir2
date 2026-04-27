@@ -1,11 +1,14 @@
 import { AdminShell } from "../../components/admin-shell";
 import { Bars } from "../../components/bars";
 import { StatusBadge } from "../../components/status-badge";
+import { adminGet, type AdminEconomyReadModel } from "../../lib/admin-api";
+import { formatNumber, statusTone } from "../../lib/format";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
-import { economyRows } from "../../lib/mock-data";
 
 export default async function EconomyPage() {
   const { t } = await getAdminI18n();
+  const economy = await adminGet<AdminEconomyReadModel>("/admin/read/economy");
+  const data = economy.ok ? economy.data : undefined;
 
   return (
     <AdminShell active="/economy">
@@ -15,8 +18,11 @@ export default async function EconomyPage() {
           <h2>{t("economy.title")}</h2>
           <p className="muted">{t("economy.subtitle")}</p>
         </div>
-        <StatusBadge tone="warn">{t("economy.inflationBadge")}</StatusBadge>
+        <StatusBadge tone={economy.ok ? "success" : "warn"}>
+          {economy.ok ? economy.data.source : t("common.unavailable")}
+        </StatusBadge>
       </div>
+      {!economy.ok ? <p className="notice">{economy.error}</p> : null}
       <div className="grid two">
         <section className="card">
           <p className="eyebrow">{t("economy.mainCurrencies")}</p>
@@ -24,52 +30,66 @@ export default async function EconomyPage() {
             <thead>
               <tr>
                 <th>{t("economy.asset")}</th>
-                <th>{t("economy.produced")}</th>
-                <th>{t("economy.consumed")}</th>
-                <th>{t("economy.net")}</th>
+                <th>{t("economy.currentTotal")}</th>
+                <th>{t("economy.holders")}</th>
+                <th>{t("economy.average")}</th>
                 <th>{t("economy.state")}</th>
               </tr>
             </thead>
             <tbody>
-              {economyRows.map(([asset, produced, consumed, net, state]) => (
-                <tr key={asset}>
-                  <td>{asset}</td>
-                  <td>{produced}</td>
-                  <td>{consumed}</td>
-                  <td>{net}</td>
+              {(data?.assets ?? []).map((asset) => (
+                <tr key={asset.asset}>
+                  <td>{asset.asset}</td>
+                  <td>{formatNumber(asset.total)}</td>
+                  <td>{formatNumber(asset.holders)}</td>
+                  <td>{formatNumber(asset.average)}</td>
                   <td>
-                    <StatusBadge tone={state === "Stable" ? "success" : "warn"}>
-                      {translateAdminStatus(t, state)}
+                    <StatusBadge tone={statusTone(asset.state)}>
+                      {translateAdminStatus(t, asset.state)}
                     </StatusBadge>
                   </td>
                 </tr>
               ))}
+              {!data?.assets.length ? (
+                <tr>
+                  <td colSpan={5}>
+                    <p className="notice">{t("economy.empty")}</p>
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </section>
         <section className="card">
           <p className="eyebrow">{t("economy.resourceDistribution")}</p>
-          <Bars
-            rows={[
-              { label: t("economy.topOne"), value: 46 },
-              { label: t("economy.guildBanks"), value: 22 },
-              { label: t("economy.market"), value: 19 },
-              { label: t("economy.dormant"), value: 13 }
-            ]}
-          />
+          {data?.goldDistribution.length ? (
+            <Bars
+              rows={data.goldDistribution.map((bucket) => ({
+                label: t(`economy.bucket.${bucket.key}`),
+                value: bucket.value,
+                suffix: `%, ${formatNumber(bucket.amount)}`
+              }))}
+            />
+          ) : (
+            <p className="notice">{t("economy.emptyDistribution")}</p>
+          )}
         </section>
       </div>
       <section className="card" style={{ marginTop: 16 }}>
         <p className="eyebrow">{t("economy.priceMovement")}</p>
-        <div className="grid three">
-          {["Dragon Scale", "Blessed Oil", "Wooma Horn"].map((item, index) => (
-            <div className="side-card" key={item} style={{ marginTop: 0 }}>
-              <h3>{item}</h3>
-              <p className="metric-value">{[12800, 8420, 22100][index].toLocaleString()}</p>
-              <p className={index === 1 ? "delta negative" : "delta"}>{index === 1 ? "+18.4% abnormal" : "+3.2% normal"}</p>
-            </div>
-          ))}
-        </div>
+        {data?.priceFeeds.length ? (
+          <div className="grid three">
+            {data.priceFeeds.map((feed) => (
+              <div className="side-card" key={feed.item} style={{ marginTop: 0 }}>
+                <h3>{feed.item}</h3>
+                <p className="metric-value">{formatNumber(feed.latestPrice)}</p>
+                <p className="delta">{feed.source}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="notice">{t("economy.noPriceFeed")}</p>
+        )}
       </section>
     </AdminShell>
   );

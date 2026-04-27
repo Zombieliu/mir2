@@ -96,6 +96,151 @@ export type SubmitCommandResponse = {
   };
 };
 
+export type AdminMapPopulation = {
+  mapFileName: string;
+  mapTitle: string;
+  characterCount: number;
+  percent: number;
+};
+
+export type AdminServiceStatus = {
+  name: string;
+  status: string;
+  detail: string;
+  latencyMs?: number;
+  configured: boolean;
+};
+
+export type AdminDashboardReadModel = {
+  source: string;
+  generatedAtMs: number;
+  accountCount: number;
+  characterCount: number;
+  onlineNow: number;
+  onlineSource: string;
+  totalGold: number;
+  totalCredit: number;
+  activeBanCount: number;
+  hotMaps: AdminMapPopulation[];
+  services: AdminServiceStatus[];
+  auditRecordCount: number;
+  outboxReceiptCount: number;
+};
+
+export type AdminPlayerSummary = {
+  playerId: string;
+  accountId: string;
+  characterIndex: number;
+  characterName: string;
+  className: string;
+  gender: string;
+  level: number;
+  mapFileName: string;
+  mapTitle: string;
+  positionX: number;
+  positionY: number;
+  hp: number;
+  maxHp: number;
+  mp: number;
+  gold: number;
+  credit: number;
+  status: string;
+  storeVersion?: number;
+  saveVersion?: number;
+};
+
+export type AdminPlayersReadModel = {
+  source: string;
+  generatedAtMs: number;
+  players: AdminPlayerSummary[];
+};
+
+export type AdminPlayerDetail = {
+  summary: AdminPlayerSummary;
+  inventoryCount: number;
+  beltCount: number;
+  storageCount: number;
+  equipmentCount: number;
+  questStateCount: number;
+  skillStateCount: number;
+  mailCount: number;
+  unclaimedMailCount: number;
+  auctionListingCount: number;
+  groupMemberCount: number;
+  guildName?: string;
+  activeBanReason?: string;
+  banUntilMs?: number;
+  bannedAtMs?: number;
+};
+
+export type AdminEconomyAsset = {
+  asset: string;
+  total: number;
+  holders: number;
+  average: number;
+  state: string;
+};
+
+export type AdminDistributionBucket = {
+  key: string;
+  label: string;
+  value: number;
+  amount: number;
+};
+
+export type AdminEconomyReadModel = {
+  source: string;
+  generatedAtMs: number;
+  assets: AdminEconomyAsset[];
+  goldDistribution: AdminDistributionBucket[];
+  priceFeeds: Array<{
+    item: string;
+    latestPrice: number;
+    sampleCount: number;
+    source: string;
+  }>;
+  priceFeedConfigured: boolean;
+};
+
+export type AdminActivitiesReadModel = {
+  source: string;
+  generatedAtMs: number;
+  configured: boolean;
+  activities: Array<{
+    activityId: string;
+    name: string;
+    startAtMs?: number;
+    activityType: string;
+    status: string;
+    signal: string;
+  }>;
+};
+
+export type AdminServersReadModel = {
+  generatedAtMs: number;
+  accountStoreSource: string;
+  accountCount: number;
+  characterCount: number;
+  zonesOnline: number;
+  zonesSource: string;
+  services: AdminServiceStatus[];
+};
+
+export type AdminRiskReadModel = {
+  source: string;
+  generatedAtMs: number;
+  cases: Array<{
+    playerId: string;
+    accountId: string;
+    characterName: string;
+    signal: string;
+    risk: string;
+    evidence: string;
+    banUntilMs?: number;
+  }>;
+  graph: Array<{ from: string; to: string; signal: string }>;
+};
+
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
 
 export function operatorHeaders() {
