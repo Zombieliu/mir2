@@ -83,7 +83,7 @@ ADMIN_OPERATOR_TOKEN=local-dev-token \
 ADMIN_OPERATOR_ID=local-gm \
 ADMIN_OPERATOR_EMAIL=gm.local@mir2.dev \
 ADMIN_OPERATOR_ROLE=ops_admin \
-ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage \
+ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage \
 ./node_modules/.bin/next dev -p 3020
 ```
 
@@ -94,7 +94,10 @@ defaults to blocking self-approval.
 
 Apply the first Postgres schema indirectly by starting Admin API with
 `ADMIN_DATABASE_URL`; the API runs `infra/postgres/migrations/0001_core.sql` at
-startup. The same migration is used by the account-store import utility:
+startup. The migration includes account-store mirror/source tables, admin
+command/audit/approval/outbox tables, and Admin projection tables for
+Activities, market price feeds, and risk trade graph edges. The same migration
+is used by the account-store import utility:
 
 ```bash
 ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \

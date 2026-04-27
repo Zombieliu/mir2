@@ -180,3 +180,60 @@ ALTER TABLE admin_outbox
 
 CREATE INDEX IF NOT EXISTS idx_admin_outbox_pending
     ON admin_outbox(status, next_attempt_at_ms, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS admin_activities (
+    activity_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    activity_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    signal TEXT NOT NULL DEFAULT '',
+    start_at_ms BIGINT,
+    reward TEXT NOT NULL DEFAULT '',
+    condition TEXT NOT NULL DEFAULT '',
+    realms_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_by TEXT NOT NULL DEFAULT '',
+    created_at_ms BIGINT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS reward TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS condition TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS realms_json JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_admin_activities_status
+    ON admin_activities(status, updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_market_price_feeds (
+    item TEXT PRIMARY KEY,
+    latest_price BIGINT NOT NULL,
+    sample_count INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_market_price_feeds_updated
+    ON admin_market_price_feeds(updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_trade_graph_edges (
+    edge_id TEXT PRIMARY KEY,
+    from_player_id TEXT NOT NULL,
+    to_player_id TEXT NOT NULL,
+    signal TEXT NOT NULL,
+    risk TEXT NOT NULL,
+    evidence TEXT NOT NULL DEFAULT '',
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_trade_graph_edges_updated
+    ON admin_trade_graph_edges(updated_at_ms DESC);

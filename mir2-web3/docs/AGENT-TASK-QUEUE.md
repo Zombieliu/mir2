@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-28-R250 completed. Admin read-model gaps for Activity config, Economy price feeds, and Risk trade graph now have real Postgres-backed projections and write routes. Admin API applies `admin_activities`, `admin_market_price_feeds`, and `admin_trade_graph_edges`; Admin Web Activities/Economy/Risk pages can create records through server actions and read them back from `/admin/read/*`. Verification: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API smoke for all three projections, Admin Web page HTTP smoke 200/200/200, fmt/diff checks.
+
 > Latest product-evolution sync: 2026-04-28-R249 completed. Gateway session cache now has a real list/read boundary: `GET /admin/sessions` returns current online session records from the in-memory or Redis cache, and Redis list coverage proves SETEX/SCAN/TTL/remove semantics. Admin API overlays that Gateway presence onto `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, and `/admin/read/servers`, so online counts, player online status, runtime HP/gold/map, and zones-online source are true Gateway/Redis data instead of unwired placeholders. Verification: focused gateway session-cache tests 8/8, gateway `/admin/sessions` endpoint test, admin-api presence overlay test, and admin-web `tsc --noEmit` passed.
 
 > Latest product-evolution sync: 2026-04-28-R248 completed. Admin Web mock read data has been removed. Dashboard, Players, Player Detail, Economy, Activities, Servers, and Risk now consume Rust `/admin/read/*` routes backed by JSON account-store or explicit Postgres source mode. Unwired domains return honest empty/unconfigured states instead of sample rows. Verification: admin-api full test suite 23+6 passed, focused read-model test passed, and admin-web `tsc --noEmit` passed.
@@ -190,6 +192,12 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | Status | Task | Owner | Files | Notes |
 | --- | --- | --- | --- | --- |
 | [x] | Make the local admin backend browser-testable | Coordinator | `apps/admin-api`, `apps/admin-web`, docs | Added `ADMIN_OPERATOR_POLICY_PATH` operator policy loading, default self-approval blocking with local `ADMIN_APPROVAL_ALLOW_SELF=true` override, and Admin Web GM forms for grant item, grant gold, kick player, and ban account. Started Docker infra, Gateway, Admin API, and Admin Web; smoke-verified API/Gateway health and `/gm-tools`. |
+
+## Product Evolution Round: 2026-04-28-R250
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Replace remaining Admin projection gaps with Postgres-backed real data | Coordinator | `apps/admin-api`, `apps/admin-web`, `infra/postgres/migrations/0001_core.sql`, docs | Added Activity config, market price feed, and risk trade graph Postgres tables plus Admin API write/read routes and Admin Web server-action forms. Live smoke wrote `activity-r250-smoke`, `GoldBar`, and `trade-r250-smoke`, then read them back from `/admin/read/activities`, `/admin/read/economy`, and `/admin/read/risk`. |
 
 ## Product Evolution Round: 2026-04-27-R227
 

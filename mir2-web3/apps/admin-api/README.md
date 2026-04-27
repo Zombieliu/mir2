@@ -17,7 +17,8 @@ The crate now contains:
   by `ADMIN_DATABASE_URL`;
 - in-memory command/audit repositories for local tests and smoke runs;
 - Postgres schema migration for accounts, characters, character saves, admin
-  command records, audit records, and admin outbox records;
+  command records, audit records, admin outbox records, activity config,
+  market price feeds, and trade graph edges;
 - account-store JSON import utility for migrating `.mir2-data/accounts.json`
   into Postgres-shaped tables;
 - command idempotency guard through `AdminCommandRepository::insert_pending`;
@@ -32,8 +33,9 @@ The crate now contains:
   service health, activity state, and risk state. These read the configured JSON
   account store or explicit Postgres account-store source, then overlay Gateway
   online presence from `ADMIN_GATEWAY_SESSIONS_URL` /
-  `http://127.0.0.1:7110/admin/sessions`. They return empty
-  `configured=false` states where no authoritative source exists yet;
+  `http://127.0.0.1:7110/admin/sessions`. When `ADMIN_DATABASE_URL` is set,
+  Activities, Economy price feeds, and Risk trade graph also read/write
+  Postgres projection tables;
 - optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
 - optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
   to fixed operator identities and permissions.
@@ -118,6 +120,9 @@ Routes:
 - `GET /admin/read/activities`
 - `GET /admin/read/servers`
 - `GET /admin/read/risk`
+- `POST /admin/activities`
+- `POST /admin/economy/price-feeds`
+- `POST /admin/risk/trade-edges`
 - `POST /admin/commands/send-system-mail`
 - `POST /admin/commands/grant-item`
 - `POST /admin/commands/grant-currency`
@@ -137,7 +142,8 @@ x-operator-permissions
 ```
 
 For local GM mail smoke, include `mail_send_system` in
-`x-operator-permissions`.
+`x-operator-permissions`. Activity, market price, and trade graph projection
+writes require `content_publish`.
 
 If `ADMIN_OPERATOR_TOKEN` is set, requests must also include
 `Authorization: Bearer <token>`. If `ADMIN_OPERATOR_POLICY_PATH` is set, the
