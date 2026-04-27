@@ -30,6 +30,7 @@ pub struct GatewaySessionCacheRecord {
 
 pub trait GatewaySessionCache: Send + Sync {
     fn get(&self, key: &GatewaySessionCacheKey) -> Option<GatewaySessionCacheRecord>;
+    fn list(&self) -> Vec<GatewaySessionCacheRecord>;
     fn put(&self, record: GatewaySessionCacheRecord);
     fn remove(&self, key: &GatewaySessionCacheKey);
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord>;
@@ -49,6 +50,15 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .expect("gateway session cache mutex should not be poisoned")
             .get(key)
             .cloned()
+    }
+
+    fn list(&self) -> Vec<GatewaySessionCacheRecord> {
+        self.records
+            .lock()
+            .expect("gateway session cache mutex should not be poisoned")
+            .values()
+            .cloned()
+            .collect()
     }
 
     fn put(&self, record: GatewaySessionCacheRecord) {
@@ -132,6 +142,56 @@ impl RedisGatewaySessionCache {
             other => Err(format!("unexpected redis PING response: {other:?}")),
         }
     }
+
+    fn list_keys(&self) -> Result<Vec<String>, String> {
+        let mut cursor = "0".to_string();
+        let mut keys = Vec::new();
+        loop {
+            let response = self.execute(&[
+                "SCAN".to_string(),
+                cursor.clone(),
+                "MATCH".to_string(),
+                format!("{}:*", self.namespace),
+                "COUNT".to_string(),
+                "100".to_string(),
+            ])?;
+            let RedisValue::Array(values) = response else {
+                return Err(format!("unexpected redis SCAN response: {response:?}"));
+            };
+            if values.len() != 2 {
+                return Err(format!("unexpected redis SCAN arity: {}", values.len()));
+            }
+            cursor = redis_string_value(&values[0])
+                .ok_or_else(|| format!("unexpected redis SCAN cursor: {:?}", values[0]))?;
+            let RedisValue::Array(batch) = &values[1] else {
+                return Err(format!("unexpected redis SCAN key batch: {:?}", values[1]));
+            };
+            for key in batch {
+                if let Some(key) = redis_string_value(key) {
+                    keys.push(key);
+                }
+            }
+            if cursor == "0" {
+                return Ok(keys);
+            }
+        }
+    }
+
+    fn get_record_by_redis_key(&self, redis_key: &str) -> Option<GatewaySessionCacheRecord> {
+        let value = match self.execute(&["GET".to_string(), redis_key.to_string()]) {
+            Ok(RedisValue::Bulk(Some(value))) => value,
+            Ok(RedisValue::Bulk(None)) => return None,
+            Ok(other) => {
+                eprintln!("unexpected redis session-cache list get response: {other:?}");
+                return None;
+            }
+            Err(error) => {
+                eprintln!("redis session-cache list get failed: {error}");
+                return None;
+            }
+        };
+        serde_json::from_str(&value).ok()
+    }
 }
 
 impl GatewaySessionCache for RedisGatewaySessionCache {
@@ -150,6 +210,28 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
             }
         };
         serde_json::from_str(&value).ok()
+    }
+
+    fn list(&self) -> Vec<GatewaySessionCacheRecord> {
+        let keys = match self.list_keys() {
+            Ok(keys) => keys,
+            Err(error) => {
+                eprintln!("redis session-cache list failed: {error}");
+                return Vec::new();
+            }
+        };
+        let mut records = keys
+            .iter()
+            .filter_map(|key| self.get_record_by_redis_key(key))
+            .collect::<Vec<_>>();
+        records.sort_by(|left, right| {
+            left.character_name
+                .cmp(&right.character_name)
+                .then_with(|| left.key.account_id.cmp(&right.key.account_id))
+                .then(left.key.character_index.cmp(&right.key.character_index))
+        });
+        records.dedup_by(|left, right| left.key == right.key);
+        records
     }
 
     fn put(&self, record: GatewaySessionCacheRecord) {
@@ -272,6 +354,7 @@ enum RedisValue {
     Simple(String),
     Bulk(Option<String>),
     Integer(i64),
+    Array(Vec<RedisValue>),
 }
 
 fn write_resp_command(stream: &mut TcpStream, args: &[String]) -> Result<(), String> {
@@ -320,8 +403,31 @@ fn read_resp_value(stream: &mut TcpStream) -> Result<RedisValue, String> {
                 .map(|value| RedisValue::Bulk(Some(value)))
                 .map_err(|error| format!("redis bulk utf8 decode failed: {error}"))
         }
+        b'*' => {
+            let line = read_line(stream)?;
+            let len = line
+                .parse::<isize>()
+                .map_err(|error| format!("redis array length parse failed: {error}"))?;
+            if len < 0 {
+                return Ok(RedisValue::Array(Vec::new()));
+            }
+            let mut values = Vec::with_capacity(len as usize);
+            for _ in 0..len {
+                values.push(read_resp_value(stream)?);
+            }
+            Ok(RedisValue::Array(values))
+        }
         b'-' => Err(format!("redis error response: {}", read_line(stream)?)),
         other => Err(format!("unsupported redis response prefix: {other}")),
+    }
+}
+
+fn redis_string_value(value: &RedisValue) -> Option<String> {
+    match value {
+        RedisValue::Simple(value) => Some(value.clone()),
+        RedisValue::Bulk(Some(value)) => Some(value.clone()),
+        RedisValue::Integer(value) => Some(value.to_string()),
+        RedisValue::Bulk(None) | RedisValue::Array(_) => None,
     }
 }
 
@@ -435,8 +541,10 @@ mod tests {
             refresh_session_cache(&cache, &session).expect("active session should cache");
         let cached =
             cached_session_record(&cache, &session).expect("active session should read cache");
+        let listed = cache.list();
 
         assert_eq!(cached, refreshed);
+        assert_eq!(listed, vec![refreshed]);
         assert_eq!(cached.key.account_id, "demo");
         assert_eq!(cached.key.character_index, 0);
         assert_eq!(cached.character_name, "Scout");
@@ -472,6 +580,7 @@ mod tests {
 
         assert_eq!(removed.account_id, "demo");
         assert!(cached_session_record(&cache, &session).is_none());
+        assert!(cache.list().is_empty());
     }
 
     #[test]
@@ -487,6 +596,7 @@ mod tests {
 
         assert_eq!(removed.key.account_id, "demo");
         assert!(cached_session_record(&cache, &session).is_none());
+        assert!(cache.list().is_empty());
     }
 
     #[test]
@@ -510,16 +620,20 @@ mod tests {
             refresh_session_cache(&cache, &session).expect("active session should cache");
         let cached =
             cached_session_record(&cache, &session).expect("redis cache should read session");
+        let listed = cache.list();
         assert_eq!(cached, refreshed);
+        assert_eq!(listed, vec![refreshed]);
         assert_eq!(cached.gold, session.world_snapshot().gold);
 
         let removed = remove_session_cache(&cache, &session).expect("active session key");
         assert_eq!(removed.account_id, "demo");
         assert!(cached_session_record(&cache, &session).is_none());
+        assert!(cache.list().is_empty());
 
         refresh_session_cache(&cache, &session).expect("active session should cache again");
         std::thread::sleep(Duration::from_millis(1_200));
         assert!(cached_session_record(&cache, &session).is_none());
+        assert!(cache.list().is_empty());
 
         cache.remove(&GatewaySessionCacheKey {
             account_id: "demo".to_string(),

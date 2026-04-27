@@ -2009,6 +2009,33 @@ where
     stream
         .read_to_string(&mut response)
         .map_err(|error| format!("gateway response read failed: {error}"))?;
+    gateway_http_response_body(&response)
+}
+
+fn get_json_from_gateway(gateway_url: &str) -> Result<String, String> {
+    let (host, path) = parse_http_url(gateway_url)?;
+    let mut stream = TcpStream::connect(&host)
+        .map_err(|error| format!("gateway endpoint unavailable: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway write timeout setup failed: {error}"))?;
+    write!(
+        stream,
+        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAccept: application/json\r\nConnection: close\r\n\r\n"
+    )
+    .map_err(|error| format!("gateway request write failed: {error}"))?;
+
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .map_err(|error| format!("gateway response read failed: {error}"))?;
+    gateway_http_response_body(&response)
+}
+
+fn gateway_http_response_body(response: &str) -> Result<String, String> {
     let (head, response_body) = response
         .split_once("\r\n\r\n")
         .ok_or_else(|| "gateway response was not valid HTTP".to_string())?;
@@ -2018,7 +2045,14 @@ where
             "gateway endpoint rejected request: {status_line} {response_body}"
         ));
     }
-    Ok(response_body.to_string())
+    if head
+        .lines()
+        .any(|line| line.eq_ignore_ascii_case("Transfer-Encoding: chunked"))
+    {
+        decode_chunked_body(response_body)
+    } else {
+        Ok(response_body.to_string())
+    }
 }
 
 fn parse_http_url(url: &str) -> Result<(String, String), String> {
@@ -2471,6 +2505,10 @@ pub struct AdminPlayerSummary {
     pub gold: u64,
     pub credit: u64,
     pub status: String,
+    pub online: bool,
+    pub online_source: Option<String>,
+    pub player_object_id: Option<u32>,
+    pub runtime_tick: Option<u64>,
     pub store_version: Option<i64>,
     pub save_version: Option<i64>,
 }
@@ -2626,6 +2664,40 @@ struct AccountReadRecord {
 struct CharacterSaveReadRecord {
     save: CharacterSaveRecord,
     save_version: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct GatewayPresenceSnapshot {
+    source: String,
+    sessions: Vec<GatewaySessionRecord>,
+    error: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionsResponse {
+    source: String,
+    sessions: Vec<GatewaySessionRecord>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionRecord {
+    key: GatewaySessionKey,
+    character_name: String,
+    map_file_name: Option<String>,
+    player_object_id: Option<u32>,
+    player_hp: Option<i32>,
+    player_max_hp: Option<i32>,
+    gold: u32,
+    tick: u64,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionKey {
+    account_id: String,
+    character_index: i32,
 }
 
 impl AdminReadModelStore {
@@ -2912,10 +2984,11 @@ async fn read_players(
 ) -> Result<Json<AdminPlayersReadModel>, ApiError> {
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let presence = load_gateway_presence();
         Ok::<_, ApiError>(AdminPlayersReadModel {
             source: snapshot.source.clone(),
             generated_at_ms: now_ms(),
-            players: build_player_summaries(&snapshot),
+            players: build_player_summaries(&snapshot, Some(&presence)),
         })
     })
     .await
@@ -2929,7 +3002,8 @@ async fn read_player_detail(
 ) -> Result<Json<AdminPlayerDetail>, ApiError> {
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
-        build_player_detail(&snapshot, &player_id).ok_or_else(|| ApiError {
+        let presence = load_gateway_presence();
+        build_player_detail(&snapshot, &player_id, Some(&presence)).ok_or_else(|| ApiError {
             status: StatusCode::NOT_FOUND,
             message: format!("player not found: {player_id}"),
         })
@@ -2965,7 +3039,8 @@ async fn read_servers(
 ) -> Result<Json<AdminServersReadModel>, ApiError> {
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
-        Ok::<_, ApiError>(build_servers_read_model(&snapshot))
+        let presence = load_gateway_presence();
+        Ok::<_, ApiError>(build_servers_read_model(&snapshot, &presence))
     })
     .await
     .map_err(join_error)??;
@@ -3376,7 +3451,8 @@ fn snapshot_from_store(source: &str, store: AccountStore) -> AccountReadSnapshot
 
 fn build_dashboard_read_model(state: AdminApiState) -> Result<AdminDashboardReadModel, ApiError> {
     let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
-    let players = build_player_summaries(&snapshot);
+    let presence = load_gateway_presence();
+    let players = build_player_summaries(&snapshot, Some(&presence));
     let (audit_record_count, outbox_receipt_count) = {
         let control = state.control_plane.lock().map_err(lock_error)?;
         (
@@ -3389,27 +3465,41 @@ fn build_dashboard_read_model(state: AdminApiState) -> Result<AdminDashboardRead
         generated_at_ms: now_ms(),
         account_count: snapshot.accounts.len(),
         character_count: players.len(),
-        online_now: 0,
-        online_source: "gateway_session_read_model_unwired".into(),
+        online_now: presence.sessions.len(),
+        online_source: presence.source.clone(),
         total_gold: players.iter().map(|player| player.gold).sum(),
         total_credit: players.iter().map(|player| player.credit).sum(),
         active_ban_count: players
             .iter()
             .filter(|player| player.status == "Banned")
             .count(),
-        hot_maps: build_hot_maps(&players),
-        services: build_service_statuses(&snapshot),
+        hot_maps: build_presence_hot_maps(&presence).unwrap_or_else(|| build_hot_maps(&players)),
+        services: build_service_statuses(&snapshot, Some(&presence)),
         audit_record_count,
         outbox_receipt_count,
     })
 }
 
-fn build_player_summaries(snapshot: &AccountReadSnapshot) -> Vec<AdminPlayerSummary> {
+fn build_player_summaries(
+    snapshot: &AccountReadSnapshot,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Vec<AdminPlayerSummary> {
     let now = now_ms();
+    let presence_by_key = presence_records_by_key(presence);
     let mut players = Vec::new();
     for account in &snapshot.accounts {
         for save in account.saves.values() {
-            players.push(player_summary_from_save(account, save, now));
+            let presence_record = presence_by_key.get(&GatewaySessionKey {
+                account_id: account.account_id.clone(),
+                character_index: save.save.character.index,
+            });
+            players.push(player_summary_from_save(
+                account,
+                save,
+                now,
+                presence.map(|presence| presence.source.as_str()),
+                presence_record.copied(),
+            ));
         }
     }
     players.sort_by(|left, right| {
@@ -3424,12 +3514,24 @@ fn build_player_summaries(snapshot: &AccountReadSnapshot) -> Vec<AdminPlayerSumm
 fn build_player_detail(
     snapshot: &AccountReadSnapshot,
     requested_player_id: &str,
+    presence: Option<&GatewayPresenceSnapshot>,
 ) -> Option<AdminPlayerDetail> {
     let now = now_ms();
     let requested_player_id = requested_player_id.trim();
+    let presence_by_key = presence_records_by_key(presence);
     for account in &snapshot.accounts {
         for save in account.saves.values() {
-            let summary = player_summary_from_save(account, save, now);
+            let presence_record = presence_by_key.get(&GatewaySessionKey {
+                account_id: account.account_id.clone(),
+                character_index: save.save.character.index,
+            });
+            let summary = player_summary_from_save(
+                account,
+                save,
+                now,
+                presence.map(|presence| presence.source.as_str()),
+                presence_record.copied(),
+            );
             if !player_id_matches(&summary, requested_player_id) {
                 continue;
             }
@@ -3483,8 +3585,21 @@ fn player_summary_from_save(
     account: &AccountReadRecord,
     save: &CharacterSaveReadRecord,
     now_ms: u64,
+    online_source: Option<&str>,
+    presence: Option<&GatewaySessionRecord>,
 ) -> AdminPlayerSummary {
     let character = &save.save.character;
+    let active_ban = account.account.active_ban(now_ms).is_some();
+    let map_file_name = presence
+        .and_then(|presence| presence.map_file_name.clone())
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| save.save.map_file_name.clone());
+    let player_hp = presence
+        .and_then(|presence| presence.player_hp)
+        .unwrap_or(save.save.hp);
+    let player_max_hp = presence
+        .and_then(|presence| presence.player_max_hp)
+        .unwrap_or(save.save.max_hp);
     AdminPlayerSummary {
         player_id: player_id(&account.account_id, character.index),
         account_id: account.account_id.clone(),
@@ -3493,20 +3608,28 @@ fn player_summary_from_save(
         class_name: serialized_text(&character.class),
         gender: serialized_text(&character.gender),
         level: character.level,
-        map_file_name: save.save.map_file_name.clone(),
+        map_file_name,
         map_title: save.save.map_title.clone(),
         position_x: save.save.position.x,
         position_y: save.save.position.y,
-        hp: save.save.hp,
-        max_hp: save.save.max_hp,
+        hp: player_hp,
+        max_hp: player_max_hp,
         mp: save.save.mp,
-        gold: u64::from(save.save.gold),
+        gold: presence
+            .map(|presence| u64::from(presence.gold))
+            .unwrap_or_else(|| u64::from(save.save.gold)),
         credit: u64::from(save.save.credit),
-        status: if account.account.active_ban(now_ms).is_some() {
+        status: if active_ban {
             "Banned".into()
+        } else if presence.is_some() {
+            "Online".into()
         } else {
             "Normal".into()
         },
+        online: presence.is_some(),
+        online_source: presence.map(|_| online_source.unwrap_or("gateway_session_cache").into()),
+        player_object_id: presence.and_then(|presence| presence.player_object_id),
+        runtime_tick: presence.map(|presence| presence.tick),
         store_version: account.store_version,
         save_version: save.save_version,
     }
@@ -3526,6 +3649,56 @@ fn decode_stage5_systems(save: &CharacterSaveRecord) -> Option<Stage5SystemsStat
     save.stage5_systems_json
         .as_deref()
         .and_then(|value| serde_json::from_str::<Stage5SystemsState>(value).ok())
+}
+
+fn load_gateway_presence() -> GatewayPresenceSnapshot {
+    let url = env::var("ADMIN_GATEWAY_SESSIONS_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/sessions".to_string());
+    let body = match get_json_from_gateway(&url) {
+        Ok(body) => body,
+        Err(error) => {
+            return GatewayPresenceSnapshot {
+                source: "gateway_sessions_unavailable".into(),
+                sessions: Vec::new(),
+                error: Some(error),
+            }
+        }
+    };
+    match serde_json::from_str::<GatewaySessionsResponse>(&body) {
+        Ok(response) => {
+            let mut sessions = response.sessions;
+            sessions.sort_by(|left, right| {
+                left.character_name
+                    .cmp(&right.character_name)
+                    .then_with(|| left.key.account_id.cmp(&right.key.account_id))
+                    .then(left.key.character_index.cmp(&right.key.character_index))
+            });
+            GatewayPresenceSnapshot {
+                source: response.source,
+                sessions,
+                error: None,
+            }
+        }
+        Err(error) => GatewayPresenceSnapshot {
+            source: "gateway_sessions_decode_failed".into(),
+            sessions: Vec::new(),
+            error: Some(format!("decode gateway sessions failed: {error}")),
+        },
+    }
+}
+
+fn presence_records_by_key(
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> BTreeMap<GatewaySessionKey, &GatewaySessionRecord> {
+    presence
+        .map(|presence| {
+            presence
+                .sessions
+                .iter()
+                .map(|record| (record.key.clone(), record))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn build_hot_maps(players: &[AdminPlayerSummary]) -> Vec<AdminMapPopulation> {
@@ -3565,8 +3738,41 @@ fn build_hot_maps(players: &[AdminPlayerSummary]) -> Vec<AdminMapPopulation> {
     rows
 }
 
+fn build_presence_hot_maps(presence: &GatewayPresenceSnapshot) -> Option<Vec<AdminMapPopulation>> {
+    if presence.sessions.is_empty() {
+        return None;
+    }
+    let mut counts: BTreeMap<String, usize> = BTreeMap::new();
+    for session in &presence.sessions {
+        let map_file_name = session
+            .map_file_name
+            .clone()
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| "unknown".to_string());
+        *counts.entry(map_file_name).or_default() += 1;
+    }
+    let max_count = counts.values().copied().max().unwrap_or(0);
+    let mut rows = counts
+        .into_iter()
+        .map(|(map_file_name, character_count)| AdminMapPopulation {
+            map_title: map_file_name.clone(),
+            map_file_name,
+            character_count,
+            percent: percent(character_count as u64, max_count as u64),
+        })
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| {
+        right
+            .character_count
+            .cmp(&left.character_count)
+            .then_with(|| left.map_file_name.cmp(&right.map_file_name))
+    });
+    rows.truncate(8);
+    Some(rows)
+}
+
 fn build_economy_read_model(snapshot: &AccountReadSnapshot) -> AdminEconomyReadModel {
-    let players = build_player_summaries(snapshot);
+    let players = build_player_summaries(snapshot, None);
     let character_count = players.len();
     let total_gold: u64 = players.iter().map(|player| player.gold).sum();
     let total_credit: u64 = players.iter().map(|player| player.credit).sum();
@@ -3621,16 +3827,26 @@ fn build_gold_distribution(players: &[AdminPlayerSummary]) -> Vec<AdminDistribut
     buckets
 }
 
-fn build_servers_read_model(snapshot: &AccountReadSnapshot) -> AdminServersReadModel {
-    let players = build_player_summaries(snapshot);
+fn build_servers_read_model(
+    snapshot: &AccountReadSnapshot,
+    presence: &GatewayPresenceSnapshot,
+) -> AdminServersReadModel {
+    let players = build_player_summaries(snapshot, Some(presence));
+    let zones_online = presence
+        .sessions
+        .iter()
+        .filter_map(|session| session.map_file_name.as_deref())
+        .filter(|map| !map.trim().is_empty())
+        .collect::<BTreeSet<_>>()
+        .len();
     AdminServersReadModel {
         generated_at_ms: now_ms(),
         account_store_source: snapshot.source.clone(),
         account_count: snapshot.accounts.len(),
         character_count: players.len(),
-        zones_online: 0,
-        zones_source: "zone_runtime_read_model_unwired".into(),
-        services: build_service_statuses(snapshot),
+        zones_online,
+        zones_source: presence.source.clone(),
+        services: build_service_statuses(snapshot, Some(presence)),
     }
 }
 
@@ -3671,7 +3887,10 @@ fn build_risk_read_model(snapshot: &AccountReadSnapshot) -> AdminRiskReadModel {
     }
 }
 
-fn build_service_statuses(snapshot: &AccountReadSnapshot) -> Vec<AdminServiceStatus> {
+fn build_service_statuses(
+    snapshot: &AccountReadSnapshot,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Vec<AdminServiceStatus> {
     let mut services = vec![
         AdminServiceStatus {
             name: "Admin API".into(),
@@ -3687,12 +3906,31 @@ fn build_service_statuses(snapshot: &AccountReadSnapshot) -> Vec<AdminServiceSta
                 "{}: {} accounts / {} characters",
                 snapshot.source,
                 snapshot.accounts.len(),
-                build_player_summaries(snapshot).len()
+                build_player_summaries(snapshot, presence).len()
             ),
             latency_ms: None,
             configured: true,
         },
     ];
+    if let Some(presence) = presence {
+        services.push(AdminServiceStatus {
+            name: "Gateway Sessions".into(),
+            status: if presence.error.is_some() {
+                "Unavailable".into()
+            } else {
+                "Healthy".into()
+            },
+            detail: presence.error.clone().unwrap_or_else(|| {
+                format!(
+                    "{}: {} online sessions",
+                    presence.source,
+                    presence.sessions.len()
+                )
+            }),
+            latency_ms: None,
+            configured: true,
+        });
+    }
     services.push(postgres_status());
     services.push(tcp_env_status(
         "Redis",
@@ -5099,7 +5337,7 @@ mod tests {
 
         let snapshot =
             read_json_account_snapshot(&path, default_character).expect("snapshot should load");
-        let players = build_player_summaries(&snapshot);
+        let players = build_player_summaries(&snapshot, None);
 
         assert_eq!(snapshot.source, "json_account_store");
         assert_eq!(players.len(), 1);
@@ -5109,7 +5347,8 @@ mod tests {
         assert_eq!(players[0].credit, 55);
         assert_eq!(players[0].status, "Banned");
 
-        let detail = build_player_detail(&snapshot, "real-account:2").expect("detail should exist");
+        let detail =
+            build_player_detail(&snapshot, "real-account:2", None).expect("detail should exist");
         assert_eq!(detail.mail_count, 1);
         assert_eq!(detail.unclaimed_mail_count, 1);
         assert_eq!(
@@ -5126,6 +5365,53 @@ mod tests {
         assert_eq!(risk.cases[0].evidence, "manual operator ban");
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn admin_read_models_overlay_gateway_presence() {
+        let default_character = SimulationConfig::default().default_character;
+        let snapshot =
+            snapshot_from_store("memory_account_store", AccountStore::new(default_character));
+        let presence = GatewayPresenceSnapshot {
+            source: "gateway_session_cache".into(),
+            sessions: vec![GatewaySessionRecord {
+                key: GatewaySessionKey {
+                    account_id: "demo".into(),
+                    character_index: 0,
+                },
+                character_name: "Scout".into(),
+                map_file_name: Some("0103".into()),
+                player_object_id: Some(7),
+                player_hp: Some(88),
+                player_max_hp: Some(99),
+                gold: 9_999,
+                tick: 42,
+            }],
+            error: None,
+        };
+
+        let players = build_player_summaries(&snapshot, Some(&presence));
+
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0].status, "Online");
+        assert!(players[0].online);
+        assert_eq!(
+            players[0].online_source.as_deref(),
+            Some("gateway_session_cache")
+        );
+        assert_eq!(players[0].map_file_name, "0103");
+        assert_eq!(players[0].hp, 88);
+        assert_eq!(players[0].max_hp, 99);
+        assert_eq!(players[0].gold, 9_999);
+        assert_eq!(players[0].runtime_tick, Some(42));
+
+        let servers = build_servers_read_model(&snapshot, &presence);
+        assert_eq!(servers.zones_online, 1);
+        assert_eq!(servers.zones_source, "gateway_session_cache");
+        assert!(servers
+            .services
+            .iter()
+            .any(|service| service.name == "Gateway Sessions" && service.status == "Healthy"));
     }
 
     #[tokio::test]

@@ -145,6 +145,10 @@ export type AdminPlayerSummary = {
   gold: number;
   credit: number;
   status: string;
+  online: boolean;
+  onlineSource?: string;
+  playerObjectId?: number;
+  runtimeTick?: number;
   storeVersion?: number;
   saveVersion?: number;
 };

@@ -15,7 +15,7 @@ Read `docs/PARITY-TRUTH-AUDIT.md` first if you are about to change any status pe
 - Latest product-evolution rounds completed on Mac: `R227` Admin Web/API foundation, `R228` live game-visible GM system mail, `R229` Docker-verified Postgres command/audit/outbox plus NATS dispatch, `R230` Postgres mirror for gameplay JSON account-store saves, and `R231` explicit Postgres account-store source-of-truth mode behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`.
 - Do not mark backend/server `100%` until live Crystal trace acceptance, blocked `Server.MirDB` import, or an explicit acceptance decision closes the remaining `0.30%`.
 - Do not mark full-project `100% Accepted` until `docs/PLAYER-QA-SCRIPT.md` passes or the user explicitly accepts remaining differences.
-- Synthetic map terrain, local JSON stores, Admin read-model gaps/unwired projections, and local-only smoke results are Candidate evidence only. They must not be counted as final accepted Crystal 1:1.
+- Synthetic map terrain, local JSON stores, remaining Admin read-model gaps/unwired projections, and local-only smoke results are Candidate evidence only. They must not be counted as final accepted Crystal 1:1.
 - If continuing product evolution instead of parity closure, read `docs/POST-1TO1-EVOLUTION-PLAN.md`, `docs/TECH-MODERNIZATION-RFC.md`, `docs/PLATFORM-CLIENT-STRATEGY.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` first. Database, cache, login UI, admin backend, global zone, client distribution, and NPC script parser changes are allowed evolution areas, but the current Candidate baseline should remain a regression reference.
 
 ## Files To Bring To Windows

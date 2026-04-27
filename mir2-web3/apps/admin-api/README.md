@@ -30,7 +30,9 @@ The crate now contains:
   current GM commands;
 - real admin read-model routes for dashboard, players, player detail, economy,
   service health, activity state, and risk state. These read the configured JSON
-  account store or explicit Postgres account-store source and return empty
+  account store or explicit Postgres account-store source, then overlay Gateway
+  online presence from `ADMIN_GATEWAY_SESSIONS_URL` /
+  `http://127.0.0.1:7110/admin/sessions`. They return empty
   `configured=false` states where no authoritative source exists yet;
 - optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
 - optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
@@ -76,6 +78,7 @@ NATS_ADDR=127.0.0.1:4222 \
 ADMIN_OUTBOX_NATS_MODE=jetstream \
 ADMIN_OUTBOX_NATS_STREAM=MIR2_ADMIN \
 ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082 \
+ADMIN_GATEWAY_SESSIONS_URL=http://127.0.0.1:7110/admin/sessions \
 ADMIN_API_ADDR=127.0.0.1:7420 \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api
 ```

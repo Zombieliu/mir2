@@ -70,6 +70,7 @@ ADMIN_CLICKHOUSE_USER=mir2 \
 ADMIN_CLICKHOUSE_PASSWORD=mir2_dev_password \
 ADMIN_GATEWAY_MAIL_URL=http://127.0.0.1:7110/admin/system-mail \
 ADMIN_GATEWAY_KICK_URL=http://127.0.0.1:7110/admin/kick-player \
+ADMIN_GATEWAY_SESSIONS_URL=http://127.0.0.1:7110/admin/sessions \
 ADMIN_OPERATOR_TOKEN=local-dev-token \
 ADMIN_APPROVAL_ALLOW_SELF=true \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api

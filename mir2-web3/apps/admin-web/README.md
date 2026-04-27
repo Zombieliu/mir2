@@ -29,10 +29,11 @@ Approvals, Audit, and Timeline read from the Rust API and ClickHouse-backed even
 projection when available. Dashboard, Players, Player Detail, Economy, Servers,
 Activities, and Risk now read Rust `/admin/read/*` endpoints. Those endpoints
 derive account/player/economy/risk data from the configured JSON account store
-or explicit Postgres account-store source; modules without an authoritative
-source, such as activity configuration, market price feeds, trade graphs, zone
-runtime, and online-session totals, show real empty/unwired states instead of
-mock numbers.
+or explicit Postgres account-store source. Gateway online presence is read from
+`GET /admin/sessions` and overlaid onto Dashboard, Players, Player Detail, and
+Servers. Modules without an authoritative projection, such as activity
+configuration, market price feeds, trade graphs, and deeper zone telemetry, show
+real empty/unwired states instead of mock numbers.
 
 ## Local Run
 
@@ -90,6 +91,6 @@ Latest smoke screenshots:
 
 - Replace local env operator headers with real operator auth.
 - Replace local self-approval smoke mode with real multi-operator approval policy.
-- Add authoritative activity config, market price, trade graph, zone runtime, and
-  online-session projections.
+- Add authoritative activity config, market price, trade graph, and deeper zone
+  runtime projections.
 - Extend real command executors beyond mail/grant/kick/ban.

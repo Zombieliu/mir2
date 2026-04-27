@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io;
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
@@ -19,7 +20,7 @@ use tokio::net::TcpListener;
 
 use crate::cache::{
     default_gateway_session_cache_from_env, refresh_session_cache, remove_session_cache,
-    SharedGatewaySessionCache,
+    GatewaySessionCacheRecord, SharedGatewaySessionCache,
 };
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession};
@@ -329,6 +330,14 @@ struct AdminKickPlayerReceipt {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct AdminSessionsResponse {
+    source: String,
+    generated_at_ms: u64,
+    sessions: Vec<GatewaySessionCacheRecord>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct AdminErrorResponse {
     error: String,
 }
@@ -344,6 +353,7 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         .route("/health", get(health))
         .route("/admin/system-mail", post(admin_system_mail))
         .route("/admin/kick-player", post(admin_kick_player))
+        .route("/admin/sessions", get(admin_sessions))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -412,8 +422,23 @@ async fn admin_kick_player(
     }))
 }
 
+async fn admin_sessions(State(state): State<WebState>) -> Json<AdminSessionsResponse> {
+    Json(AdminSessionsResponse {
+        source: "gateway_session_cache".to_string(),
+        generated_at_ms: now_ms(),
+        sessions: state.session_cache.list(),
+    })
+}
+
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
     ws.on_upgrade(move |socket| handle_socket(socket, state))
+}
+
+fn now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
@@ -2095,6 +2120,31 @@ mod tests {
         assert_eq!(systems.mail[0].items, vec!["red-potion"]);
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[tokio::test]
+    async fn admin_sessions_endpoint_lists_live_session_cache() {
+        let cache: crate::SharedGatewaySessionCache =
+            Arc::new(crate::InMemoryGatewaySessionCache::default());
+        let state = super::WebState {
+            config: Arc::new(SimulationConfig::default()),
+            session_cache: cache.clone(),
+        };
+        let mut session = crate::GatewaySession::new(crate::GatewayConfig::default());
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        });
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        crate::cache::refresh_session_cache(cache.as_ref(), &session)
+            .expect("active session should refresh into cache");
+
+        let Json(response) = super::admin_sessions(State(state)).await;
+
+        assert_eq!(response.source, "gateway_session_cache");
+        assert_eq!(response.sessions.len(), 1);
+        assert_eq!(response.sessions[0].key.account_id, "demo");
+        assert_eq!(response.sessions[0].character_name, "Scout");
     }
 
     #[test]

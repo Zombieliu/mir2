@@ -147,10 +147,13 @@ Current implementation:
 - `/admin/read/*` provides the first real Admin Web read model boundary. Player,
   player-detail, economy totals/distribution, hot maps, and banned-account risk
   cases derive from the configured account store: JSON by default, or Postgres
-  when `MIR2_ACCOUNT_STORE_BACKEND=postgres` is explicitly set. Service health
-  is checked from real local/configured endpoints. Activity config, market price
-  feeds, trade graphs, zone runtime, and online-session totals intentionally
-  return empty/unwired states until authoritative projections exist.
+  when `MIR2_ACCOUNT_STORE_BACKEND=postgres` is explicitly set. Gateway presence
+  comes from `GET /admin/sessions` and overlays online player status, runtime
+  HP/gold/map, dashboard online totals, and server zones-online source from the
+  same in-memory/Redis session cache used for kick routing. Service health is
+  checked from real local/configured endpoints. Activity config, market price
+  feeds, trade graphs, and deeper zone process telemetry intentionally return
+  empty/unwired states until authoritative projections exist.
 - `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
 - If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 
@@ -201,6 +204,7 @@ Required local environment:
 MIR2_ACCOUNT_STORE_PATH=.mir2-data/admin-live-smoke.json
 ADMIN_ACCOUNT_STORE_PATH=.mir2-data/admin-live-smoke.json
 ADMIN_GATEWAY_MAIL_URL=http://127.0.0.1:7110/admin/system-mail
+ADMIN_GATEWAY_SESSIONS_URL=http://127.0.0.1:7110/admin/sessions
 ADMIN_API_BASE_URL=http://127.0.0.1:7420
 ```
 
