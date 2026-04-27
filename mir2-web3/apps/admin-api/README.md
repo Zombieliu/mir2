@@ -28,6 +28,10 @@ The crate now contains:
 - Axum HTTP routes for health, command records, audit records, approval records,
   per-command status, event/timeline read models, outbox records, and the
   current GM commands;
+- real admin read-model routes for dashboard, players, player detail, economy,
+  service health, activity state, and risk state. These read the configured JSON
+  account store or explicit Postgres account-store source and return empty
+  `configured=false` states where no authoritative source exists yet;
 - optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
 - optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
   to fixed operator identities and permissions.
@@ -67,6 +71,11 @@ Postgres-backed Admin API. Successful commands also append a pending
 ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 MIR2_ACCOUNT_STORE_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 MIR2_ACCOUNT_STORE_BACKEND=postgres \
+MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
+NATS_ADDR=127.0.0.1:4222 \
+ADMIN_OUTBOX_NATS_MODE=jetstream \
+ADMIN_OUTBOX_NATS_STREAM=MIR2_ADMIN \
+ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082 \
 ADMIN_API_ADDR=127.0.0.1:7420 \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api
 ```
@@ -83,6 +92,9 @@ Dispatch pending admin outbox messages to NATS:
 ```bash
 ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 NATS_ADDR=127.0.0.1:4222 \
+ADMIN_OUTBOX_NATS_MODE=jetstream \
+ADMIN_OUTBOX_NATS_STREAM=MIR2_ADMIN \
+ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082 \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin dispatch-admin-outbox -- --once
 ```
 
@@ -96,6 +108,13 @@ Routes:
 - `GET /admin/events`
 - `GET /admin/timeline`
 - `GET /admin/system-mail/outbox`
+- `GET /admin/read/dashboard`
+- `GET /admin/read/players`
+- `GET /admin/read/players/:player_id`
+- `GET /admin/read/economy`
+- `GET /admin/read/activities`
+- `GET /admin/read/servers`
+- `GET /admin/read/risk`
 - `POST /admin/commands/send-system-mail`
 - `POST /admin/commands/grant-item`
 - `POST /admin/commands/grant-currency`

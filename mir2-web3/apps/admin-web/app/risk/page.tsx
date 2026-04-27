@@ -1,10 +1,13 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { adminGet, type AdminRiskReadModel } from "../../lib/admin-api";
+import { statusTone } from "../../lib/format";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
-import { riskRows } from "../../lib/mock-data";
 
 export default async function RiskPage() {
   const { t } = await getAdminI18n();
+  const risk = await adminGet<AdminRiskReadModel>("/admin/read/risk");
+  const data = risk.ok ? risk.data : undefined;
 
   return (
     <AdminShell active="/risk">
@@ -14,11 +17,11 @@ export default async function RiskPage() {
           <h2>{t("risk.title")}</h2>
           <p className="muted">{t("risk.subtitle")}</p>
         </div>
-        <div className="actions">
-          <button className="button secondary">{t("risk.batchReview")}</button>
-          <button className="button">{t("risk.openQueue")}</button>
-        </div>
+        <StatusBadge tone={risk.ok ? "success" : "warn"}>
+          {risk.ok ? risk.data.source : t("common.unavailable")}
+        </StatusBadge>
       </div>
+      {!risk.ok ? <p className="notice">{risk.error}</p> : null}
       <div className="grid two">
         <section className="card">
           <p className="eyebrow">{t("risk.caseQueue")}</p>
@@ -32,38 +35,31 @@ export default async function RiskPage() {
               </tr>
             </thead>
             <tbody>
-              {riskRows.map(([player, signal, risk, evidence]) => (
-                <tr key={player}>
-                  <td>{player}</td>
-                  <td>{signal}</td>
+              {(data?.cases ?? []).map((item) => (
+                <tr key={item.playerId}>
+                  <td>{item.characterName}</td>
+                  <td>{item.signal}</td>
                   <td>
-                    <StatusBadge tone={risk === "Critical" ? "danger" : risk === "High" ? "warn" : "default"}>
-                      {translateAdminStatus(t, risk)}
+                    <StatusBadge tone={statusTone(item.risk)}>
+                      {translateAdminStatus(t, item.risk)}
                     </StatusBadge>
                   </td>
-                  <td>{evidence}</td>
+                  <td>{item.evidence}</td>
                 </tr>
               ))}
+              {!data?.cases.length ? (
+                <tr>
+                  <td colSpan={4}>
+                    <p className="notice">{t("risk.empty")}</p>
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </section>
         <section className="card relationship-map">
           <p className="eyebrow">{t("risk.graph")}</p>
-          <div className="node hot" style={{ left: "38%", top: "34%" }}>
-            SilentCart
-          </div>
-          <div className="node" style={{ left: "8%", top: "12%" }}>
-            Mule 07
-          </div>
-          <div className="node" style={{ right: "8%", top: "14%" }}>
-            Broker
-          </div>
-          <div className="node" style={{ left: "14%", bottom: "8%" }}>
-            Miner
-          </div>
-          <div className="node" style={{ right: "16%", bottom: "10%" }}>
-            Auction
-          </div>
+          <p className="notice">{t("risk.noGraph")}</p>
         </section>
       </div>
     </AdminShell>

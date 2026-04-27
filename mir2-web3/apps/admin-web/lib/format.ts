@@ -1,0 +1,41 @@
+export function formatNumber(value: number | undefined | null) {
+  return (value ?? 0).toLocaleString();
+}
+
+export function formatVersion(value: number | undefined | null) {
+  return value === undefined || value === null ? "-" : value.toLocaleString();
+}
+
+export function formatMap(mapTitle: string, mapFileName: string) {
+  if (mapTitle.trim()) {
+    return mapTitle;
+  }
+  if (mapFileName.trim()) {
+    return mapFileName;
+  }
+  return "-";
+}
+
+export function statusTone(status: string): "default" | "success" | "warn" | "danger" {
+  const normalized = status.toLowerCase();
+  if (normalized === "healthy" || normalized === "normal" || normalized === "tracked") {
+    return "success";
+  }
+  if (normalized === "banned" || normalized === "critical" || normalized === "unavailable") {
+    return "danger";
+  }
+  if (normalized === "warn" || normalized === "high" || normalized === "notconfigured") {
+    return "warn";
+  }
+  return "default";
+}
+
+export function serviceConfigStatusKey(configured: boolean, status: string) {
+  if (configured) {
+    return "common.connected";
+  }
+  if (status.toLowerCase() === "healthy") {
+    return "common.devDefault";
+  }
+  return "common.unconfigured";
+}

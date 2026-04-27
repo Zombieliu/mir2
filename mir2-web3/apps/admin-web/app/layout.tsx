@@ -4,7 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Mir2 Aether Ops",
-  description: "Production operations console for the Mir2 MMORPG foundation"
+  description: "Production operations console for the Mir2 MMORPG foundation",
+  icons: {
+    icon: "/icon.svg"
+  }
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

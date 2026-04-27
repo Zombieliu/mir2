@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
+import { adminGet, type AdminPlayersReadModel } from "../../lib/admin-api";
+import { formatMap, formatNumber, statusTone } from "../../lib/format";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
-import { players } from "../../lib/mock-data";
 
 export default async function PlayersPage() {
   const { t } = await getAdminI18n();
+  const players = await adminGet<AdminPlayersReadModel>("/admin/read/players");
+  const rows = players.ok ? players.data.players : [];
 
   return (
     <AdminShell active="/players">
@@ -15,59 +18,56 @@ export default async function PlayersPage() {
           <h2>{t("players.title")}</h2>
           <p className="muted">{t("players.subtitle")}</p>
         </div>
-        <div className="actions">
-          <button className="button secondary">{t("players.export")}</button>
-          <button className="button">{t("players.openDrawer")}</button>
-        </div>
+        <StatusBadge tone={players.ok ? "success" : "warn"}>
+          {players.ok ? players.data.source : t("common.unavailable")}
+        </StatusBadge>
       </div>
+      {!players.ok ? <p className="notice">{players.error}</p> : null}
       <section className="card">
-        <div className="form-grid" style={{ marginBottom: 16 }}>
-          <input className="control" placeholder={t("players.searchPlaceholder")} />
-          <select className="control" defaultValue="all">
-            <option value="all">{t("players.allRealms")}</option>
-            <option value="risk">{t("players.riskOnly")}</option>
-            <option value="paid">{t("players.paidPlayers")}</option>
-          </select>
-        </div>
         <table className="table">
           <thead>
             <tr>
               <th>{t("players.player")}</th>
               <th>{t("players.class")}</th>
               <th>{t("players.level")}</th>
-              <th>{t("players.power")}</th>
-              <th>{t("players.vip")}</th>
+              <th>{t("players.map")}</th>
+              <th>{t("players.gold")}</th>
+              <th>{t("players.credit")}</th>
               <th>{t("table.status")}</th>
               <th>{t("players.action")}</th>
             </tr>
           </thead>
           <tbody>
-            {players.map(([id, name, role, level, power, vip, status]) => (
-              <tr key={id}>
+            {rows.map((player) => (
+              <tr key={player.playerId}>
                 <td>
-                  <strong>{name}</strong>
-                  <div className="muted">{id}</div>
+                  <strong>{player.characterName}</strong>
+                  <div className="muted">{player.playerId}</div>
                 </td>
-                <td>{role}</td>
-                <td>{level}</td>
-                <td>{power}</td>
-                <td>{vip}</td>
+                <td>{player.className}</td>
+                <td>{player.level}</td>
+                <td>{formatMap(player.mapTitle, player.mapFileName)}</td>
+                <td>{formatNumber(player.gold)}</td>
+                <td>{formatNumber(player.credit)}</td>
                 <td>
-                  <StatusBadge
-                    tone={
-                      status === "Normal" ? "success" : status === "Risk" ? "warn" : "danger"
-                    }
-                  >
-                    {translateAdminStatus(t, status)}
+                  <StatusBadge tone={statusTone(player.status)}>
+                    {translateAdminStatus(t, player.status)}
                   </StatusBadge>
                 </td>
                 <td>
-                  <Link className="badge" href={`/players/${id}`}>
+                  <Link className="badge" href={`/players/${encodeURIComponent(player.playerId)}`}>
                     {t("players.viewDetail")}
                   </Link>
                 </td>
               </tr>
             ))}
+            {!rows.length ? (
+              <tr>
+                <td colSpan={8}>
+                  <p className="notice">{t("players.empty")}</p>
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </section>

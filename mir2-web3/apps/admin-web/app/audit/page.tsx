@@ -154,8 +154,8 @@ export default async function AuditPage({
               </thead>
               <tbody>
                 {eventRecords.length ? (
-                  eventRecords.map((record) => (
-                    <tr key={record.eventId}>
+                  eventRecords.map((record, index) => (
+                    <tr key={eventRecordKey(record, index)}>
                       <td>{record.eventType}</td>
                       <td>{record.commandId}</td>
                       <td>{record.operatorId}</td>
@@ -207,4 +207,11 @@ function buildEventQuery(params: Record<string, string | string[] | undefined>) 
 
 function firstParam(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+function eventRecordKey(
+  record: { eventId: string; eventType: string; commandId: string; occurredAtMs: number },
+  index: number
+) {
+  return `${record.eventId}:${record.eventType}:${record.commandId}:${record.occurredAtMs}:${index}`;
 }

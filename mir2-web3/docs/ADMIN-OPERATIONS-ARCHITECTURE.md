@@ -120,6 +120,13 @@ Current implementation:
 - `GET /admin/events`
 - `GET /admin/timeline`
 - `GET /admin/system-mail/outbox`
+- `GET /admin/read/dashboard`
+- `GET /admin/read/players`
+- `GET /admin/read/players/:player_id`
+- `GET /admin/read/economy`
+- `GET /admin/read/activities`
+- `GET /admin/read/servers`
+- `GET /admin/read/risk`
 - `POST /admin/commands/send-system-mail`
 - `POST /admin/commands/grant-item`
 - `POST /admin/commands/grant-currency`
@@ -137,6 +144,13 @@ Current implementation:
 - Local Redpanda and ClickHouse now provide the first event analytics path. `dispatch-admin-outbox` publishes stable admin event envelopes to Redpanda through Pandaproxy when `ADMIN_OUTBOX_REDPANDA_URL` is set; ClickHouse subscribes to the Redpanda `admin.command.succeeded`, `admin.command.failed`, and `admin.command.denied` topics and projects JSON events into `mir2_events.admin_events` plus `mir2_events.admin_command_events`. This is an analytics/read-side projection, not gameplay authority.
 - `GET /admin/events` reads the ClickHouse admin event projection for operations UI audit views. It supports `limit`, `commandId`, `eventType`, and `status` filters and returns a degraded response with empty records if ClickHouse is unavailable.
 - `GET /admin/commands/:command_id/status` returns one command record for post-submit UI status loading and 404s when the command id is unknown.
+- `/admin/read/*` provides the first real Admin Web read model boundary. Player,
+  player-detail, economy totals/distribution, hot maps, and banned-account risk
+  cases derive from the configured account store: JSON by default, or Postgres
+  when `MIR2_ACCOUNT_STORE_BACKEND=postgres` is explicitly set. Service health
+  is checked from real local/configured endpoints. Activity config, market price
+  feeds, trade graphs, zone runtime, and online-session totals intentionally
+  return empty/unwired states until authoritative projections exist.
 - `SendSystemMail` writes command/audit records and then attempts live delivery to the running gateway through `ADMIN_GATEWAY_MAIL_URL` (default `http://127.0.0.1:7110/admin/system-mail`).
 - If the gateway is unavailable, `SendSystemMail` falls back to writing persistent game mail through `ADMIN_ACCOUNT_STORE_PATH`, `MIR2_ACCOUNT_STORE_PATH`, or `.mir2-data/accounts.json`.
 

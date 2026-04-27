@@ -4,12 +4,11 @@ import { LanguageSwitcher } from "./language-switcher";
 
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
-  { href: "/players", labelKey: "shell.nav.players", count: "12k" },
-  { href: "/players/AZ-1048", labelKey: "shell.nav.playerDetail", count: "GM" },
-  { href: "/economy", labelKey: "shell.nav.economy", count: "Risk" },
-  { href: "/activities", labelKey: "shell.nav.activities", count: "7" },
-  { href: "/servers", labelKey: "shell.nav.servers", count: "31" },
-  { href: "/risk", labelKey: "shell.nav.risk", count: "42" },
+  { href: "/players", labelKey: "shell.nav.players", count: "Read" },
+  { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },
+  { href: "/activities", labelKey: "shell.nav.activities", count: "Empty" },
+  { href: "/servers", labelKey: "shell.nav.servers", count: "Health" },
+  { href: "/risk", labelKey: "shell.nav.risk", count: "Bans" },
   { href: "/gm-tools", labelKey: "shell.nav.gmTools", count: "API" },
   { href: "/approvals", labelKey: "shell.nav.approvals", count: "Gate" },
   { href: "/timeline", labelKey: "shell.nav.timeline", count: "Read" },
@@ -55,15 +54,6 @@ export async function AdminShell({
       </aside>
       <main className="main">
         <div className="topbar">
-          <input
-            className="control"
-            placeholder={t("shell.searchPlaceholder")}
-          />
-          <select className="control" defaultValue="global">
-            <option value="global">{t("shell.realmGlobal")}</option>
-            <option value="s1">{t("shell.realmS1")}</option>
-            <option value="s2">{t("shell.realmS2")}</option>
-          </select>
           <LanguageSwitcher locale={locale} label={t("shell.language")} />
           <div className="user-chip">{t("shell.operator")}</div>
         </div>
