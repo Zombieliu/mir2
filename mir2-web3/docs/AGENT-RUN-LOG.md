@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-28-R250 completed. Admin Activities, Economy price feeds, and Risk trade graph are now real Postgres-backed projections instead of unwired empty states. Admin API has write routes for `/admin/activities`, `/admin/economy/price-feeds`, and `/admin/risk/trade-edges`; Admin Web has server-action forms on the corresponding pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API write/read smoke, Admin Web page HTTP smoke 200s, fmt/diff checks.
+
 > Latest product-evolution sync: 2026-04-28-R249 completed. Gateway now exposes `GET /admin/sessions` from the real session cache, including Redis SCAN/list support with TTL/remove coverage. Admin API overlays Gateway presence onto `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, and `/admin/read/servers`, so online totals, player online status, runtime HP/gold/map, and zones-online source are true Gateway/Redis data. Verification passed: focused gateway session-cache tests 8/8, gateway `/admin/sessions` endpoint test, admin-api presence overlay test, admin-web `tsc --noEmit`, and `git diff --check`.
 
 > Latest product-evolution sync: 2026-04-28-R248 completed. Admin Web no longer uses mock read data for Dashboard, Players, Player Detail, Economy, Activities, Servers, or Risk. Rust Admin API now exposes `/admin/read/dashboard`, `/admin/read/players`, `/admin/read/players/:player_id`, `/admin/read/economy`, `/admin/read/activities`, `/admin/read/servers`, and `/admin/read/risk`; these derive player/economy/hot-map/risk data from JSON account-store or explicit Postgres source mode and return empty/unwired states for activity config, market prices, trade graph, and deeper zone telemetry until authoritative projections exist. Verification passed: `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`, admin-web `tsc --noEmit`, and focused admin read-model test coverage.
@@ -5873,3 +5875,25 @@ Verification:
 Outcome:
 
 - Local backend testing now has visible submit, result, and delivery states for system mail. The player-facing mail panel updates with the delivered gold mail while the player remains online.
+
+## 2026-04-28-R250
+
+Goal: replace the remaining Admin Web real-data gaps for activity config, market prices, and trade graph with Postgres-backed projections.
+
+Coordinator local work:
+
+- Added `admin_activities`, `admin_market_price_feeds`, and `admin_trade_graph_edges` to the core Postgres migration.
+- Added Admin API write routes for `/admin/activities`, `/admin/economy/price-feeds`, and `/admin/risk/trade-edges`, all gated by `content_publish`.
+- Changed `/admin/read/activities`, `/admin/read/economy`, and `/admin/read/risk` to read those Postgres projections when `ADMIN_DATABASE_URL` is configured.
+- Added Admin Web server-action forms on Activities, Economy, and Risk so operators can write and then immediately read real records.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- Live API smoke wrote and read back `activity-r250-smoke`, `GoldBar`, and `trade-r250-smoke`.
+- Admin Web `/activities`, `/economy`, and `/risk` returned HTTP 200.
+
+Outcome:
+
+- Activity config, market price feeds, and trade graph no longer rely on mock or unwired empty states in the local Postgres-backed admin system. Deeper zone process telemetry remains the main Admin read-model gap.

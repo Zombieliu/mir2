@@ -31,9 +31,9 @@ Activities, and Risk now read Rust `/admin/read/*` endpoints. Those endpoints
 derive account/player/economy/risk data from the configured JSON account store
 or explicit Postgres account-store source. Gateway online presence is read from
 `GET /admin/sessions` and overlaid onto Dashboard, Players, Player Detail, and
-Servers. Modules without an authoritative projection, such as activity
-configuration, market price feeds, trade graphs, and deeper zone telemetry, show
-real empty/unwired states instead of mock numbers.
+Servers. Activities, Economy price feeds, and Risk trade graph now write and
+read real Postgres projection tables through Rust Admin API routes. Deeper zone
+telemetry still shows honest empty/unwired state instead of mock numbers.
 
 ## Local Run
 
@@ -60,7 +60,7 @@ ADMIN_OPERATOR_TOKEN=local-dev-token \
 ADMIN_OPERATOR_ID=local-gm \
 ADMIN_OPERATOR_EMAIL=gm.local@mir2.dev \
 ADMIN_OPERATOR_ROLE=ops_admin \
-ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage \
+ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage \
 ./node_modules/.bin/next dev -p 3020
 ```
 
@@ -91,6 +91,5 @@ Latest smoke screenshots:
 
 - Replace local env operator headers with real operator auth.
 - Replace local self-approval smoke mode with real multi-operator approval policy.
-- Add authoritative activity config, market price, trade graph, and deeper zone
-  runtime projections.
+- Add deeper zone runtime projections and production-grade operator workflows.
 - Extend real command executors beyond mail/grant/kick/ban.

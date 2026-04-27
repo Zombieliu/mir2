@@ -202,6 +202,7 @@ export type AdminEconomyReadModel = {
     latestPrice: number;
     sampleCount: number;
     source: string;
+    updatedAtMs: number;
   }>;
   priceFeedConfigured: boolean;
 };
@@ -217,6 +218,10 @@ export type AdminActivitiesReadModel = {
     activityType: string;
     status: string;
     signal: string;
+    reward: string;
+    condition: string;
+    realms: string[];
+    updatedAtMs: number;
   }>;
 };
 
@@ -242,7 +247,15 @@ export type AdminRiskReadModel = {
     evidence: string;
     banUntilMs?: number;
   }>;
-  graph: Array<{ from: string; to: string; signal: string }>;
+  graph: Array<{
+    edgeId: string;
+    from: string;
+    to: string;
+    signal: string;
+    risk: string;
+    evidence: string;
+    updatedAtMs: number;
+  }>;
 };
 
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
@@ -254,7 +267,7 @@ export function operatorHeaders() {
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage"
+      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage"
   };
   if (process.env.ADMIN_OPERATOR_TOKEN) {
     headers.authorization = `Bearer ${process.env.ADMIN_OPERATOR_TOKEN}`;

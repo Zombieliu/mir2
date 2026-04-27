@@ -795,6 +795,233 @@ impl PostgresAdminRepository {
             _ => Ok(None),
         }
     }
+
+    pub fn upsert_activity(
+        &self,
+        request: UpsertAdminActivityRequest,
+        operator_id: &str,
+        now_ms: u64,
+    ) -> Result<AdminActivityRecord, AdminError> {
+        let activity_id = request
+            .activity_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("activity-{now_ms}"));
+        let name = required_string("name", &request.name)?;
+        let activity_type = required_string("activity_type", &request.activity_type)?;
+        let status = optional_string(request.status).unwrap_or_else(|| "Draft".to_string());
+        let signal = optional_string(request.signal).unwrap_or_default();
+        let reward = optional_string(request.reward).unwrap_or_default();
+        let condition = optional_string(request.condition).unwrap_or_default();
+        let realms = clean_string_list(request.realms);
+        let realms_json = serde_json::to_value(&realms).map_err(|error| {
+            AdminError::Repository(format!("encode activity realms failed: {error}"))
+        })?;
+        let start_at_ms = request.start_at_ms.map(|value| value as i64);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_activities (
+                    activity_id,
+                    name,
+                    activity_type,
+                    status,
+                    signal,
+                    start_at_ms,
+                    reward,
+                    condition,
+                    realms_json,
+                    created_by,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)
+                ON CONFLICT (activity_id) DO UPDATE
+                SET name = EXCLUDED.name,
+                    activity_type = EXCLUDED.activity_type,
+                    status = EXCLUDED.status,
+                    signal = EXCLUDED.signal,
+                    start_at_ms = EXCLUDED.start_at_ms,
+                    reward = EXCLUDED.reward,
+                    condition = EXCLUDED.condition,
+                    realms_json = EXCLUDED.realms_json,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING activity_id, name, activity_type, status, signal, start_at_ms,
+                          reward, condition, realms_json, updated_at_ms",
+                &[
+                    &activity_id,
+                    &name,
+                    &activity_type,
+                    &status,
+                    &signal,
+                    &start_at_ms,
+                    &reward,
+                    &condition,
+                    &realms_json,
+                    &operator_id,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres activity upsert failed: {error}"))
+            })?;
+        row_to_activity_record(&row)
+    }
+
+    pub fn list_activities(&self, limit: usize) -> Result<Vec<AdminActivityRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT activity_id, name, activity_type, status, signal, start_at_ms,
+                        reward, condition, realms_json, updated_at_ms
+                 FROM admin_activities
+                 ORDER BY updated_at_ms DESC, activity_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres activity list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_activity_record)
+            .collect()
+    }
+
+    pub fn upsert_price_feed(
+        &self,
+        request: UpsertPriceFeedRequest,
+        now_ms: u64,
+    ) -> Result<AdminPriceFeedRecord, AdminError> {
+        let item = required_string("item", &request.item)?;
+        let source = required_string("source", &request.source)?;
+        let sample_count = request.sample_count.min(i32::MAX as usize) as i32;
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_market_price_feeds (
+                    item,
+                    latest_price,
+                    sample_count,
+                    source,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5)
+                ON CONFLICT (item) DO UPDATE
+                SET latest_price = EXCLUDED.latest_price,
+                    sample_count = EXCLUDED.sample_count,
+                    source = EXCLUDED.source,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING item, latest_price, sample_count, source, updated_at_ms",
+                &[
+                    &item,
+                    &(request.latest_price as i64),
+                    &sample_count,
+                    &source,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres price-feed upsert failed: {error}"))
+            })?;
+        row_to_price_feed_record(&row)
+    }
+
+    pub fn list_price_feeds(&self, limit: usize) -> Result<Vec<AdminPriceFeedRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT item, latest_price, sample_count, source, updated_at_ms
+                 FROM admin_market_price_feeds
+                 ORDER BY updated_at_ms DESC, item ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres price-feed list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_price_feed_record)
+            .collect()
+    }
+
+    pub fn upsert_trade_graph_edge(
+        &self,
+        request: UpsertTradeGraphEdgeRequest,
+        now_ms: u64,
+    ) -> Result<AdminRiskGraphEdge, AdminError> {
+        let from = required_string("from", &request.from)?;
+        let to = required_string("to", &request.to)?;
+        let signal = required_string("signal", &request.signal)?;
+        let risk = required_string("risk", &request.risk)?;
+        let evidence = optional_string(request.evidence).unwrap_or_default();
+        let edge_id = request
+            .edge_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("trade-edge-{from}-{to}-{now_ms}"));
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_trade_graph_edges (
+                    edge_id,
+                    from_player_id,
+                    to_player_id,
+                    signal,
+                    risk,
+                    evidence,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7)
+                ON CONFLICT (edge_id) DO UPDATE
+                SET from_player_id = EXCLUDED.from_player_id,
+                    to_player_id = EXCLUDED.to_player_id,
+                    signal = EXCLUDED.signal,
+                    risk = EXCLUDED.risk,
+                    evidence = EXCLUDED.evidence,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING edge_id, from_player_id, to_player_id, signal, risk, evidence,
+                          updated_at_ms",
+                &[
+                    &edge_id,
+                    &from,
+                    &to,
+                    &signal,
+                    &risk,
+                    &evidence,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres trade graph upsert failed: {error}"))
+            })?;
+        row_to_trade_graph_edge(&row)
+    }
+
+    pub fn list_trade_graph_edges(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<AdminRiskGraphEdge>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT edge_id, from_player_id, to_player_id, signal, risk, evidence,
+                        updated_at_ms
+                 FROM admin_trade_graph_edges
+                 ORDER BY updated_at_ms DESC, edge_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres trade graph list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_trade_graph_edge)
+            .collect()
+    }
 }
 
 impl AdminCommandRepository for PostgresAdminRepository {
@@ -2209,6 +2436,7 @@ type HttpControlPlane = AdminControlPlane<
 pub struct AdminApiState {
     control_plane: Arc<Mutex<HttpControlPlane>>,
     read_models: Arc<AdminReadModelStore>,
+    admin_store: Option<PostgresAdminRepository>,
 }
 
 impl Default for AdminApiState {
@@ -2221,19 +2449,20 @@ impl AdminApiState {
     pub fn from_env() -> Result<Self, AdminError> {
         let domain = AccountStoreSystemMailDomain::from_env();
         let read_models = Arc::new(AdminReadModelStore::from_config(domain.fallback_config()));
-        let (command_store, audit_store, approval_store) =
-            match PostgresAdminRepository::from_env()? {
-                Some(repository) => (
-                    CommandRepositoryBackend::Postgres(repository.clone()),
-                    AuditRepositoryBackend::Postgres(repository.clone()),
-                    ApprovalRepositoryBackend::Postgres(repository),
-                ),
-                None => (
-                    CommandRepositoryBackend::default(),
-                    AuditRepositoryBackend::default(),
-                    ApprovalRepositoryBackend::default(),
-                ),
-            };
+        let postgres_repository = PostgresAdminRepository::from_env()?;
+        let admin_store = postgres_repository.clone();
+        let (command_store, audit_store, approval_store) = match postgres_repository {
+            Some(repository) => (
+                CommandRepositoryBackend::Postgres(repository.clone()),
+                AuditRepositoryBackend::Postgres(repository.clone()),
+                ApprovalRepositoryBackend::Postgres(repository),
+            ),
+            None => (
+                CommandRepositoryBackend::default(),
+                AuditRepositoryBackend::default(),
+                ApprovalRepositoryBackend::default(),
+            ),
+        };
         Ok(Self {
             control_plane: Arc::new(Mutex::new(AdminControlPlane::with_repositories(
                 SystemMailExecutor::new(domain),
@@ -2242,6 +2471,7 @@ impl AdminApiState {
                 approval_store,
             ))),
             read_models,
+            admin_store,
         })
     }
 }
@@ -2281,6 +2511,9 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         .route("/admin/read/activities", get(read_activities))
         .route("/admin/read/servers", get(read_servers))
         .route("/admin/read/risk", get(read_risk))
+        .route("/admin/activities", post(upsert_activity))
+        .route("/admin/economy/price-feeds", post(upsert_price_feed))
+        .route("/admin/risk/trade-edges", post(upsert_trade_graph_edge))
         .route("/admin/commands/send-system-mail", post(submit_system_mail))
         .route("/admin/commands/grant-item", post(submit_grant_item))
         .route(
@@ -2357,6 +2590,41 @@ pub struct SubmitBanAccountRequest {
     pub account_id: String,
     pub duration_seconds: Option<u64>,
     pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertAdminActivityRequest {
+    pub activity_id: Option<String>,
+    pub name: String,
+    pub activity_type: String,
+    pub status: Option<String>,
+    pub signal: Option<String>,
+    pub start_at_ms: Option<u64>,
+    pub reward: Option<String>,
+    pub condition: Option<String>,
+    #[serde(default)]
+    pub realms: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertPriceFeedRequest {
+    pub item: String,
+    pub latest_price: u64,
+    pub sample_count: usize,
+    pub source: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertTradeGraphEdgeRequest {
+    pub edge_id: Option<String>,
+    pub from: String,
+    pub to: String,
+    pub signal: String,
+    pub risk: String,
+    pub evidence: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2570,6 +2838,7 @@ pub struct AdminPriceFeedRecord {
     pub latest_price: u64,
     pub sample_count: usize,
     pub source: String,
+    pub updated_at_ms: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2590,6 +2859,10 @@ pub struct AdminActivityRecord {
     pub activity_type: String,
     pub status: String,
     pub signal: String,
+    pub reward: String,
+    pub condition: String,
+    pub realms: Vec<String>,
+    pub updated_at_ms: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2628,9 +2901,13 @@ pub struct AdminRiskCase {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AdminRiskGraphEdge {
+    pub edge_id: String,
     pub from: String,
     pub to: String,
     pub signal: String,
+    pub risk: String,
+    pub evidence: String,
+    pub updated_at_ms: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -3018,20 +3295,67 @@ async fn read_economy(
 ) -> Result<Json<AdminEconomyReadModel>, ApiError> {
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
-        Ok::<_, ApiError>(build_economy_read_model(&snapshot))
+        let price_feeds = match state.admin_store.as_ref() {
+            Some(repository) => repository.list_price_feeds(64).map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_economy_read_model(
+            &snapshot,
+            price_feeds,
+            state.admin_store.is_some(),
+        ))
     })
     .await
     .map_err(join_error)??;
     Ok(Json(response))
 }
 
-async fn read_activities() -> Json<AdminActivitiesReadModel> {
-    Json(AdminActivitiesReadModel {
-        source: "activity_config_store_unwired".into(),
-        generated_at_ms: now_ms(),
-        configured: false,
-        activities: Vec::new(),
+async fn read_activities(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminActivitiesReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        build_activities_read_model(state.admin_store.as_ref()).map_err(ApiError::from)
     })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_activity(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertAdminActivityRequest>,
+) -> Result<Json<AdminActivityRecord>, ApiError> {
+    let operator = operator_from_headers(&headers)?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let operator_id = operator.id.clone();
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_activity(request, &operator_id, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_price_feed(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertPriceFeedRequest>,
+) -> Result<Json<AdminPriceFeedRecord>, ApiError> {
+    let operator = operator_from_headers(&headers)?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_price_feed(request, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
 }
 
 async fn read_servers(
@@ -3052,7 +3376,35 @@ async fn read_risk(
 ) -> Result<Json<AdminRiskReadModel>, ApiError> {
     let response = tokio::task::spawn_blocking(move || {
         let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
-        Ok::<_, ApiError>(build_risk_read_model(&snapshot))
+        let graph = match state.admin_store.as_ref() {
+            Some(repository) => repository
+                .list_trade_graph_edges(128)
+                .map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_risk_read_model(
+            &snapshot,
+            graph,
+            state.admin_store.is_some(),
+        ))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_trade_graph_edge(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertTradeGraphEdgeRequest>,
+) -> Result<Json<AdminRiskGraphEdge>, ApiError> {
+    let operator = operator_from_headers(&headers)?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_trade_graph_edge(request, now_ms())
+            .map_err(ApiError::from)
     })
     .await
     .map_err(join_error)??;
@@ -3771,13 +4123,22 @@ fn build_presence_hot_maps(presence: &GatewayPresenceSnapshot) -> Option<Vec<Adm
     Some(rows)
 }
 
-fn build_economy_read_model(snapshot: &AccountReadSnapshot) -> AdminEconomyReadModel {
+fn build_economy_read_model(
+    snapshot: &AccountReadSnapshot,
+    price_feeds: Vec<AdminPriceFeedRecord>,
+    price_feed_configured: bool,
+) -> AdminEconomyReadModel {
     let players = build_player_summaries(snapshot, None);
     let character_count = players.len();
     let total_gold: u64 = players.iter().map(|player| player.gold).sum();
     let total_credit: u64 = players.iter().map(|player| player.credit).sum();
+    let source = if price_feed_configured {
+        format!("{} + postgres_admin_market_price_feeds", snapshot.source)
+    } else {
+        snapshot.source.clone()
+    };
     AdminEconomyReadModel {
-        source: snapshot.source.clone(),
+        source,
         generated_at_ms: now_ms(),
         assets: vec![
             AdminEconomyAsset {
@@ -3796,8 +4157,27 @@ fn build_economy_read_model(snapshot: &AccountReadSnapshot) -> AdminEconomyReadM
             },
         ],
         gold_distribution: build_gold_distribution(&players),
-        price_feeds: Vec::new(),
-        price_feed_configured: false,
+        price_feeds,
+        price_feed_configured,
+    }
+}
+
+fn build_activities_read_model(
+    repository: Option<&PostgresAdminRepository>,
+) -> Result<AdminActivitiesReadModel, AdminError> {
+    match repository {
+        Some(repository) => Ok(AdminActivitiesReadModel {
+            source: "postgres_admin_activities".into(),
+            generated_at_ms: now_ms(),
+            configured: true,
+            activities: repository.list_activities(128)?,
+        }),
+        None => Ok(AdminActivitiesReadModel {
+            source: "activity_config_store_unwired".into(),
+            generated_at_ms: now_ms(),
+            configured: false,
+            activities: Vec::new(),
+        }),
     }
 }
 
@@ -3850,7 +4230,11 @@ fn build_servers_read_model(
     }
 }
 
-fn build_risk_read_model(snapshot: &AccountReadSnapshot) -> AdminRiskReadModel {
+fn build_risk_read_model(
+    snapshot: &AccountReadSnapshot,
+    graph: Vec<AdminRiskGraphEdge>,
+    graph_configured: bool,
+) -> AdminRiskReadModel {
     let now = now_ms();
     let mut cases = Vec::new();
     for account in &snapshot.accounts {
@@ -3879,11 +4263,16 @@ fn build_risk_read_model(snapshot: &AccountReadSnapshot) -> AdminRiskReadModel {
             });
         }
     }
+    let source = if graph_configured {
+        format!("{} + postgres_admin_trade_graph", snapshot.source)
+    } else {
+        snapshot.source.clone()
+    };
     AdminRiskReadModel {
-        source: snapshot.source.clone(),
+        source,
         generated_at_ms: now,
         cases,
-        graph: Vec::new(),
+        graph,
     }
 }
 
@@ -4319,6 +4708,32 @@ fn require_approval_manager(operator: &Operator) -> Result<(), ApiError> {
     }
 }
 
+fn require_operator_permission(
+    operator: &Operator,
+    permission: Permission,
+) -> Result<(), ApiError> {
+    if operator.has_permission(&permission)
+        || operator.has_permission(&Permission::PermissionManage)
+    {
+        Ok(())
+    } else {
+        Err(ApiError {
+            status: StatusCode::FORBIDDEN,
+            message: format!(
+                "operator lacks required permission: {}",
+                permission_text(&permission)
+            ),
+        })
+    }
+}
+
+fn configured_admin_store(state: &AdminApiState) -> Result<PostgresAdminRepository, ApiError> {
+    state.admin_store.clone().ok_or_else(|| ApiError {
+        status: StatusCode::SERVICE_UNAVAILABLE,
+        message: "ADMIN_DATABASE_URL is required for admin projection writes".into(),
+    })
+}
+
 fn required_header(headers: &HeaderMap, name: &str) -> Result<String, ApiError> {
     headers
         .get(name)
@@ -4686,6 +5101,28 @@ fn require_non_empty(field: &str, value: &str) -> Result<(), AdminError> {
     Ok(())
 }
 
+fn required_string(field: &str, value: &str) -> Result<String, AdminError> {
+    let value = value.trim();
+    if value.is_empty() {
+        return Err(AdminError::InvalidCommand(format!("{field} is required")));
+    }
+    Ok(value.to_string())
+}
+
+fn optional_string(value: Option<String>) -> Option<String> {
+    value
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+}
+
+fn clean_string_list(values: Vec<String>) -> Vec<String> {
+    values
+        .into_iter()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .collect()
+}
+
 fn error_code(error: &AdminError) -> &'static str {
     match error {
         AdminError::PermissionDenied { .. } => "permission_denied",
@@ -4852,6 +5289,53 @@ fn row_to_outbox_message(row: &Row) -> Result<AdminOutboxMessage, AdminError> {
         next_attempt_at_ms: next_attempt_at_ms.map(|value| value.max(0) as u64),
         dispatched_at_ms: dispatched_at_ms.map(|value| value.max(0) as u64),
         created_at_ms: created_at_ms.max(0) as u64,
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_activity_record(row: &Row) -> Result<AdminActivityRecord, AdminError> {
+    let start_at_ms: Option<i64> = row.get("start_at_ms");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    let realms_json: Value = row.get("realms_json");
+    let realms = serde_json::from_value::<Vec<String>>(realms_json).map_err(|error| {
+        AdminError::Repository(format!("decode activity realms failed: {error}"))
+    })?;
+    Ok(AdminActivityRecord {
+        activity_id: row.get("activity_id"),
+        name: row.get("name"),
+        start_at_ms: start_at_ms.map(|value| value.max(0) as u64),
+        activity_type: row.get("activity_type"),
+        status: row.get("status"),
+        signal: row.get("signal"),
+        reward: row.get("reward"),
+        condition: row.get("condition"),
+        realms,
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_price_feed_record(row: &Row) -> Result<AdminPriceFeedRecord, AdminError> {
+    let latest_price: i64 = row.get("latest_price");
+    let sample_count: i32 = row.get("sample_count");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminPriceFeedRecord {
+        item: row.get("item"),
+        latest_price: latest_price.max(0) as u64,
+        sample_count: sample_count.max(0) as usize,
+        source: row.get("source"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_trade_graph_edge(row: &Row) -> Result<AdminRiskGraphEdge, AdminError> {
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminRiskGraphEdge {
+        edge_id: row.get("edge_id"),
+        from: row.get("from_player_id"),
+        to: row.get("to_player_id"),
+        signal: row.get("signal"),
+        risk: row.get("risk"),
+        evidence: row.get("evidence"),
         updated_at_ms: updated_at_ms.max(0) as u64,
     })
 }
@@ -5356,11 +5840,11 @@ mod tests {
             Some("manual operator ban")
         );
 
-        let economy = build_economy_read_model(&snapshot);
+        let economy = build_economy_read_model(&snapshot, Vec::new(), false);
         assert_eq!(economy.assets[0].asset, "Gold");
         assert_eq!(economy.assets[0].total, 777);
         assert_eq!(economy.assets[1].total, 55);
-        let risk = build_risk_read_model(&snapshot);
+        let risk = build_risk_read_model(&snapshot, Vec::new(), false);
         assert_eq!(risk.cases.len(), 1);
         assert_eq!(risk.cases[0].evidence, "manual operator ban");
 
@@ -5451,6 +5935,7 @@ mod tests {
         let state = AdminApiState {
             control_plane: Arc::new(Mutex::new(control)),
             read_models,
+            admin_store: None,
         };
 
         let record = get_command_status(State(state.clone()), Path("cmd-1".into()))
@@ -5649,6 +6134,7 @@ mod tests {
                 control.approval_store,
             ))),
             read_models,
+            admin_store: None,
         };
 
         let timeline = build_admin_timeline(
