@@ -23,8 +23,14 @@ The crate now contains:
 - command idempotency guard through `AdminCommandRepository::insert_pending`;
 - `SendSystemMail` domain executor, outbox record, live gateway delivery attempt,
   and account-store fallback;
-- Axum HTTP routes for health, command records, audit records, outbox records, and
-  `SendSystemMail`.
+- grant item, grant currency, kick player, and ban account executors;
+- persistent approval records and approval events;
+- Axum HTTP routes for health, command records, audit records, approval records,
+  per-command status, event/timeline read models, outbox records, and the
+  current GM commands;
+- optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
+- optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
+  to fixed operator identities and permissions.
 
 The current `SendSystemMail` executor is connected to live local gameplay state
 when `ADMIN_GATEWAY_MAIL_URL` points at the gateway `POST /admin/system-mail`
@@ -33,7 +39,8 @@ account store path. Command/audit repositories are in-memory unless
 `ADMIN_DATABASE_URL` is set. With `ADMIN_DATABASE_URL`, the API applies
 `infra/postgres/migrations/0001_core.sql` on startup and stores command/audit
 records in Postgres. Real auth, approvals, and broader GM executors remain
-production gaps.
+production gaps have moved to real OIDC/session auth, multi-approver policy, and
+additional command executors.
 
 If `MIR2_ACCOUNT_STORE_DATABASE_URL` is also set, fallback account-store writes
 mirror the resulting JSON account store into Postgres `accounts`, `characters`,
@@ -83,9 +90,20 @@ Routes:
 
 - `GET /health`
 - `GET /admin/commands`
+- `GET /admin/commands/:command_id/status`
 - `GET /admin/audit`
+- `GET /admin/approvals`
+- `GET /admin/events`
+- `GET /admin/timeline`
 - `GET /admin/system-mail/outbox`
 - `POST /admin/commands/send-system-mail`
+- `POST /admin/commands/grant-item`
+- `POST /admin/commands/grant-currency`
+- `POST /admin/commands/kick-player`
+- `POST /admin/commands/ban-account`
+- `POST /admin/approvals`
+- `POST /admin/approvals/:approval_id/approve`
+- `POST /admin/approvals/:approval_id/reject`
 
 Write routes require operator headers:
 
@@ -99,14 +117,21 @@ x-operator-permissions
 For local GM mail smoke, include `mail_send_system` in
 `x-operator-permissions`.
 
+If `ADMIN_OPERATOR_TOKEN` is set, requests must also include
+`Authorization: Bearer <token>`. If `ADMIN_OPERATOR_POLICY_PATH` is set, the
+Bearer token selects the operator from that JSON policy file and header-supplied
+operator identity is ignored. Approval self-approval is forbidden by default;
+set `ADMIN_APPROVAL_ALLOW_SELF=true` only for local smoke runs.
+
 ## Current Implemented Commands
 
 - `SendSystemMail`: HTTP + RBAC + command repository + audit repository + domain
   outbox.
-- `GrantItem`: typed model and validation only.
-- `GrantCurrency`: typed model and validation only.
-- `KickPlayer`: typed model and validation only.
-- `BanAccount`: typed model and validation only.
+- `GrantItem`: approval-gated item grant routed through audited system mail.
+- `GrantCurrency`: approval-gated gold grant routed through audited system mail.
+- `KickPlayer`: session-routing kick through the gateway admin endpoint.
+- `BanAccount`: approval-gated account ban persisted in the account store and
+  enforced by simulation login/start-game.
 
 ## Verification
 
@@ -117,7 +142,7 @@ cargo +1.89.0 fmt --check
 
 ## Next Steps
 
-1. Add OIDC/session middleware and RBAC policy loading.
-2. Replace the initial TCP NATS publisher with a full JetStream client and retry/dead-letter policy.
-3. Harden the gateway/admin mail boundary and account-store fallback.
-4. Add typed executors for grant item, grant currency, kick, and ban.
+1. Add OIDC/session middleware and production RBAC policy management.
+2. Add multi-operator approval policy and operator audit retention rules.
+3. Expand GM executors beyond mail/grant/kick/ban.
+4. Add production deployment health checks, rate limits, and dashboards.

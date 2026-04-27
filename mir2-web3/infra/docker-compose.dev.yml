@@ -48,9 +48,8 @@ services:
       retries: 20
 
   redpanda:
-    image: redpandadata/redpanda:latest
+    image: redpandadata/redpanda:v24.3.6
     container_name: mir2-redpanda
-    profiles: ["events"]
     command:
       - redpanda
       - start
@@ -65,19 +64,30 @@ services:
       - "0"
       - --check=false
       - --kafka-addr
-      - PLAINTEXT://0.0.0.0:9092
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
       - --advertise-kafka-addr
-      - PLAINTEXT://127.0.0.1:9092
+      - internal://redpanda:9092,external://127.0.0.1:9092
+      - --pandaproxy-addr
+      - internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr
+      - internal://redpanda:8082,external://127.0.0.1:8082
+      - --set
+      - redpanda.auto_create_topics_enabled=true
     ports:
-      - "9092:9092"
+      - "9092:19092"
+      - "8082:18082"
       - "9644:9644"
     volumes:
       - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -Eq 'Healthy:[[:space:]]*true|Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:24.12-alpine
     container_name: mir2-clickhouse
-    profiles: ["analytics"]
     environment:
       CLICKHOUSE_DB: mir2_events
       CLICKHOUSE_USER: mir2
@@ -88,6 +98,15 @@ services:
       - "9000:9000"
     volumes:
       - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/initdb:/docker-entrypoint-initdb.d:ro
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --user mir2 --password mir2_dev_password --query 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
   meilisearch:
     image: getmeili/meilisearch:latest

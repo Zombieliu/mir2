@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS accounts (
     expanded_storage_expiry_time_binary_datetime BIGINT NOT NULL DEFAULT 0,
     storage_password_snapshot TEXT NOT NULL DEFAULT '',
     storage_password_last_set_binary_datetime BIGINT NOT NULL DEFAULT 0,
+    is_banned BOOLEAN NOT NULL DEFAULT FALSE,
+    ban_reason TEXT NOT NULL DEFAULT '',
+    ban_until_ms BIGINT,
+    banned_at_ms BIGINT,
     store_version BIGINT NOT NULL DEFAULT 0,
     raw_json JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -14,6 +18,14 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 ALTER TABLE accounts
     ADD COLUMN IF NOT EXISTS store_version BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS is_banned BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS ban_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS ban_until_ms BIGINT;
+ALTER TABLE accounts
+    ADD COLUMN IF NOT EXISTS banned_at_ms BIGINT;
 
 CREATE TABLE IF NOT EXISTS characters (
     account_id TEXT NOT NULL REFERENCES accounts(account_id) ON DELETE CASCADE,
@@ -111,19 +123,60 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_target
 CREATE INDEX IF NOT EXISTS idx_admin_audit_operator
     ON admin_audit_records(operator_id);
 
+CREATE TABLE IF NOT EXISTS admin_approvals (
+    approval_id TEXT PRIMARY KEY,
+    command_id TEXT NOT NULL,
+    command_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    requested_by TEXT NOT NULL,
+    requested_reason TEXT NOT NULL,
+    decided_by TEXT,
+    decision_reason TEXT,
+    created_at_ms BIGINT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    decided_at_ms BIGINT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_approvals_recent
+    ON admin_approvals(updated_at_ms DESC, created_at_ms DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_approvals_command
+    ON admin_approvals(command_id);
+CREATE INDEX IF NOT EXISTS idx_admin_approvals_status
+    ON admin_approvals(status);
+
+ALTER TABLE admin_approvals
+    ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+
 CREATE TABLE IF NOT EXISTS admin_outbox (
     outbox_id TEXT PRIMARY KEY,
-    command_id TEXT NOT NULL REFERENCES admin_commands(command_id) ON DELETE RESTRICT,
+    command_id TEXT REFERENCES admin_commands(command_id) ON DELETE RESTRICT,
     topic TEXT NOT NULL,
     payload_json JSONB NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
+    nats_status TEXT NOT NULL DEFAULT 'pending',
+    redpanda_status TEXT NOT NULL DEFAULT 'not_configured',
+    last_error TEXT,
     attempts INTEGER NOT NULL DEFAULT 0,
     next_attempt_at_ms BIGINT,
+    dispatched_at_ms BIGINT,
     created_at_ms BIGINT NOT NULL,
     updated_at_ms BIGINT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE admin_outbox
+    ALTER COLUMN command_id DROP NOT NULL;
+ALTER TABLE admin_outbox
+    ADD COLUMN IF NOT EXISTS nats_status TEXT NOT NULL DEFAULT 'pending';
+ALTER TABLE admin_outbox
+    ADD COLUMN IF NOT EXISTS redpanda_status TEXT NOT NULL DEFAULT 'not_configured';
+ALTER TABLE admin_outbox
+    ADD COLUMN IF NOT EXISTS last_error TEXT;
+ALTER TABLE admin_outbox
+    ADD COLUMN IF NOT EXISTS dispatched_at_ms BIGINT;
 
 CREATE INDEX IF NOT EXISTS idx_admin_outbox_pending
     ON admin_outbox(status, next_attempt_at_ms, created_at_ms);

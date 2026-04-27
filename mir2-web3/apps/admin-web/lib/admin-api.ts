@@ -29,6 +29,54 @@ export type AuditRecord = {
   completedAtMs?: number;
 };
 
+export type AdminEventRecord = {
+  eventId: string;
+  eventType: string;
+  commandId: string;
+  operatorId: string;
+  status: string;
+  occurredAtMs: number;
+  payloadJson: string;
+};
+
+export type AdminEventsResponse = {
+  degraded: boolean;
+  error?: string;
+  records: AdminEventRecord[];
+};
+
+export type AdminTimelineItem = {
+  source: string;
+  recordId: string;
+  commandId?: string;
+  targetId?: string;
+  eventType: string;
+  status: string;
+  actorId?: string;
+  occurredAtMs: number;
+  summary: string;
+};
+
+export type AdminTimelineResponse = {
+  degraded: boolean;
+  error?: string;
+  records: AdminTimelineItem[];
+};
+
+export type ApprovalRecord = {
+  approvalId: string;
+  commandId: string;
+  commandType: string;
+  status: string;
+  requestedBy: string;
+  requestedReason: string;
+  decidedBy?: string;
+  decisionReason?: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+  decidedAtMs?: number;
+};
+
 export type SystemMailReceipt = {
   outboxId: string;
   targetKind: string;
@@ -40,17 +88,29 @@ export type SystemMailReceipt = {
   mailIds: number[];
 };
 
+export type SubmitCommandResponse = {
+  commandId: string;
+  result: {
+    status: string;
+    message: string;
+  };
+};
+
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
 
 export function operatorHeaders() {
-  return {
+  const headers: Record<string, string> = {
     "x-operator-id": process.env.ADMIN_OPERATOR_ID ?? "local-gm",
     "x-operator-email": process.env.ADMIN_OPERATOR_EMAIL ?? "gm.local@mir2.dev",
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,character_read,inventory_read,mail_send_system,audit_read"
+      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage"
   };
+  if (process.env.ADMIN_OPERATOR_TOKEN) {
+    headers.authorization = `Bearer ${process.env.ADMIN_OPERATOR_TOKEN}`;
+  }
+  return headers;
 }
 
 export async function adminGet<T>(path: string): Promise<ApiResult<T>> {

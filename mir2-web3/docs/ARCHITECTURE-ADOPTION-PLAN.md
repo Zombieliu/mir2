@@ -25,9 +25,10 @@ Add boundaries before adding infrastructure. The project should become cloud-rea
 | Postgres | Add as the first authoritative DB target | Needed for accounts, characters, inventory, mail, audit, admin commands, and future operations | Add schema/migration plan and storage traits before replacing JSON store |
 | Redis | Add as non-authoritative cache/session/routing layer | Needed for online presence, session cache, rate limit, route cache, locks | Define cache contract and invalidation rules before code depends on Redis |
 | NATS | Add as early internal command/notification bus candidate | Fits lightweight GM command dispatch, service notifications, online/offline fanout | Add local dev service and command-bus abstraction; avoid making it the source of truth |
+| Redpanda + ClickHouse | Add local event-stream and analytics stack | Gives admin/gameplay events an append-only path and a queryable projection target without making it gameplay authority | Add Compose services plus a ClickHouse Kafka-engine projection for `admin.command.succeeded` |
 | Admin API | Keep Rust Axum for now | It already exists, shares domain types, and avoids a second backend stack too early | Continue building typed command/audit/repository layers in `apps/admin-api` |
 | Admin Web | Keep NextJS | Fastest path for high-quality operations UI | Add real read models gradually; current mock data must stay marked as mock |
-| Docker Compose | Add local dev infra | Lets Windows/Mac run the same Postgres/Redis/NATS baseline | Add `infra/docker-compose.dev.yml` with optional profiles |
+| Docker Compose | Add local dev infra | Lets Windows/Mac run the same Postgres/Redis/NATS/Redpanda/ClickHouse baseline | Add `infra/docker-compose.dev.yml` with optional search/observability profiles |
 | Observability contract | Document metrics/log/tracing now | Easy to wire later if route names, request ids, and command ids are consistent from the start | Use trace ids and structured logs in new service boundaries |
 
 ## Add Behind Interfaces, Not Full Production Yet
@@ -35,8 +36,8 @@ Add boundaries before adding infrastructure. The project should become cloud-rea
 | Area | What To Do Now | What Not To Do Yet |
 | --- | --- | --- |
 | gRPC + Protobuf | Define service contracts for account, character, admin command, zone routing, and mail after storage boundaries are stable | Do not split every module into a network service before in-process boundaries are clean |
-| Redpanda | Keep it as the event-stream target for gameplay/economy/audit events | Do not require Redpanda for core gameplay startup yet |
-| ClickHouse | Define event schemas for economy, inventory, mail, trade, auction, login, command audit | Do not build analytics dashboards before event quality is reliable |
+| Redpanda producers | Add proper app-level Kafka producers after event envelope semantics settle | Do not hand-roll Kafka protocol or make event publish part of authoritative gameplay transactions yet |
+| ClickHouse dashboards | Expand schemas for economy, inventory, mail, trade, auction, login, command audit after real producers exist | Do not build analytics dashboards before event quality is reliable |
 | Meilisearch | Plan search indexes for player, account, item, mail, auction, order, support notes | Do not make it required until real read models exist |
 | Loki + Grafana | Add optional local profile and structured log conventions | Do not block local gameplay on observability stack startup |
 | BullMQ / JetStream / Temporal | Start with command outbox and NATS candidate | Do not introduce Temporal until workflows are complex enough to need it |
@@ -93,7 +94,7 @@ Gateway / Account / World / Mail service boundaries
 ## First Implementation Sequence
 
 1. Keep parity baseline green and truthfully marked as Candidate where appropriate.
-2. Add local dev infra compose for Postgres, Redis, and NATS.
+2. Add local dev infra compose for Postgres, Redis, NATS, Redpanda, and ClickHouse.
 3. Define storage boundaries for account, character, inventory, storage, mail, and admin audit.
 4. Add Postgres schema draft and migration strategy. Done for the first core
    schema in `infra/postgres/migrations/0001_core.sql`.
@@ -103,10 +104,10 @@ Gateway / Account / World / Mail service boundaries
    Postgres mirror through `MIR2_ACCOUNT_STORE_DATABASE_URL`; it also has an
    explicit opt-in source-of-truth mode through
    `MIR2_ACCOUNT_STORE_BACKEND=postgres`, with row locks and version increments.
-6. Add Redis session/online-state cache with tests proving cache miss/hit equivalence.
-7. Add NATS command bus dispatcher for admin command dispatch, while keeping command/audit state in Postgres. First minimal dispatcher exists as `dispatch-admin-outbox`; production still needs JetStream retry/dead-letter semantics.
-8. Define event envelope schemas before introducing Redpanda as a required runtime dependency.
-9. Add ClickHouse/Meilisearch projections only after real event/read-model data exists.
+6. Add Redis session/online-state cache with tests proving cache miss/hit equivalence. Started with a gateway `GatewaySessionCache` contract, deterministic in-memory online-session records, and an optional Redis adapter with TTL tests. Redis now also stores a character-name routing index for Admin kick-player removal; broader reconnect semantics remain next.
+7. Add NATS command bus dispatcher for admin command dispatch, while keeping command/audit state in Postgres. `dispatch-admin-outbox` now supports core NATS and JetStream publish-ack modes, plus retry/dead-letter lifecycle events.
+8. Define event envelope schemas before wiring app-level Redpanda producers into runtime paths. Local Redpanda and ClickHouse now exist in Compose; Admin outbox events now use a stable envelope, publish to Redpanda through Pandaproxy when configured, track NATS/Redpanda delivery state independently, and project terminal command outcomes, approval lifecycle, and outbox lifecycle events into ClickHouse `admin_events` plus `admin_command_events`. Admin event and timeline reads are filterable and degrade cleanly when ClickHouse is unavailable.
+9. Add broader ClickHouse/Meilisearch projections only after real event/read-model data exists.
 
 ## Current Stack Answer
 
@@ -115,14 +116,13 @@ Add now:
 - Postgres as target authoritative store.
 - Redis as non-authoritative cache/session/routing.
 - NATS as command/notification bus candidate.
+- Redpanda plus ClickHouse as local event-stream and analytics infrastructure.
 - Docker Compose dev infra.
 - Storage, cache, command-bus, event-envelope interfaces.
 - Admin API in Rust Axum, not Go/NestJS yet.
 
 Document now, optional profiles only:
 
-- Redpanda.
-- ClickHouse.
 - Meilisearch.
 - Loki + Grafana.
 

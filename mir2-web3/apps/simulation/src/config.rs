@@ -63,6 +63,10 @@ pub struct AccountStore {
     )]
     pub schema_version: u16,
     pub accounts: BTreeMap<String, AccountRecord>,
+    #[serde(skip)]
+    source_account_versions: BTreeMap<String, i64>,
+    #[serde(skip)]
+    source_save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
 }
 
 impl AccountStore {
@@ -72,6 +76,8 @@ impl AccountStore {
         Self {
             schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
             accounts,
+            source_account_versions: BTreeMap::new(),
+            source_save_versions: BTreeMap::new(),
         }
     }
 
@@ -118,6 +124,29 @@ impl AccountStore {
         }
         self
     }
+
+    fn with_source_versions(mut self, versions: AccountStoreSourceVersions) -> Self {
+        self.source_account_versions = versions.accounts;
+        self.source_save_versions = versions.saves;
+        self
+    }
+
+    fn source_account_version(&self, account_id: &str) -> Option<i64> {
+        self.source_account_versions.get(account_id).copied()
+    }
+
+    fn source_save_version(&self, account_id: &str, character_index: i32) -> Option<i64> {
+        self.source_save_versions
+            .get(account_id)
+            .and_then(|versions| versions.get(&character_index))
+            .copied()
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+struct AccountStoreSourceVersions {
+    accounts: BTreeMap<String, i64>,
+    saves: BTreeMap<String, BTreeMap<i32, i64>>,
 }
 
 const fn legacy_account_store_schema_version() -> u16 {
@@ -207,8 +236,24 @@ pub struct AccountRecord {
     pub storage_password: String,
     #[serde(default)]
     pub storage_password_last_set_binary_datetime: i64,
+    #[serde(default)]
+    pub is_banned: bool,
+    #[serde(default)]
+    pub ban_reason: String,
+    #[serde(default)]
+    pub ban_until_ms: Option<u64>,
+    #[serde(default)]
+    pub banned_at_ms: Option<u64>,
     pub characters: Vec<CharacterRecord>,
     pub saves: BTreeMap<i32, CharacterSaveRecord>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountBanStatus {
+    pub reason: String,
+    pub ban_until_ms: Option<u64>,
+    pub banned_at_ms: Option<u64>,
 }
 
 impl AccountRecord {
@@ -225,9 +270,30 @@ impl AccountRecord {
             expanded_storage_expiry_time_binary_datetime: 0,
             storage_password: String::new(),
             storage_password_last_set_binary_datetime: 0,
+            is_banned: false,
+            ban_reason: String::new(),
+            ban_until_ms: None,
+            banned_at_ms: None,
             characters: vec![default_character],
             saves,
         }
+    }
+
+    pub fn active_ban(&self, now_ms: u64) -> Option<AccountBanStatus> {
+        if !self.is_banned {
+            return None;
+        }
+        if self
+            .ban_until_ms
+            .is_some_and(|ban_until_ms| ban_until_ms <= now_ms)
+        {
+            return None;
+        }
+        Some(AccountBanStatus {
+            reason: self.ban_reason.clone(),
+            ban_until_ms: self.ban_until_ms,
+            banned_at_ms: self.banned_at_ms,
+        })
     }
 }
 
@@ -335,6 +401,52 @@ mod tests {
         ));
         fs::create_dir_all(&dir).expect("temp dir should be created");
         dir
+    }
+
+    fn postgres_test_url() -> Option<String> {
+        let url = std::env::var("MIR2_TEST_POSTGRES_URL")
+            .unwrap_or_else(|_| "postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2".into());
+        Client::connect(&url, NoTls).ok().map(|_| url)
+    }
+
+    fn unique_account_store(label: &str) -> (String, AccountStore) {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or_default();
+        let account_id = format!("test-{label}-{}-{unique}", std::process::id());
+        let character = CharacterRecord {
+            index: 0,
+            name: format!("Tester{unique}"),
+            level: 1,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+        };
+        let mut accounts = BTreeMap::new();
+        accounts.insert(account_id.clone(), AccountRecord::new(character));
+        (
+            account_id,
+            AccountStore {
+                schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+                accounts,
+                source_account_versions: BTreeMap::new(),
+                source_save_versions: BTreeMap::new(),
+            },
+        )
+    }
+
+    fn cleanup_postgres_account(database_url: &str, account_id: &str) {
+        if let Ok(mut client) = Client::connect(database_url, NoTls) {
+            let _ = client.execute(
+                "DELETE FROM character_saves WHERE account_id = $1",
+                &[&account_id],
+            );
+            let _ = client.execute(
+                "DELETE FROM characters WHERE account_id = $1",
+                &[&account_id],
+            );
+            let _ = client.execute("DELETE FROM accounts WHERE account_id = $1", &[&account_id]);
+        }
     }
 
     #[test]
@@ -596,6 +708,196 @@ mod tests {
 
         let _ = fs::remove_dir_all(dir);
     }
+
+    #[test]
+    fn postgres_source_mode_rejects_stale_account_store_writer() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!(
+                "skipping postgres source-mode conflict test because Postgres is unavailable"
+            );
+            return;
+        };
+        let (account_id, store) = unique_account_store("stale");
+        cleanup_postgres_account(&database_url, &account_id);
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+        let versioned = store.with_source_versions(versions.clone());
+        let mut first = versioned.clone();
+        let mut second = versioned;
+
+        first
+            .accounts
+            .get_mut(&account_id)
+            .expect("test account should exist")
+            .password = "first".to_string();
+        let next_versions = save_account_store_to_postgres(
+            database_url.clone(),
+            first,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("first source writer should succeed");
+
+        second
+            .accounts
+            .get_mut(&account_id)
+            .expect("test account should exist")
+            .password = "second".to_string();
+        let error = save_account_store_to_postgres(
+            database_url.clone(),
+            second,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect_err("stale source writer should be rejected");
+
+        assert!(error.contains("stale postgres account-store write"));
+        assert_eq!(versions.accounts.get(&account_id), Some(&1));
+        assert_eq!(next_versions.accounts.get(&account_id), Some(&2));
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
+    #[test]
+    fn postgres_source_mode_rejects_stale_character_save_writer() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!(
+                "skipping postgres save-version conflict test because Postgres is unavailable"
+            );
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("stale-save");
+        cleanup_postgres_account(&database_url, &account_id);
+        store
+            .accounts
+            .get_mut(&account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("test save should exist")
+            .gold = 100;
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+        let versioned = store.with_source_versions(versions.clone());
+        let mut first = versioned.clone();
+        let mut second = versioned;
+
+        first
+            .accounts
+            .get_mut(&account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("first save should exist")
+            .gold = 200;
+        let next_versions = save_account_store_to_postgres(
+            database_url.clone(),
+            first,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("first source writer should succeed");
+
+        second.source_account_versions = next_versions.accounts.clone();
+        second
+            .accounts
+            .get_mut(&account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("second save should exist")
+            .gold = 300;
+        let error = save_account_store_to_postgres(
+            database_url.clone(),
+            second,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect_err("stale save writer should be rejected");
+
+        assert!(error.contains("stale postgres character-save write"));
+        assert_eq!(
+            versions
+                .saves
+                .get(&account_id)
+                .and_then(|saves| saves.get(&0)),
+            Some(&1)
+        );
+        assert_eq!(
+            next_versions
+                .saves
+                .get(&account_id)
+                .and_then(|saves| saves.get(&0)),
+            Some(&2)
+        );
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
+    #[test]
+    fn postgres_source_mode_reload_can_save_after_version_refresh() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres source-mode reload test because Postgres is unavailable");
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("reload");
+        cleanup_postgres_account(&database_url, &account_id);
+        let save = store
+            .accounts
+            .get_mut(&account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("test save should exist");
+        save.gold = 100;
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+        assert_eq!(
+            versions
+                .saves
+                .get(&account_id)
+                .and_then(|saves| saves.get(&0)),
+            Some(&1)
+        );
+
+        let mut reloaded =
+            load_account_store_from_postgres(database_url.clone(), default_character())
+                .expect("source store should reload with versions");
+        reloaded
+            .accounts
+            .retain(|loaded_account_id, _| loaded_account_id == &account_id);
+        reloaded
+            .accounts
+            .get_mut(&account_id)
+            .and_then(|account| account.saves.get_mut(&0))
+            .expect("reloaded save should exist")
+            .gold = 250;
+
+        let next_versions = save_account_store_to_postgres(
+            database_url.clone(),
+            reloaded,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("reloaded source writer should succeed");
+
+        assert_eq!(
+            next_versions
+                .saves
+                .get(&account_id)
+                .and_then(|saves| saves.get(&0)),
+            Some(&2)
+        );
+        let confirmed = load_account_store_from_postgres(database_url.clone(), default_character())
+            .expect("source store should load final state");
+        let confirmed_gold = confirmed
+            .accounts
+            .get(&account_id)
+            .and_then(|account| account.saves.get(&0))
+            .map(|save| save.gold);
+        assert_eq!(confirmed_gold, Some(250));
+        cleanup_postgres_account(&database_url, &account_id);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -840,11 +1142,19 @@ impl SimulationConfig {
             }
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
-            save_account_store_to_postgres(
+            let source_versions = save_account_store_to_postgres(
                 database_url.to_string(),
                 store,
                 self.account_store_database_mode,
             )?;
+            if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+                let mut store = self
+                    .account_store
+                    .lock()
+                    .expect("account store mutex should not be poisoned");
+                store.source_account_versions = source_versions.accounts;
+                store.source_save_versions = source_versions.saves;
+            }
         } else if let Some(path) = self.account_store_path.as_deref() {
             store.save_to_path(path)?;
         }
@@ -906,34 +1216,58 @@ fn load_account_store_from_postgres(
             .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
         let rows = client
             .query(
-                "SELECT account_id, raw_json FROM accounts ORDER BY account_id",
+                "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
                 &[],
             )
             .map_err(|error| format!("postgres account-store load failed: {error}"))?;
         if rows.is_empty() {
             let store = AccountStore::new(default_character);
-            upsert_account_store_to_postgres(
+            let versions = upsert_account_store_to_postgres(
                 &mut client,
                 &store,
                 AccountStoreDatabaseMode::SourceOfTruth,
             )?;
-            return Ok(store);
+            return Ok(store.with_source_versions(versions));
         }
         let mut accounts = BTreeMap::new();
+        let mut versions = AccountStoreSourceVersions::default();
         for row in rows {
             let account_id: String = row.get("account_id");
             let raw_json: Value = row.get("raw_json");
+            let store_version: i64 = row.get("store_version");
             let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
                 format!("postgres account raw_json decode failed for {account_id}: {error}")
             })?;
+            versions
+                .accounts
+                .insert(account_id.clone(), store_version);
             accounts.insert(account_id, account);
+        }
+        let save_rows = client
+            .query(
+                "SELECT account_id, character_index, save_version FROM character_saves ORDER BY account_id, character_index",
+                &[],
+            )
+            .map_err(|error| format!("postgres character-save version load failed: {error}"))?;
+        for row in save_rows {
+            let account_id: String = row.get("account_id");
+            let character_index: i32 = row.get("character_index");
+            let save_version: i64 = row.get("save_version");
+            versions
+                .saves
+                .entry(account_id)
+                .or_default()
+                .insert(character_index, save_version);
         }
         Ok(AccountStore {
             schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
             accounts,
+            source_account_versions: BTreeMap::new(),
+            source_save_versions: BTreeMap::new(),
         }
         .with_default_account(default_character)
-        .migrate_to_current_schema())
+        .migrate_to_current_schema()
+        .with_source_versions(versions))
     })
     .join()
     .map_err(|_| "postgres account-store load thread panicked".to_string())?
@@ -943,7 +1277,7 @@ fn save_account_store_to_postgres(
     database_url: String,
     store: AccountStore,
     mode: AccountStoreDatabaseMode,
-) -> Result<(), String> {
+) -> Result<AccountStoreSourceVersions, String> {
     std::thread::spawn(move || {
         let mut client = Client::connect(&database_url, NoTls)
             .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
@@ -962,18 +1296,34 @@ fn upsert_account_store_to_postgres(
     client: &mut Client,
     store: &AccountStore,
     mode: AccountStoreDatabaseMode,
-) -> Result<(), String> {
+) -> Result<AccountStoreSourceVersions, String> {
     let mut transaction = client
         .transaction()
         .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
+    let mut source_versions = AccountStoreSourceVersions::default();
     for (account_id, account) in &store.accounts {
-        transaction
-            .execute(
-                "SELECT account_id FROM accounts WHERE account_id = $1 FOR UPDATE",
+        let locked = transaction
+            .query_opt(
+                "SELECT store_version FROM accounts WHERE account_id = $1 FOR UPDATE",
                 &[&account_id],
             )
             .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?;
-        upsert_account_record(&mut transaction, account_id, account, mode)?;
+        if let Some(row) = locked.as_ref() {
+            let current_version: i64 = row.get("store_version");
+            if mode == AccountStoreDatabaseMode::SourceOfTruth {
+                if let Some(expected_version) = store.source_account_version(account_id) {
+                    if current_version != expected_version {
+                        return Err(format!(
+                            "stale postgres account-store write for {account_id}: expected store_version {expected_version}, found {current_version}"
+                        ));
+                    }
+                }
+            }
+        }
+        let store_version = upsert_account_record(&mut transaction, account_id, account, mode)?;
+        source_versions
+            .accounts
+            .insert(account_id.clone(), store_version);
         let mut characters = account.characters.clone();
         for save in account.saves.values() {
             if !characters
@@ -989,19 +1339,25 @@ fn upsert_account_store_to_postgres(
             upsert_character_record(&mut transaction, account_id, character)?;
         }
         for (character_index, save) in &account.saves {
-            upsert_character_save_record(
+            let save_version = upsert_character_save_record(
                 &mut transaction,
+                store,
                 account_id,
                 *character_index,
                 save,
                 mode,
             )?;
+            source_versions
+                .saves
+                .entry(account_id.clone())
+                .or_default()
+                .insert(*character_index, save_version);
         }
     }
     transaction
         .commit()
         .map_err(|error| format!("postgres account-store commit failed: {error}"))?;
-    Ok(())
+    Ok(source_versions)
 }
 
 fn upsert_account_record(
@@ -1009,12 +1365,12 @@ fn upsert_account_record(
     account_id: &str,
     account: &AccountRecord,
     mode: AccountStoreDatabaseMode,
-) -> Result<(), String> {
+) -> Result<i64, String> {
     let raw_json = to_json(account)?;
     let account_id = account_id.to_string();
     let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
-    client
-        .execute(
+    let row = client
+        .query_one(
             "INSERT INTO accounts (
                 account_id,
                 password_snapshot,
@@ -1023,10 +1379,14 @@ fn upsert_account_record(
                 expanded_storage_expiry_time_binary_datetime,
                 storage_password_snapshot,
                 storage_password_last_set_binary_datetime,
+                is_banned,
+                ban_reason,
+                ban_until_ms,
+                banned_at_ms,
                 store_version,
                 raw_json,
                 updated_at
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,1,$8,now())
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,1,$12,now())
             ON CONFLICT (account_id) DO UPDATE SET
                 password_snapshot = EXCLUDED.password_snapshot,
                 storage_size = EXCLUDED.storage_size,
@@ -1034,9 +1394,14 @@ fn upsert_account_record(
                 expanded_storage_expiry_time_binary_datetime = EXCLUDED.expanded_storage_expiry_time_binary_datetime,
                 storage_password_snapshot = EXCLUDED.storage_password_snapshot,
                 storage_password_last_set_binary_datetime = EXCLUDED.storage_password_last_set_binary_datetime,
-                store_version = CASE WHEN $9 THEN accounts.store_version + 1 ELSE accounts.store_version END,
+                is_banned = EXCLUDED.is_banned,
+                ban_reason = EXCLUDED.ban_reason,
+                ban_until_ms = EXCLUDED.ban_until_ms,
+                banned_at_ms = EXCLUDED.banned_at_ms,
+                store_version = CASE WHEN $13 THEN accounts.store_version + 1 ELSE accounts.store_version END,
                 raw_json = EXCLUDED.raw_json,
-                updated_at = now()",
+                updated_at = now()
+            RETURNING store_version",
             &[
                 &account_id,
                 &account.password,
@@ -1045,12 +1410,16 @@ fn upsert_account_record(
                 &account.expanded_storage_expiry_time_binary_datetime,
                 &account.storage_password,
                 &account.storage_password_last_set_binary_datetime,
+                &account.is_banned,
+                &account.ban_reason,
+                &(account.ban_until_ms.map(|value| value as i64)),
+                &(account.banned_at_ms.map(|value| value as i64)),
                 &raw_json,
                 &should_increment_version,
             ],
         )
         .map_err(|error| format!("postgres account upsert failed for {account_id}: {error}"))?;
-    Ok(())
+    Ok(row.get("store_version"))
 }
 
 fn upsert_character_record(
@@ -1099,11 +1468,32 @@ fn upsert_character_record(
 
 fn upsert_character_save_record(
     client: &mut Transaction<'_>,
+    store: &AccountStore,
     account_id: &str,
     character_index: i32,
     save: &CharacterSaveRecord,
     mode: AccountStoreDatabaseMode,
-) -> Result<(), String> {
+) -> Result<i64, String> {
+    let locked = client
+        .query_opt(
+            "SELECT save_version FROM character_saves WHERE account_id = $1 AND character_index = $2 FOR UPDATE",
+            &[&account_id, &character_index],
+        )
+        .map_err(|error| {
+            format!("postgres character save lock failed for {account_id}/{character_index}: {error}")
+        })?;
+    if let Some(row) = locked.as_ref() {
+        let current_version: i64 = row.get("save_version");
+        if mode == AccountStoreDatabaseMode::SourceOfTruth {
+            if let Some(expected_version) = store.source_save_version(account_id, character_index) {
+                if current_version != expected_version {
+                    return Err(format!(
+                        "stale postgres character-save write for {account_id}/{character_index}: expected save_version {expected_version}, found {current_version}"
+                    ));
+                }
+            }
+        }
+    }
     let snapshot_json = to_json(save)?;
     let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
     let stage5_systems_json = save
@@ -1114,8 +1504,8 @@ fn upsert_character_save_record(
         .map_err(|error| {
             format!("stage5 systems json decode failed for {account_id}/{character_index}: {error}")
         })?;
-    client
-        .execute(
+    let row = client
+        .query_one(
             "INSERT INTO character_saves (
                 account_id,
                 character_index,
@@ -1148,7 +1538,8 @@ fn upsert_character_save_record(
                 snapshot_json = EXCLUDED.snapshot_json,
                 stage5_systems_json = EXCLUDED.stage5_systems_json,
                 save_version = CASE WHEN $15 THEN character_saves.save_version + 1 ELSE character_saves.save_version END,
-                updated_at = now()",
+                updated_at = now()
+            RETURNING save_version",
             &[
                 &account_id,
                 &character_index,
@@ -1172,7 +1563,7 @@ fn upsert_character_save_record(
                 "postgres character save upsert failed for {account_id}/{character_index}: {error}"
             )
         })?;
-    Ok(())
+    Ok(row.get("save_version"))
 }
 
 fn to_json<T>(value: &T) -> Result<Value, String>
@@ -1611,6 +2002,66 @@ pub fn deliver_stage5_system_mail(
         delivered_count,
         mail_ids,
     })
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountBanReceipt {
+    pub account_id: String,
+    pub reason: String,
+    pub ban_until_ms: Option<u64>,
+    pub banned_at_ms: u64,
+}
+
+pub fn ban_account_in_store(
+    config: &SimulationConfig,
+    account_id: &str,
+    duration_seconds: Option<u64>,
+    reason: &str,
+) -> Result<AccountBanReceipt, String> {
+    let account_id = account_id.trim();
+    if account_id.is_empty() {
+        return Err("account_id is required".to_string());
+    }
+    let banned_at_ms = unix_now_ms();
+    let ban_until_ms =
+        duration_seconds.map(|seconds| banned_at_ms.saturating_add(seconds.saturating_mul(1000)));
+    let reason = if reason.trim().is_empty() {
+        "Admin account ban".to_string()
+    } else {
+        reason.trim().to_string()
+    };
+
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?;
+        let account = store
+            .accounts
+            .entry(account_id.to_string())
+            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+        account.is_banned = true;
+        account.ban_reason = reason.clone();
+        account.ban_until_ms = ban_until_ms;
+        account.banned_at_ms = Some(banned_at_ms);
+    }
+
+    config.save_account_store()?;
+
+    Ok(AccountBanReceipt {
+        account_id: account_id.to_string(),
+        reason,
+        ban_until_ms,
+        banned_at_ms,
+    })
+}
+
+fn unix_now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or_default()
 }
 
 fn resolve_stage5_mail_targets(

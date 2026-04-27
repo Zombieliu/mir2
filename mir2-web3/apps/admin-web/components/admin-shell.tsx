@@ -11,6 +11,8 @@ const navItems = [
   { href: "/servers", labelKey: "shell.nav.servers", count: "31" },
   { href: "/risk", labelKey: "shell.nav.risk", count: "42" },
   { href: "/gm-tools", labelKey: "shell.nav.gmTools", count: "API" },
+  { href: "/approvals", labelKey: "shell.nav.approvals", count: "Gate" },
+  { href: "/timeline", labelKey: "shell.nav.timeline", count: "Read" },
   { href: "/audit", labelKey: "shell.nav.audit", count: "RBAC" }
 ];
 
