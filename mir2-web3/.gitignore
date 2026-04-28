@@ -25,3 +25,6 @@ Desktop.ini
 
 # Browser QA
 .playwright-cli/
+
+# Local AI-generated/reference images
+ai/

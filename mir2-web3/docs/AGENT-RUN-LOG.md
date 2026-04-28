@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-29-R257 completed. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. Follow-up fixes landed for ClickHouse event/timeline command filters, Postgres-backed GM mail/grant receipt persistence, and local `ai/` artifact ignoring. Verification passed: live command `cmd-live-grant-persist-20260428221245` through peer approval, GM grant, Audit, Timeline, and persisted outbox receipt; admin-api 25+6 tests; admin-web `tsc --noEmit`; `cargo +1.89.0 fmt --check`; `git diff --check`.
+
 > Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin operator auth now supports Postgres-backed bearer tokens and `/admin/auth/me`, Admin Web has token login/logout and resolved operator display, high-risk command approval now requires a matching peer-approved request, and Gateway automatically posts zone runtime heartbeat records. Verification passed: admin-api 25+6 tests, gateway 57+7 tests, admin-web `tsc --noEmit`, live auth/operators smoke, live cross-operator approval/grant smoke, live Gateway heartbeat readback, Admin Web page smoke, fmt, and diff checks.
 
 > Latest product-evolution sync: 2026-04-28-R251-R253 completed. Admin Servers now has real Postgres zone runtime telemetry, Admin Operators/RBAC has real Postgres operator records and a new Operators page, and the console-wide HTTP smoke is green across 11 pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live API write/read smoke for zone telemetry and operator RBAC, all Admin Web pages HTTP 200, fmt/diff checks.
@@ -92,6 +94,35 @@
 Last updated: 2026-04-26
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
+
+## 2026-04-29-R257
+
+Scope:
+
+- Ran the complete local Admin operations stack for live acceptance: Docker Postgres, Redis, NATS, Redpanda, and ClickHouse; Gateway on `127.0.0.1:7110`; Admin API on `127.0.0.1:7420`; Admin Web on `127.0.0.1:3020`; Player Web on `127.0.0.1:3010`.
+- Verified Postgres-backed operator-token auth with `r254-lead-token` resolving to `ops-r254-lead` and browser login through Admin Web.
+- Exercised Operators, Approvals, GM Tools, Servers, Audit, and Timeline against live data.
+- Fixed ClickHouse event reads so command/event/status filters are applied after per-`event_id` aggregation. This prevents `/admin/events?commandId=...` and `/admin/timeline?commandId=...` from degrading on filtered reads.
+- Added `admin_system_mail_receipts` to Postgres and merged persisted receipts into `GET /admin/system-mail/outbox`, so GM Tools can read gateway/account-store delivery receipts after Admin API restart.
+- Ignored transient local `ai/*.png` reference/generated images through `.gitignore`.
+
+Validation:
+
+- `GET /health` passed for Gateway `:7110` and Admin API `:7420`.
+- `GET /login` on Admin Web `:3020` and `/` on Player Web `:3010` returned HTTP 200.
+- Live peer-approved grant command `cmd-live-grant-persist-20260428221245` succeeded with result `currency grant queued as mail-cmd-live-grant-persist-20260428221245`.
+- `/admin/events?commandId=cmd-live-grant-persist-20260428221245` returned `degraded: false` and projected command/approval events from Redpanda -> ClickHouse.
+- `/admin/timeline?commandId=cmd-live-grant-persist-20260428221245` returned merged audit, command, approval, and event records with `degraded: false`.
+- `/admin/system-mail/outbox` returned persisted receipt `mail-cmd-live-grant-persist-20260428221245`, `deliveryMode: "gateway_live"`, `deliveredCount: 2`, and mail ids `[8,5]`.
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `./node_modules/.bin/tsc --noEmit` in `apps/admin-web`
+- `cargo +1.89.0 fmt --check`
+- `git diff --check`
+
+Result:
+
+- The local live Admin operations stack is ready for human inspection.
+- The remaining acceptance step is human review of the running Admin Web/Player Web surfaces and any deployment-specific checks.
 
 ## 2026-04-27-R238
 

@@ -181,6 +181,25 @@ ALTER TABLE admin_outbox
 CREATE INDEX IF NOT EXISTS idx_admin_outbox_pending
     ON admin_outbox(status, next_attempt_at_ms, created_at_ms);
 
+CREATE TABLE IF NOT EXISTS admin_system_mail_receipts (
+    outbox_id TEXT PRIMARY KEY,
+    command_id TEXT REFERENCES admin_commands(command_id) ON DELETE RESTRICT,
+    target_kind TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    attachment_count INTEGER NOT NULL,
+    accepted_at_ms BIGINT NOT NULL,
+    delivery_mode TEXT NOT NULL,
+    delivered_count INTEGER NOT NULL,
+    mail_ids_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_system_mail_receipts_recent
+    ON admin_system_mail_receipts(accepted_at_ms DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_system_mail_receipts_command
+    ON admin_system_mail_receipts(command_id);
+
 CREATE TABLE IF NOT EXISTS admin_activities (
     activity_id TEXT PRIMARY KEY,
     name TEXT NOT NULL,

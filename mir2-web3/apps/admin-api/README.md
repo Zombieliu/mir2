@@ -18,8 +18,8 @@ The crate now contains:
 - in-memory command/audit repositories for local tests and smoke runs;
 - Postgres schema migration for accounts, characters, character saves, admin
   command records, audit records, admin outbox records, activity config,
-  market price feeds, trade graph edges, zone runtime telemetry, and operator
-  records;
+  market price feeds, trade graph edges, zone runtime telemetry, operator
+  records, and system-mail delivery receipts;
 - account-store JSON import utility for migrating `.mir2-data/accounts.json`
   into Postgres-shaped tables;
 - command idempotency guard through `AdminCommandRepository::insert_pending`;
@@ -49,7 +49,11 @@ The crate now contains:
 The current `SendSystemMail` executor is connected to live local gameplay state
 when `ADMIN_GATEWAY_MAIL_URL` points at the gateway `POST /admin/system-mail`
 endpoint. If gateway delivery is unavailable, it falls back to the configured
-account store path. Command/audit repositories are in-memory unless
+account store path. When `ADMIN_DATABASE_URL` is set, the resulting
+`gateway_live` or `account_store_fallback` receipt is also written to
+`admin_system_mail_receipts`, and `GET /admin/system-mail/outbox` merges those
+persisted receipts with in-memory receipts for Admin Web status readback.
+Command/audit repositories are in-memory unless
 `ADMIN_DATABASE_URL` is set. With `ADMIN_DATABASE_URL`, the API applies
 `infra/postgres/migrations/0001_core.sql` on startup and stores command, audit,
 approval, outbox, projection, and operator records in Postgres. Production gaps
@@ -189,6 +193,10 @@ for local smoke runs.
 cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1
 cargo +1.89.0 fmt --check
 ```
+
+Latest live local acceptance also covered Admin Web login, Operators,
+Approvals, peer-approved GM grant, Servers heartbeat, Audit, Timeline, and
+persisted system-mail receipt readback through Postgres/Redpanda/ClickHouse.
 
 ## Next Steps
 
