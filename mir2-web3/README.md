@@ -44,6 +44,7 @@ Primary references:
 - `docs/POST-1TO1-EVOLUTION-PLAN.md`
 - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
 - `docs/ADMIN-STAGING-RUNBOOK.md`
+- `docs/WINDOWS-HOME-STAGING-SERVER.md`
 
 Immediate product architecture additions:
 

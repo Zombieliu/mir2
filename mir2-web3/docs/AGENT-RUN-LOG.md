@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-29-R259 completed. Added `docs/WINDOWS-HOME-STAGING-SERVER.md` to define the home Windows desktop staging-server design: WSL2/Docker host layout, Tailscale-first network access, optional Cloudflare Tunnel path with public Gateway `/admin/*` blocked, service ports, env plan, startup order, backups, rollback, security rules, and acceptance checklist.
+
 > Latest product-evolution sync: 2026-04-29-R258 completed. Added provider-neutral Admin staging rollout assets: `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, staging websocket configuration for Player Web through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` with same-origin `/ws` fallback outside localhost, and README/infra/admin doc links. This prepares staging/internal controlled deployment and keeps production-grade blockers explicit.
 
 > Latest product-evolution sync: 2026-04-29-R257 completed and human-accepted locally. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. Follow-up fixes landed for ClickHouse event/timeline command filters, Postgres-backed GM mail/grant receipt persistence, and local `ai/` artifact ignoring. Verification passed: live command `cmd-live-grant-persist-20260428221245` through peer approval, GM grant, Audit, Timeline, and persisted outbox receipt; admin-api 25+6 tests; admin-web `tsc --noEmit`; `cargo +1.89.0 fmt --check`; `git diff --check`; user confirmed the Admin/Player live surfaces are usable.
@@ -118,6 +120,25 @@ Result:
 
 - The Admin operations stack now has a concrete staging handoff path after local live acceptance.
 - This does not mark the operations center production-grade; production blockers remain external IdP/session auth, TLS/network isolation, secret rotation, observability, launch approval policy, backup/restore rehearsal, rate limits, and deployed soak/reconnect evidence.
+
+## 2026-04-29-R259
+
+Scope:
+
+- Added `docs/WINDOWS-HOME-STAGING-SERVER.md` as the concrete design for using the user's home Windows desktop as the first internal staging server.
+- Chose WSL2 Ubuntu plus Docker Desktop WSL2 backend, with the repo in the WSL filesystem and Docker volumes for Postgres/Redis/NATS/Redpanda/ClickHouse.
+- Recommended Tailscale-only access first, then optional Cloudflare Tunnel with Admin Web protected and Gateway public exposure limited to `/ws` through a local reverse proxy.
+- Defined port exposure, home staging env values, startup order, operator bootstrap, backup/restore, update/rollback, firewall rules, and acceptance checklist.
+- Linked the new design from README, infra README, and the Admin staging runbook.
+
+Validation:
+
+- `git diff --check`
+- docs link/reference review for README, infra README, and Admin staging runbook
+
+Result:
+
+- The staging plan now supports the user's preferred deployment model: a home Windows desktop acting as `home-staging-1` for closed internal testing.
 
 ## 2026-04-29-R257
 

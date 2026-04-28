@@ -6,6 +6,7 @@ For shared staging deployment preparation, use:
 
 - `infra/staging.env.example`
 - `docs/ADMIN-STAGING-RUNBOOK.md`
+- `docs/WINDOWS-HOME-STAGING-SERVER.md`
 
 The default stack now starts the local persistence, cache, notification, event-stream, and analytics services:
 
