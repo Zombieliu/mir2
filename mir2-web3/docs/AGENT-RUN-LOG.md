@@ -1,6 +1,6 @@
 # Agent Run Log
 
-> Latest product-evolution sync: 2026-04-29-R257 completed. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. Follow-up fixes landed for ClickHouse event/timeline command filters, Postgres-backed GM mail/grant receipt persistence, and local `ai/` artifact ignoring. Verification passed: live command `cmd-live-grant-persist-20260428221245` through peer approval, GM grant, Audit, Timeline, and persisted outbox receipt; admin-api 25+6 tests; admin-web `tsc --noEmit`; `cargo +1.89.0 fmt --check`; `git diff --check`.
+> Latest product-evolution sync: 2026-04-29-R257 completed and human-accepted locally. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. Follow-up fixes landed for ClickHouse event/timeline command filters, Postgres-backed GM mail/grant receipt persistence, and local `ai/` artifact ignoring. Verification passed: live command `cmd-live-grant-persist-20260428221245` through peer approval, GM grant, Audit, Timeline, and persisted outbox receipt; admin-api 25+6 tests; admin-web `tsc --noEmit`; `cargo +1.89.0 fmt --check`; `git diff --check`; user confirmed the Admin/Player live surfaces are usable.
 
 > Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin operator auth now supports Postgres-backed bearer tokens and `/admin/auth/me`, Admin Web has token login/logout and resolved operator display, high-risk command approval now requires a matching peer-approved request, and Gateway automatically posts zone runtime heartbeat records. Verification passed: admin-api 25+6 tests, gateway 57+7 tests, admin-web `tsc --noEmit`, live auth/operators smoke, live cross-operator approval/grant smoke, live Gateway heartbeat readback, Admin Web page smoke, fmt, and diff checks.
 
@@ -121,8 +121,8 @@ Validation:
 
 Result:
 
-- The local live Admin operations stack is ready for human inspection.
-- The remaining acceptance step is human review of the running Admin Web/Player Web surfaces and any deployment-specific checks.
+- The local live Admin operations stack passed human inspection for the checked Admin Web and Player Web surfaces.
+- The remaining step is deployment preparation or broader QA against a shared/staging environment.
 
 ## 2026-04-27-R238
 
