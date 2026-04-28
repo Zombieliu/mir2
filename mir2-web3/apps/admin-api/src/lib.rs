@@ -796,6 +796,86 @@ impl PostgresAdminRepository {
         }
     }
 
+    pub fn upsert_system_mail_receipt(
+        &self,
+        receipt: &SystemMailReceipt,
+    ) -> Result<(), AdminError> {
+        let command_id = receipt
+            .outbox_id
+            .strip_prefix("mail-")
+            .unwrap_or(&receipt.outbox_id)
+            .to_string();
+        let target_kind = mail_target_kind_text(&receipt.target_kind);
+        let mail_ids_json = serde_json::to_value(&receipt.mail_ids).map_err(|error| {
+            AdminError::Repository(format!("encode mail receipt ids failed: {error}"))
+        })?;
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .execute(
+                "INSERT INTO admin_system_mail_receipts (
+                    outbox_id,
+                    command_id,
+                    target_kind,
+                    target_id,
+                    attachment_count,
+                    accepted_at_ms,
+                    delivery_mode,
+                    delivered_count,
+                    mail_ids_json
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+                ON CONFLICT (outbox_id) DO UPDATE
+                SET target_kind = EXCLUDED.target_kind,
+                    target_id = EXCLUDED.target_id,
+                    attachment_count = EXCLUDED.attachment_count,
+                    accepted_at_ms = EXCLUDED.accepted_at_ms,
+                    delivery_mode = EXCLUDED.delivery_mode,
+                    delivered_count = EXCLUDED.delivered_count,
+                    mail_ids_json = EXCLUDED.mail_ids_json,
+                    updated_at = now()",
+                &[
+                    &receipt.outbox_id,
+                    &command_id,
+                    &target_kind,
+                    &receipt.target_id,
+                    &(receipt.attachment_count.min(i32::MAX as usize) as i32),
+                    &(receipt.accepted_at_ms as i64),
+                    &receipt.delivery_mode,
+                    &(receipt.delivered_count.min(i32::MAX as usize) as i32),
+                    &mail_ids_json,
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!(
+                    "postgres system mail receipt upsert failed: {error}"
+                ))
+            })?;
+        Ok(())
+    }
+
+    pub fn list_system_mail_receipts(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<SystemMailReceipt>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT outbox_id, target_kind, target_id, attachment_count, accepted_at_ms,
+                        delivery_mode, delivered_count, mail_ids_json
+                 FROM admin_system_mail_receipts
+                 ORDER BY accepted_at_ms DESC, outbox_id DESC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map(|rows| {
+                rows.iter()
+                    .filter_map(|row| row_to_system_mail_receipt(row).ok())
+                    .collect()
+            })
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres system mail receipt list failed: {error}"))
+            })
+    }
+
     pub fn upsert_activity(
         &self,
         request: UpsertAdminActivityRequest,
@@ -2358,6 +2438,17 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
             mail_ids: delivered.mail_ids,
         };
         self.receipts.push(receipt.clone());
+        if let Ok(database_url) = env::var("ADMIN_DATABASE_URL") {
+            if !database_url.trim().is_empty() {
+                match PostgresAdminRepository::connect(database_url.trim()) {
+                    Ok(repository) => {
+                        let _ = repository.ensure_schema();
+                        let _ = repository.upsert_system_mail_receipt(&receipt);
+                    }
+                    Err(_) => {}
+                }
+            }
+        }
         Ok(receipt)
     }
 
@@ -3533,7 +3624,26 @@ async fn list_system_mail_outbox(
 ) -> Result<Json<Vec<SystemMailReceipt>>, ApiError> {
     let receipts = tokio::task::spawn_blocking(move || {
         let control = state.control_plane.lock().map_err(lock_error)?;
-        Ok::<_, ApiError>(control.executor().domain().receipts().to_vec())
+        let mut receipts = control.executor().domain().receipts().to_vec();
+        drop(control);
+        if let Some(admin_store) = state.admin_store.as_ref() {
+            for receipt in admin_store.list_system_mail_receipts(100)? {
+                if !receipts
+                    .iter()
+                    .any(|existing| existing.outbox_id == receipt.outbox_id)
+                {
+                    receipts.push(receipt);
+                }
+            }
+        }
+        receipts.sort_by(|left, right| {
+            right
+                .accepted_at_ms
+                .cmp(&left.accepted_at_ms)
+                .then_with(|| right.outbox_id.cmp(&left.outbox_id))
+        });
+        receipts.truncate(100);
+        Ok::<_, ApiError>(receipts)
     })
     .await
     .map_err(join_error)??;
@@ -5303,15 +5413,18 @@ fn build_clickhouse_admin_events_query(query: &AdminEventQuery) -> String {
     };
     let limit = query.limit.unwrap_or(100).clamp(1, 500);
     format!(
-        "SELECT event_id,\
-            argMax(event_type, ingested_at) AS event_type,\
-            argMax(command_id, ingested_at) AS command_id,\
-            argMax(operator_id, ingested_at) AS operator_id,\
-            argMax(status, ingested_at) AS status,\
-            argMax(occurred_at_ms, ingested_at) AS occurred_at_ms,\
-            argMax(payload_json, ingested_at) AS payload_json \
-         FROM admin_events{where_clause} \
-         GROUP BY event_id \
+        "SELECT event_id, event_type, command_id, operator_id, status, occurred_at_ms, payload_json \
+         FROM (\
+            SELECT event_id,\
+                argMax(event_type, ingested_at) AS event_type,\
+                argMax(command_id, ingested_at) AS command_id,\
+                argMax(operator_id, ingested_at) AS operator_id,\
+                argMax(status, ingested_at) AS status,\
+                argMax(occurred_at_ms, ingested_at) AS occurred_at_ms,\
+                argMax(payload_json, ingested_at) AS payload_json \
+            FROM admin_events \
+            GROUP BY event_id\
+         ){where_clause} \
          ORDER BY occurred_at_ms DESC, event_id DESC \
          LIMIT {limit} \
          FORMAT JSONEachRow"
@@ -5825,6 +5938,27 @@ fn row_to_outbox_message(row: &Row) -> Result<AdminOutboxMessage, AdminError> {
     })
 }
 
+fn row_to_system_mail_receipt(row: &Row) -> Result<SystemMailReceipt, AdminError> {
+    let target_kind: String = row.get("target_kind");
+    let attachment_count: i32 = row.get("attachment_count");
+    let accepted_at_ms: i64 = row.get("accepted_at_ms");
+    let delivered_count: i32 = row.get("delivered_count");
+    let mail_ids_json: Value = row.get("mail_ids_json");
+    let mail_ids = serde_json::from_value::<Vec<u32>>(mail_ids_json).map_err(|error| {
+        AdminError::Repository(format!("decode system mail receipt ids failed: {error}"))
+    })?;
+    Ok(SystemMailReceipt {
+        outbox_id: row.get("outbox_id"),
+        target_kind: parse_mail_target_kind_text(&target_kind)?,
+        target_id: row.get("target_id"),
+        attachment_count: attachment_count.max(0) as usize,
+        accepted_at_ms: accepted_at_ms.max(0) as u64,
+        delivery_mode: row.get("delivery_mode"),
+        delivered_count: delivered_count.max(0) as usize,
+        mail_ids,
+    })
+}
+
 fn row_to_activity_record(row: &Row) -> Result<AdminActivityRecord, AdminError> {
     let start_at_ms: Option<i64> = row.get("start_at_ms");
     let updated_at_ms: i64 = row.get("updated_at_ms");
@@ -5978,6 +6112,18 @@ fn target_type_text(target_type: &TargetType) -> String {
         .ok()
         .and_then(|value| value.as_str().map(str::to_string))
         .unwrap_or_else(|| format!("{target_type:?}").to_lowercase())
+}
+
+fn mail_target_kind_text(target_kind: &MailTargetKind) -> String {
+    serde_json::to_value(target_kind)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_string))
+        .unwrap_or_else(|| format!("{target_kind:?}").to_lowercase())
+}
+
+fn parse_mail_target_kind_text(value: &str) -> Result<MailTargetKind, AdminError> {
+    serde_json::from_value(Value::String(value.to_string()))
+        .map_err(|error| AdminError::Repository(format!("decode mail target kind failed: {error}")))
 }
 
 fn command_type(command: &AdminCommand) -> String {
@@ -6941,6 +7087,10 @@ mod tests {
         assert!(query.contains("status = 'succeeded'"));
         assert!(query.contains("argMax(event_type, ingested_at)"));
         assert!(query.contains("GROUP BY event_id"));
+        assert!(
+            query.find("GROUP BY event_id").expect("group by clause")
+                < query.find(" WHERE command_id").expect("outer where clause")
+        );
         assert!(query.contains("LIMIT 500"));
     }
 
