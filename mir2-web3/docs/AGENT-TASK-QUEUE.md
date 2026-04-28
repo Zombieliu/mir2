@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-29-R258 completed. Staging rollout preparation is now documented without claiming production completion: added `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, Player Web staging websocket configuration via `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` with same-origin `/ws` fallback outside localhost, and updated README/infra/admin docs to point at the staging smoke, bootstrap, rollback, and production-blocker checklist.
+
 > Latest product-evolution sync: 2026-04-29-R257 completed and human-accepted locally. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. The live smoke covered Admin Web login, Operators, Approvals, peer-approved GM grant, Servers heartbeat, Audit, and Timeline; the user then confirmed the listed surfaces are usable. Follow-up fixes landed: `/admin/events` and `/admin/timeline` now apply ClickHouse filters after event aggregation so command-id reads stay non-degraded, GM system-mail/grant receipts persist in Postgres through `admin_system_mail_receipts` and survive Admin API restart, and transient local `ai/*.png` files are ignored. Verification: live API/browser smoke for `cmd-live-grant-persist-20260428221245`, admin-api 25+6 tests, admin-web `tsc --noEmit`, `cargo +1.89.0 fmt --check`, and `git diff --check`.
 
 > Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin production boundary now uses real Postgres operator token auth when `ADMIN_OPERATOR_AUTH_BACKEND=postgres`; Admin Web has token login/logout and resolves identity through `/admin/auth/me`; high-risk commands require an approved request for the same command id/type/requesting operator and a peer approver by default; Gateway automatically writes zone runtime heartbeat records to `/admin/servers/zones`. Verification: admin-api 25+6 tests, gateway 57+7 tests, admin-web `tsc --noEmit`, live auth/read/operators smoke, cross-operator approval -> grant smoke, live Gateway heartbeat readback, Admin Web page smoke, fmt/diff checks.
@@ -227,6 +229,13 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | --- | --- | --- | --- | --- |
 | [x] | Complete local live acceptance and fix remaining Admin readback defects | Coordinator | `apps/admin-api`, `infra/postgres/migrations/0001_core.sql`, docs | Ran the full local stack with Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway `:7110`, Admin API `:7420`, Admin Web `:3020`, and Player Web `:3010`. Live smoke covered Postgres operator auth, Admin Web login, Operators, Approvals, peer approval -> GM grant, Gateway heartbeat on Servers, Audit, Timeline, and Redpanda -> ClickHouse projection; user human check then confirmed those surfaces are usable. Fixed ClickHouse event filtering so `/admin/events?commandId=...` and `/admin/timeline?commandId=...` no longer degrade after aggregation, and persisted GM system-mail/grant receipts in Postgres via `admin_system_mail_receipts` so GM Tools receipt readback survives Admin API restart. |
 | [x] | Resolve transient local AI image files | Coordinator | `.gitignore` | Classified `ai/*.png` as local AI/reference artifacts and ignored `ai/` instead of committing generated images. |
+
+## Product Evolution Round: 2026-04-29-R258
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Prepare provider-neutral Admin staging rollout assets | Coordinator | `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, docs | Added a placeholder-only staging env matrix and runbook covering required services, env vars, schema/import bootstrap, operator seeding, Redpanda topics, startup order, smoke checks for login/Operators/Approvals/GM grant/Servers/Audit/Timeline/Player Mail, rollback/outbox recovery, and remaining production blockers. |
+| [x] | Make Player Web staging Gateway routing configurable | Coordinator | `apps/web/app/page.tsx`, `apps/web/README.md`, docs | Player Web now uses `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` when set, falls back to same-origin `/ws` outside localhost, and preserves the local `ws://127.0.0.1:7110/ws` default. This removes a staging-browser blocker without changing local smoke behavior. |
 
 ## Product Evolution Round: 2026-04-27-R227
 

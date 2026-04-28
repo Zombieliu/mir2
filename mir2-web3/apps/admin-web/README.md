@@ -75,6 +75,9 @@ over `ADMIN_OPERATOR_TOKEN`, so multiple local operators can test the
 requester/approver split from the same browser session by logging out and back
 in with another token.
 
+For shared staging rollout, use `docs/ADMIN-STAGING-RUNBOOK.md` and
+`infra/staging.env.example`.
+
 For development:
 
 ```bash

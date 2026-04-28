@@ -19,6 +19,9 @@ import type {
 } from "../lib/scene-types";
 import type { ClientScreen } from "../lib/original-ui";
 
+const CONFIGURED_GATEWAY_WS_URL = process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
+const LOCAL_GATEWAY_WS_URL = "ws://127.0.0.1:7110/ws";
+
 type RuntimeStatus = {
   phase: string;
   message: string;
@@ -948,7 +951,7 @@ export default function HomePage() {
       return;
     }
 
-    const socket = new WebSocket("ws://127.0.0.1:7110/ws");
+    const socket = new WebSocket(gatewayWebSocketUrl());
     socketRef.current = socket;
     setWsState("connecting");
 
@@ -2476,6 +2479,18 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
 function gatewayChatTone(value: unknown): UiLogTone {
   const channel = gatewayChatChannel(value);
   return channel === "system" || channel === "hint" || channel === "announcement" ? "system" : "chat";
+}
+
+function gatewayWebSocketUrl() {
+  if (CONFIGURED_GATEWAY_WS_URL) return CONFIGURED_GATEWAY_WS_URL;
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    if (hostname !== "127.0.0.1" && hostname !== "localhost") {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}/ws`;
+    }
+  }
+  return LOCAL_GATEWAY_WS_URL;
 }
 
 function storageUnlockResultMessage(result: number, hasPassword: boolean) {
