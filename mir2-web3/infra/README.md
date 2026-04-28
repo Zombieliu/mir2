@@ -2,6 +2,11 @@
 
 This directory contains local infrastructure for the post-1:1 product architecture.
 
+For shared staging deployment preparation, use:
+
+- `infra/staging.env.example`
+- `docs/ADMIN-STAGING-RUNBOOK.md`
+
 The default stack now starts the local persistence, cache, notification, event-stream, and analytics services:
 
 - Postgres

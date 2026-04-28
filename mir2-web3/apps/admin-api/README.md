@@ -197,6 +197,8 @@ cargo +1.89.0 fmt --check
 Latest live local acceptance also covered Admin Web login, Operators,
 Approvals, peer-approved GM grant, Servers heartbeat, Audit, Timeline, and
 persisted system-mail receipt readback through Postgres/Redpanda/ClickHouse.
+For shared staging rollout, use `docs/ADMIN-STAGING-RUNBOOK.md` and
+`infra/staging.env.example`.
 
 ## Next Steps
 

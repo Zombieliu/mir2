@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-29-R258 completed. Added provider-neutral Admin staging rollout assets: `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, staging websocket configuration for Player Web through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` with same-origin `/ws` fallback outside localhost, and README/infra/admin doc links. This prepares staging/internal controlled deployment and keeps production-grade blockers explicit.
+
 > Latest product-evolution sync: 2026-04-29-R257 completed and human-accepted locally. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. Follow-up fixes landed for ClickHouse event/timeline command filters, Postgres-backed GM mail/grant receipt persistence, and local `ai/` artifact ignoring. Verification passed: live command `cmd-live-grant-persist-20260428221245` through peer approval, GM grant, Audit, Timeline, and persisted outbox receipt; admin-api 25+6 tests; admin-web `tsc --noEmit`; `cargo +1.89.0 fmt --check`; `git diff --check`; user confirmed the Admin/Player live surfaces are usable.
 
 > Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin operator auth now supports Postgres-backed bearer tokens and `/admin/auth/me`, Admin Web has token login/logout and resolved operator display, high-risk command approval now requires a matching peer-approved request, and Gateway automatically posts zone runtime heartbeat records. Verification passed: admin-api 25+6 tests, gateway 57+7 tests, admin-web `tsc --noEmit`, live auth/operators smoke, live cross-operator approval/grant smoke, live Gateway heartbeat readback, Admin Web page smoke, fmt, and diff checks.
@@ -94,6 +96,28 @@
 Last updated: 2026-04-26
 
 Purpose: record autonomous multi-agent rounds, assignments, outputs, verification, and progress updates.
+
+## 2026-04-29-R258
+
+Scope:
+
+- Added `infra/staging.env.example` with placeholder-only staging variables for Admin API, Gateway, Admin Web, Player Web, Postgres, Redis, NATS, Redpanda, and ClickHouse.
+- Added `docs/ADMIN-STAGING-RUNBOOK.md` covering staging topology, required services, env matrix, bootstrap/import, operator seeding, Redpanda topics, outbox worker startup, smoke checklist, rollback/recovery, and remaining production blockers.
+- Made Player Web Gateway routing staging-friendly by reading `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL`, falling back to same-origin `/ws` outside localhost, and preserving the local `ws://127.0.0.1:7110/ws` default.
+- Updated `README.md`, `infra/README.md`, `apps/web/README.md`, `apps/admin-api/README.md`, `apps/admin-web/README.md`, and `docs/ADMIN-OPERATIONS-ARCHITECTURE.md` to link the staging runbook and keep production readiness gates explicit.
+
+Validation:
+
+- `./node_modules/.bin/tsc --noEmit` in `apps/web`
+- `./node_modules/.bin/next build` in `apps/web`
+- `docker compose -f infra/docker-compose.dev.yml config`
+- duplicate-key scan for `infra/staging.env.example`
+- `git diff --check`
+
+Result:
+
+- The Admin operations stack now has a concrete staging handoff path after local live acceptance.
+- This does not mark the operations center production-grade; production blockers remain external IdP/session auth, TLS/network isolation, secret rotation, observability, launch approval policy, backup/restore rehearsal, rate limits, and deployed soak/reconnect evidence.
 
 ## 2026-04-29-R257
 
