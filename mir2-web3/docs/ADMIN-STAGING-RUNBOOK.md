@@ -45,6 +45,10 @@ Player Web
 Use `infra/staging.env.example` as the environment-variable matrix. Replace all
 placeholder secrets in the deployment platform; do not commit real values.
 
+For a home Windows desktop staging server, use
+`docs/WINDOWS-HOME-STAGING-SERVER.md` as the concrete host design and keep this
+runbook as the service/bootstrap/smoke source of truth.
+
 ## Required Services
 
 Provision these first:

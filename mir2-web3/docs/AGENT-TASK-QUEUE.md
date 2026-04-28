@@ -1,5 +1,7 @@
 # Agent Task Queue
 
+> Latest product-evolution sync: 2026-04-29-R259 completed. Added a concrete Windows home staging server design for using the user's Windows desktop as an internal test server: WSL2/Docker layout, Tailscale-first access, optional Cloudflare Tunnel with Gateway `/admin/*` blocked, host env plan, startup order, backups, rollback, firewall rules, and acceptance checklist.
+
 > Latest product-evolution sync: 2026-04-29-R258 completed. Staging rollout preparation is now documented without claiming production completion: added `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, Player Web staging websocket configuration via `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` with same-origin `/ws` fallback outside localhost, and updated README/infra/admin docs to point at the staging smoke, bootstrap, rollback, and production-blocker checklist.
 
 > Latest product-evolution sync: 2026-04-29-R257 completed and human-accepted locally. Full local live acceptance is green across Postgres, Redis, NATS, Redpanda, ClickHouse, Gateway, Admin API, Admin Web, and Player Web. The live smoke covered Admin Web login, Operators, Approvals, peer-approved GM grant, Servers heartbeat, Audit, and Timeline; the user then confirmed the listed surfaces are usable. Follow-up fixes landed: `/admin/events` and `/admin/timeline` now apply ClickHouse filters after event aggregation so command-id reads stay non-degraded, GM system-mail/grant receipts persist in Postgres through `admin_system_mail_receipts` and survive Admin API restart, and transient local `ai/*.png` files are ignored. Verification: live API/browser smoke for `cmd-live-grant-persist-20260428221245`, admin-api 25+6 tests, admin-web `tsc --noEmit`, `cargo +1.89.0 fmt --check`, and `git diff --check`.
@@ -236,6 +238,12 @@ Restart note: R225 refreshed the Mac-local Candidate regression bundle and local
 | --- | --- | --- | --- | --- |
 | [x] | Prepare provider-neutral Admin staging rollout assets | Coordinator | `infra/staging.env.example`, `docs/ADMIN-STAGING-RUNBOOK.md`, docs | Added a placeholder-only staging env matrix and runbook covering required services, env vars, schema/import bootstrap, operator seeding, Redpanda topics, startup order, smoke checks for login/Operators/Approvals/GM grant/Servers/Audit/Timeline/Player Mail, rollback/outbox recovery, and remaining production blockers. |
 | [x] | Make Player Web staging Gateway routing configurable | Coordinator | `apps/web/app/page.tsx`, `apps/web/README.md`, docs | Player Web now uses `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` when set, falls back to same-origin `/ws` outside localhost, and preserves the local `ws://127.0.0.1:7110/ws` default. This removes a staging-browser blocker without changing local smoke behavior. |
+
+## Product Evolution Round: 2026-04-29-R259
+
+| Status | Task | Owner | Files | Notes |
+| --- | --- | --- | --- | --- |
+| [x] | Design Windows home desktop internal staging server | Coordinator | `docs/WINDOWS-HOME-STAGING-SERVER.md`, docs | Defined the home Windows desktop as `home-staging-1`: WSL2 Ubuntu plus Docker Desktop WSL2 backend, repo under WSL filesystem, Tailscale-first access, optional Cloudflare Tunnel only after blocking Gateway `/admin/*`, concrete port exposure, env plan, startup order, operator bootstrap, backup/restore, update/rollback, security rules, and acceptance checklist. |
 
 ## Product Evolution Round: 2026-04-27-R227
 
