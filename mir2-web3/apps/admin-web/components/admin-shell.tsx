@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { logoutAction } from "../app/login/actions";
+import { adminGet, type AdminAuthMeResponse } from "../lib/admin-api";
 import { getAdminI18n } from "../lib/i18n";
 import { LanguageSwitcher } from "./language-switcher";
 
@@ -24,6 +26,8 @@ export async function AdminShell({
   active: string;
 }) {
   const { locale, t } = await getAdminI18n();
+  const auth = await adminGet<AdminAuthMeResponse>("/admin/auth/me");
+  const operator = auth.ok ? auth.data.operator : undefined;
 
   return (
     <div className="admin-shell">
@@ -56,7 +60,19 @@ export async function AdminShell({
       <main className="main">
         <div className="topbar">
           <LanguageSwitcher locale={locale} label={t("shell.language")} />
-          <div className="user-chip">{t("shell.operator")}</div>
+          <div className="user-chip">
+            {operator ? `${operator.operatorId} · ${operator.role}` : t("shell.operator")}
+          </div>
+          <Link className="user-chip" href="/login">
+            {auth.ok ? t("shell.switchOperator") : t("shell.login")}
+          </Link>
+          {auth.ok ? (
+            <form action={logoutAction}>
+              <button className="user-chip user-chip-button" type="submit">
+                {t("shell.logout")}
+              </button>
+            </form>
+          ) : null}
         </div>
         {children}
       </main>

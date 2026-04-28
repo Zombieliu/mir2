@@ -1,7 +1,9 @@
-use std::collections::HashMap;
-use std::io;
+use std::collections::{BTreeSet, HashMap};
+use std::env;
+use std::io::{self, Read, Write};
+use std::net::{TcpStream, ToSocketAddrs};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
@@ -17,6 +19,7 @@ use mir2_simulation::{deliver_stage5_system_mail, Stage5MailDelivery, Stage5Mail
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
+use tokio::time::sleep;
 
 use crate::cache::{
     default_gateway_session_cache_from_env, refresh_session_cache, remove_session_cache,
@@ -29,6 +32,22 @@ use crate::{GatewayConfig, GatewaySession};
 struct WebState {
     config: Arc<GatewayConfig>,
     session_cache: SharedGatewaySessionCache,
+}
+
+#[derive(Clone)]
+struct ZoneHeartbeatConfig {
+    url: String,
+    token: Option<String>,
+    operator_id: String,
+    operator_email: String,
+    operator_role: String,
+    operator_permissions: String,
+    zone_id: String,
+    name: String,
+    host: String,
+    tick_rate: u32,
+    interval: Duration,
+    started_at: Instant,
 }
 
 #[derive(Debug, Deserialize)]
@@ -338,14 +357,33 @@ struct AdminSessionsResponse {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct ZoneRuntimeHeartbeat {
+    zone_id: String,
+    name: String,
+    status: String,
+    host: String,
+    process_id: String,
+    map_count: usize,
+    player_count: usize,
+    tick_rate: u32,
+    uptime_seconds: u64,
+    source: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct AdminErrorResponse {
     error: String,
 }
 
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
+    let session_cache = default_gateway_session_cache_from_env();
+    if let Some(heartbeat_config) = ZoneHeartbeatConfig::from_env(addr) {
+        spawn_zone_runtime_heartbeat(heartbeat_config, Arc::clone(&session_cache));
+    }
     let state = WebState {
         config: Arc::new(config),
-        session_cache: default_gateway_session_cache_from_env(),
+        session_cache,
     };
 
     let app = Router::new()
@@ -439,6 +477,173 @@ fn now_ms() -> u64 {
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as u64)
         .unwrap_or_default()
+}
+
+impl ZoneHeartbeatConfig {
+    fn from_env(addr: &str) -> Option<Self> {
+        let url = env::var("MIR2_GATEWAY_ZONE_HEARTBEAT_URL")
+            .ok()
+            .filter(|value| !value.trim().is_empty())
+            .or_else(|| {
+                env::var("ADMIN_API_BASE_URL")
+                    .ok()
+                    .filter(|value| !value.trim().is_empty())
+                    .map(|base| {
+                        format!("{}/admin/servers/zones", base.trim().trim_end_matches('/'))
+                    })
+            })?;
+        let token = env::var("MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN")
+            .ok()
+            .filter(|value| !value.trim().is_empty())
+            .or_else(|| {
+                env::var("ADMIN_OPERATOR_TOKEN")
+                    .ok()
+                    .filter(|value| !value.trim().is_empty())
+            });
+        let interval_seconds = env::var("MIR2_GATEWAY_ZONE_HEARTBEAT_INTERVAL_SECONDS")
+            .ok()
+            .and_then(|value| value.trim().parse::<u64>().ok())
+            .unwrap_or(15)
+            .max(1);
+        Some(Self {
+            url,
+            token,
+            operator_id: env::var("MIR2_GATEWAY_ADMIN_OPERATOR_ID")
+                .unwrap_or_else(|_| "gateway-runtime".into()),
+            operator_email: env::var("MIR2_GATEWAY_ADMIN_OPERATOR_EMAIL")
+                .unwrap_or_else(|_| "gateway-runtime@mir2.dev".into()),
+            operator_role: env::var("MIR2_GATEWAY_ADMIN_OPERATOR_ROLE")
+                .unwrap_or_else(|_| "runtime_service".into()),
+            operator_permissions: env::var("MIR2_GATEWAY_ADMIN_OPERATOR_PERMISSIONS")
+                .unwrap_or_else(|_| "content_publish".into()),
+            zone_id: env::var("MIR2_GATEWAY_ZONE_ID").unwrap_or_else(|_| "gateway-web".into()),
+            name: env::var("MIR2_GATEWAY_ZONE_NAME").unwrap_or_else(|_| "Gateway Web".into()),
+            host: env::var("MIR2_GATEWAY_ZONE_HOST").unwrap_or_else(|_| addr.to_string()),
+            tick_rate: env::var("MIR2_GATEWAY_ZONE_TICK_RATE")
+                .ok()
+                .and_then(|value| value.trim().parse::<u32>().ok())
+                .unwrap_or(20),
+            interval: Duration::from_secs(interval_seconds),
+            started_at: Instant::now(),
+        })
+    }
+}
+
+fn spawn_zone_runtime_heartbeat(
+    config: ZoneHeartbeatConfig,
+    session_cache: SharedGatewaySessionCache,
+) {
+    tokio::spawn(async move {
+        loop {
+            let payload = build_zone_runtime_heartbeat(&config, &session_cache.list());
+            let config_for_post = config.clone();
+            if let Err(error) = tokio::task::spawn_blocking(move || {
+                post_zone_runtime_heartbeat(&config_for_post, &payload)
+            })
+            .await
+            .unwrap_or_else(|error| Err(format!("zone heartbeat task failed: {error}")))
+            {
+                eprintln!("gateway zone runtime heartbeat failed: {error}");
+            }
+            sleep(config.interval).await;
+        }
+    });
+}
+
+fn build_zone_runtime_heartbeat(
+    config: &ZoneHeartbeatConfig,
+    sessions: &[GatewaySessionCacheRecord],
+) -> ZoneRuntimeHeartbeat {
+    let maps = sessions
+        .iter()
+        .filter_map(|session| session.map_file_name.as_deref())
+        .filter(|map| !map.trim().is_empty())
+        .collect::<BTreeSet<_>>();
+    ZoneRuntimeHeartbeat {
+        zone_id: config.zone_id.clone(),
+        name: config.name.clone(),
+        status: "Healthy".into(),
+        host: config.host.clone(),
+        process_id: std::process::id().to_string(),
+        map_count: maps.len(),
+        player_count: sessions.len(),
+        tick_rate: config.tick_rate,
+        uptime_seconds: config.started_at.elapsed().as_secs(),
+        source: "gateway_heartbeat".into(),
+    }
+}
+
+fn post_zone_runtime_heartbeat(
+    config: &ZoneHeartbeatConfig,
+    payload: &ZoneRuntimeHeartbeat,
+) -> Result<(), String> {
+    let (host, path) = parse_http_url(&config.url)?;
+    let body = serde_json::to_string(payload)
+        .map_err(|error| format!("zone heartbeat encode failed: {error}"))?;
+    let mut addrs = host
+        .to_socket_addrs()
+        .map_err(|error| format!("zone heartbeat resolve failed: {error}"))?;
+    let addr = addrs
+        .next()
+        .ok_or_else(|| format!("no socket address for zone heartbeat host {host}"))?;
+    let mut stream = TcpStream::connect_timeout(&addr, Duration::from_secs(3))
+        .map_err(|error| format!("zone heartbeat connect failed at {addr}: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("zone heartbeat read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("zone heartbeat write timeout setup failed: {error}"))?;
+    let mut headers = format!(
+        "POST {path} HTTP/1.1\r\nHost: {host}\r\nContent-Type: application/json\r\nAccept: application/json\r\nX-Operator-Id: {}\r\nX-Operator-Email: {}\r\nX-Operator-Role: {}\r\nX-Operator-Permissions: {}\r\nContent-Length: {}\r\nConnection: close\r\n",
+        config.operator_id,
+        config.operator_email,
+        config.operator_role,
+        config.operator_permissions,
+        body.len()
+    );
+    if let Some(token) = config.token.as_deref() {
+        headers.push_str(&format!("Authorization: Bearer {token}\r\n"));
+    }
+    write!(stream, "{headers}\r\n{body}")
+        .map_err(|error| format!("zone heartbeat request write failed: {error}"))?;
+    stream
+        .flush()
+        .map_err(|error| format!("zone heartbeat request flush failed: {error}"))?;
+
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .map_err(|error| format!("zone heartbeat response read failed: {error}"))?;
+    let head = response
+        .split_once("\r\n\r\n")
+        .map(|(head, _)| head)
+        .ok_or_else(|| format!("invalid zone heartbeat HTTP response: {response:?}"))?;
+    let status_code = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse::<u16>().ok())
+        .ok_or_else(|| format!("missing zone heartbeat HTTP status: {head:?}"))?;
+    if (200..300).contains(&status_code) {
+        Ok(())
+    } else {
+        Err(format!("zone heartbeat rejected with HTTP {status_code}"))
+    }
+}
+
+fn parse_http_url(url: &str) -> Result<(String, String), String> {
+    let rest = url
+        .strip_prefix("http://")
+        .ok_or_else(|| format!("zone heartbeat URL must start with http://: {url}"))?;
+    let (host, path) = rest
+        .split_once('/')
+        .map(|(host, path)| (host, format!("/{path}")))
+        .unwrap_or((rest, "/".into()));
+    if host.trim().is_empty() {
+        return Err(format!("zone heartbeat URL host is required: {url}"));
+    }
+    Ok((host.to_string(), path))
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
@@ -2039,7 +2244,7 @@ mod tests {
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
     };
     use std::sync::Arc;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
@@ -2145,6 +2350,60 @@ mod tests {
         assert_eq!(response.sessions.len(), 1);
         assert_eq!(response.sessions[0].key.account_id, "demo");
         assert_eq!(response.sessions[0].character_name, "Scout");
+    }
+
+    #[test]
+    fn zone_runtime_heartbeat_summarizes_session_cache() {
+        let config = super::ZoneHeartbeatConfig {
+            url: "http://127.0.0.1:7420/admin/servers/zones".into(),
+            token: Some("operator-token".into()),
+            operator_id: "gateway-runtime".into(),
+            operator_email: "gateway-runtime@mir2.dev".into(),
+            operator_role: "runtime_service".into(),
+            operator_permissions: "content_publish".into(),
+            zone_id: "gateway-web".into(),
+            name: "Gateway Web".into(),
+            host: "127.0.0.1:7110".into(),
+            tick_rate: 20,
+            interval: Duration::from_secs(15),
+            started_at: Instant::now(),
+        };
+        let sessions = vec![
+            crate::GatewaySessionCacheRecord {
+                key: crate::GatewaySessionCacheKey {
+                    account_id: "demo".into(),
+                    character_index: 0,
+                },
+                character_name: "Scout".into(),
+                map_file_name: Some("0103".into()),
+                player_object_id: Some(1),
+                player_hp: Some(50),
+                player_max_hp: Some(60),
+                gold: 100,
+                tick: 7,
+            },
+            crate::GatewaySessionCacheRecord {
+                key: crate::GatewaySessionCacheKey {
+                    account_id: "demo2".into(),
+                    character_index: 0,
+                },
+                character_name: "Blade".into(),
+                map_file_name: Some("0103".into()),
+                player_object_id: Some(2),
+                player_hp: Some(40),
+                player_max_hp: Some(55),
+                gold: 20,
+                tick: 8,
+            },
+        ];
+
+        let heartbeat = super::build_zone_runtime_heartbeat(&config, &sessions);
+
+        assert_eq!(heartbeat.zone_id, "gateway-web");
+        assert_eq!(heartbeat.player_count, 2);
+        assert_eq!(heartbeat.map_count, 1);
+        assert_eq!(heartbeat.tick_rate, 20);
+        assert_eq!(heartbeat.source, "gateway_heartbeat");
     }
 
     #[test]

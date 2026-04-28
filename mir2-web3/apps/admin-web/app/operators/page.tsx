@@ -39,6 +39,7 @@ export default async function OperatorsPage({
                 <th>{t("operators.operator")}</th>
                 <th>{t("operators.role")}</th>
                 <th>{t("table.status")}</th>
+                <th>{t("operators.token")}</th>
                 <th>{t("operators.permissions")}</th>
               </tr>
             </thead>
@@ -55,12 +56,13 @@ export default async function OperatorsPage({
                       {translateAdminStatus(t, operator.status)}
                     </StatusBadge>
                   </td>
+                  <td>{operator.tokenConfigured ? t("common.connected") : t("common.unconfigured")}</td>
                   <td>{operator.permissions.join(", ") || "-"}</td>
                 </tr>
               ))}
               {!(data?.operators?.length ?? 0) ? (
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={5}>
                     <p className="notice">{t("operators.empty")}</p>
                   </td>
                 </tr>
@@ -83,6 +85,10 @@ export default async function OperatorsPage({
               <label className="field">
                 <span>{t("operators.role")}</span>
                 <input className="control" name="role" defaultValue="ops_admin" required />
+              </label>
+              <label className="field">
+                <span>{t("operators.token")}</span>
+                <input className="control" name="token" type="password" />
               </label>
               <label className="field">
                 <span>{t("table.status")}</span>

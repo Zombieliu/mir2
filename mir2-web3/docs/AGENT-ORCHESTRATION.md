@@ -1,5 +1,7 @@
 # Agent Orchestration
 
+> Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin auth now has a Postgres-backed operator-token mode via `ADMIN_OPERATOR_AUTH_BACKEND=postgres` and `/admin/auth/me`; high-risk command approval submission requires a matching peer-approved request; Gateway can automatically post zone runtime heartbeat records to the Rust Admin API. Local smokes covered auth, cross-operator approval/grant, live Gateway heartbeat readback, and Admin Web login/operators/approvals/servers pages.
+
 > Latest product-evolution sync: 2026-04-28-R253 completed. Admin production read models now include Postgres-backed server zone runtime telemetry and operator/RBAC records, with Admin Web write/read pages for `/servers` and `/operators`; local smokes passed through the Rust Admin API and Admin Web.
 
 > Latest product-evolution sync: 2026-04-28-R246 completed. Admin-delivered Stage 5 mail/gold now refreshes into already-online Gateway sessions before snapshots and saves, preventing keepalive from overwriting live admin mail and making the Player Web Mail panel update without logout/relogin.

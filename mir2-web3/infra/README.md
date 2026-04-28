@@ -51,6 +51,11 @@ MIR2_GATEWAY_TCP_ADDR=127.0.0.1:7000 \
 MIR2_ACCOUNT_STORE_BACKEND=postgres \
 MIR2_ACCOUNT_STORE_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
+ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
+MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN=r254-gateway-token \
+MIR2_GATEWAY_ZONE_ID=gateway-r254-live \
+MIR2_GATEWAY_ZONE_NAME="Gateway R254 Live" \
+MIR2_GATEWAY_ZONE_HEARTBEAT_INTERVAL_SECONDS=2 \
 cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
 ```
 
@@ -71,26 +76,24 @@ ADMIN_CLICKHOUSE_PASSWORD=mir2_dev_password \
 ADMIN_GATEWAY_MAIL_URL=http://127.0.0.1:7110/admin/system-mail \
 ADMIN_GATEWAY_KICK_URL=http://127.0.0.1:7110/admin/kick-player \
 ADMIN_GATEWAY_SESSIONS_URL=http://127.0.0.1:7110/admin/sessions \
-ADMIN_OPERATOR_TOKEN=local-dev-token \
-ADMIN_APPROVAL_ALLOW_SELF=true \
+ADMIN_OPERATOR_AUTH_BACKEND=postgres \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api
 ```
 
 ```bash
 cd apps/admin-web
 ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
-ADMIN_OPERATOR_TOKEN=local-dev-token \
-ADMIN_OPERATOR_ID=local-gm \
-ADMIN_OPERATOR_EMAIL=gm.local@mir2.dev \
-ADMIN_OPERATOR_ROLE=ops_admin \
-ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage \
+ADMIN_OPERATOR_TOKEN=r254-lead-token \
 ./node_modules/.bin/next dev -p 3020
 ```
 
 The admin console is then available at `http://127.0.0.1:3020`. Useful local
 pages are `/gm-tools`, `/approvals`, `/operators`, `/audit`, and `/timeline`. The
-`ADMIN_APPROVAL_ALLOW_SELF=true` flag is only for local smoke testing; production
-defaults to blocking self-approval.
+Gateway heartbeat posts zone runtime state to `/admin/servers/zones` when
+`ADMIN_API_BASE_URL` and `MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN` are set. For
+Postgres auth, seed an operator token with `content_publish` for the gateway and
+an operator token with `permission_manage` for Admin Web before starting the
+strict `ADMIN_OPERATOR_AUTH_BACKEND=postgres` API.
 
 Apply the first Postgres schema indirectly by starting Admin API with
 `ADMIN_DATABASE_URL`; the API runs `infra/postgres/migrations/0001_core.sql` at
@@ -218,18 +221,25 @@ Both cache implementations support lookup/removal by account/character index and
 by character-name routing index for Admin `KickPlayer`; Redis stores the routing
 index with the same TTL as the session record.
 
-Admin API can require a static local bearer token for operator requests:
+Admin API can require Postgres-backed operator bearer tokens for local control
+plane testing:
 
 ```bash
-ADMIN_OPERATOR_TOKEN=local-dev-token \
+ADMIN_OPERATOR_AUTH_BACKEND=postgres \
 ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 ADMIN_CLICKHOUSE_URL=http://127.0.0.1:8123 \
 cargo +1.89.0 run --locked -p mir2-admin-api
 ```
 
-For a stronger local auth boundary, set `ADMIN_OPERATOR_POLICY_PATH` to a JSON
-file. When this is configured, the Bearer token selects the operator identity and
-permissions from the policy file instead of trusting spoofable operator headers:
+With `ADMIN_OPERATOR_AUTH_BACKEND=postgres`, `Authorization: Bearer <token>` is
+resolved from `admin_operators.token_hash`; `GET /admin/auth/me` returns the
+resolved operator, and caller-supplied identity headers are ignored. Tokens can
+be created or rotated through `POST /admin/operators` by an authenticated
+operator with `permission_manage`.
+
+For bootstrap-only local runs, `ADMIN_OPERATOR_POLICY_PATH` can still map Bearer
+tokens to fixed operator identities and permissions instead of trusting
+spoofable operator headers:
 
 ```json
 {
@@ -248,8 +258,10 @@ permissions from the policy file instead of trusting spoofable operator headers:
         "inventory_grant_item",
         "currency_grant",
         "mail_send_system",
+        "content_publish",
         "audit_read",
-        "approval_manage"
+        "approval_manage",
+        "permission_manage"
       ]
     }
   ]

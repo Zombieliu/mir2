@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string; status?: number };
@@ -61,6 +63,20 @@ export type AdminTimelineResponse = {
   degraded: boolean;
   error?: string;
   records: AdminTimelineItem[];
+};
+
+export type AdminAuthMeResponse = {
+  source: string;
+  operator: {
+    operatorId: string;
+    email: string;
+    role: string;
+    status: string;
+    permissions: string[];
+    tokenConfigured: boolean;
+    updatedAtMs: number;
+    lastAuthenticatedAtMs?: number;
+  };
 };
 
 export type ApprovalRecord = {
@@ -259,7 +275,9 @@ export type AdminOperatorsReadModel = {
     role: string;
     status: string;
     permissions: string[];
+    tokenConfigured: boolean;
     updatedAtMs: number;
+    lastAuthenticatedAtMs?: number;
   }>;
 };
 
@@ -288,7 +306,11 @@ export type AdminRiskReadModel = {
 
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
 
-export function operatorHeaders() {
+export async function operatorHeaders() {
+  const cookieStore = await cookies();
+  const token =
+    cookieStore.get("admin_operator_token")?.value?.trim() ??
+    process.env.ADMIN_OPERATOR_TOKEN?.trim();
   const headers: Record<string, string> = {
     "x-operator-id": process.env.ADMIN_OPERATOR_ID ?? "local-gm",
     "x-operator-email": process.env.ADMIN_OPERATOR_EMAIL ?? "gm.local@mir2.dev",
@@ -297,17 +319,18 @@ export function operatorHeaders() {
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
       "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage"
   };
-  if (process.env.ADMIN_OPERATOR_TOKEN) {
-    headers.authorization = `Bearer ${process.env.ADMIN_OPERATOR_TOKEN}`;
+  if (token) {
+    headers.authorization = `Bearer ${token}`;
   }
   return headers;
 }
 
 export async function adminGet<T>(path: string): Promise<ApiResult<T>> {
   try {
+    const headers = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
       cache: "no-store",
-      headers: operatorHeaders()
+      headers
     });
     const data = (await response.json()) as unknown;
     if (!response.ok) {
@@ -331,12 +354,13 @@ export async function adminPost<T>(
   body: unknown
 ): Promise<ApiResult<T>> {
   try {
+    const authHeaders = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
       method: "POST",
       cache: "no-store",
       headers: {
         "content-type": "application/json",
-        ...operatorHeaders()
+        ...authHeaders
       },
       body: JSON.stringify(body)
     });

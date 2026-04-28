@@ -153,7 +153,7 @@ textarea {
 
 .topbar {
   display: grid;
-  grid-template-columns: 142px 148px;
+  grid-template-columns: 142px minmax(148px, max-content) max-content max-content;
   gap: 14px;
   align-items: center;
   justify-content: end;
@@ -190,6 +190,10 @@ textarea {
   color: #d8d5ca;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.user-chip-button {
+  cursor: pointer;
 }
 
 .language-switcher {
@@ -463,6 +467,44 @@ textarea.control {
   background: var(--blue-soft);
   color: #cfe9ff;
   font-size: 13px;
+}
+
+.login-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-panel {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, var(--panel-strong), rgba(12, 15, 20, 0.9)),
+    radial-gradient(circle at 100% 0%, rgba(99, 168, 221, 0.12), transparent 16rem);
+  box-shadow: var(--shadow);
+}
+
+.login-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.login-head h1 {
+  margin: 4px 0 0;
+  font-size: 24px;
+}
+
+.login-foot {
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
 }
 
 @media (max-width: 1080px) {

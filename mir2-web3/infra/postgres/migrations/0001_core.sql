@@ -262,9 +262,11 @@ CREATE TABLE IF NOT EXISTS admin_operators (
     role TEXT NOT NULL,
     status TEXT NOT NULL,
     permissions_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    token_hash TEXT NOT NULL DEFAULT '',
     created_by TEXT NOT NULL DEFAULT '',
     created_at_ms BIGINT NOT NULL,
     updated_at_ms BIGINT NOT NULL,
+    last_authenticated_at_ms BIGINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -272,7 +274,14 @@ CREATE TABLE IF NOT EXISTS admin_operators (
 ALTER TABLE admin_operators
     ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
 ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS token_hash TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_operators
     ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS last_authenticated_at_ms BIGINT;
 
 CREATE INDEX IF NOT EXISTS idx_admin_operators_role
     ON admin_operators(role, status);
+CREATE INDEX IF NOT EXISTS idx_admin_operators_token_hash
+    ON admin_operators(token_hash)
+    WHERE token_hash <> '';
