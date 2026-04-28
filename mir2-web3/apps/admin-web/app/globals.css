@@ -152,11 +152,11 @@ textarea {
 }
 
 .topbar {
-  display: grid;
-  grid-template-columns: 142px minmax(148px, max-content) max-content max-content;
-  gap: 14px;
+  display: flex;
+  gap: 16px;
   align-items: center;
-  justify-content: end;
+  justify-content: space-between;
+  min-height: 44px;
   margin-bottom: 22px;
 }
 
@@ -182,8 +182,8 @@ textarea {
   gap: 8px;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 0 11px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.055);
@@ -196,14 +196,33 @@ textarea {
   cursor: pointer;
 }
 
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
 .language-switcher {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.language-switcher .muted {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .language-switcher .control {
-  min-height: 34px;
-  padding-inline: 10px;
+  width: 126px;
+  min-height: 36px;
+  padding-inline: 12px;
   border-radius: 999px;
   font-size: 12px;
 }
@@ -520,8 +539,21 @@ textarea.control {
   .grid.metrics,
   .grid.two,
   .grid.three,
-  .form-grid,
-  .topbar {
+  .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .topbar-actions {
+    justify-content: flex-start;
   }
 }
