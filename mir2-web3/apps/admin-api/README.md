@@ -27,6 +27,11 @@ The crate now contains:
   and account-store fallback;
 - grant item, grant currency, kick player, and ban account executors;
 - persistent approval records and approval events;
+- Postgres-backed operator token auth selected by
+  `ADMIN_OPERATOR_AUTH_BACKEND=postgres`, with `/admin/auth/me`,
+  `admin_operators.token_hash`, and last-authenticated timestamps;
+- strict high-risk approval matching by approval id, command id, command type,
+  requesting operator, and a different deciding operator by default;
 - Axum HTTP routes for health, command records, audit records, approval records,
   per-command status, event/timeline read models, outbox records, and the
   current GM commands;
@@ -37,7 +42,7 @@ The crate now contains:
   `http://127.0.0.1:7110/admin/sessions`. When `ADMIN_DATABASE_URL` is set,
   Activities, Economy price feeds, Risk trade graph, Servers zone runtime, and
   Operators/RBAC also read/write Postgres projection/config tables;
-- optional `ADMIN_OPERATOR_TOKEN` static Bearer validation;
+- optional `ADMIN_OPERATOR_TOKEN` static Bearer validation for dev fallback;
 - optional `ADMIN_OPERATOR_POLICY_PATH` policy-file auth that maps Bearer tokens
   to fixed operator identities and permissions.
 
@@ -46,10 +51,10 @@ when `ADMIN_GATEWAY_MAIL_URL` points at the gateway `POST /admin/system-mail`
 endpoint. If gateway delivery is unavailable, it falls back to the configured
 account store path. Command/audit repositories are in-memory unless
 `ADMIN_DATABASE_URL` is set. With `ADMIN_DATABASE_URL`, the API applies
-`infra/postgres/migrations/0001_core.sql` on startup and stores command/audit
-records in Postgres. Real auth, approvals, and broader GM executors remain
-production gaps have moved to real OIDC/session auth, multi-approver policy, and
-additional command executors.
+`infra/postgres/migrations/0001_core.sql` on startup and stores command, audit,
+approval, outbox, projection, and operator records in Postgres. Production gaps
+have moved to external IdP/session auth, richer RBAC administration, support
+workflows, multi-step approval policy, and additional command executors.
 
 If `MIR2_ACCOUNT_STORE_DATABASE_URL` is also set, fallback account-store writes
 mirror the resulting JSON account store into Postgres `accounts`, `characters`,
@@ -82,6 +87,7 @@ ADMIN_OUTBOX_NATS_MODE=jetstream \
 ADMIN_OUTBOX_NATS_STREAM=MIR2_ADMIN \
 ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082 \
 ADMIN_GATEWAY_SESSIONS_URL=http://127.0.0.1:7110/admin/sessions \
+ADMIN_OPERATOR_AUTH_BACKEND=postgres \
 ADMIN_API_ADDR=127.0.0.1:7420 \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api
 ```
@@ -107,6 +113,7 @@ cargo +1.89.0 run --locked -p mir2-admin-api --bin dispatch-admin-outbox -- --on
 Routes:
 
 - `GET /health`
+- `GET /admin/auth/me`
 - `GET /admin/commands`
 - `GET /admin/commands/:command_id/status`
 - `GET /admin/audit`
@@ -136,7 +143,15 @@ Routes:
 - `POST /admin/approvals/:approval_id/approve`
 - `POST /admin/approvals/:approval_id/reject`
 
-Write routes require operator headers:
+Operator authentication:
+
+- `ADMIN_OPERATOR_AUTH_BACKEND=postgres` requires
+  `Authorization: Bearer <operator-token>`. The token is resolved from
+  `admin_operators` and caller-supplied identity headers are ignored.
+- `GET /admin/auth/me` returns the resolved operator, role, permissions, and auth
+  source. Admin Web uses this for the top-bar identity and login state.
+- Without Postgres auth, dev/local fallback can use `ADMIN_OPERATOR_POLICY_PATH`
+  or `ADMIN_OPERATOR_TOKEN` plus local operator headers:
 
 ```text
 x-operator-id
@@ -153,8 +168,10 @@ projection writes require `content_publish`; operator/RBAC writes require
 If `ADMIN_OPERATOR_TOKEN` is set, requests must also include
 `Authorization: Bearer <token>`. If `ADMIN_OPERATOR_POLICY_PATH` is set, the
 Bearer token selects the operator from that JSON policy file and header-supplied
-operator identity is ignored. Approval self-approval is forbidden by default;
-set `ADMIN_APPROVAL_ALLOW_SELF=true` only for local smoke runs.
+operator identity is ignored. Approval self-approval is forbidden by default,
+and command submission requires an approved record for the same command id,
+command type, and requesting operator. Set `ADMIN_APPROVAL_ALLOW_SELF=true` only
+for local smoke runs.
 
 ## Current Implemented Commands
 
@@ -175,7 +192,7 @@ cargo +1.89.0 fmt --check
 
 ## Next Steps
 
-1. Add OIDC/session middleware and production RBAC policy management.
-2. Add multi-operator approval policy and operator audit retention rules.
+1. Add external IdP/session middleware and production RBAC policy management.
+2. Add multi-step/quorum approval policy and operator audit retention rules.
 3. Expand GM executors beyond mail/grant/kick/ban.
 4. Add production deployment health checks, rate limits, and dashboards.

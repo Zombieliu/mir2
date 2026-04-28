@@ -12,6 +12,7 @@ export async function upsertOperatorAction(formData: FormData) {
     email: stringValue(formData, "email"),
     role: stringValue(formData, "role") || "ops_admin",
     status: stringValue(formData, "status") || "Active",
+    token: optionalString(formData, "token"),
     permissions: listValue(formData, "permissions")
   });
   revalidatePath("/operators");

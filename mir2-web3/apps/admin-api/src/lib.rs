@@ -1143,6 +1143,13 @@ impl PostgresAdminRepository {
         let permissions_json = serde_json::to_value(&permissions).map_err(|error| {
             AdminError::Repository(format!("encode operator permissions failed: {error}"))
         })?;
+        let token_hash = request
+            .token
+            .as_deref()
+            .map(str::trim)
+            .filter(|token| !token.is_empty())
+            .map(operator_token_hash)
+            .unwrap_or_default();
         let mut client = self.client.lock().map_err(repository_lock_error)?;
         let row = client
             .query_one(
@@ -1152,24 +1159,31 @@ impl PostgresAdminRepository {
                     role,
                     status,
                     permissions_json,
+                    token_hash,
                     created_by,
                     created_at_ms,
                     updated_at_ms
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$7)
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8)
                 ON CONFLICT (operator_id) DO UPDATE
                 SET email = EXCLUDED.email,
                     role = EXCLUDED.role,
                     status = EXCLUDED.status,
                     permissions_json = EXCLUDED.permissions_json,
+                    token_hash = CASE
+                        WHEN EXCLUDED.token_hash <> '' THEN EXCLUDED.token_hash
+                        ELSE admin_operators.token_hash
+                    END,
                     updated_at_ms = EXCLUDED.updated_at_ms,
                     updated_at = now()
-                RETURNING operator_id, email, role, status, permissions_json, updated_at_ms",
+                RETURNING operator_id, email, role, status, permissions_json, token_hash,
+                          updated_at_ms, last_authenticated_at_ms",
                 &[
                     &operator_id,
                     &email,
                     &role,
                     &status,
                     &permissions_json,
+                    &token_hash,
                     &actor_id,
                     &(now_ms as i64),
                 ],
@@ -1184,7 +1198,8 @@ impl PostgresAdminRepository {
         let mut client = self.client.lock().map_err(repository_lock_error)?;
         client
             .query(
-                "SELECT operator_id, email, role, status, permissions_json, updated_at_ms
+                "SELECT operator_id, email, role, status, permissions_json, token_hash,
+                        updated_at_ms, last_authenticated_at_ms
                  FROM admin_operators
                  ORDER BY updated_at_ms DESC, operator_id ASC
                  LIMIT $1",
@@ -1196,6 +1211,33 @@ impl PostgresAdminRepository {
             .iter()
             .map(row_to_operator_record)
             .collect()
+    }
+
+    pub fn operator_by_token(
+        &self,
+        token: &str,
+        now_ms: u64,
+    ) -> Result<Option<Operator>, AdminError> {
+        let token = token.trim();
+        if token.is_empty() {
+            return Ok(None);
+        }
+        let token_hash = operator_token_hash(token);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_opt(
+                "UPDATE admin_operators
+                 SET last_authenticated_at_ms = $2
+                 WHERE token_hash = $1
+                   AND token_hash <> ''
+                   AND lower(status) = 'active'
+                 RETURNING operator_id, email, role, permissions_json",
+                &[&token_hash, &(now_ms as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator token lookup failed: {error}"))
+            })?;
+        row.map(|row| row_to_operator(&row)).transpose()
     }
 }
 
@@ -2001,9 +2043,7 @@ where
                     )
                 })?;
             match self.approval_store.get(approval_id) {
-                Some(approval)
-                    if approval.command_id == envelope.command_id
-                        && approval.status == ApprovalStatus::Approved => {}
+                Some(approval) if approval_matches_command(&approval, &envelope) => {}
                 Some(approval) => {
                     audit.complete(
                         CommandStatus::Denied,
@@ -2658,6 +2698,7 @@ pub fn admin_router() -> Router {
 pub fn admin_router_with_state(state: AdminApiState) -> Router {
     Router::new()
         .route("/health", get(health))
+        .route("/admin/auth/me", get(auth_me))
         .route("/admin/commands", get(list_commands))
         .route(
             "/admin/commands/:command_id/status",
@@ -2827,6 +2868,7 @@ pub struct UpsertAdminOperatorRequest {
     pub email: String,
     pub role: String,
     pub status: Option<String>,
+    pub token: Option<String>,
     #[serde(default)]
     pub permissions: Vec<String>,
 }
@@ -3116,7 +3158,16 @@ pub struct AdminOperatorRecord {
     pub role: String,
     pub status: String,
     pub permissions: Vec<String>,
+    pub token_configured: bool,
     pub updated_at_ms: u64,
+    pub last_authenticated_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAuthMeResponse {
+    pub source: String,
+    pub operator: AdminOperatorRecord,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3342,7 +3393,7 @@ async fn create_approval(
     Json(request): Json<CreateApprovalRequest>,
 ) -> Result<Json<ApprovalRecord>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_approval_manager(&operator)?;
     if request.command_id.trim().is_empty() {
         return Err(ApiError {
@@ -3423,7 +3474,7 @@ async fn decide_approval_handler(
     status: ApprovalStatus,
 ) -> Result<Json<ApprovalRecord>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_approval_manager(&operator)?;
     let operator_id = operator.id.clone();
     let allow_self_approval = env_flag("ADMIN_APPROVAL_ALLOW_SELF");
@@ -3487,6 +3538,35 @@ async fn list_system_mail_outbox(
     .await
     .map_err(join_error)??;
     Ok(Json(receipts))
+}
+
+async fn auth_me(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+) -> Result<Json<AdminAuthMeResponse>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    let now = now_ms();
+    Ok(Json(AdminAuthMeResponse {
+        source: if operator_auth_backend_is_postgres() {
+            "postgres_admin_operators".into()
+        } else {
+            "operator_auth".into()
+        },
+        operator: AdminOperatorRecord {
+            operator_id: operator.id,
+            email: operator.email,
+            role: operator.role,
+            status: "Active".into(),
+            permissions: operator
+                .permissions
+                .iter()
+                .map(permission_text)
+                .collect::<Vec<_>>(),
+            token_configured: optional_bearer_token(&headers).is_some(),
+            updated_at_ms: now,
+            last_authenticated_at_ms: Some(now),
+        },
+    }))
 }
 
 async fn read_dashboard(
@@ -3568,7 +3648,7 @@ async fn upsert_activity(
     headers: HeaderMap,
     Json(request): Json<UpsertAdminActivityRequest>,
 ) -> Result<Json<AdminActivityRecord>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_operator_permission(&operator, Permission::ContentPublish)?;
     let repository = configured_admin_store(&state)?;
     let operator_id = operator.id.clone();
@@ -3587,7 +3667,7 @@ async fn upsert_price_feed(
     headers: HeaderMap,
     Json(request): Json<UpsertPriceFeedRequest>,
 ) -> Result<Json<AdminPriceFeedRecord>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_operator_permission(&operator, Permission::ContentPublish)?;
     let repository = configured_admin_store(&state)?;
     let response = tokio::task::spawn_blocking(move || {
@@ -3627,7 +3707,7 @@ async fn upsert_zone_runtime(
     headers: HeaderMap,
     Json(request): Json<UpsertZoneRuntimeRequest>,
 ) -> Result<Json<AdminZoneRuntimeRecord>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_operator_permission(&operator, Permission::ContentPublish)?;
     let repository = configured_admin_store(&state)?;
     let response = tokio::task::spawn_blocking(move || {
@@ -3667,7 +3747,7 @@ async fn upsert_trade_graph_edge(
     headers: HeaderMap,
     Json(request): Json<UpsertTradeGraphEdgeRequest>,
 ) -> Result<Json<AdminRiskGraphEdge>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_operator_permission(&operator, Permission::ContentPublish)?;
     let repository = configured_admin_store(&state)?;
     let response = tokio::task::spawn_blocking(move || {
@@ -3682,7 +3762,10 @@ async fn upsert_trade_graph_edge(
 
 async fn read_operators(
     State(state): State<AdminApiState>,
+    headers: HeaderMap,
 ) -> Result<Json<AdminOperatorsReadModel>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::PermissionManage)?;
     let response = tokio::task::spawn_blocking(move || {
         build_operators_read_model(state.admin_store.as_ref()).map_err(ApiError::from)
     })
@@ -3696,7 +3779,7 @@ async fn upsert_operator(
     headers: HeaderMap,
     Json(request): Json<UpsertAdminOperatorRequest>,
 ) -> Result<Json<AdminOperatorRecord>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_operator_permission(&operator, Permission::PermissionManage)?;
     let repository = configured_admin_store(&state)?;
     let actor_id = operator.id.clone();
@@ -3716,7 +3799,7 @@ async fn submit_system_mail(
     Json(request): Json<SubmitSystemMailRequest>,
 ) -> Result<Json<SubmitCommandResponse>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     let command_id = request
         .command_id
         .unwrap_or_else(|| format!("cmd-mail-{now}"));
@@ -3907,7 +3990,7 @@ async fn submit_admin_http_command(
     command: AdminCommand,
     created_at_ms: u64,
 ) -> Result<Json<SubmitCommandResponse>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     let envelope = AdminCommandEnvelope {
         command_id: command_id.clone(),
         operator,
@@ -4902,9 +4985,29 @@ fn join_error(error: tokio::task::JoinError) -> ApiError {
     }
 }
 
-fn operator_from_headers(headers: &HeaderMap) -> Result<Operator, ApiError> {
+fn operator_from_headers(
+    headers: &HeaderMap,
+    admin_store: Option<&PostgresAdminRepository>,
+) -> Result<Operator, ApiError> {
+    if operator_auth_backend_is_postgres() {
+        let repository = admin_store.ok_or_else(|| ApiError {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            message: "postgres operator auth requires ADMIN_DATABASE_URL".into(),
+        })?;
+        return operator_from_postgres_token(headers, repository);
+    }
     if let Some(operator) = operator_from_policy_file(headers)? {
         return Ok(operator);
+    }
+    if let Some(repository) = admin_store {
+        if let Some(operator) = optional_bearer_token(headers)
+            .as_deref()
+            .map(|token| operator_from_postgres_token_value(token, repository))
+            .transpose()?
+            .flatten()
+        {
+            return Ok(operator);
+        }
     }
     validate_operator_token(headers)?;
     let id = required_header(headers, "x-operator-id")?;
@@ -4923,6 +5026,39 @@ fn operator_from_headers(headers: &HeaderMap) -> Result<Operator, ApiError> {
         role,
         permissions,
     })
+}
+
+fn operator_auth_backend_is_postgres() -> bool {
+    env::var("ADMIN_OPERATOR_AUTH_BACKEND")
+        .map(|value| value.trim().eq_ignore_ascii_case("postgres"))
+        .unwrap_or(false)
+}
+
+fn operator_from_postgres_token(
+    headers: &HeaderMap,
+    repository: &PostgresAdminRepository,
+) -> Result<Operator, ApiError> {
+    let token = bearer_token(headers)?;
+    operator_from_postgres_token_value(&token, repository)?.ok_or_else(|| ApiError {
+        status: StatusCode::UNAUTHORIZED,
+        message: "operator token not found in postgres operator store".into(),
+    })
+}
+
+fn operator_from_postgres_token_value(
+    token: &str,
+    repository: &PostgresAdminRepository,
+) -> Result<Option<Operator>, ApiError> {
+    let lookup = || {
+        repository
+            .operator_by_token(token, now_ms())
+            .map_err(ApiError::from)
+    };
+    if tokio::runtime::Handle::try_current().is_ok() {
+        tokio::task::block_in_place(lookup)
+    } else {
+        lookup()
+    }
 }
 
 fn operator_from_policy_file(headers: &HeaderMap) -> Result<Option<Operator>, ApiError> {
@@ -4989,6 +5125,17 @@ fn validate_operator_token(headers: &HeaderMap) -> Result<(), ApiError> {
 
 fn bearer_token(headers: &HeaderMap) -> Result<String, ApiError> {
     let provided = required_header(headers, "authorization")?;
+    parse_bearer_token(&provided)
+}
+
+fn optional_bearer_token(headers: &HeaderMap) -> Option<String> {
+    headers
+        .get("authorization")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| parse_bearer_token(value).ok())
+}
+
+fn parse_bearer_token(provided: &str) -> Result<String, ApiError> {
     provided
         .strip_prefix("Bearer ")
         .map(str::trim)
@@ -5426,6 +5573,13 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
     }
 }
 
+fn approval_matches_command(approval: &ApprovalRecord, envelope: &AdminCommandEnvelope) -> bool {
+    approval.command_id == envelope.command_id
+        && approval.command_type == command_type(&envelope.command)
+        && approval.requested_by == envelope.operator.id
+        && approval.status == ApprovalStatus::Approved
+}
+
 fn require_non_empty(field: &str, value: &str) -> Result<(), AdminError> {
     if value.trim().is_empty() {
         return Err(AdminError::InvalidCommand(format!("{field} is required")));
@@ -5463,6 +5617,20 @@ fn canonical_permissions(values: Vec<String>) -> Result<Vec<String>, AdminError>
         permissions.insert(permission_text(&permission));
     }
     Ok(permissions.into_iter().collect())
+}
+
+fn operator_token_hash(token: &str) -> String {
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in b"mir2-admin-operator-token-v1"
+        .iter()
+        .copied()
+        .chain([0])
+        .chain(token.trim().as_bytes().iter().copied())
+    {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("fnv1a64:{hash:016x}")
 }
 
 fn normalized_id(prefix: &str, name: &str, now_ms: u64) -> String {
@@ -5730,14 +5898,33 @@ fn row_to_operator_record(row: &Row) -> Result<AdminOperatorRecord, AdminError> 
     let permissions = serde_json::from_value::<Vec<String>>(permissions_json).map_err(|error| {
         AdminError::Repository(format!("decode operator permissions failed: {error}"))
     })?;
+    let token_hash: String = row.get("token_hash");
     let updated_at_ms: i64 = row.get("updated_at_ms");
+    let last_authenticated_at_ms: Option<i64> = row.get("last_authenticated_at_ms");
     Ok(AdminOperatorRecord {
         operator_id: row.get("operator_id"),
         email: row.get("email"),
         role: row.get("role"),
         status: row.get("status"),
         permissions,
+        token_configured: !token_hash.trim().is_empty(),
         updated_at_ms: updated_at_ms.max(0) as u64,
+        last_authenticated_at_ms: last_authenticated_at_ms.map(|value| value.max(0) as u64),
+    })
+}
+
+fn row_to_operator(row: &Row) -> Result<Operator, AdminError> {
+    let permissions_json: Value = row.get("permissions_json");
+    let permissions = serde_json::from_value::<Vec<String>>(permissions_json)
+        .map_err(|error| AdminError::Repository(format!("decode operator failed: {error}")))?
+        .into_iter()
+        .map(|permission| parse_permission_text(&permission))
+        .collect::<Result<BTreeSet<_>, _>>()?;
+    Ok(Operator {
+        id: row.get("operator_id"),
+        email: row.get("email"),
+        role: row.get("role"),
+        permissions,
     })
 }
 
@@ -6066,7 +6253,7 @@ mod tests {
                 "approval-pending".into(),
                 "cmd-grant-approval".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review high risk grant".into(),
                 1_000,
             ))
@@ -6098,7 +6285,7 @@ mod tests {
                 "approval-approved".into(),
                 "cmd-grant-approval-approved".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review high risk grant".into(),
                 4_000,
             ))
@@ -6122,6 +6309,70 @@ mod tests {
             control.executor().executed_commands,
             vec!["cmd-grant-approval-approved"]
         );
+    }
+
+    #[test]
+    fn approved_high_risk_command_requires_matching_requester_and_type() {
+        let mut control = AdminControlPlane::new(RecordingExecutor::default());
+        let mut envelope = sample_envelope(operator_with([Permission::InventoryGrantItem]));
+        envelope.command_id = "cmd-grant-requester".into();
+        envelope.approval_id = Some("approval-requester-mismatch".into());
+        envelope.command = AdminCommand::GrantItem {
+            character_id: "Scout".into(),
+            item_id: "red-potion".into(),
+            count: 1,
+        };
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-requester-mismatch".into(),
+                "cmd-grant-requester".into(),
+                "grant_item".into(),
+                "other-op".into(),
+                "review different requester".into(),
+                1_000,
+            ))
+            .expect("approval create");
+        control
+            .decide_approval(
+                "approval-requester-mismatch",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved by peer".into()),
+                1_500,
+            )
+            .expect("approval approve");
+
+        let error = control
+            .submit(envelope.clone(), 2_000)
+            .expect_err("approval requested by another operator should reject");
+        assert!(matches!(error, AdminError::InvalidCommand(_)));
+
+        envelope.command_id = "cmd-grant-type".into();
+        envelope.approval_id = Some("approval-type-mismatch".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-type-mismatch".into(),
+                "cmd-grant-type".into(),
+                "grant_currency".into(),
+                "op-1".into(),
+                "review wrong command type".into(),
+                3_000,
+            ))
+            .expect("approval create");
+        control
+            .decide_approval(
+                "approval-type-mismatch",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved wrong type".into()),
+                3_500,
+            )
+            .expect("approval approve");
+        let error = control
+            .submit(envelope, 4_000)
+            .expect_err("approval with wrong command type should reject");
+        assert!(matches!(error, AdminError::InvalidCommand(_)));
+        assert!(control.executor().executed_commands.is_empty());
     }
 
     #[test]
@@ -6376,7 +6627,7 @@ mod tests {
                 "approval-1".into(),
                 "cmd-grant-item".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review item grant".into(),
                 1_000,
             ))
@@ -6409,7 +6660,7 @@ mod tests {
                 "approval-2".into(),
                 "cmd-grant-gold".into(),
                 "grant_currency".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review gold grant".into(),
                 2_500,
             ))
@@ -6469,7 +6720,7 @@ mod tests {
                 "approval-ban".into(),
                 "cmd-ban".into(),
                 "ban_account".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review ban".into(),
                 2_500,
             ))

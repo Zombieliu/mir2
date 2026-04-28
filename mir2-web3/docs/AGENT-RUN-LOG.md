@@ -1,5 +1,7 @@
 # Agent Run Log
 
+> Latest product-evolution sync: 2026-04-28-R254-R256 completed. Admin operator auth now supports Postgres-backed bearer tokens and `/admin/auth/me`, Admin Web has token login/logout and resolved operator display, high-risk command approval now requires a matching peer-approved request, and Gateway automatically posts zone runtime heartbeat records. Verification passed: admin-api 25+6 tests, gateway 57+7 tests, admin-web `tsc --noEmit`, live auth/operators smoke, live cross-operator approval/grant smoke, live Gateway heartbeat readback, Admin Web page smoke, fmt, and diff checks.
+
 > Latest product-evolution sync: 2026-04-28-R251-R253 completed. Admin Servers now has real Postgres zone runtime telemetry, Admin Operators/RBAC has real Postgres operator records and a new Operators page, and the console-wide HTTP smoke is green across 11 pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live API write/read smoke for zone telemetry and operator RBAC, all Admin Web pages HTTP 200, fmt/diff checks.
 
 > Latest product-evolution sync: 2026-04-28-R250 completed. Admin Activities, Economy price feeds, and Risk trade graph are now real Postgres-backed projections instead of unwired empty states. Admin API has write routes for `/admin/activities`, `/admin/economy/price-feeds`, and `/admin/risk/trade-edges`; Admin Web has server-action forms on the corresponding pages. Verification passed: admin-api 24+6 tests, admin-web `tsc --noEmit`, live Postgres API write/read smoke, Admin Web page HTTP smoke 200s, fmt/diff checks.
@@ -5925,3 +5927,32 @@ Verification:
 Outcome:
 
 - The local Admin backend now has real Postgres data for dashboard/player/economy/activity/server-zone/risk/operator/audit/timeline surfaces. Remaining production gaps are external identity provider/session auth, production multi-approver policy, broader support workflows, and additional GM executors.
+
+## 2026-04-28-R254-R256
+
+Goal: replace the remaining local operator-header/auth scaffolding with a real Postgres-backed operator-token path, tighten high-risk approval semantics, and make Gateway runtime telemetry write itself.
+
+Coordinator local work:
+
+- Added `ADMIN_OPERATOR_AUTH_BACKEND=postgres` to Admin API. In this mode `Authorization: Bearer <token>` is resolved from `admin_operators.token_hash`, `last_authenticated_at_ms` is updated, and caller-supplied identity headers are ignored.
+- Added `GET /admin/auth/me` and wired Admin Web shell/login/logout around an `admin_operator_token` httpOnly cookie with `ADMIN_OPERATOR_TOKEN` as the local env fallback.
+- Extended operator writes so `POST /admin/operators` can create or rotate local operator tokens without returning the secret.
+- Hardened high-risk command submission so `approvalId` must point at an approved record for the same command id, command type, and requesting operator. A different deciding operator is required unless the local self-approval override is explicitly set.
+- Updated Admin Web Approvals to show requester/decider fields and hide approve/reject actions for the current requesting operator.
+- Added Gateway zone runtime heartbeat configuration. When `ADMIN_API_BASE_URL` and `MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN` are set, Gateway periodically posts a `gateway_heartbeat` record to `/admin/servers/zones`.
+- Seeded local Postgres operators for smoke coverage: a lead operator token, a peer approver token, and a runtime service token for Gateway heartbeat.
+
+Verification:
+
+- `cargo +1.89.0 test --locked -p mir2-admin-api -- --test-threads=1`
+- `cargo +1.89.0 test --locked -p mir2-gateway -- --test-threads=1`
+- `apps/admin-web ./node_modules/.bin/tsc --noEmit`
+- Live auth smoke: unauthenticated `/admin/auth/me` returned 401, and bearer `r254-lead-token` resolved to `ops-r254-lead` from `postgres_admin_operators`.
+- Live operators smoke: `/admin/read/operators` returned real Postgres operators with `tokenConfigured: true`.
+- Live approval smoke: `ops-r254-lead` requested approval, `ops-r254-peer` approved it, and `ops-r254-lead` successfully submitted `grant_currency` with the matching approval id.
+- Live heartbeat smoke: Gateway wrote `gateway-r254-live` with source `gateway_heartbeat`, and `/admin/read/servers` returned it.
+- Admin Web HTTP smoke returned 200 for `/login`, `/operators`, `/approvals`, and `/servers`, with resolved operator identity visible in the top bar.
+
+Outcome:
+
+- The local Admin stack now uses real Postgres operator tokens, peer approval semantics, and automatic Gateway telemetry for the browser-testable backend. Remaining production work is external IdP/session auth, richer approval workflows, support-case tooling, rate limits, deployment hardening, and broader GM executor coverage.

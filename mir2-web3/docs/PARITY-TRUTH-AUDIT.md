@@ -19,7 +19,7 @@ Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates auto
 | Whole-project automated evidence | **100% Candidate** | R225 bundle: web type/build, Stage 5 smoke 88 screenshots, map/minimap smoke, WS load, Rust package tests, local packet-trace matrix, fmt, diff check | Does not prove pixel-perfect UI, live Crystal packet parity, full original assets, or production architecture |
 | Backend/server tracked slice | **99.70% Candidate** | `mir2-simulation` 664/664, `mir2-gateway` 54/54, `mir2-game-data` 22/22 after R225 | Does not prove untracked Crystal branches, live Crystal diff cleanliness, or missing map/source-data import |
 | Whole-project accepted 1:1 | **Roughly 90%** | High local coverage plus known acceptance blockers | Not a precise final score and not 99.7%; it remains an estimate until live and human gates close |
-| Admin operations backend/UI | **Product evolution / partial live integration** | GM mail/grant/kick/ban commands are real through Admin Web -> Admin API -> gateway/account store; read pages use Rust `/admin/read/*`, Gateway session presence, and Postgres activity/market/trade projections | Not Crystal 1:1, not production OIDC/RBAC policy, not full GM command coverage or zone telemetry |
+| Admin operations backend/UI | **Product evolution / partial live integration** | GM mail/grant/kick/ban commands are real through Admin Web -> Admin API -> gateway/account store; read pages use Rust `/admin/read/*`, Gateway session presence, Postgres activity/market/trade/zone/operator projections, Postgres operator token auth, peer approval, and Gateway zone heartbeat | Not Crystal 1:1, not production external IdP/session auth, not full support workflow or command coverage |
 
 ## Area Audit
 
@@ -34,7 +34,7 @@ Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates auto
 | Storage/sell/service-backed NPC flows | Candidate for no-service paths | UI no-service preservation is smoke-verified; not all real NPC service flows are backed by live service state | Service-backed storage/sell/repair/buy flows against runtime state and packet traces |
 | Stage 5 systems | Candidate / Modeled subset | Social, mail, trade, shop, auction, conquest, hero, profession flows are modeled enough for tests/smoke; many are simplified systems | Explicit product decision: either expand to Crystal-accurate systems or classify as accepted modeled subset |
 | Persistence | Candidate / Local fallback | Account-store JSON persistence and Stage 5 mail persistence work locally | Production persistence design and implementation if accepted target requires it; original Crystal DB parity if staying 1:1 |
-| Admin API and Admin Web | Product evolution, not parity | GM system mail/write commands are real through gateway/account store; Admin Web read pages now use Rust `/admin/read/*`, including Gateway session-cache online presence and Postgres-backed activity, market, trade graph, zone runtime, and operator/RBAC records | OIDC/session auth, production approval policy, support workflows, broader command executors |
+| Admin API and Admin Web | Product evolution, not parity | GM system mail/write commands are real through gateway/account store; Admin Web read pages now use Rust `/admin/read/*`, including Gateway session-cache online presence and Postgres-backed activity, market, trade graph, zone runtime, and operator/RBAC records. Operator login can use Postgres-backed bearer tokens, `/admin/auth/me`, and peer approval gates | External IdP/session auth, quorum/workflow approval policy, support workflows, broader command executors |
 | Platform coverage | Strategy only | Web runs; Tauri/Bevy/native/mobile/console are planned, not parity-complete shipped clients | Platform-specific builds, input/performance QA, packaging, store/console requirements |
 | Production/global architecture | Strategy only | Current runtime is local gateway/admin/simulation plus JSON stores; Kafka/Redpanda, ClickHouse, Postgres, Redis, global zone architecture are target plans | Architecture implementation, load tests, migrations, observability, rollback plan |
 
@@ -45,7 +45,7 @@ Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates auto
 | Packaged/synthetic Crystal map regions | This Mac lacks complete Crystal client map resources | Visuals can look non-1:1, especially indoor maps; smoke can pass while human visual acceptance fails |
 | Synthetic terrain tiles | Keeps the client playable when no real map sprites are available | It is not original Crystal art and must not count as final asset parity |
 | DOM-only runtime fallback when WebGL2 is unavailable | Keeps headless UI smoke stable | It does not validate Bevy/WebGL rendering behavior |
-| Admin production gaps | Local operator headers/policy auth and single-node smoke telemetry remain product-evolution scaffolding | Gateway session-cache online totals plus Postgres activity/market/trade/zone/operator records are real local data, but they are not a production identity provider, support workflow, or multi-zone orchestrator |
+| Admin production gaps | Local Postgres bearer-token auth and single-node Gateway heartbeat remain product-evolution scaffolding | Gateway session-cache online totals plus Postgres activity/market/trade/zone/operator records are real local data, but they are not a production identity provider, support workflow, or multi-zone orchestrator |
 | In-memory admin command/audit stores | Enables local tests/smoke | Not production persistence or compliance-grade audit |
 | JSON account store | Enables local gateway persistence and mail smoke | Not the target Postgres/Redis production architecture |
 | Stage 5 modeled systems | Provides broad gameplay/admin smoke coverage | Some flows are modeled subsets rather than exact Crystal subsystems |
@@ -58,7 +58,7 @@ Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates auto
 | Live Crystal packet comparison | `MIR2_CRYSTAL_TCP_ADDR` plus stable trace fixture credentials | Strict packet trace matrix passes with no missing Crystal endpoint and no dirty diffs |
 | Final frontend acceptance | Human access to compare against Crystal and judge visual/feel | `docs/PLAYER-QA-SCRIPT.md` passes or differences are explicitly accepted |
 | Full client map art parity | Complete `CRYSTAL_CLIENT_ROOT` containing `Map` and `Data/Map` resources | Representative maps render real sprites instead of fallback and screenshots are accepted |
-| Admin production readiness | Auth provider, production approval policy, operator session model, support workflows | Admin API/Web no longer depend on mock read data, but local env headers/policy auth are still not a production IdP/session boundary |
+| Admin production readiness | Auth provider, production approval policy, operator session model, support workflows | Admin API/Web no longer depend on mock read data and can use Postgres token auth locally, but local bearer tokens are still not a production IdP/session boundary |
 
 ## Current Recommendation
 

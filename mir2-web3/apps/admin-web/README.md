@@ -19,18 +19,22 @@ Implemented desktop-first pages:
 - Audit log
 - Timeline
 
-The GM tools page is connected to the Rust Admin API through server actions that
-add local operator headers server-side. `SendSystemMail` submits to the Rust API,
-redirects with `commandId`, and reloads command status plus the matching mail
-outbox receipt. With `ADMIN_GATEWAY_MAIL_URL` configured, the command reaches the
-running gateway and the player Mail panel can display, claim, and delete the
-delivered mail. The GM tools page also posts grant item, grant gold, kick player,
-and ban account commands directly to the Rust Admin API through server actions.
+The GM tools page is connected to the Rust Admin API through server actions. The
+server side forwards an operator bearer token from the `admin_operator_token`
+cookie or `ADMIN_OPERATOR_TOKEN`, and the shell resolves the active identity via
+`GET /admin/auth/me`. `SendSystemMail` submits to the Rust API, redirects with
+`commandId`, and reloads command status plus the matching mail outbox receipt.
+With `ADMIN_GATEWAY_MAIL_URL` configured, the command reaches the running
+gateway and the player Mail panel can display, claim, and delete the delivered
+mail. The GM tools page also posts grant item, grant gold, kick player, and ban
+account commands directly to the Rust Admin API through server actions.
 Approvals, Audit, and Timeline read from the Rust API and ClickHouse-backed event
-projection when available. Dashboard, Players, Player Detail, Economy, Servers,
-Activities, and Risk now read Rust `/admin/read/*` endpoints. Those endpoints
-derive account/player/economy/risk data from the configured JSON account store
-or explicit Postgres account-store source. Gateway online presence is read from
+projection when available. Approvals now hide self-approval actions for the
+requesting operator and expect a peer approver for high-risk commands.
+Dashboard, Players, Player Detail, Economy, Servers, Activities, and Risk now
+read Rust `/admin/read/*` endpoints. Those endpoints derive
+account/player/economy/risk data from the configured JSON account store or
+explicit Postgres account-store source. Gateway online presence is read from
 `GET /admin/sessions` and overlaid onto Dashboard, Players, Player Detail, and
 Servers. Activities, Economy price feeds, and Risk trade graph now write and
 read real Postgres projection tables through Rust Admin API routes. Servers zone
@@ -50,20 +54,26 @@ NATS_ADDR=127.0.0.1:4222 \
 ADMIN_OUTBOX_NATS_MODE=jetstream \
 ADMIN_OUTBOX_NATS_STREAM=MIR2_ADMIN \
 ADMIN_OUTBOX_REDPANDA_URL=http://127.0.0.1:8082 \
+ADMIN_OPERATOR_AUTH_BACKEND=postgres \
 cargo +1.89.0 run --locked -p mir2-admin-api --bin mir2-admin-api
 ```
+
+Seed at least one operator with a token before enabling
+`ADMIN_OPERATOR_AUTH_BACKEND=postgres`. The Operators page can rotate or create
+tokens after an authenticated operator with `permission_manage` exists.
 
 Start the admin web:
 
 ```bash
 ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
-ADMIN_OPERATOR_TOKEN=local-dev-token \
-ADMIN_OPERATOR_ID=local-gm \
-ADMIN_OPERATOR_EMAIL=gm.local@mir2.dev \
-ADMIN_OPERATOR_ROLE=ops_admin \
-ADMIN_OPERATOR_PERMISSIONS=account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage \
+ADMIN_OPERATOR_TOKEN=r254-lead-token \
 ./node_modules/.bin/next dev -p 3020
 ```
+
+Open `http://127.0.0.1:3020/login` to switch tokens. The cookie takes precedence
+over `ADMIN_OPERATOR_TOKEN`, so multiple local operators can test the
+requester/approver split from the same browser session by logging out and back
+in with another token.
 
 For development:
 
@@ -90,6 +100,7 @@ Latest smoke screenshots:
 
 ## Production Gaps
 
-- Replace local env/header operator auth with production IdP/session auth.
-- Replace local self-approval smoke mode with real multi-operator approval policy.
+- Replace local bearer-token operators with production IdP/session auth.
+- Extend approval policy from one peer approval to production quorum/workflow
+  rules.
 - Extend real command executors beyond mail/grant/kick/ban.

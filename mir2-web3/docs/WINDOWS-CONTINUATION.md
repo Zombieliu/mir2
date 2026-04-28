@@ -12,7 +12,7 @@ Read `docs/PARITY-TRUTH-AUDIT.md` first if you are about to change any status pe
 - Backend/server tracked-slice parity: `99.70%`.
 - Real full-project accepted 1:1: `roughly 90.0%`.
 - Active round: `2026-04-26-R226`.
-- Latest product-evolution rounds completed on Mac: `R227` Admin Web/API foundation, `R228` live game-visible GM system mail, `R229` Docker-verified Postgres command/audit/outbox plus NATS dispatch, `R230` Postgres mirror for gameplay JSON account-store saves, `R231` explicit Postgres account-store source-of-truth mode behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`, `R249` Gateway/Redis online presence read models, `R250` Postgres-backed Admin Activity/Economy/Risk projections, and `R251-R253` Postgres zone runtime plus operator/RBAC records.
+- Latest product-evolution rounds completed on Mac: `R227` Admin Web/API foundation, `R228` live game-visible GM system mail, `R229` Docker-verified Postgres command/audit/outbox plus NATS dispatch, `R230` Postgres mirror for gameplay JSON account-store saves, `R231` explicit Postgres account-store source-of-truth mode behind `MIR2_ACCOUNT_STORE_BACKEND=postgres`, `R249` Gateway/Redis online presence read models, `R250` Postgres-backed Admin Activity/Economy/Risk projections, `R251-R253` Postgres zone runtime plus operator/RBAC records, and `R254-R256` Postgres operator-token auth, peer approval matching, and automatic Gateway zone heartbeat.
 - Do not mark backend/server `100%` until live Crystal trace acceptance, blocked `Server.MirDB` import, or an explicit acceptance decision closes the remaining `0.30%`.
 - Do not mark full-project `100% Accepted` until `docs/PLAYER-QA-SCRIPT.md` passes or the user explicitly accepts remaining differences.
 - Synthetic map terrain, local JSON stores, local Admin control-plane smoke results, and production-only Admin gaps such as external identity/provider workflows are Candidate/product-evolution evidence only. They must not be counted as final accepted Crystal 1:1.
@@ -59,6 +59,17 @@ Local Docker infra for product-evolution work:
 $env:ADMIN_DATABASE_URL='postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2'
 $env:MIR2_ACCOUNT_STORE_DATABASE_URL='postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2'
 $env:NATS_ADDR='127.0.0.1:4222'
+$env:ADMIN_OPERATOR_AUTH_BACKEND='postgres'
+$env:ADMIN_OPERATOR_TOKEN='<seeded-operator-token>'
+```
+
+For Gateway runtime heartbeat into the Admin Servers page:
+
+```powershell
+$env:ADMIN_API_BASE_URL='http://127.0.0.1:7420'
+$env:MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN='<seeded-runtime-service-token>'
+$env:MIR2_GATEWAY_ZONE_ID='gateway-local'
+$env:MIR2_GATEWAY_ZONE_NAME='Gateway Local'
 ```
 
 Optional Postgres source-of-truth gameplay account store:
