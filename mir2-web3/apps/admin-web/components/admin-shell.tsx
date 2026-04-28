@@ -60,19 +60,21 @@ export async function AdminShell({
       <main className="main">
         <div className="topbar">
           <LanguageSwitcher locale={locale} label={t("shell.language")} />
-          <div className="user-chip">
-            {operator ? `${operator.operatorId} · ${operator.role}` : t("shell.operator")}
+          <div className="topbar-actions">
+            <div className="user-chip">
+              {operator ? `${operator.operatorId} · ${operator.role}` : t("shell.operator")}
+            </div>
+            <Link className="user-chip" href="/login">
+              {auth.ok ? t("shell.switchOperator") : t("shell.login")}
+            </Link>
+            {auth.ok ? (
+              <form action={logoutAction}>
+                <button className="user-chip user-chip-button" type="submit">
+                  {t("shell.logout")}
+                </button>
+              </form>
+            ) : null}
           </div>
-          <Link className="user-chip" href="/login">
-            {auth.ok ? t("shell.switchOperator") : t("shell.login")}
-          </Link>
-          {auth.ok ? (
-            <form action={logoutAction}>
-              <button className="user-chip user-chip-button" type="submit">
-                {t("shell.logout")}
-              </button>
-            </form>
-          ) : null}
         </div>
         {children}
       </main>
