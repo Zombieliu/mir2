@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777320528245,
+  "flow": "account_lifecycle",
+  "fixture": {
+    "mode": "ephemeral",
+    "account": "cdx0428030348",
+    "lifecycleAccount": "T250R25070001",
+    "lifecycleCharacter": "TrR250V701",
+    "character": "Cdx0428030348",
+    "characterIndex": 8
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7310",
+    "ok": true,
+    "elapsedMs": 1323,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 0,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 757,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 757,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 851,
+        "direction": "client",
+        "packetId": 3,
+        "packet": "NewAccount",
+        "payloadLen": 73,
+        "payloadHash": "fnv1a64:71bb3e8de8fe13b3",
+        "decoded": true,
+        "detail": {
+          "accountId": "T250R25070001"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 859,
+        "direction": "server",
+        "packetId": 4,
+        "packet": "NewAccount",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63c54c8601c577",
+        "decoded": true,
+        "detail": {
+          "result": 8
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 946,
+        "direction": "client",
+        "packetId": 4,
+        "packet": "ChangePassword",
+        "payloadLen": 35,
+        "payloadHash": "fnv1a64:6eca89c7a1bc63d4",
+        "decoded": true,
+        "detail": {
+          "accountId": "T250R25070001"
+        }
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 953,
+        "direction": "server",
+        "packetId": 5,
+        "packet": "ChangePassword",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bb4c8601b479",
+        "decoded": true,
+        "detail": {
+          "result": 6
+        }
+      },
+      {
+        "sequence": 7,
+        "elapsedMs": 1039,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 24,
+        "payloadHash": "fnv1a64:2695c9a06e9c88c9",
+        "decoded": true,
+        "detail": {
+          "accountId": "T250R25070001"
+        }
+      },
+      {
+        "sequence": 8,
+        "elapsedMs": 1039,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4d25767f9dce13f5",
+        "decoded": true,
+        "detail": {
+          "characterCount": 0,
+          "characters": []
+        }
+      },
+      {
+        "sequence": 9,
+        "elapsedMs": 1135,
+        "direction": "client",
+        "packetId": 6,
+        "packet": "NewCharacter",
+        "payloadLen": 13,
+        "payloadHash": "fnv1a64:ad452bc378661012",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "name": "TrR250V701"
+        }
+      },
+      {
+        "sequence": 10,
+        "elapsedMs": 1143,
+        "direction": "server",
+        "packetId": 11,
+        "packet": "NewCharacterSuccess",
+        "payloadLen": 27,
+        "payloadHash": "fnv1a64:5a2347a5196257cb",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "index": 15,
+          "lastAccessBinaryDatetime": 0,
+          "level": 0,
+          "name": "TrR250V701"
+        }
+      },
+      {
+        "sequence": 11,
+        "elapsedMs": 1228,
+        "direction": "client",
+        "packetId": 7,
+        "packet": "DeleteCharacter",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:6d0ad2a94cdac2ca",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 15
+        }
+      },
+      {
+        "sequence": 12,
+        "elapsedMs": 1236,
+        "direction": "server",
+        "packetId": 13,
+        "packet": "DeleteCharacterSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:6d0ad2a94cdac2ca",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 15
+        }
+      }
+    ]
+  },
+  "crystal": {
+    "endpoint": "127.0.0.1:7000",
+    "ok": false,
+    "elapsedMs": 0,
+    "error": "你的主机中的软件中止了一个已建立的连接。 (os error 10053)",
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 0,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      }
+    ]
+  },
+  "diff": {
+    "clean": false,
+    "comparedEntries": 13,
+    "mismatchReasons": [
+      "direction_mismatch",
+      "endpoint_error",
+      "missing_crystal_packet"
+    ],
+    "mismatches": [
+      {
+        "sequence": 0,
+        "reason": "direction_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 0,
+          "packet": "Connected",
+          "payloadLen": 0,
+          "payloadHash": "fnv1a64:cbf29ce484222325",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "client",
+          "packetId": 0,
+          "packet": "ClientVersion",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:8ce23005a62754b0",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 1,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 0,
+          "packet": "ClientVersion",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:8ce23005a62754b0",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 2,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 1,
+          "packet": "ClientVersion",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bc4c8601b62c",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 3,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 3,
+          "packet": "NewAccount",
+          "payloadLen": 73,
+          "payloadHash": "fnv1a64:71bb3e8de8fe13b3",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 4,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 4,
+          "packet": "NewAccount",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63c54c8601c577",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 5,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 4,
+          "packet": "ChangePassword",
+          "payloadLen": 35,
+          "payloadHash": "fnv1a64:6eca89c7a1bc63d4",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 6,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 5,
+          "packet": "ChangePassword",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bb4c8601b479",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 7,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 5,
+          "packet": "Login",
+          "payloadLen": 24,
+          "payloadHash": "fnv1a64:2695c9a06e9c88c9",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 8,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 9,
+          "packet": "LoginSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:4d25767f9dce13f5",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 9,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 6,
+          "packet": "NewCharacter",
+          "payloadLen": 13,
+          "payloadHash": "fnv1a64:ad452bc378661012",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 10,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 11,
+          "packet": "NewCharacterSuccess",
+          "payloadLen": 27,
+          "payloadHash": "fnv1a64:5a2347a5196257cb",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 11,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 7,
+          "packet": "DeleteCharacter",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6d0ad2a94cdac2ca",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 12,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 13,
+          "packet": "DeleteCharacterSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6d0ad2a94cdac2ca",
+          "decoded": true
+        },
+        "crystal": null
+      }
+    ]
+  }
+}

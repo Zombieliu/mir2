@@ -1,0 +1,152 @@
+{
+  "screen": "game",
+  "mapFileName": "0",
+  "mapTitle": "BichonProvince",
+  "player": {
+    "x": 284,
+    "y": 607
+  },
+  "entityCount": 17,
+  "npcCount": 8,
+  "monsterCount": 8,
+  "npcEntities": [
+    {
+      "objectId": "1",
+      "name": "Teleport_Gilbert",
+      "x": 287,
+      "y": 615,
+      "sprite": "NPC/15"
+    },
+    {
+      "objectId": "2",
+      "name": "BorderVillage_Board",
+      "x": 284,
+      "y": 615,
+      "sprite": "NPC/45"
+    },
+    {
+      "objectId": "3",
+      "name": "Assistant_Jane",
+      "x": 284,
+      "y": 606,
+      "sprite": "NPC/05"
+    },
+    {
+      "objectId": "5",
+      "name": "Blacksmith_Smith",
+      "x": 296,
+      "y": 613,
+      "sprite": "NPC/00"
+    },
+    {
+      "objectId": "6",
+      "name": "Merchant_John",
+      "x": 292,
+      "y": 603,
+      "sprite": "NPC/11"
+    },
+    {
+      "objectId": "8",
+      "name": "Merchant_Ruben",
+      "x": 288,
+      "y": 608,
+      "sprite": "NPC/01"
+    },
+    {
+      "objectId": "42",
+      "name": "Merchant_Scott",
+      "x": 291,
+      "y": 610,
+      "sprite": "NPC/03"
+    },
+    {
+      "objectId": "43",
+      "name": "MaterialDealer_Reece",
+      "x": 295,
+      "y": 605,
+      "sprite": "NPC/03"
+    }
+  ],
+  "monsterEntities": [
+    {
+      "objectId": "200339",
+      "name": "Royal_Guard",
+      "x": 276,
+      "y": 604,
+      "sprite": "Monster/000"
+    },
+    {
+      "objectId": "200340",
+      "name": "Royal_Guard",
+      "x": 280,
+      "y": 600,
+      "sprite": "Monster/000"
+    },
+    {
+      "objectId": "206300",
+      "name": "Deer",
+      "x": 276,
+      "y": 611,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "206500",
+      "name": "Deer",
+      "x": 275,
+      "y": 601,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "206600",
+      "name": "Scarecrow",
+      "x": 284,
+      "y": 608,
+      "sprite": "Monster/005"
+    },
+    {
+      "objectId": "206602",
+      "name": "Scarecrow",
+      "x": 281,
+      "y": 598,
+      "sprite": "Monster/005"
+    },
+    {
+      "objectId": "206701",
+      "name": "Deer",
+      "x": 282,
+      "y": 610,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "271800",
+      "name": "Hen",
+      "x": 281,
+      "y": 601,
+      "sprite": "Monster/003"
+    }
+  ],
+  "visibleNameplates": [
+    "QA0429Hero",
+    "Scarecrow",
+    "Deer",
+    "Hen",
+    "Royal Guard",
+    "Deer",
+    "Royal Guard",
+    "Deer",
+    "Scarecrow",
+    "Assistant Jane",
+    "Merchant Ruben",
+    "Merchant Scott",
+    "BorderVillage Board",
+    "Merchant John",
+    "Teleport Gilbert",
+    "MaterialDealer Reece",
+    "Blacksmith Smith"
+  ],
+  "hasUnderscoreNameplate": false,
+  "questTrackerVisible": false,
+  "npcSpriteElementCount": 8,
+  "monsterSpriteElementCount": 8,
+  "capturedAt": "2026-04-28T18:38:23.802Z"
+}

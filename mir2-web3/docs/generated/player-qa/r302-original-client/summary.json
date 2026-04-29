@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "round": "2026-04-28-R302",
+  "generatedAt": "2026-04-28T11:01:07.9026422Z",
+  "purpose": "Live original Crystal Server.exe/Client.exe launch and web Stage 5 comparison evidence.",
+  "crystal": {
+    "server": {
+      "executable": "E:\\mir2\\Crystal\\Build\\Server\\Debug\\Server.exe",
+      "pid": 13636,
+      "tcpEndpoint": "127.0.0.1:7000",
+      "tcpListeningObserved": true
+    },
+    "client": {
+      "executable": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Client.exe",
+      "pid": 25184,
+      "account": "R302C0428B",
+      "character": "R302HeroB",
+      "characterIndex": 34,
+      "screenshots": [
+        "docs/generated/player-qa/r302-original-client/crystal-client-01-autologin.png",
+        "docs/generated/player-qa/r302-original-client/crystal-client-02-select.png",
+        "docs/generated/player-qa/r302-original-client/crystal-client-03-game.png",
+        "docs/generated/player-qa/r302-original-client/crystal-client-05-game-unobstructed.png"
+      ],
+      "configBackup": "docs/generated/player-qa/r302-original-client/Mir2Test.ini.before-r302"
+    },
+    "lifecycleProbe": {
+      "path": "docs/generated/player-qa/r302-original-client/crystal-account-lifecycle-client-fixture-kept.json",
+      "crystalOk": true,
+      "accountCreateResult": 8,
+      "passwordChangeResult": 6,
+      "characterCreatePacket": "NewCharacterSuccess",
+      "characterIndex": 34
+    }
+  },
+  "web": {
+    "url": "http://127.0.0.1:3002",
+    "smokeManifest": "docs/generated/player-qa/r302-original-client/web-stage5-ui-smoke-manifest.json",
+    "screenshotCount": 88,
+    "criticalConsoleErrorCount": 0,
+    "compactTextNodeCount": 32,
+    "screenshots": [
+      "docs/generated/player-qa/r302-original-client/web-stage5-login.png",
+      "docs/generated/player-qa/r302-original-client/web-stage5-select.png",
+      "docs/generated/player-qa/r302-original-client/web-stage5-game.png",
+      "docs/generated/player-qa/r302-original-client/web-stage5-compact-game.png",
+      "docs/generated/player-qa/r302-original-client/web-stage5-minimap-expanded.png"
+    ]
+  },
+  "packetMatrix": {
+    "path": "docs/generated/player-qa/r302-original-client/packet-matrix/latest-matrix.json",
+    "acceptanceMode": "stable",
+    "localOkCount": 8,
+    "localFailedCount": 1,
+    "crystalOkCount": 9,
+    "stableDiffCleanCount": 2,
+    "acceptedPacketParityCount": 2,
+    "artifactCount": 9,
+    "packetParityAccepted": false,
+    "interpretation": "Fresh current-live matrix did not reproduce R298/R300 accepted stable matrix because the mutable Crystal fixture and fresh local account store are not state-aligned; this R302 artifact is diagnostic and does not supersede R300."
+  },
+  "packetTraceTooling": {
+    "addedKeepLifecycleCharacterSwitch": true,
+    "env": "MIR2_PACKET_TRACE_KEEP_LIFECYCLE_CHARACTER=1",
+    "reason": "Allows live original-client QA fixtures to keep the created Crystal character instead of deleting it at the end of account_lifecycle.",
+    "verification": "cargo +1.89.0 test --locked -p mir2-gateway --bin packet_trace -- --test-threads=1 (16/16)"
+  },
+  "truth": {
+    "automatedParityEvidence": "100% Candidate",
+    "backendTrackedSlice": "100% Accepted under explicit stable-diff packet acceptance from R300/R298 evidence",
+    "wholeProjectAcceptedCrystal1To1": "roughly 90%, not final until human visual/feel acceptance or explicit accepted differences",
+    "r302Conclusion": "Original Crystal server and client can be launched locally and captured through login/select/game. R302 does not close whole-project 100% Accepted because the web and original client captures are not yet a deterministic same-scene visual/feel acceptance pass."
+  },
+  "cleanup": {
+    "clientIniRestored": true,
+    "stoppedProcesses": [
+      {
+        "Label": "crystal-client",
+        "Pid": 25184
+      },
+      {
+        "Label": "web-wrapper",
+        "Pid": 5004
+      },
+      {
+        "Label": "web-port-owner",
+        "Pid": 12268
+      },
+      {
+        "Label": "local-gateway-wrapper",
+        "Pid": 10232
+      },
+      {
+        "Label": "local-gateway-port-owner",
+        "Pid": 7868
+      },
+      {
+        "Label": "crystal-server",
+        "Pid": 13636
+      }
+    ],
+    "remainingPorts": [],
+    "portsVerifiedClosed": true
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777317006428,
+  "flow": "movement_chat_keepalive",
+  "fixture": {
+    "mode": "ephemeral",
+    "account": "cdx0428030348",
+    "lifecycleAccount": "TraceLive0315",
+    "lifecycleCharacter": "TraceLiveTri",
+    "character": "Cdx0428030348",
+    "characterIndex": 8
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7310",
+    "ok": true,
+    "elapsedMs": 852,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 24,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 107,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 107,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 199,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 22,
+        "payloadHash": "fnv1a64:373749c7e01ddce4",
+        "decoded": true
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 199,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 34,
+        "payloadHash": "fnv1a64:310e7059fbcc0e0f",
+        "decoded": true
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 291,
+        "direction": "client",
+        "packetId": 8,
+        "packet": "StartGame",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4cfad6c24f7bf87d",
+        "decoded": true
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 292,
+        "direction": "server",
+        "packetId": 14,
+        "packet": "StartGame",
+        "payloadLen": 5,
+        "payloadHash": "fnv1a64:b200c32f2fee3fc3",
+        "decoded": true
+      },
+      {
+        "sequence": 7,
+        "elapsedMs": 292,
+        "direction": "server",
+        "packetId": 17,
+        "packet": "MapInformation",
+        "payloadLen": 32,
+        "payloadHash": "fnv1a64:d90bea7ecebfe207",
+        "decoded": true
+      },
+      {
+        "sequence": 8,
+        "elapsedMs": 292,
+        "direction": "server",
+        "packetId": 21,
+        "packet": "UserInformation",
+        "payloadLen": 120,
+        "payloadHash": "fnv1a64:590659220647d1a5",
+        "decoded": true
+      },
+      {
+        "sequence": 9,
+        "elapsedMs": 292,
+        "direction": "server",
+        "packetId": 23,
+        "packet": "UserLocation",
+        "payloadLen": 9,
+        "payloadHash": "fnv1a64:4a2f05699948a0ca",
+        "decoded": true
+      },
+      {
+        "sequence": 10,
+        "elapsedMs": 292,
+        "direction": "server",
+        "packetId": 30,
+        "packet": "Chat",
+        "payloadLen": 40,
+        "payloadHash": "fnv1a64:94586cb9a374c305",
+        "decoded": true
+      },
+      {
+        "sequence": 11,
+        "elapsedMs": 384,
+        "direction": "client",
+        "packetId": 10,
+        "packet": "Turn",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bf4c8601bb45",
+        "decoded": true
+      },
+      {
+        "sequence": 12,
+        "elapsedMs": 385,
+        "direction": "server",
+        "packetId": 27,
+        "packet": "ObjectTurn",
+        "payloadLen": 13,
+        "payloadHash": "fnv1a64:dabd3870575a0795",
+        "decoded": true
+      },
+      {
+        "sequence": 13,
+        "elapsedMs": 478,
+        "direction": "client",
+        "packetId": 11,
+        "packet": "Walk",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bf4c8601bb45",
+        "decoded": true
+      },
+      {
+        "sequence": 14,
+        "elapsedMs": 571,
+        "direction": "client",
+        "packetId": 12,
+        "packet": "Run",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63b94c8601b113",
+        "decoded": true
+      },
+      {
+        "sequence": 15,
+        "elapsedMs": 571,
+        "direction": "server",
+        "packetId": 27,
+        "packet": "ObjectTurn",
+        "payloadLen": 13,
+        "payloadHash": "fnv1a64:dabd32705759fd63",
+        "decoded": true
+      },
+      {
+        "sequence": 16,
+        "elapsedMs": 665,
+        "direction": "client",
+        "packetId": 13,
+        "packet": "Chat",
+        "payloadLen": 16,
+        "payloadHash": "fnv1a64:ac0a5e42689572eb",
+        "decoded": true
+      },
+      {
+        "sequence": 17,
+        "elapsedMs": 665,
+        "direction": "server",
+        "packetId": 31,
+        "packet": "ObjectChat",
+        "payloadLen": 32,
+        "payloadHash": "fnv1a64:466927b1e9e43eac",
+        "decoded": true
+      },
+      {
+        "sequence": 18,
+        "elapsedMs": 758,
+        "direction": "client",
+        "packetId": 2,
+        "packet": "KeepAlive",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:f046c72c66c2d08e",
+        "decoded": true
+      },
+      {
+        "sequence": 19,
+        "elapsedMs": 758,
+        "direction": "server",
+        "packetId": 3,
+        "packet": "KeepAlive",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:f046c72c66c2d08e",
+        "decoded": true
+      }
+    ]
+  },
+  "crystal": {
+    "endpoint": "127.0.0.1:7000",
+    "ok": false,
+    "elapsedMs": 0,
+    "error": "你的主机中的软件中止了一个已建立的连接。 (os error 10053)",
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 0,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true
+      }
+    ]
+  },
+  "diff": {
+    "clean": false,
+    "comparedEntries": 20,
+    "mismatchReasons": [
+      "direction_mismatch",
+      "endpoint_error",
+      "missing_crystal_packet"
+    ],
+    "mismatches": [
+      {
+        "sequence": 0,
+        "reason": "direction_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 0,
+          "packet": "Connected",
+          "payloadLen": 0,
+          "payloadHash": "fnv1a64:cbf29ce484222325",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "client",
+          "packetId": 0,
+          "packet": "ClientVersion",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:8ce23005a62754b0",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 1,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 0,
+          "packet": "ClientVersion",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:8ce23005a62754b0",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 2,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 1,
+          "packet": "ClientVersion",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bc4c8601b62c",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 3,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 5,
+          "packet": "Login",
+          "payloadLen": 22,
+          "payloadHash": "fnv1a64:373749c7e01ddce4",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 4,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 9,
+          "packet": "LoginSuccess",
+          "payloadLen": 34,
+          "payloadHash": "fnv1a64:310e7059fbcc0e0f",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 5,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 8,
+          "packet": "StartGame",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:4cfad6c24f7bf87d",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 6,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 14,
+          "packet": "StartGame",
+          "payloadLen": 5,
+          "payloadHash": "fnv1a64:b200c32f2fee3fc3",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 7,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 17,
+          "packet": "MapInformation",
+          "payloadLen": 32,
+          "payloadHash": "fnv1a64:d90bea7ecebfe207",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 8,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 21,
+          "packet": "UserInformation",
+          "payloadLen": 120,
+          "payloadHash": "fnv1a64:590659220647d1a5",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 9,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 23,
+          "packet": "UserLocation",
+          "payloadLen": 9,
+          "payloadHash": "fnv1a64:4a2f05699948a0ca",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 10,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 30,
+          "packet": "Chat",
+          "payloadLen": 40,
+          "payloadHash": "fnv1a64:94586cb9a374c305",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 11,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 10,
+          "packet": "Turn",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bf4c8601bb45",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 12,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 27,
+          "packet": "ObjectTurn",
+          "payloadLen": 13,
+          "payloadHash": "fnv1a64:dabd3870575a0795",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 13,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 11,
+          "packet": "Walk",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bf4c8601bb45",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 14,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 12,
+          "packet": "Run",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63b94c8601b113",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 15,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 27,
+          "packet": "ObjectTurn",
+          "payloadLen": 13,
+          "payloadHash": "fnv1a64:dabd32705759fd63",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 16,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 13,
+          "packet": "Chat",
+          "payloadLen": 16,
+          "payloadHash": "fnv1a64:ac0a5e42689572eb",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 17,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 31,
+          "packet": "ObjectChat",
+          "payloadLen": 32,
+          "payloadHash": "fnv1a64:466927b1e9e43eac",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 18,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "client",
+          "packetId": 2,
+          "packet": "KeepAlive",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:f046c72c66c2d08e",
+          "decoded": true
+        },
+        "crystal": null
+      },
+      {
+        "sequence": 19,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 3,
+          "packet": "KeepAlive",
+          "payloadLen": 8,
+          "payloadHash": "fnv1a64:f046c72c66c2d08e",
+          "decoded": true
+        },
+        "crystal": null
+      }
+    ]
+  }
+}

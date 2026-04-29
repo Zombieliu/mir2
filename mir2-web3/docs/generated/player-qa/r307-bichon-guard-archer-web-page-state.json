@@ -1,0 +1,85 @@
+{
+  "screen": "game",
+  "mapFileName": "0",
+  "mapTitle": "BichonProvince",
+  "player": {
+    "x": 287,
+    "y": 618
+  },
+  "entityCount": 13,
+  "npcCount": 5,
+  "monsterCount": 7,
+  "monsterEntities": [
+    {
+      "objectId": "200325",
+      "name": "ArcherGuard",
+      "x": 295,
+      "y": 624,
+      "sprite": "Monster/139"
+    },
+    {
+      "objectId": "200716",
+      "name": "Guard",
+      "x": 291,
+      "y": 620,
+      "sprite": "Monster/000"
+    },
+    {
+      "objectId": "206300",
+      "name": "Deer",
+      "x": 297,
+      "y": 615,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "206500",
+      "name": "Deer",
+      "x": 291,
+      "y": 619,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "206501",
+      "name": "Deer",
+      "x": 283,
+      "y": 620,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "206502",
+      "name": "Deer",
+      "x": 293,
+      "y": 619,
+      "sprite": "Monster/004"
+    },
+    {
+      "objectId": "271800",
+      "name": "Hen",
+      "x": 277,
+      "y": 609,
+      "sprite": "Monster/003"
+    }
+  ],
+  "visibleNameplates": [
+    "QA0429Hero",
+    "Deer",
+    "Deer",
+    "Guard",
+    "Deer",
+    "ArcherGuard",
+    "Deer",
+    "Hen",
+    "BorderVillage Board",
+    "Teleport Gilbert",
+    "CraftsLady Jude",
+    "Merchant Scott",
+    "Blacksmith Smith"
+  ],
+  "hasGuard": true,
+  "hasArcherGuard": true,
+  "hasUnderscoreNameplate": false,
+  "questTrackerVisible": false,
+  "npcSpriteElementCount": 5,
+  "monsterSpriteElementCount": 7,
+  "capturedAt": "2026-04-28T18:56:35.379Z"
+}

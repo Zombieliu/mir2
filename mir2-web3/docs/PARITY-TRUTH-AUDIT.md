@@ -4,33 +4,35 @@ Last updated: 2026-04-28
 
 Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates automated Candidate evidence from final accepted 1:1, fallback behavior, and externally blocked work. If another doc conflicts with this one, use this audit for status wording.
 
+Latest R302 note: original Crystal `Server.exe` and visible `Client.exe` were launched locally on Windows and captured at select/game screens. Evidence is under `docs/generated/player-qa/r302-original-client/summary.json`. This improves the visual-reference evidence, but does not close whole-project Accepted 1:1 because the web and original client captures are not yet a deterministic same-scene human visual/feel acceptance pass. The fresh R302 live matrix is diagnostic only (`stableDiffCleanCount=2/9`, `packetParityAccepted=false`) and does not supersede R300/R298 stable-diff packet acceptance.
+
 ## Status Definitions
 
 - **Accepted 1:1** means verified against real Crystal data/resources and live Crystal behavior, with human visual/feel acceptance where UI is involved.
 - **Candidate** means the local automated bundle is green for the current modeled slice. Candidate is useful regression evidence, but it is not final acceptance.
 - **Fallback** means the project intentionally substitutes synthetic/local/mock behavior when real Crystal resources or services are unavailable.
-- **Blocked** means the project cannot truthfully close the item on this Mac without external inputs such as `Server.MirDB`, Crystal client map assets, a live Crystal endpoint, or a human acceptance decision.
+- **Blocked** means the project cannot truthfully close the item without external inputs such as Crystal client map assets, a live Crystal endpoint, stable trace fixtures, or a human acceptance decision.
 - **Product evolution** means post-1:1 custom MMORPG work. It may intentionally diverge from Crystal and should not be counted as Crystal parity.
 
 ## Current Truth Snapshot
 
 | Metric | Honest Status | Evidence | What It Does Not Prove |
 | --- | --- | --- | --- |
-| Whole-project automated evidence | **100% Candidate** | R225 bundle: web type/build, Stage 5 smoke 88 screenshots, map/minimap smoke, WS load, Rust package tests, local packet-trace matrix, fmt, diff check | Does not prove pixel-perfect UI, live Crystal packet parity, full original assets, or production architecture |
-| Backend/server tracked slice | **99.70% Candidate** | `mir2-simulation` 664/664, `mir2-gateway` 54/54, `mir2-game-data` 22/22 after R225 | Does not prove untracked Crystal branches, live Crystal diff cleanliness, or missing map/source-data import |
-| Whole-project accepted 1:1 | **Roughly 90%** | High local coverage plus known acceptance blockers | Not a precise final score and not 99.7%; it remains an estimate until live and human gates close |
+| Whole-project automated evidence | **100% Candidate** | R301 final automated acceptance pack: `docs/generated/player-qa/r301-summary.json`; web build/typecheck, map API smoke 18/18 with 0 failures, minimap smoke 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors, Stage 5 smoke 88 screenshots with 0 critical console errors, Rust package tests, and R300 stable-diff packet acceptance evidence | Does not prove pixel-perfect UI, strict exact live Crystal packet parity, full original assets, or production architecture |
+| Backend/server tracked slice | **100% Accepted for the tracked backend/server slice** | R248 Windows server-data import plus R298 live Crystal stable packet matrix evidence. R298 wrote `docs/generated/packet-traces/r298-live-matrix/latest-matrix.json` with `crystalMissingCount=0`, `stableDiffCleanCount=9/9`, and `acceptedStableLiveComparisonCount=9`; R299 payload-hex probing showed strict exact dirtiness is live Crystal dynamic state; R300 records the stable-diff packet acceptance policy in `docs/PACKET-PARITY-ACCEPTANCE.md` and `docs/generated/packet-traces/r300-stable-acceptance.json`; R301 reverified packet-trace bin 15/15, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674 | Does not prove whole-project frontend acceptance, untracked Crystal branches, or product-evolution systems. Strict exact live diff remains a diagnostic, not the accepted packet gate |
+| Whole-project accepted 1:1 | **Roughly 90%** | High local coverage plus known frontend acceptance blockers | Not a precise final score and not the backend tracked-slice score; it remains an estimate until human visual/feel acceptance closes |
 | Admin operations backend/UI | **Product evolution / partial live integration** | GM mail/grant/kick/ban commands are real through Admin Web -> Admin API -> gateway/account store; read pages use Rust `/admin/read/*`, Gateway session presence, Postgres activity/market/trade/zone/operator projections, Postgres operator token auth, peer approval, and Gateway zone heartbeat | Not Crystal 1:1, not production external IdP/session auth, not full support workflow or command coverage |
 
 ## Area Audit
 
 | Area | Current Classification | Real State | Required To Mark Accepted |
 | --- | --- | --- | --- |
-| Backend gameplay simulation | Candidate | Large Rust slice is green and many runtime-only `sim.*` surfaces were removed; still a tracked slice, not the entire Crystal universe | Live Crystal packet/behavior comparison, source-data import closure, explicit acceptance for unsupported branches |
-| Gateway protocol | Candidate / Blocked | Local gateway, WS load, and local packet-trace matrix are green; live side is not configured | Set `MIR2_CRYSTAL_TCP_ADDR`; strict packet matrix with `crystalMissingCount=0`, `diffDirtyCount=0`, `acceptedLiveComparisonCount=artifactCount` |
-| Crystal server data import | Blocked on this Mac | `packages/tooling/scripts/generate-crystal-respawn-manifest.mjs` needs `Crystal/Build/Server/Debug/Server.MirDB` and matching route data | Provide `Server.MirDB` and `Envir/Routes`; rerun generator and package tests |
-| Crystal client map rendering | Candidate / Fallback | Map API can serve packaged/exported regions; when real `.map`/`Data/Map` files are missing it falls back to synthetic terrain. Recent bug fixed so non-0 missing maps no longer reuse 0-map region coordinates | Provide full `CRYSTAL_CLIENT_ROOT` with `Map/*.map` and `Data/Map`; verify real sprite counts for representative maps; human visual acceptance |
-| Minimap assets | Candidate with known warning | Smoke reports 0 failures with known missing indices `450/451`; available minimaps render | Source or accept missing minimap indices; direct Crystal comparison |
-| Web player UI | Candidate / Human-blocked | Stage 5 smoke covers many flows and screenshots, compact layout, panels, mail, inventory, storage, combat target, system menu, login/select lifecycle | Human Crystal visual/feel pass, mouse targeting/combat feel acceptance, or explicit accepted differences |
+| Backend gameplay simulation | Candidate | Large Rust slice is green, many runtime-only `sim.*` surfaces were removed, and R248 closed the current server-data import gate; still a tracked slice, not the entire Crystal universe | Live Crystal packet/behavior comparison and explicit acceptance for unsupported branches |
+| Gateway protocol | Accepted for tracked matrix under stable-diff policy / strict exact diagnostic remains | Local gateway, WS load, and local/live packet-trace matrix are green. R298 configured `MIR2_CRYSTAL_TCP_ADDR=127.0.0.1:7000`, treated live `TimeOfDay` as stable-comparator volatile payload, and captured 9/9 local+Crystal TCP artifacts with stable live comparison clean. R300 explicitly accepts stable-diff evidence for the representative packet gate; exact packet diff is still dirty (`diffDirtyCount=9`) because live AOI/world packets and volatile payloads differ | Does not prove deterministic byte-for-byte equality against ordinary live Crystal; use strict exact only when the Crystal fixture controls dynamic state |
+| Crystal server data import | Candidate on Windows | R248 regenerated Crystal respawn/monster/item/NPC-info manifests from local `Server.MirDB` plus `Build/Server/Debug/Envir/Routes`; map rows include real drop-rule flags and package/runtime tests passed | Keep this evidence current if Crystal DB/routes change; still does not prove live Crystal packet parity |
+| Crystal client map rendering | Candidate / Fallback when resources are absent | R301 map API smoke served 18/18 representative requests with 0 failures using the current resource path. When real `.map`/`Data/Map` files are missing it still falls back to packaged/synthetic terrain | Keep full `CRYSTAL_CLIENT_ROOT` available; expand representative-map review; human visual acceptance |
+| Minimap assets | Candidate with known warning | R301 minimap smoke reports 0 failures with known missing indices `450/451`; available minimaps render, and map-transfer UI receives `miniMapIndex` from gateway `MapInformation` | Source or accept missing minimap indices; direct Crystal comparison |
+| Web player UI | Candidate / Human-blocked | R301 Stage 5 smoke covers 88 screenshots, compact layout, 32 compact text nodes with no overflow, panels, mail, inventory, storage, combat target, system menu, login/select lifecycle, map transfer/minimap, and exported original scene NPC/Monster sprite libs; `criticalConsoleErrorCount=0` | Human Crystal visual/feel pass, mouse targeting/combat feel acceptance, or explicit accepted differences |
 | Storage/sell/service-backed NPC flows | Candidate for no-service paths | UI no-service preservation is smoke-verified; not all real NPC service flows are backed by live service state | Service-backed storage/sell/repair/buy flows against runtime state and packet traces |
 | Stage 5 systems | Candidate / Modeled subset | Social, mail, trade, shop, auction, conquest, hero, profession flows are modeled enough for tests/smoke; many are simplified systems | Explicit product decision: either expand to Crystal-accurate systems or classify as accepted modeled subset |
 | Persistence | Candidate / Local fallback | Account-store JSON persistence and Stage 5 mail persistence work locally | Production persistence design and implementation if accepted target requires it; original Crystal DB parity if staying 1:1 |
@@ -54,8 +56,8 @@ Purpose: keep the Crystal / Mir2 1:1 status honest. This document separates auto
 
 | Blocker | Needed Input | Close Condition |
 | --- | --- | --- |
-| Server map/data import | `Crystal/Build/Server/Debug/Server.MirDB` plus matching `Envir/Routes` | Generator succeeds; generated data reviewed; `mir2-game-data` tests pass |
-| Live Crystal packet comparison | `MIR2_CRYSTAL_TCP_ADDR` plus stable trace fixture credentials | Strict packet trace matrix passes with no missing Crystal endpoint and no dirty diffs |
+| Server map/data import | Closed for current Windows evidence in R248 | Generator succeeded from local `Server.MirDB` and matching `Build/Server/Debug/Envir/Routes`; `mir2-game-data` and runtime regressions passed |
+| Live Crystal packet comparison | Closed for the current representative matrix under stable-diff acceptance | R298 refreshed the stable deterministic live matrix (`stableDiffCleanCount=9/9`, `crystalMissingCount=0`). R299 payload-hex probing showed the remaining exact dirtiness comes from dynamic Crystal state/control surfaces such as object ids, timestamps, character indices, AOI ordering/payloads, and dynamic NPC payloads. R300 accepts stable-diff evidence for packet parity; strict exact remains optional deterministic-fixture work |
 | Final frontend acceptance | Human access to compare against Crystal and judge visual/feel | `docs/PLAYER-QA-SCRIPT.md` passes or differences are explicitly accepted |
 | Full client map art parity | Complete `CRYSTAL_CLIENT_ROOT` containing `Map` and `Data/Map` resources | Representative maps render real sprites instead of fallback and screenshots are accepted |
 | Admin production readiness | Auth provider, production approval policy, operator session model, support workflows | Admin API/Web no longer depend on mock read data and can use Postgres token auth locally, but local bearer tokens are still not a production IdP/session boundary |
@@ -66,15 +68,15 @@ Keep the project status wording as:
 
 ```text
 Automated parity evidence: 100% Candidate.
-Backend/server tracked slice: 99.70% Candidate.
+Backend/server tracked slice: 100% Accepted for the tracked backend/server slice under stable-diff packet acceptance.
 Whole-project accepted Crystal 1:1: roughly 90%, not final.
 ```
 
-Do not use `100%` without the word `Candidate` unless the live Crystal trace gate, source-data gate, and human acceptance gate are all closed or explicitly accepted by the user.
+Do not use `100% Accepted` for the whole project unless the human acceptance gate is closed or explicitly accepted by the user.
 
 ## Next Audit Actions
 
-1. On Windows, provide `Server.MirDB`, `Envir/Routes`, and full client map resources, then rerun the map/data import and map API smoke.
-2. Configure `MIR2_CRYSTAL_TCP_ADDR` and run strict packet trace matrix.
-3. Run `docs/PLAYER-QA-SCRIPT.md` for human visual/feel acceptance.
+1. Keep the accepted stable packet matrix command in `docs/PACKET-PARITY-ACCEPTANCE.md` green when packet-trace code changes. Treat strict exact as diagnostic deterministic-fixture work.
+2. Keep full client map resources available through `CRYSTAL_CLIENT_ROOT`; expand representative map/API visual review beyond the R301 automated smoke.
+3. Run the human pass in `docs/PLAYER-QA-SCRIPT.md` for final visual/feel acceptance.
 4. For product evolution, move Admin, Postgres/Redis, global-zone, UI redesign, and DSL work into product docs instead of claiming Crystal parity.

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "round": "2026-04-28-R301",
+  "decision": "final-automation-acceptance-pack-refreshed",
+  "completedAt": "2026-04-28",
+  "scope": "whole-project automated Candidate evidence plus the R300 backend/server stable-diff accepted packet gate",
+  "status": {
+    "automatedParityEvidence": "100% Candidate",
+    "backendServerTrackedSlice": "100% Accepted under explicit stable-diff packet acceptance",
+    "wholeProjectAcceptedCrystal1To1": "roughly 90%, pending human visual/feel acceptance"
+  },
+  "evidence": {
+    "packetAcceptanceDecision": "docs/generated/packet-traces/r300-stable-acceptance.json",
+    "mapApiSmoke": "docs/generated/map/r301-crystal-map-api.json",
+    "minimapAssetSmoke": "docs/generated/assets/r301-minimap-assets.json",
+    "stage5UiSmokeManifest": "docs/generated/player-qa/r301/stage5-ui-smoke-manifest.json",
+    "wsLoad": "docs/generated/load/r301-ws.json"
+  },
+  "results": {
+    "packetTraceBin": {
+      "command": "cargo +1.89.0 test --locked -p mir2-gateway --bin packet_trace -- --test-threads=1",
+      "passed": "15/15"
+    },
+    "web": {
+      "typecheck": "passed",
+      "build": "passed"
+    },
+    "mapApiSmoke": {
+      "requestCount": 18,
+      "failureCount": 0
+    },
+    "minimapAssetSmoke": {
+      "failureCount": 0,
+      "neededMiniMapCount": 226,
+      "exportedMiniMapCount": 225,
+      "knownMissingMiniMapIndices": [
+        450,
+        451
+      ]
+    },
+    "stage5UiSmoke": {
+      "screenshotCount": 88,
+      "compactPanelCount": 8,
+      "compactTextNodeCount": 32,
+      "criticalConsoleErrorCount": 0,
+      "compactTextOverflowCount": 0,
+      "flowCounts": {
+        "inventory": 4,
+        "storage": 4,
+        "storagePassword": 4,
+        "chat": 7,
+        "systemMenu": 4,
+        "stage5Systems": 3,
+        "login": 8,
+        "select": 13,
+        "belt": 4
+      }
+    },
+    "wsLoad": {
+      "clients": 64,
+      "ready": 64,
+      "errorCount": 0,
+      "messages": 40039,
+      "commandsSent": 3136,
+      "durationMs": 5236,
+      "keepAliveP95Ms": 637
+    },
+    "rust": {
+      "mir2GameData": "27/27",
+      "mir2Gateway": "55/55 plus packet_trace 15/15",
+      "mir2AdminApi": "22/22",
+      "mir2Simulation": "674/674"
+    },
+    "formatting": {
+      "cargoFmtCheck": "passed after docs sync",
+      "gitDiffCheck": "passed after docs sync"
+    }
+  },
+  "services": {
+    "temporaryGatewayWebAddr": "127.0.0.1:7110",
+    "temporaryGatewayTcpAddr": "127.0.0.1:7000",
+    "temporaryWebBaseUrl": "http://127.0.0.1:3002",
+    "stoppedAfterSmoke": true,
+    "verifiedClosedPorts": [
+      7000,
+      7110,
+      3002
+    ]
+  },
+  "notRun": [
+    "Docker",
+    "fresh live Crystal packet matrix",
+    "strict exact deterministic Crystal fixture"
+  ],
+  "remaining": [
+    "human Crystal visual/feel acceptance, or an explicit decision to accept remaining visual/feel differences, before whole-project 100% Accepted"
+  ]
+}

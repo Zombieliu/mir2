@@ -288,6 +288,38 @@ fn item_info_packets_use_crystal_payloads() {
 }
 
 #[test]
+fn quest_and_recipe_info_packets_preserve_raw_payloads() {
+    for (packet, packet_id) in [
+        (
+            ServerPacket::NewQuestInfo {
+                payload: vec![1, 2, 3],
+            },
+            ServerPacketId::NewQuestInfo,
+        ),
+        (
+            ServerPacket::NewRecipeInfo {
+                payload: vec![4, 5, 6],
+            },
+            ServerPacketId::NewRecipeInfo,
+        ),
+        (
+            ServerPacket::Raw {
+                packet_id: ServerPacketId::GameShopInfo,
+                payload: vec![7, 8, 9],
+            },
+            ServerPacketId::GameShopInfo,
+        ),
+    ] {
+        let bytes = encode_server_packet(&packet).expect("raw packet should encode");
+        let frame = decode_frame(&bytes).expect("raw packet frame should decode");
+        let decoded = decode_server_packet(&bytes).expect("raw packet should roundtrip");
+
+        assert_eq!(frame.packet_id, packet_id as i16);
+        assert_eq!(decoded, packet);
+    }
+}
+
+#[test]
 fn mir_grid_type_values_match_crystal() {
     assert_eq!(MirGridType::Inventory as u8, 1);
     assert_eq!(MirGridType::Equipment as u8, 2);
@@ -989,8 +1021,11 @@ fn user_information_packet_roundtrip() {
             has_hero: false,
             hero_behaviour: 0,
             inventory_section_present: false,
+            inventory: None,
             equipment_section_present: false,
+            equipment: None,
             quest_inventory_section_present: false,
+            quest_inventory: None,
             gold: 1000,
             credit: 0,
             has_expanded_storage: false,

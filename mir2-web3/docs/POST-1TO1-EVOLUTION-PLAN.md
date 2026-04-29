@@ -1,6 +1,6 @@
 # Post-1:1 Evolution Plan
 
-Last updated: 2026-04-26
+Last updated: 2026-04-28
 
 Purpose: define how to evolve this project after the Crystal / Mir2 1:1 Candidate baseline without confusing product changes with parity regressions.
 
@@ -13,9 +13,10 @@ Architecture adoption plan: `docs/ARCHITECTURE-ADOPTION-PLAN.md` defines which s
 The current project state is a verified MMORPG foundation with a Crystal / Mir2 compatibility baseline:
 
 - Automation status: `100.0% Candidate`.
-- Backend/server tracked-slice parity: `99.70%`.
+- Backend/server tracked-slice parity: `100% Accepted under explicit stable-diff packet acceptance`.
 - Real full-project accepted 1:1: `roughly 90.0%`.
-- Remaining 1:1 blockers: live Crystal packet comparison, missing local `Server.MirDB` import evidence, and human visual/feel acceptance.
+- Latest acceptance-pack evidence: R301 refreshed web build/typecheck, map/minimap smokes, WS load, Stage 5 UI smoke, packet-trace bin, and Rust package regressions under `docs/generated/player-qa/r301-summary.json`.
+- Remaining 1:1 blocker: human visual/feel acceptance for whole-project Accepted status. Strict exact packet comparison remains diagnostic until deterministic Crystal fixtures control volatile live state.
 
 This baseline should be preserved as a regression reference. Future product work is allowed to diverge from Crystal, but each divergence should be explicit.
 

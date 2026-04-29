@@ -87,10 +87,12 @@ async function main() {
 
 async function runClient(index, runId, metrics) {
   const accountId = `load-ws-${runId}-${index}`;
+  const characterName = `Load${index}${runId.replace(/[^a-z0-9]/gi, "").slice(-6)}`;
   const password = "load-pass";
   const pendingKeepAlives = new Map();
   let loginSuccess = false;
   let userInformation = false;
+  let createdCharacterIndex = null;
 
   const ws = new RawWebSocketClient(
     WS_URL,
@@ -103,10 +105,14 @@ async function runClient(index, runId, metrics) {
       return;
     }
     if (payload.packet === "LoginSuccess") loginSuccess = true;
+    if (payload.packet === "NewCharacterSuccess") {
+      createdCharacterIndex = payload.payload?.character?.index ?? null;
+    }
     if (payload.packet === "UserInformation") userInformation = true;
-    if (payload.packet === "KeepAlive" && pendingKeepAlives.has(payload.time)) {
-      metrics.keepAliveLatenciesMs.push(Date.now() - pendingKeepAlives.get(payload.time));
-      pendingKeepAlives.delete(payload.time);
+    const keepAliveTime = payload.payload?.time;
+    if (payload.packet === "KeepAlive" && pendingKeepAlives.has(keepAliveTime)) {
+      metrics.keepAliveLatenciesMs.push(Date.now() - pendingKeepAlives.get(keepAliveTime));
+      pendingKeepAlives.delete(keepAliveTime);
     }
     },
     () => {
@@ -117,49 +123,65 @@ async function runClient(index, runId, metrics) {
     },
   );
 
-  await ws.connect();
-  metrics.opened += 1;
+  try {
+    await ws.connect();
+    metrics.opened += 1;
 
-  send(ws, metrics, { type: "clientVersion" });
-  send(ws, metrics, {
-    type: "newAccount",
-    accountId,
-    password,
-    birthDateBinary: 0,
-    userName: accountId,
-    secretQuestion: "",
-    secretAnswer: "",
-    emailAddress: "",
-  });
-  send(ws, metrics, { type: "login", accountId, password });
-  await waitFor(() => loginSuccess, READY_TIMEOUT_MS, `login ${index}`);
-  send(ws, metrics, { type: "startGame", characterIndex: 0 });
-  await waitFor(() => userInformation, READY_TIMEOUT_MS, `startGame ${index}`);
-  metrics.ready += 1;
+    send(ws, metrics, { type: "clientVersion" });
+    send(ws, metrics, {
+      type: "newAccount",
+      accountId,
+      password,
+      birthDateBinary: 0,
+      userName: accountId,
+      secretQuestion: "",
+      secretAnswer: "",
+      emailAddress: "",
+    });
+    send(ws, metrics, { type: "login", accountId, password });
+    await waitFor(() => loginSuccess, READY_TIMEOUT_MS, `login ${index}`);
+    send(ws, metrics, {
+      type: "newCharacter",
+      name: characterName,
+      gender: index % 2 === 0 ? "Male" : "Female",
+      class: ["Warrior", "Wizard", "Taoist"][index % 3],
+    });
+    await waitFor(
+      () => createdCharacterIndex !== null,
+      READY_TIMEOUT_MS,
+      `newCharacter ${index}`,
+    );
+    send(ws, metrics, { type: "startGame", characterIndex: createdCharacterIndex });
+    await waitFor(() => userInformation, READY_TIMEOUT_MS, `startGame ${index}`);
+    metrics.ready += 1;
 
-  const directions = ["Right", "Down", "Left", "Up"];
-  for (let action = 0; action < ACTIONS; action += 1) {
-    const time = Date.now() * 1000 + index * 100 + action;
-    pendingKeepAlives.set(time, Date.now());
-    send(ws, metrics, { type: "keepAlive", time });
-    send(ws, metrics, { type: action % 3 === 0 ? "run" : "walk", direction: directions[action % directions.length] });
-    if (action % 10 === 0) {
-      send(ws, metrics, { type: "chat", message: `load ${index}:${action}` });
+    const directions = ["Right", "Down", "Left", "Up"];
+    for (let action = 0; action < ACTIONS; action += 1) {
+      const time = Date.now() * 1000 + index * 100 + action;
+      pendingKeepAlives.set(time, Date.now());
+      send(ws, metrics, { type: "keepAlive", time });
+      send(ws, metrics, { type: action % 3 === 0 ? "run" : "walk", direction: directions[action % directions.length] });
+      if (action % 10 === 0) {
+        send(ws, metrics, { type: "chat", message: `load ${index}:${action}` });
+      }
+      if (action % 15 === 0) {
+        send(ws, metrics, {
+          type: "stage5Command",
+          action: "social.friend",
+          args: [`load-peer-${action}`],
+        });
+      }
+      await delay(THINK_MS);
     }
-    if (action % 15 === 0) {
-      send(ws, metrics, {
-        type: "stage5Command",
-        action: "social.friend",
-        args: [`load-peer-${action}`],
-      });
+
+    await delay(250);
+    return { index, ready: true };
+  } finally {
+    if (!ws.closed) {
+      ws.close();
+      await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `close ${index}`).catch(() => {});
     }
-    await delay(THINK_MS);
   }
-
-  await delay(250);
-  ws.close();
-  await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `close ${index}`).catch(() => {});
-  return { index, ready: true };
 }
 
 function send(ws, metrics, command) {
