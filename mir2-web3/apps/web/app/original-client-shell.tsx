@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 
 import {
   ORIGINAL_UI,
@@ -120,8 +120,10 @@ type DisplayEntity = {
   level?: number;
   hp?: number;
   maxHp?: number;
+  nameColourArgb?: number;
   dead?: boolean;
   sprite?: EntitySprite | null;
+  questIds?: number[];
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -229,6 +231,7 @@ type DisplayLogLine = {
     | "guild"
     | "system"
     | "hint"
+    | "server"
     | "announcement"
     | "network";
 };
@@ -413,6 +416,15 @@ const VIEWPORT_TILE_LEFT_ORIGIN = VIEWPORT_OFFSET_X * VIEWPORT_CELL_WIDTH - VIEW
 const VIEWPORT_TILE_TOP_ORIGIN = VIEWPORT_OFFSET_Y * VIEWPORT_CELL_HEIGHT;
 const VIEWPORT_TILE_CENTER_X = VIEWPORT_TILE_LEFT_ORIGIN + VIEWPORT_CELL_WIDTH / 2;
 const VIEWPORT_TILE_CENTER_Y = VIEWPORT_TILE_TOP_ORIGIN + VIEWPORT_CELL_HEIGHT / 2;
+const LOGIN_STATIC_BACKGROUND_FRAME = 0;
+const LOGIN_TRANSITION_FRAME_MS = 180;
+const ORIGINAL_AUDIO = {
+  loginMusic: "/original-ui/Sound/Login2.wav",
+  loginEffect: "/original-ui/Sound/100.wav",
+  selectMusic: "/original-ui/Sound/Select2.wav",
+} as const;
+const ORIGINAL_MUSIC_VOLUME = 0.72;
+const ORIGINAL_EFFECT_VOLUME = 0.86;
 
 type TranslateFn = (
   key: string,
@@ -437,6 +449,30 @@ function selectedTargetActionLabel(
   }
 
   return t("ui.targetDistance", [actionLabel, targetDistance], `${actionLabel} · ${targetDistance} tiles`);
+}
+
+function entityDisplayName(entity: DisplayEntity): string {
+  if (entity.kind !== "npc" && entity.kind !== "monster") {
+    return entity.name;
+  }
+
+  return entity.name.replace(/_/g, " ");
+}
+
+function desiredMusicForScreen(screen: ClientScreen, loginTransitionActive: boolean) {
+  if (loginTransitionActive) {
+    return ORIGINAL_AUDIO.loginMusic;
+  }
+
+  if (screen === "login") {
+    return ORIGINAL_AUDIO.loginMusic;
+  }
+
+  if (screen === "select") {
+    return ORIGINAL_AUDIO.selectMusic;
+  }
+
+  return null;
 }
 
 export function OriginalClientShell({
@@ -522,11 +558,16 @@ export function OriginalClientShell({
   const locale = languageLocale(language);
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
   const runtimeMessageLabel = formatRuntimeMessage(language, runtimeMessage);
-  const [introFrame, setIntroFrame] = useState(0);
+  const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [selectPortraitFrameIndex, setSelectPortraitFrameIndex] = useState(0);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(() => Date.now());
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
+  const previousScreenRef = useRef<ClientScreen>(screen);
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
+  const loginEffectAudioRef = useRef<HTMLAudioElement | null>(null);
+  const activeMusicSrcRef = useRef<string | null>(null);
+  const pendingMusicSrcRef = useRef<string | null>(null);
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
 
@@ -534,18 +575,105 @@ export function OriginalClientShell({
   const selectedPortraitFrames = selectedCharacter ? portraitFramesForCharacter(selectedCharacter) : [];
   const activeSelectPortraitFrame =
     selectedPortraitFrames[selectPortraitFrameIndex % Math.max(selectedPortraitFrames.length, 1)] ?? null;
+  const loginBackgroundFrame =
+    ORIGINAL_UI.login.backgroundFrames[LOGIN_STATIC_BACKGROUND_FRAME] ?? ORIGINAL_UI.login.backgroundFrames[0];
+  const loginTransitionBackground =
+    screen !== "select" || loginTransitionFrame === null
+      ? null
+      : ORIGINAL_UI.login.backgroundFrames[
+          Math.min(loginTransitionFrame, ORIGINAL_UI.login.backgroundFrames.length - 1)
+        ] ?? loginBackgroundFrame;
+  const loginTransitionAudioActive = screen === "select" && loginTransitionFrame !== null;
 
-  useEffect(() => {
-    if (screen !== "login") {
+  const syncMusic = useCallback((src: string | null) => {
+    pendingMusicSrcRef.current = src;
+
+    if (!src) {
+      musicAudioRef.current?.pause();
+      activeMusicSrcRef.current = null;
       return;
     }
 
-    const timer = window.setInterval(() => {
-      setIntroFrame((current) => (current + 1) % ORIGINAL_UI.login.backgroundFrames.length);
-    }, 180);
+    const audio = musicAudioRef.current ?? new Audio();
+    musicAudioRef.current = audio;
 
-    return () => window.clearInterval(timer);
+    if (activeMusicSrcRef.current !== src) {
+      audio.pause();
+      audio.src = src;
+      audio.currentTime = 0;
+      activeMusicSrcRef.current = src;
+    }
+
+    audio.loop = true;
+    audio.volume = ORIGINAL_MUSIC_VOLUME;
+    void audio.play().catch(() => undefined);
+  }, []);
+
+  const playLoginEffect = useCallback(() => {
+    const audio = loginEffectAudioRef.current ?? new Audio();
+    loginEffectAudioRef.current = audio;
+    audio.src = ORIGINAL_AUDIO.loginEffect;
+    audio.currentTime = 0;
+    audio.volume = ORIGINAL_EFFECT_VOLUME;
+    void audio.play().catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const handleUserAudioGesture = () => syncMusic(pendingMusicSrcRef.current);
+
+    window.addEventListener("pointerdown", handleUserAudioGesture, true);
+    window.addEventListener("keydown", handleUserAudioGesture, true);
+
+    return () => {
+      window.removeEventListener("pointerdown", handleUserAudioGesture, true);
+      window.removeEventListener("keydown", handleUserAudioGesture, true);
+      musicAudioRef.current?.pause();
+      loginEffectAudioRef.current?.pause();
+    };
+  }, [syncMusic]);
+
+  useEffect(() => {
+    const previousScreen = previousScreenRef.current;
+    previousScreenRef.current = screen;
+
+    if (previousScreen === "login" && screen === "select") {
+      setLoginTransitionFrame(0);
+      return;
+    }
+
+    if (screen !== "select") {
+      setLoginTransitionFrame(null);
+    }
   }, [screen]);
+
+  useEffect(() => {
+    if (loginTransitionFrame === null) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setLoginTransitionFrame((current) => {
+        if (current === null) {
+          return null;
+        }
+
+        const nextFrame = current + 1;
+        return nextFrame >= ORIGINAL_UI.login.backgroundFrames.length ? null : nextFrame;
+      });
+    }, LOGIN_TRANSITION_FRAME_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [loginTransitionFrame]);
+
+  useEffect(() => {
+    syncMusic(desiredMusicForScreen(screen, loginTransitionAudioActive));
+  }, [loginTransitionAudioActive, screen, syncMusic]);
+
+  useEffect(() => {
+    if (loginTransitionFrame === 0) {
+      playLoginEffect();
+    }
+  }, [loginTransitionFrame, playLoginEffect]);
 
   useEffect(() => {
     setSelectPortraitFrameIndex(0);
@@ -920,7 +1048,17 @@ export function OriginalClientShell({
             <div className="client-scene-overlay">
               <img
                 className="client-scene-background"
-                src={ORIGINAL_UI.login.backgroundFrames[introFrame]}
+                src={loginBackgroundFrame}
+                alt=""
+                draggable={false}
+              />
+            </div>
+          ) : null}
+          {loginTransitionBackground ? (
+            <div className="client-scene-overlay login-transition-overlay" aria-hidden="true">
+              <img
+                className="client-scene-background"
+                src={loginTransitionBackground}
                 alt=""
                 draggable={false}
               />
@@ -1016,8 +1154,11 @@ export function OriginalClientShell({
                 ? EMPTY_VIEWPORT_OFFSET
                 : entityMotionOffsetForEntity(entity, entityMotionSnapshotsRef.current, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+              const label = entityDisplayName(entity);
               const hitWidth = Math.max(sprite?.body?.width ?? 48, sprite?.hair?.width ?? 0, 48);
               const hitHeight = Math.max(sprite?.body?.height ?? 64, sprite?.hair?.height ?? 0, 64);
+              const healthRatio =
+                isPlayer && entity.hp !== undefined && entity.maxHp ? ratio(entity.hp, entity.maxHp) : null;
 
               return (
                 <div
@@ -1043,6 +1184,11 @@ export function OriginalClientShell({
                     onActivateEntity(entity.objectId);
                   }}
                 >
+                  {healthRatio !== null ? (
+                    <div className="entity-health-bar" style={{ top: nameplateTopOffset(sprite) - 7 }}>
+                      <span style={{ width: `${healthRatio * 100}%` }} />
+                    </div>
+                  ) : null}
                   <button
                     type="button"
                     className="entity-sprite-hit"
@@ -1052,7 +1198,7 @@ export function OriginalClientShell({
                       width: `${hitWidth}px`,
                       height: `${hitHeight}px`,
                     }}
-                    aria-label={entity.name}
+                    aria-label={label}
                   />
                   {sprite?.rearWeapons.map((weapon, index) => (
                     <img
@@ -1166,6 +1312,7 @@ export function OriginalClientShell({
                     ? EMPTY_VIEWPORT_OFFSET
                     : entityMotionOffsetForEntity(entity, entityMotionSnapshotsRef.current, motionNow);
                   const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+                  const label = entityNameplateParts(entity);
 
                   return (
                     <button
@@ -1174,8 +1321,9 @@ export function OriginalClientShell({
                       className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
                       style={{
                         left: `${VIEWPORT_TILE_CENTER_X + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
-                        top: `${VIEWPORT_TILE_CENTER_Y + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + nameplateTopOffset(sprite)}px`,
-                      }}
+                        top: `${VIEWPORT_TILE_CENTER_Y + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
+                        "--entity-name-color": entityNameplateColor(entity),
+                      } as CSSProperties}
                       data-ui-interactive="true"
                       onClick={() => onActivateEntity(entity.objectId)}
                       onContextMenu={(event) => {
@@ -1184,7 +1332,8 @@ export function OriginalClientShell({
                         onActivateEntity(entity.objectId);
                       }}
                     >
-                      <strong>{entity.name}</strong>
+                      <strong>{label.primary}</strong>
+                      {label.secondary ? <span className="entity-subname">{label.secondary}</span> : null}
                       {entity.dead ? <span>{t("ui.dead")}</span> : null}
                       {!entity.dead && entity.objectId === selectedEntity?.objectId && entity.hp !== undefined && entity.maxHp ? (
                         <span>{`${entity.hp}/${entity.maxHp}`}</span>
@@ -1440,7 +1589,7 @@ function GameUiScene({
   onDeleteMail,
   transferOptions,
 }: GameUiSceneProps) {
-  const [showDuraPanel, setShowDuraPanel] = useState(true);
+  const [showDuraPanel, setShowDuraPanel] = useState(false);
   const [showBelt, setShowBelt] = useState(true);
   const [beltVertical, setBeltVertical] = useState(false);
   const [activeChatFilter, setActiveChatFilter] = useState<ChatFilterKey>("all");
@@ -1514,7 +1663,6 @@ function GameUiScene({
         onSendChat={onSendChat}
         onCloseSettings={() => setShowChatSettings(false)}
       />
-      <QuestTrackerPanel t={t} quests={world.questLog} hints={world.interactionHints} />
       <MainHud
         t={t}
         connected={world.connected}
@@ -1741,42 +1889,6 @@ function GameSceneBackdrop({
         />
       ))}
     </div>
-  );
-}
-
-function QuestTrackerPanel({
-  t,
-  quests,
-  hints,
-}: {
-  t: TranslateFn;
-  quests: DisplayQuest[];
-  hints: string[];
-}) {
-  const primaryQuest = quests.find((quest) => quest.stage !== "completed") ?? quests[0] ?? null;
-
-  return (
-    <section className="quest-tracker-panel">
-      <div className="quest-tracker-title">{t("ui.quest")}</div>
-      {primaryQuest ? (
-        <>
-          <div className={`quest-stage ${primaryQuest.stage}`}>{formatQuestStage(t, primaryQuest.stage)}</div>
-          <strong className="quest-name">{primaryQuest.title}</strong>
-          <div className="quest-progress">{primaryQuest.progressLabel}</div>
-          <div className="quest-objective">{primaryQuest.objective}</div>
-          <div className="quest-reward">{primaryQuest.rewardPreview}</div>
-        </>
-      ) : (
-        <div className="quest-objective">{t("ui.noActiveQuest")}</div>
-      )}
-      <div className="quest-hints">
-        {hints.slice(0, 2).map((hint) => (
-          <div key={hint} className="quest-hint-line">
-            {hint}
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 
@@ -4802,6 +4914,15 @@ function nameplateTopOffset(sprite: ViewportEntitySprite | null) {
   return sprite?.nameplateTop ?? -60;
 }
 
+function entityNameplateTopOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {
+  if (entity.kind !== "selfPlayer" && entity.kind !== "player") {
+    return nameplateTopOffset(sprite);
+  }
+
+  const bodyBottom = sprite?.body ? sprite.body.y + sprite.body.height : 16;
+  return Math.max(bodyBottom + 8, 24);
+}
+
 function weaponPlacementForDirection(direction?: string) {
   switch (direction) {
     case "Left":
@@ -4857,6 +4978,9 @@ function questIconForEntity(
 
   const activeQuest = questLog.find((quest) => quest.stage !== "completed") ?? null;
   if (!activeQuest) {
+    return null;
+  }
+  if (!entity.questIds?.includes(activeQuest.questId)) {
     return null;
   }
 
@@ -5208,7 +5332,7 @@ function playerFacingChatLines(logs: DisplayLogLine[], activeFilter: ChatFilterK
     .filter((line) => line.tone !== "network")
     .filter((line) => matchesChatFilter(line, activeFilter))
     .map((line) => ({
-      text: line.text.replace(/^\[\d{1,2}:\d{2}:\d{2}\]\s*/, ""),
+      text: trimLogTimestamp(line.text),
       tone: line.tone === "chat" ? ("chat" as const) : ("system" as const),
       channel: line.channel,
     }))
@@ -5225,7 +5349,7 @@ function playerFacingChatLines(logs: DisplayLogLine[], activeFilter: ChatFilterK
 }
 
 function trimLogTimestamp(text: string) {
-  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}\]\s*/, "");
+  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
 }
 
 function matchesChatFilter(line: DisplayLogLine, activeFilter: ChatFilterKey) {
@@ -5350,6 +5474,23 @@ function miniMapEntityColor(kind: string) {
   }
 }
 
+function entityNameplateColor(entity: DisplayEntity) {
+  return argbToCssColor(entity.nameColourArgb) ?? (entity.kind === "npc" ? "#00ff00" : "#ffffff");
+}
+
+function entityNameplateParts(entity: DisplayEntity) {
+  const label = entityDisplayName(entity);
+  if (entity.kind !== "npc") {
+    return { primary: label, secondary: null };
+  }
+  const parts = label.split(" ").filter(Boolean);
+  if (parts.length < 2) {
+    return { primary: label, secondary: null };
+  }
+
+  return { primary: parts.slice(0, -1).join(" "), secondary: parts.at(-1) ?? null };
+}
+
 function argbToCssColor(value: number | undefined) {
   if (value === undefined || value === -1) {
     return undefined;
@@ -5408,19 +5549,6 @@ function equipmentSlotFromLabel(label: string): EquipmentSlot {
       return "belt";
     default:
       return "stone";
-  }
-}
-
-function formatQuestStage(t: TranslateFn, stage: QuestStage) {
-  switch (stage) {
-    case "available":
-      return t("ui.questStage.available");
-    case "inProgress":
-      return t("ui.questStage.inProgress");
-    case "readyToTurnIn":
-      return t("ui.questStage.readyToTurnIn");
-    case "completed":
-      return t("ui.questStage.completed");
   }
 }
 

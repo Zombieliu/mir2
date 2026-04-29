@@ -1,0 +1,57 @@
+{
+  "type": "websocket",
+  "wsUrl": "ws://127.0.0.1:7110/ws",
+  "runId": "moi7bz45-31932",
+  "host": "WIN-27HGHD7FBV0",
+  "clients": 1,
+  "pool": 1,
+  "actionsPerClient": 2,
+  "thinkMs": 20,
+  "startedAt": "2026-04-28T05:44:53.383Z",
+  "finishedAt": "2026-04-28T05:44:54.912Z",
+  "durationMs": 1514,
+  "opened": 1,
+  "ready": 1,
+  "closed": 1,
+  "errors": 0,
+  "messages": 628,
+  "commandsSent": 11,
+  "keepAliveLatenciesMs": [
+    108
+  ],
+  "clientFailures": [],
+  "rssSamples": [
+    {
+      "atUnixMs": 1777355093544,
+      "pid": 17200,
+      "workingSetBytes": 23920640,
+      "handleCount": 118
+    },
+    {
+      "atUnixMs": 1777355094234,
+      "pid": 17200,
+      "workingSetBytes": 34574336,
+      "handleCount": 118
+    },
+    {
+      "atUnixMs": 1777355094912,
+      "pid": 17200,
+      "workingSetBytes": 34471936,
+      "handleCount": 118
+    }
+  ],
+  "rss": {
+    "count": 3,
+    "min": 23920640,
+    "max": 34574336,
+    "avg": 30988970.67,
+    "p95": 34574336
+  },
+  "keepAlive": {
+    "count": 1,
+    "min": 108,
+    "max": 108,
+    "avg": 108,
+    "p95": 108
+  }
+}

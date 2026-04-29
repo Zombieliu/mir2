@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-22T09:48:16.790Z",
+  "generated_at": "2026-04-27T22:19:17.824Z",
   "source_file": "Crystal/Build/Server/Debug/Server.MirDB",
   "crystal_db_version": 117,
   "crystal_db_custom_version": 0,
@@ -35,7 +35,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1
     },
     {
       "npc_index": 2,
@@ -67,7 +68,8 @@
       "show_on_big_map": true,
       "big_map_icon": 118,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2
     },
     {
       "npc_index": 3,
@@ -99,7 +101,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 3
     },
     {
       "npc_index": 4,
@@ -131,7 +134,8 @@
       "show_on_big_map": true,
       "big_map_icon": 111,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 4
     },
     {
       "npc_index": 5,
@@ -163,7 +167,8 @@
       "show_on_big_map": true,
       "big_map_icon": 112,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 5
     },
     {
       "npc_index": 7,
@@ -195,7 +200,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 6
     },
     {
       "npc_index": 8,
@@ -227,7 +233,8 @@
       "show_on_big_map": true,
       "big_map_icon": 105,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 7
     },
     {
       "npc_index": 9,
@@ -259,7 +266,8 @@
       "show_on_big_map": true,
       "big_map_icon": 105,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 8
     },
     {
       "npc_index": 15,
@@ -291,7 +299,8 @@
       "show_on_big_map": true,
       "big_map_icon": 119,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 9
     },
     {
       "npc_index": 16,
@@ -323,7 +332,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 10
     },
     {
       "npc_index": 17,
@@ -355,7 +365,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 11
     },
     {
       "npc_index": 18,
@@ -387,7 +398,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 12
     },
     {
       "npc_index": 19,
@@ -419,7 +431,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 13
     },
     {
       "npc_index": 20,
@@ -451,7 +464,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 14
     },
     {
       "npc_index": 22,
@@ -483,7 +497,8 @@
       "show_on_big_map": true,
       "big_map_icon": 119,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 15
     },
     {
       "npc_index": 23,
@@ -515,7 +530,8 @@
       "show_on_big_map": true,
       "big_map_icon": 119,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 16
     },
     {
       "npc_index": 24,
@@ -547,7 +563,8 @@
       "show_on_big_map": true,
       "big_map_icon": 119,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 17
     },
     {
       "npc_index": 25,
@@ -579,7 +596,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 18
     },
     {
       "npc_index": 27,
@@ -611,7 +629,8 @@
       "show_on_big_map": true,
       "big_map_icon": 104,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 19
     },
     {
       "npc_index": 28,
@@ -643,7 +662,8 @@
       "show_on_big_map": true,
       "big_map_icon": 101,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 20
     },
     {
       "npc_index": 31,
@@ -675,7 +695,8 @@
       "show_on_big_map": true,
       "big_map_icon": 108,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 21
     },
     {
       "npc_index": 33,
@@ -707,7 +728,8 @@
       "show_on_big_map": true,
       "big_map_icon": 101,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 22
     },
     {
       "npc_index": 34,
@@ -739,7 +761,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 23
     },
     {
       "npc_index": 35,
@@ -771,7 +794,8 @@
       "show_on_big_map": true,
       "big_map_icon": 118,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 24
     },
     {
       "npc_index": 36,
@@ -803,7 +827,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 25
     },
     {
       "npc_index": 37,
@@ -835,7 +860,8 @@
       "show_on_big_map": true,
       "big_map_icon": 109,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 26
     },
     {
       "npc_index": 38,
@@ -867,7 +893,8 @@
       "show_on_big_map": true,
       "big_map_icon": 109,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 27
     },
     {
       "npc_index": 39,
@@ -899,7 +926,8 @@
       "show_on_big_map": true,
       "big_map_icon": 109,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 28
     },
     {
       "npc_index": 40,
@@ -931,7 +959,8 @@
       "show_on_big_map": true,
       "big_map_icon": 114,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 29
     },
     {
       "npc_index": 41,
@@ -963,7 +992,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 30
     },
     {
       "npc_index": 42,
@@ -995,7 +1025,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 31
     },
     {
       "npc_index": 43,
@@ -1027,7 +1058,8 @@
       "show_on_big_map": true,
       "big_map_icon": 103,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 32
     },
     {
       "npc_index": 54,
@@ -1091,7 +1123,8 @@
       "show_on_big_map": true,
       "big_map_icon": 111,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 33
     },
     {
       "npc_index": 56,
@@ -1123,7 +1156,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 34
     },
     {
       "npc_index": 57,
@@ -1155,7 +1189,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 35
     },
     {
       "npc_index": 60,
@@ -1187,7 +1222,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 36
     },
     {
       "npc_index": 62,
@@ -1219,7 +1255,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 37
     },
     {
       "npc_index": 276,
@@ -1251,7 +1288,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 38
     },
     {
       "npc_index": 277,
@@ -1283,7 +1321,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 39
     },
     {
       "npc_index": 283,
@@ -1315,7 +1354,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 40
     },
     {
       "npc_index": 284,
@@ -1347,7 +1387,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 41
     },
     {
       "npc_index": 295,
@@ -1379,7 +1420,8 @@
       "show_on_big_map": true,
       "big_map_icon": 101,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 42
     },
     {
       "npc_index": 302,
@@ -1411,7 +1453,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 43
     },
     {
       "npc_index": 303,
@@ -1443,7 +1486,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 44
     },
     {
       "npc_index": 386,
@@ -1475,7 +1519,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 45
     },
     {
       "npc_index": 44,
@@ -1507,7 +1552,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 427
     },
     {
       "npc_index": 61,
@@ -1539,7 +1585,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 428
     },
     {
       "npc_index": 26,
@@ -1571,7 +1618,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 429
     },
     {
       "npc_index": 29,
@@ -1603,7 +1651,8 @@
       "show_on_big_map": true,
       "big_map_icon": 101,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 430
     },
     {
       "npc_index": 30,
@@ -1635,7 +1684,8 @@
       "show_on_big_map": true,
       "big_map_icon": 101,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 431
     },
     {
       "npc_index": 45,
@@ -1667,7 +1717,8 @@
       "show_on_big_map": true,
       "big_map_icon": 107,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 432
     },
     {
       "npc_index": 296,
@@ -1699,7 +1750,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 433
     },
     {
       "npc_index": 32,
@@ -1731,7 +1783,8 @@
       "show_on_big_map": true,
       "big_map_icon": 108,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 434
     },
     {
       "npc_index": 58,
@@ -1763,7 +1816,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 435
     },
     {
       "npc_index": 46,
@@ -1795,7 +1849,8 @@
       "show_on_big_map": true,
       "big_map_icon": 104,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 436
     },
     {
       "npc_index": 47,
@@ -1827,7 +1882,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 437
     },
     {
       "npc_index": 48,
@@ -1859,7 +1915,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 438
     },
     {
       "npc_index": 49,
@@ -1891,7 +1948,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 439
     },
     {
       "npc_index": 50,
@@ -1923,7 +1981,8 @@
       "show_on_big_map": true,
       "big_map_icon": 105,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 440
     },
     {
       "npc_index": 51,
@@ -1955,7 +2014,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 441
     },
     {
       "npc_index": 53,
@@ -1987,7 +2047,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 442
     },
     {
       "npc_index": 59,
@@ -2019,7 +2080,8 @@
       "show_on_big_map": true,
       "big_map_icon": 100,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 443
     },
     {
       "npc_index": 52,
@@ -2051,7 +2113,8 @@
       "show_on_big_map": true,
       "big_map_icon": 120,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 444
     },
     {
       "npc_index": 14,
@@ -2083,7 +2146,8 @@
       "show_on_big_map": true,
       "big_map_icon": 116,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 445
     },
     {
       "npc_index": 6,
@@ -2115,7 +2179,8 @@
       "show_on_big_map": true,
       "big_map_icon": 107,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 446
     },
     {
       "npc_index": 11,
@@ -2147,7 +2212,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 447
     },
     {
       "npc_index": 12,
@@ -2179,7 +2245,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 448
     },
     {
       "npc_index": 13,
@@ -2211,7 +2278,8 @@
       "show_on_big_map": true,
       "big_map_icon": 106,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 449
     },
     {
       "npc_index": 10,
@@ -2243,7 +2311,8 @@
       "show_on_big_map": true,
       "big_map_icon": 108,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 450
     },
     {
       "npc_index": 21,
@@ -2275,7 +2344,8 @@
       "show_on_big_map": true,
       "big_map_icon": 102,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 451
     },
     {
       "npc_index": 65,
@@ -2307,7 +2377,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 452
     },
     {
       "npc_index": 63,
@@ -2339,7 +2410,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 453
     },
     {
       "npc_index": 64,
@@ -2371,7 +2443,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 454
     },
     {
       "npc_index": 301,
@@ -2403,7 +2476,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 455
     },
     {
       "npc_index": 67,
@@ -2435,7 +2509,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 456
     },
     {
       "npc_index": 66,
@@ -2467,7 +2542,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 457
     },
     {
       "npc_index": 68,
@@ -2499,7 +2575,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 458
     },
     {
       "npc_index": 69,
@@ -2531,7 +2608,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 459
     },
     {
       "npc_index": 70,
@@ -2563,7 +2641,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 460
     },
     {
       "npc_index": 71,
@@ -2595,7 +2674,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 461
     },
     {
       "npc_index": 72,
@@ -2627,7 +2707,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 462
     },
     {
       "npc_index": 73,
@@ -2659,7 +2740,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 463
     },
     {
       "npc_index": 285,
@@ -2691,7 +2773,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 464
     },
     {
       "npc_index": 74,
@@ -2723,7 +2806,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 557
     },
     {
       "npc_index": 75,
@@ -2755,7 +2839,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 558
     },
     {
       "npc_index": 79,
@@ -2787,7 +2872,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 559
     },
     {
       "npc_index": 80,
@@ -2819,7 +2905,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 560
     },
     {
       "npc_index": 85,
@@ -2851,7 +2938,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 561
     },
     {
       "npc_index": 86,
@@ -2883,7 +2971,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 562
     },
     {
       "npc_index": 87,
@@ -2915,7 +3004,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 563
     },
     {
       "npc_index": 88,
@@ -2947,7 +3037,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 564
     },
     {
       "npc_index": 280,
@@ -2979,7 +3070,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 565
     },
     {
       "npc_index": 286,
@@ -3011,7 +3103,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 566
     },
     {
       "npc_index": 84,
@@ -3043,7 +3136,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 621
     },
     {
       "npc_index": 82,
@@ -3075,7 +3169,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 622
     },
     {
       "npc_index": 83,
@@ -3107,7 +3202,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 623
     },
     {
       "npc_index": 78,
@@ -3139,7 +3235,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 624
     },
     {
       "npc_index": 81,
@@ -3171,7 +3268,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 625
     },
     {
       "npc_index": 77,
@@ -3203,7 +3301,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 626
     },
     {
       "npc_index": 76,
@@ -3235,7 +3334,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 627
     },
     {
       "npc_index": 123,
@@ -3267,7 +3367,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 628
     },
     {
       "npc_index": 124,
@@ -3299,7 +3400,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 629
     },
     {
       "npc_index": 125,
@@ -3331,7 +3433,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 630
     },
     {
       "npc_index": 126,
@@ -3363,7 +3466,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 631
     },
     {
       "npc_index": 288,
@@ -3395,7 +3499,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 632
     },
     {
       "npc_index": 127,
@@ -3427,7 +3532,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 696
     },
     {
       "npc_index": 297,
@@ -3459,7 +3565,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 697
     },
     {
       "npc_index": 96,
@@ -3491,7 +3598,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 698
     },
     {
       "npc_index": 98,
@@ -3523,7 +3631,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 699
     },
     {
       "npc_index": 99,
@@ -3555,7 +3664,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 700
     },
     {
       "npc_index": 100,
@@ -3587,7 +3697,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 701
     },
     {
       "npc_index": 101,
@@ -3619,7 +3730,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 702
     },
     {
       "npc_index": 102,
@@ -3651,7 +3763,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 703
     },
     {
       "npc_index": 103,
@@ -3683,7 +3796,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 704
     },
     {
       "npc_index": 104,
@@ -3715,7 +3829,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 705
     },
     {
       "npc_index": 105,
@@ -3747,7 +3862,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 706
     },
     {
       "npc_index": 106,
@@ -3779,7 +3895,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 707
     },
     {
       "npc_index": 107,
@@ -3811,7 +3928,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 708
     },
     {
       "npc_index": 108,
@@ -3843,7 +3961,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 709
     },
     {
       "npc_index": 109,
@@ -3875,7 +3994,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 710
     },
     {
       "npc_index": 110,
@@ -3907,7 +4027,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 711
     },
     {
       "npc_index": 111,
@@ -3939,7 +4060,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 712
     },
     {
       "npc_index": 113,
@@ -3971,7 +4093,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 713
     },
     {
       "npc_index": 114,
@@ -4003,7 +4126,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 714
     },
     {
       "npc_index": 115,
@@ -4035,7 +4159,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 715
     },
     {
       "npc_index": 116,
@@ -4067,7 +4192,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 716
     },
     {
       "npc_index": 117,
@@ -4099,7 +4225,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 717
     },
     {
       "npc_index": 119,
@@ -4131,7 +4258,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 718
     },
     {
       "npc_index": 120,
@@ -4163,7 +4291,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 719
     },
     {
       "npc_index": 287,
@@ -4195,7 +4324,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 720
     },
     {
       "npc_index": 89,
@@ -4227,7 +4357,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 832
     },
     {
       "npc_index": 97,
@@ -4259,7 +4390,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 833
     },
     {
       "npc_index": 118,
@@ -4291,7 +4423,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 834
     },
     {
       "npc_index": 92,
@@ -4323,7 +4456,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 835
     },
     {
       "npc_index": 95,
@@ -4355,7 +4489,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 836
     },
     {
       "npc_index": 91,
@@ -4387,7 +4522,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 837
     },
     {
       "npc_index": 93,
@@ -4419,7 +4555,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 838
     },
     {
       "npc_index": 94,
@@ -4451,7 +4588,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 839
     },
     {
       "npc_index": 90,
@@ -4483,7 +4621,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 840
     },
     {
       "npc_index": 121,
@@ -4515,7 +4654,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 841
     },
     {
       "npc_index": 122,
@@ -4547,7 +4687,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 842
     },
     {
       "npc_index": 112,
@@ -4579,7 +4720,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 843
     },
     {
       "npc_index": 128,
@@ -4611,7 +4753,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 844
     },
     {
       "npc_index": 129,
@@ -4643,7 +4786,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 845
     },
     {
       "npc_index": 130,
@@ -4675,7 +4819,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 846
     },
     {
       "npc_index": 131,
@@ -4707,7 +4852,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 847
     },
     {
       "npc_index": 132,
@@ -4739,7 +4885,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 848
     },
     {
       "npc_index": 133,
@@ -4771,7 +4918,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 849
     },
     {
       "npc_index": 136,
@@ -4803,7 +4951,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 850
     },
     {
       "npc_index": 137,
@@ -4835,7 +4984,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 851
     },
     {
       "npc_index": 278,
@@ -4867,7 +5017,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 852
     },
     {
       "npc_index": 289,
@@ -4899,7 +5050,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 853
     },
     {
       "npc_index": 134,
@@ -4931,7 +5083,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 909
     },
     {
       "npc_index": 135,
@@ -4963,7 +5116,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 910
     },
     {
       "npc_index": 140,
@@ -5027,7 +5181,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 911
     },
     {
       "npc_index": 138,
@@ -5059,7 +5214,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 912
     },
     {
       "npc_index": 139,
@@ -5091,7 +5247,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 913
     },
     {
       "npc_index": 142,
@@ -5123,7 +5280,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 914
     },
     {
       "npc_index": 143,
@@ -5155,7 +5313,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 915
     },
     {
       "npc_index": 144,
@@ -5187,7 +5346,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 916
     },
     {
       "npc_index": 145,
@@ -5219,7 +5379,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 917
     },
     {
       "npc_index": 146,
@@ -5251,7 +5412,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 918
     },
     {
       "npc_index": 147,
@@ -5283,7 +5445,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 919
     },
     {
       "npc_index": 148,
@@ -5315,7 +5478,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 920
     },
     {
       "npc_index": 149,
@@ -5347,7 +5511,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 921
     },
     {
       "npc_index": 150,
@@ -5379,7 +5544,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 922
     },
     {
       "npc_index": 160,
@@ -5411,7 +5577,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 923
     },
     {
       "npc_index": 161,
@@ -5443,7 +5610,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 924
     },
     {
       "npc_index": 162,
@@ -5475,7 +5643,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 925
     },
     {
       "npc_index": 164,
@@ -5507,7 +5676,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 926
     },
     {
       "npc_index": 165,
@@ -5539,7 +5709,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 927
     },
     {
       "npc_index": 166,
@@ -5571,7 +5742,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 928
     },
     {
       "npc_index": 178,
@@ -5603,7 +5775,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 929
     },
     {
       "npc_index": 279,
@@ -5635,7 +5808,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 930
     },
     {
       "npc_index": 290,
@@ -5667,7 +5841,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 931
     },
     {
       "npc_index": 291,
@@ -5699,7 +5874,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 932
     },
     {
       "npc_index": 151,
@@ -5731,7 +5907,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1129
     },
     {
       "npc_index": 163,
@@ -5763,7 +5940,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1130
     },
     {
       "npc_index": 152,
@@ -5795,7 +5973,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1131
     },
     {
       "npc_index": 153,
@@ -5827,7 +6006,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1132
     },
     {
       "npc_index": 154,
@@ -5859,7 +6039,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1133
     },
     {
       "npc_index": 155,
@@ -5891,7 +6072,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1134
     },
     {
       "npc_index": 156,
@@ -5923,7 +6105,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1135
     },
     {
       "npc_index": 157,
@@ -5955,7 +6138,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1136
     },
     {
       "npc_index": 158,
@@ -5987,7 +6171,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1137
     },
     {
       "npc_index": 159,
@@ -6019,7 +6204,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1138
     },
     {
       "npc_index": 184,
@@ -6051,7 +6237,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1139
     },
     {
       "npc_index": 182,
@@ -6083,7 +6270,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1140
     },
     {
       "npc_index": 183,
@@ -6115,7 +6303,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1141
     },
     {
       "npc_index": 187,
@@ -6147,7 +6336,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1142
     },
     {
       "npc_index": 179,
@@ -6179,7 +6369,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1143
     },
     {
       "npc_index": 180,
@@ -6211,7 +6402,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1144
     },
     {
       "npc_index": 181,
@@ -6243,7 +6435,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1145
     },
     {
       "npc_index": 304,
@@ -6275,7 +6468,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1146
     },
     {
       "npc_index": 167,
@@ -6307,7 +6501,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1147
     },
     {
       "npc_index": 168,
@@ -6339,7 +6534,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1148
     },
     {
       "npc_index": 177,
@@ -6371,7 +6567,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1149
     },
     {
       "npc_index": 173,
@@ -6403,7 +6600,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1150
     },
     {
       "npc_index": 171,
@@ -6435,7 +6633,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1151
     },
     {
       "npc_index": 172,
@@ -6467,7 +6666,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1152
     },
     {
       "npc_index": 174,
@@ -6499,7 +6699,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1153
     },
     {
       "npc_index": 175,
@@ -6531,7 +6732,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1154
     },
     {
       "npc_index": 176,
@@ -6563,7 +6765,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1155
     },
     {
       "npc_index": 169,
@@ -6595,7 +6798,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1156
     },
     {
       "npc_index": 170,
@@ -6627,7 +6831,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": false
+      "conquest_visible": false,
+      "loaded_object_id": 1157
     },
     {
       "npc_index": 188,
@@ -6659,7 +6864,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1158
     },
     {
       "npc_index": 186,
@@ -6691,7 +6897,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1159
     },
     {
       "npc_index": 185,
@@ -6723,7 +6930,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1160
     },
     {
       "npc_index": 299,
@@ -6755,7 +6963,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1161
     },
     {
       "npc_index": 298,
@@ -6787,7 +6996,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1162
     },
     {
       "npc_index": 190,
@@ -6819,7 +7029,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1163
     },
     {
       "npc_index": 193,
@@ -6851,7 +7062,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1164
     },
     {
       "npc_index": 195,
@@ -6883,7 +7095,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1165
     },
     {
       "npc_index": 197,
@@ -6915,7 +7128,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1166
     },
     {
       "npc_index": 198,
@@ -6947,7 +7161,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1167
     },
     {
       "npc_index": 199,
@@ -6979,7 +7194,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1168
     },
     {
       "npc_index": 200,
@@ -7011,7 +7227,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1169
     },
     {
       "npc_index": 201,
@@ -7043,7 +7260,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1170
     },
     {
       "npc_index": 202,
@@ -7075,7 +7293,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1171
     },
     {
       "npc_index": 203,
@@ -7107,7 +7326,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1172
     },
     {
       "npc_index": 204,
@@ -7139,7 +7359,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1173
     },
     {
       "npc_index": 205,
@@ -7171,7 +7392,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1174
     },
     {
       "npc_index": 206,
@@ -7203,7 +7425,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1175
     },
     {
       "npc_index": 208,
@@ -7235,7 +7458,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1176
     },
     {
       "npc_index": 281,
@@ -7267,7 +7491,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1177
     },
     {
       "npc_index": 292,
@@ -7299,7 +7524,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1178
     },
     {
       "npc_index": 192,
@@ -7331,7 +7557,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1247
     },
     {
       "npc_index": 189,
@@ -7363,7 +7590,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1248
     },
     {
       "npc_index": 191,
@@ -7395,7 +7623,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1249
     },
     {
       "npc_index": 207,
@@ -7427,7 +7656,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1250
     },
     {
       "npc_index": 194,
@@ -7459,7 +7689,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1251
     },
     {
       "npc_index": 196,
@@ -7491,7 +7722,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1252
     },
     {
       "npc_index": 209,
@@ -7523,7 +7755,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1253
     },
     {
       "npc_index": 210,
@@ -7555,7 +7788,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1254
     },
     {
       "npc_index": 211,
@@ -7587,7 +7821,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1255
     },
     {
       "npc_index": 212,
@@ -7619,7 +7854,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1256
     },
     {
       "npc_index": 213,
@@ -7651,7 +7887,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1257
     },
     {
       "npc_index": 214,
@@ -7683,7 +7920,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1258
     },
     {
       "npc_index": 215,
@@ -7715,7 +7953,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1259
     },
     {
       "npc_index": 216,
@@ -7747,7 +7986,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1260
     },
     {
       "npc_index": 217,
@@ -7779,7 +8019,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1261
     },
     {
       "npc_index": 218,
@@ -7811,7 +8052,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1262
     },
     {
       "npc_index": 219,
@@ -7843,7 +8085,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1263
     },
     {
       "npc_index": 220,
@@ -7875,7 +8118,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1264
     },
     {
       "npc_index": 222,
@@ -7907,7 +8151,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1265
     },
     {
       "npc_index": 282,
@@ -7939,7 +8184,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1266
     },
     {
       "npc_index": 221,
@@ -7971,7 +8217,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1341
     },
     {
       "npc_index": 223,
@@ -8003,7 +8250,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1342
     },
     {
       "npc_index": 224,
@@ -8035,7 +8283,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1343
     },
     {
       "npc_index": 225,
@@ -8067,7 +8316,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1344
     },
     {
       "npc_index": 226,
@@ -8099,7 +8349,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1345
     },
     {
       "npc_index": 227,
@@ -8131,7 +8382,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1346
     },
     {
       "npc_index": 228,
@@ -8163,7 +8415,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1347
     },
     {
       "npc_index": 229,
@@ -8195,7 +8448,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1348
     },
     {
       "npc_index": 230,
@@ -8227,7 +8481,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1349
     },
     {
       "npc_index": 231,
@@ -8259,7 +8514,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1350
     },
     {
       "npc_index": 232,
@@ -8291,7 +8547,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1351
     },
     {
       "npc_index": 233,
@@ -8323,7 +8580,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1352
     },
     {
       "npc_index": 234,
@@ -8355,7 +8613,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1353
     },
     {
       "npc_index": 241,
@@ -8387,7 +8646,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1354
     },
     {
       "npc_index": 242,
@@ -8419,7 +8679,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1355
     },
     {
       "npc_index": 243,
@@ -8451,7 +8712,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1356
     },
     {
       "npc_index": 244,
@@ -8483,7 +8745,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1357
     },
     {
       "npc_index": 293,
@@ -8515,7 +8778,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1358
     },
     {
       "npc_index": 305,
@@ -8547,7 +8811,8 @@
       "show_on_big_map": true,
       "big_map_icon": 119,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1359
     },
     {
       "npc_index": 237,
@@ -8579,7 +8844,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1473
     },
     {
       "npc_index": 239,
@@ -8611,7 +8877,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1474
     },
     {
       "npc_index": 240,
@@ -8643,7 +8910,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1475
     },
     {
       "npc_index": 236,
@@ -8675,7 +8943,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1476
     },
     {
       "npc_index": 238,
@@ -8707,7 +8976,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1477
     },
     {
       "npc_index": 235,
@@ -8739,7 +9009,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1478
     },
     {
       "npc_index": 245,
@@ -8771,7 +9042,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1479
     },
     {
       "npc_index": 246,
@@ -8803,7 +9075,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1480
     },
     {
       "npc_index": 247,
@@ -8835,7 +9108,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1481
     },
     {
       "npc_index": 248,
@@ -8867,7 +9141,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1482
     },
     {
       "npc_index": 249,
@@ -8899,7 +9174,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1483
     },
     {
       "npc_index": 250,
@@ -8931,7 +9207,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1484
     },
     {
       "npc_index": 251,
@@ -8963,7 +9240,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1485
     },
     {
       "npc_index": 252,
@@ -8995,7 +9273,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1486
     },
     {
       "npc_index": 253,
@@ -9027,7 +9306,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1487
     },
     {
       "npc_index": 254,
@@ -9059,7 +9339,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1488
     },
     {
       "npc_index": 255,
@@ -9091,7 +9372,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1489
     },
     {
       "npc_index": 256,
@@ -9123,7 +9405,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1490
     },
     {
       "npc_index": 257,
@@ -9155,7 +9438,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1491
     },
     {
       "npc_index": 258,
@@ -9187,7 +9471,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1492
     },
     {
       "npc_index": 259,
@@ -9219,7 +9504,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1493
     },
     {
       "npc_index": 260,
@@ -9251,7 +9537,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1494
     },
     {
       "npc_index": 261,
@@ -9283,7 +9570,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1495
     },
     {
       "npc_index": 262,
@@ -9315,7 +9603,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1496
     },
     {
       "npc_index": 263,
@@ -9347,7 +9636,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1497
     },
     {
       "npc_index": 264,
@@ -9379,7 +9669,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1498
     },
     {
       "npc_index": 265,
@@ -9411,7 +9702,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1499
     },
     {
       "npc_index": 266,
@@ -9443,7 +9735,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1500
     },
     {
       "npc_index": 267,
@@ -9475,7 +9768,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1501
     },
     {
       "npc_index": 268,
@@ -9507,7 +9801,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1502
     },
     {
       "npc_index": 269,
@@ -9539,7 +9834,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1503
     },
     {
       "npc_index": 270,
@@ -9571,7 +9867,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1504
     },
     {
       "npc_index": 271,
@@ -9603,7 +9900,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1505
     },
     {
       "npc_index": 272,
@@ -9635,7 +9933,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1506
     },
     {
       "npc_index": 273,
@@ -9667,7 +9966,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1507
     },
     {
       "npc_index": 274,
@@ -9699,7 +9999,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1508
     },
     {
       "npc_index": 275,
@@ -9731,7 +10032,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1509
     },
     {
       "npc_index": 300,
@@ -9763,7 +10065,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1510
     },
     {
       "npc_index": 307,
@@ -9795,7 +10098,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1614
     },
     {
       "npc_index": 308,
@@ -9827,7 +10131,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1615
     },
     {
       "npc_index": 309,
@@ -9859,7 +10164,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1616
     },
     {
       "npc_index": 310,
@@ -9891,7 +10197,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1617
     },
     {
       "npc_index": 314,
@@ -9923,7 +10230,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1666
     },
     {
       "npc_index": 315,
@@ -9955,7 +10263,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1667
     },
     {
       "npc_index": 316,
@@ -9987,7 +10296,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1668
     },
     {
       "npc_index": 317,
@@ -10019,7 +10329,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1669
     },
     {
       "npc_index": 321,
@@ -10051,7 +10362,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1718
     },
     {
       "npc_index": 322,
@@ -10083,7 +10395,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1719
     },
     {
       "npc_index": 323,
@@ -10115,7 +10428,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1720
     },
     {
       "npc_index": 324,
@@ -10147,7 +10461,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1721
     },
     {
       "npc_index": 328,
@@ -10179,7 +10494,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1770
     },
     {
       "npc_index": 329,
@@ -10211,7 +10527,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1771
     },
     {
       "npc_index": 330,
@@ -10243,7 +10560,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1772
     },
     {
       "npc_index": 331,
@@ -10275,7 +10593,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1773
     },
     {
       "npc_index": 335,
@@ -10307,7 +10626,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1822
     },
     {
       "npc_index": 336,
@@ -10339,7 +10659,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1823
     },
     {
       "npc_index": 337,
@@ -10371,7 +10692,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1824
     },
     {
       "npc_index": 338,
@@ -10403,7 +10725,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1825
     },
     {
       "npc_index": 342,
@@ -10435,7 +10758,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1874
     },
     {
       "npc_index": 343,
@@ -10467,7 +10791,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1875
     },
     {
       "npc_index": 344,
@@ -10499,7 +10824,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1876
     },
     {
       "npc_index": 345,
@@ -10531,7 +10857,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1877
     },
     {
       "npc_index": 349,
@@ -10563,7 +10890,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1926
     },
     {
       "npc_index": 350,
@@ -10595,7 +10923,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1927
     },
     {
       "npc_index": 351,
@@ -10627,7 +10956,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1928
     },
     {
       "npc_index": 352,
@@ -10659,7 +10989,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1929
     },
     {
       "npc_index": 356,
@@ -10691,7 +11022,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1978
     },
     {
       "npc_index": 357,
@@ -10723,7 +11055,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1979
     },
     {
       "npc_index": 358,
@@ -10755,7 +11088,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1980
     },
     {
       "npc_index": 359,
@@ -10787,7 +11121,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 1981
     },
     {
       "npc_index": 363,
@@ -10819,7 +11154,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2030
     },
     {
       "npc_index": 364,
@@ -10851,7 +11187,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2031
     },
     {
       "npc_index": 365,
@@ -10883,7 +11220,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2032
     },
     {
       "npc_index": 366,
@@ -10915,7 +11253,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2033
     },
     {
       "npc_index": 370,
@@ -10947,7 +11286,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2082
     },
     {
       "npc_index": 371,
@@ -10979,7 +11319,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2083
     },
     {
       "npc_index": 372,
@@ -11011,7 +11352,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2084
     },
     {
       "npc_index": 373,
@@ -11043,7 +11385,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2085
     },
     {
       "npc_index": 311,
@@ -11075,7 +11418,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2134
     },
     {
       "npc_index": 312,
@@ -11107,7 +11451,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2135
     },
     {
       "npc_index": 318,
@@ -11139,7 +11484,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2136
     },
     {
       "npc_index": 319,
@@ -11171,7 +11517,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2137
     },
     {
       "npc_index": 325,
@@ -11203,7 +11550,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2138
     },
     {
       "npc_index": 326,
@@ -11235,7 +11583,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2139
     },
     {
       "npc_index": 332,
@@ -11267,7 +11616,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2140
     },
     {
       "npc_index": 333,
@@ -11299,7 +11649,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2141
     },
     {
       "npc_index": 339,
@@ -11331,7 +11682,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2142
     },
     {
       "npc_index": 340,
@@ -11363,7 +11715,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2143
     },
     {
       "npc_index": 346,
@@ -11395,7 +11748,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2144
     },
     {
       "npc_index": 347,
@@ -11427,7 +11781,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2145
     },
     {
       "npc_index": 353,
@@ -11459,7 +11814,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2146
     },
     {
       "npc_index": 354,
@@ -11491,7 +11847,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2147
     },
     {
       "npc_index": 360,
@@ -11523,7 +11880,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2148
     },
     {
       "npc_index": 361,
@@ -11555,7 +11913,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2149
     },
     {
       "npc_index": 367,
@@ -11587,7 +11946,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2150
     },
     {
       "npc_index": 368,
@@ -11619,7 +11979,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2151
     },
     {
       "npc_index": 374,
@@ -11651,7 +12012,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2152
     },
     {
       "npc_index": 375,
@@ -11683,7 +12045,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2153
     },
     {
       "npc_index": 313,
@@ -11715,7 +12078,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2154
     },
     {
       "npc_index": 320,
@@ -11747,7 +12111,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2155
     },
     {
       "npc_index": 327,
@@ -11779,7 +12144,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2156
     },
     {
       "npc_index": 334,
@@ -11811,7 +12177,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2157
     },
     {
       "npc_index": 341,
@@ -11843,7 +12210,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2158
     },
     {
       "npc_index": 348,
@@ -11875,7 +12243,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2159
     },
     {
       "npc_index": 355,
@@ -11907,7 +12276,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2160
     },
     {
       "npc_index": 362,
@@ -11939,7 +12309,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2161
     },
     {
       "npc_index": 369,
@@ -11971,7 +12342,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2162
     },
     {
       "npc_index": 376,
@@ -12003,7 +12375,8 @@
       "show_on_big_map": false,
       "big_map_icon": 0,
       "can_teleport_to": false,
-      "conquest_visible": true
+      "conquest_visible": true,
+      "loaded_object_id": 2163
     }
   ]
 }

@@ -198,6 +198,8 @@ impl TryFrom<u8> for MirGridType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Spell {
     None = 0,
+    Healing = 61,
+    TrapHexagon = 73,
     DigOutArmadillo = 206,
     GeneralMeowMeowThunder = 207,
     TucsonGeneralRock = 213,
@@ -209,6 +211,8 @@ impl TryFrom<u8> for Spell {
     fn try_from(value: u8) -> Result<Self> {
         match value {
             0 => Ok(Self::None),
+            61 => Ok(Self::Healing),
+            73 => Ok(Self::TrapHexagon),
             206 => Ok(Self::DigOutArmadillo),
             207 => Ok(Self::GeneralMeowMeowThunder),
             213 => Ok(Self::TucsonGeneralRock),
@@ -295,8 +299,11 @@ pub struct UserInformation {
     pub has_hero: bool,
     pub hero_behaviour: u8,
     pub inventory_section_present: bool,
+    pub inventory: Option<Vec<Option<UserItem>>>,
     pub equipment_section_present: bool,
+    pub equipment: Option<Vec<Option<UserItem>>>,
     pub quest_inventory_section_present: bool,
+    pub quest_inventory: Option<Vec<Option<UserItem>>>,
     pub gold: u32,
     pub credit: u32,
     pub has_expanded_storage: bool,
@@ -333,12 +340,12 @@ impl UserInformation {
         let level_effects = reader.read_u16()?;
         let has_hero = reader.read_bool()?;
         let hero_behaviour = reader.read_u8()?;
-        let inventory_section_present =
-            decode_optional_empty_item_section(reader, "inventory_slots")?;
-        let equipment_section_present =
-            decode_optional_empty_item_section(reader, "equipment_slots")?;
-        let quest_inventory_section_present =
-            decode_optional_empty_item_section(reader, "quest_inventory_slots")?;
+        let (inventory_section_present, inventory) =
+            decode_optional_item_section(reader, "inventory_slots")?;
+        let (equipment_section_present, equipment) =
+            decode_optional_item_section(reader, "equipment_slots")?;
+        let (quest_inventory_section_present, quest_inventory) =
+            decode_optional_item_section(reader, "quest_inventory_slots")?;
         let gold = reader.read_u32()?;
         let credit = reader.read_u32()?;
         let has_expanded_storage = reader.read_bool()?;
@@ -375,8 +382,11 @@ impl UserInformation {
             has_hero,
             hero_behaviour,
             inventory_section_present,
+            inventory,
             equipment_section_present,
+            equipment,
             quest_inventory_section_present,
+            quest_inventory,
             gold,
             credit,
             has_expanded_storage,
@@ -413,9 +423,21 @@ impl UserInformation {
         writer.write_u16(self.level_effects);
         writer.write_bool(self.has_hero);
         writer.write_u8(self.hero_behaviour);
-        encode_optional_empty_item_section(writer, self.inventory_section_present);
-        encode_optional_empty_item_section(writer, self.equipment_section_present);
-        encode_optional_empty_item_section(writer, self.quest_inventory_section_present);
+        encode_optional_item_section(
+            writer,
+            self.inventory_section_present,
+            self.inventory.as_deref(),
+        )?;
+        encode_optional_item_section(
+            writer,
+            self.equipment_section_present,
+            self.equipment.as_deref(),
+        )?;
+        encode_optional_item_section(
+            writer,
+            self.quest_inventory_section_present,
+            self.quest_inventory.as_deref(),
+        )?;
         writer.write_u32(self.gold);
         writer.write_u32(self.credit);
         writer.write_bool(self.has_expanded_storage);
@@ -1492,13 +1514,13 @@ impl ObjectRangeAttackInfo {
     }
 }
 
-fn decode_optional_empty_item_section(
+fn decode_optional_item_section(
     reader: &mut PacketReader<'_>,
     section: &'static str,
-) -> Result<bool> {
+) -> Result<(bool, Option<Vec<Option<UserItem>>>)> {
     let present = reader.read_bool()?;
     if !present {
-        return Ok(false);
+        return Ok((false, None));
     }
 
     let count = reader.read_i32()?;
@@ -1508,18 +1530,45 @@ fn decode_optional_empty_item_section(
             value: count,
         });
     }
-    if count != 0 {
-        return Err(PacketCodecError::UnsupportedUserInformationSection { section, count });
+
+    let mut items = Vec::with_capacity(count as usize);
+    for _ in 0..count {
+        if reader.read_bool()? {
+            items.push(Some(UserItem::decode(reader)?));
+        } else {
+            items.push(None);
+        }
     }
 
-    Ok(true)
+    Ok((true, Some(items)))
 }
 
-fn encode_optional_empty_item_section(writer: &mut PacketWriter, present: bool) {
+fn encode_optional_item_section(
+    writer: &mut PacketWriter,
+    present: bool,
+    items: Option<&[Option<UserItem>]>,
+) -> Result<()> {
+    let present = present || items.is_some();
     writer.write_bool(present);
-    if present {
-        writer.write_i32(0);
+    if !present {
+        return Ok(());
     }
+
+    let Some(items) = items else {
+        writer.write_i32(0);
+        return Ok(());
+    };
+    writer.write_i32(
+        i32::try_from(items.len())
+            .map_err(|_| PacketCodecError::PacketTooLarge { size: items.len() })?,
+    );
+    for item in items {
+        writer.write_bool(item.is_some());
+        if let Some(item) = item {
+            item.encode(writer)?;
+        }
+    }
+    Ok(())
 }
 
 fn decode_empty_count_section(reader: &mut PacketReader<'_>, section: &'static str) -> Result<i32> {
