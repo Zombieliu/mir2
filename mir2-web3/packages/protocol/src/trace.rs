@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::ids::ServerPacketId;
 use crate::packets::{ClientPacket, ServerPacket};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -90,6 +91,24 @@ pub fn client_packet_name(packet: &ClientPacket) -> &'static str {
 
 pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
     match packet {
+        ServerPacket::Raw { packet_id, .. } => match packet_id {
+            ServerPacketId::TimeOfDay => "TimeOfDay",
+            ServerPacketId::ChangeAMode => "ChangeAMode",
+            ServerPacketId::ChangePMode => "ChangePMode",
+            ServerPacketId::SwitchGroup => "SwitchGroup",
+            ServerPacketId::BaseStatsInfo => "BaseStatsInfo",
+            ServerPacketId::DefaultNPC => "DefaultNPC",
+            ServerPacketId::NPCUpdate => "NPCUpdate",
+            ServerPacketId::NPCResponse => "NPCResponse",
+            ServerPacketId::CompleteQuest => "CompleteQuest",
+            ServerPacketId::ReceiveMail => "ReceiveMail",
+            ServerPacketId::FriendUpdate => "FriendUpdate",
+            ServerPacketId::LoverUpdate => "LoverUpdate",
+            ServerPacketId::MentorUpdate => "MentorUpdate",
+            ServerPacketId::GuildBuffList => "GuildBuffList",
+            ServerPacketId::GameShopInfo => "GameShopInfo",
+            _ => "Raw",
+        },
         ServerPacket::Connected => "Connected",
         ServerPacket::ClientVersion { .. } => "ClientVersion",
         ServerPacket::Disconnect { .. } => "Disconnect",
@@ -179,6 +198,8 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::ObjectRangeAttack { .. } => "ObjectRangeAttack",
         ServerPacket::RefreshItem { .. } => "RefreshItem",
         ServerPacket::ObjectSpell { .. } => "ObjectSpell",
+        ServerPacket::NewQuestInfo { .. } => "NewQuestInfo",
+        ServerPacket::NewRecipeInfo { .. } => "NewRecipeInfo",
         ServerPacket::ResizeStorage { .. } => "ResizeStorage",
         ServerPacket::StorageUnlockResult { .. } => "StorageUnlockResult",
         ServerPacket::StoragePasswordResult { .. } => "StoragePasswordResult",

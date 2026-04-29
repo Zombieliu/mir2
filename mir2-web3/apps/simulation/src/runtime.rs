@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::component::Component;
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::{Resource, World};
+use bevy_ecs::prelude::{Resource, With, Without, World};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
@@ -19,10 +19,13 @@ use crate::config::{
     WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldSnapshot,
 };
 use mir2_game_data::{
-    crystal_drop_table_for_monster_name, crystal_item_by_index, crystal_item_by_name,
-    crystal_magic_by_spell, crystal_map_respawns_by_file_name, crystal_map_respawns_by_index,
-    crystal_monster_by_name, crystal_monster_manifest, crystal_npc_info_by_script_key,
-    crystal_npc_script_by_key, crystal_starter_region_respawns, format_localized_text,
+    crystal_base_stats_info_packet_payload, crystal_drop_table_for_monster_name,
+    crystal_game_shop_info_packet_payloads, crystal_guild_buff_list_packet_payload,
+    crystal_item_by_index, crystal_item_by_name, crystal_magic_by_spell,
+    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_name,
+    crystal_monster_manifest, crystal_npc_info_by_script_key, crystal_npc_info_manifest,
+    crystal_npc_script_by_key, crystal_quest_packet_manifest, crystal_quest_packet_payloads,
+    crystal_recipe_bootstrap_packets, crystal_starter_region_respawns, format_localized_text,
     localized_text_or_fallback, starter_server_data, BlockedMapCellTemplate, CrystalDropEntry,
     CrystalItemTemplate, CrystalMonsterTemplate, CrystalNpcScript, CrystalNpcSection,
     CrystalRandomItemStatProfile, CrystalRandomStatRoll, CrystalRespawnTemplate, DecorKind,
@@ -35,14 +38,15 @@ use mir2_protocol::{
     MirGridType, MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
     ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectMovement, ObjectPlayerInfo,
     ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point,
-    ServerPacket, Spell, StruckInfo, UserInformation, UserItem, UserItemRentalInformation,
-    UserItemSealedInfo, UserItemStat, UserLocation,
+    ServerPacket, ServerPacketId, Spell, StruckInfo, UserInformation, UserItem,
+    UserItemRentalInformation, UserItemSealedInfo, UserItemStat, UserLocation,
 };
 
 const GUIDE_QUEST_ID: i32 = 1001;
 const GUIDE_NPC_ID: u32 = 4001;
 const FIELD_WASP_ID: u32 = 3002;
 const CRYSTAL_DATA_RANGE: i32 = 16;
+const CRYSTAL_RESPAWN_OBJECT_ID_BASE: u32 = 200_000;
 const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
 const BUG_BAT_IMAGE: u16 = 42;
 const BUG_BAT_FALLBACK_VIEW_RANGE: u8 = 7;
@@ -2029,8 +2033,8 @@ impl SimulationSession {
             let mut facing = player.get_mut::<Facing>().expect("player facing");
             if facing.0 != direction {
                 facing.0 = direction;
-                packets.push(ServerPacket::ObjectTurn {
-                    movement: current_movement(self.app.world()),
+                packets.push(ServerPacket::UserLocation {
+                    location: current_location(self.app.world()),
                 });
             }
         }
@@ -2109,8 +2113,8 @@ impl SimulationSession {
         }
 
         let Some(object_id) = attack_target_in_direction(self.app.world(), direction) else {
-            return vec![ServerPacket::ObjectTurn {
-                movement: current_movement(self.app.world()),
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
             }];
         };
 
@@ -2132,16 +2136,14 @@ impl SimulationSession {
             .entity_mut(player)
             .insert(Facing(direction));
 
-        let mut packets = vec![
-            ServerPacket::UserLocation {
-                location: current_location(self.app.world()),
-            },
-            ServerPacket::ObjectHarvest {
-                movement: current_movement(self.app.world()),
-            },
-        ];
+        let mut packets = vec![ServerPacket::UserLocation {
+            location: current_location(self.app.world()),
+        }];
 
         if let Some(selection) = harvest_target_in_direction(self.app.world(), direction) {
+            packets.push(ServerPacket::ObjectHarvest {
+                movement: current_movement(self.app.world()),
+            });
             match selection {
                 HarvestTargetSelection::Target(target) => {
                     packets.extend(harvest_monster_entity(self.app.world_mut(), target));
@@ -2480,25 +2482,10 @@ impl SimulationSession {
                         || !resources.config.require_storage_password;
                 }
 
-                vec![
-                    ServerPacket::DeleteCharacterSuccess { character_index },
-                    ServerPacket::Chat {
-                        message: format_localized_text(
-                            current_language(self.app.world()),
-                            "custom.characterDeleted",
-                            [deleted_name],
-                        ),
-                        chat_type: ChatType::System,
-                    },
-                ]
+                let _ = deleted_name;
+                vec![ServerPacket::DeleteCharacterSuccess { character_index }]
             }
-            Err(error) => vec![
-                ServerPacket::DeleteCharacter { result: 1 },
-                ServerPacket::Chat {
-                    message: error,
-                    chat_type: ChatType::System,
-                },
-            ],
+            Err(_error) => vec![ServerPacket::DeleteCharacter { result: 1 }],
         }
     }
 
@@ -3619,11 +3606,10 @@ impl SimulationSession {
                 ..
             } => {
                 let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
-                let characters =
-                    ensure_account_with_password(&resources.config, &account_id, &password);
-                resources.account_id = Some(account_id);
-                resources.characters = characters;
-                vec![ServerPacket::NewAccount { result: 8 }]
+                let result =
+                    create_account_with_password(&resources.config, &account_id, &password);
+                resources.characters.clear();
+                vec![ServerPacket::NewAccount { result }]
             }
             ClientPacket::ChangePassword {
                 account_id,
@@ -3702,7 +3688,7 @@ impl SimulationSession {
                 );
                 resources.characters = account_characters(&resources.config, &account_id);
                 vec![ServerPacket::NewCharacterSuccess {
-                    char_info: character.to_select_info(),
+                    char_info: character.to_new_character_select_info(),
                 }]
             }
             ClientPacket::DeleteCharacter { character_index } => {
@@ -3741,8 +3727,8 @@ impl SimulationSession {
                         .world_mut()
                         .entity_mut(player)
                         .insert(Facing(direction));
-                    let mut packets = vec![ServerPacket::ObjectTurn {
-                        movement: current_movement(self.app.world()),
+                    let mut packets = vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
                     }];
                     packets.extend(advance_world(self.app.world_mut()));
                     packets
@@ -3925,18 +3911,42 @@ impl SimulationSession {
             let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
             apply_character_save(&mut resources, &save);
         }
+        refresh_runtime_map_collision(self.app.world_mut());
         refresh_storage_password_state(self.app.world_mut());
         rebuild_world(self.app.world_mut());
+        if should_use_crystal_current_map_world(self.app.world()) {
+            clear_non_player_world_entities(self.app.world_mut());
+            spawn_visible_world_for_current_map(self.app.world_mut());
+        }
 
         let visible_objects = collect_visible_objects(self.app.world());
         self.visible_objects = visible_objects.keys().copied().collect();
 
         let resources = self.app.world().resource::<SimulationResources>();
+        let mut sent_item_info_indices = BTreeSet::new();
         let mut packets = vec![
             ServerPacket::StartGame {
                 result: 4,
-                resolution: 0,
+                resolution: 1920,
             },
+            ServerPacket::Chat {
+                message: format_localized_text(
+                    current_language(self.app.world()),
+                    "server.Welcome",
+                    [localized_text_or_fallback(
+                        current_language(self.app.world()),
+                        "server.GameName",
+                        "Legend of Mir 2",
+                    )],
+                ),
+                chat_type: ChatType::Hint,
+            },
+        ];
+        packets.extend(start_game_item_info_packets(
+            resources,
+            &mut sent_item_info_indices,
+        ));
+        packets.extend([
             ServerPacket::MapInformation {
                 info: {
                     let mut info = resources.current_map.clone();
@@ -3971,23 +3981,28 @@ impl SimulationSession {
                     resources.storage_size,
                     resources.has_expanded_storage,
                     resources.storage_has_password,
-                    storage_password_required(
-                        &resources.config,
-                        resources.storage_has_password,
-                        resources.storage_unlocked,
-                    ),
+                    resources.config.require_storage_password,
                     resources.storage_password_last_set_binary_datetime,
                     resources.expanded_storage_expiry_time_binary_datetime,
                     resources.stage5_systems.appearance.hair,
-                    !resources.inventory_items.is_empty(),
-                    !resources.equipment_items.is_empty(),
-                    resources
-                        .inventory_items
-                        .iter()
-                        .any(|item| item.container == ItemContainer::Quest),
+                    &resources.inventory_items,
+                    &resources.equipment_items,
                 ),
             },
-        ];
+        ]);
+        packets.extend(
+            crystal_quest_packet_payloads()
+                .into_iter()
+                .map(|payload| ServerPacket::NewQuestInfo { payload }),
+        );
+        packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
+        packets.extend(start_game_account_social_and_shop_packets());
+        packets.extend(start_game_base_stats_packet(character.class));
+        packets.extend(start_game_static_visible_object_packets(
+            &resources.current_map.file_name,
+            &resources.player_position,
+            &character,
+        ));
         if resources.storage_size != BASE_STORAGE_SLOTS
             || resources.has_expanded_storage
             || resources.expanded_storage_expiry_time_binary_datetime != 0
@@ -3998,29 +4013,13 @@ impl SimulationSession {
                 expiry_time_binary_datetime: resources.expanded_storage_expiry_time_binary_datetime,
             });
         }
-        packets.extend([
-            ServerPacket::UserLocation {
-                location: current_location(self.app.world()),
-            },
-            ServerPacket::Chat {
-                message: format_localized_text(
-                    current_language(self.app.world()),
-                    "server.Welcome",
-                    [localized_text_or_fallback(
-                        current_language(self.app.world()),
-                        "server.GameName",
-                        "Legend of Mir 2",
-                    )],
-                ),
-                chat_type: ChatType::Hint,
-            },
-        ]);
         for bundle in visible_objects.into_values() {
             packets.push(bundle.spawn_packet);
             if let Some(health_packet) = bundle.health_packet {
                 packets.push(health_packet);
             }
         }
+        packets.extend(start_game_post_visible_crystal_bootstrap_packets());
         packets
     }
 
@@ -4033,33 +4032,16 @@ impl SimulationSession {
             return Vec::new();
         };
 
-        let (previous_position, previous_direction) = {
-            let entity = self.app.world().entity(player);
-            (
-                entity.get::<Position>().expect("player position").0.clone(),
-                entity.get::<Facing>().expect("player facing").0,
-            )
-        };
-
         self.app
             .world_mut()
             .entity_mut(player)
             .insert(Facing(direction));
 
-        let moved = step_player(self.app.world_mut(), move_distance_for_mode(running));
-        let current_position =
-            entity_position(self.app.world(), player).expect("player position after movement");
-        let current_direction =
-            entity_facing(self.app.world(), player).expect("player facing after movement");
+        step_player(self.app.world_mut(), move_distance_for_mode(running));
 
-        let mut packets = Vec::new();
-        if moved {
-            packets.push(player_motion_packet(self.app.world(), running));
-        } else if previous_direction != current_direction || previous_position != current_position {
-            packets.push(ServerPacket::ObjectTurn {
-                movement: current_movement(self.app.world()),
-            });
-        }
+        let mut packets = vec![ServerPacket::UserLocation {
+            location: current_location(self.app.world()),
+        }];
 
         packets.extend(advance_world(self.app.world_mut()));
         packets
@@ -4257,6 +4239,7 @@ fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> 
         belt_items_json: encode_state_vec(&resources.belt_items),
         storage_items_json: encode_state_vec(&resources.storage_items),
         equipment_items_json: encode_state_vec(&resources.equipment_items),
+        equipment_items_explicit_empty: resources.equipment_items.is_empty(),
         quest_states_json: encode_state_vec(&resources.quests),
         skill_states_json: encode_state_vec(&resources.skills),
         npc_flag_states_json: encode_state_vec(&resources.npc_flags),
@@ -4865,26 +4848,22 @@ fn remove_storage_password_impl(world: &mut World, current_password: &str) -> Ve
     }]
 }
 
-fn ensure_account_with_password(
-    config: &SimulationConfig,
-    account_id: &str,
-    password: &str,
-) -> Vec<CharacterRecord> {
+fn create_account_with_password(config: &SimulationConfig, account_id: &str, password: &str) -> u8 {
     let mut store = config
         .account_store
         .lock()
         .expect("account store mutex should not be poisoned");
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+    if store.accounts.contains_key(account_id) {
+        return 7;
+    }
+    let mut account = AccountRecord::empty();
     account.password = password.to_string();
-    let characters = account.characters.clone();
+    store.accounts.insert(account_id.to_string(), account);
     drop(store);
     if let Err(error) = config.save_account_store() {
         eprintln!("failed to persist account store: {error}");
     }
-    characters
+    8
 }
 
 enum AccountLoginResult {
@@ -4979,17 +4958,11 @@ fn add_character_to_account(
         .account_store
         .lock()
         .expect("account store mutex should not be poisoned");
+    character.index = store.allocate_character_index();
     let account = store
         .accounts
         .entry(account_id.to_string())
         .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-    character.index = account
-        .characters
-        .iter()
-        .map(|character| character.index)
-        .max()
-        .map(|index| index + 1)
-        .unwrap_or(0);
     account.characters.push(character.clone());
     account
         .saves
@@ -5014,10 +4987,6 @@ fn delete_character_from_account(
         .accounts
         .entry(account_id.to_string())
         .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-
-    if account.characters.len() <= 1 {
-        return Err("At least one character must remain on the account.".to_string());
-    }
 
     let Some(existing) = account
         .characters
@@ -5107,11 +5076,12 @@ fn apply_character_save(resources: &mut SimulationResources, save: &CharacterSav
     } else {
         decode_state_vec(&save.storage_items_json).unwrap_or_else(seed_storage_items)
     };
-    resources.equipment_items = if save.equipment_items_json.is_empty() {
-        seed_equipment_items()
-    } else {
-        decode_state_vec(&save.equipment_items_json).unwrap_or_else(seed_equipment_items)
-    };
+    resources.equipment_items =
+        if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
+            seed_equipment_items()
+        } else {
+            decode_state_vec(&save.equipment_items_json).unwrap_or_else(seed_equipment_items)
+        };
     resources.quests = if save.quest_states_json.is_empty() {
         vec![QuestState::guide_training()]
     } else {
@@ -5330,6 +5300,7 @@ fn collect_world_entities(
         let self_marker = entity.get::<SelfPlayer>();
         let remote_marker = entity.get::<RemotePlayer>();
         let npc_marker = entity.get::<Npc>();
+        let npc_agent = entity.get::<NpcAgent>();
 
         if self_marker.is_none() && !point_visible(scene_view, &position.0) {
             continue;
@@ -5378,13 +5349,20 @@ fn collect_world_entities(
         let sprite = entity_sprite_snapshot(
             body,
             monster_agent,
-            entity.get::<NpcAgent>(),
+            npc_agent,
             if self_marker.is_some() {
                 Some(self_equipment_items)
             } else {
                 None
             },
         );
+        let quest_ids = npc_agent
+            .map(|agent| agent.quest_ids.clone())
+            .unwrap_or_default();
+        let name_colour_argb = match kind {
+            WorldEntityKind::Npc => -16_711_936,
+            _ => -1,
+        };
 
         result.push(WorldEntitySnapshot {
             object_id: object_id.0,
@@ -5398,9 +5376,11 @@ fn collect_world_entities(
             level,
             hp,
             max_hp,
+            name_colour_argb,
             dead,
             disposition,
             sprite,
+            quest_ids,
         });
     }
 
@@ -5809,6 +5789,7 @@ fn build_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable {
     }
 }
 
+#[cfg(test)]
 fn build_crystal_current_map_spawn_table(
     config: &SimulationConfig,
     map_file_name: &str,
@@ -5865,6 +5846,55 @@ fn build_crystal_current_map_spawn_table(
             }
         })
         .collect();
+
+    MonsterSpawnTable { rules }
+}
+
+fn build_crystal_current_map_visible_spawn_table(
+    config: &SimulationConfig,
+    map_file_name: &str,
+    player_position: &Point,
+) -> MonsterSpawnTable {
+    let mut rules = Vec::new();
+
+    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
+        for respawn in map.respawns {
+            let visible_spawns =
+                start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
+            if visible_spawns.is_empty() {
+                continue;
+            }
+
+            for (slot_index, spawn_position, direction) in visible_spawns {
+                let route = normalized_route_steps_for_map(config, map_file_name, &respawn.route);
+                let object_id = crystal_respawn_object_id(&respawn, slot_index);
+                rules.push(MonsterSpawnRule {
+                    name: respawn.monster_name.clone(),
+                    image: respawn.monster_image,
+                    direction,
+                    respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
+                        delay_minutes: respawn.delay_minutes,
+                        random_delay_minutes: respawn.random_delay_minutes,
+                    },
+                    ai: respawn.monster_ai,
+                    disposition: monster_disposition_for_ai(respawn.monster_ai),
+                    hostile_to_player: monster_targets_players(respawn.monster_ai),
+                    view_range: i32::from(respawn.monster_view_range),
+                    can_wander: crystal_respawn_can_wander(respawn.monster_hp),
+                    move_interval_ticks: crystal_speed_to_ticks(respawn.monster_move_speed),
+                    attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
+                    max_hp: respawn.monster_hp.max(1),
+                    route,
+                    slots: vec![MonsterSpawnSlot {
+                        entity: None,
+                        object_id,
+                        spawn_position,
+                        next_respawn_tick: None,
+                    }],
+                });
+            }
+        }
+    }
 
     MonsterSpawnTable { rules }
 }
@@ -6253,15 +6283,6 @@ fn relocate_player_to_map(
 
     refresh_runtime_map_collision(world);
     clear_non_player_world_entities(world);
-    let current_map_file_name = {
-        let resources = world.resource::<SimulationResources>();
-        resources.current_map.file_name.clone()
-    };
-    let config = world.resource::<SimulationResources>().config.clone();
-    world.insert_resource(build_crystal_current_map_spawn_table(
-        &config,
-        &current_map_file_name,
-    ));
     spawn_visible_world_for_current_map(world);
 
     let language = current_language(world);
@@ -6288,12 +6309,8 @@ fn relocate_player_to_map(
 }
 
 fn refresh_runtime_map_collision(world: &mut World) {
-    let current_map_file_name = world
-        .resource::<SimulationResources>()
-        .current_map
-        .file_name
-        .clone();
-    let collision = runtime_map_collision_data(&current_map_file_name).unwrap_or_else(|| {
+    let current_map = world.resource::<SimulationResources>().current_map.clone();
+    let collision = runtime_active_map_collision_data(&current_map).unwrap_or_else(|| {
         let fallback = world
             .resource::<SimulationResources>()
             .config
@@ -6308,6 +6325,16 @@ fn refresh_runtime_map_collision(world: &mut World) {
     resources.closed_door_cells = collision.closed_door_set;
 }
 
+fn runtime_active_map_collision_data(map: &MapInformation) -> Option<RuntimeMapCollisionData> {
+    if normalize_map_file_name(&map.file_name) == normalize_map_file_name("0")
+        && map.title != "Starter Field"
+    {
+        return runtime_full_map_collision_data(&map.file_name)
+            .or_else(|| runtime_map_collision_data(&map.file_name));
+    }
+    runtime_map_collision_data(&map.file_name)
+}
+
 fn parse_debug_crystal_transfer_key(key: &str) -> Option<(String, Point)> {
     let mut parts = key.split(':');
     if parts.next()? != "crystal" {
@@ -6320,23 +6347,29 @@ fn parse_debug_crystal_transfer_key(key: &str) -> Option<(String, Point)> {
 }
 
 fn clear_non_player_world_entities(world: &mut World) {
-    let entities: Vec<Entity> = world
-        .iter_entities()
-        .filter_map(|entity| {
-            (entity.contains::<WorldObject>() && !entity.contains::<SelfPlayer>())
-                .then_some(entity.id())
-        })
-        .collect();
+    let mut query = world.query_filtered::<Entity, (With<WorldObject>, Without<SelfPlayer>)>();
+    let entities: Vec<Entity> = query.iter(world).collect();
 
     for entity in entities {
         let _ = world.despawn(entity);
     }
 }
 
+fn should_use_crystal_current_map_world(world: &World) -> bool {
+    let resources = world.resource::<SimulationResources>();
+    resources.current_map.title != resources.config.map.title
+        || normalize_map_file_name(&resources.current_map.file_name)
+            != normalize_map_file_name(&resources.config.map.file_name)
+}
+
 fn spawn_visible_world_for_current_map(world: &mut World) {
     let mut spawn_table = {
         let resources = world.resource::<SimulationResources>();
-        build_crystal_current_map_spawn_table(&resources.config, &resources.current_map.file_name)
+        build_crystal_current_map_visible_spawn_table(
+            &resources.config,
+            &resources.current_map.file_name,
+            &resources.player_position,
+        )
     };
 
     for (rule_index, rule) in spawn_table.rules.iter_mut().enumerate() {
@@ -6386,7 +6419,54 @@ fn spawn_visible_world_for_current_map(world: &mut World) {
         }
     }
 
+    spawn_crystal_current_map_npcs(world);
     world.insert_resource(spawn_table);
+}
+
+fn spawn_crystal_current_map_npcs(world: &mut World) {
+    let (map_file_name, character) = {
+        let resources = world.resource::<SimulationResources>();
+        let Some(character) = resources.selected_character.clone() else {
+            return;
+        };
+        (
+            normalize_map_file_name(&resources.current_map.file_name),
+            character,
+        )
+    };
+    let quest_ids_by_npc = crystal_quest_ids_by_npc();
+
+    for npc in crystal_npc_info_manifest().npcs {
+        let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
+        if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
+            continue;
+        }
+        if !crystal_npc_visible_to_character(&npc, &character) {
+            continue;
+        }
+        let Some(object_id) = npc.loaded_object_id else {
+            continue;
+        };
+        let quest_ids = quest_ids_by_npc
+            .get(&object_id)
+            .map(|ids| ids.iter().copied().collect())
+            .unwrap_or_default();
+
+        world.spawn((
+            WorldObject,
+            Npc,
+            ObjectId(object_id),
+            DisplayName::literal(npc.name),
+            Position(npc.location),
+            Facing(MirDirection::Up),
+            NpcAgent {
+                image: npc.image,
+                colour_argb: 0,
+                quest_ids,
+                script_key: Some(npc.script_key),
+            },
+        ));
+    }
 }
 
 fn parse_runtime_map_collision(map_file_name: &str, bytes: &[u8]) -> Option<StarterMapCollision> {
@@ -20891,6 +20971,525 @@ fn request_item_info_impl(item_index: i32) -> Vec<ServerPacket> {
     }
 }
 
+fn start_game_item_info_packets(
+    resources: &SimulationResources,
+    sent_item_info_indices: &mut BTreeSet<i32>,
+) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    for item_key in resources
+        .inventory_items
+        .iter()
+        .map(|item| item.key.as_str())
+        .chain(
+            resources
+                .equipment_items
+                .iter()
+                .map(|item| item.key.as_str()),
+        )
+    {
+        let Some(template) = crystal_item_template_for_item_key(item_key) else {
+            continue;
+        };
+        if sent_item_info_indices.insert(template.item_index) {
+            packets.push(ServerPacket::NewItemInfo {
+                info: item_info_from_crystal_template(template),
+            });
+        }
+    }
+    packets
+}
+
+fn start_game_recipe_info_packets(sent_item_info_indices: &mut BTreeSet<i32>) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    for recipe in crystal_recipe_bootstrap_packets() {
+        for item_index in recipe.item_info_indices {
+            if !sent_item_info_indices.insert(item_index) {
+                continue;
+            }
+            let Some(template) = crystal_item_by_index(item_index) else {
+                continue;
+            };
+            packets.push(ServerPacket::NewItemInfo {
+                info: item_info_from_crystal_template(template),
+            });
+        }
+        packets.push(ServerPacket::NewRecipeInfo {
+            payload: recipe.payload,
+        });
+    }
+    packets
+}
+
+fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> {
+    let mut packets = vec![
+        raw_server_packet(ServerPacketId::CompleteQuest, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::ReceiveMail, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::FriendUpdate, &[0, 0, 0, 0]),
+        raw_server_packet(
+            ServerPacketId::LoverUpdate,
+            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ),
+        raw_server_packet(
+            ServerPacketId::MentorUpdate,
+            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ),
+    ];
+    packets.extend(
+        crystal_game_shop_info_packet_payloads()
+            .into_iter()
+            .map(|payload| ServerPacket::Raw {
+                packet_id: ServerPacketId::GameShopInfo,
+                payload,
+            }),
+    );
+    packets
+}
+
+fn start_game_base_stats_packet(class: MirClass) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    if let Some(payload) = crystal_base_stats_info_packet_payload(class) {
+        packets.push(ServerPacket::Raw {
+            packet_id: ServerPacketId::BaseStatsInfo,
+            payload,
+        });
+    }
+    packets
+}
+
+fn start_game_static_visible_object_packets(
+    map_file_name: &str,
+    player_position: &Point,
+    character: &CharacterRecord,
+) -> Vec<ServerPacket> {
+    let normalized_map = normalize_map_file_name(map_file_name);
+    let quest_ids_by_npc = crystal_quest_ids_by_npc();
+    let mut objects = Vec::<(i32, i32, u32, ServerPacket)>::new();
+
+    for npc in crystal_npc_info_manifest().npcs {
+        if npc
+            .map_file_name
+            .as_deref()
+            .map(normalize_map_file_name)
+            .as_deref()
+            != Some(normalized_map.as_str())
+        {
+            continue;
+        }
+        if !point_in_data_range(&npc.location, player_position) {
+            continue;
+        }
+        if !crystal_npc_visible_to_character(&npc, character) {
+            continue;
+        }
+        let Some(object_id) = npc.loaded_object_id else {
+            continue;
+        };
+        let quest_ids = quest_ids_by_npc
+            .get(&object_id)
+            .map(|ids| ids.iter().copied().collect())
+            .unwrap_or_default();
+        objects.push((
+            npc.location.y,
+            npc.location.x,
+            object_id,
+            ServerPacket::ObjectNpc {
+                info: NpcInfo {
+                    object_id,
+                    name: npc.name,
+                    name_colour_argb: -16_711_936,
+                    image: npc.image,
+                    colour_argb: 0,
+                    location: npc.location,
+                    direction: MirDirection::Up,
+                    quest_ids,
+                },
+            },
+        ));
+    }
+
+    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
+        for respawn in &map.respawns {
+            let visible_spawns =
+                start_game_visible_respawn_spawns(map_file_name, respawn, player_position);
+            for (slot_index, location, direction) in visible_spawns {
+                let object_id = crystal_respawn_object_id(respawn, slot_index);
+                objects.push((
+                    location.y,
+                    location.x,
+                    object_id,
+                    crystal_respawn_object_monster_packet(respawn, object_id, location, direction),
+                ));
+            }
+        }
+        for spell in map.safe_zone_spells {
+            if !point_in_data_range(&spell.location, player_position) {
+                continue;
+            }
+            let spell_kind = match spell.spell.as_str() {
+                "TrapHexagon" => Spell::TrapHexagon,
+                "Healing" => Spell::Healing,
+                _ => Spell::None,
+            };
+            objects.push((
+                spell.location.y,
+                spell.location.x,
+                spell.object_id,
+                ServerPacket::ObjectSpell {
+                    info: ObjectSpellInfo {
+                        object_id: spell.object_id,
+                        location: spell.location,
+                        spell: spell_kind,
+                        direction: MirDirection::Up,
+                        param: false,
+                    },
+                },
+            ));
+        }
+    }
+
+    objects.sort_by_key(|(y, x, object_id, _)| (*y, *x, *object_id));
+    objects
+        .into_iter()
+        .map(|(_, _, _, packet)| packet)
+        .collect()
+}
+
+fn start_game_visible_respawn_spawns(
+    map_file_name: &str,
+    respawn: &CrystalRespawnTemplate,
+    player_position: &Point,
+) -> Vec<(usize, Point, MirDirection)> {
+    if respawn.count == 0 {
+        return Vec::new();
+    }
+
+    if respawn.count == 1 && respawn.spread == 0 {
+        if point_in_data_range(&respawn.location, player_position) {
+            return vec![(0, respawn.location.clone(), respawn.direction)];
+        }
+        return Vec::new();
+    }
+
+    let spread = i32::from(respawn.spread);
+    if spread <= 0 {
+        return Vec::new();
+    }
+
+    let data_min_x = player_position.x - CRYSTAL_DATA_RANGE;
+    let data_max_x = player_position.x + CRYSTAL_DATA_RANGE;
+    let data_min_y = player_position.y - CRYSTAL_DATA_RANGE;
+    let data_max_y = player_position.y + CRYSTAL_DATA_RANGE;
+    let spawn_min_x = respawn.location.x - spread;
+    let spawn_max_x = respawn.location.x + spread;
+    let spawn_min_y = respawn.location.y - spread;
+    let spawn_max_y = respawn.location.y + spread;
+
+    let min_x = data_min_x.max(spawn_min_x);
+    let max_x = data_max_x.min(spawn_max_x);
+    let min_y = data_min_y.max(spawn_min_y);
+    let max_y = data_max_y.min(spawn_max_y);
+    if min_x > max_x || min_y > max_y {
+        return Vec::new();
+    }
+
+    let full_collision = runtime_full_map_collision_data(map_file_name);
+    let visible_candidates = full_collision
+        .as_ref()
+        .map(|collision| walkable_points_in_rect(collision, min_x, max_x, min_y, max_y));
+    let spawn_candidate_count = full_collision.as_ref().map(|collision| {
+        walkable_point_count_in_rect(
+            collision,
+            spawn_min_x,
+            spawn_max_x,
+            spawn_min_y,
+            spawn_max_y,
+        )
+    });
+    let (visible_count, visible_cells, width) =
+        if let (Some(visible_candidates), Some(spawn_candidate_count)) =
+            (&visible_candidates, spawn_candidate_count)
+        {
+            if spawn_candidate_count == 0 || visible_candidates.is_empty() {
+                return Vec::new();
+            }
+            let visible_count = ((usize::from(respawn.count) * visible_candidates.len())
+                / spawn_candidate_count)
+                .min(usize::from(respawn.count));
+            (
+                visible_count,
+                u64::try_from(visible_candidates.len()).expect("visible cell count should fit u64"),
+                0,
+            )
+        } else {
+            let visible_width = i64::from(max_x - min_x + 1);
+            let visible_height = i64::from(max_y - min_y + 1);
+            let spawn_side = i64::from(spread * 2 + 1);
+            let visible_area = visible_width * visible_height;
+            let spawn_area = spawn_side * spawn_side;
+            let visible_count = ((i64::from(respawn.count) * visible_area) / spawn_area)
+                .clamp(0, i64::from(respawn.count)) as usize;
+            (
+                visible_count,
+                u64::try_from(visible_area).expect("visible area should fit u64"),
+                i32::try_from(visible_width).expect("visible width should fit i32"),
+            )
+        };
+    if visible_count == 0 {
+        return Vec::new();
+    }
+
+    let mut used = BTreeSet::new();
+    let mut spawns = Vec::new();
+
+    for slot_index in 0..visible_count {
+        let base = deterministic_roll(
+            0,
+            respawn.respawn_index.max(0) as usize,
+            slot_index,
+            visible_cells,
+        );
+        let mut cell_index = i32::try_from(base).expect("visible cell index should fit i32");
+        for _ in 0..visible_cells {
+            let point = if let Some(visible_candidates) = &visible_candidates {
+                visible_candidates[cell_index as usize].clone()
+            } else {
+                Point {
+                    x: min_x + (cell_index % width),
+                    y: min_y + (cell_index / width),
+                }
+            };
+            let x = point.x;
+            let y = point.y;
+            if used.insert((x, y)) {
+                let direction = crystal_respawn_dynamic_direction(respawn, slot_index);
+                spawns.push((slot_index, point, direction));
+                break;
+            }
+            cell_index = (cell_index + 1) % i32::try_from(visible_cells).unwrap_or(i32::MAX);
+        }
+    }
+
+    spawns
+}
+
+fn runtime_full_map_collision_data(map_file_name: &str) -> Option<RuntimeMapCollisionData> {
+    let normalized = normalize_map_file_name(map_file_name);
+    static RUNTIME_FULL_MAP_COLLISION_CACHE: OnceLock<
+        Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
+    > = OnceLock::new();
+    let cache = RUNTIME_FULL_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
+    if let Some(cached) = cache
+        .lock()
+        .expect("runtime full map collision cache should not be poisoned")
+        .get(&normalized)
+        .cloned()
+    {
+        return cached;
+    }
+
+    let parsed = crystal_map_path(&normalized)
+        .and_then(|map_path| fs::read(map_path).ok())
+        .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
+        .map(runtime_map_collision_from_template);
+    cache
+        .lock()
+        .expect("runtime full map collision cache should not be poisoned")
+        .insert(normalized, parsed.clone());
+    parsed
+}
+
+fn walkable_points_in_rect(
+    collision: &RuntimeMapCollisionData,
+    min_x: i32,
+    max_x: i32,
+    min_y: i32,
+    max_y: i32,
+) -> Vec<Point> {
+    let mut points = Vec::new();
+    for y in min_y..=max_y {
+        for x in min_x..=max_x {
+            let point = Point { x, y };
+            if full_map_collision_walkable(collision, &point) {
+                points.push(point);
+            }
+        }
+    }
+    points
+}
+
+fn walkable_point_count_in_rect(
+    collision: &RuntimeMapCollisionData,
+    min_x: i32,
+    max_x: i32,
+    min_y: i32,
+    max_y: i32,
+) -> usize {
+    let mut count = 0;
+    for y in min_y..=max_y {
+        for x in min_x..=max_x {
+            if full_map_collision_walkable(collision, &Point { x, y }) {
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+fn full_map_collision_walkable(collision: &RuntimeMapCollisionData, point: &Point) -> bool {
+    point_in_bounds(&collision.collision.region_bounds, point)
+        && !collision.blocked_set.contains(&tile_key(point))
+        && !collision.closed_door_set.contains(&tile_key(point))
+}
+
+fn crystal_respawn_object_id(respawn: &CrystalRespawnTemplate, slot_index: usize) -> u32 {
+    if respawn.count == 1 && respawn.spread == 0 {
+        return CRYSTAL_RESPAWN_OBJECT_ID_BASE + respawn.respawn_index as u32;
+    }
+
+    CRYSTAL_RESPAWN_OBJECT_ID_BASE
+        + respawn.respawn_index.max(0) as u32 * 100
+        + u32::try_from(slot_index).unwrap_or(u32::MAX)
+}
+
+fn crystal_respawn_dynamic_direction(
+    respawn: &CrystalRespawnTemplate,
+    slot_index: usize,
+) -> MirDirection {
+    match deterministic_roll(0, respawn.respawn_index.max(0) as usize, slot_index + 17, 8) {
+        0 => MirDirection::Up,
+        1 => MirDirection::UpRight,
+        2 => MirDirection::Right,
+        3 => MirDirection::DownRight,
+        4 => MirDirection::Down,
+        5 => MirDirection::DownLeft,
+        6 => MirDirection::Left,
+        _ => MirDirection::UpLeft,
+    }
+}
+
+fn crystal_respawn_object_monster_packet(
+    respawn: &CrystalRespawnTemplate,
+    object_id: u32,
+    location: Point,
+    direction: MirDirection,
+) -> ServerPacket {
+    let monster = crystal_monster_by_name(&respawn.monster_name);
+    ServerPacket::ObjectMonster {
+        info: MonsterInfo {
+            object_id,
+            name: respawn.monster_name.clone(),
+            name_colour_argb: -1,
+            location,
+            image: respawn.monster_image,
+            direction,
+            effect: monster
+                .as_ref()
+                .map(|template| template.effect)
+                .unwrap_or(0),
+            ai: respawn.monster_ai,
+            light: monster.as_ref().map(|template| template.light).unwrap_or(0),
+            dead: false,
+            skeleton: false,
+            poison: 0,
+            hidden: false,
+            shock_time: 0,
+            binding_shot_center: false,
+            extra: false,
+            extra_byte: 0,
+            master_object_id: 0,
+            rarity: 0,
+            buffs: Vec::new(),
+        },
+    }
+}
+
+fn crystal_quest_ids_by_npc() -> BTreeMap<u32, BTreeSet<i32>> {
+    crystal_quest_packet_manifest().quests.into_iter().fold(
+        BTreeMap::<u32, BTreeSet<i32>>::new(),
+        |mut by_npc, quest| {
+            by_npc
+                .entry(quest.npc_index)
+                .or_default()
+                .insert(quest.index);
+            by_npc
+                .entry(quest.finish_npc_index)
+                .or_default()
+                .insert(quest.index);
+            by_npc
+        },
+    )
+}
+
+fn crystal_npc_visible_to_character(
+    npc: &mir2_game_data::CrystalNpcInfoTemplate,
+    character: &CharacterRecord,
+) -> bool {
+    if npc.flag_needed != 0 {
+        return false;
+    }
+    if npc.min_level != 0 && i32::from(character.level) < i32::from(npc.min_level) {
+        return false;
+    }
+    if npc.max_level != 0 && i32::from(character.level) > i32::from(npc.max_level) {
+        return false;
+    }
+    if !npc.class_required.is_empty()
+        && !npc
+            .class_required
+            .eq_ignore_ascii_case(crystal_class_name(character.class))
+    {
+        return false;
+    }
+    if npc.time_visible {
+        return false;
+    }
+    true
+}
+
+fn crystal_class_name(class: MirClass) -> &'static str {
+    match class {
+        MirClass::Warrior => "Warrior",
+        MirClass::Wizard => "Wizard",
+        MirClass::Taoist => "Taoist",
+        MirClass::Assassin => "Assassin",
+        MirClass::Archer => "Archer",
+    }
+}
+
+fn point_in_data_range(point: &Point, center: &Point) -> bool {
+    point.x >= center.x - CRYSTAL_DATA_RANGE
+        && point.x <= center.x + CRYSTAL_DATA_RANGE
+        && point.y >= center.y - CRYSTAL_DATA_RANGE
+        && point.y <= center.y + CRYSTAL_DATA_RANGE
+}
+
+fn start_game_post_visible_crystal_bootstrap_packets() -> Vec<ServerPacket> {
+    vec![
+        raw_server_packet(ServerPacketId::TimeOfDay, &[4]),
+        raw_server_packet(ServerPacketId::ChangeAMode, &[0]),
+        raw_server_packet(ServerPacketId::ChangePMode, &[0]),
+        raw_server_packet(ServerPacketId::SwitchGroup, &[0]),
+        raw_server_packet(ServerPacketId::DefaultNPC, &[0, 0, 0, 0]),
+        ServerPacket::Raw {
+            packet_id: ServerPacketId::GuildBuffList,
+            payload: crystal_guild_buff_list_packet_payload(),
+        },
+        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
+        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
+    ]
+}
+
+fn raw_server_packet(packet_id: ServerPacketId, payload: &[u8]) -> ServerPacket {
+    ServerPacket::Raw {
+        packet_id,
+        payload: payload.to_vec(),
+    }
+}
+
 fn item_info_from_crystal_template(template: CrystalItemTemplate) -> ItemInfo {
     ItemInfo {
         index: template.item_index,
@@ -27230,13 +27829,12 @@ fn build_user_information(
     storage_password_last_set_binary_datetime: i64,
     expanded_storage_expiry_time_binary_datetime: i64,
     hair: u8,
-    inventory_section_present: bool,
-    equipment_section_present: bool,
-    quest_inventory_section_present: bool,
+    inventory_items: &[ItemState],
+    equipment_items: &[EquipmentState],
 ) -> UserInformation {
     UserInformation {
         object_id: config.object_id,
-        real_id: config.real_id,
+        real_id: u32::try_from(character.index).unwrap_or(config.real_id),
         name: character.name.clone(),
         guild_name: String::new(),
         guild_rank: String::new(),
@@ -27254,9 +27852,12 @@ fn build_user_information(
         level_effects: 0,
         has_hero: false,
         hero_behaviour: 0,
-        inventory_section_present,
-        equipment_section_present,
-        quest_inventory_section_present,
+        inventory_section_present: true,
+        inventory: Some(user_inventory_slots(inventory_items)),
+        equipment_section_present: true,
+        equipment: Some(user_equipment_slots(equipment_items)),
+        quest_inventory_section_present: true,
+        quest_inventory: Some(user_quest_inventory_slots(inventory_items)),
         gold,
         credit,
         has_expanded_storage,
@@ -27273,11 +27874,52 @@ fn build_user_information(
         },
         magic_count: 0,
         intelligent_creature_count: 0,
-        summoned_creature_type: 0,
+        summoned_creature_type: 99,
         creature_summoned: false,
         allow_observe: false,
         observer: false,
     }
+}
+
+fn user_inventory_slots(items: &[ItemState]) -> Vec<Option<UserItem>> {
+    let mut slots = vec![None; 46];
+    for item in items {
+        let index = match item.container {
+            ItemContainer::Bag1 => usize::from(item.slot),
+            ItemContainer::Bag2 => 40 + usize::from(item.slot),
+            _ => continue,
+        };
+        if let Some(slot) = slots.get_mut(index) {
+            *slot = Some(user_item_from_item_state(item));
+        }
+    }
+    slots
+}
+
+fn user_equipment_slots(items: &[EquipmentState]) -> Vec<Option<UserItem>> {
+    let mut slots = vec![None; 14];
+    for item in items {
+        let Some(index) = equipment_slot_index(item.slot) else {
+            continue;
+        };
+        if let Some(slot) = slots.get_mut(index) {
+            *slot = user_item_from_equipment_state(item);
+        }
+    }
+    slots
+}
+
+fn user_quest_inventory_slots(items: &[ItemState]) -> Vec<Option<UserItem>> {
+    let mut slots = vec![None; 40];
+    for item in items
+        .iter()
+        .filter(|item| item.container == ItemContainer::Quest)
+    {
+        if let Some(slot) = slots.get_mut(usize::from(item.slot)) {
+            *slot = Some(user_item_from_item_state(item));
+        }
+    }
+    slots
 }
 
 fn seed_inventory_items() -> Vec<ItemState> {
@@ -28092,8 +28734,9 @@ mod tests {
         entity_by_object_id, entity_facing, entity_object_id, entity_position,
         equipment_slot_from_index, equipment_slot_index, execute_crystal_npc_action_line,
         initial_monster_ai_state, initial_wooma_taurus_state, initial_yimoogi_state,
-        is_static_spawnable_point, offset_point, player_entity, respawn_tick_for_schedule,
-        set_crystal_npc_flag, spawn_positions_for_rule, spawn_runtime_monster, tile_distance,
+        is_static_spawnable_point, offset_point, player_entity, point_in_data_range,
+        respawn_tick_for_schedule, set_crystal_npc_flag, spawn_positions_for_rule,
+        spawn_runtime_monster, start_game_visible_respawn_spawns, tile_distance,
         CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing,
         HarvestMonsterState, ItemState, Monster, MonsterAgent, MonsterAiState,
         MonsterRespawnSchedule, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable,
@@ -28104,15 +28747,16 @@ mod tests {
     use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
     use crate::{
         deliver_stage5_system_mail, EquipmentSlot, ItemContainer, QuestStage, SimulationConfig,
-        Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition,
+        Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition, WorldEntityKind,
     };
     use bevy_ecs::entity::Entity;
     use mir2_game_data::{
-        crystal_monster_by_name, CrystalNpcScript, CrystalNpcSection, EquipmentTemplate,
+        crystal_map_respawns_by_file_name, crystal_monster_by_name, CrystalNpcScript,
+        CrystalNpcSection, EquipmentTemplate,
     };
     use mir2_protocol::{
         trace_server_packets, ChatType, ClientPacket, MirClass, MirDirection, MirGender,
-        MirGridType, Point, ServerPacket, Spell, UserItemStat,
+        MirGridType, Point, ServerPacket, ServerPacketId, Spell, UserItemStat,
     };
 
     fn default_npc_condition_context() -> super::CrystalNpcContextState {
@@ -28144,6 +28788,13 @@ mod tests {
                 ServerPacket::ObjectDied { info } if info.object_id == object_id
             )
         })
+    }
+
+    fn new_character_success_index(packets: &[ServerPacket]) -> i32 {
+        match packets.first() {
+            Some(ServerPacket::NewCharacterSuccess { char_info }) => char_info.index,
+            other => panic!("unexpected new-character packet: {other:?}"),
+        }
     }
 
     fn attack_until_monster_dies(
@@ -29134,19 +29785,65 @@ mod tests {
 
         assert!(matches!(
             packets[0],
-            ServerPacket::StartGame { result: 4, .. }
+            ServerPacket::StartGame {
+                result: 4,
+                resolution: 1920
+            }
         ));
-        assert!(matches!(packets[1], ServerPacket::MapInformation { .. }));
-        assert!(matches!(packets[2], ServerPacket::UserInformation { .. }));
-        assert!(matches!(packets[3], ServerPacket::UserLocation { .. }));
         assert!(matches!(
-            &packets[4],
+            &packets[1],
             ServerPacket::Chat {
                 chat_type: ChatType::Hint,
                 message,
                 ..
             } if message == "Welcome to the Legend of Mir 2 Server."
         ));
+        let map_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::MapInformation { .. }))
+            .expect("bootstrap should include map information");
+        let user_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::UserInformation { .. }))
+            .expect("bootstrap should include user information");
+        let base_stats_index = packets
+            .iter()
+            .position(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::Raw {
+                        packet_id: ServerPacketId::BaseStatsInfo,
+                        ..
+                    }
+                )
+            })
+            .expect("bootstrap should include Crystal base stats");
+        let guild_buff_index = packets
+            .iter()
+            .position(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::Raw {
+                        packet_id: ServerPacketId::GuildBuffList,
+                        ..
+                    }
+                )
+            })
+            .expect("bootstrap should include Crystal guild buff list");
+        let recipe_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::NewRecipeInfo { .. }))
+            .expect("bootstrap should include Crystal recipe information");
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(packets[2..map_index]
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::NewItemInfo { .. })));
+        assert!(map_index < user_index);
+        assert!(user_index < recipe_index);
+        assert!(recipe_index < base_stats_index);
+        assert!(base_stats_index < guild_buff_index);
     }
 
     #[test]
@@ -29156,7 +29853,7 @@ mod tests {
         let trace = trace_server_packets(&packets);
         let names = trace
             .iter()
-            .take(5)
+            .take(6)
             .map(|entry| entry.packet)
             .collect::<Vec<_>>();
 
@@ -29164,10 +29861,11 @@ mod tests {
             names,
             vec![
                 "StartGame",
-                "MapInformation",
-                "UserInformation",
-                "UserLocation",
                 "Chat",
+                "NewItemInfo",
+                "NewItemInfo",
+                "NewItemInfo",
+                "NewItemInfo",
             ]
         );
         assert_eq!(
@@ -29176,6 +29874,18 @@ mod tests {
         );
         assert_eq!(
             trace[1].packet_id,
+            mir2_protocol::ServerPacketId::Chat as i16
+        );
+        assert_eq!(
+            trace[2].packet_id,
+            mir2_protocol::ServerPacketId::NewItemInfo as i16
+        );
+        let map_trace = trace
+            .iter()
+            .find(|entry| entry.packet == "MapInformation")
+            .expect("trace should include map information");
+        assert_eq!(
+            map_trace.packet_id,
             mir2_protocol::ServerPacketId::MapInformation as i16
         );
     }
@@ -29250,6 +29960,114 @@ mod tests {
     }
 
     #[test]
+    fn new_account_starts_with_empty_crystal_character_list() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let created = session.handle_packet(ClientPacket::NewAccount {
+            account_id: "traceacct".to_string(),
+            password: "Tracepass1".to_string(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Trace".to_string(),
+            secret_question: "q".to_string(),
+            secret_answer: "a".to_string(),
+            email_address: "trace@example.test".to_string(),
+        });
+        assert!(matches!(created[0], ServerPacket::NewAccount { result: 8 }));
+
+        let login = session.handle_packet(ClientPacket::Login {
+            account_id: "traceacct".to_string(),
+            password: "Tracepass1".to_string(),
+        });
+        match &login[0] {
+            ServerPacket::LoginSuccess { characters } => assert!(characters.is_empty()),
+            other => panic!("unexpected login packet: {other:?}"),
+        }
+
+        let created_character = session.handle_packet(ClientPacket::NewCharacter {
+            name: "TraceOne".to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        });
+        match &created_character[0] {
+            ServerPacket::NewCharacterSuccess { char_info } => {
+                assert_eq!(char_info.index, 1);
+                assert_eq!(char_info.name, "TraceOne");
+                assert_eq!(char_info.level, 0);
+                assert_eq!(char_info.last_access_binary_datetime, 0);
+            }
+            other => panic!("unexpected new character packet: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn duplicate_new_account_returns_crystal_duplicate_result() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let first = session.handle_packet(ClientPacket::NewAccount {
+            account_id: "dupeacct".to_string(),
+            password: "Tracepass1".to_string(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Trace".to_string(),
+            secret_question: "q".to_string(),
+            secret_answer: "a".to_string(),
+            email_address: "trace@example.test".to_string(),
+        });
+        assert!(matches!(first[0], ServerPacket::NewAccount { result: 8 }));
+
+        let duplicate = session.handle_packet(ClientPacket::NewAccount {
+            account_id: "dupeacct".to_string(),
+            password: "Tracepass1".to_string(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Trace".to_string(),
+            secret_question: "q".to_string(),
+            secret_answer: "a".to_string(),
+            email_address: "trace@example.test".to_string(),
+        });
+        assert!(matches!(
+            duplicate[0],
+            ServerPacket::NewAccount { result: 7 }
+        ));
+    }
+
+    #[test]
+    fn delete_character_allows_last_character_without_extra_chat() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::NewAccount {
+            account_id: "delacct".to_string(),
+            password: "Tracepass1".to_string(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Trace".to_string(),
+            secret_question: "q".to_string(),
+            secret_answer: "a".to_string(),
+            email_address: "trace@example.test".to_string(),
+        });
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "delacct".to_string(),
+            password: "Tracepass1".to_string(),
+        });
+        let created_character = session.handle_packet(ClientPacket::NewCharacter {
+            name: "TraceDel".to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        });
+        let character_index = new_character_success_index(&created_character);
+
+        let deleted = session.handle_packet(ClientPacket::DeleteCharacter { character_index });
+
+        assert_eq!(
+            deleted,
+            vec![ServerPacket::DeleteCharacterSuccess { character_index }]
+        );
+
+        let relogin = session.handle_packet(ClientPacket::Login {
+            account_id: "delacct".to_string(),
+            password: "Tracepass1".to_string(),
+        });
+        match &relogin[0] {
+            ServerPacket::LoginSuccess { characters } => assert!(characters.is_empty()),
+            other => panic!("unexpected relogin packet: {other:?}"),
+        }
+    }
+
+    #[test]
     fn disconnect_emits_protocol_disconnect_reason() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         let packets = session.handle_packet(ClientPacket::Disconnect);
@@ -29298,7 +30116,9 @@ mod tests {
         match &packets[0] {
             ServerPacket::NewCharacterSuccess { char_info } => {
                 assert_eq!(char_info.name, "Blade");
+                assert_eq!(char_info.level, 0);
                 assert_eq!(char_info.class, MirClass::Wizard);
+                assert_eq!(char_info.last_access_binary_datetime, 0);
             }
             other => panic!("unexpected packet: {other:?}"),
         }
@@ -29516,12 +30336,19 @@ mod tests {
             secret_answer: "a".to_string(),
             email_address: "alpha@example.test".to_string(),
         });
-        let _ = alpha.handle_packet(ClientPacket::NewCharacter {
+        let _ = alpha.handle_packet(ClientPacket::Login {
+            account_id: "alpha".to_string(),
+            password: "alpha-pass".to_string(),
+        });
+        let alpha_created = alpha.handle_packet(ClientPacket::NewCharacter {
             name: "AlphaBlade".to_string(),
             gender: MirGender::Male,
             class: MirClass::Warrior,
         });
-        let _ = alpha.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let alpha_index = new_character_success_index(&alpha_created);
+        let _ = alpha.handle_packet(ClientPacket::StartGame {
+            character_index: alpha_index,
+        });
         set_player_position(&mut alpha, Point { x: 333, y: 267 });
         let _ = alpha.handle_packet(ClientPacket::LogOut);
 
@@ -29534,12 +30361,19 @@ mod tests {
             secret_answer: "a".to_string(),
             email_address: "beta@example.test".to_string(),
         });
-        let _ = beta.handle_packet(ClientPacket::NewCharacter {
+        let _ = beta.handle_packet(ClientPacket::Login {
+            account_id: "beta".to_string(),
+            password: "beta-pass".to_string(),
+        });
+        let beta_created = beta.handle_packet(ClientPacket::NewCharacter {
             name: "BetaMage".to_string(),
             gender: MirGender::Female,
             class: MirClass::Wizard,
         });
-        let _ = beta.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let beta_index = new_character_success_index(&beta_created);
+        let _ = beta.handle_packet(ClientPacket::StartGame {
+            character_index: beta_index,
+        });
         set_player_position(&mut beta, Point { x: 334, y: 267 });
         let _ = beta.handle_packet(ClientPacket::LogOut);
 
@@ -29557,7 +30391,9 @@ mod tests {
         };
         assert!(alpha_names.contains(&"AlphaBlade"));
         assert!(!alpha_names.contains(&"BetaMage"));
-        let _ = alpha_reload.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let _ = alpha_reload.handle_packet(ClientPacket::StartGame {
+            character_index: alpha_index,
+        });
         let alpha_player = alpha_reload
             .world_snapshot()
             .entities
@@ -29580,7 +30416,9 @@ mod tests {
         };
         assert!(beta_names.contains(&"BetaMage"));
         assert!(!beta_names.contains(&"AlphaBlade"));
-        let _ = beta_reload.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let _ = beta_reload.handle_packet(ClientPacket::StartGame {
+            character_index: beta_index,
+        });
         let beta_player = beta_reload
             .world_snapshot()
             .entities
@@ -29629,12 +30467,19 @@ mod tests {
             secret_answer: "a".to_string(),
             email_address: "alpha@example.test".to_string(),
         });
-        let _ = alpha.handle_packet(ClientPacket::NewCharacter {
+        let _ = alpha.handle_packet(ClientPacket::Login {
+            account_id: "load-alpha".to_string(),
+            password: "alpha-pass".to_string(),
+        });
+        let alpha_created = alpha.handle_packet(ClientPacket::NewCharacter {
             name: "LoadAlpha".to_string(),
             gender: MirGender::Male,
             class: MirClass::Warrior,
         });
-        let _ = alpha.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let alpha_index = new_character_success_index(&alpha_created);
+        let _ = alpha.handle_packet(ClientPacket::StartGame {
+            character_index: alpha_index,
+        });
 
         let _ = beta.handle_packet(ClientPacket::NewAccount {
             account_id: "load-beta".to_string(),
@@ -29645,12 +30490,19 @@ mod tests {
             secret_answer: "a".to_string(),
             email_address: "beta@example.test".to_string(),
         });
-        let _ = beta.handle_packet(ClientPacket::NewCharacter {
+        let _ = beta.handle_packet(ClientPacket::Login {
+            account_id: "load-beta".to_string(),
+            password: "beta-pass".to_string(),
+        });
+        let beta_created = beta.handle_packet(ClientPacket::NewCharacter {
             name: "LoadBeta".to_string(),
             gender: MirGender::Female,
             class: MirClass::Wizard,
         });
-        let _ = beta.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let beta_index = new_character_success_index(&beta_created);
+        let _ = beta.handle_packet(ClientPacket::StartGame {
+            character_index: beta_index,
+        });
 
         for tick in 0..180 {
             if tick % 30 == 0 {
@@ -29674,7 +30526,9 @@ mod tests {
             account_id: "load-alpha".to_string(),
             password: "alpha-pass".to_string(),
         });
-        let _ = alpha_reload.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let _ = alpha_reload.handle_packet(ClientPacket::StartGame {
+            character_index: alpha_index,
+        });
         let alpha_player = alpha_reload
             .world_snapshot()
             .entities
@@ -29688,7 +30542,9 @@ mod tests {
             account_id: "load-beta".to_string(),
             password: "beta-pass".to_string(),
         });
-        let _ = beta_reload.handle_packet(ClientPacket::StartGame { character_index: 1 });
+        let _ = beta_reload.handle_packet(ClientPacket::StartGame {
+            character_index: beta_index,
+        });
         let beta_player = beta_reload
             .world_snapshot()
             .entities
@@ -30014,9 +30870,10 @@ mod tests {
         });
 
         match &packets[0] {
-            ServerPacket::ObjectWalk { movement } => {
-                assert_eq!(movement.position.x, 331);
-                assert_eq!(movement.position.y, 270);
+            ServerPacket::UserLocation { location } => {
+                assert_eq!(location.position.x, 331);
+                assert_eq!(location.position.y, 270);
+                assert_eq!(location.direction, MirDirection::Right);
             }
             other => panic!("unexpected packet: {other:?}"),
         }
@@ -30064,7 +30921,7 @@ mod tests {
         });
 
         assert_eq!(player_position(&session), Point { x: 334, y: 273 });
-        assert!(matches!(packets[0], ServerPacket::ObjectTurn { .. }));
+        assert!(matches!(packets[0], ServerPacket::UserLocation { .. }));
     }
 
     #[test]
@@ -30078,7 +30935,7 @@ mod tests {
         });
 
         assert_eq!(player_position(&session), Point { x: 326, y: 266 });
-        assert!(matches!(packets[0], ServerPacket::ObjectTurn { .. }));
+        assert!(matches!(packets[0], ServerPacket::UserLocation { .. }));
     }
 
     #[test]
@@ -30201,6 +31058,91 @@ mod tests {
         assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
         assert!(snapshot.in_safe_zone);
         assert_eq!(player_position(&session), Point { x: 330, y: 270 });
+    }
+
+    #[test]
+    fn crystal_current_map_transfer_spawns_manifest_npcs_into_world() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.transfer_map("crystal:0:284:607");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectNpc { info }
+                if info.object_id == 3
+                    && info.name == "Assistant_Jane"
+                    && info.location == (Point { x: 284, y: 606 })
+        )));
+        let assistant = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == 3)
+            .expect("Assistant_Jane should be visible near the comparison point");
+        assert_eq!(assistant.kind, WorldEntityKind::Npc);
+        assert_eq!(assistant.name, "Assistant_Jane");
+        assert_eq!((assistant.x, assistant.y), (284, 606));
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.kind == WorldEntityKind::Npc && entity.name == "Merchant_Ruben"
+        }));
+    }
+
+    #[test]
+    fn crystal_current_map_transfer_spawns_visible_respawns_into_world() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.transfer_map("crystal:0:284:607");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info } if info.name == "Deer"
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info } if info.name == "Royal_Guard"
+        )));
+        assert!(snapshot
+            .entities
+            .iter()
+            .any(|entity| { entity.kind == WorldEntityKind::Monster && entity.name == "Deer" }));
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.kind == WorldEntityKind::Monster && entity.name == "Royal_Guard"
+        }));
+    }
+
+    #[test]
+    fn crystal_current_map_transfer_spawns_visible_archer_guard_into_world() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+        let packets = session.transfer_map("crystal:0:287:618");
+        let snapshot = session.world_snapshot();
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.name == "Guard" && info.location == (Point { x: 291, y: 620 })
+        )));
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.name == "ArcherGuard" && info.location == (Point { x: 295, y: 624 })
+        )));
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.kind == WorldEntityKind::Monster
+                && entity.name == "Guard"
+                && entity.x == 291
+                && entity.y == 620
+        }));
+        assert!(snapshot.entities.iter().any(|entity| {
+            entity.kind == WorldEntityKind::Monster
+                && entity.name == "ArcherGuard"
+                && entity.x == 295
+                && entity.y == 624
+        }));
     }
 
     #[test]
@@ -30462,6 +31404,32 @@ mod tests {
             packet,
             ServerPacket::ObjectMonster { info } if info.name == "Royal_Guard" && info.ai == 6
         )));
+    }
+
+    #[test]
+    fn start_game_visible_respawns_include_spread_spawn_density() {
+        let map = crystal_map_respawns_by_file_name("0").expect("Bichon respawns");
+        let player_position = Point { x: 289, y: 616 };
+        let deer = map
+            .respawns
+            .iter()
+            .find(|respawn| respawn.respawn_index == 65)
+            .expect("Bichon deer spread respawn");
+        let fixed_guard = map
+            .respawns
+            .iter()
+            .find(|respawn| respawn.respawn_index == 340)
+            .expect("Bichon fixed guard respawn");
+
+        let deer_spawns = start_game_visible_respawn_spawns("0", deer, &player_position);
+        assert!(!deer_spawns.is_empty());
+        assert!(deer_spawns
+            .iter()
+            .all(|(_, point, _)| point_in_data_range(point, &player_position)));
+
+        let guard_spawns = start_game_visible_respawn_spawns("0", fixed_guard, &player_position);
+        assert_eq!(guard_spawns.len(), 1);
+        assert_eq!(guard_spawns[0].1, fixed_guard.location);
     }
 
     #[test]
@@ -54775,7 +55743,9 @@ mod tests {
         });
         assert!(walk_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::ObjectWalk { movement } if movement.position == (Point { x: 331, y: 270 })
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 331, y: 270 })
+                    && location.direction == MirDirection::Right
         )));
 
         set_player_position(&mut session, Point { x: 326, y: 270 });
@@ -61307,7 +62277,7 @@ mod tests {
             packet,
             ServerPacket::UserInformation {
                 info
-            } if !info.has_storage_password && !info.require_storage_password
+            } if !info.has_storage_password && info.require_storage_password
         )));
 
         activate_storage_service(&mut session);
@@ -61404,7 +62374,7 @@ mod tests {
             packet,
             ServerPacket::UserInformation {
                 info
-            } if !info.has_storage_password && !info.require_storage_password
+            } if !info.has_storage_password && info.require_storage_password
         )));
         let final_snapshot = session.world_snapshot();
         assert_eq!(final_snapshot.storage_password_last_set_binary_datetime, 0);

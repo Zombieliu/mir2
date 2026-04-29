@@ -128,7 +128,9 @@ impl GatewaySession {
 mod tests {
     use super::{GatewayConfig, GatewaySession};
     use crate::CharacterRecord;
-    use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
+    use mir2_protocol::{
+        ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket, ServerPacketId,
+    };
 
     #[test]
     fn gateway_panic_boundary_returns_operation_error() {
@@ -184,17 +186,39 @@ mod tests {
             packets[0],
             ServerPacket::StartGame { result: 4, .. }
         ));
-        assert!(matches!(packets[1], ServerPacket::MapInformation { .. }));
-        assert!(matches!(packets[2], ServerPacket::UserInformation { .. }));
-        assert!(matches!(packets[3], ServerPacket::UserLocation { .. }));
         assert!(matches!(
-            &packets[4],
+            &packets[1],
             ServerPacket::Chat {
                 chat_type: ChatType::Hint,
                 message,
                 ..
             } if message == "Welcome to the Legend of Mir 2 Server."
         ));
+        let map_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::MapInformation { .. }))
+            .expect("bootstrap should include map information");
+        let user_index = packets
+            .iter()
+            .position(|packet| matches!(packet, ServerPacket::UserInformation { .. }))
+            .expect("bootstrap should include user information");
+        let base_stats_index = packets
+            .iter()
+            .position(|packet| {
+                matches!(
+                    packet,
+                    ServerPacket::Raw {
+                        packet_id: ServerPacketId::BaseStatsInfo,
+                        ..
+                    }
+                )
+            })
+            .expect("bootstrap should include base stats");
+        assert!(map_index < user_index);
+        assert!(user_index < base_stats_index);
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectPlayer { .. })));
@@ -215,9 +239,10 @@ mod tests {
         });
 
         match &packets[0] {
-            ServerPacket::ObjectWalk { movement } => {
-                assert_eq!(movement.position.x, 331);
-                assert_eq!(movement.position.y, 270);
+            ServerPacket::UserLocation { location } => {
+                assert_eq!(location.position.x, 331);
+                assert_eq!(location.position.y, 270);
+                assert_eq!(location.direction, MirDirection::Right);
             }
             other => panic!("unexpected packet: {other:?}"),
         }

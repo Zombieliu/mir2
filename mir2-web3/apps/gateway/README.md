@@ -9,10 +9,10 @@ for authority logic, exposes browser HTTP/WebSocket routes, accepts Crystal-fram
 TCP packets, persists account/character state through the configured account
 store, and carries the local packet trace harness used by the 1:1 parity docs.
 
-It is still not marked as a fully accepted drop-in Crystal replacement. The
-remaining hard gates are live Crystal packet comparison through
-`MIR2_CRYSTAL_TCP_ADDR`, missing local `Crystal/Build/Server/Debug/Server.MirDB`
-data import evidence, and final human Crystal visual/feel acceptance.
+R300 accepts the stable live packet comparator for the current tracked
+backend/server packet matrix. Strict exact live diff remains available as a
+diagnostic for deterministic fixture work, while final whole-project acceptance
+still depends on human Crystal visual/feel acceptance.
 
 ## Main Surfaces
 
@@ -81,7 +81,7 @@ $env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
 cargo run -p mir2-gateway --bin packet_trace -- --matrix
 ```
 
-Capture local and live Crystal side by side:
+Capture local and live Crystal side by side with the strict exact diagnostic:
 
 ```powershell
 cd E:\mir2\mir2-web3
@@ -93,13 +93,24 @@ $env:MIR2_PACKET_TRACE_REQUIRE_DIFF_CLEAN='1'
 cargo run -p mir2-gateway --bin packet_trace -- --matrix
 ```
 
+Capture local and live Crystal side by side with the accepted stable comparator:
+
+```powershell
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7310'
+$env:MIR2_CRYSTAL_TCP_ADDR='<crystal-host>:<crystal-port>'
+$env:MIR2_PACKET_TRACE_ACCEPT_STABLE_DIFF='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_CRYSTAL='1'
+cargo run -p mir2-gateway --bin packet_trace -- --matrix
+```
+
 Matrix output is written under `docs/generated/packet-traces/matrix` unless
 `MIR2_PACKET_TRACE_MATRIX_OUT_DIR` is set.
 
 ## Current Limitations
 
-- Live Crystal diff is blocked until `MIR2_CRYSTAL_TCP_ADDR` points at a stable
-  Crystal server fixture.
+- Strict exact live diff still requires a deterministic Crystal server fixture.
 - Source-data import remains blocked on machines that do not have
   `Crystal/Build/Server/Debug/Server.MirDB` and matching `Envir/Routes`.
 - Some full-project systems are still covered by WebSocket/UI smoke or simulation
