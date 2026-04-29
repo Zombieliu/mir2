@@ -1,0 +1,992 @@
+{
+  "schemaVersion": 2,
+  "nextCharacterIndex": 33,
+  "accounts": {
+    "CdxTra7719201": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "CdxTraceLif01": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "CdxTraceawdnb": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "CdxTracernjcb": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "CdxTracezwiob": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25000001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25000002": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25060001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25060002": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25070001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25070002": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25080001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25080002": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25090001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25090002": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R250CHK": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R250CLN": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25100001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25110001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T250R25120001": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777316564588": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 1,
+          "name": "Trace6564588",
+          "level": 1,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "1": {
+          "character": {
+            "index": 1,
+            "name": "Trace6564588",
+            "level": 1,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "",
+          "map_title": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "inventory_items_json": [],
+          "belt_items_json": [],
+          "storage_items_json": [],
+          "equipment_items_json": [],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [],
+          "skill_states_json": [],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": null
+        }
+      }
+    },
+    "T777317284550": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777319329405": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777319402032": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777319757109": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777319796976": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "T777332270799": {
+      "password": "Tracepass1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 21,
+          "name": "Trace2270799",
+          "level": 1,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "21": {
+          "character": {
+            "index": 21,
+            "name": "Trace2270799",
+            "level": 1,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "0",
+          "map_title": "Starter Field",
+          "position": {
+            "x": 331,
+            "y": 272
+          },
+          "direction": "Down",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "inventory_items_json": [
+            "{\"key\":\"red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"bag1\",\"quantity\":5,\"description\":\"Basic healing potion for starter field testing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"bag1\",\"quantity\":3,\"description\":\"Starter mana potion reserved for belt wiring.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"training-manual\",\"name\":\"Training Manual\",\"icon\":121,\"slot\":2,\"unique_id\":2,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Reminds the tester to open inventory, belt, and character panes.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":106,\"slot\":3,\"unique_id\":3,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Starter equippable helmet used to validate the equip pipeline.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"dagger\",\"name\":\"Dagger\",\"icon\":37,\"slot\":4,\"unique_id\":4,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 weapon sample for visible equipment rendering.\",\"durability_current\":20,\"durability_max\":20,\"weight\":1,\"equip_slot\":\"weapon\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":5,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"leather-armour\",\"name\":\"Leather Armour\",\"icon\":95,\"slot\":5,\"unique_id\":5,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 armour sample for visible equipment rendering.\",\"durability_current\":18,\"durability_max\":18,\"weight\":2,\"equip_slot\":\"armour\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":4,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"town-teleport\",\"name\":\"Town Teleport\",\"icon\":79,\"slot\":0,\"unique_id\":0,\"container\":\"bag2\",\"quantity\":1,\"description\":\"Reserved slot for future travel skill and safe-zone routing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "belt_items_json": [
+            "{\"key\":\"belt-red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"belt\",\"quantity\":5,\"description\":\"Hotkey potion wired into slot 1.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"belt-blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"belt\",\"quantity\":3,\"description\":\"Hotkey potion wired into slot 2.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"belt-lantern-oil\",\"name\":\"Lantern Oil\",\"icon\":119,\"slot\":5,\"unique_id\":5,\"container\":\"belt\",\"quantity\":1,\"description\":\"Placeholder consumable for later shortcut actions.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "storage_items_json": [
+            "{\"key\":\"stored-red-potion\",\"name\":\"Red Potion\",\"icon\":0,\"slot\":0,\"unique_id\":0,\"container\":\"storage\",\"quantity\":10,\"description\":\"Warehouse starter stack used to validate storage flows.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"stored-bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":0,\"slot\":1,\"unique_id\":1,\"container\":\"storage\",\"quantity\":1,\"description\":\"Warehouse equipment sample for store/take-back validation.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "equipment_items_json": [
+            "{\"key\":\"wooden-sword\",\"slot\":\"weapon\",\"name\":\"Wooden Sword\",\"icon\":36,\"shape\":0,\"description\":\"Starter weapon issued before the first field assignment.\",\"durability_current\":18,\"durability_max\":20,\"grade\":\"common\",\"added_attack\":2,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":4,\"defence\":0}",
+            "{\"key\":\"cloth-armour\",\"slot\":\"armour\",\"name\":\"Cloth Armour\",\"icon\":94,\"shape\":0,\"description\":\"Basic cloth set used for test durability and equipment wiring.\",\"durability_current\":12,\"durability_max\":14,\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":3}",
+            "{\"key\":\"copper-necklace\",\"slot\":\"necklace\",\"name\":\"Copper Necklace\",\"icon\":205,\"shape\":null,\"description\":\"Small stat necklace for the starter layout.\",\"durability_current\":8,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":1,\"defence\":0}",
+            "{\"key\":\"wood-bracelet-left\",\"slot\":\"braceletLeft\",\"name\":\"Wood Bracelet\",\"icon\":204,\"shape\":null,\"description\":\"Starter bracelet seeded for panel rendering.\",\"durability_current\":9,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"straw-sandals\",\"slot\":\"boots\",\"name\":\"Straw Sandals\",\"icon\":219,\"shape\":null,\"description\":\"Light movement gear for the early field scene.\",\"durability_current\":5,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"rope-belt\",\"slot\":\"belt\",\"name\":\"Rope Belt\",\"icon\":180,\"shape\":null,\"description\":\"Starter belt backing the bottom shortcut bar.\",\"durability_current\":6,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0}"
+          ],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [
+            "{\"quest_id\":1001,\"title\":\"Field Wasp Trial\",\"summary\":\"Village Guide wants proof that you can handle the training road safely.\",\"reward_preview\":\"300 gold, Guide Ring, Repair Powder x2\",\"required\":1,\"current\":0,\"stage\":\"available\"}"
+          ],
+          "skill_states_json": [
+            "{\"key\":\"minor-heal\",\"name\":\"Minor Heal\",\"description\":\"Restores a small amount of HP for backend skill-loop testing.\",\"level\":3,\"cooldown_ticks\":6,\"cooldown_ends_at\":0}",
+            "{\"key\":\"battle-focus\",\"name\":\"Battle Focus\",\"description\":\"Short attack/defence buff used to validate the buff runtime.\",\"level\":3,\"cooldown_ticks\":12,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-shinsu\",\"name\":\"Summon Shinsu\",\"description\":\"Summons or recalls a Shinsu pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-vampire\",\"name\":\"Summon Vampire\",\"description\":\"Summons or recalls a Vampire Spider pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":210,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-toad\",\"name\":\"Summon Toad\",\"description\":\"Summons or recalls a Spitting Toad pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-snakes\",\"name\":\"Summon Snakes\",\"description\":\"Summons or recalls a Snake Totem pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"stonetrap\",\"name\":\"Stone Trap\",\"description\":\"Summons a Stoning Spider trap for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}"
+          ],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": "{\"group\":{\"members\":[],\"lootMode\":\"free\"},\"guild\":{\"name\":\"\",\"members\":[],\"rank\":\"\",\"permissions\":[],\"chatLog\":[]},\"social\":{\"friends\":[],\"blocked\":[]},\"mail\":[],\"trade\":null,\"auction\":[],\"conquest\":{\"castleOwner\":\"\",\"activeWars\":[],\"eventLog\":[],\"taxRatePercent\":0,\"gold\":0,\"guards\":[],\"walls\":[],\"gates\":[],\"openGates\":[]},\"guildTerritory\":{\"owned\":false,\"mapFileName\":\"GA0\",\"rentalDaysLeft\":0,\"recallLog\":[]},\"hero\":null,\"profession\":{\"miningLevel\":0,\"ore\":0,\"craftedItems\":[]},\"appearance\":{\"hair\":0},\"nameLists\":[]}"
+        }
+      }
+    },
+    "TraceLive0305": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 1,
+          "name": "TraceLiveOne",
+          "level": 1,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "1": {
+          "character": {
+            "index": 1,
+            "name": "TraceLiveOne",
+            "level": 1,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "",
+          "map_title": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "inventory_items_json": [],
+          "belt_items_json": [],
+          "storage_items_json": [],
+          "equipment_items_json": [],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [],
+          "skill_states_json": [],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": null
+        }
+      }
+    },
+    "TraceLive0310": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 1,
+          "name": "TraceLiveTwo",
+          "level": 1,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "1": {
+          "character": {
+            "index": 1,
+            "name": "TraceLiveTwo",
+            "level": 1,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "",
+          "map_title": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "inventory_items_json": [],
+          "belt_items_json": [],
+          "storage_items_json": [],
+          "equipment_items_json": [],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [],
+          "skill_states_json": [],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": null
+        }
+      }
+    },
+    "TraceLive0315": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "TraceLive0320": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "TraceLive0330": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdx0428030348": {
+      "password": "Test123",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 8,
+          "name": "Cdx0428030348",
+          "level": 1,
+          "class": "Warrior",
+          "gender": "Male"
+        },
+        {
+          "index": 9,
+          "name": "C20428030348",
+          "level": 1,
+          "class": "Wizard",
+          "gender": "Female"
+        }
+      ],
+      "saves": {
+        "8": {
+          "character": {
+            "index": 8,
+            "name": "Cdx0428030348",
+            "level": 1,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "0",
+          "map_title": "BichonProvince",
+          "position": {
+            "x": 305,
+            "y": 626
+          },
+          "direction": "Right",
+          "hp": 18,
+          "max_hp": 18,
+          "mp": 14,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 0,
+          "credit": 0,
+          "inventory_items_json": [
+            "{\"key\":\"crystal-item-221\",\"name\":\"WoodenSword\",\"icon\":0,\"slot\":6,\"unique_id\":29,\"container\":\"bag1\",\"quantity\":1,\"description\":\"\",\"durability_current\":4000,\"durability_max\":4000,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":false,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"crystal-item-317\",\"name\":\"BaseDress(M)\",\"icon\":0,\"slot\":7,\"unique_id\":30,\"container\":\"bag1\",\"quantity\":1,\"description\":\"\",\"durability_current\":5000,\"durability_max\":5000,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":false,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"crystal-item-722\",\"name\":\"Candle\",\"icon\":0,\"slot\":8,\"unique_id\":32,\"container\":\"bag1\",\"quantity\":1,\"description\":\"\",\"durability_current\":8000,\"durability_max\":8000,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":false,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"crystal-item-658\",\"name\":\"(HP)DrugSmall\",\"icon\":0,\"slot\":10,\"unique_id\":31,\"container\":\"bag1\",\"quantity\":1,\"description\":\"\",\"durability_current\":0,\"durability_max\":0,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":false,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "belt_items_json": [
+            "{\"key\":\"belt-red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"belt\",\"quantity\":5,\"description\":\"Hotkey potion wired into slot 1.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"belt-blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"belt\",\"quantity\":3,\"description\":\"Hotkey potion wired into slot 2.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"belt-lantern-oil\",\"name\":\"Lantern Oil\",\"icon\":119,\"slot\":5,\"unique_id\":5,\"container\":\"belt\",\"quantity\":1,\"description\":\"Placeholder consumable for later shortcut actions.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "storage_items_json": [
+            "{\"key\":\"stored-red-potion\",\"name\":\"Red Potion\",\"icon\":0,\"slot\":0,\"unique_id\":0,\"container\":\"storage\",\"quantity\":10,\"description\":\"Warehouse starter stack used to validate storage flows.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"stored-bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":0,\"slot\":1,\"unique_id\":1,\"container\":\"storage\",\"quantity\":1,\"description\":\"Warehouse equipment sample for store/take-back validation.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "equipment_items_json": [],
+          "equipment_items_explicit_empty": true,
+          "quest_states_json": [
+            "{\"quest_id\":1001,\"title\":\"Field Wasp Trial\",\"summary\":\"Village Guide wants proof that you can handle the training road safely.\",\"reward_preview\":\"300 gold, Guide Ring, Repair Powder x2\",\"required\":1,\"current\":0,\"stage\":\"available\"}"
+          ],
+          "skill_states_json": [
+            "{\"key\":\"minor-heal\",\"name\":\"Minor Heal\",\"description\":\"Restores a small amount of HP for backend skill-loop testing.\",\"level\":3,\"cooldown_ticks\":6,\"cooldown_ends_at\":0}",
+            "{\"key\":\"battle-focus\",\"name\":\"Battle Focus\",\"description\":\"Short attack/defence buff used to validate the buff runtime.\",\"level\":3,\"cooldown_ticks\":12,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-shinsu\",\"name\":\"Summon Shinsu\",\"description\":\"Summons or recalls a Shinsu pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-vampire\",\"name\":\"Summon Vampire\",\"description\":\"Summons or recalls a Vampire Spider pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":210,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-toad\",\"name\":\"Summon Toad\",\"description\":\"Summons or recalls a Spitting Toad pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-snakes\",\"name\":\"Summon Snakes\",\"description\":\"Summons or recalls a Snake Totem pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"stonetrap\",\"name\":\"Stone Trap\",\"description\":\"Summons a Stoning Spider trap for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}"
+          ],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": "{\"group\":{\"members\":[],\"lootMode\":\"free\"},\"guild\":{\"name\":\"\",\"members\":[],\"rank\":\"\",\"permissions\":[],\"chatLog\":[]},\"social\":{\"friends\":[],\"blocked\":[]},\"mail\":[],\"trade\":null,\"auction\":[],\"conquest\":{\"castleOwner\":\"\",\"activeWars\":[],\"eventLog\":[],\"taxRatePercent\":0,\"gold\":0,\"guards\":[],\"walls\":[],\"gates\":[],\"openGates\":[]},\"guildTerritory\":{\"owned\":false,\"mapFileName\":\"GA0\",\"rentalDaysLeft\":0,\"recallLog\":[]},\"hero\":null,\"profession\":{\"miningLevel\":0,\"ore\":0,\"craftedItems\":[]},\"appearance\":{\"hair\":4},\"nameLists\":[]}"
+        },
+        "9": {
+          "character": {
+            "index": 9,
+            "name": "C20428030348",
+            "level": 1,
+            "class": "Wizard",
+            "gender": "Female"
+          },
+          "map_file_name": "0",
+          "map_title": "Starter Field",
+          "position": {
+            "x": 330,
+            "y": 270
+          },
+          "direction": "Down",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1280,
+          "credit": 0,
+          "inventory_items_json": [
+            "{\"key\":\"red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"bag1\",\"quantity\":5,\"description\":\"Basic healing potion for starter field testing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"bag1\",\"quantity\":3,\"description\":\"Starter mana potion reserved for belt wiring.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"training-manual\",\"name\":\"Training Manual\",\"icon\":121,\"slot\":2,\"unique_id\":2,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Reminds the tester to open inventory, belt, and character panes.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":106,\"slot\":3,\"unique_id\":3,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Starter equippable helmet used to validate the equip pipeline.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"dagger\",\"name\":\"Dagger\",\"icon\":37,\"slot\":4,\"unique_id\":4,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 weapon sample for visible equipment rendering.\",\"durability_current\":20,\"durability_max\":20,\"weight\":1,\"equip_slot\":\"weapon\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":5,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"leather-armour\",\"name\":\"Leather Armour\",\"icon\":95,\"slot\":5,\"unique_id\":5,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 armour sample for visible equipment rendering.\",\"durability_current\":18,\"durability_max\":18,\"weight\":2,\"equip_slot\":\"armour\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":4,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"town-teleport\",\"name\":\"Town Teleport\",\"icon\":79,\"slot\":0,\"unique_id\":0,\"container\":\"bag2\",\"quantity\":1,\"description\":\"Reserved slot for future travel skill and safe-zone routing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "belt_items_json": [
+            "{\"key\":\"belt-red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"belt\",\"quantity\":5,\"description\":\"Hotkey potion wired into slot 1.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"belt-blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"belt\",\"quantity\":3,\"description\":\"Hotkey potion wired into slot 2.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"belt-lantern-oil\",\"name\":\"Lantern Oil\",\"icon\":119,\"slot\":5,\"unique_id\":5,\"container\":\"belt\",\"quantity\":1,\"description\":\"Placeholder consumable for later shortcut actions.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "storage_items_json": [
+            "{\"key\":\"stored-red-potion\",\"name\":\"Red Potion\",\"icon\":0,\"slot\":0,\"unique_id\":0,\"container\":\"storage\",\"quantity\":10,\"description\":\"Warehouse starter stack used to validate storage flows.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"stored-bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":0,\"slot\":1,\"unique_id\":1,\"container\":\"storage\",\"quantity\":1,\"description\":\"Warehouse equipment sample for store/take-back validation.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "equipment_items_json": [
+            "{\"key\":\"wooden-sword\",\"slot\":\"weapon\",\"name\":\"Wooden Sword\",\"icon\":36,\"shape\":0,\"description\":\"Starter weapon issued before the first field assignment.\",\"durability_current\":18,\"durability_max\":20,\"grade\":\"common\",\"added_attack\":2,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":4,\"defence\":0}",
+            "{\"key\":\"cloth-armour\",\"slot\":\"armour\",\"name\":\"Cloth Armour\",\"icon\":94,\"shape\":0,\"description\":\"Basic cloth set used for test durability and equipment wiring.\",\"durability_current\":12,\"durability_max\":14,\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":3}",
+            "{\"key\":\"copper-necklace\",\"slot\":\"necklace\",\"name\":\"Copper Necklace\",\"icon\":205,\"shape\":null,\"description\":\"Small stat necklace for the starter layout.\",\"durability_current\":8,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":1,\"defence\":0}",
+            "{\"key\":\"wood-bracelet-left\",\"slot\":\"braceletLeft\",\"name\":\"Wood Bracelet\",\"icon\":204,\"shape\":null,\"description\":\"Starter bracelet seeded for panel rendering.\",\"durability_current\":9,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"straw-sandals\",\"slot\":\"boots\",\"name\":\"Straw Sandals\",\"icon\":219,\"shape\":null,\"description\":\"Light movement gear for the early field scene.\",\"durability_current\":5,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"rope-belt\",\"slot\":\"belt\",\"name\":\"Rope Belt\",\"icon\":180,\"shape\":null,\"description\":\"Starter belt backing the bottom shortcut bar.\",\"durability_current\":6,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0}"
+          ],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [
+            "{\"quest_id\":1001,\"title\":\"Field Wasp Trial\",\"summary\":\"Village Guide wants proof that you can handle the training road safely.\",\"reward_preview\":\"300 gold, Guide Ring, Repair Powder x2\",\"required\":1,\"current\":0,\"stage\":\"available\"}"
+          ],
+          "skill_states_json": [
+            "{\"key\":\"minor-heal\",\"name\":\"Minor Heal\",\"description\":\"Restores a small amount of HP for backend skill-loop testing.\",\"level\":3,\"cooldown_ticks\":6,\"cooldown_ends_at\":0}",
+            "{\"key\":\"battle-focus\",\"name\":\"Battle Focus\",\"description\":\"Short attack/defence buff used to validate the buff runtime.\",\"level\":3,\"cooldown_ticks\":12,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-shinsu\",\"name\":\"Summon Shinsu\",\"description\":\"Summons or recalls a Shinsu pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-vampire\",\"name\":\"Summon Vampire\",\"description\":\"Summons or recalls a Vampire Spider pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":210,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-toad\",\"name\":\"Summon Toad\",\"description\":\"Summons or recalls a Spitting Toad pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-snakes\",\"name\":\"Summon Snakes\",\"description\":\"Summons or recalls a Snake Totem pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"stonetrap\",\"name\":\"Stone Trap\",\"description\":\"Summons a Stoning Spider trap for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}"
+          ],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": "{\"group\":{\"members\":[],\"lootMode\":\"free\"},\"guild\":{\"name\":\"\",\"members\":[],\"rank\":\"\",\"permissions\":[],\"chatLog\":[]},\"social\":{\"friends\":[],\"blocked\":[]},\"mail\":[],\"trade\":null,\"auction\":[],\"conquest\":{\"castleOwner\":\"\",\"activeWars\":[],\"eventLog\":[],\"taxRatePercent\":0,\"gold\":0,\"guards\":[],\"walls\":[],\"gates\":[],\"openGates\":[]},\"guildTerritory\":{\"owned\":false,\"mapFileName\":\"GA0\",\"rentalDaysLeft\":0,\"recallLog\":[]},\"hero\":null,\"profession\":{\"miningLevel\":0,\"ore\":0,\"craftedItems\":[]},\"appearance\":{\"hair\":0},\"nameLists\":[]}"
+        }
+      }
+    },
+    "cdxr269000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdxr276000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdxr279000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdxr280000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdxr284000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "cdxr286000101": {
+      "password": "Tracenew1",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [],
+      "saves": {}
+    },
+    "demo": {
+      "password": "demo",
+      "storage_size": 80,
+      "has_expanded_storage": false,
+      "expanded_storage_expiry_time_binary_datetime": 0,
+      "storage_password": "",
+      "storage_password_last_set_binary_datetime": 0,
+      "is_banned": false,
+      "ban_reason": "",
+      "ban_until_ms": null,
+      "banned_at_ms": null,
+      "characters": [
+        {
+          "index": 0,
+          "name": "Scout",
+          "level": 7,
+          "class": "Warrior",
+          "gender": "Male"
+        }
+      ],
+      "saves": {
+        "0": {
+          "character": {
+            "index": 0,
+            "name": "Scout",
+            "level": 7,
+            "class": "Warrior",
+            "gender": "Male"
+          },
+          "map_file_name": "0",
+          "map_title": "Starter Field",
+          "position": {
+            "x": 334,
+            "y": 278
+          },
+          "direction": "Right",
+          "hp": 120,
+          "max_hp": 120,
+          "mp": 45,
+          "experience": 0,
+          "max_experience": 100,
+          "gold": 1278,
+          "credit": 0,
+          "inventory_items_json": [
+            "{\"key\":\"red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":10,\"unique_id\":0,\"container\":\"bag1\",\"quantity\":5,\"description\":\"Basic healing potion for starter field testing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Starter mana potion reserved for belt wiring.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"training-manual\",\"name\":\"Training Manual\",\"icon\":121,\"slot\":2,\"unique_id\":2,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Reminds the tester to open inventory, belt, and character panes.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":106,\"slot\":3,\"unique_id\":3,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Starter equippable helmet used to validate the equip pipeline.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"dagger\",\"name\":\"Dagger\",\"icon\":37,\"slot\":4,\"unique_id\":4,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 weapon sample for visible equipment rendering.\",\"durability_current\":20,\"durability_max\":20,\"weight\":1,\"equip_slot\":\"weapon\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":5,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"leather-armour\",\"name\":\"Leather Armour\",\"icon\":95,\"slot\":5,\"unique_id\":5,\"container\":\"bag1\",\"quantity\":1,\"description\":\"Standard shape-01 armour sample for visible equipment rendering.\",\"durability_current\":18,\"durability_max\":18,\"weight\":2,\"equip_slot\":\"armour\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":4,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"town-teleport\",\"name\":\"Town Teleport\",\"icon\":79,\"slot\":0,\"unique_id\":0,\"container\":\"bag2\",\"quantity\":1,\"description\":\"Reserved slot for future travel skill and safe-zone routing.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "belt_items_json": [
+            "{\"key\":\"belt-red-potion\",\"name\":\"Red Potion\",\"icon\":23,\"slot\":0,\"unique_id\":0,\"container\":\"belt\",\"quantity\":5,\"description\":\"Hotkey potion wired into slot 1.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"belt-blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":1,\"unique_id\":1,\"container\":\"belt\",\"quantity\":3,\"description\":\"Hotkey potion wired into slot 2.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"belt-lantern-oil\",\"name\":\"Lantern Oil\",\"icon\":119,\"slot\":5,\"unique_id\":5,\"container\":\"belt\",\"quantity\":1,\"description\":\"Placeholder consumable for later shortcut actions.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":0}",
+            "{\"key\":\"blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":2,\"unique_id\":2,\"container\":\"belt\",\"quantity\":1,\"description\":\"Starter mana potion reserved for belt wiring.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}",
+            "{\"key\":\"blue-potion\",\"name\":\"Blue Potion\",\"icon\":15,\"slot\":3,\"unique_id\":3,\"container\":\"belt\",\"quantity\":1,\"description\":\"Starter mana potion reserved for belt wiring.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":0,\"heal_mp\":20}"
+          ],
+          "storage_items_json": [
+            "{\"key\":\"stored-red-potion\",\"name\":\"Red Potion\",\"icon\":0,\"slot\":0,\"unique_id\":0,\"container\":\"storage\",\"quantity\":10,\"description\":\"Warehouse starter stack used to validate storage flows.\",\"durability_current\":null,\"durability_max\":null,\"weight\":1,\"equip_slot\":null,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0,\"heal_hp\":35,\"heal_mp\":0}",
+            "{\"key\":\"stored-bronze-helmet\",\"name\":\"Bronze Helmet\",\"icon\":0,\"slot\":1,\"unique_id\":1,\"container\":\"storage\",\"quantity\":1,\"description\":\"Warehouse equipment sample for store/take-back validation.\",\"durability_current\":16,\"durability_max\":16,\"weight\":2,\"equip_slot\":\"helmet\",\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":2,\"heal_hp\":0,\"heal_mp\":0}"
+          ],
+          "equipment_items_json": [
+            "{\"key\":\"wooden-sword\",\"slot\":\"weapon\",\"name\":\"Wooden Sword\",\"icon\":36,\"shape\":0,\"description\":\"Starter weapon issued before the first field assignment.\",\"durability_current\":18,\"durability_max\":20,\"grade\":\"common\",\"added_attack\":2,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":4,\"defence\":0}",
+            "{\"key\":\"cloth-armour\",\"slot\":\"armour\",\"name\":\"Cloth Armour\",\"icon\":94,\"shape\":0,\"description\":\"Basic cloth set used for test durability and equipment wiring.\",\"durability_current\":12,\"durability_max\":14,\"grade\":\"common\",\"added_attack\":0,\"added_defence\":1,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":3}",
+            "{\"key\":\"copper-necklace\",\"slot\":\"necklace\",\"name\":\"Copper Necklace\",\"icon\":205,\"shape\":null,\"description\":\"Small stat necklace for the starter layout.\",\"durability_current\":8,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":1,\"defence\":0}",
+            "{\"key\":\"wood-bracelet-left\",\"slot\":\"braceletLeft\",\"name\":\"Wood Bracelet\",\"icon\":204,\"shape\":null,\"description\":\"Starter bracelet seeded for panel rendering.\",\"durability_current\":9,\"durability_max\":10,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"straw-sandals\",\"slot\":\"boots\",\"name\":\"Straw Sandals\",\"icon\":219,\"shape\":null,\"description\":\"Light movement gear for the early field scene.\",\"durability_current\":5,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":1}",
+            "{\"key\":\"rope-belt\",\"slot\":\"belt\",\"name\":\"Rope Belt\",\"icon\":180,\"shape\":null,\"description\":\"Starter belt backing the bottom shortcut bar.\",\"durability_current\":6,\"durability_max\":8,\"grade\":\"none\",\"added_attack\":0,\"added_defence\":0,\"added_luck\":0,\"added_stats\":[],\"cursed\":false,\"socket_slots\":0,\"gem_count\":0,\"identified\":null,\"soul_bound_id\":null,\"sealed_expiry_time_binary_datetime\":0,\"sealed_next_time_binary_datetime\":0,\"rental_binding_flags\":0,\"attack\":0,\"defence\":0}"
+          ],
+          "equipment_items_explicit_empty": false,
+          "quest_states_json": [
+            "{\"quest_id\":1001,\"title\":\"Field Wasp Trial\",\"summary\":\"Village Guide wants proof that you can handle the training road safely.\",\"reward_preview\":\"300 gold, Guide Ring, Repair Powder x2\",\"required\":1,\"current\":0,\"stage\":\"available\"}"
+          ],
+          "skill_states_json": [
+            "{\"key\":\"minor-heal\",\"name\":\"Minor Heal\",\"description\":\"Restores a small amount of HP for backend skill-loop testing.\",\"level\":3,\"cooldown_ticks\":6,\"cooldown_ends_at\":0}",
+            "{\"key\":\"battle-focus\",\"name\":\"Battle Focus\",\"description\":\"Short attack/defence buff used to validate the buff runtime.\",\"level\":3,\"cooldown_ticks\":12,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-shinsu\",\"name\":\"Summon Shinsu\",\"description\":\"Summons or recalls a Shinsu pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-vampire\",\"name\":\"Summon Vampire\",\"description\":\"Summons or recalls a Vampire Spider pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":210,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-toad\",\"name\":\"Summon Toad\",\"description\":\"Summons or recalls a Spitting Toad pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"summon-snakes\",\"name\":\"Summon Snakes\",\"description\":\"Summons or recalls a Snake Totem pet for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}",
+            "{\"key\":\"stonetrap\",\"name\":\"Stone Trap\",\"description\":\"Summons a Stoning Spider trap for backend summon-parity testing.\",\"level\":3,\"cooldown_ticks\":180,\"cooldown_ends_at\":0}"
+          ],
+          "npc_flag_states_json": [],
+          "npc_saved_values_json": [],
+          "npc_buy_back_items_json": [],
+          "npc_used_goods_items_json": [],
+          "stage5_systems_json": "{\"group\":{\"members\":[],\"lootMode\":\"free\"},\"guild\":{\"name\":\"\",\"members\":[],\"rank\":\"\",\"permissions\":[],\"chatLog\":[]},\"social\":{\"friends\":[],\"blocked\":[]},\"mail\":[],\"trade\":null,\"auction\":[],\"conquest\":{\"castleOwner\":\"\",\"activeWars\":[],\"eventLog\":[],\"taxRatePercent\":0,\"gold\":0,\"guards\":[],\"walls\":[],\"gates\":[],\"openGates\":[]},\"guildTerritory\":{\"owned\":false,\"mapFileName\":\"GA0\",\"rentalDaysLeft\":0,\"recallLog\":[]},\"hero\":null,\"profession\":{\"miningLevel\":0,\"ore\":0,\"craftedItems\":[]},\"appearance\":{\"hair\":0},\"nameLists\":[]}"
+        }
+      }
+    }
+  }
+}

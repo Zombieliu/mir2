@@ -1,6 +1,6 @@
 # Player QA Script
 
-Last updated: 2026-04-26
+Last updated: 2026-04-29
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
@@ -22,6 +22,7 @@ The target is to keep routine development review small and reserve most human ti
 Before starting human acceptance for a Candidate build, the Coordinator should provide fresh evidence for:
 
 - `npm.cmd run build`
+- `npm.cmd run audit:crystal-map-coverage`
 - `npm.cmd run smoke:crystal-minimap-assets`
 - `npm.cmd run smoke:crystal-map-api`
 - `npm.cmd run smoke:stage5-ui`
@@ -30,16 +31,22 @@ Before starting human acceptance for a Candidate build, the Coordinator should p
 
 Existing frontend evidence sources:
 
-- `apps/web/package.json` scripts: `build`, `smoke:crystal-minimap-assets`, `smoke:crystal-map-api`, `smoke:stage5-ui`, `load:gateway-ws`
+- `apps/web/package.json` scripts: `build`, `audit:crystal-map-coverage`, `smoke:crystal-minimap-assets`, `smoke:crystal-map-api`, `smoke:stage5-ui`, `load:gateway-ws`
 - `docs/stage5-screenshots/stage5-ui-smoke-manifest.json`
 - `docs/generated/load/latest-ws.json`
 - `docs/generated/load/latest-tcp.json`
+- `docs/generated/map/latest-crystal-map-coverage.json`
 - `docs/generated/map/latest-crystal-map-api.json`
 - `docs/generated/assets/latest-minimap-assets.json`
 
 Latest automated frontend evidence:
 
-- 2026-04-26 R224: Local packet trace matrix evidence restored. `packet_trace --list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 TCP-traceable artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`. Live Crystal trace comparison remains blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
+- 2026-04-29 R303: All-map frontend source-resource audit was added and passed via `npm.cmd run audit:crystal-map-coverage --prefix apps\web`, with evidence archived at `docs/generated/map/r303-crystal-map-coverage.json`. The audit confirms 463/463 Crystal manifest maps have local map files, 0 unsupported map types, 0 parse errors, 463/463 sampled viewports with source frames, and no missing sampled map libraries. It also records remaining map acceptance risks: 11 sampled maps have out-of-range frame-reference risk, minimap 450/451 are still missing for `DogYoArena2` / `DogYoHyun`, and full-map visual 1:1 still needs comparison/human acceptance.
+- 2026-04-28 R302: Windows original-client comparison evidence is archived at `docs/generated/player-qa/r302-original-client/summary.json`. Original Crystal `Server.exe` listened on `127.0.0.1:7000`, visible `Client.exe` reached select/game with retained character `R302HeroB`, and screenshots were captured for login rejection, select, game welcome, and unobstructed game HUD. Matching web evidence was refreshed through Stage 5 UI smoke at `http://127.0.0.1:3002` with 88 screenshots and 0 critical console errors, archived as `docs/generated/player-qa/r302-original-client/web-stage5-ui-smoke-manifest.json`. This is visual-reference evidence only; it does not close whole-project 100% Accepted because the comparison is not yet a deterministic same-scene human visual/feel pass.
+- 2026-04-28 R301: Windows final automated Candidate acceptance pack passed and is summarized in `docs/generated/player-qa/r301-summary.json`. Web `tsc --noEmit` and `npm.cmd run build` passed; map API smoke wrote `docs/generated/map/r301-crystal-map-api.json` with 18/18 requests and 0 failures; minimap smoke wrote `docs/generated/assets/r301-minimap-assets.json` with 0 failures and the known 450/451 warning; WS load wrote `docs/generated/load/r301-ws.json` with 64/64 ready, 0 errors, and keepalive p95 637 ms; Stage 5 UI smoke wrote `docs/generated/player-qa/r301/stage5-ui-smoke-manifest.json` with 88 screenshots, 0 critical console errors, and 32 compact text nodes checked without overflow. Rust verification passed `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. Temporary gateway/web services were stopped and ports 7000/7110/3002 verified closed. Human Crystal visual/feel acceptance remains required for whole-project 100% Accepted.
+- 2026-04-28 R300: backend/server tracked-slice packet parity is accepted under the explicit stable-diff policy. R298 supplies the 9/9 stable-clean live Crystal matrix, R299 identifies strict exact dirtiness as Crystal dynamic state, and R300 records/enforces the stable-diff acceptance mode in `docs/PACKET-PARITY-ACCEPTANCE.md` and `docs/generated/packet-traces/r300-stable-acceptance.json`. This does not replace the human Crystal visual/feel pass required for whole-project 100% Accepted.
+- 2026-04-28 R297: Windows automated player QA refresh passed with `CRYSTAL_CLIENT_ROOT=E:\mir2\Crystal\Build\Client\Debug`. Web `npm.cmd run build`, `tsc --noEmit`, map API smoke 18/18, minimap smoke 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors and keepalive p95 632 ms, and Stage 5 UI smoke 88 screenshots with 0 critical console errors passed. This round also exported missing original scene sprite libs (`NPC/07`, `NPC/08`, `NPC/16`, `NPC/27`, `NPC/45`, `NPC/52`, `NPC/83`, `Monster/000`, `Monster/139`), fixed map-transfer minimap state from gateway `MapInformation`, and hardened concurrent account-store file saves for Windows load. Rust validation passed `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, and `git diff --check`. Human Crystal visual/feel acceptance remains required for 100% Accepted.
+- 2026-04-26 R224: Local packet trace matrix evidence restored. `packet_trace --list-flows` works, `mir2-gateway` passes 53/53 including packet trace bin tests 6/6, and require-local `packet_trace --matrix` wrote 9 TCP-traceable artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`. Live Crystal trace comparison was later refreshed by R298 and accepted under R300 stable-diff policy.
 - 2026-04-26 R223: **100% Candidate** automated gate passed. Stage 5 UI smoke captured 88 screenshots with advanced Stage 5 systems state and compact Mail/Report bounds. Direct `next build`, `tsc --noEmit`, map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 47/47, full `mir2-simulation` 664/664, `fmt --check`, and `diff --check` passed. Human Crystal visual/feel acceptance remains required for 100% Accepted.
 - 2026-04-26 R184: direct `next build`, Crystal minimap smoke, Crystal map API smoke, Stage 5 UI smoke with 10 screenshots, gateway health on `127.0.0.1:7110`, and websocket load 64/64 ready passed. Human Crystal visual/feel acceptance remains required.
 - 2026-04-26 R185: Stage 5 UI smoke passed with 11 screenshots, named desktop 1024x768 and compact 820x640 viewport metadata, compact layout bounds assertions, and `stage5-compact-game.png`. Human Crystal visual/feel acceptance remains required.

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777395165142,
+  "flow": "core_bootstrap",
+  "fixture": {
+    "mode": "ephemeral",
+    "account": "R302C0428B",
+    "lifecycleAccount": "T777395162318",
+    "lifecycleCharacter": "Trace5162318",
+    "character": "Scout",
+    "characterIndex": 34
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7000",
+    "ok": true,
+    "elapsedMs": 2823,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 13,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 773,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 779,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 1290,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 21,
+        "payloadHash": "fnv1a64:65d5f581ac92e6c6",
+        "decoded": true,
+        "detail": {
+          "accountId": "R302C0428B"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 1294,
+        "direction": "server",
+        "packetId": 7,
+        "packet": "Login",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63b94c8601b113",
+        "decoded": true,
+        "detail": {
+          "result": 4
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 1805,
+        "direction": "client",
+        "packetId": 8,
+        "packet": "StartGame",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:8dc54d858381faf7",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 34
+        }
+      }
+    ]
+  }
+}

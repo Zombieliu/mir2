@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777333795748,
+  "flow": "account_lifecycle",
+  "fixture": {
+    "mode": "ephemeral",
+    "account": "cdx0428030348",
+    "lifecycleAccount": "cdxr284000101",
+    "lifecycleCharacter": "R284Trace01",
+    "character": "Cdx0428030348",
+    "characterIndex": 8
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7310",
+    "ok": true,
+    "elapsedMs": 6107,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 22,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 773,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 773,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 1525,
+        "direction": "client",
+        "packetId": 3,
+        "packet": "NewAccount",
+        "payloadLen": 73,
+        "payloadHash": "fnv1a64:340e86bca5aedc54",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 1533,
+        "direction": "server",
+        "packetId": 4,
+        "packet": "NewAccount",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63c54c8601c577",
+        "decoded": true,
+        "detail": {
+          "result": 8
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 2285,
+        "direction": "client",
+        "packetId": 4,
+        "packet": "ChangePassword",
+        "payloadLen": 35,
+        "payloadHash": "fnv1a64:95ef0475adf9c9ab",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 2294,
+        "direction": "server",
+        "packetId": 5,
+        "packet": "ChangePassword",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bb4c8601b479",
+        "decoded": true,
+        "detail": {
+          "result": 6
+        }
+      },
+      {
+        "sequence": 7,
+        "elapsedMs": 3055,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 24,
+        "payloadHash": "fnv1a64:955c95b018e0930c",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 8,
+        "elapsedMs": 3055,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4d25767f9dce13f5",
+        "decoded": true,
+        "detail": {
+          "characterCount": 0,
+          "characters": []
+        }
+      },
+      {
+        "sequence": 9,
+        "elapsedMs": 3821,
+        "direction": "client",
+        "packetId": 6,
+        "packet": "NewCharacter",
+        "payloadLen": 14,
+        "payloadHash": "fnv1a64:e47b10f8ca2116c4",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "name": "R284Trace01"
+        }
+      },
+      {
+        "sequence": 10,
+        "elapsedMs": 3830,
+        "direction": "server",
+        "packetId": 11,
+        "packet": "NewCharacterSuccess",
+        "payloadLen": 28,
+        "payloadHash": "fnv1a64:e3e0d05d9ba59cad",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "index": 25,
+          "lastAccessBinaryDatetime": 0,
+          "level": 0,
+          "name": "R284Trace01"
+        }
+      },
+      {
+        "sequence": 11,
+        "elapsedMs": 4585,
+        "direction": "client",
+        "packetId": 7,
+        "packet": "DeleteCharacter",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 25
+        }
+      },
+      {
+        "sequence": 12,
+        "elapsedMs": 4594,
+        "direction": "server",
+        "packetId": 13,
+        "packet": "DeleteCharacterSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 25
+        }
+      }
+    ]
+  },
+  "crystal": {
+    "endpoint": "127.0.0.1:7000",
+    "ok": true,
+    "elapsedMs": 6129,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 12,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 766,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 778,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 1538,
+        "direction": "client",
+        "packetId": 3,
+        "packet": "NewAccount",
+        "payloadLen": 73,
+        "payloadHash": "fnv1a64:340e86bca5aedc54",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 1551,
+        "direction": "server",
+        "packetId": 4,
+        "packet": "NewAccount",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63c54c8601c577",
+        "decoded": true,
+        "detail": {
+          "result": 8
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 2309,
+        "direction": "client",
+        "packetId": 4,
+        "packet": "ChangePassword",
+        "payloadLen": 35,
+        "payloadHash": "fnv1a64:95ef0475adf9c9ab",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 2316,
+        "direction": "server",
+        "packetId": 5,
+        "packet": "ChangePassword",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bb4c8601b479",
+        "decoded": true,
+        "detail": {
+          "result": 6
+        }
+      },
+      {
+        "sequence": 7,
+        "elapsedMs": 3078,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 24,
+        "payloadHash": "fnv1a64:955c95b018e0930c",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdxr284000101"
+        }
+      },
+      {
+        "sequence": 8,
+        "elapsedMs": 3079,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4d25767f9dce13f5",
+        "decoded": true,
+        "detail": {
+          "characterCount": 0,
+          "characters": []
+        }
+      },
+      {
+        "sequence": 9,
+        "elapsedMs": 3846,
+        "direction": "client",
+        "packetId": 6,
+        "packet": "NewCharacter",
+        "payloadLen": 14,
+        "payloadHash": "fnv1a64:e47b10f8ca2116c4",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "name": "R284Trace01"
+        }
+      },
+      {
+        "sequence": 10,
+        "elapsedMs": 3857,
+        "direction": "server",
+        "packetId": 11,
+        "packet": "NewCharacterSuccess",
+        "payloadLen": 28,
+        "payloadHash": "fnv1a64:758513d7a9aff9c7",
+        "decoded": true,
+        "detail": {
+          "class": "Warrior",
+          "gender": "Male",
+          "index": 23,
+          "lastAccessBinaryDatetime": 0,
+          "level": 0,
+          "name": "R284Trace01"
+        }
+      },
+      {
+        "sequence": 11,
+        "elapsedMs": 4610,
+        "direction": "client",
+        "packetId": 7,
+        "packet": "DeleteCharacter",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:6ce032ebfe88a752",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 23
+        }
+      },
+      {
+        "sequence": 12,
+        "elapsedMs": 4619,
+        "direction": "server",
+        "packetId": 13,
+        "packet": "DeleteCharacterSuccess",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:6ce032ebfe88a752",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 23
+        }
+      }
+    ]
+  },
+  "diff": {
+    "clean": false,
+    "comparedEntries": 13,
+    "mismatchReasons": [
+      "payload_hash_mismatch"
+    ],
+    "mismatches": [
+      {
+        "sequence": 10,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 11,
+          "packet": "NewCharacterSuccess",
+          "payloadLen": 28,
+          "payloadHash": "fnv1a64:e3e0d05d9ba59cad",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 11,
+          "packet": "NewCharacterSuccess",
+          "payloadLen": 28,
+          "payloadHash": "fnv1a64:758513d7a9aff9c7",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 11,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "client",
+          "packetId": 7,
+          "packet": "DeleteCharacter",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "client",
+          "packetId": 7,
+          "packet": "DeleteCharacter",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6ce032ebfe88a752",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 12,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 13,
+          "packet": "DeleteCharacterSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 13,
+          "packet": "DeleteCharacterSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6ce032ebfe88a752",
+          "decoded": true
+        }
+      }
+    ]
+  },
+  "stableDiff": {
+    "clean": false,
+    "comparedEntries": 13,
+    "mismatchReasons": [
+      "payload_hash_mismatch"
+    ],
+    "mismatches": [
+      {
+        "sequence": 10,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 11,
+          "packet": "NewCharacterSuccess",
+          "payloadLen": 28,
+          "payloadHash": "fnv1a64:e3e0d05d9ba59cad",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 11,
+          "packet": "NewCharacterSuccess",
+          "payloadLen": 28,
+          "payloadHash": "fnv1a64:758513d7a9aff9c7",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 11,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "client",
+          "packetId": 7,
+          "packet": "DeleteCharacter",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "client",
+          "packetId": 7,
+          "packet": "DeleteCharacter",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6ce032ebfe88a752",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 12,
+        "reason": "payload_hash_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 13,
+          "packet": "DeleteCharacterSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:acaaeb3f5ca204fc",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 13,
+          "packet": "DeleteCharacterSuccess",
+          "payloadLen": 4,
+          "payloadHash": "fnv1a64:6ce032ebfe88a752",
+          "decoded": true
+        }
+      }
+    ]
+  }
+}

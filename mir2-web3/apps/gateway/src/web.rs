@@ -909,6 +909,13 @@ async fn send_error_message(
 
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
+        ServerPacket::Raw { packet_id, payload } => json!({
+            "type": "packet",
+            "packet": format!("{:?}", packet_id),
+            "payload": {
+                "rawPayloadLength": payload.len()
+            }
+        }),
         ServerPacket::Connected => json!({
             "type": "packet",
             "packet": "Connected",
@@ -1040,6 +1047,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "mapIndex": info.map_index,
                 "fileName": info.file_name,
                 "title": info.title,
+                "miniMapIndex": info.mini_map,
+                "bigMapIndex": info.big_map,
                 "spawnFlags": {
                     "lightning": info.has_lightning(),
                     "fire": info.has_fire()
@@ -1862,6 +1871,20 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "spell": info.spell as u8,
                 "direction": format!("{:?}", info.direction),
                 "param": info.param
+            }
+        }),
+        ServerPacket::NewQuestInfo { payload } => json!({
+            "type": "packet",
+            "packet": "NewQuestInfo",
+            "payload": {
+                "rawPayloadLength": payload.len()
+            }
+        }),
+        ServerPacket::NewRecipeInfo { payload } => json!({
+            "type": "packet",
+            "packet": "NewRecipeInfo",
+            "payload": {
+                "rawPayloadLength": payload.len()
             }
         }),
         ServerPacket::ResizeStorage {

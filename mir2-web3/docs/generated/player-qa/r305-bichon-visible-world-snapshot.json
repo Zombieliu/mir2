@@ -1,0 +1,2972 @@
+{
+  "wsUrl": "ws://127.0.0.1:7110/ws",
+  "accountId": "QA0429A",
+  "characterIndex": 3,
+  "transferKey": "crystal:0:284:607",
+  "loginCharacters": [
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "index": 3,
+      "level": 1,
+      "name": "QA0429Hero"
+    }
+  ],
+  "packets": [
+    "Connected",
+    "ClientVersion",
+    "LoginSuccess",
+    "StartGame",
+    "Chat",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "MapInformation",
+    "UserInformation",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewQuestInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewRecipeInfo",
+    "NewItemInfo",
+    "NewRecipeInfo",
+    "CompleteQuest",
+    "ReceiveMail",
+    "FriendUpdate",
+    "LoverUpdate",
+    "MentorUpdate",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "GameShopInfo",
+    "BaseStatsInfo",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectNpc",
+    "ObjectMonster",
+    "ObjectMonster",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectMonster",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectMonster",
+    "ObjectSpell",
+    "ObjectMonster",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectMonster",
+    "ObjectNpc",
+    "ObjectSpell",
+    "ObjectMonster",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectSpell",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectNpc",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "ObjectMonster",
+    "ObjectHealth",
+    "TimeOfDay",
+    "ChangeAMode",
+    "ChangePMode",
+    "SwitchGroup",
+    "DefaultNPC",
+    "GuildBuffList",
+    "NPCUpdate",
+    "NPCUpdate",
+    "NPCUpdate",
+    "NPCResponse",
+    "NPCResponse",
+    "NPCResponse",
+    "MapInformation",
+    "UserLocation"
+  ],
+  "snapshot": {
+    "activeBuffs": [],
+    "activeNpcDialog": null,
+    "beltItems": [
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "belt",
+        "description": "Basic healing potion for starter field testing.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 23,
+        "key": "belt-red-potion",
+        "name": "Red Potion",
+        "quantity": 5,
+        "slot": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "belt",
+        "description": "Starter mana potion reserved for belt wiring.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 15,
+        "key": "belt-blue-potion",
+        "name": "Blue Potion",
+        "quantity": 3,
+        "slot": 1
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "belt",
+        "description": "Placeholder consumable for later shortcut actions.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 119,
+        "key": "belt-lantern-oil",
+        "name": "Lantern Oil",
+        "quantity": 1,
+        "slot": 5
+      }
+    ],
+    "credit": 0,
+    "currentWeight": 24,
+    "decorObjects": [],
+    "entities": [
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Teleport_Gilbert",
+        "objectId": 1,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/15",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 287,
+        "y": 615
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "BorderVillage_Board",
+        "objectId": 2,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/45",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 284,
+        "y": 615
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Assistant_Jane",
+        "objectId": 3,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/05",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 284,
+        "y": 606
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Blacksmith_Smith",
+        "objectId": 5,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/00",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 296,
+        "y": 613
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Merchant_John",
+        "objectId": 6,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/11",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 292,
+        "y": 603
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Merchant_Ruben",
+        "objectId": 8,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/01",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 288,
+        "y": 608
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "Merchant_Scott",
+        "objectId": 42,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/03",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 291,
+        "y": 610
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": null,
+        "kind": "npc",
+        "level": null,
+        "maxHp": null,
+        "name": "MaterialDealer_Reece",
+        "objectId": 43,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "NPC/03",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 295,
+        "y": 605
+      },
+      {
+        "class": "Warrior",
+        "dead": false,
+        "direction": "Down",
+        "disposition": "friendly",
+        "gender": "Male",
+        "hp": 120,
+        "kind": "selfPlayer",
+        "level": 1,
+        "maxHp": 120,
+        "name": "QA0429Hero",
+        "objectId": 1000,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "CArmour/00",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": "CHair/00",
+          "weaponFrameOffset": 0,
+          "weaponLibrary": "CWeapon/00",
+          "weaponLibrarySecondary": null
+        },
+        "x": 284,
+        "y": 607
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "UpLeft",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 999999,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 999999,
+        "name": "Royal_Guard",
+        "objectId": 200339,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/000",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 276,
+        "y": 604
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "UpLeft",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 999999,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 999999,
+        "name": "Royal_Guard",
+        "objectId": 200340,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/000",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 280,
+        "y": 600
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "UpRight",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 25,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 25,
+        "name": "Deer",
+        "objectId": 206300,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/004",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 277,
+        "y": 611
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "UpLeft",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 25,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 25,
+        "name": "Deer",
+        "objectId": 206500,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/004",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 275,
+        "y": 602
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Right",
+        "disposition": "hostile",
+        "gender": null,
+        "hp": 20,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 20,
+        "name": "Scarecrow",
+        "objectId": 206600,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/005",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 285,
+        "y": 609
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "hostile",
+        "gender": null,
+        "hp": 20,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 20,
+        "name": "Scarecrow",
+        "objectId": 206602,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/005",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 280,
+        "y": 598
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 25,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 25,
+        "name": "Deer",
+        "objectId": 206701,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/004",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 282,
+        "y": 611
+      },
+      {
+        "class": null,
+        "dead": false,
+        "direction": "Left",
+        "disposition": "neutral",
+        "gender": null,
+        "hp": 5,
+        "kind": "monster",
+        "level": null,
+        "maxHp": 5,
+        "name": "Hen",
+        "objectId": 271800,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/003",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        },
+        "x": 281,
+        "y": 600
+      }
+    ],
+    "equipmentItems": [
+      {
+        "addedAttack": 2,
+        "addedDefence": 0,
+        "addedLuck": 0,
+        "attack": 6,
+        "defence": 0,
+        "description": "Starter weapon issued before the first field assignment.",
+        "durabilityCurrent": 18,
+        "durabilityMax": 20,
+        "grade": "common",
+        "icon": 36,
+        "name": "Wooden Sword",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": 0,
+        "slot": "weapon",
+        "socketSlots": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 1,
+        "addedLuck": 0,
+        "attack": 0,
+        "defence": 4,
+        "description": "Basic cloth set used for test durability and equipment wiring.",
+        "durabilityCurrent": 12,
+        "durabilityMax": 14,
+        "grade": "common",
+        "icon": 94,
+        "name": "Cloth Armour",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": 0,
+        "slot": "armour",
+        "socketSlots": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedLuck": 0,
+        "attack": 1,
+        "defence": 0,
+        "description": "Small stat necklace for the starter layout.",
+        "durabilityCurrent": 8,
+        "durabilityMax": 10,
+        "grade": "none",
+        "icon": 205,
+        "name": "Copper Necklace",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": null,
+        "slot": "necklace",
+        "socketSlots": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedLuck": 0,
+        "attack": 0,
+        "defence": 1,
+        "description": "Starter bracelet seeded for panel rendering.",
+        "durabilityCurrent": 9,
+        "durabilityMax": 10,
+        "grade": "none",
+        "icon": 204,
+        "name": "Wood Bracelet",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": null,
+        "slot": "braceletLeft",
+        "socketSlots": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedLuck": 0,
+        "attack": 0,
+        "defence": 1,
+        "description": "Light movement gear for the early field scene.",
+        "durabilityCurrent": 5,
+        "durabilityMax": 8,
+        "grade": "none",
+        "icon": 219,
+        "name": "Straw Sandals",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": null,
+        "slot": "boots",
+        "socketSlots": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedLuck": 0,
+        "attack": 0,
+        "defence": 0,
+        "description": "Starter belt backing the bottom shortcut bar.",
+        "durabilityCurrent": 6,
+        "durabilityMax": 8,
+        "grade": "none",
+        "icon": 180,
+        "name": "Rope Belt",
+        "sealedExpiryTimeBinaryDatetime": 0,
+        "sealedNextTimeBinaryDatetime": 0,
+        "shape": null,
+        "slot": "belt",
+        "socketSlots": 0
+      }
+    ],
+    "expandedStorageExpiryTimeBinaryDatetime": 0,
+    "freeBagSlots": 73,
+    "gold": 1280,
+    "groundDrops": [],
+    "hasExpandedStorage": false,
+    "hasStoragePassword": false,
+    "inSafeZone": true,
+    "interactionHints": [
+      "Left click walks, right click runs, and clicking a target focuses it.",
+      "Target monsters or NPCs in-scene, then attack or talk from range 1.",
+      "Quest: Village Guide is waiting near the west banner."
+    ],
+    "inventoryItems": [
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag1",
+        "description": "Basic healing potion for starter field testing.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 23,
+        "key": "red-potion",
+        "name": "Red Potion",
+        "quantity": 5,
+        "slot": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag1",
+        "description": "Starter mana potion reserved for belt wiring.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 15,
+        "key": "blue-potion",
+        "name": "Blue Potion",
+        "quantity": 3,
+        "slot": 1
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag1",
+        "description": "Reminds the tester to open inventory, belt, and character panes.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 121,
+        "key": "training-manual",
+        "name": "Training Manual",
+        "quantity": 1,
+        "slot": 2
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 1,
+        "container": "bag1",
+        "description": "Starter equippable helmet used to validate the equip pipeline.",
+        "durabilityCurrent": 16,
+        "durabilityMax": 16,
+        "grade": "common",
+        "icon": 106,
+        "key": "bronze-helmet",
+        "name": "Bronze Helmet",
+        "quantity": 1,
+        "slot": 3
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag1",
+        "description": "Standard shape-01 weapon sample for visible equipment rendering.",
+        "durabilityCurrent": 20,
+        "durabilityMax": 20,
+        "grade": "common",
+        "icon": 37,
+        "key": "dagger",
+        "name": "Dagger",
+        "quantity": 1,
+        "slot": 4
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag1",
+        "description": "Standard shape-01 armour sample for visible equipment rendering.",
+        "durabilityCurrent": 18,
+        "durabilityMax": 18,
+        "grade": "common",
+        "icon": 95,
+        "key": "leather-armour",
+        "name": "Leather Armour",
+        "quantity": 1,
+        "slot": 5
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "bag2",
+        "description": "Reserved slot for future travel skill and safe-zone routing.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 79,
+        "key": "town-teleport",
+        "name": "Town Teleport",
+        "quantity": 1,
+        "slot": 0
+      }
+    ],
+    "knownSkills": [
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Restores a small amount of HP for backend skill-loop testing.",
+        "key": "minor-heal",
+        "name": "Minor Heal"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Short attack/defence buff used to validate the buff runtime.",
+        "key": "battle-focus",
+        "name": "Battle Focus"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Summons or recalls a Shinsu pet for backend summon-parity testing.",
+        "key": "summon-shinsu",
+        "name": "Summon Shinsu"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Summons or recalls a Vampire Spider pet for backend summon-parity testing.",
+        "key": "summon-vampire",
+        "name": "Summon Vampire"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Summons or recalls a Spitting Toad pet for backend summon-parity testing.",
+        "key": "summon-toad",
+        "name": "Summon Toad"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Summons or recalls a Snake Totem pet for backend summon-parity testing.",
+        "key": "summon-snakes",
+        "name": "Summon Snakes"
+      },
+      {
+        "cooldownRemainingTicks": 0,
+        "description": "Summons a Stoning Spider trap for backend summon-parity testing.",
+        "key": "stonetrap",
+        "name": "Stone Trap"
+      }
+    ],
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "mapTransfers": [
+      {
+        "bounds": {
+          "maxX": 341,
+          "maxY": 271,
+          "minX": 339,
+          "minY": 268
+        },
+        "key": "starter-east-field-gate",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0",
+        "toMapTitle": "BichonProvince",
+        "toPosition": {
+          "x": 330,
+          "y": 270
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 347,
+          "maxY": 188,
+          "minX": 347,
+          "minY": 188
+        },
+        "key": "crystal-move:0:347:188:2:13:40",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0122",
+        "toMapTitle": "Palace",
+        "toPosition": {
+          "x": 13,
+          "y": 40
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 308,
+          "maxY": 264,
+          "minX": 308,
+          "minY": 264
+        },
+        "key": "crystal-move:0:308:264:3:3:7",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0102",
+        "toMapTitle": "MeatStore",
+        "toPosition": {
+          "x": 3,
+          "y": 7
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 326,
+          "maxY": 288,
+          "minX": 326,
+          "minY": 288
+        },
+        "key": "crystal-move:0:326:288:4:8:12",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0108",
+        "toMapTitle": "ReagentStore",
+        "toPosition": {
+          "x": 8,
+          "y": 12
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 322,
+          "maxY": 247,
+          "minX": 322,
+          "minY": 247
+        },
+        "key": "crystal-move:0:322:247:6:4:10",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0104",
+        "toMapTitle": "Library",
+        "toPosition": {
+          "x": 4,
+          "y": 10
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 354,
+          "maxY": 319,
+          "minX": 354,
+          "minY": 319
+        },
+        "key": "crystal-move:0:354:319:7:9:13",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0107",
+        "toMapTitle": "BeautySaloon",
+        "toPosition": {
+          "x": 9,
+          "y": 13
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 295,
+          "maxY": 251,
+          "minX": 295,
+          "minY": 251
+        },
+        "key": "crystal-move:0:295:251:8:8:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0125",
+        "toMapTitle": "Inn",
+        "toPosition": {
+          "x": 8,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 295,
+          "maxY": 250,
+          "minX": 295,
+          "minY": 250
+        },
+        "key": "crystal-move:0:295:250:8:8:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0125",
+        "toMapTitle": "Inn",
+        "toPosition": {
+          "x": 8,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 335,
+          "maxY": 299,
+          "minX": 335,
+          "minY": 299
+        },
+        "key": "crystal-move:0:335:299:10:5:12",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0103",
+        "toMapTitle": "WeaponStore",
+        "toPosition": {
+          "x": 5,
+          "y": 12
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 335,
+          "maxY": 300,
+          "minX": 335,
+          "minY": 300
+        },
+        "key": "crystal-move:0:335:300:10:6:12",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0103",
+        "toMapTitle": "WeaponStore",
+        "toPosition": {
+          "x": 6,
+          "y": 12
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 344,
+          "maxY": 308,
+          "minX": 344,
+          "minY": 308
+        },
+        "key": "crystal-move:0:344:308:10:17:24",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0103",
+        "toMapTitle": "WeaponStore",
+        "toPosition": {
+          "x": 17,
+          "y": 24
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 345,
+          "maxY": 308,
+          "minX": 345,
+          "minY": 308
+        },
+        "key": "crystal-move:0:345:308:10:18:24",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0103",
+        "toMapTitle": "WeaponStore",
+        "toPosition": {
+          "x": 18,
+          "y": 24
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 295,
+          "maxY": 284,
+          "minX": 295,
+          "minY": 284
+        },
+        "key": "crystal-move:0:295:284:11:8:23",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0105",
+        "toMapTitle": "AccessoryStore",
+        "toPosition": {
+          "x": 8,
+          "y": 23
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 295,
+          "maxY": 285,
+          "minX": 295,
+          "minY": 285
+        },
+        "key": "crystal-move:0:295:285:11:8:23",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0105",
+        "toMapTitle": "AccessoryStore",
+        "toPosition": {
+          "x": 8,
+          "y": 23
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 305,
+          "maxY": 276,
+          "minX": 305,
+          "minY": 276
+        },
+        "key": "crystal-move:0:305:276:11:20:11",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0105",
+        "toMapTitle": "AccessoryStore",
+        "toPosition": {
+          "x": 20,
+          "y": 11
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 307,
+          "maxY": 311,
+          "minX": 307,
+          "minY": 311
+        },
+        "key": "crystal-move:0:307:311:12:8:24",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0106",
+        "toMapTitle": "DrapersStore",
+        "toPosition": {
+          "x": 8,
+          "y": 24
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 307,
+          "maxY": 310,
+          "minX": 307,
+          "minY": 310
+        },
+        "key": "crystal-move:0:307:310:12:9:23",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0106",
+        "toMapTitle": "DrapersStore",
+        "toPosition": {
+          "x": 9,
+          "y": 23
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 317,
+          "maxY": 302,
+          "minX": 317,
+          "minY": 302
+        },
+        "key": "crystal-move:0:317:302:12:21:11",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0106",
+        "toMapTitle": "DrapersStore",
+        "toPosition": {
+          "x": 21,
+          "y": 11
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 317,
+          "maxY": 301,
+          "minX": 317,
+          "minY": 301
+        },
+        "key": "crystal-move:0:317:301:12:20:12",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0106",
+        "toMapTitle": "DrapersStore",
+        "toPosition": {
+          "x": 20,
+          "y": 12
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 289,
+          "maxY": 292,
+          "minX": 289,
+          "minY": 292
+        },
+        "key": "crystal-move:0:289:292:13:9:22",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0101",
+        "toMapTitle": "Tavern",
+        "toPosition": {
+          "x": 9,
+          "y": 22
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 286,
+          "maxY": 296,
+          "minX": 286,
+          "minY": 296
+        },
+        "key": "crystal-move:0:286:296:13:17:13",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0101",
+        "toMapTitle": "Tavern",
+        "toPosition": {
+          "x": 17,
+          "y": 13
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 278,
+          "maxY": 239,
+          "minX": 278,
+          "minY": 239
+        },
+        "key": "crystal-move:0:278:239:15:5:8",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0128",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 5,
+          "y": 8
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 284,
+          "maxY": 236,
+          "minX": 284,
+          "minY": 236
+        },
+        "key": "crystal-move:0:284:236:16:2:7",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0129",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 2,
+          "y": 7
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 271,
+          "maxY": 256,
+          "minX": 271,
+          "minY": 256
+        },
+        "key": "crystal-move:0:271:256:17:13:17",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0123",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 13,
+          "y": 17
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 283,
+          "maxY": 268,
+          "minX": 283,
+          "minY": 268
+        },
+        "key": "crystal-move:0:283:268:18:7:12",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0124",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 7,
+          "y": 12
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 396,
+          "maxY": 230,
+          "minX": 396,
+          "minY": 230
+        },
+        "key": "crystal-move:0:396:230:19:11:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0110",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 11,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 396,
+          "maxY": 229,
+          "minX": 396,
+          "minY": 229
+        },
+        "key": "crystal-move:0:396:229:19:11:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0110",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 11,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 400,
+          "maxY": 225,
+          "minX": 400,
+          "minY": 225
+        },
+        "key": "crystal-move:0:400:225:20:11:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0111",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 11,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 399,
+          "maxY": 225,
+          "minX": 399,
+          "minY": 225
+        },
+        "key": "crystal-move:0:399:225:20:10:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0111",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 10,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 404,
+          "maxY": 221,
+          "minX": 404,
+          "minY": 221
+        },
+        "key": "crystal-move:0:404:221:21:11:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0112",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 11,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 403,
+          "maxY": 221,
+          "minX": 403,
+          "minY": 221
+        },
+        "key": "crystal-move:0:403:221:21:10:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0112",
+        "toMapTitle": "Academy",
+        "toPosition": {
+          "x": 10,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 414,
+          "maxY": 243,
+          "minX": 414,
+          "minY": 243
+        },
+        "key": "crystal-move:0:414:243:22:19:20",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0137",
+        "toMapTitle": "ContestGround",
+        "toPosition": {
+          "x": 19,
+          "y": 20
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 415,
+          "maxY": 241,
+          "minX": 415,
+          "minY": 241
+        },
+        "key": "crystal-move:0:415:241:22:18:21",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0137",
+        "toMapTitle": "ContestGround",
+        "toPosition": {
+          "x": 18,
+          "y": 21
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 416,
+          "maxY": 241,
+          "minX": 416,
+          "minY": 241
+        },
+        "key": "crystal-move:0:416:241:22:17:22",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0137",
+        "toMapTitle": "ContestGround",
+        "toPosition": {
+          "x": 17,
+          "y": 22
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 315,
+          "maxY": 613,
+          "minX": 315,
+          "minY": 613
+        },
+        "key": "crystal-move:0:315:613:24:3:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0121",
+        "toMapTitle": "Barracks",
+        "toPosition": {
+          "x": 3,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 266,
+          "maxY": 630,
+          "minX": 266,
+          "minY": 630
+        },
+        "key": "crystal-move:0:266:630:26:7:11",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0130",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 7,
+          "y": 11
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 271,
+          "maxY": 621,
+          "minX": 271,
+          "minY": 621
+        },
+        "key": "crystal-move:0:271:621:27:5:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0131",
+        "toMapTitle": "PrivateHouse",
+        "toPosition": {
+          "x": 5,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 295,
+          "maxY": 649,
+          "minX": 295,
+          "minY": 649
+        },
+        "key": "crystal-move:0:295:649:28:3:19",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0136",
+        "toMapTitle": "BorderRestaurant",
+        "toPosition": {
+          "x": 3,
+          "y": 19
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 283,
+          "maxY": 636,
+          "minX": 283,
+          "minY": 636
+        },
+        "key": "crystal-move:0:283:636:29:13:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0132",
+        "toMapTitle": "Library",
+        "toPosition": {
+          "x": 13,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 282,
+          "maxY": 636,
+          "minX": 282,
+          "minY": 636
+        },
+        "key": "crystal-move:0:282:636:29:14:15",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0132",
+        "toMapTitle": "Library",
+        "toPosition": {
+          "x": 14,
+          "y": 15
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 282,
+          "maxY": 635,
+          "minX": 282,
+          "minY": 635
+        },
+        "key": "crystal-move:0:282:635:29:15:14",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0132",
+        "toMapTitle": "Library",
+        "toPosition": {
+          "x": 15,
+          "y": 14
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 274,
+          "maxY": 636,
+          "minX": 274,
+          "minY": 636
+        },
+        "key": "crystal-move:0:274:636:30:5:10",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0138",
+        "toMapTitle": "B1Residence",
+        "toPosition": {
+          "x": 5,
+          "y": 10
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 302,
+          "maxY": 622,
+          "minX": 302,
+          "minY": 622
+        },
+        "key": "crystal-move:0:302:622:31:2:11",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0141",
+        "toMapTitle": "GroceryStore",
+        "toPosition": {
+          "x": 2,
+          "y": 11
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 311,
+          "maxY": 631,
+          "minX": 311,
+          "minY": 631
+        },
+        "key": "crystal-move:0:311:631:31:17:26",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0141",
+        "toMapTitle": "GroceryStore",
+        "toPosition": {
+          "x": 17,
+          "y": 26
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 307,
+          "maxY": 627,
+          "minX": 307,
+          "minY": 627
+        },
+        "key": "crystal-move:0:307:627:32:2:10",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0140",
+        "toMapTitle": "Warehouse",
+        "toPosition": {
+          "x": 2,
+          "y": 10
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 314,
+          "maxY": 474,
+          "minX": 314,
+          "minY": 474
+        },
+        "key": "crystal-move:0:314:474:33:17:21",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0115",
+        "toMapTitle": "MageHouse",
+        "toPosition": {
+          "x": 17,
+          "y": 21
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 43,
+          "maxY": 111,
+          "minX": 43,
+          "minY": 111
+        },
+        "key": "crystal-move:0:43:111:34:154:368",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "D011",
+        "toMapTitle": "NaturalCave",
+        "toPosition": {
+          "x": 154,
+          "y": 368
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 664,
+          "maxY": 215,
+          "minX": 664,
+          "minY": 215
+        },
+        "key": "crystal-move:0:664:215:47:25:181",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "D401",
+        "toMapTitle": "DeadMineEntrance",
+        "toPosition": {
+          "x": 25,
+          "y": 181
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 663,
+          "maxY": 215,
+          "minX": 663,
+          "minY": 215
+        },
+        "key": "crystal-move:0:663:215:47:24:181",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "D401",
+        "toMapTitle": "DeadMineEntrance",
+        "toPosition": {
+          "x": 24,
+          "y": 181
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 324,
+          "maxY": 41,
+          "minX": 324,
+          "minY": 41
+        },
+        "key": "crystal-move:0:324:41:64:562:557",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 562,
+          "y": 557
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 325,
+          "maxY": 42,
+          "minX": 325,
+          "minY": 42
+        },
+        "key": "crystal-move:0:325:42:64:563:558",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 563,
+          "y": 558
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 326,
+          "maxY": 43,
+          "minX": 326,
+          "minY": 43
+        },
+        "key": "crystal-move:0:326:43:64:562:558",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 562,
+          "y": 558
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 326,
+          "maxY": 42,
+          "minX": 326,
+          "minY": 42
+        },
+        "key": "crystal-move:0:326:42:64:561:557",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 561,
+          "y": 557
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 325,
+          "maxY": 41,
+          "minX": 325,
+          "minY": 41
+        },
+        "key": "crystal-move:0:325:41:64:563:558",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 563,
+          "y": 558
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 325,
+          "maxY": 40,
+          "minX": 325,
+          "minY": 40
+        },
+        "key": "crystal-move:0:325:40:64:562:558",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 562,
+          "y": 558
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 326,
+          "maxY": 40,
+          "minX": 326,
+          "minY": 40
+        },
+        "key": "crystal-move:0:326:40:64:561:557",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "1",
+        "toMapTitle": "WoomyonWoods(S)",
+        "toPosition": {
+          "x": 561,
+          "y": 557
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 666,
+          "maxY": 86,
+          "minX": 666,
+          "minY": 86
+        },
+        "key": "crystal-move:0:666:86:144:411:566",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "2",
+        "toMapTitle": "SerpentValley",
+        "toPosition": {
+          "x": 411,
+          "y": 566
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 667,
+          "maxY": 87,
+          "minX": 667,
+          "minY": 87
+        },
+        "key": "crystal-move:0:667:87:144:411:566",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "2",
+        "toMapTitle": "SerpentValley",
+        "toPosition": {
+          "x": 411,
+          "y": 566
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 667,
+          "maxY": 88,
+          "minX": 667,
+          "minY": 88
+        },
+        "key": "crystal-move:0:667:88:144:412:567",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "2",
+        "toMapTitle": "SerpentValley",
+        "toPosition": {
+          "x": 412,
+          "y": 567
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 316,
+          "maxY": 649,
+          "minX": 316,
+          "minY": 649
+        },
+        "key": "crystal-move:0:316:649:334:61:82",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 61,
+          "y": 82
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 315,
+          "maxY": 650,
+          "minX": 315,
+          "minY": 650
+        },
+        "key": "crystal-move:0:315:650:334:61:82",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 61,
+          "y": 82
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 316,
+          "maxY": 650,
+          "minX": 316,
+          "minY": 650
+        },
+        "key": "crystal-move:0:316:650:334:61:82",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 61,
+          "y": 82
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 315,
+          "maxY": 649,
+          "minX": 315,
+          "minY": 649
+        },
+        "key": "crystal-move:0:315:649:334:62:81",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 62,
+          "y": 81
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 315,
+          "maxY": 648,
+          "minX": 315,
+          "minY": 648
+        },
+        "key": "crystal-move:0:315:648:334:62:81",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 62,
+          "y": 81
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 314,
+          "maxY": 649,
+          "minX": 314,
+          "minY": 649
+        },
+        "key": "crystal-move:0:314:649:334:62:81",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "HELL00",
+        "toMapTitle": "WasteLands",
+        "toPosition": {
+          "x": 62,
+          "y": 81
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 310,
+          "maxY": 600,
+          "minX": 310,
+          "minY": 600
+        },
+        "key": "crystal-move:0:310:600:25:14:16",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0127",
+        "toMapTitle": "Prison",
+        "toPosition": {
+          "x": 14,
+          "y": 16
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 286,
+          "maxY": 296,
+          "minX": 286,
+          "minY": 296
+        },
+        "key": "crystal-move:0:286:296:13:9:22",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0101",
+        "toMapTitle": "Tavern",
+        "toPosition": {
+          "x": 9,
+          "y": 22
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 347,
+          "maxY": 189,
+          "minX": 347,
+          "minY": 189
+        },
+        "key": "crystal-move:0:347:189:2:13:40",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0122",
+        "toMapTitle": "Palace",
+        "toPosition": {
+          "x": 13,
+          "y": 40
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 322,
+          "maxY": 473,
+          "minX": 322,
+          "minY": 473
+        },
+        "key": "crystal-move:0:322:473:387:0:0",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "01041",
+        "toMapTitle": "ArchersHideout",
+        "toPosition": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 323,
+          "maxY": 474,
+          "minX": 323,
+          "minY": 474
+        },
+        "key": "crystal-move:0:323:474:387:0:0",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "01041",
+        "toMapTitle": "ArchersHideout",
+        "toPosition": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 147,
+          "maxY": 33,
+          "minX": 147,
+          "minY": 33
+        },
+        "key": "crystal-move:0:147:33:39:151:362",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "D001",
+        "toMapTitle": "OmaCave_1F",
+        "toPosition": {
+          "x": 151,
+          "y": 362
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 148,
+          "maxY": 34,
+          "minX": 148,
+          "minY": 34
+        },
+        "key": "crystal-move:0:148:34:39:151:362",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "D001",
+        "toMapTitle": "OmaCave_1F",
+        "toPosition": {
+          "x": 151,
+          "y": 362
+        }
+      },
+      {
+        "bounds": {
+          "maxX": 414,
+          "maxY": 243,
+          "minX": 414,
+          "minY": 243
+        },
+        "key": "crystal-move:0:414:243:22:0:0",
+        "mapFileName": "0",
+        "toDirection": "Down",
+        "toMapFileName": "0137",
+        "toMapTitle": "ContestGround",
+        "toPosition": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    ],
+    "maxBagSlots": 80,
+    "maxWeight": 100,
+    "playerExperience": 0,
+    "playerHp": 120,
+    "playerMaxExperience": 100,
+    "playerMaxHp": 120,
+    "playerMp": 45,
+    "playerObjectId": 1000,
+    "questLog": [
+      {
+        "current": 0,
+        "objective": "Speak with Village Guide to accept the first field assignment.",
+        "progressLabel": "Not accepted",
+        "questId": 1001,
+        "required": 1,
+        "rewardPreview": "300 gold, Guide Ring, Repair Powder x2",
+        "stage": "available",
+        "summary": "Village Guide wants proof that you can handle the training road safely.",
+        "title": "Field Wasp Trial",
+        "tracker": "Village Guide is waiting near the west banner."
+      }
+    ],
+    "requireStoragePassword": false,
+    "sceneView": {
+      "center": {
+        "x": 284,
+        "y": 607
+      },
+      "height": 18,
+      "width": 24
+    },
+    "stage5Systems": {
+      "appearance": {
+        "hair": 0
+      },
+      "auction": [],
+      "conquest": {
+        "activeWars": [],
+        "castleOwner": "",
+        "eventLog": [],
+        "gates": [],
+        "gold": 0,
+        "guards": [],
+        "openGates": [],
+        "taxRatePercent": 0,
+        "walls": []
+      },
+      "group": {
+        "lootMode": "free",
+        "members": []
+      },
+      "guild": {
+        "chatLog": [],
+        "members": [],
+        "name": "",
+        "permissions": [],
+        "rank": ""
+      },
+      "guildTerritory": {
+        "mapFileName": "GA0",
+        "owned": false,
+        "recallLog": [],
+        "rentalDaysLeft": 0
+      },
+      "hero": null,
+      "mail": [],
+      "nameLists": [],
+      "profession": {
+        "craftedItems": [],
+        "miningLevel": 0,
+        "ore": 0
+      },
+      "social": {
+        "blocked": [],
+        "friends": []
+      },
+      "trade": null
+    },
+    "storageItems": [
+      {
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "container": "storage",
+        "description": "Warehouse starter stack used to validate storage flows.",
+        "durabilityCurrent": null,
+        "durabilityMax": null,
+        "grade": "none",
+        "icon": 0,
+        "key": "stored-red-potion",
+        "name": "Red Potion",
+        "quantity": 10,
+        "slot": 0
+      },
+      {
+        "addedAttack": 0,
+        "addedDefence": 1,
+        "container": "storage",
+        "description": "Warehouse equipment sample for store/take-back validation.",
+        "durabilityCurrent": 16,
+        "durabilityMax": 16,
+        "grade": "common",
+        "icon": 0,
+        "key": "stored-bronze-helmet",
+        "name": "Bronze Helmet",
+        "quantity": 1,
+        "slot": 1
+      }
+    ],
+    "storagePasswordLastSetBinaryDatetime": 0,
+    "storageSize": 80,
+    "terrainPatches": [],
+    "tick": 0
+  },
+  "summary": {
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "class": "Warrior",
+      "dead": false,
+      "direction": "Down",
+      "disposition": "friendly",
+      "gender": "Male",
+      "hp": 120,
+      "kind": "selfPlayer",
+      "level": 1,
+      "maxHp": 120,
+      "name": "QA0429Hero",
+      "objectId": 1000,
+      "sprite": {
+        "altBodyLibrary": null,
+        "altFrameBaseOffset": null,
+        "altHairLibrary": null,
+        "altWeaponFrameOffset": null,
+        "altWeaponLibrary": null,
+        "altWeaponLibrarySecondary": null,
+        "bodyLibrary": "CArmour/00",
+        "directionStride": 4,
+        "frameBaseOffset": 0,
+        "frameCount": 4,
+        "hairLibrary": "CHair/00",
+        "weaponFrameOffset": 0,
+        "weaponLibrary": "CWeapon/00",
+        "weaponLibrarySecondary": null
+      },
+      "x": 284,
+      "y": 607
+    },
+    "entityCount": 17,
+    "npcCount": 8,
+    "monsterCount": 8,
+    "npcNames": [
+      {
+        "objectId": 1,
+        "name": "Teleport_Gilbert",
+        "x": 287,
+        "y": 615,
+        "sprite": "NPC/15"
+      },
+      {
+        "objectId": 2,
+        "name": "BorderVillage_Board",
+        "x": 284,
+        "y": 615,
+        "sprite": "NPC/45"
+      },
+      {
+        "objectId": 3,
+        "name": "Assistant_Jane",
+        "x": 284,
+        "y": 606,
+        "sprite": "NPC/05"
+      },
+      {
+        "objectId": 5,
+        "name": "Blacksmith_Smith",
+        "x": 296,
+        "y": 613,
+        "sprite": "NPC/00"
+      },
+      {
+        "objectId": 6,
+        "name": "Merchant_John",
+        "x": 292,
+        "y": 603,
+        "sprite": "NPC/11"
+      },
+      {
+        "objectId": 8,
+        "name": "Merchant_Ruben",
+        "x": 288,
+        "y": 608,
+        "sprite": "NPC/01"
+      },
+      {
+        "objectId": 42,
+        "name": "Merchant_Scott",
+        "x": 291,
+        "y": 610,
+        "sprite": "NPC/03"
+      },
+      {
+        "objectId": 43,
+        "name": "MaterialDealer_Reece",
+        "x": 295,
+        "y": 605,
+        "sprite": "NPC/03"
+      }
+    ],
+    "monsterNames": [
+      {
+        "objectId": 200339,
+        "name": "Royal_Guard",
+        "x": 276,
+        "y": 604,
+        "sprite": "Monster/000"
+      },
+      {
+        "objectId": 200340,
+        "name": "Royal_Guard",
+        "x": 280,
+        "y": 600,
+        "sprite": "Monster/000"
+      },
+      {
+        "objectId": 206300,
+        "name": "Deer",
+        "x": 277,
+        "y": 611,
+        "sprite": "Monster/004"
+      },
+      {
+        "objectId": 206500,
+        "name": "Deer",
+        "x": 275,
+        "y": 602,
+        "sprite": "Monster/004"
+      },
+      {
+        "objectId": 206600,
+        "name": "Scarecrow",
+        "x": 285,
+        "y": 609,
+        "sprite": "Monster/005"
+      },
+      {
+        "objectId": 206602,
+        "name": "Scarecrow",
+        "x": 280,
+        "y": 598,
+        "sprite": "Monster/005"
+      },
+      {
+        "objectId": 206701,
+        "name": "Deer",
+        "x": 282,
+        "y": 611,
+        "sprite": "Monster/004"
+      },
+      {
+        "objectId": 271800,
+        "name": "Hen",
+        "x": 281,
+        "y": 600,
+        "sprite": "Monster/003"
+      }
+    ]
+  },
+  "checks": {
+    "hasAssistant": true,
+    "hasRuben": true,
+    "hasDeer": true,
+    "hasRoyalGuard": true,
+    "playerAtTarget": true
+  }
+}

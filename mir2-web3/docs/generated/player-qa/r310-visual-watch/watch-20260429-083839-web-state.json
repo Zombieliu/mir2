@@ -1,0 +1,253 @@
+{
+  "screen": "game",
+  "mapFileName": "0",
+  "mapTitle": "BichonProvince",
+  "player": {
+    "x": 287,
+    "y": 618
+  },
+  "transitionOverlayVisible": false,
+  "entityCount": 13,
+  "npcCount": 5,
+  "monsterCount": 7,
+  "visibleNameplates": [
+    "QA0429Hero",
+    "Deer",
+    "Guard",
+    "Deer",
+    "Deer",
+    "ArcherGuard",
+    "Deer",
+    "Hen",
+    "BorderVillage\nBoard",
+    "Teleport\nGilbert",
+    "CraftsLady\nJude",
+    "Merchant\nScott",
+    "Blacksmith\nSmith"
+  ],
+  "visibleNameplateDetails": [
+    {
+      "text": "QA0429Hero",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate self ",
+      "rect": {
+        "left": 452.9375,
+        "top": 389,
+        "right": 535.0625,
+        "bottom": 401,
+        "width": 82.125,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 287.0078125,
+        "top": 304.015625,
+        "right": 316.9921875,
+        "bottom": 316.015625,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Guard",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 666.421875,
+        "top": 336,
+        "right": 705.578125,
+        "bottom": 348,
+        "width": 39.15625,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 705.4609375,
+        "top": 304,
+        "right": 735.4453125,
+        "bottom": 316,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 815.0078125,
+        "top": 304.015625,
+        "right": 844.9921875,
+        "bottom": 316.015625,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "ArcherGuard",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 836.9375,
+        "top": 486,
+        "right": 919.0625,
+        "bottom": 498,
+        "width": 82.125,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 874.0546875,
+        "top": 208,
+        "right": 904.0390625,
+        "bottom": 220,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Hen",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 0.9453125,
+        "top": 75.96875,
+        "right": 27.0546875,
+        "bottom": 87.96875,
+        "width": 26.109375,
+        "height": 12
+      }
+    },
+    {
+      "text": "BorderVillage\nBoard",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 306.6953125,
+        "top": 154,
+        "right": 393.3046875,
+        "bottom": 178,
+        "width": 86.609375,
+        "height": 24
+      }
+    },
+    {
+      "text": "Teleport\nGilbert",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 467.703125,
+        "top": 190,
+        "right": 520.296875,
+        "bottom": 214,
+        "width": 52.59375,
+        "height": 24
+      }
+    },
+    {
+      "text": "CraftsLady\nJude",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 796.15625,
+        "top": 316,
+        "right": 863.84375,
+        "bottom": 340,
+        "width": 67.6875,
+        "height": 24
+      }
+    },
+    {
+      "text": "Merchant\nScott",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 655.9375,
+        "top": 28,
+        "right": 716.0625,
+        "bottom": 52,
+        "width": 60.125,
+        "height": 24
+      }
+    },
+    {
+      "text": "Blacksmith\nSmith",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 891.078125,
+        "top": 121,
+        "right": 960.921875,
+        "bottom": 145,
+        "width": 69.84375,
+        "height": 24
+      }
+    }
+  ],
+  "questMarkerCount": 0,
+  "entityHealthBarCount": 1,
+  "nextDevPortalCount": 1,
+  "nextDevIndicatorVisible": false,
+  "stage": {
+    "left": 0,
+    "top": 0,
+    "right": 1024,
+    "bottom": 768,
+    "width": 1024,
+    "height": 768
+  },
+  "hud": {
+    "left": 0,
+    "top": 616,
+    "right": 1024,
+    "bottom": 768,
+    "width": 1024,
+    "height": 152
+  },
+  "miniMap": {
+    "left": 896,
+    "top": 1,
+    "right": 1024,
+    "bottom": 155,
+    "width": 128,
+    "height": 154
+  },
+  "chat": {
+    "left": 230,
+    "top": 671,
+    "right": 862,
+    "bottom": 739,
+    "width": 632,
+    "height": 68
+  },
+  "network404Count": 0,
+  "consoleErrorCount": 0,
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": [],
+  "screenshot": "docs/generated/player-qa/r310-visual-watch/watch-20260429-083839-web.png"
+}

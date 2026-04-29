@@ -1,6 +1,6 @@
 # Parity Harness
 
-Last updated: 2026-04-26
+Last updated: 2026-04-28
 
 This file documents the repeatable local-vs-Crystal packet and behavior harness used by `docs/CRYSTAL-1TO1-ROADMAP.md`.
 
@@ -89,7 +89,12 @@ The matrix summary in `latest-matrix.json` includes:
 - `localOkCount` / `localFailedCount`: local Rust gateway capture status.
 - `crystalOkCount` / `crystalFailedCount` / `crystalMissingCount`: live Crystal endpoint status.
 - `diffCleanCount` / `diffDirtyCount` / `diffMissingCount`: local-vs-Crystal diff status.
+- `stableDiffCleanCount` / `stableDiffDirtyCount` / `stableDiffMissingCount`: accepted stable-comparator status after filtering known live Crystal volatility.
 - `acceptedLiveComparisonCount`: entries with local success, Crystal success, and clean diff.
+- `acceptedStableLiveComparisonCount`: entries with local success, Crystal success, and clean stable diff.
+- `acceptanceMode`: `exact` by default, or `stable` when `MIR2_PACKET_TRACE_ACCEPT_STABLE_DIFF=1` or `MIR2_PACKET_TRACE_DIFF_ACCEPTANCE=stable` is set.
+- `acceptedPacketParityCount`: entries accepted by the configured `acceptanceMode`.
+- `packetParityAccepted`: true when every attempted TCP artifact is accepted by the configured `acceptanceMode`.
 
 Use require mode for local/CI checks:
 
@@ -100,7 +105,7 @@ $env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
 cargo run -p mir2-gateway --bin packet_trace -- --matrix
 ```
 
-Use strict live mode after Crystal is reachable:
+Use strict live mode after Crystal is reachable and a deterministic exact fixture exists:
 
 ```powershell
 cd E:\mir2\mir2-web3
@@ -112,9 +117,27 @@ $env:MIR2_PACKET_TRACE_REQUIRE_DIFF_CLEAN='1'
 cargo run -p mir2-gateway --bin packet_trace -- --matrix
 ```
 
-`MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1` implies diff-clean mode. The command exits non-zero when a required endpoint is unavailable, a required diff is missing, or a comparable diff has mismatches.
+With the default exact acceptance mode, `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1` implies exact diff-clean mode. The command exits non-zero when a required endpoint is unavailable, a required diff is missing, or a comparable diff has mismatches.
 
-For a fully accepted live matrix, `latest-matrix.json` should have `localOkCount == artifactCount`, `crystalMissingCount == 0`, `diffDirtyCount == 0`, and `acceptedLiveComparisonCount == artifactCount`.
+For a fully accepted strict-exact live matrix, `latest-matrix.json` should have `localOkCount == artifactCount`, `crystalMissingCount == 0`, `diffDirtyCount == 0`, and `acceptedLiveComparisonCount == artifactCount`. This is stricter than the R300 accepted stable-diff packet gate and remains a deterministic-fixture diagnostic for ordinary live Crystal runs with dynamic state.
+
+Use accepted stable live mode when the stable comparator has been explicitly accepted for the current representative matrix:
+
+```powershell
+cd E:\mir2\mir2-web3
+$env:MIR2_GATEWAY_TCP_ADDR='127.0.0.1:7310'
+$env:MIR2_CRYSTAL_TCP_ADDR='<crystal-host>:<crystal-port>'
+$env:MIR2_PACKET_TRACE_ACCEPT_STABLE_DIFF='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_LOCAL='1'
+$env:MIR2_PACKET_TRACE_REQUIRE_CRYSTAL='1'
+cargo +1.89.0 run --locked -p mir2-gateway --bin packet_trace -- --matrix
+```
+
+In stable acceptance mode, `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1` requires the accepted comparator to pass. Keep `MIR2_PACKET_TRACE_REQUIRE_DIFF_CLEAN=1` unset unless you specifically want the strict exact diagnostic to fail on live Crystal dynamic state.
+
+For the accepted stable matrix, `latest-matrix.json` should have `acceptanceMode == "stable"`, `localOkCount == artifactCount`, `crystalMissingCount == 0`, `stableDiffDirtyCount == 0`, `acceptedPacketParityCount == artifactCount`, and `packetParityAccepted == true`.
+
+R300 records this acceptance policy in `docs/PACKET-PARITY-ACCEPTANCE.md`.
 
 ## Fixture Modes
 

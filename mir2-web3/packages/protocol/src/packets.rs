@@ -589,6 +589,10 @@ impl ClientPacket {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ServerPacket {
+    Raw {
+        packet_id: ServerPacketId,
+        payload: Vec<u8>,
+    },
     Connected,
     ClientVersion {
         result: u8,
@@ -903,6 +907,12 @@ pub enum ServerPacket {
     ObjectSpell {
         info: ObjectSpellInfo,
     },
+    NewQuestInfo {
+        payload: Vec<u8>,
+    },
+    NewRecipeInfo {
+        payload: Vec<u8>,
+    },
     ResizeStorage {
         size: i32,
         has_expanded_storage: bool,
@@ -927,6 +937,7 @@ pub enum ServerPacket {
 impl ServerPacket {
     pub fn packet_id(&self) -> ServerPacketId {
         match self {
+            Self::Raw { packet_id, .. } => *packet_id,
             Self::Connected => ServerPacketId::Connected,
             Self::ClientVersion { .. } => ServerPacketId::ClientVersion,
             Self::Disconnect { .. } => ServerPacketId::Disconnect,
@@ -1016,6 +1027,8 @@ impl ServerPacket {
             Self::ObjectRangeAttack { .. } => ServerPacketId::ObjectRangeAttack,
             Self::RefreshItem { .. } => ServerPacketId::RefreshItem,
             Self::ObjectSpell { .. } => ServerPacketId::ObjectSpell,
+            Self::NewQuestInfo { .. } => ServerPacketId::NewQuestInfo,
+            Self::NewRecipeInfo { .. } => ServerPacketId::NewRecipeInfo,
             Self::ResizeStorage { .. } => ServerPacketId::ResizeStorage,
             Self::StorageUnlockResult { .. } => ServerPacketId::StorageUnlockResult,
             Self::StoragePasswordResult { .. } => ServerPacketId::StoragePasswordResult,
@@ -1026,6 +1039,7 @@ impl ServerPacket {
 
     fn encode_payload(&self, writer: &mut PacketWriter) -> Result<()> {
         match self {
+            Self::Raw { payload, .. } => writer.write_bytes(payload),
             Self::Connected => {}
             Self::ClientVersion { result }
             | Self::NewAccount { result }
@@ -1324,6 +1338,8 @@ impl ServerPacket {
             Self::ObjectRangeAttack { info } => info.encode(writer),
             Self::RefreshItem { item } => item.encode(writer)?,
             Self::ObjectSpell { info } => info.encode(writer),
+            Self::NewQuestInfo { payload } => writer.write_bytes(payload),
+            Self::NewRecipeInfo { payload } => writer.write_bytes(payload),
             Self::ResizeStorage {
                 size,
                 has_expanded_storage,
@@ -1359,6 +1375,24 @@ impl ServerPacket {
 
     fn decode_payload(packet_id: ServerPacketId, reader: &mut PacketReader<'_>) -> Result<Self> {
         let packet = match packet_id {
+            ServerPacketId::TimeOfDay
+            | ServerPacketId::ChangeAMode
+            | ServerPacketId::ChangePMode
+            | ServerPacketId::SwitchGroup
+            | ServerPacketId::BaseStatsInfo
+            | ServerPacketId::DefaultNPC
+            | ServerPacketId::NPCUpdate
+            | ServerPacketId::NPCResponse
+            | ServerPacketId::CompleteQuest
+            | ServerPacketId::ReceiveMail
+            | ServerPacketId::FriendUpdate
+            | ServerPacketId::LoverUpdate
+            | ServerPacketId::MentorUpdate
+            | ServerPacketId::GuildBuffList
+            | ServerPacketId::GameShopInfo => Self::Raw {
+                packet_id,
+                payload: reader.read_bytes(reader.remaining())?,
+            },
             ServerPacketId::Connected => Self::Connected,
             ServerPacketId::ClientVersion => Self::ClientVersion {
                 result: reader.read_u8()?,
@@ -1714,6 +1748,12 @@ impl ServerPacket {
             },
             ServerPacketId::ObjectSpell => Self::ObjectSpell {
                 info: ObjectSpellInfo::decode(reader)?,
+            },
+            ServerPacketId::NewQuestInfo => Self::NewQuestInfo {
+                payload: reader.read_bytes(reader.remaining())?,
+            },
+            ServerPacketId::NewRecipeInfo => Self::NewRecipeInfo {
+                payload: reader.read_bytes(reader.remaining())?,
             },
             ServerPacketId::ResizeStorage => Self::ResizeStorage {
                 size: reader.read_i32()?,

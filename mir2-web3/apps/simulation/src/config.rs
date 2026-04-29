@@ -3,8 +3,8 @@ use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::{Arc, Mutex, OnceLock};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
@@ -50,6 +50,17 @@ impl CharacterRecord {
             last_access_binary_datetime: 638452800000000000,
         }
     }
+
+    pub fn to_new_character_select_info(&self) -> SelectInfo {
+        SelectInfo {
+            index: self.index,
+            name: self.name.clone(),
+            level: 0,
+            class: self.class,
+            gender: self.gender,
+            last_access_binary_datetime: 0,
+        }
+    }
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
@@ -62,6 +73,8 @@ pub struct AccountStore {
         default = "legacy_account_store_schema_version"
     )]
     pub schema_version: u16,
+    #[serde(rename = "nextCharacterIndex", default)]
+    pub next_character_index: i32,
     pub accounts: BTreeMap<String, AccountRecord>,
     #[serde(skip)]
     source_account_versions: BTreeMap<String, i64>,
@@ -75,6 +88,7 @@ impl AccountStore {
         accounts.insert("demo".to_string(), AccountRecord::new(default_character));
         Self {
             schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+            next_character_index: 1,
             accounts,
             source_account_versions: BTreeMap::new(),
             source_save_versions: BTreeMap::new(),
@@ -122,7 +136,28 @@ impl AccountStore {
         if self.schema_version < ACCOUNT_STORE_SCHEMA_VERSION {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }
+        self.normalize_next_character_index();
         self
+    }
+
+    pub(crate) fn allocate_character_index(&mut self) -> i32 {
+        self.normalize_next_character_index();
+        let index = self.next_character_index;
+        self.next_character_index = self.next_character_index.saturating_add(1);
+        index
+    }
+
+    fn normalize_next_character_index(&mut self) {
+        let min_next = self
+            .accounts
+            .values()
+            .flat_map(|account| account.characters.iter().map(|character| character.index))
+            .max()
+            .map(|index| index.saturating_add(1))
+            .unwrap_or(0);
+        if self.next_character_index < min_next {
+            self.next_character_index = min_next;
+        }
     }
 
     fn with_source_versions(mut self, versions: AccountStoreSourceVersions) -> Self {
@@ -165,13 +200,37 @@ fn write_file_atomically(path: &Path, data: &[u8]) -> io::Result<()> {
         file.sync_all()?;
     }
 
-    match replace_file_atomically(&temp_path, path) {
+    match replace_file_atomically_with_retry(&temp_path, path) {
         Ok(()) => Ok(()),
         Err(error) => {
             let _ = fs::remove_file(&temp_path);
             Err(error)
         }
     }
+}
+
+fn replace_file_atomically_with_retry(from: &Path, to: &Path) -> io::Result<()> {
+    let mut delay = Duration::from_millis(5);
+    let mut last_error = None;
+    for attempt in 0..8 {
+        match replace_file_atomically(from, to) {
+            Ok(()) => return Ok(()),
+            Err(error) if attempt < 7 && is_retryable_atomic_replace_error(&error) => {
+                last_error = Some(error);
+                std::thread::sleep(delay);
+                delay = delay.saturating_mul(2);
+            }
+            Err(error) => return Err(error),
+        }
+    }
+    Err(last_error.unwrap_or_else(|| io::Error::last_os_error()))
+}
+
+fn is_retryable_atomic_replace_error(error: &io::Error) -> bool {
+    matches!(
+        error.kind(),
+        io::ErrorKind::PermissionDenied | io::ErrorKind::AlreadyExists | io::ErrorKind::WouldBlock
+    )
 }
 
 fn atomic_temp_path(path: &Path) -> PathBuf {
@@ -279,6 +338,23 @@ impl AccountRecord {
         }
     }
 
+    pub fn empty() -> Self {
+        Self {
+            password: default_account_password(),
+            storage_size: default_storage_size(),
+            has_expanded_storage: false,
+            expanded_storage_expiry_time_binary_datetime: 0,
+            storage_password: String::new(),
+            storage_password_last_set_binary_datetime: 0,
+            is_banned: false,
+            ban_reason: String::new(),
+            ban_until_ms: None,
+            banned_at_ms: None,
+            characters: Vec::new(),
+            saves: BTreeMap::new(),
+        }
+    }
+
     pub fn active_ban(&self, now_ms: u64) -> Option<AccountBanStatus> {
         if !self.is_banned {
             return None;
@@ -327,6 +403,8 @@ pub struct CharacterSaveRecord {
     #[serde(default)]
     pub storage_items_json: Vec<String>,
     pub equipment_items_json: Vec<String>,
+    #[serde(default)]
+    pub equipment_items_explicit_empty: bool,
     pub quest_states_json: Vec<String>,
     pub skill_states_json: Vec<String>,
     #[serde(default)]
@@ -360,6 +438,7 @@ impl CharacterSaveRecord {
             belt_items_json: Vec::new(),
             storage_items_json: Vec::new(),
             equipment_items_json: Vec::new(),
+            equipment_items_explicit_empty: false,
             quest_states_json: Vec::new(),
             skill_states_json: Vec::new(),
             npc_flag_states_json: Vec::new(),
@@ -428,6 +507,7 @@ mod tests {
             account_id,
             AccountStore {
                 schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+                next_character_index: 1,
                 accounts,
                 source_account_versions: BTreeMap::new(),
                 source_save_versions: BTreeMap::new(),
@@ -1136,10 +1216,8 @@ impl SimulationConfig {
                 .expect("account store mutex should not be poisoned");
             store.clone()
         };
-        if self.account_store_database_mode == AccountStoreDatabaseMode::Mirror {
-            if let Some(path) = self.account_store_path.as_deref() {
-                store.save_to_path(path)?;
-            }
+        if let Some(path) = self.account_store_path.as_deref() {
+            save_account_store_snapshot_to_path(&store, path)?;
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
             let source_versions = save_account_store_to_postgres(
@@ -1155,8 +1233,6 @@ impl SimulationConfig {
                 store.source_account_versions = source_versions.accounts;
                 store.source_save_versions = source_versions.saves;
             }
-        } else if let Some(path) = self.account_store_path.as_deref() {
-            store.save_to_path(path)?;
         }
         Ok(())
     }
@@ -1200,6 +1276,16 @@ impl SimulationConfig {
 
         self.save_account_store()
     }
+}
+
+static ACCOUNT_STORE_FILE_WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+fn save_account_store_snapshot_to_path(store: &AccountStore, path: &Path) -> Result<(), String> {
+    let _guard = ACCOUNT_STORE_FILE_WRITE_LOCK
+        .get_or_init(|| Mutex::new(()))
+        .lock()
+        .expect("account store file write mutex should not be poisoned");
+    store.save_to_path(path)
 }
 
 fn load_account_store_from_postgres(
@@ -1261,6 +1347,7 @@ fn load_account_store_from_postgres(
         }
         Ok(AccountStore {
             schema_version: ACCOUNT_STORE_SCHEMA_VERSION,
+            next_character_index: 0,
             accounts,
             source_account_versions: BTreeMap::new(),
             source_save_versions: BTreeMap::new(),
@@ -1700,9 +1787,11 @@ pub struct WorldEntitySnapshot {
     pub level: Option<u16>,
     pub hp: Option<i32>,
     pub max_hp: Option<i32>,
+    pub name_colour_argb: i32,
     pub dead: bool,
     pub disposition: WorldEntityDisposition,
     pub sprite: Option<WorldEntitySpriteSnapshot>,
+    pub quest_ids: Vec<i32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

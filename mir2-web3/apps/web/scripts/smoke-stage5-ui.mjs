@@ -64,7 +64,8 @@ class CdpClient {
     if (message.method === "Log.entryAdded") {
       const entry = message.params?.entry;
       if (entry?.level === "error" && !String(entry.url ?? "").includes("favicon")) {
-        this.consoleErrors.push({ source: entry.source ?? "log", text: entry.text ?? "" });
+        const url = entry.url ? ` (${entry.url})` : "";
+        this.consoleErrors.push({ source: entry.source ?? "log", text: `${entry.text ?? ""}${url}` });
       }
     }
   }

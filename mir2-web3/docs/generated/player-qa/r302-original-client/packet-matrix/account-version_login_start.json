@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUnixMs": 1777373141199,
+  "flow": "core_bootstrap",
+  "fixture": {
+    "mode": "stable",
+    "account": "cdx0428030348",
+    "lifecycleAccount": "TraceFixture",
+    "lifecycleCharacter": "TraceOne",
+    "character": "Cdx0428030348",
+    "characterIndex": 8
+  },
+  "local": {
+    "endpoint": "127.0.0.1:7310",
+    "ok": true,
+    "elapsedMs": 2805,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 3,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 768,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 769,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 1272,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 19,
+        "payloadHash": "fnv1a64:33d31a9fe02fa492",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdx0428030348"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 1273,
+        "direction": "server",
+        "packetId": 9,
+        "packet": "LoginSuccess",
+        "payloadLen": 26,
+        "payloadHash": "fnv1a64:094fe1bdf34cd7f2",
+        "decoded": true,
+        "detail": {
+          "characterCount": 1,
+          "characters": [
+            {
+              "class": "Warrior",
+              "gender": "Male",
+              "index": 0,
+              "lastAccessBinaryDatetime": 638452800000000000,
+              "level": 7,
+              "name": "Scout"
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 1775,
+        "direction": "client",
+        "packetId": 8,
+        "packet": "StartGame",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4cfad6c24f7bf87d",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 8
+        }
+      },
+      {
+        "sequence": 6,
+        "elapsedMs": 1775,
+        "direction": "server",
+        "packetId": 14,
+        "packet": "StartGame",
+        "payloadLen": 5,
+        "payloadHash": "fnv1a64:fe1a162e1fcabe15",
+        "decoded": true,
+        "detail": {
+          "resolution": 0,
+          "result": 2
+        }
+      }
+    ]
+  },
+  "crystal": {
+    "endpoint": "127.0.0.1:7000",
+    "ok": true,
+    "elapsedMs": 2816,
+    "entries": [
+      {
+        "sequence": 0,
+        "elapsedMs": 9,
+        "direction": "server",
+        "packetId": 0,
+        "packet": "Connected",
+        "payloadLen": 0,
+        "payloadHash": "fnv1a64:cbf29ce484222325",
+        "decoded": true
+      },
+      {
+        "sequence": 1,
+        "elapsedMs": 770,
+        "direction": "client",
+        "packetId": 0,
+        "packet": "ClientVersion",
+        "payloadLen": 8,
+        "payloadHash": "fnv1a64:8ce23005a62754b0",
+        "decoded": true,
+        "detail": {
+          "versionHashLength": 4
+        }
+      },
+      {
+        "sequence": 2,
+        "elapsedMs": 771,
+        "direction": "server",
+        "packetId": 1,
+        "packet": "ClientVersion",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bc4c8601b62c",
+        "decoded": true,
+        "detail": {
+          "result": 1
+        }
+      },
+      {
+        "sequence": 3,
+        "elapsedMs": 1283,
+        "direction": "client",
+        "packetId": 5,
+        "packet": "Login",
+        "payloadLen": 19,
+        "payloadHash": "fnv1a64:33d31a9fe02fa492",
+        "decoded": true,
+        "detail": {
+          "accountId": "cdx0428030348"
+        }
+      },
+      {
+        "sequence": 4,
+        "elapsedMs": 1296,
+        "direction": "server",
+        "packetId": 7,
+        "packet": "Login",
+        "payloadLen": 1,
+        "payloadHash": "fnv1a64:af63bf4c8601bb45",
+        "decoded": true,
+        "detail": {
+          "result": 2
+        }
+      },
+      {
+        "sequence": 5,
+        "elapsedMs": 1800,
+        "direction": "client",
+        "packetId": 8,
+        "packet": "StartGame",
+        "payloadLen": 4,
+        "payloadHash": "fnv1a64:4cfad6c24f7bf87d",
+        "decoded": true,
+        "detail": {
+          "characterIndex": 8
+        }
+      }
+    ]
+  },
+  "diff": {
+    "clean": false,
+    "comparedEntries": 7,
+    "mismatchReasons": [
+      "missing_crystal_packet",
+      "packet_id_mismatch"
+    ],
+    "mismatches": [
+      {
+        "sequence": 4,
+        "reason": "packet_id_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 9,
+          "packet": "LoginSuccess",
+          "payloadLen": 26,
+          "payloadHash": "fnv1a64:094fe1bdf34cd7f2",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 7,
+          "packet": "Login",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bf4c8601bb45",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 6,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 14,
+          "packet": "StartGame",
+          "payloadLen": 5,
+          "payloadHash": "fnv1a64:fe1a162e1fcabe15",
+          "decoded": true
+        },
+        "crystal": null
+      }
+    ]
+  },
+  "stableDiff": {
+    "clean": false,
+    "comparedEntries": 7,
+    "mismatchReasons": [
+      "missing_crystal_packet",
+      "packet_id_mismatch"
+    ],
+    "mismatches": [
+      {
+        "sequence": 4,
+        "reason": "packet_id_mismatch",
+        "local": {
+          "direction": "server",
+          "packetId": 9,
+          "packet": "LoginSuccess",
+          "payloadLen": 26,
+          "payloadHash": "fnv1a64:094fe1bdf34cd7f2",
+          "decoded": true
+        },
+        "crystal": {
+          "direction": "server",
+          "packetId": 7,
+          "packet": "Login",
+          "payloadLen": 1,
+          "payloadHash": "fnv1a64:af63bf4c8601bb45",
+          "decoded": true
+        }
+      },
+      {
+        "sequence": 6,
+        "reason": "missing_crystal_packet",
+        "local": {
+          "direction": "server",
+          "packetId": 14,
+          "packet": "StartGame",
+          "payloadLen": 5,
+          "payloadHash": "fnv1a64:fe1a162e1fcabe15",
+          "decoded": true
+        },
+        "crystal": null
+      }
+    ]
+  }
+}

@@ -519,6 +519,8 @@ pub struct CrystalNpcInfoManifest {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CrystalNpcInfoTemplate {
     pub npc_index: i32,
+    #[serde(default)]
+    pub loaded_object_id: Option<u32>,
     pub map_index: i32,
     pub map_file_name: Option<String>,
     pub file_name: String,
@@ -545,6 +547,113 @@ pub struct CrystalNpcInfoTemplate {
     pub big_map_icon: i32,
     pub can_teleport_to: bool,
     pub conquest_visible: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CrystalQuestPacketManifest {
+    pub generated_at: String,
+    pub source_file: String,
+    pub source_quests_dir: String,
+    pub source_npcs_dir: String,
+    pub crystal_db_version: i32,
+    pub crystal_db_custom_version: i32,
+    pub total_quests: usize,
+    pub quests: Vec<CrystalQuestPacketTemplate>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalQuestPacketTemplate {
+    pub index: i32,
+    pub name: String,
+    pub group: String,
+    pub file_name: String,
+    pub npc_index: u32,
+    pub finish_npc_index: u32,
+    pub payload_len: usize,
+    pub payload_hex: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CrystalRecipePacketManifest {
+    pub generated_at: String,
+    pub source_file: String,
+    pub source_recipe_dir: String,
+    pub crystal_db_version: i32,
+    pub crystal_db_custom_version: i32,
+    pub total_recipes: usize,
+    pub recipes: Vec<CrystalRecipePacketTemplate>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalRecipePacketTemplate {
+    pub name: String,
+    pub item_index: i32,
+    pub item_name: String,
+    pub gold: u32,
+    pub chance: u8,
+    pub item_info_indices: Vec<i32>,
+    pub tool_count: usize,
+    pub ingredient_count: usize,
+    pub payload_len: usize,
+    pub payload_hex: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CrystalRecipeBootstrapPacket {
+    pub item_info_indices: Vec<i32>,
+    pub payload: Vec<u8>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CrystalGameShopPacketManifest {
+    pub generated_at: String,
+    pub source_file: String,
+    pub crystal_db_version: i32,
+    pub crystal_db_custom_version: i32,
+    pub total_items: usize,
+    pub items: Vec<CrystalGameShopPacketTemplate>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalGameShopPacketTemplate {
+    pub item_index: i32,
+    pub game_shop_index: i32,
+    pub item_name: String,
+    pub gold_price: u32,
+    pub credit_price: u32,
+    pub count: u16,
+    pub class: String,
+    pub category: String,
+    pub stock: i32,
+    pub stock_level: i32,
+    pub payload_len: usize,
+    pub payload_hex: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct CrystalBaseStatsPacketManifest {
+    pub generated_at: String,
+    pub source_configs_dir: String,
+    pub total_classes: usize,
+    pub classes: Vec<CrystalBaseStatsPacketTemplate>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalBaseStatsPacketTemplate {
+    pub class: String,
+    pub class_id: u8,
+    pub stat_count: usize,
+    pub cap_count: usize,
+    pub payload_len: usize,
+    pub payload_hex: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalGuildBuffPacketManifest {
+    pub generated_at: String,
+    pub source_config_file: String,
+    pub payload_len: usize,
+    pub payload_hex: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -750,6 +859,8 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub safe_zones: Vec<CrystalSafeZoneTemplate>,
     #[serde(default)]
+    pub safe_zone_spells: Vec<CrystalSafeZoneSpellTemplate>,
+    #[serde(default)]
     pub movement_count: usize,
     #[serde(default)]
     pub movements: Vec<CrystalMovementTemplate>,
@@ -762,6 +873,13 @@ pub struct CrystalSafeZoneTemplate {
     pub location: Point,
     pub size: u16,
     pub start_point: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalSafeZoneSpellTemplate {
+    pub object_id: u32,
+    pub location: Point,
+    pub spell: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1046,6 +1164,120 @@ pub fn crystal_npc_info_manifest() -> CrystalNpcInfoManifest {
         .clone()
 }
 
+pub fn crystal_quest_packet_manifest() -> CrystalQuestPacketManifest {
+    static CRYSTAL_QUEST_PACKET_MANIFEST: OnceLock<CrystalQuestPacketManifest> = OnceLock::new();
+    CRYSTAL_QUEST_PACKET_MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_quest_packet_manifest.json"
+            ))
+            .expect("crystal quest packet manifest json should be valid")
+        })
+        .clone()
+}
+
+pub fn crystal_quest_packet_payloads() -> Vec<Vec<u8>> {
+    crystal_quest_packet_manifest()
+        .quests
+        .into_iter()
+        .map(|quest| {
+            decode_hex(&quest.payload_hex)
+                .expect("crystal quest packet payload hex should be valid")
+        })
+        .collect()
+}
+
+pub fn crystal_recipe_packet_manifest() -> CrystalRecipePacketManifest {
+    static CRYSTAL_RECIPE_PACKET_MANIFEST: OnceLock<CrystalRecipePacketManifest> = OnceLock::new();
+    CRYSTAL_RECIPE_PACKET_MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_recipe_packet_manifest.json"
+            ))
+            .expect("crystal recipe packet manifest json should be valid")
+        })
+        .clone()
+}
+
+pub fn crystal_recipe_bootstrap_packets() -> Vec<CrystalRecipeBootstrapPacket> {
+    crystal_recipe_packet_manifest()
+        .recipes
+        .into_iter()
+        .map(|recipe| CrystalRecipeBootstrapPacket {
+            item_info_indices: recipe.item_info_indices,
+            payload: decode_hex(&recipe.payload_hex)
+                .expect("crystal recipe packet payload hex should be valid"),
+        })
+        .collect()
+}
+
+pub fn crystal_game_shop_packet_manifest() -> CrystalGameShopPacketManifest {
+    static CRYSTAL_GAME_SHOP_PACKET_MANIFEST: OnceLock<CrystalGameShopPacketManifest> =
+        OnceLock::new();
+    CRYSTAL_GAME_SHOP_PACKET_MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_game_shop_packet_manifest.json"
+            ))
+            .expect("crystal game shop packet manifest json should be valid")
+        })
+        .clone()
+}
+
+pub fn crystal_game_shop_info_packet_payloads() -> Vec<Vec<u8>> {
+    crystal_game_shop_packet_manifest()
+        .items
+        .into_iter()
+        .map(|item| {
+            decode_hex(&item.payload_hex)
+                .expect("crystal game shop packet payload hex should be valid")
+        })
+        .collect()
+}
+
+pub fn crystal_base_stats_packet_manifest() -> CrystalBaseStatsPacketManifest {
+    static CRYSTAL_BASE_STATS_PACKET_MANIFEST: OnceLock<CrystalBaseStatsPacketManifest> =
+        OnceLock::new();
+    CRYSTAL_BASE_STATS_PACKET_MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_base_stats_packet_manifest.json"
+            ))
+            .expect("crystal base stats packet manifest json should be valid")
+        })
+        .clone()
+}
+
+pub fn crystal_base_stats_info_packet_payload(class: MirClass) -> Option<Vec<u8>> {
+    let class_name = format!("{class:?}");
+    crystal_base_stats_packet_manifest()
+        .classes
+        .into_iter()
+        .find(|packet| packet.class == class_name)
+        .map(|packet| {
+            decode_hex(&packet.payload_hex)
+                .expect("crystal base stats packet payload hex should be valid")
+        })
+}
+
+pub fn crystal_guild_buff_packet_manifest() -> CrystalGuildBuffPacketManifest {
+    static CRYSTAL_GUILD_BUFF_PACKET_MANIFEST: OnceLock<CrystalGuildBuffPacketManifest> =
+        OnceLock::new();
+    CRYSTAL_GUILD_BUFF_PACKET_MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_guild_buff_packet_manifest.json"
+            ))
+            .expect("crystal guild buff packet manifest json should be valid")
+        })
+        .clone()
+}
+
+pub fn crystal_guild_buff_list_packet_payload() -> Vec<u8> {
+    let packet = crystal_guild_buff_packet_manifest();
+    decode_hex(&packet.payload_hex).expect("crystal guild buff packet payload hex should be valid")
+}
+
 pub fn crystal_npc_command_summary() -> CrystalNpcCommandSummary {
     static CRYSTAL_NPC_COMMAND_SUMMARY: OnceLock<CrystalNpcCommandSummary> = OnceLock::new();
     CRYSTAL_NPC_COMMAND_SUMMARY
@@ -1216,22 +1448,50 @@ fn respawn_overlaps_bounds(respawn: &CrystalRespawnTemplate, bounds: MapBounds) 
         && respawn.location.y - spread <= bounds.max_y
 }
 
+fn decode_hex(value: &str) -> Result<Vec<u8>, String> {
+    if value.len() % 2 != 0 {
+        return Err("hex string has odd length".to_string());
+    }
+    let mut bytes = Vec::with_capacity(value.len() / 2);
+    let raw = value.as_bytes();
+    for index in (0..raw.len()).step_by(2) {
+        let high = hex_nibble(raw[index])?;
+        let low = hex_nibble(raw[index + 1])?;
+        bytes.push((high << 4) | low);
+    }
+    Ok(bytes)
+}
+
+fn hex_nibble(byte: u8) -> Result<u8, String> {
+    match byte {
+        b'0'..=b'9' => Ok(byte - b'0'),
+        b'a'..=b'f' => Ok(byte - b'a' + 10),
+        b'A'..=b'F' => Ok(byte - b'A' + 10),
+        _ => Err(format!("invalid hex byte {byte}")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
+        crystal_base_stats_info_packet_payload, crystal_base_stats_packet_manifest,
         crystal_buff_by_type, crystal_buff_manifest, crystal_drop_manifest,
-        crystal_drop_table_by_key, crystal_drop_table_for_monster_name, crystal_item_by_index,
-        crystal_item_by_name, crystal_item_manifest, crystal_magic_by_spell,
+        crystal_drop_table_by_key, crystal_drop_table_for_monster_name,
+        crystal_game_shop_info_packet_payloads, crystal_game_shop_packet_manifest,
+        crystal_guild_buff_list_packet_payload, crystal_guild_buff_packet_manifest,
+        crystal_item_by_index, crystal_item_by_name, crystal_item_manifest, crystal_magic_by_spell,
         crystal_magic_manifest, crystal_map_respawns_by_file_name, crystal_map_respawns_by_index,
         crystal_monster_ai_summary, crystal_monster_by_index, crystal_monster_by_name,
         crystal_monster_manifest, crystal_npc_command_summary, crystal_npc_info_by_script_key,
         crystal_npc_info_manifest, crystal_npc_manifest, crystal_npc_script_by_key,
+        crystal_quest_packet_manifest, crystal_quest_packet_payloads,
         crystal_random_item_stat_profile, crystal_random_item_stats_manifest,
-        crystal_respawn_manifest, crystal_starter_region_respawns, format_localized_text,
-        localization_bundle, localized_text, starter_map_collision, starter_scene,
-        starter_server_data, DropTemplate, LanguageCode, MapCellAttribute, SkillEffectTemplate,
+        crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_respawn_manifest,
+        crystal_starter_region_respawns, format_localized_text, localization_bundle,
+        localized_text, starter_map_collision, starter_scene, starter_server_data, DropTemplate,
+        LanguageCode, MapCellAttribute, SkillEffectTemplate,
     };
-    use mir2_protocol::Point;
+    use mir2_protocol::{MirClass, Point};
 
     #[test]
     fn starter_scene_loads() {
@@ -1591,6 +1851,92 @@ mod tests {
         assert_eq!(wicked_trader.rate, 200);
         assert_eq!(wicked_trader.price_rate, 2.0);
         assert_eq!(wicked_trader.location, Point { x: 4, y: 6 });
+        assert!(wicked_trader.loaded_object_id.is_some());
+    }
+
+    #[test]
+    fn crystal_quest_packet_manifest_loads() {
+        let manifest = crystal_quest_packet_manifest();
+
+        assert_eq!(manifest.total_quests, 154);
+        assert_eq!(manifest.total_quests, manifest.quests.len());
+
+        let first = manifest.quests.first().expect("first quest packet");
+        assert_eq!(first.index, 1);
+        assert_eq!(first.name, "Assistant's Request");
+        assert_eq!(first.payload_len, first.payload_hex.len() / 2);
+
+        let payloads = crystal_quest_packet_payloads();
+        assert_eq!(payloads.len(), manifest.total_quests);
+        assert_eq!(payloads[0].len(), first.payload_len);
+    }
+
+    #[test]
+    fn crystal_recipe_packet_manifest_loads() {
+        let manifest = crystal_recipe_packet_manifest();
+
+        assert!(manifest.total_recipes >= 70);
+        assert_eq!(manifest.total_recipes, manifest.recipes.len());
+
+        let first = manifest.recipes.first().expect("first recipe packet");
+        assert_eq!(first.name, "(HP)DrugXL");
+        assert_eq!(first.item_index, 664);
+        assert_eq!(first.payload_len, first.payload_hex.len() / 2);
+        assert!(first.item_info_indices.contains(&664));
+
+        let packets = crystal_recipe_bootstrap_packets();
+        assert_eq!(packets.len(), manifest.total_recipes);
+        assert_eq!(packets[0].payload.len(), first.payload_len);
+    }
+
+    #[test]
+    fn crystal_game_shop_packet_manifest_loads() {
+        let manifest = crystal_game_shop_packet_manifest();
+
+        assert_eq!(manifest.total_items, 105);
+        assert_eq!(manifest.total_items, manifest.items.len());
+
+        let first = manifest.items.first().expect("first game shop packet");
+        assert_eq!(first.item_index, 1268);
+        assert_eq!(first.item_name, "DestructionLiquor1");
+        assert_eq!(first.payload_len, first.payload_hex.len() / 2);
+
+        let payloads = crystal_game_shop_info_packet_payloads();
+        assert_eq!(payloads.len(), manifest.total_items);
+        assert_eq!(payloads[0].len(), first.payload_len);
+    }
+
+    #[test]
+    fn crystal_base_stats_packet_manifest_loads() {
+        let manifest = crystal_base_stats_packet_manifest();
+
+        assert_eq!(manifest.total_classes, 5);
+        assert_eq!(manifest.total_classes, manifest.classes.len());
+
+        let warrior = manifest
+            .classes
+            .iter()
+            .find(|packet| packet.class == "Warrior")
+            .expect("Warrior base stats packet");
+        assert_eq!(warrior.class_id, 0);
+        assert_eq!(warrior.stat_count, 11);
+        assert_eq!(warrior.cap_count, 9);
+        assert_eq!(warrior.payload_len, warrior.payload_hex.len() / 2);
+
+        let payload =
+            crystal_base_stats_info_packet_payload(MirClass::Warrior).expect("Warrior payload");
+        assert_eq!(payload.len(), warrior.payload_len);
+    }
+
+    #[test]
+    fn crystal_guild_buff_packet_manifest_loads() {
+        let manifest = crystal_guild_buff_packet_manifest();
+
+        assert_eq!(manifest.payload_len, 660);
+        assert_eq!(manifest.payload_len, manifest.payload_hex.len() / 2);
+
+        let payload = crystal_guild_buff_list_packet_payload();
+        assert_eq!(payload.len(), manifest.payload_len);
     }
 
     #[test]
@@ -1807,6 +2153,9 @@ mod tests {
             safe_zone.location == (Point { x: 288, y: 616 })
                 && safe_zone.size == 10
                 && safe_zone.start_point
+        }));
+        assert!(bichon.safe_zone_spells.iter().any(|spell| {
+            spell.object_id == 46 && spell.location == (Point { x: 278, y: 606 })
         }));
         assert!(bichon.movements.iter().any(|movement| {
             movement.map_index == 2

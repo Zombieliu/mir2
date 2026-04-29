@@ -40,6 +40,7 @@ type UiLogChannel =
   | "guild"
   | "system"
   | "hint"
+  | "server"
   | "announcement"
   | "network";
 
@@ -104,9 +105,11 @@ type GatewayWorldEntity = {
   level?: number | null;
   hp?: number | null;
   maxHp?: number | null;
+  nameColourArgb?: number | null;
   dead: boolean;
   disposition: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
+  questIds?: number[];
 };
 
 type GatewayGroundDrop = {
@@ -278,9 +281,11 @@ type WorldEntity = {
   level?: number;
   hp?: number;
   maxHp?: number;
+  nameColourArgb?: number;
   dead?: boolean;
   disposition?: EntityDisposition;
   sprite?: GatewayWorldEntitySprite | null;
+  questIds?: number[];
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -553,6 +558,7 @@ export default function HomePage() {
   const pendingNewAccountRef = useRef(false);
   const pendingTransferRef = useRef<string | null>(null);
   const pendingNpcInteractRef = useRef<string | null>(null);
+  const gameEntryChatSeededRef = useRef(false);
   const movementPlanRef = useRef<MovementPlan | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
@@ -649,7 +655,7 @@ export default function HomePage() {
           return;
         }
 
-        appendLog(t("runtime.loadingModule"));
+        appendLog(t("runtime.loadingModule"), "network");
         const runtimePath = "/bevy-runtime/pkg/mir2_bevy_runtime.js";
         const runtime = (await import(
           /* webpackIgnore: true */ runtimePath
@@ -703,7 +709,6 @@ export default function HomePage() {
     async function loadSceneBlueprint() {
       try {
         loadingSceneKeyRef.current = sceneKey;
-        appendLog(t("log.loadingSceneBlueprint"));
         const params = new URLSearchParams({
           map: normalizedMapFileName,
           x: String(center.x),
@@ -833,16 +838,39 @@ export default function HomePage() {
     tone: UiLogTone = "system",
     channel: UiLogChannel = defaultLogChannel(tone),
   ) {
+    if (tone === "network") return;
+
     setLogs((current) =>
       [
-        {
-          text: `[${new Date().toLocaleTimeString(locale)}] ${text}`,
-          tone,
-          channel,
-        },
+        createLogLine(text, tone, channel, locale),
         ...current,
       ].slice(0, 24),
     );
+  }
+
+  function appendCrystalGameEntryChat() {
+    if (gameEntryChatSeededRef.current) return;
+    gameEntryChatSeededRef.current = true;
+
+    const lines = [
+      t("server.Welcome", [t("server.GameName", [], "Legend of Mir 2")], "Welcome to the Legend of Mir 2 Server."),
+      t("client.AttackMode_Peace", [], "[Mode: Peaceful]"),
+      t("client.PetMode_Both", [], "[Pet: Attack and Move]"),
+      t("server.OnlinePlayers", [1], "Online Players: 1"),
+    ];
+
+    setLogs((current) => {
+      const existing = new Set(current.map((line) => trimLogTimestamp(line.text)));
+      const missing = lines.filter((line) => !existing.has(line));
+      if (!missing.length) {
+        return current;
+      }
+
+      const seeded = [...missing]
+        .reverse()
+        .map((line) => createLogLine(line, "chat", "server", locale));
+      return [...seeded, ...current].slice(0, 24);
+    });
   }
 
   function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
@@ -876,6 +904,7 @@ export default function HomePage() {
             playBounds: OriginalMapRegion["playBounds"];
           } | null;
           selectedObjectId: string | null;
+          logs: UiLogLine[];
           entities: WorldEntity[];
           groundDrops: GroundDrop[];
           beltItems: WorldItem[];
@@ -919,6 +948,7 @@ export default function HomePage() {
             }
           : null,
         selectedObjectId: world.selectedObjectId,
+        logs,
         entities: world.entities,
         groundDrops: world.groundDrops,
         beltItems: world.beltItems,
@@ -1058,6 +1088,7 @@ export default function HomePage() {
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
     movementPlanRef.current = null;
+    gameEntryChatSeededRef.current = false;
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       send({ type: "disconnect" });
     }
@@ -1508,14 +1539,16 @@ export default function HomePage() {
           );
         }
         break;
-      case "MapInformation":
+      case "MapInformation": {
+        const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         setWorld((current) => ({
           ...current,
           mapTitle: stringOrNull(payload.title),
           mapFileName: stringOrNull(payload.fileName) ?? current.mapFileName,
-          miniMapIndex: null,
+          miniMapIndex: miniMapIndex && miniMapIndex > 0 ? miniMapIndex : null,
         }));
         break;
+      }
       case "UserInformation": {
         const objectId = stringifyId(payload.objectId);
         const location = payload.location as { x?: number; y?: number } | undefined;
@@ -1547,10 +1580,12 @@ export default function HomePage() {
             level: numberOrUndefined(payload.level),
             hp: numberOrUndefined(payload.hp),
             maxHp: numberOrUndefined(payload.hp),
+            nameColourArgb: -1,
             disposition: "friendly",
           }),
         }));
         setScreen("game");
+        appendCrystalGameEntryChat();
         break;
       }
       case "UserLocation":
@@ -1790,6 +1825,7 @@ export default function HomePage() {
         classKey: kind === "player" || kind === "selfPlayer" ? mapClassKey(payload.class) : undefined,
         genderKey: kind === "player" || kind === "selfPlayer" ? mapGenderKey(payload.gender) : undefined,
         level: numberOrUndefined(payload.level),
+        nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? (kind === "npc" ? -16_711_936 : -1),
         dead: payload.dead === true,
         disposition,
         sprite: spriteFromPacket(payload, kind),
@@ -2046,9 +2082,11 @@ export default function HomePage() {
       level: entity.level ?? undefined,
       hp: entity.hp ?? undefined,
       maxHp: entity.maxHp ?? undefined,
+      nameColourArgb: entity.nameColourArgb ?? undefined,
       dead: entity.dead,
       disposition: entity.disposition,
       sprite: entity.sprite ?? null,
+      questIds: Array.isArray(entity.questIds) ? entity.questIds : [],
     }));
     const groundDrops = (snapshot.groundDrops ?? []).map((drop) => ({
       objectId: String(drop.objectId),
@@ -2439,6 +2477,23 @@ function hasWebGl2Support() {
   }
 }
 
+function createLogLine(
+  text: string,
+  tone: UiLogTone,
+  channel: UiLogChannel,
+  locale: string,
+): UiLogLine {
+  return {
+    text: `[${new Date().toLocaleTimeString(locale)}] ${text}`,
+    tone,
+    channel,
+  };
+}
+
+function trimLogTimestamp(text: string) {
+  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
+}
+
 function defaultLogChannel(tone: UiLogTone): UiLogChannel {
   if (tone === "network") {
     return "network";
@@ -2465,7 +2520,9 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
     case "system":
       return "system";
     case "hint":
-      return "hint";
+      return "server";
+    case "server":
+      return "server";
     case "announcement":
       return "announcement";
     default:

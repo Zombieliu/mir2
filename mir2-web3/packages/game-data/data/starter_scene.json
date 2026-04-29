@@ -1,10 +1,10 @@
 {
   "map": {
-    "map_index": 0,
+    "map_index": 1,
     "file_name": "0",
     "title": "Starter Field",
-    "mini_map": 0,
-    "big_map": 0,
+    "mini_map": 101,
+    "big_map": 101,
     "lights": 0,
     "flags": 0,
     "map_dark_light": 0,

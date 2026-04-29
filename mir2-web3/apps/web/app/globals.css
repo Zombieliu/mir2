@@ -45,9 +45,7 @@ img {
 
 .mir-client-page {
   height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(87, 58, 22, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(19, 12, 7, 0.98), rgba(4, 3, 2, 1));
+  background: #000;
 }
 
 .mir-stage {
@@ -67,9 +65,7 @@ img {
   transform: translate(-50%, -50%);
   transform-origin: center center;
   background: #000;
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.62),
-    0 0 0 1px rgba(209, 175, 112, 0.08);
+  box-shadow: none;
 }
 
 #mir2-web3-canvas {
@@ -124,6 +120,11 @@ img {
   inset: 0;
   z-index: 1;
   overflow: hidden;
+}
+
+.login-transition-overlay {
+  z-index: 19;
+  pointer-events: none;
 }
 
 .client-scene-background {
@@ -215,6 +216,23 @@ img {
   filter: brightness(1.2) saturate(1.15) drop-shadow(0 0 10px rgba(145, 235, 188, 0.42));
 }
 
+.entity-health-bar {
+  position: absolute;
+  left: -18px;
+  width: 36px;
+  height: 4px;
+  border: 1px solid #101010;
+  background: #270000;
+  box-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+.entity-health-bar span {
+  display: block;
+  height: 100%;
+  background: #00c000;
+}
+
 .viewport-projectile {
   position: absolute;
   width: 28px;
@@ -299,6 +317,7 @@ img {
 .entity-nameplate strong {
   font-size: 12px;
   line-height: 1;
+  color: var(--entity-name-color, #ffffff);
 }
 
 .entity-nameplate span {
@@ -309,23 +328,10 @@ img {
   color: #ceb78f;
 }
 
-.entity-nameplate.self strong {
-  color: #f0d487;
+.entity-nameplate .entity-subname {
+  color: #ffffff;
 }
 
-.entity-nameplate.player strong {
-  color: #d7e5ff;
-}
-
-.entity-nameplate.monster strong {
-  color: #ffccbe;
-}
-
-.entity-nameplate.npc strong {
-  color: #dcffcf;
-}
-
-.entity-nameplate.selected strong,
 .entity-nameplate.selected span {
   color: #fff0b9;
 }
@@ -352,7 +358,6 @@ img {
 .game-ui-scene .mini-map-panel,
 .game-ui-scene .dura-panel,
 .game-ui-scene .dura-status-panel,
-.game-ui-scene .quest-tracker-panel,
 .game-ui-scene .npc-dialog-panel,
 .game-ui-scene .overlay-panel,
 .game-ui-scene .language-selector {
@@ -915,6 +920,10 @@ img {
 
 .chat-feed-line.channel-guild {
   color: #8fe0a8;
+}
+
+.chat-feed-line.channel-server {
+  color: #00a000;
 }
 
 .chat-feed-line.channel-hint {
@@ -1850,7 +1859,7 @@ button.character-spell-value:hover {
 
 .mini-map-panel {
   position: absolute;
-  right: -2px;
+  right: 0;
   top: 1px;
   width: 128px;
   height: 154px;
@@ -2017,7 +2026,6 @@ button.character-spell-value:hover {
 .dura-piece.amulet { left: 19px; top: 57px; }
 .dura-piece.mount { left: 46px; top: 71px; }
 
-.quest-tracker-panel,
 .npc-dialog-panel {
   position: absolute;
   z-index: 16;
@@ -2028,17 +2036,6 @@ button.character-spell-value:hover {
   text-shadow: 1px 1px 0 #000;
 }
 
-.quest-tracker-panel {
-  left: 18px;
-  top: 18px;
-  width: 212px;
-  min-height: 150px;
-  padding: 10px 12px;
-  display: grid;
-  gap: 6px;
-}
-
-.quest-tracker-title,
 .npc-dialog-caption {
   color: #bea06e;
   font-size: 11px;
@@ -2046,50 +2043,10 @@ button.character-spell-value:hover {
   text-transform: uppercase;
 }
 
-.quest-stage {
-  width: fit-content;
-  padding: 2px 6px;
-  border: 1px solid rgba(204, 176, 110, 0.3);
-  font-size: 10px;
-  color: #e6d3a7;
-}
-
-.quest-stage.readyToTurnIn {
-  color: #f0d68f;
-}
-
-.quest-stage.completed {
-  color: #a6c796;
-}
-
-.quest-name {
-  font-size: 15px;
-}
-
-.quest-progress,
-.quest-reward,
-.quest-objective,
-.quest-hint-line,
 .npc-dialog-body p,
 .npc-dialog-footer {
   font-size: 12px;
   line-height: 1.25;
-}
-
-.quest-progress {
-  color: #efdfa8;
-}
-
-.quest-reward,
-.quest-hints {
-  color: #cbb38a;
-}
-
-.quest-hints {
-  display: grid;
-  gap: 4px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(190, 157, 99, 0.18);
 }
 
 .npc-dialog-panel {
@@ -2269,17 +2226,11 @@ button.character-spell-value:hover {
   }
 }
 
-@media (max-width: 1280px), (max-height: 860px) {
+@media (max-width: 1023px), (max-height: 767px) {
   body {
     overflow: auto;
   }
 
-  .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-}
-
-@media (max-width: 1120px), (max-height: 760px) {
   .client-stage-frame {
     transform: translate(-50%, -50%) scale(0.78);
   }
