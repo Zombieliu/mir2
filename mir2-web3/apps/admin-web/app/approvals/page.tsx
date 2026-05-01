@@ -1,6 +1,10 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
-import { adminGet, type ApprovalRecord } from "../../lib/admin-api";
+import {
+  adminGet,
+  type AdminAuthMeResponse,
+  type ApprovalRecord
+} from "../../lib/admin-api";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 import {
   approveApprovalAction,
@@ -17,6 +21,8 @@ export default async function ApprovalsPage({
   const params = (await searchParams) ?? {};
   const error = firstParam(params.error);
   const approvals = await adminGet<ApprovalRecord[]>("/admin/approvals");
+  const auth = await adminGet<AdminAuthMeResponse>("/admin/auth/me");
+  const operatorId = auth.ok ? auth.data.operator.operatorId : undefined;
 
   return (
     <AdminShell active="/approvals">
@@ -82,6 +88,10 @@ export default async function ApprovalsPage({
                       <td>{approval.approvalId}</td>
                       <td>
                         {approval.commandType} / {approval.commandId}
+                        <div className="muted">
+                          {t("approvals.requestedBy")}: {approval.requestedBy}
+                          {approval.decidedBy ? ` / ${t("approvals.decidedBy")}: ${approval.decidedBy}` : ""}
+                        </div>
                       </td>
                       <td>
                         <StatusBadge
@@ -91,7 +101,9 @@ export default async function ApprovalsPage({
                         </StatusBadge>
                       </td>
                       <td>
-                        {approval.status === "pending" ? (
+                        {approval.status === "pending" && approval.requestedBy === operatorId ? (
+                          <p className="muted">{t("approvals.peerRequired")}</p>
+                        ) : approval.status === "pending" ? (
                           <div className="actions">
                             <form action={approveApprovalAction}>
                               <input

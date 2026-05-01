@@ -22,3 +22,10 @@ Desktop.ini
 
 # Logs
 *.log
+
+# Browser QA
+.playwright-cli/
+output/playwright/
+
+# Local AI-generated/reference images
+ai/

@@ -1,6 +1,6 @@
 import { AdminShell } from "../../components/admin-shell";
 import { StatusBadge } from "../../components/status-badge";
-import { adminGet, type AdminTimelineResponse } from "../../lib/admin-api";
+import { adminGet, type AdminTimelineItem, type AdminTimelineResponse } from "../../lib/admin-api";
 import { getAdminI18n, translateAdminStatus } from "../../lib/i18n";
 
 export default async function TimelinePage({
@@ -65,8 +65,8 @@ export default async function TimelinePage({
           </thead>
           <tbody>
             {records.length ? (
-              records.map((record) => (
-                <tr key={`${record.source}-${record.recordId}`}>
+              records.map((record, index) => (
+                <tr key={timelineRecordKey(record, index)}>
                   <td>{record.source}</td>
                   <td>{record.commandId ?? "-"}</td>
                   <td>{record.targetId ?? "-"}</td>
@@ -112,4 +112,17 @@ function buildTimelineQuery(params: Record<string, string | string[] | undefined
 
 function firstParam(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+function timelineRecordKey(record: AdminTimelineItem, index: number) {
+  return [
+    record.source,
+    record.recordId,
+    record.commandId ?? "",
+    record.targetId ?? "",
+    record.eventType,
+    record.status,
+    record.occurredAtMs,
+    index
+  ].join(":");
 }

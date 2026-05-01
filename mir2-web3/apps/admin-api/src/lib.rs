@@ -6,7 +6,7 @@ use std::io::{Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
@@ -14,8 +14,9 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use mir2_simulation::{
-    ban_account_in_store, deliver_stage5_system_mail, SimulationConfig, Stage5MailDelivery,
-    Stage5MailDeliveryReceipt, Stage5MailTargetKind,
+    ban_account_in_store, deliver_stage5_system_mail, AccountRecord, AccountStore, CharacterRecord,
+    CharacterSaveRecord, SimulationConfig, Stage5MailDelivery, Stage5MailDeliveryReceipt,
+    Stage5MailTargetKind, Stage5SystemsState,
 };
 use postgres::error::SqlState;
 use postgres::{Client, NoTls, Row};
@@ -793,6 +794,530 @@ impl PostgresAdminRepository {
             }
             _ => Ok(None),
         }
+    }
+
+    pub fn upsert_system_mail_receipt(
+        &self,
+        receipt: &SystemMailReceipt,
+    ) -> Result<(), AdminError> {
+        let command_id = receipt
+            .outbox_id
+            .strip_prefix("mail-")
+            .unwrap_or(&receipt.outbox_id)
+            .to_string();
+        let target_kind = mail_target_kind_text(&receipt.target_kind);
+        let mail_ids_json = serde_json::to_value(&receipt.mail_ids).map_err(|error| {
+            AdminError::Repository(format!("encode mail receipt ids failed: {error}"))
+        })?;
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .execute(
+                "INSERT INTO admin_system_mail_receipts (
+                    outbox_id,
+                    command_id,
+                    target_kind,
+                    target_id,
+                    attachment_count,
+                    accepted_at_ms,
+                    delivery_mode,
+                    delivered_count,
+                    mail_ids_json
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+                ON CONFLICT (outbox_id) DO UPDATE
+                SET target_kind = EXCLUDED.target_kind,
+                    target_id = EXCLUDED.target_id,
+                    attachment_count = EXCLUDED.attachment_count,
+                    accepted_at_ms = EXCLUDED.accepted_at_ms,
+                    delivery_mode = EXCLUDED.delivery_mode,
+                    delivered_count = EXCLUDED.delivered_count,
+                    mail_ids_json = EXCLUDED.mail_ids_json,
+                    updated_at = now()",
+                &[
+                    &receipt.outbox_id,
+                    &command_id,
+                    &target_kind,
+                    &receipt.target_id,
+                    &(receipt.attachment_count.min(i32::MAX as usize) as i32),
+                    &(receipt.accepted_at_ms as i64),
+                    &receipt.delivery_mode,
+                    &(receipt.delivered_count.min(i32::MAX as usize) as i32),
+                    &mail_ids_json,
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!(
+                    "postgres system mail receipt upsert failed: {error}"
+                ))
+            })?;
+        Ok(())
+    }
+
+    pub fn list_system_mail_receipts(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<SystemMailReceipt>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT outbox_id, target_kind, target_id, attachment_count, accepted_at_ms,
+                        delivery_mode, delivered_count, mail_ids_json
+                 FROM admin_system_mail_receipts
+                 ORDER BY accepted_at_ms DESC, outbox_id DESC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map(|rows| {
+                rows.iter()
+                    .filter_map(|row| row_to_system_mail_receipt(row).ok())
+                    .collect()
+            })
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres system mail receipt list failed: {error}"))
+            })
+    }
+
+    pub fn upsert_activity(
+        &self,
+        request: UpsertAdminActivityRequest,
+        operator_id: &str,
+        now_ms: u64,
+    ) -> Result<AdminActivityRecord, AdminError> {
+        let activity_id = request
+            .activity_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("activity-{now_ms}"));
+        let name = required_string("name", &request.name)?;
+        let activity_type = required_string("activity_type", &request.activity_type)?;
+        let status = optional_string(request.status).unwrap_or_else(|| "Draft".to_string());
+        let signal = optional_string(request.signal).unwrap_or_default();
+        let reward = optional_string(request.reward).unwrap_or_default();
+        let condition = optional_string(request.condition).unwrap_or_default();
+        let realms = clean_string_list(request.realms);
+        let realms_json = serde_json::to_value(&realms).map_err(|error| {
+            AdminError::Repository(format!("encode activity realms failed: {error}"))
+        })?;
+        let start_at_ms = request.start_at_ms.map(|value| value as i64);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_activities (
+                    activity_id,
+                    name,
+                    activity_type,
+                    status,
+                    signal,
+                    start_at_ms,
+                    reward,
+                    condition,
+                    realms_json,
+                    created_by,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)
+                ON CONFLICT (activity_id) DO UPDATE
+                SET name = EXCLUDED.name,
+                    activity_type = EXCLUDED.activity_type,
+                    status = EXCLUDED.status,
+                    signal = EXCLUDED.signal,
+                    start_at_ms = EXCLUDED.start_at_ms,
+                    reward = EXCLUDED.reward,
+                    condition = EXCLUDED.condition,
+                    realms_json = EXCLUDED.realms_json,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING activity_id, name, activity_type, status, signal, start_at_ms,
+                          reward, condition, realms_json, updated_at_ms",
+                &[
+                    &activity_id,
+                    &name,
+                    &activity_type,
+                    &status,
+                    &signal,
+                    &start_at_ms,
+                    &reward,
+                    &condition,
+                    &realms_json,
+                    &operator_id,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres activity upsert failed: {error}"))
+            })?;
+        row_to_activity_record(&row)
+    }
+
+    pub fn list_activities(&self, limit: usize) -> Result<Vec<AdminActivityRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT activity_id, name, activity_type, status, signal, start_at_ms,
+                        reward, condition, realms_json, updated_at_ms
+                 FROM admin_activities
+                 ORDER BY updated_at_ms DESC, activity_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres activity list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_activity_record)
+            .collect()
+    }
+
+    pub fn upsert_price_feed(
+        &self,
+        request: UpsertPriceFeedRequest,
+        now_ms: u64,
+    ) -> Result<AdminPriceFeedRecord, AdminError> {
+        let item = required_string("item", &request.item)?;
+        let source = required_string("source", &request.source)?;
+        let sample_count = request.sample_count.min(i32::MAX as usize) as i32;
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_market_price_feeds (
+                    item,
+                    latest_price,
+                    sample_count,
+                    source,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5)
+                ON CONFLICT (item) DO UPDATE
+                SET latest_price = EXCLUDED.latest_price,
+                    sample_count = EXCLUDED.sample_count,
+                    source = EXCLUDED.source,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING item, latest_price, sample_count, source, updated_at_ms",
+                &[
+                    &item,
+                    &(request.latest_price as i64),
+                    &sample_count,
+                    &source,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres price-feed upsert failed: {error}"))
+            })?;
+        row_to_price_feed_record(&row)
+    }
+
+    pub fn list_price_feeds(&self, limit: usize) -> Result<Vec<AdminPriceFeedRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT item, latest_price, sample_count, source, updated_at_ms
+                 FROM admin_market_price_feeds
+                 ORDER BY updated_at_ms DESC, item ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres price-feed list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_price_feed_record)
+            .collect()
+    }
+
+    pub fn upsert_trade_graph_edge(
+        &self,
+        request: UpsertTradeGraphEdgeRequest,
+        now_ms: u64,
+    ) -> Result<AdminRiskGraphEdge, AdminError> {
+        let from = required_string("from", &request.from)?;
+        let to = required_string("to", &request.to)?;
+        let signal = required_string("signal", &request.signal)?;
+        let risk = required_string("risk", &request.risk)?;
+        let evidence = optional_string(request.evidence).unwrap_or_default();
+        let edge_id = request
+            .edge_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("trade-edge-{from}-{to}-{now_ms}"));
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_trade_graph_edges (
+                    edge_id,
+                    from_player_id,
+                    to_player_id,
+                    signal,
+                    risk,
+                    evidence,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7)
+                ON CONFLICT (edge_id) DO UPDATE
+                SET from_player_id = EXCLUDED.from_player_id,
+                    to_player_id = EXCLUDED.to_player_id,
+                    signal = EXCLUDED.signal,
+                    risk = EXCLUDED.risk,
+                    evidence = EXCLUDED.evidence,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING edge_id, from_player_id, to_player_id, signal, risk, evidence,
+                          updated_at_ms",
+                &[
+                    &edge_id,
+                    &from,
+                    &to,
+                    &signal,
+                    &risk,
+                    &evidence,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres trade graph upsert failed: {error}"))
+            })?;
+        row_to_trade_graph_edge(&row)
+    }
+
+    pub fn list_trade_graph_edges(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<AdminRiskGraphEdge>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT edge_id, from_player_id, to_player_id, signal, risk, evidence,
+                        updated_at_ms
+                 FROM admin_trade_graph_edges
+                 ORDER BY updated_at_ms DESC, edge_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres trade graph list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_trade_graph_edge)
+            .collect()
+    }
+
+    pub fn upsert_zone_runtime(
+        &self,
+        request: UpsertZoneRuntimeRequest,
+        now_ms: u64,
+    ) -> Result<AdminZoneRuntimeRecord, AdminError> {
+        let name = required_string("name", &request.name)?;
+        let zone_id = request
+            .zone_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| normalized_id("zone", &name, now_ms));
+        let status = optional_string(request.status).unwrap_or_else(|| "Healthy".to_string());
+        let host = optional_string(request.host).unwrap_or_default();
+        let process_id = optional_string(request.process_id).unwrap_or_default();
+        let map_count = request.map_count.unwrap_or_default().min(i32::MAX as usize) as i32;
+        let player_count = request
+            .player_count
+            .unwrap_or_default()
+            .min(i32::MAX as usize) as i32;
+        let tick_rate = request.tick_rate.unwrap_or_default().min(i32::MAX as u32) as i32;
+        let uptime_seconds = request
+            .uptime_seconds
+            .unwrap_or_default()
+            .min(i64::MAX as u64) as i64;
+        let source =
+            optional_string(request.source).unwrap_or_else(|| "operator_projection".into());
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_zone_runtime_records (
+                    zone_id,
+                    name,
+                    status,
+                    host,
+                    process_id,
+                    map_count,
+                    player_count,
+                    tick_rate,
+                    uptime_seconds,
+                    source,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                ON CONFLICT (zone_id) DO UPDATE
+                SET name = EXCLUDED.name,
+                    status = EXCLUDED.status,
+                    host = EXCLUDED.host,
+                    process_id = EXCLUDED.process_id,
+                    map_count = EXCLUDED.map_count,
+                    player_count = EXCLUDED.player_count,
+                    tick_rate = EXCLUDED.tick_rate,
+                    uptime_seconds = EXCLUDED.uptime_seconds,
+                    source = EXCLUDED.source,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING zone_id, name, status, host, process_id, map_count, player_count,
+                          tick_rate, uptime_seconds, source, updated_at_ms",
+                &[
+                    &zone_id,
+                    &name,
+                    &status,
+                    &host,
+                    &process_id,
+                    &map_count,
+                    &player_count,
+                    &tick_rate,
+                    &uptime_seconds,
+                    &source,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres zone runtime upsert failed: {error}"))
+            })?;
+        row_to_zone_runtime_record(&row)
+    }
+
+    pub fn list_zone_runtime(
+        &self,
+        limit: usize,
+    ) -> Result<Vec<AdminZoneRuntimeRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT zone_id, name, status, host, process_id, map_count, player_count,
+                        tick_rate, uptime_seconds, source, updated_at_ms
+                 FROM admin_zone_runtime_records
+                 ORDER BY updated_at_ms DESC, zone_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres zone runtime list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_zone_runtime_record)
+            .collect()
+    }
+
+    pub fn upsert_operator(
+        &self,
+        request: UpsertAdminOperatorRequest,
+        actor_id: &str,
+        now_ms: u64,
+    ) -> Result<AdminOperatorRecord, AdminError> {
+        let email = required_string("email", &request.email)?;
+        let role = required_string("role", &request.role)?;
+        let operator_id = request
+            .operator_id
+            .as_deref()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| email.clone());
+        let status = optional_string(request.status).unwrap_or_else(|| "Active".to_string());
+        let permissions = canonical_permissions(request.permissions)?;
+        let permissions_json = serde_json::to_value(&permissions).map_err(|error| {
+            AdminError::Repository(format!("encode operator permissions failed: {error}"))
+        })?;
+        let token_hash = request
+            .token
+            .as_deref()
+            .map(str::trim)
+            .filter(|token| !token.is_empty())
+            .map(operator_token_hash)
+            .unwrap_or_default();
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_one(
+                "INSERT INTO admin_operators (
+                    operator_id,
+                    email,
+                    role,
+                    status,
+                    permissions_json,
+                    token_hash,
+                    created_by,
+                    created_at_ms,
+                    updated_at_ms
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8)
+                ON CONFLICT (operator_id) DO UPDATE
+                SET email = EXCLUDED.email,
+                    role = EXCLUDED.role,
+                    status = EXCLUDED.status,
+                    permissions_json = EXCLUDED.permissions_json,
+                    token_hash = CASE
+                        WHEN EXCLUDED.token_hash <> '' THEN EXCLUDED.token_hash
+                        ELSE admin_operators.token_hash
+                    END,
+                    updated_at_ms = EXCLUDED.updated_at_ms,
+                    updated_at = now()
+                RETURNING operator_id, email, role, status, permissions_json, token_hash,
+                          updated_at_ms, last_authenticated_at_ms",
+                &[
+                    &operator_id,
+                    &email,
+                    &role,
+                    &status,
+                    &permissions_json,
+                    &token_hash,
+                    &actor_id,
+                    &(now_ms as i64),
+                ],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator upsert failed: {error}"))
+            })?;
+        row_to_operator_record(&row)
+    }
+
+    pub fn list_operators(&self, limit: usize) -> Result<Vec<AdminOperatorRecord>, AdminError> {
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        client
+            .query(
+                "SELECT operator_id, email, role, status, permissions_json, token_hash,
+                        updated_at_ms, last_authenticated_at_ms
+                 FROM admin_operators
+                 ORDER BY updated_at_ms DESC, operator_id ASC
+                 LIMIT $1",
+                &[&(limit.min(i32::MAX as usize) as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator list failed: {error}"))
+            })?
+            .iter()
+            .map(row_to_operator_record)
+            .collect()
+    }
+
+    pub fn operator_by_token(
+        &self,
+        token: &str,
+        now_ms: u64,
+    ) -> Result<Option<Operator>, AdminError> {
+        let token = token.trim();
+        if token.is_empty() {
+            return Ok(None);
+        }
+        let token_hash = operator_token_hash(token);
+        let mut client = self.client.lock().map_err(repository_lock_error)?;
+        let row = client
+            .query_opt(
+                "UPDATE admin_operators
+                 SET last_authenticated_at_ms = $2
+                 WHERE token_hash = $1
+                   AND token_hash <> ''
+                   AND lower(status) = 'active'
+                 RETURNING operator_id, email, role, permissions_json",
+                &[&token_hash, &(now_ms as i64)],
+            )
+            .map_err(|error| {
+                AdminError::Repository(format!("postgres operator token lookup failed: {error}"))
+            })?;
+        row.map(|row| row_to_operator(&row)).transpose()
     }
 }
 
@@ -1598,9 +2123,7 @@ where
                     )
                 })?;
             match self.approval_store.get(approval_id) {
-                Some(approval)
-                    if approval.command_id == envelope.command_id
-                        && approval.status == ApprovalStatus::Approved => {}
+                Some(approval) if approval_matches_command(&approval, &envelope) => {}
                 Some(approval) => {
                     audit.complete(
                         CommandStatus::Denied,
@@ -1882,6 +2405,10 @@ impl AccountStoreSystemMailDomain {
     pub fn receipts(&self) -> &[SystemMailReceipt] {
         &self.receipts
     }
+
+    pub fn fallback_config(&self) -> &SimulationConfig {
+        &self.fallback_config
+    }
 }
 
 impl SystemMailDomain for AccountStoreSystemMailDomain {
@@ -1911,6 +2438,17 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
             mail_ids: delivered.mail_ids,
         };
         self.receipts.push(receipt.clone());
+        if let Ok(database_url) = env::var("ADMIN_DATABASE_URL") {
+            if !database_url.trim().is_empty() {
+                match PostgresAdminRepository::connect(database_url.trim()) {
+                    Ok(repository) => {
+                        let _ = repository.ensure_schema();
+                        let _ = repository.upsert_system_mail_receipt(&receipt);
+                    }
+                    Err(_) => {}
+                }
+            }
+        }
         Ok(receipt)
     }
 
@@ -2004,6 +2542,33 @@ where
     stream
         .read_to_string(&mut response)
         .map_err(|error| format!("gateway response read failed: {error}"))?;
+    gateway_http_response_body(&response)
+}
+
+fn get_json_from_gateway(gateway_url: &str) -> Result<String, String> {
+    let (host, path) = parse_http_url(gateway_url)?;
+    let mut stream = TcpStream::connect(&host)
+        .map_err(|error| format!("gateway endpoint unavailable: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway read timeout setup failed: {error}"))?;
+    stream
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| format!("gateway write timeout setup failed: {error}"))?;
+    write!(
+        stream,
+        "GET {path} HTTP/1.1\r\nHost: {host}\r\nAccept: application/json\r\nConnection: close\r\n\r\n"
+    )
+    .map_err(|error| format!("gateway request write failed: {error}"))?;
+
+    let mut response = String::new();
+    stream
+        .read_to_string(&mut response)
+        .map_err(|error| format!("gateway response read failed: {error}"))?;
+    gateway_http_response_body(&response)
+}
+
+fn gateway_http_response_body(response: &str) -> Result<String, String> {
     let (head, response_body) = response
         .split_once("\r\n\r\n")
         .ok_or_else(|| "gateway response was not valid HTTP".to_string())?;
@@ -2013,7 +2578,14 @@ where
             "gateway endpoint rejected request: {status_line} {response_body}"
         ));
     }
-    Ok(response_body.to_string())
+    if head
+        .lines()
+        .any(|line| line.eq_ignore_ascii_case("Transfer-Encoding: chunked"))
+    {
+        decode_chunked_body(response_body)
+    } else {
+        Ok(response_body.to_string())
+    }
 }
 
 fn parse_http_url(url: &str) -> Result<(String, String), String> {
@@ -2169,6 +2741,8 @@ type HttpControlPlane = AdminControlPlane<
 #[derive(Clone)]
 pub struct AdminApiState {
     control_plane: Arc<Mutex<HttpControlPlane>>,
+    read_models: Arc<AdminReadModelStore>,
+    admin_store: Option<PostgresAdminRepository>,
 }
 
 impl Default for AdminApiState {
@@ -2179,26 +2753,31 @@ impl Default for AdminApiState {
 
 impl AdminApiState {
     pub fn from_env() -> Result<Self, AdminError> {
-        let (command_store, audit_store, approval_store) =
-            match PostgresAdminRepository::from_env()? {
-                Some(repository) => (
-                    CommandRepositoryBackend::Postgres(repository.clone()),
-                    AuditRepositoryBackend::Postgres(repository.clone()),
-                    ApprovalRepositoryBackend::Postgres(repository),
-                ),
-                None => (
-                    CommandRepositoryBackend::default(),
-                    AuditRepositoryBackend::default(),
-                    ApprovalRepositoryBackend::default(),
-                ),
-            };
+        let domain = AccountStoreSystemMailDomain::from_env();
+        let read_models = Arc::new(AdminReadModelStore::from_config(domain.fallback_config()));
+        let postgres_repository = PostgresAdminRepository::from_env()?;
+        let admin_store = postgres_repository.clone();
+        let (command_store, audit_store, approval_store) = match postgres_repository {
+            Some(repository) => (
+                CommandRepositoryBackend::Postgres(repository.clone()),
+                AuditRepositoryBackend::Postgres(repository.clone()),
+                ApprovalRepositoryBackend::Postgres(repository),
+            ),
+            None => (
+                CommandRepositoryBackend::default(),
+                AuditRepositoryBackend::default(),
+                ApprovalRepositoryBackend::default(),
+            ),
+        };
         Ok(Self {
             control_plane: Arc::new(Mutex::new(AdminControlPlane::with_repositories(
-                SystemMailExecutor::new(AccountStoreSystemMailDomain::from_env()),
+                SystemMailExecutor::new(domain),
                 command_store,
                 audit_store,
                 approval_store,
             ))),
+            read_models,
+            admin_store,
         })
     }
 }
@@ -2210,6 +2789,7 @@ pub fn admin_router() -> Router {
 pub fn admin_router_with_state(state: AdminApiState) -> Router {
     Router::new()
         .route("/health", get(health))
+        .route("/admin/auth/me", get(auth_me))
         .route("/admin/commands", get(list_commands))
         .route(
             "/admin/commands/:command_id/status",
@@ -2231,6 +2811,19 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         .route("/admin/events", get(list_admin_events))
         .route("/admin/timeline", get(list_admin_timeline))
         .route("/admin/system-mail/outbox", get(list_system_mail_outbox))
+        .route("/admin/read/dashboard", get(read_dashboard))
+        .route("/admin/read/players", get(read_players))
+        .route("/admin/read/players/:player_id", get(read_player_detail))
+        .route("/admin/read/economy", get(read_economy))
+        .route("/admin/read/activities", get(read_activities))
+        .route("/admin/read/servers", get(read_servers))
+        .route("/admin/read/risk", get(read_risk))
+        .route("/admin/read/operators", get(read_operators))
+        .route("/admin/activities", post(upsert_activity))
+        .route("/admin/economy/price-feeds", post(upsert_price_feed))
+        .route("/admin/risk/trade-edges", post(upsert_trade_graph_edge))
+        .route("/admin/servers/zones", post(upsert_zone_runtime))
+        .route("/admin/operators", post(upsert_operator))
         .route("/admin/commands/send-system-mail", post(submit_system_mail))
         .route("/admin/commands/grant-item", post(submit_grant_item))
         .route(
@@ -2307,6 +2900,68 @@ pub struct SubmitBanAccountRequest {
     pub account_id: String,
     pub duration_seconds: Option<u64>,
     pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertAdminActivityRequest {
+    pub activity_id: Option<String>,
+    pub name: String,
+    pub activity_type: String,
+    pub status: Option<String>,
+    pub signal: Option<String>,
+    pub start_at_ms: Option<u64>,
+    pub reward: Option<String>,
+    pub condition: Option<String>,
+    #[serde(default)]
+    pub realms: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertPriceFeedRequest {
+    pub item: String,
+    pub latest_price: u64,
+    pub sample_count: usize,
+    pub source: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertTradeGraphEdgeRequest {
+    pub edge_id: Option<String>,
+    pub from: String,
+    pub to: String,
+    pub signal: String,
+    pub risk: String,
+    pub evidence: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertZoneRuntimeRequest {
+    pub zone_id: Option<String>,
+    pub name: String,
+    pub status: Option<String>,
+    pub host: Option<String>,
+    pub process_id: Option<String>,
+    pub map_count: Option<usize>,
+    pub player_count: Option<usize>,
+    pub tick_rate: Option<u32>,
+    pub uptime_seconds: Option<u64>,
+    pub source: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpsertAdminOperatorRequest {
+    pub operator_id: Option<String>,
+    pub email: String,
+    pub role: String,
+    pub status: Option<String>,
+    pub token: Option<String>,
+    #[serde(default)]
+    pub permissions: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2392,6 +3047,365 @@ pub struct AdminTimelineResponse {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminDashboardReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub account_count: usize,
+    pub character_count: usize,
+    pub online_now: usize,
+    pub online_source: String,
+    pub total_gold: u64,
+    pub total_credit: u64,
+    pub active_ban_count: usize,
+    pub hot_maps: Vec<AdminMapPopulation>,
+    pub services: Vec<AdminServiceStatus>,
+    pub audit_record_count: usize,
+    pub outbox_receipt_count: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMapPopulation {
+    pub map_file_name: String,
+    pub map_title: String,
+    pub character_count: usize,
+    pub percent: u8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServiceStatus {
+    pub name: String,
+    pub status: String,
+    pub detail: String,
+    pub latency_ms: Option<u64>,
+    pub configured: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminPlayersReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub players: Vec<AdminPlayerSummary>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminPlayerSummary {
+    pub player_id: String,
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub class_name: String,
+    pub gender: String,
+    pub level: u16,
+    pub map_file_name: String,
+    pub map_title: String,
+    pub position_x: i32,
+    pub position_y: i32,
+    pub hp: i32,
+    pub max_hp: i32,
+    pub mp: i32,
+    pub gold: u64,
+    pub credit: u64,
+    pub status: String,
+    pub online: bool,
+    pub online_source: Option<String>,
+    pub player_object_id: Option<u32>,
+    pub runtime_tick: Option<u64>,
+    pub store_version: Option<i64>,
+    pub save_version: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminPlayerDetail {
+    pub summary: AdminPlayerSummary,
+    pub inventory_count: usize,
+    pub belt_count: usize,
+    pub storage_count: usize,
+    pub equipment_count: usize,
+    pub quest_state_count: usize,
+    pub skill_state_count: usize,
+    pub mail_count: usize,
+    pub unclaimed_mail_count: usize,
+    pub auction_listing_count: usize,
+    pub group_member_count: usize,
+    pub guild_name: Option<String>,
+    pub active_ban_reason: Option<String>,
+    pub ban_until_ms: Option<u64>,
+    pub banned_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminEconomyReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub assets: Vec<AdminEconomyAsset>,
+    pub gold_distribution: Vec<AdminDistributionBucket>,
+    pub price_feeds: Vec<AdminPriceFeedRecord>,
+    pub price_feed_configured: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminEconomyAsset {
+    pub asset: String,
+    pub total: u64,
+    pub holders: usize,
+    pub average: u64,
+    pub state: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminDistributionBucket {
+    pub key: String,
+    pub label: String,
+    pub value: u8,
+    pub amount: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminPriceFeedRecord {
+    pub item: String,
+    pub latest_price: u64,
+    pub sample_count: usize,
+    pub source: String,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminActivitiesReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub activities: Vec<AdminActivityRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminActivityRecord {
+    pub activity_id: String,
+    pub name: String,
+    pub start_at_ms: Option<u64>,
+    pub activity_type: String,
+    pub status: String,
+    pub signal: String,
+    pub reward: String,
+    pub condition: String,
+    pub realms: Vec<String>,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminServersReadModel {
+    pub generated_at_ms: u64,
+    pub account_store_source: String,
+    pub account_count: usize,
+    pub character_count: usize,
+    pub zones_online: usize,
+    pub zones_source: String,
+    pub zone_runtime_configured: bool,
+    pub zones: Vec<AdminZoneRuntimeRecord>,
+    pub services: Vec<AdminServiceStatus>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminZoneRuntimeRecord {
+    pub zone_id: String,
+    pub name: String,
+    pub status: String,
+    pub host: String,
+    pub process_id: String,
+    pub map_count: usize,
+    pub player_count: usize,
+    pub tick_rate: u32,
+    pub uptime_seconds: u64,
+    pub source: String,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminOperatorsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub operators: Vec<AdminOperatorRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminOperatorRecord {
+    pub operator_id: String,
+    pub email: String,
+    pub role: String,
+    pub status: String,
+    pub permissions: Vec<String>,
+    pub token_configured: bool,
+    pub updated_at_ms: u64,
+    pub last_authenticated_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAuthMeResponse {
+    pub source: String,
+    pub operator: AdminOperatorRecord,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminRiskReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub cases: Vec<AdminRiskCase>,
+    pub graph: Vec<AdminRiskGraphEdge>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminRiskCase {
+    pub player_id: String,
+    pub account_id: String,
+    pub character_name: String,
+    pub signal: String,
+    pub risk: String,
+    pub evidence: String,
+    pub ban_until_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminRiskGraphEdge {
+    pub edge_id: String,
+    pub from: String,
+    pub to: String,
+    pub signal: String,
+    pub risk: String,
+    pub evidence: String,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone)]
+struct AdminReadModelStore {
+    source: AdminReadModelSource,
+    default_character: CharacterRecord,
+}
+
+#[derive(Debug, Clone)]
+enum AdminReadModelSource {
+    JsonPath(PathBuf),
+    Postgres(String),
+    Memory(Arc<Mutex<AccountStore>>),
+}
+
+#[derive(Debug, Clone)]
+struct AccountReadSnapshot {
+    source: String,
+    accounts: Vec<AccountReadRecord>,
+}
+
+#[derive(Debug, Clone)]
+struct AccountReadRecord {
+    account_id: String,
+    account: AccountRecord,
+    store_version: Option<i64>,
+    saves: BTreeMap<i32, CharacterSaveReadRecord>,
+}
+
+#[derive(Debug, Clone)]
+struct CharacterSaveReadRecord {
+    save: CharacterSaveRecord,
+    save_version: Option<i64>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct GatewayPresenceSnapshot {
+    source: String,
+    sessions: Vec<GatewaySessionRecord>,
+    error: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionsResponse {
+    source: String,
+    sessions: Vec<GatewaySessionRecord>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionRecord {
+    key: GatewaySessionKey,
+    character_name: String,
+    map_file_name: Option<String>,
+    player_object_id: Option<u32>,
+    player_hp: Option<i32>,
+    player_max_hp: Option<i32>,
+    gold: u32,
+    tick: u64,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[serde(rename_all = "camelCase")]
+struct GatewaySessionKey {
+    account_id: String,
+    character_index: i32,
+}
+
+impl AdminReadModelStore {
+    fn from_config(config: &SimulationConfig) -> Self {
+        let backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
+        let source = if backend.eq_ignore_ascii_case("postgres") {
+            env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
+                .ok()
+                .or_else(|| config.account_store_database_url.clone())
+                .filter(|value| !value.trim().is_empty())
+                .map(AdminReadModelSource::Postgres)
+        } else {
+            config
+                .account_store_path
+                .clone()
+                .or_else(|| env::var("ADMIN_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
+                .or_else(|| env::var("MIR2_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
+                .map(AdminReadModelSource::JsonPath)
+        }
+        .unwrap_or_else(|| AdminReadModelSource::Memory(config.account_store.clone()));
+        Self {
+            source,
+            default_character: config.default_character.clone(),
+        }
+    }
+
+    fn load_snapshot(&self) -> Result<AccountReadSnapshot, AdminError> {
+        match &self.source {
+            AdminReadModelSource::JsonPath(path) => {
+                read_json_account_snapshot(path, self.default_character.clone())
+            }
+            AdminReadModelSource::Postgres(database_url) => {
+                read_postgres_account_snapshot(database_url, self.default_character.clone())
+            }
+            AdminReadModelSource::Memory(store) => {
+                let store = store
+                    .lock()
+                    .map_err(|_| AdminError::Repository("account read model lock poisoned".into()))?
+                    .clone();
+                Ok(snapshot_from_store("memory_account_store", store))
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ErrorResponse {
     error: String,
 }
@@ -2470,7 +3484,7 @@ async fn create_approval(
     Json(request): Json<CreateApprovalRequest>,
 ) -> Result<Json<ApprovalRecord>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_approval_manager(&operator)?;
     if request.command_id.trim().is_empty() {
         return Err(ApiError {
@@ -2551,7 +3565,7 @@ async fn decide_approval_handler(
     status: ApprovalStatus,
 ) -> Result<Json<ApprovalRecord>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     require_approval_manager(&operator)?;
     let operator_id = operator.id.clone();
     let allow_self_approval = env_flag("ADMIN_APPROVAL_ALLOW_SELF");
@@ -2610,11 +3624,283 @@ async fn list_system_mail_outbox(
 ) -> Result<Json<Vec<SystemMailReceipt>>, ApiError> {
     let receipts = tokio::task::spawn_blocking(move || {
         let control = state.control_plane.lock().map_err(lock_error)?;
-        Ok::<_, ApiError>(control.executor().domain().receipts().to_vec())
+        let mut receipts = control.executor().domain().receipts().to_vec();
+        drop(control);
+        if let Some(admin_store) = state.admin_store.as_ref() {
+            for receipt in admin_store.list_system_mail_receipts(100)? {
+                if !receipts
+                    .iter()
+                    .any(|existing| existing.outbox_id == receipt.outbox_id)
+                {
+                    receipts.push(receipt);
+                }
+            }
+        }
+        receipts.sort_by(|left, right| {
+            right
+                .accepted_at_ms
+                .cmp(&left.accepted_at_ms)
+                .then_with(|| right.outbox_id.cmp(&left.outbox_id))
+        });
+        receipts.truncate(100);
+        Ok::<_, ApiError>(receipts)
     })
     .await
     .map_err(join_error)??;
     Ok(Json(receipts))
+}
+
+async fn auth_me(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+) -> Result<Json<AdminAuthMeResponse>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    let now = now_ms();
+    Ok(Json(AdminAuthMeResponse {
+        source: if operator_auth_backend_is_postgres() {
+            "postgres_admin_operators".into()
+        } else {
+            "operator_auth".into()
+        },
+        operator: AdminOperatorRecord {
+            operator_id: operator.id,
+            email: operator.email,
+            role: operator.role,
+            status: "Active".into(),
+            permissions: operator
+                .permissions
+                .iter()
+                .map(permission_text)
+                .collect::<Vec<_>>(),
+            token_configured: optional_bearer_token(&headers).is_some(),
+            updated_at_ms: now,
+            last_authenticated_at_ms: Some(now),
+        },
+    }))
+}
+
+async fn read_dashboard(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminDashboardReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || build_dashboard_read_model(state))
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_players(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminPlayersReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let presence = load_gateway_presence();
+        Ok::<_, ApiError>(AdminPlayersReadModel {
+            source: snapshot.source.clone(),
+            generated_at_ms: now_ms(),
+            players: build_player_summaries(&snapshot, Some(&presence)),
+        })
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_player_detail(
+    State(state): State<AdminApiState>,
+    Path(player_id): Path<String>,
+) -> Result<Json<AdminPlayerDetail>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let presence = load_gateway_presence();
+        build_player_detail(&snapshot, &player_id, Some(&presence)).ok_or_else(|| ApiError {
+            status: StatusCode::NOT_FOUND,
+            message: format!("player not found: {player_id}"),
+        })
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_economy(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminEconomyReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let price_feeds = match state.admin_store.as_ref() {
+            Some(repository) => repository.list_price_feeds(64).map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_economy_read_model(
+            &snapshot,
+            price_feeds,
+            state.admin_store.is_some(),
+        ))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_activities(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminActivitiesReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        build_activities_read_model(state.admin_store.as_ref()).map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_activity(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertAdminActivityRequest>,
+) -> Result<Json<AdminActivityRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let operator_id = operator.id.clone();
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_activity(request, &operator_id, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_price_feed(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertPriceFeedRequest>,
+) -> Result<Json<AdminPriceFeedRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_price_feed(request, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_servers(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminServersReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let presence = load_gateway_presence();
+        let zones = match state.admin_store.as_ref() {
+            Some(repository) => repository.list_zone_runtime(128).map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_servers_read_model(
+            &snapshot,
+            &presence,
+            zones,
+            state.admin_store.is_some(),
+        ))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_zone_runtime(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertZoneRuntimeRequest>,
+) -> Result<Json<AdminZoneRuntimeRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_zone_runtime(request, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_risk(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminRiskReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let graph = match state.admin_store.as_ref() {
+            Some(repository) => repository
+                .list_trade_graph_edges(128)
+                .map_err(ApiError::from)?,
+            None => Vec::new(),
+        };
+        Ok::<_, ApiError>(build_risk_read_model(
+            &snapshot,
+            graph,
+            state.admin_store.is_some(),
+        ))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_trade_graph_edge(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertTradeGraphEdgeRequest>,
+) -> Result<Json<AdminRiskGraphEdge>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::ContentPublish)?;
+    let repository = configured_admin_store(&state)?;
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_trade_graph_edge(request, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_operators(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+) -> Result<Json<AdminOperatorsReadModel>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::PermissionManage)?;
+    let response = tokio::task::spawn_blocking(move || {
+        build_operators_read_model(state.admin_store.as_ref()).map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn upsert_operator(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<UpsertAdminOperatorRequest>,
+) -> Result<Json<AdminOperatorRecord>, ApiError> {
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
+    require_operator_permission(&operator, Permission::PermissionManage)?;
+    let repository = configured_admin_store(&state)?;
+    let actor_id = operator.id.clone();
+    let response = tokio::task::spawn_blocking(move || {
+        repository
+            .upsert_operator(request, &actor_id, now_ms())
+            .map_err(ApiError::from)
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
 }
 
 async fn submit_system_mail(
@@ -2623,7 +3909,7 @@ async fn submit_system_mail(
     Json(request): Json<SubmitSystemMailRequest>,
 ) -> Result<Json<SubmitCommandResponse>, ApiError> {
     let now = now_ms();
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     let command_id = request
         .command_id
         .unwrap_or_else(|| format!("cmd-mail-{now}"));
@@ -2814,7 +4100,7 @@ async fn submit_admin_http_command(
     command: AdminCommand,
     created_at_ms: u64,
 ) -> Result<Json<SubmitCommandResponse>, ApiError> {
-    let operator = operator_from_headers(&headers)?;
+    let operator = operator_from_headers(&headers, state.admin_store.as_ref())?;
     let envelope = AdminCommandEnvelope {
         command_id: command_id.clone(),
         operator,
@@ -2832,6 +4118,931 @@ async fn submit_admin_http_command(
     .await
     .map_err(join_error)??;
     Ok(Json(SubmitCommandResponse { command_id, result }))
+}
+
+fn read_json_account_snapshot(
+    path: &PathBuf,
+    default_character: CharacterRecord,
+) -> Result<AccountReadSnapshot, AdminError> {
+    match fs::read_to_string(path) {
+        Ok(data) => {
+            let store = serde_json::from_str::<AccountStore>(&data).map_err(|error| {
+                AdminError::Repository(format!(
+                    "decode json account store {} failed: {error}",
+                    path.display()
+                ))
+            })?;
+            Ok(snapshot_from_store("json_account_store", store))
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            let mut store = AccountStore::new(default_character);
+            store.accounts.clear();
+            Ok(snapshot_from_store("json_account_store_missing", store))
+        }
+        Err(error) => Err(AdminError::Repository(format!(
+            "read json account store {} failed: {error}",
+            path.display()
+        ))),
+    }
+}
+
+fn read_postgres_account_snapshot(
+    database_url: &str,
+    default_character: CharacterRecord,
+) -> Result<AccountReadSnapshot, AdminError> {
+    let mut client = Client::connect(database_url, NoTls).map_err(|error| {
+        AdminError::Repository(format!(
+            "postgres account read-model connect failed: {error}"
+        ))
+    })?;
+    client
+        .batch_execute(include_str!(
+            "../../../infra/postgres/migrations/0001_core.sql"
+        ))
+        .map_err(|error| {
+            AdminError::Repository(format!(
+                "postgres account read-model migration failed: {error}"
+            ))
+        })?;
+    let rows = client
+        .query(
+            "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
+            &[],
+        )
+        .map_err(|error| {
+            AdminError::Repository(format!("postgres account read-model query failed: {error}"))
+        })?;
+    let mut accounts = BTreeMap::new();
+    for row in rows {
+        let account_id: String = row.get("account_id");
+        let raw_json: Value = row.get("raw_json");
+        let store_version: i64 = row.get("store_version");
+        let account = serde_json::from_value::<AccountRecord>(raw_json).map_err(|error| {
+            AdminError::Repository(format!(
+                "decode postgres account raw_json failed for {account_id}: {error}"
+            ))
+        })?;
+        let saves = account
+            .saves
+            .iter()
+            .map(|(character_index, save)| {
+                (
+                    *character_index,
+                    CharacterSaveReadRecord {
+                        save: save.clone(),
+                        save_version: None,
+                    },
+                )
+            })
+            .collect();
+        accounts.insert(
+            account_id.clone(),
+            AccountReadRecord {
+                account_id,
+                account,
+                store_version: Some(store_version),
+                saves,
+            },
+        );
+    }
+    let save_rows = client
+        .query(
+            "SELECT account_id, character_index, snapshot_json, save_version
+             FROM character_saves
+             ORDER BY account_id, character_index",
+            &[],
+        )
+        .map_err(|error| {
+            AdminError::Repository(format!(
+                "postgres character-save read-model query failed: {error}"
+            ))
+        })?;
+    for row in save_rows {
+        let account_id: String = row.get("account_id");
+        let character_index: i32 = row.get("character_index");
+        let snapshot_json: Value = row.get("snapshot_json");
+        let save_version: i64 = row.get("save_version");
+        let save =
+            serde_json::from_value::<CharacterSaveRecord>(snapshot_json).map_err(|error| {
+                AdminError::Repository(format!(
+                "decode postgres character save failed for {account_id}/{character_index}: {error}"
+            ))
+            })?;
+        let account = accounts.entry(account_id.clone()).or_insert_with(|| {
+            let mut account = AccountRecord::new(default_character.clone());
+            account.characters.clear();
+            account.saves.clear();
+            AccountReadRecord {
+                account_id: account_id.clone(),
+                account,
+                store_version: None,
+                saves: BTreeMap::new(),
+            }
+        });
+        if !account
+            .account
+            .characters
+            .iter()
+            .any(|character| character.index == save.character.index)
+        {
+            account.account.characters.push(save.character.clone());
+        }
+        account.account.saves.insert(character_index, save.clone());
+        account.saves.insert(
+            character_index,
+            CharacterSaveReadRecord {
+                save,
+                save_version: Some(save_version),
+            },
+        );
+    }
+    Ok(AccountReadSnapshot {
+        source: "postgres_account_store".into(),
+        accounts: accounts.into_values().collect(),
+    })
+}
+
+fn snapshot_from_store(source: &str, store: AccountStore) -> AccountReadSnapshot {
+    AccountReadSnapshot {
+        source: source.to_string(),
+        accounts: store
+            .accounts
+            .into_iter()
+            .map(|(account_id, account)| {
+                let saves = account
+                    .saves
+                    .iter()
+                    .map(|(character_index, save)| {
+                        (
+                            *character_index,
+                            CharacterSaveReadRecord {
+                                save: save.clone(),
+                                save_version: None,
+                            },
+                        )
+                    })
+                    .collect();
+                AccountReadRecord {
+                    account_id,
+                    account,
+                    store_version: None,
+                    saves,
+                }
+            })
+            .collect(),
+    }
+}
+
+fn build_dashboard_read_model(state: AdminApiState) -> Result<AdminDashboardReadModel, ApiError> {
+    let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+    let presence = load_gateway_presence();
+    let players = build_player_summaries(&snapshot, Some(&presence));
+    let (audit_record_count, outbox_receipt_count) = {
+        let control = state.control_plane.lock().map_err(lock_error)?;
+        (
+            control.audit_records(100).len(),
+            control.executor().domain().receipts().len(),
+        )
+    };
+    Ok(AdminDashboardReadModel {
+        source: snapshot.source.clone(),
+        generated_at_ms: now_ms(),
+        account_count: snapshot.accounts.len(),
+        character_count: players.len(),
+        online_now: presence.sessions.len(),
+        online_source: presence.source.clone(),
+        total_gold: players.iter().map(|player| player.gold).sum(),
+        total_credit: players.iter().map(|player| player.credit).sum(),
+        active_ban_count: players
+            .iter()
+            .filter(|player| player.status == "Banned")
+            .count(),
+        hot_maps: build_presence_hot_maps(&presence).unwrap_or_else(|| build_hot_maps(&players)),
+        services: build_service_statuses(&snapshot, Some(&presence)),
+        audit_record_count,
+        outbox_receipt_count,
+    })
+}
+
+fn build_player_summaries(
+    snapshot: &AccountReadSnapshot,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Vec<AdminPlayerSummary> {
+    let now = now_ms();
+    let presence_by_key = presence_records_by_key(presence);
+    let mut players = Vec::new();
+    for account in &snapshot.accounts {
+        for save in account.saves.values() {
+            let presence_record = presence_by_key.get(&GatewaySessionKey {
+                account_id: account.account_id.clone(),
+                character_index: save.save.character.index,
+            });
+            players.push(player_summary_from_save(
+                account,
+                save,
+                now,
+                presence.map(|presence| presence.source.as_str()),
+                presence_record.copied(),
+            ));
+        }
+    }
+    players.sort_by(|left, right| {
+        left.character_name
+            .cmp(&right.character_name)
+            .then_with(|| left.account_id.cmp(&right.account_id))
+            .then(left.character_index.cmp(&right.character_index))
+    });
+    players
+}
+
+fn build_player_detail(
+    snapshot: &AccountReadSnapshot,
+    requested_player_id: &str,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Option<AdminPlayerDetail> {
+    let now = now_ms();
+    let requested_player_id = requested_player_id.trim();
+    let presence_by_key = presence_records_by_key(presence);
+    for account in &snapshot.accounts {
+        for save in account.saves.values() {
+            let presence_record = presence_by_key.get(&GatewaySessionKey {
+                account_id: account.account_id.clone(),
+                character_index: save.save.character.index,
+            });
+            let summary = player_summary_from_save(
+                account,
+                save,
+                now,
+                presence.map(|presence| presence.source.as_str()),
+                presence_record.copied(),
+            );
+            if !player_id_matches(&summary, requested_player_id) {
+                continue;
+            }
+            let systems = decode_stage5_systems(&save.save);
+            let active_ban = account.account.active_ban(now);
+            let guild_name = systems
+                .as_ref()
+                .map(|systems| systems.guild.name.trim().to_string())
+                .filter(|name| !name.is_empty());
+            return Some(AdminPlayerDetail {
+                summary,
+                inventory_count: save.save.inventory_items_json.len(),
+                belt_count: save.save.belt_items_json.len(),
+                storage_count: save.save.storage_items_json.len(),
+                equipment_count: save.save.equipment_items_json.len(),
+                quest_state_count: save.save.quest_states_json.len(),
+                skill_state_count: save.save.skill_states_json.len(),
+                mail_count: systems
+                    .as_ref()
+                    .map(|systems| systems.mail.len())
+                    .unwrap_or(0),
+                unclaimed_mail_count: systems
+                    .as_ref()
+                    .map(|systems| {
+                        systems
+                            .mail
+                            .iter()
+                            .filter(|mail| !mail.claimed && !mail.deleted)
+                            .count()
+                    })
+                    .unwrap_or(0),
+                auction_listing_count: systems
+                    .as_ref()
+                    .map(|systems| systems.auction.len())
+                    .unwrap_or(0),
+                group_member_count: systems
+                    .as_ref()
+                    .map(|systems| systems.group.members.len())
+                    .unwrap_or(0),
+                guild_name,
+                active_ban_reason: active_ban.as_ref().map(|ban| ban.reason.clone()),
+                ban_until_ms: active_ban.as_ref().and_then(|ban| ban.ban_until_ms),
+                banned_at_ms: active_ban.as_ref().and_then(|ban| ban.banned_at_ms),
+            });
+        }
+    }
+    None
+}
+
+fn player_summary_from_save(
+    account: &AccountReadRecord,
+    save: &CharacterSaveReadRecord,
+    now_ms: u64,
+    online_source: Option<&str>,
+    presence: Option<&GatewaySessionRecord>,
+) -> AdminPlayerSummary {
+    let character = &save.save.character;
+    let active_ban = account.account.active_ban(now_ms).is_some();
+    let map_file_name = presence
+        .and_then(|presence| presence.map_file_name.clone())
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| save.save.map_file_name.clone());
+    let player_hp = presence
+        .and_then(|presence| presence.player_hp)
+        .unwrap_or(save.save.hp);
+    let player_max_hp = presence
+        .and_then(|presence| presence.player_max_hp)
+        .unwrap_or(save.save.max_hp);
+    AdminPlayerSummary {
+        player_id: player_id(&account.account_id, character.index),
+        account_id: account.account_id.clone(),
+        character_index: character.index,
+        character_name: character.name.clone(),
+        class_name: serialized_text(&character.class),
+        gender: serialized_text(&character.gender),
+        level: character.level,
+        map_file_name,
+        map_title: save.save.map_title.clone(),
+        position_x: save.save.position.x,
+        position_y: save.save.position.y,
+        hp: player_hp,
+        max_hp: player_max_hp,
+        mp: save.save.mp,
+        gold: presence
+            .map(|presence| u64::from(presence.gold))
+            .unwrap_or_else(|| u64::from(save.save.gold)),
+        credit: u64::from(save.save.credit),
+        status: if active_ban {
+            "Banned".into()
+        } else if presence.is_some() {
+            "Online".into()
+        } else {
+            "Normal".into()
+        },
+        online: presence.is_some(),
+        online_source: presence.map(|_| online_source.unwrap_or("gateway_session_cache").into()),
+        player_object_id: presence.and_then(|presence| presence.player_object_id),
+        runtime_tick: presence.map(|presence| presence.tick),
+        store_version: account.store_version,
+        save_version: save.save_version,
+    }
+}
+
+fn player_id(account_id: &str, character_index: i32) -> String {
+    format!("{account_id}:{character_index}")
+}
+
+fn player_id_matches(summary: &AdminPlayerSummary, requested: &str) -> bool {
+    summary.player_id == requested
+        || summary.character_name.eq_ignore_ascii_case(requested)
+        || format!("{}:{}", summary.account_id, summary.character_index) == requested
+}
+
+fn decode_stage5_systems(save: &CharacterSaveRecord) -> Option<Stage5SystemsState> {
+    save.stage5_systems_json
+        .as_deref()
+        .and_then(|value| serde_json::from_str::<Stage5SystemsState>(value).ok())
+}
+
+fn load_gateway_presence() -> GatewayPresenceSnapshot {
+    let url = env::var("ADMIN_GATEWAY_SESSIONS_URL")
+        .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/sessions".to_string());
+    let body = match get_json_from_gateway(&url) {
+        Ok(body) => body,
+        Err(error) => {
+            return GatewayPresenceSnapshot {
+                source: "gateway_sessions_unavailable".into(),
+                sessions: Vec::new(),
+                error: Some(error),
+            }
+        }
+    };
+    match serde_json::from_str::<GatewaySessionsResponse>(&body) {
+        Ok(response) => {
+            let mut sessions = response.sessions;
+            sessions.sort_by(|left, right| {
+                left.character_name
+                    .cmp(&right.character_name)
+                    .then_with(|| left.key.account_id.cmp(&right.key.account_id))
+                    .then(left.key.character_index.cmp(&right.key.character_index))
+            });
+            GatewayPresenceSnapshot {
+                source: response.source,
+                sessions,
+                error: None,
+            }
+        }
+        Err(error) => GatewayPresenceSnapshot {
+            source: "gateway_sessions_decode_failed".into(),
+            sessions: Vec::new(),
+            error: Some(format!("decode gateway sessions failed: {error}")),
+        },
+    }
+}
+
+fn presence_records_by_key(
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> BTreeMap<GatewaySessionKey, &GatewaySessionRecord> {
+    presence
+        .map(|presence| {
+            presence
+                .sessions
+                .iter()
+                .map(|record| (record.key.clone(), record))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn build_hot_maps(players: &[AdminPlayerSummary]) -> Vec<AdminMapPopulation> {
+    let mut counts: BTreeMap<(String, String), usize> = BTreeMap::new();
+    for player in players {
+        let map_file_name = if player.map_file_name.trim().is_empty() {
+            "unknown".to_string()
+        } else {
+            player.map_file_name.clone()
+        };
+        let map_title = if player.map_title.trim().is_empty() {
+            map_file_name.clone()
+        } else {
+            player.map_title.clone()
+        };
+        *counts.entry((map_file_name, map_title)).or_default() += 1;
+    }
+    let max_count = counts.values().copied().max().unwrap_or(0);
+    let mut rows = counts
+        .into_iter()
+        .map(
+            |((map_file_name, map_title), character_count)| AdminMapPopulation {
+                map_file_name,
+                map_title,
+                character_count,
+                percent: percent(character_count as u64, max_count as u64),
+            },
+        )
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| {
+        right
+            .character_count
+            .cmp(&left.character_count)
+            .then_with(|| left.map_title.cmp(&right.map_title))
+    });
+    rows.truncate(8);
+    rows
+}
+
+fn build_presence_hot_maps(presence: &GatewayPresenceSnapshot) -> Option<Vec<AdminMapPopulation>> {
+    if presence.sessions.is_empty() {
+        return None;
+    }
+    let mut counts: BTreeMap<String, usize> = BTreeMap::new();
+    for session in &presence.sessions {
+        let map_file_name = session
+            .map_file_name
+            .clone()
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| "unknown".to_string());
+        *counts.entry(map_file_name).or_default() += 1;
+    }
+    let max_count = counts.values().copied().max().unwrap_or(0);
+    let mut rows = counts
+        .into_iter()
+        .map(|(map_file_name, character_count)| AdminMapPopulation {
+            map_title: map_file_name.clone(),
+            map_file_name,
+            character_count,
+            percent: percent(character_count as u64, max_count as u64),
+        })
+        .collect::<Vec<_>>();
+    rows.sort_by(|left, right| {
+        right
+            .character_count
+            .cmp(&left.character_count)
+            .then_with(|| left.map_file_name.cmp(&right.map_file_name))
+    });
+    rows.truncate(8);
+    Some(rows)
+}
+
+fn build_economy_read_model(
+    snapshot: &AccountReadSnapshot,
+    price_feeds: Vec<AdminPriceFeedRecord>,
+    price_feed_configured: bool,
+) -> AdminEconomyReadModel {
+    let players = build_player_summaries(snapshot, None);
+    let character_count = players.len();
+    let total_gold: u64 = players.iter().map(|player| player.gold).sum();
+    let total_credit: u64 = players.iter().map(|player| player.credit).sum();
+    let source = if price_feed_configured {
+        format!("{} + postgres_admin_market_price_feeds", snapshot.source)
+    } else {
+        snapshot.source.clone()
+    };
+    AdminEconomyReadModel {
+        source,
+        generated_at_ms: now_ms(),
+        assets: vec![
+            AdminEconomyAsset {
+                asset: "Gold".into(),
+                total: total_gold,
+                holders: players.iter().filter(|player| player.gold > 0).count(),
+                average: average(total_gold, character_count),
+                state: "Tracked".into(),
+            },
+            AdminEconomyAsset {
+                asset: "Credit".into(),
+                total: total_credit,
+                holders: players.iter().filter(|player| player.credit > 0).count(),
+                average: average(total_credit, character_count),
+                state: "Tracked".into(),
+            },
+        ],
+        gold_distribution: build_gold_distribution(&players),
+        price_feeds,
+        price_feed_configured,
+    }
+}
+
+fn build_activities_read_model(
+    repository: Option<&PostgresAdminRepository>,
+) -> Result<AdminActivitiesReadModel, AdminError> {
+    match repository {
+        Some(repository) => Ok(AdminActivitiesReadModel {
+            source: "postgres_admin_activities".into(),
+            generated_at_ms: now_ms(),
+            configured: true,
+            activities: repository.list_activities(128)?,
+        }),
+        None => Ok(AdminActivitiesReadModel {
+            source: "activity_config_store_unwired".into(),
+            generated_at_ms: now_ms(),
+            configured: false,
+            activities: Vec::new(),
+        }),
+    }
+}
+
+fn build_gold_distribution(players: &[AdminPlayerSummary]) -> Vec<AdminDistributionBucket> {
+    let mut amounts = players.iter().map(|player| player.gold).collect::<Vec<_>>();
+    amounts.sort_by(|left, right| right.cmp(left));
+    let total: u64 = amounts.iter().sum();
+    if total == 0 || amounts.is_empty() {
+        return Vec::new();
+    }
+    let top_amount = amounts[0];
+    let remaining = total.saturating_sub(top_amount);
+    let mut buckets = vec![AdminDistributionBucket {
+        key: "topCharacter".into(),
+        label: "Top character".into(),
+        value: percent(top_amount, total),
+        amount: top_amount,
+    }];
+    if remaining > 0 {
+        buckets.push(AdminDistributionBucket {
+            key: "remainingCharacters".into(),
+            label: "Remaining characters".into(),
+            value: percent(remaining, total),
+            amount: remaining,
+        });
+    }
+    buckets
+}
+
+fn build_servers_read_model(
+    snapshot: &AccountReadSnapshot,
+    presence: &GatewayPresenceSnapshot,
+    zones: Vec<AdminZoneRuntimeRecord>,
+    zone_runtime_configured: bool,
+) -> AdminServersReadModel {
+    let players = build_player_summaries(snapshot, Some(presence));
+    let session_zones_online = presence
+        .sessions
+        .iter()
+        .filter_map(|session| session.map_file_name.as_deref())
+        .filter(|map| !map.trim().is_empty())
+        .collect::<BTreeSet<_>>()
+        .len();
+    let runtime_zones_online = zones
+        .iter()
+        .filter(|zone| zone.status.eq_ignore_ascii_case("healthy"))
+        .count();
+    let zones_online = runtime_zones_online.max(session_zones_online);
+    let zones_source = if zone_runtime_configured {
+        "postgres_admin_zone_runtime + gateway_session_cache".into()
+    } else {
+        presence.source.clone()
+    };
+    AdminServersReadModel {
+        generated_at_ms: now_ms(),
+        account_store_source: snapshot.source.clone(),
+        account_count: snapshot.accounts.len(),
+        character_count: players.len(),
+        zones_online,
+        zones_source,
+        zone_runtime_configured,
+        zones,
+        services: build_service_statuses(snapshot, Some(presence)),
+    }
+}
+
+fn build_operators_read_model(
+    repository: Option<&PostgresAdminRepository>,
+) -> Result<AdminOperatorsReadModel, AdminError> {
+    match repository {
+        Some(repository) => Ok(AdminOperatorsReadModel {
+            source: "postgres_admin_operators".into(),
+            generated_at_ms: now_ms(),
+            configured: true,
+            operators: repository.list_operators(128)?,
+        }),
+        None => Ok(AdminOperatorsReadModel {
+            source: "operator_store_unwired".into(),
+            generated_at_ms: now_ms(),
+            configured: false,
+            operators: Vec::new(),
+        }),
+    }
+}
+
+fn build_risk_read_model(
+    snapshot: &AccountReadSnapshot,
+    graph: Vec<AdminRiskGraphEdge>,
+    graph_configured: bool,
+) -> AdminRiskReadModel {
+    let now = now_ms();
+    let mut cases = Vec::new();
+    for account in &snapshot.accounts {
+        let Some(active_ban) = account.account.active_ban(now) else {
+            continue;
+        };
+        let reason = if active_ban.reason.trim().is_empty() {
+            "active account ban".to_string()
+        } else {
+            active_ban.reason.clone()
+        };
+        let risk = if active_ban.ban_until_ms.is_none() {
+            "Critical"
+        } else {
+            "High"
+        };
+        for save in account.saves.values() {
+            cases.push(AdminRiskCase {
+                player_id: player_id(&account.account_id, save.save.character.index),
+                account_id: account.account_id.clone(),
+                character_name: save.save.character.name.clone(),
+                signal: "account_ban".into(),
+                risk: risk.into(),
+                evidence: reason.clone(),
+                ban_until_ms: active_ban.ban_until_ms,
+            });
+        }
+    }
+    let source = if graph_configured {
+        format!("{} + postgres_admin_trade_graph", snapshot.source)
+    } else {
+        snapshot.source.clone()
+    };
+    AdminRiskReadModel {
+        source,
+        generated_at_ms: now,
+        cases,
+        graph,
+    }
+}
+
+fn build_service_statuses(
+    snapshot: &AccountReadSnapshot,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Vec<AdminServiceStatus> {
+    let mut services = vec![
+        AdminServiceStatus {
+            name: "Admin API".into(),
+            status: "Healthy".into(),
+            detail: "current process is serving read models".into(),
+            latency_ms: Some(0),
+            configured: true,
+        },
+        AdminServiceStatus {
+            name: "Account Store".into(),
+            status: "Healthy".into(),
+            detail: format!(
+                "{}: {} accounts / {} characters",
+                snapshot.source,
+                snapshot.accounts.len(),
+                build_player_summaries(snapshot, presence).len()
+            ),
+            latency_ms: None,
+            configured: true,
+        },
+    ];
+    if let Some(presence) = presence {
+        services.push(AdminServiceStatus {
+            name: "Gateway Sessions".into(),
+            status: if presence.error.is_some() {
+                "Unavailable".into()
+            } else {
+                "Healthy".into()
+            },
+            detail: presence.error.clone().unwrap_or_else(|| {
+                format!(
+                    "{}: {} online sessions",
+                    presence.source,
+                    presence.sessions.len()
+                )
+            }),
+            latency_ms: None,
+            configured: true,
+        });
+    }
+    services.push(postgres_status());
+    services.push(tcp_env_status(
+        "Redis",
+        "MIR2_GATEWAY_REDIS_CACHE_URL",
+        "redis://127.0.0.1:6379",
+        6379,
+    ));
+    services.push(tcp_env_status("NATS", "NATS_ADDR", "127.0.0.1:4222", 4222));
+    services.push(tcp_env_status(
+        "Redpanda Pandaproxy",
+        "ADMIN_OUTBOX_REDPANDA_URL",
+        "http://127.0.0.1:8082",
+        8082,
+    ));
+    services.push(clickhouse_status());
+    services
+}
+
+fn postgres_status() -> AdminServiceStatus {
+    let configured_url = env::var("ADMIN_DATABASE_URL")
+        .ok()
+        .or_else(|| env::var("MIR2_ACCOUNT_STORE_DATABASE_URL").ok())
+        .filter(|value| !value.trim().is_empty());
+    let Some(database_url) = configured_url else {
+        return AdminServiceStatus {
+            name: "Postgres".into(),
+            status: "NotConfigured".into(),
+            detail: "ADMIN_DATABASE_URL and MIR2_ACCOUNT_STORE_DATABASE_URL are unset".into(),
+            latency_ms: None,
+            configured: false,
+        };
+    };
+    let started = Instant::now();
+    match Client::connect(database_url.trim(), NoTls)
+        .and_then(|mut client| client.query_one("SELECT 1", &[]).map(|_| ()))
+    {
+        Ok(()) => AdminServiceStatus {
+            name: "Postgres".into(),
+            status: "Healthy".into(),
+            detail: "SELECT 1 succeeded".into(),
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured: true,
+        },
+        Err(error) => AdminServiceStatus {
+            name: "Postgres".into(),
+            status: "Unavailable".into(),
+            detail: error.to_string(),
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured: true,
+        },
+    }
+}
+
+fn clickhouse_status() -> AdminServiceStatus {
+    let configured = env::var("ADMIN_CLICKHOUSE_URL")
+        .map(|value| !value.trim().is_empty())
+        .unwrap_or(false);
+    let started = Instant::now();
+    let query = AdminEventQuery {
+        limit: Some(1),
+        command_id: None,
+        event_type: None,
+        status: None,
+    };
+    match fetch_clickhouse_admin_events(&query) {
+        Ok(records) => AdminServiceStatus {
+            name: "ClickHouse".into(),
+            status: "Healthy".into(),
+            detail: format!(
+                "admin_events query succeeded, {} sampled rows",
+                records.len()
+            ),
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured: true,
+        },
+        Err(error) => AdminServiceStatus {
+            name: "ClickHouse".into(),
+            status: if configured {
+                "Unavailable".into()
+            } else {
+                "NotConfigured".into()
+            },
+            detail: error.message,
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured,
+        },
+    }
+}
+
+fn tcp_env_status(
+    name: &str,
+    env_name: &str,
+    default_target: &str,
+    default_port: u16,
+) -> AdminServiceStatus {
+    let configured_target = env::var(env_name)
+        .ok()
+        .filter(|value| !value.trim().is_empty());
+    let configured = configured_target.is_some();
+    let raw_target = configured_target.as_deref().unwrap_or(default_target);
+    let target = match normalize_tcp_target(raw_target, default_port) {
+        Ok(target) => target,
+        Err(error) => {
+            return AdminServiceStatus {
+                name: name.into(),
+                status: "Unavailable".into(),
+                detail: error,
+                latency_ms: None,
+                configured,
+            }
+        }
+    };
+    let started = Instant::now();
+    let result = target
+        .to_socket_addrs()
+        .map_err(|error| error.to_string())
+        .and_then(|mut addrs| {
+            let addr = addrs
+                .next()
+                .ok_or_else(|| format!("no socket address for {target}"))?;
+            TcpStream::connect_timeout(&addr, Duration::from_secs(1))
+                .map_err(|error| format!("tcp connect failed at {addr}: {error}"))
+        });
+    match result {
+        Ok(_) => AdminServiceStatus {
+            name: name.into(),
+            status: "Healthy".into(),
+            detail: if configured {
+                format!("{env_name} reachable at {target}")
+            } else {
+                format!("default dev endpoint reachable at {target}; {env_name} is unset")
+            },
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured,
+        },
+        Err(error) => AdminServiceStatus {
+            name: name.into(),
+            status: if configured {
+                "Unavailable".into()
+            } else {
+                "NotConfigured".into()
+            },
+            detail: if configured {
+                error
+            } else {
+                format!("{env_name} is unset and default dev endpoint {target} is not reachable")
+            },
+            latency_ms: Some(started.elapsed().as_millis() as u64),
+            configured,
+        },
+    }
+}
+
+fn normalize_tcp_target(raw_target: &str, default_port: u16) -> Result<String, String> {
+    let trimmed = raw_target.trim();
+    if trimmed.is_empty() {
+        return Err("tcp target is empty".into());
+    }
+    let without_scheme = trimmed
+        .split_once("://")
+        .map(|(_, rest)| rest)
+        .unwrap_or(trimmed);
+    let host_port = without_scheme.split('/').next().unwrap_or_default();
+    if host_port.is_empty() {
+        return Err(format!("invalid tcp target: {raw_target}"));
+    }
+    if host_port.rsplit_once(':').is_some() {
+        Ok(host_port.to_string())
+    } else {
+        Ok(format!("{host_port}:{default_port}"))
+    }
+}
+
+fn average(total: u64, count: usize) -> u64 {
+    if count == 0 {
+        0
+    } else {
+        total / count as u64
+    }
+}
+
+fn percent(amount: u64, total: u64) -> u8 {
+    if total == 0 {
+        0
+    } else {
+        amount.saturating_mul(100).div_ceil(total).min(100) as u8
+    }
+}
+
+fn serialized_text<T>(value: &T) -> String
+where
+    T: Serialize + fmt::Debug,
+{
+    match serde_json::to_value(value) {
+        Ok(Value::String(value)) => value,
+        Ok(other) => other.to_string(),
+        Err(_) => format!("{value:?}"),
+    }
 }
 
 #[derive(Debug)]
@@ -2884,9 +5095,29 @@ fn join_error(error: tokio::task::JoinError) -> ApiError {
     }
 }
 
-fn operator_from_headers(headers: &HeaderMap) -> Result<Operator, ApiError> {
+fn operator_from_headers(
+    headers: &HeaderMap,
+    admin_store: Option<&PostgresAdminRepository>,
+) -> Result<Operator, ApiError> {
+    if operator_auth_backend_is_postgres() {
+        let repository = admin_store.ok_or_else(|| ApiError {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            message: "postgres operator auth requires ADMIN_DATABASE_URL".into(),
+        })?;
+        return operator_from_postgres_token(headers, repository);
+    }
     if let Some(operator) = operator_from_policy_file(headers)? {
         return Ok(operator);
+    }
+    if let Some(repository) = admin_store {
+        if let Some(operator) = optional_bearer_token(headers)
+            .as_deref()
+            .map(|token| operator_from_postgres_token_value(token, repository))
+            .transpose()?
+            .flatten()
+        {
+            return Ok(operator);
+        }
     }
     validate_operator_token(headers)?;
     let id = required_header(headers, "x-operator-id")?;
@@ -2905,6 +5136,39 @@ fn operator_from_headers(headers: &HeaderMap) -> Result<Operator, ApiError> {
         role,
         permissions,
     })
+}
+
+fn operator_auth_backend_is_postgres() -> bool {
+    env::var("ADMIN_OPERATOR_AUTH_BACKEND")
+        .map(|value| value.trim().eq_ignore_ascii_case("postgres"))
+        .unwrap_or(false)
+}
+
+fn operator_from_postgres_token(
+    headers: &HeaderMap,
+    repository: &PostgresAdminRepository,
+) -> Result<Operator, ApiError> {
+    let token = bearer_token(headers)?;
+    operator_from_postgres_token_value(&token, repository)?.ok_or_else(|| ApiError {
+        status: StatusCode::UNAUTHORIZED,
+        message: "operator token not found in postgres operator store".into(),
+    })
+}
+
+fn operator_from_postgres_token_value(
+    token: &str,
+    repository: &PostgresAdminRepository,
+) -> Result<Option<Operator>, ApiError> {
+    let lookup = || {
+        repository
+            .operator_by_token(token, now_ms())
+            .map_err(ApiError::from)
+    };
+    if tokio::runtime::Handle::try_current().is_ok() {
+        tokio::task::block_in_place(lookup)
+    } else {
+        lookup()
+    }
 }
 
 fn operator_from_policy_file(headers: &HeaderMap) -> Result<Option<Operator>, ApiError> {
@@ -2971,6 +5235,17 @@ fn validate_operator_token(headers: &HeaderMap) -> Result<(), ApiError> {
 
 fn bearer_token(headers: &HeaderMap) -> Result<String, ApiError> {
     let provided = required_header(headers, "authorization")?;
+    parse_bearer_token(&provided)
+}
+
+fn optional_bearer_token(headers: &HeaderMap) -> Option<String> {
+    headers
+        .get("authorization")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| parse_bearer_token(value).ok())
+}
+
+fn parse_bearer_token(provided: &str) -> Result<String, ApiError> {
     provided
         .strip_prefix("Bearer ")
         .map(str::trim)
@@ -3020,6 +5295,32 @@ fn require_approval_manager(operator: &Operator) -> Result<(), ApiError> {
             message: "operator lacks required permission: approval_manage".into(),
         })
     }
+}
+
+fn require_operator_permission(
+    operator: &Operator,
+    permission: Permission,
+) -> Result<(), ApiError> {
+    if operator.has_permission(&permission)
+        || operator.has_permission(&Permission::PermissionManage)
+    {
+        Ok(())
+    } else {
+        Err(ApiError {
+            status: StatusCode::FORBIDDEN,
+            message: format!(
+                "operator lacks required permission: {}",
+                permission_text(&permission)
+            ),
+        })
+    }
+}
+
+fn configured_admin_store(state: &AdminApiState) -> Result<PostgresAdminRepository, ApiError> {
+    state.admin_store.clone().ok_or_else(|| ApiError {
+        status: StatusCode::SERVICE_UNAVAILABLE,
+        message: "ADMIN_DATABASE_URL is required for admin projection writes".into(),
+    })
 }
 
 fn required_header(headers: &HeaderMap, name: &str) -> Result<String, ApiError> {
@@ -3112,9 +5413,19 @@ fn build_clickhouse_admin_events_query(query: &AdminEventQuery) -> String {
     };
     let limit = query.limit.unwrap_or(100).clamp(1, 500);
     format!(
-        "SELECT event_id,event_type,command_id,operator_id,status,occurred_at_ms,payload_json \
-         FROM admin_events{where_clause} \
-         ORDER BY occurred_at_ms DESC \
+        "SELECT event_id, event_type, command_id, operator_id, status, occurred_at_ms, payload_json \
+         FROM (\
+            SELECT event_id,\
+                argMax(event_type, ingested_at) AS event_type,\
+                argMax(command_id, ingested_at) AS command_id,\
+                argMax(operator_id, ingested_at) AS operator_id,\
+                argMax(status, ingested_at) AS status,\
+                argMax(occurred_at_ms, ingested_at) AS occurred_at_ms,\
+                argMax(payload_json, ingested_at) AS payload_json \
+            FROM admin_events \
+            GROUP BY event_id\
+         ){where_clause} \
+         ORDER BY occurred_at_ms DESC, event_id DESC \
          LIMIT {limit} \
          FORMAT JSONEachRow"
     )
@@ -3375,11 +5686,86 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
     }
 }
 
+fn approval_matches_command(approval: &ApprovalRecord, envelope: &AdminCommandEnvelope) -> bool {
+    approval.command_id == envelope.command_id
+        && approval.command_type == command_type(&envelope.command)
+        && approval.requested_by == envelope.operator.id
+        && approval.status == ApprovalStatus::Approved
+}
+
 fn require_non_empty(field: &str, value: &str) -> Result<(), AdminError> {
     if value.trim().is_empty() {
         return Err(AdminError::InvalidCommand(format!("{field} is required")));
     }
     Ok(())
+}
+
+fn required_string(field: &str, value: &str) -> Result<String, AdminError> {
+    let value = value.trim();
+    if value.is_empty() {
+        return Err(AdminError::InvalidCommand(format!("{field} is required")));
+    }
+    Ok(value.to_string())
+}
+
+fn optional_string(value: Option<String>) -> Option<String> {
+    value
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+}
+
+fn clean_string_list(values: Vec<String>) -> Vec<String> {
+    values
+        .into_iter()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .collect()
+}
+
+fn canonical_permissions(values: Vec<String>) -> Result<Vec<String>, AdminError> {
+    let mut permissions = BTreeSet::new();
+    for value in clean_string_list(values) {
+        let permission = serde_json::from_value::<Permission>(Value::String(value.clone()))
+            .map_err(|_| AdminError::InvalidCommand(format!("unknown permission: {value}")))?;
+        permissions.insert(permission_text(&permission));
+    }
+    Ok(permissions.into_iter().collect())
+}
+
+fn operator_token_hash(token: &str) -> String {
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in b"mir2-admin-operator-token-v1"
+        .iter()
+        .copied()
+        .chain([0])
+        .chain(token.trim().as_bytes().iter().copied())
+    {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("fnv1a64:{hash:016x}")
+}
+
+fn normalized_id(prefix: &str, name: &str, now_ms: u64) -> String {
+    let mut slug = name
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() {
+                ch.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>();
+    while slug.contains("--") {
+        slug = slug.replace("--", "-");
+    }
+    let slug = slug.trim_matches('-');
+    if slug.is_empty() {
+        format!("{prefix}-{now_ms}")
+    } else {
+        format!("{prefix}-{slug}")
+    }
 }
 
 fn error_code(error: &AdminError) -> &'static str {
@@ -3552,6 +5938,130 @@ fn row_to_outbox_message(row: &Row) -> Result<AdminOutboxMessage, AdminError> {
     })
 }
 
+fn row_to_system_mail_receipt(row: &Row) -> Result<SystemMailReceipt, AdminError> {
+    let target_kind: String = row.get("target_kind");
+    let attachment_count: i32 = row.get("attachment_count");
+    let accepted_at_ms: i64 = row.get("accepted_at_ms");
+    let delivered_count: i32 = row.get("delivered_count");
+    let mail_ids_json: Value = row.get("mail_ids_json");
+    let mail_ids = serde_json::from_value::<Vec<u32>>(mail_ids_json).map_err(|error| {
+        AdminError::Repository(format!("decode system mail receipt ids failed: {error}"))
+    })?;
+    Ok(SystemMailReceipt {
+        outbox_id: row.get("outbox_id"),
+        target_kind: parse_mail_target_kind_text(&target_kind)?,
+        target_id: row.get("target_id"),
+        attachment_count: attachment_count.max(0) as usize,
+        accepted_at_ms: accepted_at_ms.max(0) as u64,
+        delivery_mode: row.get("delivery_mode"),
+        delivered_count: delivered_count.max(0) as usize,
+        mail_ids,
+    })
+}
+
+fn row_to_activity_record(row: &Row) -> Result<AdminActivityRecord, AdminError> {
+    let start_at_ms: Option<i64> = row.get("start_at_ms");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    let realms_json: Value = row.get("realms_json");
+    let realms = serde_json::from_value::<Vec<String>>(realms_json).map_err(|error| {
+        AdminError::Repository(format!("decode activity realms failed: {error}"))
+    })?;
+    Ok(AdminActivityRecord {
+        activity_id: row.get("activity_id"),
+        name: row.get("name"),
+        start_at_ms: start_at_ms.map(|value| value.max(0) as u64),
+        activity_type: row.get("activity_type"),
+        status: row.get("status"),
+        signal: row.get("signal"),
+        reward: row.get("reward"),
+        condition: row.get("condition"),
+        realms,
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_price_feed_record(row: &Row) -> Result<AdminPriceFeedRecord, AdminError> {
+    let latest_price: i64 = row.get("latest_price");
+    let sample_count: i32 = row.get("sample_count");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminPriceFeedRecord {
+        item: row.get("item"),
+        latest_price: latest_price.max(0) as u64,
+        sample_count: sample_count.max(0) as usize,
+        source: row.get("source"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_trade_graph_edge(row: &Row) -> Result<AdminRiskGraphEdge, AdminError> {
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminRiskGraphEdge {
+        edge_id: row.get("edge_id"),
+        from: row.get("from_player_id"),
+        to: row.get("to_player_id"),
+        signal: row.get("signal"),
+        risk: row.get("risk"),
+        evidence: row.get("evidence"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_zone_runtime_record(row: &Row) -> Result<AdminZoneRuntimeRecord, AdminError> {
+    let map_count: i32 = row.get("map_count");
+    let player_count: i32 = row.get("player_count");
+    let tick_rate: i32 = row.get("tick_rate");
+    let uptime_seconds: i64 = row.get("uptime_seconds");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    Ok(AdminZoneRuntimeRecord {
+        zone_id: row.get("zone_id"),
+        name: row.get("name"),
+        status: row.get("status"),
+        host: row.get("host"),
+        process_id: row.get("process_id"),
+        map_count: map_count.max(0) as usize,
+        player_count: player_count.max(0) as usize,
+        tick_rate: tick_rate.max(0) as u32,
+        uptime_seconds: uptime_seconds.max(0) as u64,
+        source: row.get("source"),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+    })
+}
+
+fn row_to_operator_record(row: &Row) -> Result<AdminOperatorRecord, AdminError> {
+    let permissions_json: Value = row.get("permissions_json");
+    let permissions = serde_json::from_value::<Vec<String>>(permissions_json).map_err(|error| {
+        AdminError::Repository(format!("decode operator permissions failed: {error}"))
+    })?;
+    let token_hash: String = row.get("token_hash");
+    let updated_at_ms: i64 = row.get("updated_at_ms");
+    let last_authenticated_at_ms: Option<i64> = row.get("last_authenticated_at_ms");
+    Ok(AdminOperatorRecord {
+        operator_id: row.get("operator_id"),
+        email: row.get("email"),
+        role: row.get("role"),
+        status: row.get("status"),
+        permissions,
+        token_configured: !token_hash.trim().is_empty(),
+        updated_at_ms: updated_at_ms.max(0) as u64,
+        last_authenticated_at_ms: last_authenticated_at_ms.map(|value| value.max(0) as u64),
+    })
+}
+
+fn row_to_operator(row: &Row) -> Result<Operator, AdminError> {
+    let permissions_json: Value = row.get("permissions_json");
+    let permissions = serde_json::from_value::<Vec<String>>(permissions_json)
+        .map_err(|error| AdminError::Repository(format!("decode operator failed: {error}")))?
+        .into_iter()
+        .map(|permission| parse_permission_text(&permission))
+        .collect::<Result<BTreeSet<_>, _>>()?;
+    Ok(Operator {
+        id: row.get("operator_id"),
+        email: row.get("email"),
+        role: row.get("role"),
+        permissions,
+    })
+}
+
 fn status_text(status: &CommandStatus) -> String {
     serde_json::to_value(status)
         .ok()
@@ -3602,6 +6112,18 @@ fn target_type_text(target_type: &TargetType) -> String {
         .ok()
         .and_then(|value| value.as_str().map(str::to_string))
         .unwrap_or_else(|| format!("{target_type:?}").to_lowercase())
+}
+
+fn mail_target_kind_text(target_kind: &MailTargetKind) -> String {
+    serde_json::to_value(target_kind)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_string))
+        .unwrap_or_else(|| format!("{target_kind:?}").to_lowercase())
+}
+
+fn parse_mail_target_kind_text(value: &str) -> Result<MailTargetKind, AdminError> {
+    serde_json::from_value(Value::String(value.to_string()))
+        .map_err(|error| AdminError::Repository(format!("decode mail target kind failed: {error}")))
 }
 
 fn command_type(command: &AdminCommand) -> String {
@@ -3877,7 +6399,7 @@ mod tests {
                 "approval-pending".into(),
                 "cmd-grant-approval".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review high risk grant".into(),
                 1_000,
             ))
@@ -3909,7 +6431,7 @@ mod tests {
                 "approval-approved".into(),
                 "cmd-grant-approval-approved".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review high risk grant".into(),
                 4_000,
             ))
@@ -3933,6 +6455,70 @@ mod tests {
             control.executor().executed_commands,
             vec!["cmd-grant-approval-approved"]
         );
+    }
+
+    #[test]
+    fn approved_high_risk_command_requires_matching_requester_and_type() {
+        let mut control = AdminControlPlane::new(RecordingExecutor::default());
+        let mut envelope = sample_envelope(operator_with([Permission::InventoryGrantItem]));
+        envelope.command_id = "cmd-grant-requester".into();
+        envelope.approval_id = Some("approval-requester-mismatch".into());
+        envelope.command = AdminCommand::GrantItem {
+            character_id: "Scout".into(),
+            item_id: "red-potion".into(),
+            count: 1,
+        };
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-requester-mismatch".into(),
+                "cmd-grant-requester".into(),
+                "grant_item".into(),
+                "other-op".into(),
+                "review different requester".into(),
+                1_000,
+            ))
+            .expect("approval create");
+        control
+            .decide_approval(
+                "approval-requester-mismatch",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved by peer".into()),
+                1_500,
+            )
+            .expect("approval approve");
+
+        let error = control
+            .submit(envelope.clone(), 2_000)
+            .expect_err("approval requested by another operator should reject");
+        assert!(matches!(error, AdminError::InvalidCommand(_)));
+
+        envelope.command_id = "cmd-grant-type".into();
+        envelope.approval_id = Some("approval-type-mismatch".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-type-mismatch".into(),
+                "cmd-grant-type".into(),
+                "grant_currency".into(),
+                "op-1".into(),
+                "review wrong command type".into(),
+                3_000,
+            ))
+            .expect("approval create");
+        control
+            .decide_approval(
+                "approval-type-mismatch",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved wrong type".into()),
+                3_500,
+            )
+            .expect("approval approve");
+        let error = control
+            .submit(envelope, 4_000)
+            .expect_err("approval with wrong command type should reject");
+        assert!(matches!(error, AdminError::InvalidCommand(_)));
+        assert!(control.executor().executed_commands.is_empty());
     }
 
     #[test]
@@ -3989,6 +6575,127 @@ mod tests {
         assert_eq!(receipts[0].attachment_count, 1);
     }
 
+    #[test]
+    fn admin_read_models_derive_from_json_account_store() {
+        let path = std::env::temp_dir().join(format!(
+            "mir2-admin-read-{}-{}.json",
+            std::process::id(),
+            now_ms()
+        ));
+        let default_character = SimulationConfig::default().default_character;
+        let mut character = default_character.clone();
+        character.index = 2;
+        character.name = "LiveScout".into();
+        character.level = 18;
+        let mut account = AccountRecord::new(character.clone());
+        account.is_banned = true;
+        account.ban_reason = "manual operator ban".into();
+        account.ban_until_ms = Some(now_ms().saturating_add(60_000));
+        let save = account.saves.get_mut(&2).expect("save should exist");
+        save.map_file_name = "0103".into();
+        save.map_title = "WeaponStore".into();
+        save.position.x = 6;
+        save.position.y = 12;
+        save.gold = 777;
+        save.credit = 55;
+        let mut systems = Stage5SystemsState::default();
+        systems.mail.push(mir2_simulation::Stage5MailMessage {
+            id: 1,
+            from: "GM".into(),
+            to: "LiveScout".into(),
+            subject: "Real mail".into(),
+            body: "Persisted read-model smoke".into(),
+            gold: 10,
+            items: Vec::new(),
+            claimed: false,
+            deleted: false,
+        });
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("systems should encode"));
+        let mut store = AccountStore::new(default_character.clone());
+        store.accounts.clear();
+        store.accounts.insert("real-account".into(), account);
+        store.save_to_path(&path).expect("store should save");
+
+        let snapshot =
+            read_json_account_snapshot(&path, default_character).expect("snapshot should load");
+        let players = build_player_summaries(&snapshot, None);
+
+        assert_eq!(snapshot.source, "json_account_store");
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0].player_id, "real-account:2");
+        assert_eq!(players[0].character_name, "LiveScout");
+        assert_eq!(players[0].gold, 777);
+        assert_eq!(players[0].credit, 55);
+        assert_eq!(players[0].status, "Banned");
+
+        let detail =
+            build_player_detail(&snapshot, "real-account:2", None).expect("detail should exist");
+        assert_eq!(detail.mail_count, 1);
+        assert_eq!(detail.unclaimed_mail_count, 1);
+        assert_eq!(
+            detail.active_ban_reason.as_deref(),
+            Some("manual operator ban")
+        );
+
+        let economy = build_economy_read_model(&snapshot, Vec::new(), false);
+        assert_eq!(economy.assets[0].asset, "Gold");
+        assert_eq!(economy.assets[0].total, 777);
+        assert_eq!(economy.assets[1].total, 55);
+        let risk = build_risk_read_model(&snapshot, Vec::new(), false);
+        assert_eq!(risk.cases.len(), 1);
+        assert_eq!(risk.cases[0].evidence, "manual operator ban");
+
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn admin_read_models_overlay_gateway_presence() {
+        let default_character = SimulationConfig::default().default_character;
+        let snapshot =
+            snapshot_from_store("memory_account_store", AccountStore::new(default_character));
+        let presence = GatewayPresenceSnapshot {
+            source: "gateway_session_cache".into(),
+            sessions: vec![GatewaySessionRecord {
+                key: GatewaySessionKey {
+                    account_id: "demo".into(),
+                    character_index: 0,
+                },
+                character_name: "Scout".into(),
+                map_file_name: Some("0103".into()),
+                player_object_id: Some(7),
+                player_hp: Some(88),
+                player_max_hp: Some(99),
+                gold: 9_999,
+                tick: 42,
+            }],
+            error: None,
+        };
+
+        let players = build_player_summaries(&snapshot, Some(&presence));
+
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0].status, "Online");
+        assert!(players[0].online);
+        assert_eq!(
+            players[0].online_source.as_deref(),
+            Some("gateway_session_cache")
+        );
+        assert_eq!(players[0].map_file_name, "0103");
+        assert_eq!(players[0].hp, 88);
+        assert_eq!(players[0].max_hp, 99);
+        assert_eq!(players[0].gold, 9_999);
+        assert_eq!(players[0].runtime_tick, Some(42));
+
+        let servers = build_servers_read_model(&snapshot, &presence, Vec::new(), false);
+        assert_eq!(servers.zones_online, 1);
+        assert_eq!(servers.zones_source, "gateway_session_cache");
+        assert!(servers
+            .services
+            .iter()
+            .any(|service| service.name == "Gateway Sessions" && service.status == "Healthy"));
+    }
+
     #[tokio::test]
     async fn get_command_status_returns_one_command_record() {
         let path = std::env::temp_dir().join(format!(
@@ -3997,6 +6704,7 @@ mod tests {
             now_ms()
         ));
         let config = SimulationConfig::default().with_account_store_path(path.clone());
+        let read_models = Arc::new(AdminReadModelStore::from_config(&config));
         let executor =
             SystemMailExecutor::new(AccountStoreSystemMailDomain::with_gateway_and_fallback(
                 "http://127.0.0.1:1/admin/system-mail".into(),
@@ -4024,6 +6732,8 @@ mod tests {
         control.submit(envelope, 2_000).expect("mail should queue");
         let state = AdminApiState {
             control_plane: Arc::new(Mutex::new(control)),
+            read_models,
+            admin_store: None,
         };
 
         let record = get_command_status(State(state.clone()), Path("cmd-1".into()))
@@ -4063,7 +6773,7 @@ mod tests {
                 "approval-1".into(),
                 "cmd-grant-item".into(),
                 "grant_item".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review item grant".into(),
                 1_000,
             ))
@@ -4096,7 +6806,7 @@ mod tests {
                 "approval-2".into(),
                 "cmd-grant-gold".into(),
                 "grant_currency".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review gold grant".into(),
                 2_500,
             ))
@@ -4156,7 +6866,7 @@ mod tests {
                 "approval-ban".into(),
                 "cmd-ban".into(),
                 "ban_account".into(),
-                "lead-gm".into(),
+                "op-1".into(),
                 "review ban".into(),
                 2_500,
             ))
@@ -4180,10 +6890,12 @@ mod tests {
 
     #[test]
     fn admin_timeline_merges_local_command_audit_and_approval_records() {
+        let config = SimulationConfig::default();
+        let read_models = Arc::new(AdminReadModelStore::from_config(&config));
         let executor =
             SystemMailExecutor::new(AccountStoreSystemMailDomain::with_gateway_and_fallback(
                 "http://127.0.0.1:1/admin/system-mail".into(),
-                SimulationConfig::default(),
+                config,
             ));
         let mut control = AdminControlPlane::with_repositories(
             executor,
@@ -4219,6 +6931,8 @@ mod tests {
                 control.audit_store,
                 control.approval_store,
             ))),
+            read_models,
+            admin_store: None,
         };
 
         let timeline = build_admin_timeline(
@@ -4371,6 +7085,12 @@ mod tests {
         assert!(query.contains("command_id = 'cmd\\'1'"));
         assert!(query.contains("event_type = 'admin.command.succeeded'"));
         assert!(query.contains("status = 'succeeded'"));
+        assert!(query.contains("argMax(event_type, ingested_at)"));
+        assert!(query.contains("GROUP BY event_id"));
+        assert!(
+            query.find("GROUP BY event_id").expect("group by clause")
+                < query.find(" WHERE command_id").expect("outer where clause")
+        );
         assert!(query.contains("LIMIT 500"));
     }
 

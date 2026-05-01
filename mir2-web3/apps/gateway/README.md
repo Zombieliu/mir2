@@ -49,6 +49,12 @@ Health check:
 
 - `http://127.0.0.1:7010/health`
 
+Admin runtime read endpoints:
+
+- `POST /admin/system-mail`: deliver audited Admin API mail into the configured account store.
+- `POST /admin/kick-player`: remove one character from the current session/routing cache.
+- `GET /admin/sessions`: list current online session-cache records from the in-memory or Redis cache.
+
 ## Smoke And Trace
 
 Scripted TCP smoke:

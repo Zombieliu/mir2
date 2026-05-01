@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string; status?: number };
@@ -63,6 +65,20 @@ export type AdminTimelineResponse = {
   records: AdminTimelineItem[];
 };
 
+export type AdminAuthMeResponse = {
+  source: string;
+  operator: {
+    operatorId: string;
+    email: string;
+    role: string;
+    status: string;
+    permissions: string[];
+    tokenConfigured: boolean;
+    updatedAtMs: number;
+    lastAuthenticatedAtMs?: number;
+  };
+};
+
 export type ApprovalRecord = {
   approvalId: string;
   commandId: string;
@@ -96,28 +112,225 @@ export type SubmitCommandResponse = {
   };
 };
 
+export type AdminMapPopulation = {
+  mapFileName: string;
+  mapTitle: string;
+  characterCount: number;
+  percent: number;
+};
+
+export type AdminServiceStatus = {
+  name: string;
+  status: string;
+  detail: string;
+  latencyMs?: number;
+  configured: boolean;
+};
+
+export type AdminDashboardReadModel = {
+  source: string;
+  generatedAtMs: number;
+  accountCount: number;
+  characterCount: number;
+  onlineNow: number;
+  onlineSource: string;
+  totalGold: number;
+  totalCredit: number;
+  activeBanCount: number;
+  hotMaps: AdminMapPopulation[];
+  services: AdminServiceStatus[];
+  auditRecordCount: number;
+  outboxReceiptCount: number;
+};
+
+export type AdminPlayerSummary = {
+  playerId: string;
+  accountId: string;
+  characterIndex: number;
+  characterName: string;
+  className: string;
+  gender: string;
+  level: number;
+  mapFileName: string;
+  mapTitle: string;
+  positionX: number;
+  positionY: number;
+  hp: number;
+  maxHp: number;
+  mp: number;
+  gold: number;
+  credit: number;
+  status: string;
+  online: boolean;
+  onlineSource?: string;
+  playerObjectId?: number;
+  runtimeTick?: number;
+  storeVersion?: number;
+  saveVersion?: number;
+};
+
+export type AdminPlayersReadModel = {
+  source: string;
+  generatedAtMs: number;
+  players: AdminPlayerSummary[];
+};
+
+export type AdminPlayerDetail = {
+  summary: AdminPlayerSummary;
+  inventoryCount: number;
+  beltCount: number;
+  storageCount: number;
+  equipmentCount: number;
+  questStateCount: number;
+  skillStateCount: number;
+  mailCount: number;
+  unclaimedMailCount: number;
+  auctionListingCount: number;
+  groupMemberCount: number;
+  guildName?: string;
+  activeBanReason?: string;
+  banUntilMs?: number;
+  bannedAtMs?: number;
+};
+
+export type AdminEconomyAsset = {
+  asset: string;
+  total: number;
+  holders: number;
+  average: number;
+  state: string;
+};
+
+export type AdminDistributionBucket = {
+  key: string;
+  label: string;
+  value: number;
+  amount: number;
+};
+
+export type AdminEconomyReadModel = {
+  source: string;
+  generatedAtMs: number;
+  assets: AdminEconomyAsset[];
+  goldDistribution: AdminDistributionBucket[];
+  priceFeeds: Array<{
+    item: string;
+    latestPrice: number;
+    sampleCount: number;
+    source: string;
+    updatedAtMs: number;
+  }>;
+  priceFeedConfigured: boolean;
+};
+
+export type AdminActivitiesReadModel = {
+  source: string;
+  generatedAtMs: number;
+  configured: boolean;
+  activities: Array<{
+    activityId: string;
+    name: string;
+    startAtMs?: number;
+    activityType: string;
+    status: string;
+    signal: string;
+    reward: string;
+    condition: string;
+    realms: string[];
+    updatedAtMs: number;
+  }>;
+};
+
+export type AdminServersReadModel = {
+  generatedAtMs: number;
+  accountStoreSource: string;
+  accountCount: number;
+  characterCount: number;
+  zonesOnline: number;
+  zonesSource: string;
+  zoneRuntimeConfigured: boolean;
+  zones: Array<{
+    zoneId: string;
+    name: string;
+    status: string;
+    host: string;
+    processId: string;
+    mapCount: number;
+    playerCount: number;
+    tickRate: number;
+    uptimeSeconds: number;
+    source: string;
+    updatedAtMs: number;
+  }>;
+  services: AdminServiceStatus[];
+};
+
+export type AdminOperatorsReadModel = {
+  source: string;
+  generatedAtMs: number;
+  configured: boolean;
+  operators: Array<{
+    operatorId: string;
+    email: string;
+    role: string;
+    status: string;
+    permissions: string[];
+    tokenConfigured: boolean;
+    updatedAtMs: number;
+    lastAuthenticatedAtMs?: number;
+  }>;
+};
+
+export type AdminRiskReadModel = {
+  source: string;
+  generatedAtMs: number;
+  cases: Array<{
+    playerId: string;
+    accountId: string;
+    characterName: string;
+    signal: string;
+    risk: string;
+    evidence: string;
+    banUntilMs?: number;
+  }>;
+  graph: Array<{
+    edgeId: string;
+    from: string;
+    to: string;
+    signal: string;
+    risk: string;
+    evidence: string;
+    updatedAtMs: number;
+  }>;
+};
+
 const adminApiBase = process.env.ADMIN_API_BASE_URL ?? "http://127.0.0.1:7420";
 
-export function operatorHeaders() {
+export async function operatorHeaders() {
+  const cookieStore = await cookies();
+  const token =
+    cookieStore.get("admin_operator_token")?.value?.trim() ??
+    process.env.ADMIN_OPERATOR_TOKEN?.trim();
   const headers: Record<string, string> = {
     "x-operator-id": process.env.ADMIN_OPERATOR_ID ?? "local-gm",
     "x-operator-email": process.env.ADMIN_OPERATOR_EMAIL ?? "gm.local@mir2.dev",
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,audit_read,approval_manage"
+      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage"
   };
-  if (process.env.ADMIN_OPERATOR_TOKEN) {
-    headers.authorization = `Bearer ${process.env.ADMIN_OPERATOR_TOKEN}`;
+  if (token) {
+    headers.authorization = `Bearer ${token}`;
   }
   return headers;
 }
 
 export async function adminGet<T>(path: string): Promise<ApiResult<T>> {
   try {
+    const headers = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
       cache: "no-store",
-      headers: operatorHeaders()
+      headers
     });
     const data = (await response.json()) as unknown;
     if (!response.ok) {
@@ -141,12 +354,13 @@ export async function adminPost<T>(
   body: unknown
 ): Promise<ApiResult<T>> {
   try {
+    const authHeaders = await operatorHeaders();
     const response = await fetch(`${adminApiBase}${path}`, {
       method: "POST",
       cache: "no-store",
       headers: {
         "content-type": "application/json",
-        ...operatorHeaders()
+        ...authHeaders
       },
       body: JSON.stringify(body)
     });
