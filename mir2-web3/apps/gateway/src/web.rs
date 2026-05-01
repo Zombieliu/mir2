@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 use std::io;
 use std::sync::Arc;
 
@@ -534,9 +535,18 @@ fn execute_session_action(
     session: &mut GatewaySession,
     action: SessionAction,
 ) -> Result<Vec<ServerPacket>, String> {
+    let move_log = move_log_for_action(&action);
     match action {
-        SessionAction::Packet(packet) => Ok(session.handle_packet(packet)),
-        SessionAction::MoveTo { x, y, running } => Ok(session.move_to(x, y, running)),
+        SessionAction::Packet(packet) => {
+            let responses = session.handle_packet(packet);
+            log_move_action(move_log, &responses);
+            Ok(responses)
+        }
+        SessionAction::MoveTo { x, y, running } => {
+            let responses = session.move_to(x, y, running);
+            log_move_action(move_log, &responses);
+            Ok(responses)
+        }
         SessionAction::Attack { object_id } => Ok(session.attack(object_id)),
         SessionAction::Interact { object_id } => Ok(session.interact(object_id)),
         SessionAction::SelectNpcDialog { target } => Ok(session.select_npc_dialog_target(&target)),
@@ -550,6 +560,57 @@ fn execute_session_action(
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
+}
+
+fn move_log_for_action(action: &SessionAction) -> Option<String> {
+    if !move_logging_enabled() {
+        return None;
+    }
+
+    match action {
+        SessionAction::MoveTo { x, y, running } => Some(format!(
+            "MoveTo target=({x},{y}) mode={}",
+            if *running { "run" } else { "walk" }
+        )),
+        SessionAction::Packet(ClientPacket::Walk { direction }) => Some(format!("Walk direction={direction:?}")),
+        SessionAction::Packet(ClientPacket::Run { direction }) => Some(format!("Run direction={direction:?}")),
+        SessionAction::Packet(ClientPacket::Turn { direction }) => Some(format!("Turn direction={direction:?}")),
+        _ => None,
+    }
+}
+
+fn move_logging_enabled() -> bool {
+    env::var("MIR2_GATEWAY_MOVE_LOG")
+        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .unwrap_or(false)
+}
+
+fn log_move_action(action: Option<String>, responses: &[ServerPacket]) {
+    let Some(action) = action else {
+        return;
+    };
+
+    let movement = responses.iter().find_map(|packet| match packet {
+        ServerPacket::UserLocation { location } => Some(format!(
+            "UserLocation=({}, {}) {:?}",
+            location.position.x, location.position.y, location.direction
+        )),
+        ServerPacket::ObjectWalk { movement } => Some(format!(
+            "ObjectWalk=({}, {}) {:?}",
+            movement.position.x, movement.position.y, movement.direction
+        )),
+        ServerPacket::ObjectRun { movement } => Some(format!(
+            "ObjectRun=({}, {}) {:?}",
+            movement.position.x, movement.position.y, movement.direction
+        )),
+        _ => None,
+    });
+
+    eprintln!(
+        "mir2-gateway movement {action} -> {} packets={} ",
+        movement.unwrap_or_else(|| "no movement packet".to_string()),
+        responses.len()
+    );
 }
 
 fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, String> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent, type MouseEvent } from "react";
 
 import {
   ORIGINAL_UI,
@@ -33,6 +33,11 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import type { OriginalMapRegion } from "../lib/scene-types";
+import {
+  CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
+  CRYSTAL_GAME_SHOP_ITEMS,
+} from "../lib/generated/crystal-game-shop-data";
+import { CRYSTAL_BIG_MAP_NPCS } from "../lib/generated/crystal-npc-info-data";
 
 type MiniMapLibraryMeta = {
   frames: Array<{
@@ -124,6 +129,9 @@ type DisplayEntity = {
   dead?: boolean;
   sprite?: EntitySprite | null;
   questIds?: number[];
+  bigMapIcon?: number;
+  showOnBigMap?: boolean;
+  canTeleportTo?: boolean;
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -242,6 +250,7 @@ type DisplayWorld = {
   mapFileName: string | null;
   inSafeZone: boolean;
   miniMapIndex: number | null;
+  bigMapIndex?: number | null;
   playerName: string | null;
   playerHp?: number;
   playerMaxHp?: number;
@@ -249,6 +258,7 @@ type DisplayWorld = {
   playerExperience: number;
   playerMaxExperience: number;
   gold: number;
+  credit: number;
   currentWeight: number;
   maxWeight: number;
   freeBagSlots: number;
@@ -334,6 +344,7 @@ type OriginalClientShellProps = {
   wsState: string;
   world: DisplayWorld;
   player: DisplayEntity | null;
+  predictedPlayerPosition: { x: number; y: number } | null;
   selectedEntity: DisplayEntity | null;
   sortedEntities: DisplayEntity[];
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
@@ -384,6 +395,7 @@ type OriginalClientShellProps = {
   onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
+  onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   transferOptions: SystemMenuTransferOption[];
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
@@ -393,6 +405,9 @@ type OriginalClientShellProps = {
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onViewportTileClick: (x: number, y: number) => void;
   onViewportTileSecondaryAction: (x: number, y: number) => void;
+  onViewportTileStepClick: (x: number, y: number) => void;
+  onViewportTileStepSecondaryAction: (x: number, y: number) => void;
+  onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run") => void;
   onPickGroundDrop: (objectId: string) => void;
   onSelectEntity: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
@@ -416,6 +431,10 @@ const VIEWPORT_TILE_LEFT_ORIGIN = VIEWPORT_OFFSET_X * VIEWPORT_CELL_WIDTH - VIEW
 const VIEWPORT_TILE_TOP_ORIGIN = VIEWPORT_OFFSET_Y * VIEWPORT_CELL_HEIGHT;
 const VIEWPORT_TILE_CENTER_X = VIEWPORT_TILE_LEFT_ORIGIN + VIEWPORT_CELL_WIDTH / 2;
 const VIEWPORT_TILE_CENTER_Y = VIEWPORT_TILE_TOP_ORIGIN + VIEWPORT_CELL_HEIGHT / 2;
+const VIEWPORT_ENTITY_LEFT_ORIGIN = VIEWPORT_OFFSET_X * VIEWPORT_CELL_WIDTH;
+const VIEWPORT_ENTITY_TOP_ORIGIN = VIEWPORT_OFFSET_Y * VIEWPORT_CELL_HEIGHT;
+const CRYSTAL_MOVE_INPUT_INTERVAL_MS = 100;
+const MAX_PREDICTED_PLAYER_LEAD_TILES = 10;
 const LOGIN_STATIC_BACKGROUND_FRAME = 0;
 const LOGIN_TRANSITION_FRAME_MS = 180;
 const ORIGINAL_AUDIO = {
@@ -431,6 +450,54 @@ type TranslateFn = (
   args?: Array<string | number>,
   fallback?: string,
 ) => string;
+
+type HeldScenePointer = {
+  button: 0 | 2;
+  sceneX: number;
+  sceneY: number;
+  startedAt: number;
+  dispatched: boolean;
+  tileX?: number;
+  tileY?: number;
+};
+
+type CrystalGameShopEntry = {
+  item_index: number;
+  game_shop_index: number;
+  item_name: string;
+  gold_price: number;
+  credit_price: number;
+  count: number;
+  class: string;
+  category: string;
+  stock: number;
+  stock_level: number;
+};
+
+type CrystalItemEntry = {
+  image: number;
+  item_type: number;
+};
+
+type GameShopSectionFilter = "all" | "top" | "deals" | "new";
+type GameShopClassFilter = "all" | EntityClassKey;
+type GameShopPaymentType = "gold" | "credit";
+
+const GAME_SHOP_ITEMS_PER_PAGE = 8;
+const GAME_SHOP_CLASS_FILTERS: GameShopClassFilter[] = ["all", "warrior", "assassin", "taoist", "wizard", "archer"];
+const GAME_SHOP_PREVIEW_ITEM_TYPES = new Set([1, 2, 13, 37]);
+const BIG_MAP_NPC_INDEX = new Map(
+  CRYSTAL_BIG_MAP_NPCS.map((npc) => [bigMapNpcKey(npc.map, npc.name, npc.x, npc.y), npc]),
+);
+
+type BigMapNpcRowView = {
+  key: string;
+  name: string;
+  icon: number;
+  x: number;
+  y: number;
+  canTeleportTo: boolean;
+};
 
 function selectedTargetActionLabel(
   t: TranslateFn,
@@ -452,11 +519,20 @@ function selectedTargetActionLabel(
 }
 
 function entityDisplayName(entity: DisplayEntity): string {
+  return entity.name;
+}
+
+function entityDisplayLabelLines(entity: DisplayEntity): Array<{ text: string; role: "primary" | "secondary" }> {
   if (entity.kind !== "npc" && entity.kind !== "monster") {
-    return entity.name;
+    return [{ text: entity.name, role: "primary" }];
   }
 
-  return entity.name.replace(/_/g, " ");
+  const parts = entity.name.split("_").filter(Boolean);
+  if (parts.length <= 1) {
+    return [{ text: entity.name.replace(/_/g, " "), role: "primary" }];
+  }
+
+  return parts.map((part, index) => ({ text: part, role: index === 0 ? "primary" : "secondary" }));
 }
 
 function desiredMusicForScreen(screen: ClientScreen, loginTransitionActive: boolean) {
@@ -483,6 +559,7 @@ export function OriginalClientShell({
   wsState,
   world,
   player,
+  predictedPlayerPosition,
   selectedEntity,
   sortedEntities,
   viewportEntities,
@@ -533,6 +610,7 @@ export function OriginalClientShell({
   onTransferMap,
   onClaimMail,
   onDeleteMail,
+  onBuyGameShopItem,
   transferOptions,
   onToggleCharacter,
   onToggleInventory,
@@ -542,6 +620,9 @@ export function OriginalClientShell({
   onOpenInventoryTab,
   onViewportTileClick,
   onViewportTileSecondaryAction,
+  onViewportTileStepClick,
+  onViewportTileStepSecondaryAction,
+  onViewportDirectionStep,
   onPickGroundDrop,
   onSelectEntity,
   onActivateEntity,
@@ -570,6 +651,19 @@ export function OriginalClientShell({
   const pendingMusicSrcRef = useRef<string | null>(null);
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
+  const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const latestMoveInputRef = useRef<{
+    screen: ClientScreen;
+    player: DisplayEntity | null;
+    renderPlayer: DisplayEntity | null;
+    playerCameraMotionOffset: ViewportOffset;
+  }>({
+    screen,
+    player,
+    renderPlayer: player,
+    playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
+  });
 
   const selectedCharacter = characters[selectedCharacterIndex] ?? null;
   const selectedPortraitFrames = selectedCharacter ? portraitFramesForCharacter(selectedCharacter) : [];
@@ -796,61 +890,24 @@ export function OriginalClientShell({
       return;
     }
 
-    const timer = window.setInterval(() => {
+    let animationFrame = 0;
+    const updateMotionClock = () => {
       setMotionNow(Date.now());
-    }, 32);
+      animationFrame = window.requestAnimationFrame(updateMotionClock);
+    };
+    animationFrame = window.requestAnimationFrame(updateMotionClock);
 
-    return () => window.clearInterval(timer);
+    return () => window.cancelAnimationFrame(animationFrame);
   }, [screen]);
 
-  useEffect(() => {
-    if (screen !== "game") {
-      entityMotionSnapshotsRef.current = {};
-      return;
-    }
-
-    const now = Date.now();
-    const nextSnapshots: Record<string, EntityMotionSnapshot> = {};
-
-    for (const entity of world.entities) {
-      const previous = entityMotionSnapshotsRef.current[entity.objectId];
-      const previousX = previous ? previous.toX : entity.x;
-      const previousY = previous ? previous.toY : entity.y;
-      const tileDistance = Math.max(Math.abs(entity.x - previousX), Math.abs(entity.y - previousY));
-
-      if (tileDistance > 0) {
-        const animationState = animationStateForMovement(entity, tileDistance);
-        nextSnapshots[entity.objectId] = {
-          fromX: previousX,
-          fromY: previousY,
-          toX: entity.x,
-          toY: entity.y,
-          animationState,
-          startedAt: now,
-          expiresAt: now + animationStateLifetimeMs(animationState, tileDistance),
-        };
-        continue;
-      }
-
-      nextSnapshots[entity.objectId] = previous
-        ? {
-            ...previous,
-            toX: entity.x,
-            toY: entity.y,
-          }
-        : {
-            fromX: entity.x,
-            fromY: entity.y,
-            toX: entity.x,
-            toY: entity.y,
-            animationState: "standing",
-            startedAt: now,
-            expiresAt: 0,
-          };
-    }
-
-    entityMotionSnapshotsRef.current = nextSnapshots;
-  }, [screen, world.entities]);
+  const renderPlayer = useMemo(() => (
+    player &&
+    predictedPlayerPosition &&
+    Math.max(Math.abs(player.x - predictedPlayerPosition.x), Math.abs(player.y - predictedPlayerPosition.y)) <=
+      MAX_PREDICTED_PLAYER_LEAD_TILES
+      ? { ...player, x: predictedPlayerPosition.x, y: predictedPlayerPosition.y }
+      : player
+  ), [player, predictedPlayerPosition]);
 
   useEffect(() => {
     if (screen !== "game") {
@@ -943,9 +1000,22 @@ export function OriginalClientShell({
   }, [sceneSpriteLibraries, screen, world.entities]);
 
   const sceneNow = motionNow;
-  const playerCameraMotionOffset = player
-    ? cameraMotionOffsetForEntity(player, entityMotionSnapshotsRef.current, motionNow)
+  entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
+    screen,
+    world.entities,
+    renderPlayer,
+    entityMotionSnapshotsRef.current,
+    sceneNow,
+  );
+  const playerCameraMotionOffset = renderPlayer
+    ? cameraMotionOffsetForEntity(renderPlayer, entityMotionSnapshotsRef.current, motionNow)
     : EMPTY_VIEWPORT_OFFSET;
+  latestMoveInputRef.current = {
+    screen,
+    player,
+    renderPlayer,
+    playerCameraMotionOffset,
+  };
   const viewportEntitySprites = player
     ? viewportEntities.map((entity) => ({
         entity,
@@ -962,33 +1032,86 @@ export function OriginalClientShell({
     ? world.groundDrops
         .filter(
           (drop) =>
-            Math.abs(drop.x - player.x) <= VIEWPORT_RANGE_X &&
-            Math.abs(drop.y - player.y) <= VIEWPORT_RANGE_Y,
+            Math.abs(drop.x - (renderPlayer ?? player).x) <= VIEWPORT_RANGE_X &&
+            Math.abs(drop.y - (renderPlayer ?? player).y) <= VIEWPORT_RANGE_Y,
         )
         .map((drop) => ({
           ...drop,
-          dx: drop.x - player.x,
-          dy: drop.y - player.y,
+          dx: drop.x - (renderPlayer ?? player).x,
+          dy: drop.y - (renderPlayer ?? player).y,
         }))
     : [];
-  const viewportMapSprites = player
-    ? buildViewportMapSprites(world, player, sceneSpriteFrameIndex)
+  const viewportMapSprites = renderPlayer
+    ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex)
     : EMPTY_VIEWPORT_MAP_SPRITES;
-  const viewportProjectiles = player
+  const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
         .map((projectile) => ({
           ...projectile,
-          fromDx: projectile.fromX - player.x,
-          fromDy: projectile.fromY - player.y,
-          toDx: projectile.toX - player.x,
-          toDy: projectile.toY - player.y,
+          fromDx: projectile.fromX - renderPlayer.x,
+          fromDy: projectile.fromY - renderPlayer.y,
+          toDx: projectile.toX - renderPlayer.x,
+          toDy: projectile.toY - renderPlayer.y,
           progress: projectileProgress(projectile, motionNow),
         }))
     : [];
-  const viewportDepthPlayer = player ?? { x: 0, y: 0 };
+  const viewportDepthPlayer = renderPlayer ?? player ?? { x: 0, y: 0 };
   const showSyntheticScene =
     screen === "game" && !viewportMapSprites.floor.length && Boolean(world.originalMapRegion);
+
+  function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
+    const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+    const scaleX = ORIGINAL_UI.game.sceneWidth / Math.max(rect.width, 1);
+    const scaleY = ORIGINAL_UI.game.sceneHeight / Math.max(rect.height, 1);
+    return {
+      sceneX: (event.clientX - rect.left) * scaleX,
+      sceneY: (event.clientY - rect.top) * scaleY,
+    };
+  }
+
+  function tileFromScenePoint(sceneX: number, sceneY: number) {
+    const latest = latestMoveInputRef.current;
+    const basePlayer = latest.renderPlayer ?? latest.player;
+    if (!basePlayer) return null;
+    return {
+      x: Math.round(
+        basePlayer.x +
+          (sceneX - VIEWPORT_TILE_CENTER_X - latest.playerCameraMotionOffset.x) / VIEWPORT_CELL_WIDTH,
+      ),
+      y: Math.round(
+        basePlayer.y +
+          (sceneY - VIEWPORT_TILE_CENTER_Y - latest.playerCameraMotionOffset.y) / VIEWPORT_CELL_HEIGHT,
+      ),
+    };
+  }
+
+  function dispatchSceneMoveInput(pointer: HeldScenePointer) {
+    if (latestMoveInputRef.current.screen !== "game") return;
+    const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
+    if (!tile) return;
+
+    if (pointer.button === 2) {
+      onViewportDirectionStep(tile.x, tile.y, "run");
+    } else {
+      onViewportDirectionStep(tile.x, tile.y, "walk");
+    }
+  }
+
+  function dispatchSceneClickInput(pointer: HeldScenePointer) {
+    if (latestMoveInputRef.current.screen !== "game") return;
+    const tile =
+      pointer.tileX !== undefined && pointer.tileY !== undefined
+        ? { x: pointer.tileX, y: pointer.tileY }
+        : tileFromScenePoint(pointer.sceneX, pointer.sceneY);
+    if (!tile) return;
+
+    if (pointer.button === 2) {
+      onViewportTileSecondaryAction(tile.x, tile.y);
+    } else {
+      onViewportTileClick(tile.x, tile.y);
+    }
+  }
 
   function handleScenePointerAction(event: MouseEvent<HTMLDivElement>) {
     if (screen !== "game" || !player) {
@@ -1003,29 +1126,77 @@ export function OriginalClientShell({
       return;
     }
 
-    event.preventDefault();
-    const rect = event.currentTarget.getBoundingClientRect();
-    const scaleX = ORIGINAL_UI.game.sceneWidth / Math.max(rect.width, 1);
-    const scaleY = ORIGINAL_UI.game.sceneHeight / Math.max(rect.height, 1);
-    const sceneX = (event.clientX - rect.left) * scaleX;
-    const sceneY = (event.clientY - rect.top) * scaleY;
-    const x = Math.round(player.x + (sceneX - VIEWPORT_TILE_CENTER_X - playerCameraMotionOffset.x) / VIEWPORT_CELL_WIDTH);
-    const y = Math.round(player.y + (sceneY - VIEWPORT_TILE_CENTER_Y - playerCameraMotionOffset.y) / VIEWPORT_CELL_HEIGHT);
-
-    if (event.button === 2) {
-      onViewportTileSecondaryAction(x, y);
+    if (event.button !== 0 && event.button !== 2) {
       return;
     }
 
-    if (event.button === 0) {
-      onViewportTileClick(x, y);
-    }
+    event.preventDefault();
+    const point = scenePointFromMouseEvent(event);
+    const pointer: HeldScenePointer = {
+      button: event.button,
+      sceneX: point.sceneX,
+      sceneY: point.sceneY,
+      startedAt: Date.now(),
+      dispatched: false,
+    };
+    heldScenePointerRef.current = pointer;
   }
+
+  function handleScenePointerMove(event: MouseEvent<HTMLDivElement>) {
+    const held = heldScenePointerRef.current;
+    if (!held || screen !== "game") {
+      return;
+    }
+
+    const point = scenePointFromMouseEvent(event);
+    heldScenePointerRef.current = {
+      ...held,
+      sceneX: point.sceneX,
+      sceneY: point.sceneY,
+    };
+  }
+
+  function stopHeldScenePointer() {
+    const held = heldScenePointerRef.current;
+    heldScenePointerRef.current = null;
+    if (!held || held.dispatched) return;
+    dispatchSceneClickInput(held);
+  }
+
+  useEffect(() => {
+    if (screen !== "game") {
+      heldScenePointerRef.current = null;
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      const held = heldScenePointerRef.current;
+      if (!held) return;
+      if (!held.dispatched && Date.now() - held.startedAt < CRYSTAL_MOVE_INPUT_INTERVAL_MS) {
+        return;
+      }
+      held.dispatched = true;
+      dispatchSceneMoveInput(held);
+    }, CRYSTAL_MOVE_INPUT_INTERVAL_MS);
+
+    const stop = () => {
+      heldScenePointerRef.current = null;
+    };
+    window.addEventListener("mouseup", stop);
+    window.addEventListener("blur", stop);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("mouseup", stop);
+      window.removeEventListener("blur", stop);
+    };
+  }, [screen, onViewportDirectionStep]);
 
   return (
     <main className="mir-client-page">
       <section className="mir-stage">
         <div
+          ref={stageFrameRef}
           className="client-stage-frame"
           onMouseDownCapture={(event) => {
             if (screen === "game" && event.button === 2) {
@@ -1033,6 +1204,8 @@ export function OriginalClientShell({
             }
           }}
           onMouseDown={handleScenePointerAction}
+          onMouseMove={handleScenePointerMove}
+          onMouseUp={stopHeldScenePointer}
           onContextMenuCapture={(event) => {
             if (screen === "game") {
               event.preventDefault();
@@ -1082,8 +1255,8 @@ export function OriginalClientShell({
                 type="button"
                 className="tile-hit"
                 style={{
-                  left: `${VIEWPORT_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-                  top: `${VIEWPORT_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+                  left: `${VIEWPORT_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x}px`,
+                  top: `${VIEWPORT_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y}px`,
                 }}
                 data-ui-interactive="true"
                 onMouseDown={(event) => {
@@ -1092,15 +1265,39 @@ export function OriginalClientShell({
                   }
 
                   event.stopPropagation();
+                  const point = scenePointFromMouseEvent(event);
+                  const pointer: HeldScenePointer = {
+                    button: event.button,
+                    sceneX: point.sceneX,
+                    sceneY: point.sceneY,
+                    startedAt: Date.now(),
+                    dispatched: false,
+                    tileX: tile.x,
+                    tileY: tile.y,
+                  };
+                  heldScenePointerRef.current = pointer;
                   if (event.button === 2) {
                     event.preventDefault();
                   }
                 }}
-                onClick={() => onViewportTileClick(tile.x, tile.y)}
+                onMouseMove={(event) => {
+                  const held = heldScenePointerRef.current;
+                  if (!held) return;
+                  const point = scenePointFromMouseEvent(event);
+                  heldScenePointerRef.current = {
+                    ...held,
+                    sceneX: point.sceneX,
+                    sceneY: point.sceneY,
+                  };
+                }}
+                onMouseUp={stopHeldScenePointer}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
                 onContextMenu={(event) => {
                   event.preventDefault();
                   event.stopPropagation();
-                  onViewportTileSecondaryAction(tile.x, tile.y);
                 }}
                 aria-label={`tile ${tile.x}, ${tile.y}`}
               />
@@ -1165,8 +1362,8 @@ export function OriginalClientShell({
                   key={`sprite-${entity.objectId}`}
                   className={`entity-sprite-stack ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""} ${entity.dead ? "dead" : ""} ${isEntityAttacking(entity, motionNow) ? "attacking" : ""} ${isEntityStruck(entity, motionNow) ? "struck" : ""} ${isEntityReviving(entity, motionNow) ? "reviving" : ""}`}
                   style={{
-                    left: `${VIEWPORT_TILE_CENTER_X + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
-                    top: `${VIEWPORT_TILE_CENTER_Y + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y}px`,
+                    left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
+                    top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y}px`,
                     zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64),
                   }}
                   data-ui-interactive="true"
@@ -1185,7 +1382,7 @@ export function OriginalClientShell({
                   }}
                 >
                   {healthRatio !== null ? (
-                    <div className="entity-health-bar" style={{ top: nameplateTopOffset(sprite) - 7 }}>
+                    <div className="entity-health-bar">
                       <span style={{ width: `${healthRatio * 100}%` }} />
                     </div>
                   ) : null}
@@ -1312,7 +1509,7 @@ export function OriginalClientShell({
                     ? EMPTY_VIEWPORT_OFFSET
                     : entityMotionOffsetForEntity(entity, entityMotionSnapshotsRef.current, motionNow);
                   const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
-                  const label = entityNameplateParts(entity);
+                  const labelLines = entityDisplayLabelLines(entity);
 
                   return (
                     <button
@@ -1320,8 +1517,8 @@ export function OriginalClientShell({
                       type="button"
                       className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
                       style={{
-                        left: `${VIEWPORT_TILE_CENTER_X + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x}px`,
-                        top: `${VIEWPORT_TILE_CENTER_Y + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
+                        left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + 25}px`,
+                        top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
                         "--entity-name-color": entityNameplateColor(entity),
                       } as CSSProperties}
                       data-ui-interactive="true"
@@ -1332,15 +1529,15 @@ export function OriginalClientShell({
                         onActivateEntity(entity.objectId);
                       }}
                     >
-                      <strong>{label.primary}</strong>
-                      {label.secondary ? <span className="entity-subname">{label.secondary}</span> : null}
-                      {entity.dead ? <span>{t("ui.dead")}</span> : null}
-                      {!entity.dead && entity.objectId === selectedEntity?.objectId && entity.hp !== undefined && entity.maxHp ? (
-                        <span>{`${entity.hp}/${entity.maxHp}`}</span>
-                      ) : null}
-                      {!entity.dead && entity.objectId === selectedEntity?.objectId ? (
-                        <span>{selectedTargetActionLabel(t, entity, targetDistance)}</span>
-                      ) : null}
+                      {labelLines.map((line, index) => (
+                        <strong
+                          key={`${entity.objectId}-label-${index}`}
+                          className={line.role === "secondary" ? "entity-subname" : undefined}
+                        >
+                          {line.text}
+                        </strong>
+                      ))}
+                      {entity.dead ? <strong className="entity-state-label">{t("ui.dead")}</strong> : null}
                     </button>
                   );
                 })
@@ -1429,6 +1626,7 @@ export function OriginalClientShell({
               onTransferMap={onTransferMap}
               onClaimMail={onClaimMail}
               onDeleteMail={onDeleteMail}
+              onBuyGameShopItem={onBuyGameShopItem}
               transferOptions={transferOptions}
             />
           ) : null}
@@ -1540,6 +1738,7 @@ type GameUiSceneProps = {
   onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
+  onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   transferOptions: SystemMenuTransferOption[];
 };
 
@@ -1587,6 +1786,7 @@ function GameUiScene({
   onTransferMap,
   onClaimMail,
   onDeleteMail,
+  onBuyGameShopItem,
   transferOptions,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
@@ -1596,8 +1796,10 @@ function GameUiScene({
   const [chatExpanded, setChatExpanded] = useState(true);
   const [showChatSettings, setShowChatSettings] = useState(false);
   const [showMailPanel, setShowMailPanel] = useState(false);
+  const [showBigMap, setShowBigMap] = useState(false);
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
+  const [showGameShop, setShowGameShop] = useState(false);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
   const dialogKey = world.activeNpcDialog
@@ -1621,7 +1823,9 @@ function GameUiScene({
         world={world}
         player={player}
         showMailPanel={showMailPanel}
+        showBigMap={showBigMap}
         onToggleMail={() => setShowMailPanel((current) => !current)}
+        onToggleBigMap={() => setShowBigMap((current) => !current)}
       />
       <DuraPanel
         t={t}
@@ -1679,6 +1883,8 @@ function GameUiScene({
         onOpenInventoryTab={onOpenInventoryTab}
         onDropGold={() => onDropGold(100)}
         onLogout={onLogout}
+        showGameShop={showGameShop}
+        onToggleGameShop={() => setShowGameShop((current) => !current)}
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
       />
@@ -1689,6 +1895,14 @@ function GameUiScene({
           onClaim={onClaimMail}
           onDelete={onDeleteMail}
           onClose={() => setShowMailPanel(false)}
+        />
+      ) : null}
+      {showBigMap ? (
+        <BigMapDialog
+          t={t}
+          world={world}
+          player={player}
+          onClose={() => setShowBigMap(false)}
         />
       ) : null}
       {showReportPanel ? <ReportPanel t={t} logs={logs} onClose={() => setShowReportPanel(false)} /> : null}
@@ -1703,22 +1917,20 @@ function GameUiScene({
           transferOptions={transferOptions}
           onClose={() => setShowSystemMenu(false)}
           onLogout={onLogout}
-          onOpenCharacter={() => {
-            onOpenCharacterTab("char");
-            setShowSystemMenu(false);
-          }}
-          onOpenInventory={() => {
-            onOpenInventoryTab("bag1");
-            setShowSystemMenu(false);
-          }}
-          onOpenQuest={() => {
-            onOpenInventoryTab("quest");
-            setShowSystemMenu(false);
-          }}
           onTransferMap={(transferKey) => {
             onTransferMap(transferKey);
             setShowSystemMenu(false);
           }}
+        />
+      ) : null}
+      {showGameShop ? (
+        <GameShopWindow
+          t={t}
+          gold={world.gold}
+          credits={world.credit}
+          playerClass={player?.classKey ?? "warrior"}
+          onBuy={onBuyGameShopItem}
+          onClose={() => setShowGameShop(false)}
         />
       ) : null}
       {visibleDialog ? (
@@ -1850,6 +2062,7 @@ function GameSceneBackdrop({
           <img
             key={sprite.key}
             className="scene-backdrop-sprite"
+            data-map-sprite-key={sprite.key}
             src={sprite.path}
             alt=""
             draggable={false}
@@ -1881,6 +2094,7 @@ function GameSceneBackdrop({
         <div
           key={tile.key}
           className="scene-backdrop-tile"
+          data-map-sprite-key={tile.key}
           style={{
             left: tile.left + cameraOffset.x,
             top: tile.top + cameraOffset.y,
@@ -1905,17 +2119,60 @@ function MailPanel({
   onDelete: (mailId: number) => void;
   onClose: () => void;
 }) {
-  const entries = mail.filter((message) => !message.deleted).slice(0, 5);
+  const entries = mail.filter((message) => !message.deleted);
+  const visibleEntries = entries.slice(0, 10);
+  const selectedEntry = visibleEntries.find((entry) => entry.id !== undefined) ?? visibleEntries[0] ?? null;
+  const pageCount = Math.max(1, Math.ceil(entries.length / 10));
 
   return (
-    <section className="overlay-panel mail-panel">
-      <div className="overlay-panel-head">
-        <strong>{t("client.Mail", [], "Mail")}</strong>
-        <button type="button" onClick={onClose}>
-          {t("ui.close")}
-        </button>
+    <section className="mail-panel">
+      <img className="mail-frame" src={ORIGINAL_UI.mail.frame} alt="" draggable={false} />
+      <img className="mail-title-image" src={ORIGINAL_UI.mail.title} alt="" draggable={false} />
+      <div className="mail-close">
+        <SpriteButton sprite={ORIGINAL_UI.mail.closeButton} label={t("ui.close")} onClick={onClose} />
       </div>
-      <div className="overlay-panel-list">
+      <div className="mail-help">
+        <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
+      </div>
+      <div className="mail-header type">{t("client.Type", [], "Type")}</div>
+      <div className="mail-header sender">{t("client.Sender", [], "Sender")}</div>
+      <div className="mail-header message">{t("client.Message", [], "Message")}</div>
+      {visibleEntries.map((entry, index) => (
+        <MailListRow
+          key={`mail-row-${entry.id ?? index}`}
+          entry={entry}
+          index={index}
+          selected={index === 0}
+          onClaim={onClaim}
+          onDelete={onDelete}
+        />
+      ))}
+      <div className="mail-page-previous">
+        <SpriteButton sprite={ORIGINAL_UI.mail.previousButton} label={t("ui.previous", [], "Previous")} onClick={() => undefined} />
+      </div>
+      <div className="overlay-panel-foot mail-page-label">{`1 / ${pageCount}`}</div>
+      <div className="mail-page-next">
+        <SpriteButton sprite={ORIGINAL_UI.mail.nextButton} label={t("ui.next", [], "Next")} onClick={() => undefined} />
+      </div>
+      <div className="mail-action send"><SpriteButton sprite={ORIGINAL_UI.mail.sendButton} label={t("client.Send", [], "Send")} onClick={() => undefined} /></div>
+      <div className="mail-action reply"><SpriteButton sprite={ORIGINAL_UI.mail.replyButton} label={t("client.Reply", [], "Reply")} onClick={() => undefined} /></div>
+      <div className="mail-action read">
+        <SpriteButton
+          sprite={ORIGINAL_UI.mail.readButton}
+          label={t("client.Read", [], "Read")}
+          onClick={() => selectedEntry?.id !== undefined && !selectedEntry.claimed ? onClaim(selectedEntry.id) : undefined}
+        />
+      </div>
+      <div className="mail-action delete">
+        <SpriteButton
+          sprite={ORIGINAL_UI.mail.deleteButton}
+          label={t("client.Delete", [], "Delete")}
+          onClick={() => selectedEntry?.id !== undefined ? onDelete(selectedEntry.id) : undefined}
+        />
+      </div>
+      <div className="mail-action block disabled"><SpriteButton sprite={ORIGINAL_UI.mail.blockListButton} label={t("client.BlockList", [], "Block List")} onClick={() => undefined} /></div>
+      <div className="mail-action bug disabled"><SpriteButton sprite={ORIGINAL_UI.mail.bugReportButton} label={t("client.ReportBug", [], "Report Bug")} onClick={() => undefined} /></div>
+      <div className="overlay-panel-list mail-legacy-list" hidden>
         {entries.length ? (
           entries.map((entry, index) => (
             <div key={`mail-${entry.id ?? index}`} className="overlay-panel-row">
@@ -1953,7 +2210,157 @@ function MailPanel({
           <div className="overlay-panel-empty">No mail</div>
         )}
       </div>
-      <div className="overlay-panel-foot">{`${entries.length}/${mail.length}`}</div>
+      <div className="overlay-panel-foot mail-legacy-foot">{`${entries.length}/${mail.length}`}</div>
+    </section>
+  );
+}
+
+function MailListRow({
+  entry,
+  index,
+  selected,
+  onClaim,
+  onDelete,
+}: {
+  entry: DisplayMailMessage;
+  index: number;
+  selected: boolean;
+  onClaim: (mailId: number) => void;
+  onDelete: (mailId: number) => void;
+}) {
+  const hasParcel = !entry.claimed && (Boolean(entry.gold) || Boolean(entry.items?.length));
+  const icon = entry.gold && !entry.items?.length ? ORIGINAL_UI.mail.icons.gold : ORIGINAL_UI.mail.icons.letter;
+  const sender = entry.from ?? "System";
+  const message = (entry.body || entry.subject || "").replace(/\s+/g, " ");
+
+  return (
+    <button
+      type="button"
+      className="overlay-panel-row mail-row"
+      style={{ top: 55 + index * 33 }}
+      onDoubleClick={() => entry.id !== undefined && !entry.claimed && onClaim(entry.id)}
+    >
+      {selected ? <img className="mail-row-selected" src={ORIGINAL_UI.mail.icons.selected} alt="" draggable={false} /> : null}
+      <span className="mail-row-icon-area">
+        <img className="mail-row-icon" src={icon} alt="" draggable={false} />
+        {!entry.claimed ? <img className={`mail-row-flag unread ${hasParcel ? "second" : ""}`} src={ORIGINAL_UI.mail.icons.unread} alt="" draggable={false} /> : null}
+        {hasParcel ? <img className="mail-row-flag parcel" src={ORIGINAL_UI.mail.icons.parcel} alt="" draggable={false} /> : null}
+      </span>
+      <span className="mail-row-sender">{sender}</span>
+      <span className="mail-row-message">{message}</span>
+      <span className="overlay-panel-actions mail-row-actions">
+        <button
+          type="button"
+          disabled={entry.claimed || entry.id === undefined}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (entry.id !== undefined) onClaim(entry.id);
+          }}
+        >
+          Claim
+        </button>
+        <button
+          type="button"
+          disabled={entry.id === undefined}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (entry.id !== undefined) onDelete(entry.id);
+          }}
+        >
+          Delete
+        </button>
+      </span>
+    </button>
+  );
+}
+
+function BigMapDialog({
+  t,
+  world,
+  player,
+  onClose,
+}: {
+  t: TranslateFn;
+  world: DisplayWorld;
+  player: DisplayEntity | null;
+  onClose: () => void;
+}) {
+  const [showWorldMap, setShowWorldMap] = useState(false);
+  const bigMapAsset = originalBigMapAssetPath(world.bigMapIndex ?? world.miniMapIndex);
+  const mapWidth = Math.max(world.originalMapRegion?.mapWidth ?? player?.x ?? 1, 1);
+  const mapHeight = Math.max(world.originalMapRegion?.mapHeight ?? player?.y ?? 1, 1);
+  const viewport = bigMapViewport(bigMapAsset);
+  const scaleX = viewport.contentWidth / mapWidth;
+  const scaleY = viewport.contentHeight / mapHeight;
+  const coordinateLabel = player ? `[ ${player.x}, ${player.y} ]` : "[ 0, 0 ]";
+  const npcRows = bigMapNpcRowsForWorld(world).slice(0, 18);
+
+  return (
+    <section className="big-map-dialog" aria-label={t("client.BigMapKey", ["M"], t("ui.map"))}>
+      <img className="big-map-frame" src={ORIGINAL_UI.bigMap.frame} alt="" draggable={false} />
+      <div className="big-map-title">{world.mapTitle ?? world.mapFileName ?? ""}</div>
+      <div className="big-map-close"><SpriteButton sprite={ORIGINAL_UI.bigMap.closeButton} label={t("ui.close")} onClick={onClose} /></div>
+      <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} /></div>
+      <div className="big-map-scroll thumb"><SpriteButton sprite={ORIGINAL_UI.bigMap.positionBar} label={t("ui.scroll", [], "Scroll")} onClick={() => undefined} /></div>
+      <div className="big-map-scroll down"><SpriteButton sprite={ORIGINAL_UI.bigMap.downButton} label={t("ui.down", [], "Down")} onClick={() => undefined} /></div>
+      <div className="big-map-viewport" style={{ left: viewport.left, top: viewport.top, width: viewport.width, height: viewport.height }}>
+        {bigMapAsset ? (
+          <img
+            className="big-map-raster"
+            src={bigMapAsset.src}
+            alt=""
+            draggable={false}
+            style={{ width: viewport.contentWidth, height: viewport.contentHeight, left: viewport.imageLeft, top: viewport.imageTop }}
+          />
+        ) : (
+          <div className="big-map-fallback" />
+        )}
+        {world.entities.map((entity) => {
+          const left = viewport.imageLeft + entity.x * scaleX - 1;
+          const top = viewport.imageTop + entity.y * scaleY - 1;
+          return <span key={`big-map-dot-${entity.objectId}`} className={`big-map-dot ${entity.kind}`} style={{ left, top }} />;
+        })}
+        {player ? (
+          <img
+            className="big-map-user-dot"
+            src={ORIGINAL_UI.bigMap.radarDot}
+            alt=""
+            draggable={false}
+            style={{ left: viewport.imageLeft + player.x * scaleX - 6, top: viewport.imageTop + player.y * scaleY - 5 }}
+          />
+        ) : null}
+      </div>
+      <div className="big-map-coordinate">{coordinateLabel}</div>
+      <div className="big-map-npc-list">
+        {npcRows.map((entity, index) => (
+          <button
+            key={`big-map-npc-${entity.key}`}
+            type="button"
+            className="big-map-npc-row"
+            style={{ top: index * 21 }}
+          >
+            <img
+              className="big-map-npc-icon"
+              src={originalMapLinkIconPath(entity.icon)}
+              alt=""
+              draggable={false}
+            />
+            <span className="big-map-npc-name">{bigMapNpcDisplayName(entity.name)}</span>
+          </button>
+        ))}
+      </div>
+      <div className="big-map-world-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.worldButton} label={t("ui.world", [], "World")} onClick={() => setShowWorldMap(true)} /></div>
+      <div className="big-map-my-location-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.myLocationButton} label={t("ui.myLocation", [], "My Location")} onClick={() => setShowWorldMap(false)} /></div>
+      <div className="big-map-teleport-button disabled"><SpriteButton sprite={ORIGINAL_UI.bigMap.teleportButton} label={t("ui.teleport", [], "Teleport")} onClick={() => undefined} active /></div>
+      <div className="big-map-search-button"><SpriteButton sprite={ORIGINAL_UI.bigMap.searchButton} label={t("ui.search", [], "Search")} onClick={() => undefined} /></div>
+      <input className="big-map-search-input" aria-label={t("ui.search", [], "Search")} readOnly />
+      {showWorldMap ? (
+        <div className="big-map-world-overlay">
+          <img className="big-map-world-image" src={ORIGINAL_UI.bigMap.worldMap} alt="" draggable={false} />
+          <img className="big-map-world-clouds" src={ORIGINAL_UI.bigMap.worldClouds} alt="" draggable={false} />
+          <img className="big-map-world-border" src={ORIGINAL_UI.bigMap.worldBorder} alt="" draggable={false} />
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -1999,9 +2406,6 @@ function SystemMenuPanel({
   transferOptions,
   onClose,
   onLogout,
-  onOpenCharacter,
-  onOpenInventory,
-  onOpenQuest,
   onTransferMap,
 }: {
   t: TranslateFn;
@@ -2013,14 +2417,27 @@ function SystemMenuPanel({
   transferOptions: SystemMenuTransferOption[];
   onClose: () => void;
   onLogout: () => void;
-  onOpenCharacter: () => void;
-  onOpenInventory: () => void;
-  onOpenQuest: () => void;
   onTransferMap: (transferKey: string) => void;
 }) {
   const [qaMap, setQaMap] = useState(() => normalizeMapInput(mapFileName ?? "0"));
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
   const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
+  const noop = () => undefined;
+  const menuButtons = [
+    { key: "exit", label: t("ui.exit"), onClick: onLogout },
+    { key: "logout", label: t("ui.logout", [], "Log Out"), onClick: onLogout },
+    { key: "help", label: t("ui.help", [], "Help"), onClick: noop },
+    { key: "keyboard", label: t("ui.keyboard", [], "Keyboard"), onClick: noop },
+    { key: "ranking", label: t("ui.ranking", [], "Ranking"), onClick: noop },
+    { key: "creature", label: t("ui.creature", [], "Creature"), onClick: noop },
+    { key: "ride", label: t("ui.mount", [], "Mount"), onClick: noop },
+    { key: "fishing", label: t("ui.fishing", [], "Fishing"), onClick: noop },
+    { key: "friend", label: t("ui.friends", [], "Friends"), onClick: noop },
+    { key: "mentor", label: t("ui.mentor", [], "Mentor"), onClick: noop },
+    { key: "relationship", label: t("ui.relationship", [], "Relationship"), onClick: noop },
+    { key: "group", label: t("ui.group", [], "Group"), onClick: noop },
+    { key: "guild", label: t("ui.guild", [], "Guild"), onClick: noop },
+  ] as const;
 
   function submitQaTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -2036,66 +2453,73 @@ function SystemMenuPanel({
   }
 
   return (
-    <section className="overlay-panel system-menu-panel">
-      <div className="overlay-panel-head">
-        <strong>{t("ui.menu")}</strong>
-        <button type="button" onClick={onClose}>
-          {t("ui.close")}
-        </button>
-      </div>
-      <div className="system-menu-meta">
-        <span>{playerName ?? "-"}</span>
-        <span>{mapTitle ?? t("ui.map")}{mapFileName ? ` [${mapFileName}]` : ""}</span>
-        <span>{inSafeZone ? t("ui.safeZone", [], "Safe Zone") : t("ui.combatZone", [], "Combat Zone")}</span>
-      </div>
-      <div className="system-menu-actions">
-        <button type="button" onClick={onOpenCharacter}>{t("ui.character")}</button>
-        <button type="button" onClick={onOpenInventory}>{t("ui.inventory")}</button>
-        <button type="button" onClick={onOpenQuest}>{t("ui.quest")}</button>
-        <button type="button" onClick={onLogout}>{t("ui.exit")}</button>
-      </div>
-      <div className="system-menu-transfer-list">
-        <div className="system-menu-transfer-title">{t("ui.transfer", [], "Transfer")}</div>
-        {transferOptions.map((option) => (
-          <button key={option.key} type="button" onClick={() => onTransferMap(option.key)}>
-            {option.label}
-          </button>
-        ))}
-      </div>
-      <form className="system-menu-qa-transfer" onSubmit={submitQaTransfer}>
-        <div className="system-menu-transfer-title">{t("ui.qaJump", [], "QA Jump")}</div>
-        <label>
-          <span>{t("ui.map")}</span>
-          <input
-            value={qaMap}
-            onChange={(event) => setQaMap(event.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </label>
-        <div className="system-menu-qa-transfer-coords">
-          <label>
-            <span>X</span>
-            <input
-              type="number"
-              value={qaX}
-              onChange={(event) => setQaX(event.target.value)}
-              inputMode="numeric"
-            />
-          </label>
-          <label>
-            <span>Y</span>
-            <input
-              type="number"
-              value={qaY}
-              onChange={(event) => setQaY(event.target.value)}
-              inputMode="numeric"
-            />
-          </label>
-          <button type="submit">{t("ui.go", [], "Go")}</button>
+    <>
+      <section className="system-menu-panel" aria-label={t("ui.menu")}>
+        <img className="system-menu-frame" src={ORIGINAL_UI.menu.frame} alt="" draggable={false} />
+        {menuButtons.map((button) => {
+          const definition = ORIGINAL_UI.menu.buttons[button.key];
+
+          return (
+            <div
+              key={button.key}
+              className="system-menu-icon"
+              style={{ left: `${definition.x}px`, top: `${definition.y}px` }}
+            >
+              <SpriteButton sprite={definition.sprite} label={button.label} onClick={button.onClick} />
+            </div>
+          );
+        })}
+        <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
+      </section>
+      <section className="system-menu-qa-panel" aria-label="QA transfer">
+        <div className="system-menu-meta">
+          <span>{playerName ?? "-"}</span>
+          <span>{mapTitle ?? t("ui.map")}{mapFileName ? ` [${mapFileName}]` : ""}</span>
+          <span>{inSafeZone ? t("ui.safeZone", [], "Safe Zone") : t("ui.combatZone", [], "Combat Zone")}</span>
         </div>
-      </form>
-    </section>
+        <div className="system-menu-transfer-list">
+          <div className="system-menu-transfer-title">{t("ui.transfer", [], "Transfer")}</div>
+          {transferOptions.map((option) => (
+            <button key={option.key} type="button" onClick={() => onTransferMap(option.key)}>
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <form className="system-menu-qa-transfer" onSubmit={submitQaTransfer}>
+          <div className="system-menu-transfer-title">{t("ui.qaJump", [], "QA Jump")}</div>
+          <label>
+            <span>{t("ui.map")}</span>
+            <input
+              value={qaMap}
+              onChange={(event) => setQaMap(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+          <div className="system-menu-qa-transfer-coords">
+            <label>
+              <span>X</span>
+              <input
+                type="number"
+                value={qaX}
+                onChange={(event) => setQaX(event.target.value)}
+                inputMode="numeric"
+              />
+            </label>
+            <label>
+              <span>Y</span>
+              <input
+                type="number"
+                value={qaY}
+                onChange={(event) => setQaY(event.target.value)}
+                inputMode="numeric"
+              />
+            </label>
+            <button type="submit">{t("ui.go", [], "Go")}</button>
+          </div>
+        </form>
+      </section>
+    </>
   );
 }
 
@@ -2106,6 +2530,280 @@ function normalizeMapInput(value: string) {
 function parseFiniteInteger(value: string) {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function GameShopWindow({
+  t,
+  gold,
+  credits,
+  playerClass,
+  onBuy,
+  onClose,
+}: {
+  t: TranslateFn;
+  gold: number;
+  credits: number;
+  playerClass: EntityClassKey;
+  onBuy: (gameShopIndex: number, quantity: number, paymentType: GameShopPaymentType) => void;
+  onClose: () => void;
+}) {
+  const [sectionFilter, setSectionFilter] = useState<GameShopSectionFilter>("all");
+  const [classFilter, setClassFilter] = useState<GameShopClassFilter>(playerClass);
+  const [categoryFilter, setCategoryFilter] = useState("Show All");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [paymentType, setPaymentType] = useState<GameShopPaymentType>("gold");
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+
+  const sectionItems = useMemo(
+    () => applyGameShopSectionFilter(CRYSTAL_GAME_SHOP_ITEMS, sectionFilter),
+    [sectionFilter],
+  );
+  const classItems = useMemo(
+    () => sectionItems.filter((item) => gameShopClassMatches(item.class, classFilter)),
+    [sectionItems, classFilter],
+  );
+  const searchQuery = search.trim().toLowerCase();
+  const searchedItems = useMemo(
+    () =>
+      classItems.filter((item) =>
+        searchQuery ? item.item_name.toLowerCase().includes(searchQuery) : true,
+      ),
+    [classItems, searchQuery],
+  );
+  const categories = useMemo(
+    () => [
+      "Show All",
+      ...Array.from(new Set(searchedItems.map((item) => item.category))).sort((left, right) =>
+        left.localeCompare(right),
+      ),
+    ],
+    [searchedItems],
+  );
+  const filteredItems = useMemo(
+    () =>
+      searchedItems
+        .filter((item) => categoryFilter === "Show All" || item.category === categoryFilter)
+        .slice()
+        .sort(compareGameShopItems),
+    [searchedItems, categoryFilter],
+  );
+  const pageCount = Math.max(1, Math.ceil(filteredItems.length / GAME_SHOP_ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const visibleItems = filteredItems.slice(
+    currentPage * GAME_SHOP_ITEMS_PER_PAGE,
+    currentPage * GAME_SHOP_ITEMS_PER_PAGE + GAME_SHOP_ITEMS_PER_PAGE,
+  );
+
+  useEffect(() => {
+    setClassFilter(playerClass);
+  }, [playerClass]);
+
+  useEffect(() => {
+    setPage(0);
+    if (!categories.includes(categoryFilter)) {
+      setCategoryFilter("Show All");
+    }
+  }, [categories, categoryFilter]);
+
+  useEffect(() => {
+    if (page > pageCount - 1) {
+      setPage(pageCount - 1);
+    }
+  }, [page, pageCount]);
+
+  const setQuantity = (gameShopIndex: number, nextQuantity: number) => {
+    setQuantities((current) => ({
+      ...current,
+      [gameShopIndex]: Math.max(1, Math.min(99, nextQuantity)),
+    }));
+  };
+
+  return (
+    <section className="game-shop-window" aria-label={t("ui.gameShop")}>
+      <img className="game-shop-frame" src={ORIGINAL_UI.gameShop.frame} alt="" draggable={false} />
+      <img className="game-shop-title" src={ORIGINAL_UI.gameShop.title} alt="GAMESHOP" draggable={false} />
+      <div className="game-shop-close">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.closeButton} label={t("ui.close")} onClick={onClose} />
+      </div>
+      <img className="game-shop-filter-bg" src={ORIGINAL_UI.gameShop.filterBackground} alt="" draggable={false} />
+      <div className="game-shop-scroll up">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} />
+      </div>
+      <div className="game-shop-scroll thumb">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.positionBar} label={t("ui.scroll", [], "Scroll")} onClick={() => undefined} />
+      </div>
+      <div className="game-shop-scroll down">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.downButton} label={t("ui.down", [], "Down")} onClick={() => undefined} />
+      </div>
+      <div className="game-shop-section all">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.sectionTabs.all} label="All" active={sectionFilter === "all"} onClick={() => setSectionFilter("all")} />
+      </div>
+      <div className="game-shop-section top">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.sectionTabs.top} label="Top" active={sectionFilter === "top"} onClick={() => setSectionFilter("top")} />
+      </div>
+      <div className="game-shop-section deals">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.sectionTabs.deals} label="Deals" active={sectionFilter === "deals"} onClick={() => setSectionFilter("deals")} />
+      </div>
+      <div className="game-shop-section new">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.sectionTabs.newItems} label="New" active={sectionFilter === "new"} onClick={() => setSectionFilter("new")} />
+      </div>
+      <div className="game-shop-class-tabs">
+        {GAME_SHOP_CLASS_FILTERS.map((key, index) => (
+          <div key={key} style={{ left: `${index === 0 ? 0 : 29 + (index - 1) * 23}px` }}>
+            <SpriteButton
+              sprite={ORIGINAL_UI.gameShop.classTabs[key]}
+              label={key}
+              active={classFilter === key}
+              onClick={() => setClassFilter(key)}
+            />
+          </div>
+        ))}
+      </div>
+      <input
+        className="game-shop-search"
+        aria-label="Search"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        spellCheck={false}
+      />
+      <div className="game-shop-categories">
+        {categories.map((category) => (
+          <button
+            key={category}
+            type="button"
+            className={category === categoryFilter ? "active" : ""}
+            onClick={() => setCategoryFilter(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+      <div className="game-shop-cells">
+        {visibleItems.map((item, index) => (
+          <GameShopCell
+            key={item.game_shop_index}
+            item={item}
+            index={index}
+            quantity={quantities[item.game_shop_index] ?? 1}
+            onQuantityChange={(nextQuantity) => setQuantity(item.game_shop_index, nextQuantity)}
+            onBuy={() => onBuy(item.game_shop_index, quantities[item.game_shop_index] ?? 1, paymentType)}
+            t={t}
+          />
+        ))}
+      </div>
+      <div className="game-shop-total credits">{credits}</div>
+      <div className="game-shop-total gold">{gold}</div>
+      <button type="button" className="game-shop-payment gold" onClick={() => setPaymentType("gold")}>
+        <img src={paymentType === "gold" ? ORIGINAL_UI.gameShop.paymentBox.checked : ORIGINAL_UI.gameShop.paymentBox.unchecked} alt="" draggable={false} />
+        <span>Gold</span>
+      </button>
+      <button type="button" className="game-shop-payment credit" onClick={() => setPaymentType("credit")}>
+        <img src={paymentType === "credit" ? ORIGINAL_UI.gameShop.paymentBox.checked : ORIGINAL_UI.gameShop.paymentBox.unchecked} alt="" draggable={false} />
+        <span>Credits</span>
+      </button>
+      <div className="game-shop-page">{currentPage + 1} / {pageCount}</div>
+      <div className="game-shop-page-button previous">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.previous", [], "Previous")} onClick={() => setPage((current) => Math.max(0, current - 1))} />
+      </div>
+      <div className="game-shop-page-button next">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.next", [], "Next")} onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))} />
+      </div>
+    </section>
+  );
+}
+
+function GameShopCell({
+  item,
+  index,
+  quantity,
+  onQuantityChange,
+  onBuy,
+  t,
+}: {
+  item: CrystalGameShopEntry;
+  index: number;
+  quantity: number;
+  onQuantityChange: (quantity: number) => void;
+  onBuy: () => void;
+  t: TranslateFn;
+}) {
+  const info = gameShopItemInfo(item.item_index);
+  const left = index < 4 ? 152 + index * 132 : 152 + (index - 4) * 132;
+  const top = index < 4 ? 115 : 275;
+  const hasPreview = Boolean(info && GAME_SHOP_PREVIEW_ITEM_TYPES.has(info.item_type));
+  const displayName = truncateGameShopName(item.item_name);
+
+  return (
+    <div className="game-shop-cell-frame" style={{ left, top }}>
+      <img className="game-shop-cell-bg" src={ORIGINAL_UI.gameShop.cellFrame} alt="" draggable={false} />
+      <div className="game-shop-cell-name" title={item.item_name}>{displayName}</div>
+      {info ? (
+        <img
+          className="game-shop-cell-icon"
+          src={originalItemIconPath(info.image)}
+          alt=""
+          draggable={false}
+        />
+      ) : null}
+      <div className="game-shop-cell-stock-label">STOCK:</div>
+      <div className="game-shop-cell-stock-value">{formatGameShopStock(item.stock)}</div>
+      <div className="game-shop-cell-count">{item.count > 1 ? item.count : ""}</div>
+      <div className="game-shop-cell-quantity-down">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.down", [], "Down")} onClick={() => onQuantityChange(quantity - 1)} />
+      </div>
+      <div className="game-shop-cell-quantity">{quantity}</div>
+      <div className="game-shop-cell-quantity-up">
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.up", [], "Up")} onClick={() => onQuantityChange(quantity + 1)} />
+      </div>
+      <div className="game-shop-cell-credit-price">{item.credit_price * quantity}</div>
+      <div className="game-shop-cell-gold-price">{item.gold_price * quantity}</div>
+      {hasPreview ? (
+        <div className="game-shop-cell-preview">
+          <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => undefined} />
+        </div>
+      ) : null}
+      <div className={hasPreview ? "game-shop-cell-buy with-preview" : "game-shop-cell-buy"}>
+        <SpriteButton sprite={ORIGINAL_UI.gameShop.buyButton} label={t("ui.buy", [], "Buy")} onClick={onBuy} />
+      </div>
+    </div>
+  );
+}
+
+function applyGameShopSectionFilter(items: readonly CrystalGameShopEntry[], section: GameShopSectionFilter) {
+  switch (section) {
+    case "top":
+      return items.slice(0, 24);
+    case "deals":
+      return items.filter((item) => item.gold_price > 0 && item.credit_price > 0);
+    case "new":
+      return [];
+    case "all":
+    default:
+      return items;
+  }
+}
+
+function gameShopClassMatches(itemClass: string, classFilter: GameShopClassFilter) {
+  return classFilter === "all" || itemClass.toLowerCase() === "all" || itemClass.toLowerCase() === classFilter;
+}
+
+function gameShopItemInfo(itemIndex: number): CrystalItemEntry | undefined {
+  return CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX[String(itemIndex) as keyof typeof CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX];
+}
+
+function compareGameShopItems(left: CrystalGameShopEntry, right: CrystalGameShopEntry) {
+  return left.item_name.localeCompare(right.item_name) || left.game_shop_index - right.game_shop_index;
+}
+
+function truncateGameShopName(name: string) {
+  return name.length > 17 ? `${name.slice(0, 17)}...` : name;
+}
+
+function formatGameShopStock(stock: number) {
+  if (stock <= 0) return "\u221e";
+  if (stock >= 99) return "99+";
+  return String(stock);
 }
 
 function NpcDialogPanel({
@@ -2122,37 +2820,36 @@ function NpcDialogPanel({
   onSubmitInput: (value: string) => void;
 }) {
   const [inputValue, setInputValue] = useState("");
+  const bodyLines = dialog.body.filter((line) => line.trim().length > 0);
 
   return (
     <section className="npc-dialog-panel">
       <div className="npc-dialog-head">
-        <div>
-          <div className="npc-dialog-caption">{dialog.npcName}</div>
-          <strong>{dialog.title}</strong>
+        <strong>{dialog.title || dialog.npcName}</strong>
+        <div className="npc-dialog-actions">
+          <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
+          <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close")} onClick={onClose} />
         </div>
-        <button type="button" className="npc-dialog-close" onClick={onClose} aria-label={t("ui.close")}>
-          X
-        </button>
       </div>
       <div className="npc-dialog-body">
-        {dialog.body.map((line, index) => (
+        {bodyLines.map((line, index) => (
           <p key={`${dialog.npcObjectId}-${index}`}>{line}</p>
         ))}
+        {dialog.links.length ? (
+          <div className="npc-dialog-links">
+            {dialog.links.map((link, index) => (
+              <button
+                key={`${dialog.npcObjectId}-link-${index}-${link.target}`}
+                type="button"
+                data-target={link.target}
+                onClick={() => onSelectTarget(link.target)}
+              >
+                {link.text}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
-      {dialog.links.length ? (
-        <div className="npc-dialog-links">
-          {dialog.links.map((link, index) => (
-            <button
-              key={`${dialog.npcObjectId}-link-${index}-${link.target}`}
-              type="button"
-              data-target={link.target}
-              onClick={() => onSelectTarget(link.target)}
-            >
-              {link.text}
-            </button>
-          ))}
-        </div>
-      ) : null}
       {dialog.input ? (
         <form
           className="npc-dialog-input-form"
@@ -2174,7 +2871,7 @@ function NpcDialogPanel({
           <button type="submit">{t("ui.confirm", [], "Confirm")}</button>
         </form>
       ) : null}
-      <div className="npc-dialog-footer">{dialog.footer}</div>
+      {dialog.footer ? <div className="npc-dialog-footer">{dialog.footer}</div> : null}
     </section>
   );
 }
@@ -2211,7 +2908,7 @@ function ChatFrame({
   const previousMaxScrollOffsetRef = useRef(0);
   const previousActiveFilterRef = useRef(activeFilter);
   const previousExpandedRef = useRef(expanded);
-  const visibleLineCount = 6;
+  const visibleLineCount = 4;
   const maxScrollOffset = Math.max(lines.length - visibleLineCount, 0);
   const visibleLines = lines.slice(scrollOffset, scrollOffset + visibleLineCount);
   const knobTop = maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28);
@@ -2372,6 +3069,12 @@ function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }: BeltDi
         alt=""
         draggable={false}
       />
+      <img
+        className="belt-dialog-bg belt-dialog-overlay"
+        src={vertical ? ORIGINAL_UI.game.belt.verticalOverlay : ORIGINAL_UI.game.belt.horizontalOverlay}
+        alt=""
+        draggable={false}
+      />
       {ORIGINAL_UI.game.belt.slots.map((slot, index) => {
         const item = itemBySlot.get(index) ?? null;
 
@@ -2441,10 +3144,12 @@ type MiniMapPanelProps = {
   world: DisplayWorld;
   player: DisplayEntity | null;
   showMailPanel: boolean;
+  showBigMap: boolean;
   onToggleMail: () => void;
+  onToggleBigMap: () => void;
 };
 
-function MiniMapPanel({ t, world, player, showMailPanel, onToggleMail }: MiniMapPanelProps) {
+function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onToggleMail, onToggleBigMap }: MiniMapPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
   const miniMapAsset = originalMiniMapAssetPath(world.miniMapIndex);
   const hasRasterMiniMap = Boolean(miniMapAsset);
@@ -2473,7 +3178,7 @@ function MiniMapPanel({ t, world, player, showMailPanel, onToggleMail }: MiniMap
         />
       </div>
       <div className="mini-map-button bigmap">
-        <SpriteButton sprite={ORIGINAL_UI.game.miniMapButtons.bigMap} label={t("client.BigMapKey", ["M"], t("ui.map"))} onClick={() => setCollapsed(false)} />
+        <SpriteButton sprite={ORIGINAL_UI.game.miniMapButtons.bigMap} label={t("client.BigMapKey", ["M"], t("ui.map"))} onClick={onToggleBigMap} active={showBigMap} />
       </div>
       {hasRasterMiniMap ? <div className="mini-map-button toggle">
         <SpriteButton sprite={ORIGINAL_UI.game.miniMapButtons.toggle} label={t("ui.toggleMiniMap")} onClick={() => setCollapsed((current) => !current)} />
@@ -2888,6 +3593,8 @@ type MainHudProps = {
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onDropGold: () => void;
   onLogout: () => void;
+  showGameShop: boolean;
+  onToggleGameShop: () => void;
   showMenu: boolean;
   onToggleMenu: () => void;
 };
@@ -2908,6 +3615,8 @@ function MainHud({
   onOpenInventoryTab,
   onDropGold,
   onLogout,
+  showGameShop,
+  onToggleGameShop,
   showMenu,
   onToggleMenu,
 }: MainHudProps) {
@@ -2918,6 +3627,7 @@ function MainHud({
   const maxHp = world.playerMaxHp ?? 0;
   const currentMp = world.playerMp ?? 0;
   const maxMp = 100;
+  const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
@@ -2933,11 +3643,21 @@ function MainHud({
         <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
         <img className="hud-weight-bar" src={ORIGINAL_UI.hud.weightBar} alt="" draggable={false} />
 
-        <div className="hud-orb-fill hp" style={{ clipPath: `inset(${(1 - healthRatio) * 100}% 0 0 0 round 999px)` }} />
-        <div className="hud-orb-fill mp" style={{ clipPath: `inset(${(1 - manaRatio) * 100}% 0 0 0 round 999px)` }} />
+        <div className={`hud-orb-fill hp ${hpOnlyOrb ? "hp-only" : ""}`} style={{ height: `${80 * healthRatio}px` }}>
+          <img src={hpOnlyOrb ? ORIGINAL_UI.hud.healthOnlyOrb : ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
+        </div>
+        <div className={`hud-orb-fill mp ${hpOnlyOrb ? "hidden" : ""}`} style={{ height: `${80 * manaRatio}px` }}>
+          <img src={ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
+        </div>
 
-        <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>
-        <div className="hud-bottom-label">{`${maxHp}    ${maxMp}`}</div>
+        {hpOnlyOrb ? (
+          <div className="hud-health-only-label">{`HP ${currentHp}/${maxHp}`}</div>
+        ) : (
+          <>
+            <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>
+            <div className="hud-bottom-label">{`${maxHp}    ${maxMp}`}</div>
+          </>
+        )}
         <div className="hud-level-label">{player?.level ?? 1}</div>
         <div className="hud-name-label">{player?.name ?? ""}</div>
         <div className="hud-map-label">
@@ -2951,7 +3671,7 @@ function MainHud({
         <div className="hud-space-label">{`${world.currentWeight}`}</div>
 
         <div className="hud-button shop">
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={() => onOpenInventoryTab("quest")} />
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.gameShop} label={t("ui.gameShop")} onClick={onToggleGameShop} active={showGameShop} />
         </div>
         <div className="hud-button menu">
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.menu} label={t("ui.menu")} onClick={onToggleMenu} active={showMenu} />
@@ -3049,7 +3769,7 @@ export function InventoryWindow({
   const visibleStorageItems = storagePageLocked
     ? []
     : world.storageItems.filter((item) => item.slot >= storagePageStart && item.slot < storagePageEnd);
-  const showStorageWindow = activeTab === "quest" || storageMode !== null;
+  const showStorageWindow = storageMode !== null;
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DisplayItem | null>(null);
   const [pendingSellItem, setPendingSellItem] = useState<DisplayItem | null>(null);
   const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
@@ -3266,83 +3986,6 @@ export function InventoryWindow({
           active={deleteMode}
         />
       </div>
-      <div className="inventory-delete" style={{ left: 103 }}>
-        <button
-          type="button"
-          className="window-tab-button"
-          onClick={() => {
-            setSellMode((current) => !current);
-            setDeleteMode(false);
-            setPendingDeleteItem(null);
-            setPendingSellItem(null);
-            setPendingMoveItem(null);
-            setPendingSplitItem(null);
-            setPendingGoldDrop(false);
-            setStorageMode(null);
-            setDeleteFeedback(null);
-          }}
-        >
-          <img src={ORIGINAL_UI.inventory.deleteButton.base} alt={t("ui.sellItem", [], "Sell Item")} draggable={false} />
-        </button>
-      </div>
-      <div className="inventory-delete" style={{ left: 144 }}>
-        <button
-          type="button"
-          className="window-tab-button"
-          onClick={() => {
-            setPendingGoldDrop(true);
-            setDeleteMode(false);
-            setSellMode(false);
-            setPendingDeleteItem(null);
-            setPendingSellItem(null);
-            setPendingMoveItem(null);
-            setPendingSplitItem(null);
-            setStorageMode(null);
-            setDeleteFeedback(null);
-          }}
-        >
-          <img src={ORIGINAL_UI.inventory.closeButton.base} alt={t("ui.dropGold", [], "Drop Gold")} draggable={false} />
-        </button>
-      </div>
-      <div className="inventory-delete" style={{ left: 185 }}>
-        <button
-          type="button"
-          className="window-tab-button"
-          onClick={() => {
-            setStorageMode((current) => (current === "store" ? null : "store"));
-            setDeleteMode(false);
-            setSellMode(false);
-            setPendingDeleteItem(null);
-            setPendingSellItem(null);
-            setPendingMoveItem(null);
-            setPendingSplitItem(null);
-            setPendingGoldDrop(false);
-            setDeleteFeedback(null);
-          }}
-        >
-          <img src={ORIGINAL_UI.inventory.deleteButton.base} alt={t("ui.storeItem", [], "Store Item")} draggable={false} />
-        </button>
-      </div>
-      <div className="inventory-delete" style={{ left: 226 }}>
-        <button
-          type="button"
-          className="window-tab-button"
-          onClick={() => {
-            setStorageMode((current) => (current === "takeBack" ? null : "takeBack"));
-            setDeleteMode(false);
-            setSellMode(false);
-            setPendingDeleteItem(null);
-            setPendingSellItem(null);
-            setPendingMoveItem(null);
-            setPendingSplitItem(null);
-            setPendingGoldDrop(false);
-            setDeleteFeedback(null);
-          }}
-        >
-          <img src={ORIGINAL_UI.inventory.closeButton.base} alt={t("ui.takeBackItem", [], "Take Back")} draggable={false} />
-        </button>
-      </div>
-
       <div className="inventory-grid">
         {ORIGINAL_UI.inventory.slots.map((slot, slotIndex) => (
           <div
@@ -3517,20 +4160,8 @@ export function InventoryWindow({
 
       <img className="inventory-weight-bar" src={ORIGINAL_UI.inventory.weightBar} alt="" draggable={false} />
       <div className="inventory-gold">{world.gold}</div>
-      <div className="inventory-weight">{`${world.currentWeight}/${world.maxWeight}`}</div>
+      <div className="inventory-weight">{world.freeBagSlots}</div>
       {deleteMode ? <div className="inventory-delete-hint">{`${t("ui.deleteItem")}...`}</div> : null}
-      {sellMode ? <div className="inventory-delete-hint">{`${t("ui.sellItem", [], "Sell Item")}...`}</div> : null}
-      {storageMode === "store" ? (
-        <div className="inventory-delete-hint">{`${t("ui.storeItem", [], "Store Item")}...`}</div>
-      ) : null}
-      {storageMode === "takeBack" ? (
-        <div className="inventory-delete-hint">{`${t("ui.takeBackItem", [], "Take Back")}...`}</div>
-      ) : null}
-      {pendingMoveItem ? (
-        <div className="inventory-delete-hint">
-          {`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${t("ui.selectTargetSlot", [], "select target slot")}`}
-        </div>
-      ) : null}
       {showStorageWindow ? (
         <div className="window-shell storage-window">
           <div className="storage-window-title">{t("ui.storageWindow", [], "Storage")}</div>
@@ -4009,7 +4640,6 @@ export function CharacterWindow({
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
-  const [repairMode, setRepairMode] = useState<"normal" | "special" | null>(null);
   const stats1Values = [
     displayFieldValue(world.playerHp, world.playerMaxHp),
     displayFieldValue(world.playerMp, 100),
@@ -4037,18 +4667,14 @@ export function CharacterWindow({
     "",
   ];
   const spellValues = [
-    ...world.knownSkills.slice(0, 4).map((skill) => {
+    ...world.knownSkills.slice(0, 7).map((skill) => {
       const cooldownSuffix =
         skill.cooldownRemainingTicks > 0 ? ` (${skill.cooldownRemainingTicks})` : "";
       return `${skill.name}${cooldownSuffix}`;
     }),
-    ...world.activeBuffs.slice(0, 2).map((buff) => {
-      const modifiers = [`ATK ${buff.attackBonus}`, `DEF ${buff.defenceBonus}`].join(" / ");
-      return `${buff.name} ${modifiers}`.trim();
-    }),
   ];
-  while (spellValues.length < 6) {
-    spellValues.push(world.interactionHints[spellValues.length] ?? "");
+  while (spellValues.length < 7) {
+    spellValues.push("");
   }
 
   return (
@@ -4085,16 +4711,6 @@ export function CharacterWindow({
                     className="character-slot-card"
                     title={item.name}
                     onClick={() => {
-                      if (repairMode === "normal") {
-                        onRepairItem({ slot: item.slot });
-                        setRepairMode(null);
-                        return;
-                      }
-                      if (repairMode === "special") {
-                        onSpecialRepairItem({ slot: item.slot });
-                        setRepairMode(null);
-                        return;
-                      }
                       onRemoveItem({ slot: item.slot });
                     }}
                   >
@@ -4109,29 +4725,6 @@ export function CharacterWindow({
               </div>
             );
           })}
-          {repairMode ? (
-            <div className="inventory-delete-hint" style={{ position: "absolute", left: 18, top: 340, width: 220 }}>
-              {repairMode === "normal"
-                ? t("ui.repairItem", [], "Repair Item")
-                : t("ui.specialRepairItem", [], "Special Repair")}
-            </div>
-          ) : null}
-          <div className="character-repair-actions">
-            <button
-              type="button"
-              className={repairMode === "normal" ? "active" : ""}
-              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
-            >
-              {t("ui.repairItem", [], "Repair Item")}
-            </button>
-            <button
-              type="button"
-              className={repairMode === "special" ? "active" : ""}
-              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
-            >
-              {t("ui.specialRepairItem", [], "Special Repair")}
-            </button>
-          </div>
         </>
       ) : null}
 
@@ -4723,10 +5316,7 @@ function spriteAnimationMetaForEntity(
   }
 }
 
-function animationStateForMovement(
-  entity: DisplayEntity,
-  tileDistance: number,
-): EntitySpriteAnimationState {
+function animationStateForMovement(entity: DisplayEntity, tileDistance: number): EntitySpriteAnimationState {
   if (entity.dead || entity.kind === "npc") {
     return "standing";
   }
@@ -4741,9 +5331,9 @@ function animationStateForMovement(
 function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, tileDistance: number) {
   switch (animationState) {
     case "running":
-      return Math.max(560, tileDistance * 280);
+      return Math.max(600, tileDistance * 300);
     case "walking":
-      return Math.max(560, tileDistance * 560);
+      return Math.max(600, tileDistance * 600);
     default:
       return 0;
   }
@@ -4807,6 +5397,82 @@ function entityMotionOffsetForEntity(
   };
 }
 
+function refreshEntityMotionSnapshots(
+  screen: ClientScreen,
+  entities: DisplayEntity[],
+  renderPlayer: DisplayEntity | null,
+  snapshots: Record<string, EntityMotionSnapshot>,
+  now: number,
+): Record<string, EntityMotionSnapshot> {
+  if (screen !== "game") {
+    return {};
+  }
+
+  const nextSnapshots: Record<string, EntityMotionSnapshot> = {};
+  const motionEntities = entities.map((entity) =>
+    renderPlayer && entity.objectId === renderPlayer.objectId
+      ? { ...entity, x: renderPlayer.x, y: renderPlayer.y }
+      : entity,
+  );
+
+  for (const entity of motionEntities) {
+    const previous = snapshots[entity.objectId];
+    if (previous && previous.toX === entity.x && previous.toY === entity.y) {
+      nextSnapshots[entity.objectId] = previous;
+      continue;
+    }
+
+    const previousX = previous ? currentMotionCoordinate(previous.fromX, previous.toX, previous, now) : entity.x;
+    const previousY = previous ? currentMotionCoordinate(previous.fromY, previous.toY, previous, now) : entity.y;
+    const tileDistance = Math.max(Math.abs(entity.x - previousX), Math.abs(entity.y - previousY));
+
+    if (tileDistance > 3) {
+      nextSnapshots[entity.objectId] = {
+        fromX: entity.x,
+        fromY: entity.y,
+        toX: entity.x,
+        toY: entity.y,
+        animationState: "standing",
+        startedAt: now,
+        expiresAt: 0,
+      };
+      continue;
+    }
+
+    if (tileDistance > 0.001) {
+      const animationState = animationStateForMovement(entity, tileDistance);
+      nextSnapshots[entity.objectId] = {
+        fromX: previousX,
+        fromY: previousY,
+        toX: entity.x,
+        toY: entity.y,
+        animationState,
+        startedAt: now,
+        expiresAt: now + animationStateLifetimeMs(animationState, tileDistance),
+      };
+      continue;
+    }
+
+    nextSnapshots[entity.objectId] = previous
+      ? {
+          ...previous,
+          toX: entity.x,
+          toY: entity.y,
+        }
+      : {
+          fromX: entity.x,
+          fromY: entity.y,
+          toX: entity.x,
+          toY: entity.y,
+          animationState: "standing",
+          startedAt: now,
+          expiresAt: 0,
+        };
+  }
+
+  return nextSnapshots;
+}
+
 function cameraMotionOffsetForEntity(
   entity: DisplayEntity,
   snapshots: Record<string, EntityMotionSnapshot>,
@@ -4836,6 +5502,15 @@ function remainingMotionRatio(snapshot: EntityMotionSnapshot, now: number) {
   const duration = snapshot.expiresAt - snapshot.startedAt;
   const elapsed = Math.min(Math.max(now - snapshot.startedAt, 0), duration);
   return 1 - elapsed / duration;
+}
+
+function currentMotionCoordinate(from: number, to: number, snapshot: EntityMotionSnapshot, now: number) {
+  const remaining = remainingMotionRatio(snapshot, now);
+  if (remaining <= 0) {
+    return to;
+  }
+
+  return to + (from - to) * remaining;
 }
 
 function projectileProgress(projectile: DisplayProjectile, now: number) {
@@ -4906,8 +5581,8 @@ function computeNameplateTop(
   hairFrame: OriginalSceneSpriteFrameMeta | null,
   weaponFrame?: OriginalSceneSpriteFrameMeta | null,
 ) {
-  const top = Math.min(bodyFrame?.y ?? -48, hairFrame?.y ?? bodyFrame?.y ?? -48, weaponFrame?.y ?? bodyFrame?.y ?? -48);
-  return top - 10;
+  const displayTop = bodyFrame?.y ?? -48;
+  return displayTop - 10;
 }
 
 function nameplateTopOffset(sprite: ViewportEntitySprite | null) {
@@ -4915,12 +5590,11 @@ function nameplateTopOffset(sprite: ViewportEntitySprite | null) {
 }
 
 function entityNameplateTopOffset(entity: DisplayEntity, sprite: ViewportEntitySprite | null) {
-  if (entity.kind !== "selfPlayer" && entity.kind !== "player") {
-    return nameplateTopOffset(sprite);
-  }
-
-  const bodyBottom = sprite?.body ? sprite.body.y + sprite.body.height : 16;
-  return Math.max(bodyBottom + 8, 24);
+  const lineAdjustment =
+    (entity.kind === "npc" || entity.kind === "monster") && entity.name.includes("_")
+      ? -((entity.name.split("_").filter(Boolean).length - 1) * 10) / 2
+      : 0;
+  return nameplateTopOffset(sprite) + lineAdjustment;
 }
 
 function weaponPlacementForDirection(direction?: string) {
@@ -5027,6 +5701,71 @@ function selectClassLabel(t: TranslateFn, classKey: SelectCharacterEntry["classK
 
 function originalItemIconPath(icon: number) {
   return `/original-ui/Items/${icon}.png`;
+}
+
+function originalMapLinkIconPath(icon: number) {
+  return ORIGINAL_UI.bigMap.mapLinkIcon(icon);
+}
+
+function bigMapNpcKey(mapFileName: string | null | undefined, name: string, x: number, y: number) {
+  return `${mapFileName ?? ""}|${name}|${x}|${y}`;
+}
+
+function withBigMapNpcInfo(mapFileName: string | null | undefined, entity: DisplayEntity): DisplayEntity {
+  if (entity.kind !== "npc") return entity;
+
+  const info = BIG_MAP_NPC_INDEX.get(bigMapNpcKey(mapFileName, entity.name, entity.x, entity.y));
+  if (!info) {
+    return entity;
+  }
+
+  return {
+    ...entity,
+    bigMapIcon: info.icon,
+    showOnBigMap: true,
+    canTeleportTo: info.teleport,
+  };
+}
+
+function bigMapNpcRowsForWorld(world: DisplayWorld): BigMapNpcRowView[] {
+  const mapFileName = world.mapFileName ?? "";
+  const manifestRows = CRYSTAL_BIG_MAP_NPCS.filter((npc) => npc.map === mapFileName);
+  if (manifestRows.length > 0) {
+    return manifestRows.map((npc, index) => ({
+      key: `${npc.map}-${npc.name}-${npc.x}-${npc.y}-${index}`,
+      name: npc.name,
+      icon: npc.icon,
+      x: npc.x,
+      y: npc.y,
+      canTeleportTo: npc.teleport,
+    }));
+  }
+
+  return world.entities
+    .filter((entity) => entity.kind === "npc")
+    .map((entity) => withBigMapNpcInfo(world.mapFileName, entity))
+    .filter((entity) => entity.showOnBigMap !== false)
+    .map((entity) => ({
+      key: entity.objectId,
+      name: entity.name,
+      icon: entity.bigMapIcon ?? 120,
+      x: entity.x,
+      y: entity.y,
+      canTeleportTo: entity.canTeleportTo === true,
+    }));
+}
+
+function bigMapNpcDisplayName(name: string) {
+  if (!name.includes("_")) {
+    return name;
+  }
+
+  const parts = name.split("_").filter(Boolean);
+  if (parts.length <= 1) {
+    return name.replace(/_/g, "");
+  }
+
+  return `${parts.slice(0, -1).map((part) => `(${part})`).join("")}${parts.at(-1) ?? ""}`;
 }
 
 function statNumber(value: number) {
@@ -5433,6 +6172,29 @@ function originalMiniMapAssetPath(miniMapIndex: number | null) {
   }
 
   return MINI_MAP_ASSETS.get(miniMapIndex) ?? null;
+}
+
+function originalBigMapAssetPath(bigMapIndex: number | null | undefined) {
+  if (!bigMapIndex || bigMapIndex <= 0) {
+    return null;
+  }
+
+  return MINI_MAP_ASSETS.get(bigMapIndex) ?? null;
+}
+
+function bigMapViewport(asset: { src: string; width: number; height: number } | null) {
+  const contentWidth = asset ? Math.min(568, asset.width) : 568;
+  const contentHeight = asset ? Math.min(380, asset.height) : 380;
+  return {
+    left: 14 + Math.floor((568 - contentWidth) / 2),
+    top: 52 + Math.floor((380 - contentHeight) / 2),
+    width: contentWidth,
+    height: contentHeight,
+    contentWidth,
+    contentHeight,
+    imageLeft: 0,
+    imageTop: 0,
+  };
 }
 
 function miniMapRasterStyle(raster: { left: number; top: number; width: number; height: number }) {

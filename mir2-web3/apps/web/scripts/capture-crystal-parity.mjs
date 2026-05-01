@@ -141,6 +141,28 @@ async function main() {
     await transferIfNeeded(client, map, x, y);
     await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
     await delay(750);
+    if (args.openGameShop === "true") {
+      await installCommandProbe(client);
+      await click(client, ".hud-button.shop button");
+      await waitUntil(client, "document.querySelector('.game-shop-window')", "game shop window", 5_000);
+      await delay(750);
+      if (args.buyGameShop === "true") {
+        await click(client, ".game-shop-payment.credit");
+        await delay(100);
+        await click(client, ".game-shop-cell-buy .sprite-button");
+        await delay(1_000);
+      }
+    }
+    if (args.openMail === "true") {
+      await click(client, ".mini-map-button.mail button");
+      await waitUntil(client, "document.querySelector('.mail-panel')", "mail panel", 5_000);
+      await delay(500);
+    }
+    if (args.openBigMap === "true") {
+      await click(client, ".mini-map-button.bigmap button");
+      await waitUntil(client, "document.querySelector('.big-map-dialog')", "big map dialog", 5_000);
+      await delay(500);
+    }
 
     const state = await readState(client);
     const screenshotPath = path.join(outputDir, `${prefix}.png`);
@@ -236,9 +258,7 @@ async function transferIfNeeded(client, targetMap, targetX, targetY) {
 
   await click(client, ".hud-button.menu button");
   await waitUntil(client, "document.querySelector('.system-menu-qa-transfer')", "qa transfer panel", 5_000);
-  await fillInput(client, ".system-menu-qa-transfer input:nth-of-type(1)", targetMap);
-  await fillInput(client, ".system-menu-qa-transfer input:nth-of-type(2)", String(targetX));
-  await fillInput(client, ".system-menu-qa-transfer input:nth-of-type(3)", String(targetY));
+  await fillTransferInputs(client, targetMap, String(targetX), String(targetY));
   await click(client, ".system-menu-qa-transfer button[type='submit']");
   await waitUntil(
     client,
@@ -253,6 +273,106 @@ async function transferIfNeeded(client, targetMap, targetX, targetY) {
     "target scene",
     20_000,
   );
+}
+
+async function installCommandProbe(client) {
+  await client.evaluate(`
+    (() => {
+      const sentKey = "__mir2QaSentCommands";
+      window[sentKey] = [];
+
+      if (!WebSocket.prototype.__mir2QaSendProbeWrapped) {
+        const originalWebSocketSend = WebSocket.prototype.send;
+        WebSocket.prototype.send = function(data) {
+          try {
+            const text =
+              typeof data === "string"
+                ? data
+                : data instanceof ArrayBuffer
+                  ? new TextDecoder().decode(data)
+                  : "";
+            const command = JSON.parse(text);
+            window[sentKey].push({
+              t: Date.now(),
+              command,
+            });
+          } catch {
+            // Best-effort QA probe.
+          }
+          return originalWebSocketSend.apply(this, arguments);
+        };
+        Object.defineProperty(WebSocket.prototype, "__mir2QaSendProbeWrapped", {
+          value: true,
+          configurable: true,
+        });
+      }
+
+      const wrapStage = (stage) => {
+        if (!stage || stage.__mir2QaSendProbeWrapped || typeof stage.send !== "function") return stage;
+        const originalSend = stage.send;
+        stage.send = function(command) {
+          try {
+            window[sentKey].push({
+              t: Date.now(),
+              command: JSON.parse(JSON.stringify(command)),
+            });
+          } catch {
+            // Best-effort QA probe.
+          }
+          return originalSend.apply(this, arguments);
+        };
+        Object.defineProperty(stage, "__mir2QaSendProbeWrapped", {
+          value: true,
+          configurable: true,
+        });
+        return stage;
+      };
+
+      const descriptor = Object.getOwnPropertyDescriptor(window, "__mir2Stage5");
+      if (descriptor?.get?.__mir2QaSendProbeAccessor) {
+        wrapStage(window.__mir2Stage5);
+        return true;
+      }
+      if (descriptor && descriptor.configurable === false) {
+        wrapStage(window.__mir2Stage5);
+        return false;
+      }
+
+      let currentStage = wrapStage(window.__mir2Stage5);
+      const getter = function() {
+        return currentStage;
+      };
+      getter.__mir2QaSendProbeAccessor = true;
+      Object.defineProperty(window, "__mir2Stage5", {
+        configurable: true,
+        enumerable: true,
+        get: getter,
+        set: (nextStage) => {
+          currentStage = wrapStage(nextStage);
+        },
+      });
+      return true;
+    })()
+  `);
+}
+
+async function fillTransferInputs(client, map, x, y) {
+  const ok = await client.evaluate(`
+    (() => {
+      const form = document.querySelector(".system-menu-qa-transfer");
+      const inputs = Array.from(form?.querySelectorAll("input") ?? []);
+      if (inputs.length < 3) return false;
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+      const values = ${JSON.stringify([map, x, y])};
+      inputs.slice(0, 3).forEach((input, index) => {
+        setter.call(input, values[index]);
+        input.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText" }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      return true;
+    })()
+  `);
+  if (!ok) throw new Error("Could not fill QA transfer inputs");
 }
 
 async function fillInput(client, selector, value) {
@@ -301,7 +421,18 @@ async function readState(client) {
       const hud = document.querySelector(".main-hud-shell")?.getBoundingClientRect();
       const chat = document.querySelector(".chat-frame")?.getBoundingClientRect();
       const duraPanel = document.querySelector(".dura-panel")?.getBoundingClientRect();
+      const gameShop = document.querySelector(".game-shop-window")?.getBoundingClientRect();
+      const mailPanel = document.querySelector(".mail-panel")?.getBoundingClientRect();
+      const bigMap = document.querySelector(".big-map-dialog")?.getBoundingClientRect();
+      const hudHealthOnlyLabel = document.querySelector(".hud-health-only-label");
       const chatLines = Array.from(document.querySelectorAll(".chat-feed-line")).map((node) => node.textContent ?? "");
+      const state = window.__mir2Stage5?.state ?? {};
+      const inventoryItems = state.world?.inventoryItems ?? state.inventoryItems ?? [];
+      const beltItems = state.world?.beltItems ?? state.beltItems ?? [];
+      const storageItems = state.world?.storageItems ?? state.storageItems ?? [];
+      const equipmentItems = state.world?.equipmentItems ?? state.equipmentItems ?? [];
+      const questLog = state.world?.questLog ?? state.questLog ?? [];
+      const knownSkills = state.world?.knownSkills ?? state.knownSkills ?? [];
       const nextDevPortals = Array.from(document.querySelectorAll("nextjs-portal"));
       const visibleNextDevPortals = nextDevPortals.filter((node) => {
         const box = node.getBoundingClientRect();
@@ -316,14 +447,26 @@ async function readState(client) {
         width: value.width,
         height: value.height,
       }) : null;
-      const state = window.__mir2Stage5?.state ?? {};
       const entities = state.entities ?? [];
       const nameplateNodes = Array.from(document.querySelectorAll(".entity-nameplate"));
+      const stageCursor = stage ? getComputedStyle(document.querySelector(".client-stage-frame")).cursor : null;
       return {
         screen: state.screen ?? null,
         mapFileName: state.mapFileName ?? null,
         mapTitle: state.mapTitle ?? null,
         player: state.player ?? null,
+        playerHp: state.world?.playerHp ?? state.playerHp ?? null,
+        playerMaxHp: state.world?.playerMaxHp ?? state.playerMaxHp ?? null,
+        playerMp: state.world?.playerMp ?? state.playerMp ?? null,
+          gold: state.world?.gold ?? state.gold ?? null,
+          credit: state.world?.credit ?? state.credit ?? null,
+          inventoryItemCount: inventoryItems.length,
+        beltItemCount: beltItems.length,
+        storageItemCount: storageItems.length,
+        equipmentItemCount: equipmentItems.length,
+        questCount: questLog.length,
+        skillCount: knownSkills.length,
+        hudHealthOnlyLabel: hudHealthOnlyLabel?.textContent ?? null,
         logs: state.logs ?? [],
         transitionOverlayVisible: Boolean(document.querySelector(".login-transition-overlay")),
         entityCount: entities.length,
@@ -349,7 +492,84 @@ async function readState(client) {
         miniMap: rect(miniMap),
         chat: rect(chat),
         duraPanel: rect(duraPanel),
+          gameShop: readGameShopState(rect, gameShop),
+        mailPanel: readMailState(rect, mailPanel),
+        bigMap: readBigMapState(rect, bigMap),
+        cursor: {
+          stage: stageCursor,
+          npcHit: document.querySelector(".entity-sprite-stack.npc .entity-sprite-hit")
+            ? getComputedStyle(document.querySelector(".entity-sprite-stack.npc .entity-sprite-hit")).cursor
+            : null,
+          monsterHit: document.querySelector(".entity-sprite-stack.monster .entity-sprite-hit")
+            ? getComputedStyle(document.querySelector(".entity-sprite-stack.monster .entity-sprite-hit")).cursor
+            : null,
+        },
       };
+
+      function readGameShopState(rect, gameShopBounds) {
+        const cells = Array.from(document.querySelectorAll(".game-shop-cell-frame"));
+        const icons = Array.from(document.querySelectorAll(".game-shop-cell-icon"));
+        const sentCommands = Array.isArray(window.__mir2QaSentCommands) ? window.__mir2QaSentCommands : [];
+        return {
+          visible: Boolean(document.querySelector(".game-shop-window")),
+          inventoryVisible: Boolean(document.querySelector(".inventory-window")),
+          bounds: rect(gameShopBounds),
+          cellCount: cells.length,
+          firstCellBounds: rect(cells[0]?.getBoundingClientRect()),
+          firstCellName: document.querySelector(".game-shop-cell-name")?.textContent ?? null,
+          firstCellCreditPrice: document.querySelector(".game-shop-cell-credit-price")?.textContent ?? null,
+          firstCellGoldPrice: document.querySelector(".game-shop-cell-gold-price")?.textContent ?? null,
+          categoryCount: document.querySelectorAll(".game-shop-categories button").length,
+          categories: Array.from(document.querySelectorAll(".game-shop-categories button")).map((node) => node.textContent ?? ""),
+          pageLabel: document.querySelector(".game-shop-page")?.textContent ?? null,
+          loadedIconCount: icons.filter((icon) => icon.complete && icon.naturalWidth > 0).length,
+          iconSources: icons.slice(0, 8).map((icon) => icon.getAttribute("src")),
+          buyButtonCount: document.querySelectorAll(".game-shop-cell-buy .sprite-button").length,
+          previewButtonCount: document.querySelectorAll(".game-shop-cell-preview .sprite-button").length,
+          paymentGoldBox: document.querySelector(".game-shop-payment.gold img")?.getAttribute("src") ?? null,
+          paymentCreditBox: document.querySelector(".game-shop-payment.credit img")?.getAttribute("src") ?? null,
+          sentCommandTail: sentCommands.slice(-8),
+          oldPlaceholderCellCount: document.querySelectorAll(".game-shop-cell").length,
+        };
+      }
+
+      function readMailState(rect, mailBounds) {
+        const rowNodes = Array.from(document.querySelectorAll(".mail-row"));
+        const overlayHead = document.querySelector(".mail-panel > .overlay-panel-head");
+        return {
+          visible: Boolean(document.querySelector(".mail-panel")),
+          bounds: rect(mailBounds),
+          rowCount: rowNodes.length,
+          rowTexts: rowNodes.slice(0, 10).map((node) => node.textContent?.trim() ?? ""),
+          pageLabel: document.querySelector(".mail-page-label")?.textContent ?? null,
+          hasFrame: Boolean(document.querySelector(".mail-frame")),
+          emptyVisible: Boolean(document.querySelector(".mail-empty")),
+          visibleOverlayHead: overlayHead ? (() => {
+            const box = overlayHead.getBoundingClientRect();
+            const style = getComputedStyle(overlayHead);
+            return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0 && box.left >= 0 && box.top >= 0;
+          })() : false,
+          oldOverlayRowCount: document.querySelectorAll(".mail-panel .overlay-panel-list > .overlay-panel-row").length,
+        };
+      }
+
+      function readBigMapState(rect, bigMapBounds) {
+        return {
+          visible: Boolean(document.querySelector(".big-map-dialog")),
+          bounds: rect(bigMapBounds),
+          viewport: rect(document.querySelector(".big-map-viewport")?.getBoundingClientRect()),
+          npcRowCount: document.querySelectorAll(".big-map-npc-row").length,
+          npcRows: Array.from(document.querySelectorAll(".big-map-npc-row")).slice(0, 10).map((node) => ({
+            text: node.textContent?.trim() ?? "",
+            icon: node.querySelector(".big-map-npc-icon")?.getAttribute("src") ?? null,
+          })),
+          dotCount: document.querySelectorAll(".big-map-dot").length,
+          hasFrame: Boolean(document.querySelector(".big-map-frame")),
+          hasRaster: Boolean(document.querySelector(".big-map-raster")),
+          title: document.querySelector(".big-map-title")?.textContent ?? null,
+          coordinate: document.querySelector(".big-map-coordinate")?.textContent ?? null,
+        };
+      }
     })()
   `);
 }

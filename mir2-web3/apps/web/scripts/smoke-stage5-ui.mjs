@@ -845,16 +845,16 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-minimap-collapsed.png"));
 
     await clickSelector(client, ".mini-map-button.bigmap button");
-    await waitForMiniMapState(client, (state) => state.sceneHidden === false, "expanded by big map button", 5_000);
-    minimapFlow.push(await readMiniMapState(client, "expandedAfterBigMap"));
-    screenshots.push(await screenshot(client, "stage5-minimap-expanded.png"));
+    await waitForMiniMapState(client, (state) => state.bigMapOpen === true, "big map dialog open", 5_000);
+    minimapFlow.push(await readMiniMapState(client, "bigMapOpen"));
+    screenshots.push(await screenshot(client, "stage5-minimap-bigmap.png"));
 
     await clickSelector(client, ".mini-map-button.mail button");
     await waitForSelector(client, ".mail-panel", 5_000);
     minimapFlow.push(await readMiniMapState(client, "mailOpen"));
     mailFlow.push(await readMailState(client, "mailOpen"));
     screenshots.push(await screenshot(client, "stage5-minimap-mail.png"));
-    await clickOptional(client, ".mail-panel .overlay-panel-head button");
+    await clickOptional(client, ".mail-panel .mail-close button");
     await waitForMiniMapState(client, (state) => state.mailOpen === false, "mail closed", 5_000);
     mailFlow.push(await readMailState(client, "mailClosed"));
 
@@ -1165,7 +1165,7 @@ async function main() {
       })),
     );
     screenshots.push(await screenshot(client, "stage5-compact-mail.png"));
-    await clickOptional(client, ".mail-panel .overlay-panel-head button");
+    await clickOptional(client, ".mail-panel .mail-close button");
 
     await clickSelector(client, ".chat-filter-button.report button");
     await waitForChatState(client, (state) => state.reportOpen === true, "compact report", 5_000);
@@ -2239,7 +2239,7 @@ async function readMailState(client, label) {
       return {
         label: ${JSON.stringify(label)},
         open: Boolean(panel),
-        title: document.querySelector(".mail-panel .overlay-panel-head strong")?.textContent?.trim() ?? "",
+        title: document.querySelector(".mail-panel .mail-title-image") ? "Mail" : "",
         rows: Array.from(document.querySelectorAll(".mail-panel .overlay-panel-row")).map(
           (row) => row.textContent?.trim() ?? "",
         ),
@@ -2693,6 +2693,7 @@ async function readMiniMapState(client, label) {
       const panel = document.querySelector(".mini-map-panel");
       const scene = document.querySelector(".mini-map-scene-shell");
       const mail = document.querySelector(".mail-panel");
+      const bigMap = document.querySelector(".big-map-dialog");
       const name = document.querySelector(".mini-map-name");
       const coords = document.querySelector(".mini-map-coords");
       const rect = panel?.getBoundingClientRect();
@@ -2701,6 +2702,7 @@ async function readMiniMapState(client, label) {
         panelVisible: Boolean(panel),
         sceneHidden: scene?.classList.contains("hidden") ?? null,
         mailOpen: Boolean(mail),
+        bigMapOpen: Boolean(bigMap),
         nameText: name?.textContent?.trim() ?? "",
         coordsText: coords?.textContent?.trim() ?? "",
         panelRect: rect
