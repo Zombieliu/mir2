@@ -1,0 +1,1764 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:3002",
+  "account": "QA0429A",
+  "startedAt": "2026-05-01T11:05:02.329Z",
+  "start": {
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 287,
+      "y": 616
+    },
+    "selfEntity": {
+      "x": 287,
+      "y": 616,
+      "direction": "UpLeft",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 469.2,
+      "top": 283,
+      "width": 71.59,
+      "height": 12
+    },
+    "floor": {
+      "left": -250,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:04:56 PM] Online Players: 1",
+      "[7:04:56 PM] [Pet: Attack and Move]",
+      "[7:04:56 PM] [Mode: Peaceful]",
+      "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+    ]
+  },
+  "finalState": {
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 290,
+      "y": 617
+    },
+    "selfEntity": {
+      "x": 290,
+      "y": 617,
+      "direction": "Left",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 469.2,
+      "top": 284,
+      "width": 71.59,
+      "height": 12
+    },
+    "floor": {
+      "left": -273.19,
+      "top": -170.67,
+      "width": 96,
+      "height": 64
+    },
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:04:56 PM] Online Players: 1",
+      "[7:04:56 PM] [Pet: Attack and Move]",
+      "[7:04:56 PM] [Mode: Peaceful]",
+      "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+    ]
+  },
+  "sampleMs": 50,
+  "sampleCount": 33,
+  "jumps": [],
+  "summary": [
+    {
+      "label": "run-right-1",
+      "count": 9,
+      "firstPlayer": {
+        "x": 287,
+        "y": 616
+      },
+      "lastPlayer": {
+        "x": 289,
+        "y": 616
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    },
+    {
+      "label": "run-right-2",
+      "count": 8,
+      "firstPlayer": {
+        "x": 289,
+        "y": 616
+      },
+      "lastPlayer": {
+        "x": 291,
+        "y": 616
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    },
+    {
+      "label": "walk-down-1",
+      "count": 8,
+      "firstPlayer": {
+        "x": 291,
+        "y": 616
+      },
+      "lastPlayer": {
+        "x": 291,
+        "y": 617
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    },
+    {
+      "label": "walk-left-1",
+      "count": 8,
+      "firstPlayer": {
+        "x": 291,
+        "y": 617
+      },
+      "lastPlayer": {
+        "x": 290,
+        "y": 617
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    }
+  ],
+  "samples": [
+    {
+      "label": "run-right-1",
+      "t": 0,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 101,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 195,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 289,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 432,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 556,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -250,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 640,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 287,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 287,
+        "y": 616,
+        "direction": "UpLeft",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 767,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -202,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-1",
+      "t": 880,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -216.23,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 0,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -225.03,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 96,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -256.72,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 200,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -202,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 390,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -220.23,
+        "top": 352,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 524,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 289,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -202,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 654,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -119.11,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 730,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -123.27,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "run-right-2",
+      "t": 826,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -140.23,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 0,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 616
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 616,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -165.36,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 109,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 284,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -174.16,
+        "top": 224,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 198,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 286,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -197.19,
+        "top": 253.52,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 304,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 286,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -206,
+        "top": 250.94,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 461,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 285,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -227.44,
+        "top": 244.66,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 601,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 284,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -258.8,
+        "top": 235.47,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 692,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 286,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -188.72,
+        "top": 256,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-down-1",
+      "t": 797,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 285,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -201.83,
+        "top": 252.16,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 0,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 291,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 291,
+        "y": 617,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 284,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -201.83,
+        "top": 252.16,
+        "width": 48,
+        "height": 32
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 107,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 285,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -210.31,
+        "top": -166.31,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 198,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -273.19,
+        "top": -170.67,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 307,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -276.75,
+        "top": -173.73,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 518,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -282.33,
+        "top": -178.53,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 661,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -290.52,
+        "top": -185.56,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 770,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -273.19,
+        "top": -170.67,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    },
+    {
+      "label": "walk-left-1",
+      "t": 875,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 290,
+        "y": 617
+      },
+      "selfEntity": {
+        "x": 290,
+        "y": 617,
+        "direction": "Left",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -274.27,
+        "top": -171.59,
+        "width": 96,
+        "height": 64
+      },
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:04:56 PM] Online Players: 1",
+        "[7:04:56 PM] [Pet: Attack and Move]",
+        "[7:04:56 PM] [Mode: Peaceful]",
+        "[7:04:56 PM] Welcome to the Legend of Mir 2 Server."
+      ]
+    }
+  ],
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": [],
+  "screenshotPath": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r320-web-movement-jitter-dom.png"
+}

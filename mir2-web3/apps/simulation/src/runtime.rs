@@ -10,9 +10,9 @@ use bevy_ecs::prelude::{Resource, With, Without, World};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    AccountBanStatus, AccountRecord, BuffSnapshot, CharacterRecord, CharacterSaveRecord,
-    EquipmentItemSnapshot, EquipmentSlot, GroundDropSnapshot, ItemContainer, ItemGrade,
-    MapDropRuleRecord, MapTransferSnapshot, MonsterSpawnSource, NpcDialogInputSnapshot,
+    crystal_base_vitals, AccountBanStatus, AccountRecord, BuffSnapshot, CharacterRecord,
+    CharacterSaveRecord, EquipmentItemSnapshot, EquipmentSlot, GroundDropSnapshot, ItemContainer,
+    ItemGrade, MapDropRuleRecord, MapTransferSnapshot, MonsterSpawnSource, NpcDialogInputSnapshot,
     NpcDialogLinkSnapshot, NpcDialogSnapshot, QuestSnapshot, QuestStage, SimulationConfig,
     SkillSnapshot, Stage5AuctionListing, Stage5HeroState, Stage5MailMessage, Stage5SystemsState,
     Stage5TradeState, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
@@ -20,7 +20,8 @@ use crate::config::{
 };
 use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_drop_table_for_monster_name,
-    crystal_game_shop_info_packet_payloads, crystal_guild_buff_list_packet_payload,
+    crystal_game_shop_info_packet_payloads, crystal_game_shop_packet_manifest,
+    crystal_guild_buff_list_packet_payload,
     crystal_item_by_index, crystal_item_by_name, crystal_magic_by_spell,
     crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_name,
     crystal_monster_manifest, crystal_npc_info_by_script_key, crystal_npc_info_manifest,
@@ -1661,6 +1662,10 @@ impl SimulationResources {
         let initial_collision = runtime_map_collision_data(&config.map.file_name)
             .or_else(|| runtime_map_collision_data(&config.map_collision.map_file_name))
             .unwrap_or_else(|| runtime_map_collision_from_template(config.map_collision.clone()));
+        let (default_max_hp, default_mp) = crystal_base_vitals(
+            config.default_character.class,
+            config.default_character.level,
+        );
         Self {
             config: config.clone(),
             map_region_bounds: initial_collision.collision.region_bounds,
@@ -1677,13 +1682,13 @@ impl SimulationResources {
             player_position: config.spawn.clone(),
             player_direction: MirDirection::Down,
             player_vitals: PlayerVitals {
-                hp: 120,
-                max_hp: 120,
-                mp: 45,
+                hp: default_max_hp,
+                max_hp: default_max_hp,
+                mp: default_mp,
             },
             experience: 0,
             max_experience: 100,
-            gold: 1280,
+            gold: 0,
             credit: 0,
             storage_size: BASE_STORAGE_SLOTS,
             has_expanded_storage: false,
@@ -1698,12 +1703,12 @@ impl SimulationResources {
             storage_sent: false,
             storage_has_password: false,
             storage_password_last_set_binary_datetime: 0,
-            inventory_items: seed_inventory_items(),
-            belt_items: seed_belt_items(),
-            storage_items: seed_storage_items(),
-            equipment_items: seed_equipment_items(),
-            quests: vec![QuestState::guide_training()],
-            skills: seed_skills(),
+            inventory_items: Vec::new(),
+            belt_items: Vec::new(),
+            storage_items: Vec::new(),
+            equipment_items: Vec::new(),
+            quests: Vec::new(),
+            skills: Vec::new(),
             npc_flags: Vec::new(),
             npc_variables: Vec::new(),
             npc_saved_values: Vec::new(),
@@ -1724,23 +1729,25 @@ impl SimulationResources {
 
     fn default_save_for_character(&self, character: CharacterRecord) -> CharacterSaveRecord {
         let mut save = CharacterSaveRecord::new(character);
+        let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
         save.position = self.config.spawn.clone();
         save.map_file_name = self.config.map.file_name.clone();
         save.map_title = self.config.map.title.clone();
         save.direction = MirDirection::Down;
-        save.hp = 120;
-        save.max_hp = 120;
-        save.mp = 45;
+        save.hp = max_hp;
+        save.max_hp = max_hp;
+        save.mp = mp;
         save.experience = 0;
         save.max_experience = 100;
-        save.gold = 1280;
+        save.gold = 0;
         save.credit = 0;
-        save.inventory_items_json = encode_state_vec(&seed_inventory_items());
-        save.belt_items_json = encode_state_vec(&seed_belt_items());
-        save.storage_items_json = encode_state_vec(&seed_storage_items());
-        save.equipment_items_json = encode_state_vec(&seed_equipment_items());
-        save.quest_states_json = encode_state_vec(&vec![QuestState::guide_training()]);
-        save.skill_states_json = encode_state_vec(&seed_skills());
+        save.inventory_items_json = Vec::new();
+        save.belt_items_json = Vec::new();
+        save.storage_items_json = Vec::new();
+        save.equipment_items_json = Vec::new();
+        save.equipment_items_explicit_empty = true;
+        save.quest_states_json = Vec::new();
+        save.skill_states_json = Vec::new();
         save.npc_flag_states_json = Vec::new();
         save.npc_saved_values_json = Vec::new();
         save.npc_buy_back_items_json = Vec::new();
@@ -2547,6 +2554,8 @@ impl SimulationSession {
             "trade.cancel" => self.stage5_trade_cancel(),
             "shop.buy" => self.stage5_shop_buy(args),
             "shop.buyCredit" => self.stage5_shop_buy_credit(args),
+            "gameShop.buyCredit" => self.game_shop_buy_credit(args),
+            "gameShop.buyGold" => self.game_shop_buy_gold(args),
             "auction.list" => self.stage5_auction_list(args),
             "auction.buy" => self.stage5_auction_buy(args),
             "auction.cancel" => self.stage5_auction_cancel(args),
@@ -3042,6 +3051,109 @@ impl SimulationSession {
                 language,
                 "server.BoughtItemForCredit",
                 [key, price.to_string()],
+            )),
+        ]
+    }
+
+    fn game_shop_buy_credit(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let Some((item_key, item_name, price)) = game_shop_purchase_details(args, true) else {
+            return vec![system_message(&format_localized_text(
+                current_language(self.app.world()),
+                "server.InvalidPacketReceived",
+                ["gameShop.buyCredit".to_string()],
+            ))];
+        };
+        self.deliver_game_shop_credit_purchase(item_key, item_name, price)
+    }
+
+    fn game_shop_buy_gold(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let Some((item_key, item_name, price)) = game_shop_purchase_details(args, false) else {
+            return vec![system_message(&format_localized_text(
+                current_language(self.app.world()),
+                "server.InvalidPacketReceived",
+                ["gameShop.buyGold".to_string()],
+            ))];
+        };
+        let language = current_language(self.app.world());
+        {
+            let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
+            if resources.gold < price {
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.LowGold",
+                    "server.LowGold",
+                ))];
+            }
+            if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &item_key, 1) {
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouCannotCarryAnymore",
+                    "server.YouCannotCarryAnymore",
+                ))];
+            }
+            resources.gold -= price;
+        }
+        add_or_increment_item(
+            self.app.world_mut(),
+            ItemContainer::Bag1,
+            &item_key,
+            &item_name,
+            "Crystal game shop purchase.",
+            8,
+            1,
+            1,
+        );
+        vec![system_message(&format_localized_text(
+            language,
+            "server.BoughtItemForGold",
+            [item_name, price.to_string()],
+        ))]
+    }
+
+    fn deliver_game_shop_credit_purchase(
+        &mut self,
+        item_key: String,
+        item_name: String,
+        price: u32,
+    ) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
+        let player_name = stage5_player_name(self.app.world());
+        {
+            let mut resources = self.app.world_mut().resource_mut::<SimulationResources>();
+            if resources.credit < price {
+                return vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.YouDontHaveEnoughCurrency",
+                    "server.YouDontHaveEnoughCurrency",
+                ))];
+            }
+            resources.credit -= price;
+            let mail_id = resources
+                .stage5_systems
+                .mail
+                .iter()
+                .map(|mail| mail.id)
+                .max()
+                .unwrap_or(0)
+                + 1;
+            resources.stage5_systems.mail.push(Stage5MailMessage {
+                id: mail_id,
+                from: "Gameshop".to_string(),
+                to: player_name,
+                subject: "Game shop purchase".to_string(),
+                body: format!("{item_name} was sent from the game shop."),
+                gold: 0,
+                items: vec![item_key],
+                claimed: false,
+                deleted: false,
+            });
+        }
+        vec![
+            ServerPacket::LoseCredit { credit: price },
+            system_message(&format_localized_text(
+                language,
+                "server.BoughtItemForCredit",
+                [item_name, price.to_string()],
             )),
         ]
     }
@@ -4964,9 +5076,10 @@ fn add_character_to_account(
         .entry(account_id.to_string())
         .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
     account.characters.push(character.clone());
-    account
-        .saves
-        .insert(character.index, CharacterSaveRecord::new(character.clone()));
+    account.saves.insert(
+        character.index,
+        crystal_new_character_save(character.clone()),
+    );
     drop(store);
     if let Err(error) = config.save_account_store() {
         eprintln!("failed to persist account store: {error}");
@@ -5028,13 +5141,123 @@ fn character_save_for_start(
         .iter()
         .find(|character| character.index == character_index)
         .cloned()?;
-    Some(
-        account
-            .saves
-            .entry(character_index)
-            .or_insert_with(|| resources.default_save_for_character(character.clone()))
-            .clone(),
-    )
+    let save = account
+        .saves
+        .entry(character_index)
+        .or_insert_with(|| resources.default_save_for_character(character.clone()));
+    let mut changed = false;
+    changed |= normalize_legacy_default_vitals(save);
+    changed |= normalize_legacy_default_account_demo_seed_state(save);
+    changed |= normalize_legacy_crystal_new_character_seed_state(save);
+    let save = save.clone();
+    drop(store);
+    if changed {
+        if let Err(error) = resources.config.save_account_store() {
+            eprintln!("failed to persist normalized character save: {error}");
+        }
+    }
+    Some(save)
+}
+
+fn crystal_new_character_save(character: CharacterRecord) -> CharacterSaveRecord {
+    let mut save = CharacterSaveRecord::new(character);
+    save.gold = 0;
+    save.inventory_items_json = Vec::new();
+    save.belt_items_json = Vec::new();
+    save.storage_items_json = Vec::new();
+    save.equipment_items_json = Vec::new();
+    save.equipment_items_explicit_empty = true;
+    save.quest_states_json = Vec::new();
+    save.skill_states_json = Vec::new();
+    save.stage5_systems_json = Some(
+        serde_json::to_string(&Stage5SystemsState::default())
+            .expect("stage5 systems state should serialize"),
+    );
+    save
+}
+
+fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) -> bool {
+    if save.hp != 120 || save.max_hp != 120 || save.mp != 45 {
+        return false;
+    }
+
+    let (max_hp, mp) = crystal_base_vitals(save.character.class, save.character.level);
+    save.hp = max_hp;
+    save.max_hp = max_hp;
+    save.mp = mp;
+    true
+}
+
+fn normalize_legacy_default_account_demo_seed_state(save: &mut CharacterSaveRecord) -> bool {
+    if save.character.index != 0 || save.character.level != 7 {
+        return false;
+    }
+
+    let mut changed = false;
+    if save.gold == 0 {
+        save.gold = 1280;
+        changed = true;
+    }
+    if save.inventory_items_json.is_empty() {
+        save.inventory_items_json = encode_state_vec(&seed_inventory_items());
+        changed = true;
+    }
+    if save.belt_items_json.is_empty() {
+        save.belt_items_json = encode_state_vec(&seed_belt_items());
+        changed = true;
+    }
+    if save.storage_items_json.is_empty() {
+        save.storage_items_json = encode_state_vec(&seed_storage_items());
+        changed = true;
+    }
+    if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
+        save.equipment_items_json = encode_state_vec(&seed_equipment_items());
+        changed = true;
+    }
+    if save.quest_states_json.is_empty() {
+        save.quest_states_json = encode_state_vec(&vec![QuestState::guide_training()]);
+        changed = true;
+    }
+    if save.skill_states_json.is_empty() {
+        save.skill_states_json = encode_state_vec(&seed_skills());
+        changed = true;
+    }
+    changed
+}
+
+fn normalize_legacy_crystal_new_character_seed_state(save: &mut CharacterSaveRecord) -> bool {
+    if save.character.level != 1 || save.gold != 1280 || save.credit != 0 {
+        return false;
+    }
+    if !encoded_items_match_seed(&save.inventory_items_json, seed_inventory_items)
+        || !encoded_items_match_seed(&save.belt_items_json, seed_belt_items)
+        || !encoded_items_match_seed(&save.storage_items_json, seed_storage_items)
+        || !encoded_items_match_seed(&save.equipment_items_json, seed_equipment_items)
+        || !encoded_items_match_seed(&save.quest_states_json, || {
+            vec![QuestState::guide_training()]
+        })
+        || !encoded_items_match_seed(&save.skill_states_json, seed_skills)
+    {
+        return false;
+    }
+
+    save.gold = 0;
+    save.inventory_items_json = Vec::new();
+    save.belt_items_json = Vec::new();
+    save.storage_items_json = Vec::new();
+    save.equipment_items_json = Vec::new();
+    save.equipment_items_explicit_empty = true;
+    save.quest_states_json = Vec::new();
+    save.skill_states_json = Vec::new();
+    true
+}
+
+fn encoded_items_match_seed<T, F>(encoded: &[String], seed: F) -> bool
+where
+    T: Serialize + for<'de> Deserialize<'de>,
+    F: FnOnce() -> Vec<T>,
+{
+    encoded == encode_state_vec(&seed())
 }
 
 fn apply_character_save(resources: &mut SimulationResources, save: &CharacterSaveRecord) {
@@ -5061,38 +5284,17 @@ fn apply_character_save(resources: &mut SimulationResources, save: &CharacterSav
     resources.max_experience = save.max_experience.max(1);
     resources.gold = save.gold;
     resources.credit = save.credit;
-    resources.inventory_items = if save.inventory_items_json.is_empty() {
-        seed_inventory_items()
-    } else {
-        decode_state_vec(&save.inventory_items_json).unwrap_or_else(seed_inventory_items)
-    };
-    resources.belt_items = if save.belt_items_json.is_empty() {
-        seed_belt_items()
-    } else {
-        decode_state_vec(&save.belt_items_json).unwrap_or_else(seed_belt_items)
-    };
-    resources.storage_items = if save.storage_items_json.is_empty() {
-        seed_storage_items()
-    } else {
-        decode_state_vec(&save.storage_items_json).unwrap_or_else(seed_storage_items)
-    };
+    resources.inventory_items = decode_state_vec(&save.inventory_items_json).unwrap_or_default();
+    resources.belt_items = decode_state_vec(&save.belt_items_json).unwrap_or_default();
+    resources.storage_items = decode_state_vec(&save.storage_items_json).unwrap_or_default();
     resources.equipment_items =
         if save.equipment_items_json.is_empty() && !save.equipment_items_explicit_empty {
             seed_equipment_items()
         } else {
-            decode_state_vec(&save.equipment_items_json).unwrap_or_else(seed_equipment_items)
+            decode_state_vec(&save.equipment_items_json).unwrap_or_default()
         };
-    resources.quests = if save.quest_states_json.is_empty() {
-        vec![QuestState::guide_training()]
-    } else {
-        decode_state_vec(&save.quest_states_json)
-            .unwrap_or_else(|| vec![QuestState::guide_training()])
-    };
-    resources.skills = if save.skill_states_json.is_empty() {
-        seed_skills()
-    } else {
-        decode_state_vec(&save.skill_states_json).unwrap_or_else(seed_skills)
-    };
+    resources.quests = decode_state_vec(&save.quest_states_json).unwrap_or_default();
+    resources.skills = decode_state_vec(&save.skill_states_json).unwrap_or_default();
     resources.npc_flags = if save.npc_flag_states_json.is_empty() {
         Vec::new()
     } else {
@@ -28509,6 +28711,31 @@ fn parse_u32_arg(args: &[String], index: usize) -> Option<u32> {
     args.get(index).and_then(|value| value.parse::<u32>().ok())
 }
 
+fn game_shop_purchase_details(args: Vec<String>, credit: bool) -> Option<(String, String, u32)> {
+    let game_shop_index = args.first()?.parse::<i32>().ok()?;
+    let quantity = args
+        .get(1)
+        .and_then(|value| value.parse::<u32>().ok())
+        .unwrap_or(1)
+        .clamp(1, 99);
+    let product = crystal_game_shop_packet_manifest()
+        .items
+        .into_iter()
+        .find(|item| item.game_shop_index == game_shop_index)?;
+    let unit_price = if credit {
+        product.credit_price
+    } else {
+        product.gold_price
+    };
+    if unit_price == 0 {
+        return None;
+    }
+    let template = crystal_item_by_index(product.item_index)?;
+    let item_key = crystal_item_key_for_template(&template);
+    let total_price = unit_price.checked_mul(quantity)?;
+    Some((item_key, template.name, total_price))
+}
+
 fn stage5_item_name(key: &str) -> String {
     key.split(['-', '_'])
         .filter(|part| !part.is_empty())
@@ -28746,8 +28973,9 @@ mod tests {
     };
     use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
     use crate::{
-        deliver_stage5_system_mail, EquipmentSlot, ItemContainer, QuestStage, SimulationConfig,
-        Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition, WorldEntityKind,
+        deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
+        ItemContainer, QuestStage, SimulationConfig, Stage5MailDelivery, Stage5MailTargetKind,
+        WorldEntityDisposition, WorldEntityKind,
     };
     use bevy_ecs::entity::Entity;
     use mir2_game_data::{
@@ -29844,6 +30072,228 @@ mod tests {
         assert!(user_index < recipe_index);
         assert!(recipe_index < base_stats_index);
         assert!(base_stats_index < guild_buff_index);
+    }
+
+    #[test]
+    fn start_game_uses_crystal_default_warrior_vitals() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let user_info = packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::UserInformation { info } => Some(info),
+                _ => None,
+            })
+            .expect("start game should include user information");
+
+        assert_eq!(user_info.level, 7);
+        assert_eq!(user_info.hp, 60);
+        assert_eq!(user_info.mp, 35);
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_hp, Some(60));
+        assert_eq!(snapshot.player_max_hp, Some(60));
+        assert_eq!(snapshot.player_mp, Some(35));
+    }
+
+    #[test]
+    fn start_game_migrates_legacy_default_vitals() {
+        let config = SimulationConfig::default();
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store
+                .accounts
+                .get_mut("demo")
+                .expect("default account should exist");
+            let save = account
+                .saves
+                .get_mut(&0)
+                .expect("default save should exist");
+            save.hp = 120;
+            save.max_hp = 120;
+            save.mp = 45;
+        }
+
+        let mut session = SimulationSession::new(config);
+        let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let user_info = packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::UserInformation { info } => Some(info),
+                _ => None,
+            })
+            .expect("start game should include user information");
+
+        assert_eq!(user_info.level, 7);
+        assert_eq!(user_info.hp, 60);
+        assert_eq!(user_info.mp, 35);
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_max_hp, Some(60));
+    }
+
+    #[test]
+    fn start_game_migrates_legacy_level_one_warrior_vitals() {
+        let config = SimulationConfig::default();
+        let character = CharacterRecord {
+            index: 42,
+            name: "CrystalLevelOne".to_string(),
+            level: 1,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+        };
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store
+                .accounts
+                .get_mut("demo")
+                .expect("default account should exist");
+            account.characters.push(character.clone());
+            let mut save = CharacterSaveRecord::new(character.clone());
+            save.hp = 120;
+            save.max_hp = 120;
+            save.mp = 45;
+            account.saves.insert(character.index, save);
+        }
+
+        let mut session = SimulationSession::new(config);
+        let packets = session.handle_packet(ClientPacket::StartGame {
+            character_index: character.index,
+        });
+        let user_info = packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::UserInformation { info } => Some(info),
+                _ => None,
+            })
+            .expect("start game should include user information");
+
+        assert_eq!(user_info.level, 1);
+        assert_eq!(user_info.hp, 18);
+        assert_eq!(user_info.mp, 14);
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.player_max_hp, Some(18));
+    }
+
+    #[test]
+    fn new_crystal_character_starts_without_web_seed_state() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::NewAccount {
+            account_id: "crystalempty".to_string(),
+            password: "Tracepass1".to_string(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Trace".to_string(),
+            secret_question: "q".to_string(),
+            secret_answer: "a".to_string(),
+            email_address: "trace@example.test".to_string(),
+        });
+        let _ = session.handle_packet(ClientPacket::Login {
+            account_id: "crystalempty".to_string(),
+            password: "Tracepass1".to_string(),
+        });
+        let created_character = session.handle_packet(ClientPacket::NewCharacter {
+            name: "EmptyOne".to_string(),
+            gender: MirGender::Male,
+            class: MirClass::Warrior,
+        });
+        let character_index = new_character_success_index(&created_character);
+
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(snapshot.gold, 0);
+        assert!(snapshot.inventory_items.is_empty());
+        assert!(snapshot.belt_items.is_empty());
+        assert!(snapshot.storage_items.is_empty());
+        assert!(snapshot.equipment_items.is_empty());
+        assert!(snapshot.quest_log.is_empty());
+        assert!(snapshot.known_skills.is_empty());
+        assert_eq!(snapshot.player_hp, Some(18));
+        assert_eq!(snapshot.player_mp, Some(14));
+    }
+
+    #[test]
+    fn start_game_clears_legacy_level_one_web_seed_state() {
+        let config = SimulationConfig::default();
+        let character = CharacterRecord {
+            index: 43,
+            name: "LegacySeed".to_string(),
+            level: 1,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+        };
+        {
+            let mut store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            let account = store
+                .accounts
+                .get_mut("demo")
+                .expect("default account should exist");
+            account.characters.push(character.clone());
+            let mut save = CharacterSaveRecord::new(character.clone());
+            save.hp = 18;
+            save.max_hp = 18;
+            save.mp = 14;
+            save.gold = 1280;
+            save.inventory_items_json = super::encode_state_vec(&super::seed_inventory_items());
+            save.belt_items_json = super::encode_state_vec(&super::seed_belt_items());
+            save.storage_items_json = super::encode_state_vec(&super::seed_storage_items());
+            save.equipment_items_json = super::encode_state_vec(&super::seed_equipment_items());
+            save.equipment_items_explicit_empty = false;
+            save.quest_states_json =
+                super::encode_state_vec(&vec![super::QuestState::guide_training()]);
+            save.skill_states_json = super::encode_state_vec(&super::seed_skills());
+            account.saves.insert(character.index, save);
+        }
+
+        let mut session = SimulationSession::new(config.clone());
+        let _ = session.handle_packet(ClientPacket::StartGame {
+            character_index: character.index,
+        });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(snapshot.gold, 0);
+        assert!(snapshot.inventory_items.is_empty());
+        assert!(snapshot.belt_items.is_empty());
+        assert!(snapshot.storage_items.is_empty());
+        assert!(snapshot.equipment_items.is_empty());
+        assert!(snapshot.quest_log.is_empty());
+        assert!(snapshot.known_skills.is_empty());
+
+        let store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let save = store
+            .accounts
+            .get("demo")
+            .and_then(|account| account.saves.get(&character.index))
+            .expect("migrated save should remain stored");
+        assert_eq!(save.gold, 0);
+        assert!(save.equipment_items_explicit_empty);
+        assert!(save.inventory_items_json.is_empty());
+        assert!(save.skill_states_json.is_empty());
+    }
+
+    #[test]
+    fn default_demo_character_keeps_stage5_seed_state() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let snapshot = session.world_snapshot();
+
+        assert_eq!(snapshot.gold, 1280);
+        assert!(!snapshot.inventory_items.is_empty());
+        assert!(!snapshot.belt_items.is_empty());
+        assert!(!snapshot.storage_items.is_empty());
+        assert!(!snapshot.equipment_items.is_empty());
+        assert!(!snapshot.quest_log.is_empty());
+        assert!(!snapshot.known_skills.is_empty());
     }
 
     #[test]
@@ -65680,6 +66130,37 @@ mod tests {
             .inventory_items
             .iter()
             .any(|item| item.key == "mail-credit-item"));
+    }
+
+    #[test]
+    fn crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery() {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<SimulationResources>()
+            .credit = 500;
+
+        let packets = session.stage5_command(
+            "gameShop.buyCredit",
+            vec!["1".to_string(), "1".to_string()],
+        );
+        let snapshot = session.world_snapshot();
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 220 })));
+        assert_eq!(snapshot.credit, 280);
+        assert!(snapshot.stage5_systems.mail.iter().any(|mail| {
+            mail.from == "Gameshop"
+                && mail.items == vec!["crystal-item-1268".to_string()]
+                && !mail.claimed
+        }));
+        assert!(!snapshot
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "crystal-item-1268"));
     }
 
     #[test]

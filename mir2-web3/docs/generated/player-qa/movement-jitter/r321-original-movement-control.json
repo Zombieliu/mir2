@@ -1,0 +1,224 @@
+﻿{
+    "samples":  [
+                    {
+                        "label":  "run-right-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-000-run-right-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  1,
+                        "index":  0
+                    },
+                    {
+                        "label":  "run-right-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-001-run-right-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  166,
+                        "index":  1
+                    },
+                    {
+                        "label":  "run-right-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-002-run-right-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  306,
+                        "index":  2
+                    },
+                    {
+                        "label":  "run-right-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-003-run-right-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  446,
+                        "index":  3
+                    },
+                    {
+                        "label":  "run-right-2",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-004-run-right-2.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  0,
+                        "index":  4
+                    },
+                    {
+                        "label":  "run-right-2",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-005-run-right-2.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  155,
+                        "index":  5
+                    },
+                    {
+                        "label":  "run-right-2",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-006-run-right-2.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  311,
+                        "index":  6
+                    },
+                    {
+                        "label":  "run-right-2",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-007-run-right-2.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  467,
+                        "index":  7
+                    },
+                    {
+                        "label":  "walk-down-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-008-walk-down-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  0,
+                        "index":  8
+                    },
+                    {
+                        "label":  "walk-down-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-009-walk-down-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  156,
+                        "index":  9
+                    },
+                    {
+                        "label":  "walk-down-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-010-walk-down-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  312,
+                        "index":  10
+                    },
+                    {
+                        "label":  "walk-down-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-011-walk-down-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  467,
+                        "index":  11
+                    },
+                    {
+                        "label":  "walk-left-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-012-walk-left-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  0,
+                        "index":  12
+                    },
+                    {
+                        "label":  "walk-left-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-013-walk-left-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  157,
+                        "index":  13
+                    },
+                    {
+                        "label":  "walk-left-1",
+                        "capture":  {
+                                        "screenY":  33,
+                                        "path":  "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r321-original-movement-control-014-walk-left-1.png",
+                                        "width":  1024,
+                                        "screenX":  60,
+                                        "height":  768
+                                    },
+                        "elapsedMs":  327,
+                        "index":  14
+                    }
+                ],
+    "sampleMs":  100,
+    "stepWaitMs":  500,
+    "startedAt":  "2026-05-01T19:14:53.7641645+08:00",
+    "sampleCount":  15,
+    "ok":  true,
+    "holdMs":  70,
+    "actions":  [
+                    {
+                        "label":  "run-right-1",
+                        "clientY":  380,
+                        "clientX":  630,
+                        "button":  "right"
+                    },
+                    {
+                        "label":  "run-right-2",
+                        "clientY":  380,
+                        "clientX":  630,
+                        "button":  "right"
+                    },
+                    {
+                        "label":  "walk-down-1",
+                        "clientY":  468,
+                        "clientX":  514,
+                        "button":  "left"
+                    },
+                    {
+                        "label":  "walk-left-1",
+                        "clientY":  386,
+                        "clientX":  450,
+                        "button":  "left"
+                    }
+                ],
+    "window":  {
+                   "screenY":  33,
+                   "width":  1024,
+                   "pid":  33944,
+                   "screenX":  60,
+                   "title":  "Legend of Mir 2",
+                   "height":  768
+               }
+}

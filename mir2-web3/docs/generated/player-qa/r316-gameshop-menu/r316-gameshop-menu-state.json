@@ -1,0 +1,35 @@
+{
+  "afterShop": {
+    "shopVisible": true,
+    "inventoryVisible": false,
+    "menuVisible": false,
+    "shopBounds": {
+      "left": 164,
+      "top": 70,
+      "width": 696,
+      "height": 476
+    },
+    "shopTitleLoaded": true
+  },
+  "afterMenu": {
+    "menuVisible": true,
+    "menuBounds": {
+      "left": 988,
+      "top": 349,
+      "width": 36,
+      "height": 282
+    },
+    "iconCount": 13,
+    "qaBounds": {
+      "left": -10000,
+      "top": -10000,
+      "width": 248,
+      "height": 495
+    },
+    "oldOverlayHeadVisible": false,
+    "gameShopVisible": false,
+    "inventoryVisible": false
+  },
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": []
+}

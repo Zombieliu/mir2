@@ -1,0 +1,114 @@
+warning: function `spawn_ground_drop` is never used
+     --> apps\simulation\src\runtime.rs:22423:4
+      |
+22423 | fn spawn_ground_drop(
+      |    ^^^^^^^^^^^^^^^^^
+      |
+      = note: `#[warn(dead_code)]` on by default
+
+warning: `mir2-simulation` (lib) generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running `target\debug\mir2-gateway.exe`
+mir2-gateway tcp listening on 127.0.0.1:7310
+mir2-gateway web listening on http://127.0.0.1:7110
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(332, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(334, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(336, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(338, 270) Right packets=3 
+mir2-gateway movement Run direction=Right -> UserLocation=(340, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(342, 270) Right packets=4 
+mir2-gateway movement Run direction=Right -> UserLocation=(344, 270) Right packets=2 
+error: process didn't exit successfully: `target\debug\mir2-gateway.exe` (exit code: 0xffffffff)

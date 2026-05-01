@@ -1,0 +1,308 @@
+{
+  "screen": "game",
+  "mapFileName": "0",
+  "mapTitle": "BichonProvince",
+  "player": {
+    "x": 287,
+    "y": 618
+  },
+  "playerHp": 18,
+  "playerMaxHp": 18,
+  "playerMp": 14,
+  "gold": 0,
+  "inventoryItemCount": 0,
+  "beltItemCount": 0,
+  "storageItemCount": 0,
+  "equipmentItemCount": 0,
+  "questCount": 0,
+  "skillCount": 0,
+  "hudHealthOnlyLabel": "HP 18/18",
+  "logs": [
+    {
+      "text": "[7:14:54 PM] Online Players: 1",
+      "tone": "chat",
+      "channel": "server"
+    },
+    {
+      "text": "[7:14:54 PM] [Pet: Attack and Move]",
+      "tone": "chat",
+      "channel": "server"
+    },
+    {
+      "text": "[7:14:54 PM] [Mode: Peaceful]",
+      "tone": "chat",
+      "channel": "server"
+    },
+    {
+      "text": "[7:14:54 PM] Welcome to the Legend of Mir 2 Server.",
+      "tone": "chat",
+      "channel": "server"
+    }
+  ],
+  "transitionOverlayVisible": false,
+  "entityCount": 14,
+  "npcCount": 5,
+  "monsterCount": 8,
+  "visibleNameplates": [
+    "QA0429Hero",
+    "Deer",
+    "Deer",
+    "Guard",
+    "Deer",
+    "ArcherGuard",
+    "Deer",
+    "Hen",
+    "Scarecrow",
+    "BorderVillage\nBoard",
+    "Teleport\nGilbert",
+    "CraftsLady\nJude",
+    "Merchant\nScott",
+    "Blacksmith\nSmith"
+  ],
+  "visibleNameplateDetails": [
+    {
+      "text": "QA0429Hero",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate self ",
+      "rect": {
+        "left": 463.9375,
+        "top": 276,
+        "right": 546.0625,
+        "bottom": 288,
+        "width": 82.125,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 349.8515625,
+        "top": 214.546875,
+        "right": 379.8359375,
+        "bottom": 226.546875,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": -29.2421875,
+        "top": 234.28125,
+        "right": 0.7421875,
+        "bottom": 246.28125,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Guard",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 350.15625,
+        "top": 246.546875,
+        "right": 389.3125,
+        "bottom": 258.546875,
+        "width": 39.15625,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 498.7421875,
+        "top": 234.28125,
+        "right": 528.7265625,
+        "bottom": 246.28125,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "ArcherGuard",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 520.671875,
+        "top": 396.546875,
+        "right": 602.796875,
+        "bottom": 408.546875,
+        "width": 82.125,
+        "height": 12
+      }
+    },
+    {
+      "text": "Deer",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": 589.8515625,
+        "top": 118.546875,
+        "right": 619.8359375,
+        "bottom": 130.546875,
+        "width": 29.984375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Hen",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": -310.4140625,
+        "top": -44.4375,
+        "right": -284.3046875,
+        "bottom": -32.4375,
+        "width": 26.109375,
+        "height": 12
+      }
+    },
+    {
+      "text": "Scarecrow",
+      "color": "rgb(255, 255, 255)",
+      "secondaryColor": null,
+      "classes": "entity-nameplate monster ",
+      "rect": {
+        "left": -238.7578125,
+        "top": -74.4375,
+        "right": -173.7421875,
+        "bottom": -62.4375,
+        "width": 65.015625,
+        "height": 12
+      }
+    },
+    {
+      "text": "BorderVillage\nBoard",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": -9.5703125,
+        "top": 64.546875,
+        "right": 77.0390625,
+        "bottom": 88.546875,
+        "width": 86.609375,
+        "height": 24
+      }
+    },
+    {
+      "text": "Teleport\nGilbert",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 151.4375,
+        "top": 100.546875,
+        "right": 204.03125,
+        "bottom": 124.546875,
+        "width": 52.59375,
+        "height": 24
+      }
+    },
+    {
+      "text": "CraftsLady\nJude",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 479.890625,
+        "top": 226.546875,
+        "right": 547.578125,
+        "bottom": 250.546875,
+        "width": 67.6875,
+        "height": 24
+      }
+    },
+    {
+      "text": "Merchant\nScott",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 339.671875,
+        "top": -61.4375,
+        "right": 399.796875,
+        "bottom": -37.4375,
+        "width": 60.125,
+        "height": 24
+      }
+    },
+    {
+      "text": "Blacksmith\nSmith",
+      "color": "rgb(0, 255, 0)",
+      "secondaryColor": "rgb(255, 255, 255)",
+      "classes": "entity-nameplate npc ",
+      "rect": {
+        "left": 574.8125,
+        "top": 31.546875,
+        "right": 644.65625,
+        "bottom": 55.546875,
+        "width": 69.84375,
+        "height": 24
+      }
+    }
+  ],
+  "questMarkerCount": 0,
+  "entityHealthBarCount": 1,
+  "visibleChatLines": [
+    "Welcome to the Legend of Mir 2 Server.",
+    "[Mode: Peaceful]",
+    "[Pet: Attack and Move]",
+    "Online Players: 1"
+  ],
+  "nextDevPortalCount": 1,
+  "nextDevIndicatorVisible": false,
+  "stage": {
+    "left": 0,
+    "top": 0,
+    "right": 1024,
+    "bottom": 768,
+    "width": 1024,
+    "height": 768
+  },
+  "hud": {
+    "left": 0,
+    "top": 616,
+    "right": 1024,
+    "bottom": 768,
+    "width": 1024,
+    "height": 152
+  },
+  "miniMap": {
+    "left": 896,
+    "top": 1,
+    "right": 1024,
+    "bottom": 155,
+    "width": 128,
+    "height": 154
+  },
+  "chat": {
+    "left": 230,
+    "top": 671,
+    "right": 862,
+    "bottom": 739,
+    "width": 632,
+    "height": 68
+  },
+  "duraPanel": null,
+  "network404Count": 0,
+  "consoleErrorCount": 0,
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": [],
+  "screenshot": "docs/generated/player-qa/r316-gameshop-menu/r316-standard-capture.png"
+}

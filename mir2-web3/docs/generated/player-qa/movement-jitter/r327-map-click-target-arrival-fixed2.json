@@ -1,0 +1,4778 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:3002",
+  "account": "QA0429A",
+  "interaction": "clickTarget",
+  "startTarget": {
+    "map": "0",
+    "x": 330,
+    "y": 270
+  },
+  "startedAt": "2026-05-01T14:07:03.386Z",
+  "start": {
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 330,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "selfEntity": {
+      "x": 330,
+      "y": 270,
+      "direction": "Down",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 469.2,
+      "top": 283,
+      "width": 71.59,
+      "height": 12
+    },
+    "floor": {
+      "left": -298,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-14:314:254:0",
+    "centerSprite": {
+      "left": 470,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-5:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[10:06:55 PM] Online Players: 1",
+      "[10:06:55 PM] [Pet: Attack and Move]",
+      "[10:06:55 PM] [Mode: Peaceful]",
+      "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+    ],
+    "sentMoveTail": []
+  },
+  "finalState": {
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 336,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "selfEntity": {
+      "x": 336,
+      "y": 270,
+      "direction": "Right",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 469.2,
+      "top": 283,
+      "width": 71.59,
+      "height": 12
+    },
+    "floor": {
+      "left": -221.52,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-5:320:254:0",
+    "centerSprite": {
+      "left": 258.47,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-5:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[10:06:55 PM] Online Players: 1",
+      "[10:06:55 PM] [Pet: Attack and Move]",
+      "[10:06:55 PM] [Mode: Peaceful]",
+      "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+    ],
+    "sentMoveTail": [
+      {
+        "t": 1777644417624,
+        "command": {
+          "type": "moveTo",
+          "x": 332,
+          "y": 270,
+          "mode": "run"
+        }
+      },
+      {
+        "t": 1777644418265,
+        "command": {
+          "type": "moveTo",
+          "x": 334,
+          "y": 270,
+          "mode": "run"
+        }
+      },
+      {
+        "t": 1777644419472,
+        "command": {
+          "type": "moveTo",
+          "x": 336,
+          "y": 270,
+          "mode": "run"
+        }
+      }
+    ]
+  },
+  "sampleMs": 50,
+  "sampleCount": 45,
+  "actions": [
+    {
+      "label": "click-target-8,0",
+      "mode": "run",
+      "x": 338,
+      "y": 270,
+      "durationMs": 5200,
+      "interaction": "clickTarget",
+      "dispatch": {
+        "type": "tile",
+        "x": 338,
+        "y": 270,
+        "button": "right",
+        "clientX": 878,
+        "clientY": 368
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 283,
+          "width": 71.59,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-14:314:254:0"
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": {
+          "x": 332,
+          "y": 270
+        },
+        "movementPlan": {
+          "targetX": 338,
+          "targetY": 270,
+          "mode": "run",
+          "packetMode": "target",
+          "nextStepAt": 1777644418224,
+          "actionX": 332,
+          "actionY": 270,
+          "visualUntil": 1777644418224
+        },
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 462,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 283,
+          "width": 71.59,
+          "height": 12
+        },
+        "floor": {
+          "left": -210,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-14:316:254:0"
+      }
+    }
+  ],
+  "jumps": [
+    {
+      "label": "click-target-8,0",
+      "t": 3754,
+      "spriteDx": 0,
+      "spriteDy": 0,
+      "nameDx": 0,
+      "nameDy": -2,
+      "centerDx": 21.11,
+      "centerDy": 0,
+      "from": {
+        "t": 3629,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": {
+          "x": 336,
+          "y": 270
+        },
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 182,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 283,
+          "width": 71.59,
+          "height": 12
+        }
+      },
+      "to": {
+        "t": 3754,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 203.11,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 281,
+          "width": 71.59,
+          "height": 12
+        }
+      }
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3879,
+      "spriteDx": 0,
+      "spriteDy": 0,
+      "nameDx": 0,
+      "nameDy": 2,
+      "centerDx": 32,
+      "centerDy": 0,
+      "from": {
+        "t": 3754,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 203.11,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 281,
+          "width": 71.59,
+          "height": 12
+        }
+      },
+      "to": {
+        "t": 3879,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 235.11,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 283,
+          "width": 71.59,
+          "height": 12
+        }
+      }
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3988,
+      "spriteDx": 0,
+      "spriteDy": 0,
+      "nameDx": 0,
+      "nameDy": -1,
+      "centerDx": 18.41,
+      "centerDy": 0,
+      "from": {
+        "t": 3879,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 235.11,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 283,
+          "width": 71.59,
+          "height": 12
+        }
+      },
+      "to": {
+        "t": 3988,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 253.52,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 282,
+          "width": 71.59,
+          "height": 12
+        }
+      }
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4112,
+      "spriteDx": 0,
+      "spriteDy": 0,
+      "nameDx": 0,
+      "nameDy": -1,
+      "centerDx": 19.03,
+      "centerDy": 0,
+      "from": {
+        "t": 3988,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 253.52,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 282,
+          "width": 71.59,
+          "height": 12
+        }
+      },
+      "to": {
+        "t": 4112,
+        "player": {
+          "x": 334,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 272.55,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-5:330:270:0",
+        "nameplate": {
+          "left": 469.2,
+          "top": 281,
+          "width": 71.59,
+          "height": 12
+        }
+      }
+    }
+  ],
+  "summary": [
+    {
+      "label": "click-target-8,0",
+      "count": 45,
+      "firstPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "lastPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    }
+  ],
+  "samples": [
+    {
+      "label": "click-target-8,0",
+      "t": 0,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418224,
+        "actionX": 332,
+        "actionY": 270,
+        "visualUntil": 1777644418224
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -221.67,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-14:316:254:0",
+      "centerSprite": {
+        "left": 450.31,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 125,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418224,
+        "actionX": 332,
+        "actionY": 270,
+        "visualUntil": 1777644418224
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -241.19,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-14:316:254:0",
+      "centerSprite": {
+        "left": 430.8,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 248,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418224,
+        "actionX": 332,
+        "actionY": 270,
+        "visualUntil": 1777644418224
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -260.87,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-14:316:254:0",
+      "centerSprite": {
+        "left": 411.11,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 372,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418224,
+        "actionX": 332,
+        "actionY": 270,
+        "visualUntil": 1777644418224
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -280.72,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-14:316:254:0",
+      "centerSprite": {
+        "left": 391.27,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 595,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 332,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418224,
+        "actionX": 332,
+        "actionY": 270,
+        "visualUntil": 1777644418224
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -202,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 374,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 751,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -225.52,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 350.47,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 875,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -257.83,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 318.16,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1000,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -277.19,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 298.8,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1115,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -297.03,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278.95,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1236,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1343,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1438,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1593,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1702,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 332,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 334,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644418865,
+        "actionX": 334,
+        "actionY": 270,
+        "pendingX": 334,
+        "pendingY": 270,
+        "pendingSentAt": 1777644418265,
+        "visualUntil": 1777644418865
+      },
+      "selfEntity": {
+        "x": 332,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1810,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -210.8,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 269.19,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 1935,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -233.52,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 246.47,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2043,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -251.75,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 228.23,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2173,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -273.52,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 206.47,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2308,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -294.95,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 185.03,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2433,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2603,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2728,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2818,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 2914,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3008,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3101,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3194,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3288,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3397,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3474,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": {
+        "targetX": 338,
+        "targetY": 270,
+        "mode": "run",
+        "packetMode": "target",
+        "nextStepAt": 1777644420071,
+        "actionX": 336,
+        "actionY": 270,
+        "pendingX": 336,
+        "pendingY": 270,
+        "pendingSentAt": 1777644419471,
+        "visualUntil": 1777644420071
+      },
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3629,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": {
+        "x": 336,
+        "y": 270
+      },
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -394,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 182,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3754,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -372.87,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 203.11,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3879,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -340.87,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 235.11,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 3988,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -322.47,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 253.52,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4112,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 281,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -303.44,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 272.55,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4237,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4330,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4423,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4516,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4656,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4765,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4875,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 4968,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 5060,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 282,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-3:318:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    },
+    {
+      "label": "click-target-8,0",
+      "t": 5139,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 334,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "selfEntity": {
+        "x": 334,
+        "y": 270,
+        "direction": "Right",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 469.2,
+        "top": 283,
+        "width": 71.59,
+        "height": 12
+      },
+      "floor": {
+        "left": -202,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-5:320:254:0",
+      "centerSprite": {
+        "left": 278,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-5:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[10:06:55 PM] Online Players: 1",
+        "[10:06:55 PM] [Pet: Attack and Move]",
+        "[10:06:55 PM] [Mode: Peaceful]",
+        "[10:06:55 PM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [
+        {
+          "t": 1777644417624,
+          "command": {
+            "type": "moveTo",
+            "x": 332,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644418265,
+          "command": {
+            "type": "moveTo",
+            "x": 334,
+            "y": 270,
+            "mode": "run"
+          }
+        },
+        {
+          "t": 1777644419472,
+          "command": {
+            "type": "moveTo",
+            "x": 336,
+            "y": 270,
+            "mode": "run"
+          }
+        }
+      ]
+    }
+  ],
+  "nonFaviconNetwork404s": [
+    "http://127.0.0.1:3002/original-ui/NPC/25/meta.json"
+  ],
+  "consoleErrors": [
+    {
+      "source": "network",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found) (http://127.0.0.1:3002/original-ui/NPC/25/meta.json)"
+    }
+  ],
+  "screenshotPath": "E:\\mir2\\mir2-web3\\docs\\generated\\player-qa\\movement-jitter\\r327-map-click-target-arrival-fixed2.png"
+}

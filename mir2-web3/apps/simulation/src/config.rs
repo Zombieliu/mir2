@@ -419,17 +419,36 @@ pub struct CharacterSaveRecord {
     pub stage5_systems_json: Option<String>,
 }
 
+pub fn crystal_base_vitals(class: MirClass, level: u16) -> (i32, i32) {
+    let level = f32::from(level);
+    let hp = match class {
+        MirClass::Warrior => 14.0 + (level / 4.0 + 4.5 + level / 20.0) * level,
+        MirClass::Wizard => 14.0 + (level / 15.0 + 1.8) * level,
+        MirClass::Taoist => 14.0 + (level / 6.0 + 2.5) * level,
+        MirClass::Assassin | MirClass::Archer => 14.0 + (level / 4.0 + 3.25) * level,
+    } as i32;
+    let mp = match class {
+        MirClass::Wizard => 13.0 + ((level / 5.0 + 2.0) * 2.2 * level),
+        MirClass::Taoist => 13.0 + level / 8.0 * 2.2 * level,
+        MirClass::Warrior => 11.0 + level * 3.5,
+        MirClass::Assassin => 11.0 + level * 5.0,
+        MirClass::Archer => 11.0 + level * 4.0,
+    } as i32;
+    (hp.max(1), mp.max(0))
+}
+
 impl CharacterSaveRecord {
     pub fn new(character: CharacterRecord) -> Self {
+        let (max_hp, mp) = crystal_base_vitals(character.class, character.level);
         Self {
             character,
             map_file_name: String::new(),
             map_title: String::new(),
             position: Point { x: 0, y: 0 },
             direction: MirDirection::Down,
-            hp: 120,
-            max_hp: 120,
-            mp: 45,
+            hp: max_hp,
+            max_hp,
+            mp,
             experience: 0,
             max_experience: default_max_experience(),
             gold: 1280,
