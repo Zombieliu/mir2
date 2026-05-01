@@ -1,19 +1,21 @@
 import Link from "next/link";
+import { logoutAction } from "../app/login/actions";
+import { adminGet, type AdminAuthMeResponse } from "../lib/admin-api";
 import { getAdminI18n } from "../lib/i18n";
 import { LanguageSwitcher } from "./language-switcher";
 
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
-  { href: "/players", labelKey: "shell.nav.players", count: "12k" },
-  { href: "/players/AZ-1048", labelKey: "shell.nav.playerDetail", count: "GM" },
-  { href: "/economy", labelKey: "shell.nav.economy", count: "Risk" },
-  { href: "/activities", labelKey: "shell.nav.activities", count: "7" },
-  { href: "/servers", labelKey: "shell.nav.servers", count: "31" },
-  { href: "/risk", labelKey: "shell.nav.risk", count: "42" },
+  { href: "/players", labelKey: "shell.nav.players", count: "Read" },
+  { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },
+  { href: "/activities", labelKey: "shell.nav.activities", count: "Empty" },
+  { href: "/servers", labelKey: "shell.nav.servers", count: "Health" },
+  { href: "/risk", labelKey: "shell.nav.risk", count: "Bans" },
   { href: "/gm-tools", labelKey: "shell.nav.gmTools", count: "API" },
   { href: "/approvals", labelKey: "shell.nav.approvals", count: "Gate" },
+  { href: "/operators", labelKey: "shell.nav.operators", count: "RBAC" },
   { href: "/timeline", labelKey: "shell.nav.timeline", count: "Read" },
-  { href: "/audit", labelKey: "shell.nav.audit", count: "RBAC" }
+  { href: "/audit", labelKey: "shell.nav.audit", count: "Audit" }
 ];
 
 export async function AdminShell({
@@ -24,6 +26,8 @@ export async function AdminShell({
   active: string;
 }) {
   const { locale, t } = await getAdminI18n();
+  const auth = await adminGet<AdminAuthMeResponse>("/admin/auth/me");
+  const operator = auth.ok ? auth.data.operator : undefined;
 
   return (
     <div className="admin-shell">
@@ -55,17 +59,22 @@ export async function AdminShell({
       </aside>
       <main className="main">
         <div className="topbar">
-          <input
-            className="control"
-            placeholder={t("shell.searchPlaceholder")}
-          />
-          <select className="control" defaultValue="global">
-            <option value="global">{t("shell.realmGlobal")}</option>
-            <option value="s1">{t("shell.realmS1")}</option>
-            <option value="s2">{t("shell.realmS2")}</option>
-          </select>
           <LanguageSwitcher locale={locale} label={t("shell.language")} />
-          <div className="user-chip">{t("shell.operator")}</div>
+          <div className="topbar-actions">
+            <div className="user-chip">
+              {operator ? `${operator.operatorId} · ${operator.role}` : t("shell.operator")}
+            </div>
+            <Link className="user-chip" href="/login">
+              {auth.ok ? t("shell.switchOperator") : t("shell.login")}
+            </Link>
+            {auth.ok ? (
+              <form action={logoutAction}>
+                <button className="user-chip user-chip-button" type="submit">
+                  {t("shell.logout")}
+                </button>
+              </form>
+            ) : null}
+          </div>
         </div>
         {children}
       </main>

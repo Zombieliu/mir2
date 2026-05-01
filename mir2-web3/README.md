@@ -43,6 +43,8 @@ Primary references:
 - `docs/ARCHITECTURE-ADOPTION-PLAN.md`
 - `docs/POST-1TO1-EVOLUTION-PLAN.md`
 - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
+- `docs/ADMIN-STAGING-RUNBOOK.md`
+- `docs/WINDOWS-HOME-STAGING-SERVER.md`
 
 Immediate product architecture additions:
 
@@ -51,12 +53,13 @@ Immediate product architecture additions:
 - Postgres is the authoritative database target.
 - Redis is the non-authoritative cache/session/routing target.
 - NATS is the early internal command/notification bus candidate.
-- Redpanda, ClickHouse, Meilisearch, Loki, and Grafana are optional local profiles until real adapters/projections exist.
+- Redpanda and ClickHouse back the current Admin event analytics projection.
+- Meilisearch, Loki, and Grafana remain optional local profiles.
 
 Start core local infrastructure:
 
 ```bash
-docker compose -f infra/docker-compose.dev.yml up -d postgres redis nats
+docker compose -f infra/docker-compose.dev.yml up -d postgres redis nats redpanda clickhouse
 ```
 
 ## Legacy MVP Goal
@@ -77,12 +80,13 @@ Current implemented checkpoint:
 1. `packages/protocol` now has typed packet support for login/select/start-game, `MapInformation`, `UserInformation`, movement, chat, `ObjectPlayer`, `NewMonsterInfo`, and `NewNpcInfo`.
 2. `apps/simulation` emits a deterministic bootstrap scene with the player, one remote player, one monster, and one NPC for local testing.
 3. `apps/gateway` exposes TCP, HTTP health, WebSocket bridge, browser manual smoke UI, and a TCP smoke binary.
-4. `apps/admin-api` exposes an Axum Admin API with audited `SendSystemMail`, live gateway delivery, account-store fallback, Postgres command/audit/outbox adapters, a JSON account-store import utility, and NATS outbox dispatch.
-5. `apps/admin-web` is a separate NextJS operations console with Dashboard, players, economy, servers, risk, GM tools, audit, and English/Simplified Chinese UI copy.
-6. `apps/simulation` can mirror JSON account-store saves into Postgres when `MIR2_ACCOUNT_STORE_DATABASE_URL` is configured, and can explicitly opt into Postgres source-of-truth mode with `MIR2_ACCOUNT_STORE_BACKEND=postgres`. JSON remains the default runtime source of truth.
+4. `apps/admin-api` exposes an Axum Admin API with Postgres-backed operator auth, audited GM commands, peer approval, live gateway delivery, persistent receipts, Postgres command/audit/outbox adapters, and Redpanda/ClickHouse event reads.
+5. `apps/admin-web` is a separate NextJS operations console with login, dashboard, players, economy, activities, servers, risk, GM tools, approvals, operators, audit, timeline, and English/Simplified Chinese UI copy.
+6. `apps/simulation` and `apps/gateway` can run with Postgres as the explicit account-store source of truth with Redis session/routing cache.
+7. `apps/web` can be pointed at a staging Gateway through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL`, while preserving the local default gateway websocket.
 
 Immediate next steps:
 
-1. Replace the initial Admin API outbox NATS publisher with JetStream retries and dead-letter handling.
-2. Add higher-level repository tests and conflict handling around the new Postgres account-store source mode.
-3. Add Redis online/session/routing cache without making it authoritative.
+1. Deploy a shared staging stack using `infra/staging.env.example`.
+2. Run `docs/ADMIN-STAGING-RUNBOOK.md` smoke checks.
+3. Close production blockers before marking the operations center production-grade.

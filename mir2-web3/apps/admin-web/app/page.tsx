@@ -2,19 +2,36 @@ import { AdminShell } from "../components/admin-shell";
 import { Bars } from "../components/bars";
 import { MetricCard } from "../components/metric-card";
 import { StatusBadge } from "../components/status-badge";
-import { adminGet, type AuditRecord, type SystemMailReceipt } from "../lib/admin-api";
+import { adminGet, type AdminDashboardReadModel } from "../lib/admin-api";
+import { formatNumber, serviceConfigStatusKey, statusTone } from "../lib/format";
 import { getAdminI18n, translateAdminStatus } from "../lib/i18n";
-import { hotMaps, metrics, servers } from "../lib/mock-data";
 
 export default async function DashboardPage() {
   const { t } = await getAdminI18n();
-  const audit = await adminGet<AuditRecord[]>("/admin/audit");
-  const outbox = await adminGet<SystemMailReceipt[]>("/admin/system-mail/outbox");
-  const metricText = [
-    { title: t("metric.onlineNow"), delta: t("metric.onlineDelta") },
-    { title: t("metric.dauMau"), delta: t("metric.dauMauDelta") },
-    { title: t("metric.revenueToday"), delta: t("metric.revenueDelta") },
-    { title: t("metric.riskQueue"), delta: t("metric.riskDelta") }
+  const dashboard = await adminGet<AdminDashboardReadModel>("/admin/read/dashboard");
+  const data = dashboard.ok ? dashboard.data : undefined;
+  const metrics = [
+    {
+      title: t("metric.accounts"),
+      value: formatNumber(data?.accountCount),
+      delta: data ? data.source : t("common.unavailable")
+    },
+    {
+      title: t("metric.characters"),
+      value: formatNumber(data?.characterCount),
+      delta: t("metric.charactersNote")
+    },
+    {
+      title: t("metric.totalGold"),
+      value: formatNumber(data?.totalGold),
+      delta: t("metric.totalCredit", { value: formatNumber(data?.totalCredit) })
+    },
+    {
+      title: t("metric.riskQueue"),
+      value: formatNumber(data?.activeBanCount),
+      delta: t("metric.riskDeltaReal"),
+      negative: Boolean(data?.activeBanCount)
+    }
   ];
 
   return (
@@ -25,19 +42,15 @@ export default async function DashboardPage() {
           <h2>{t("dashboard.title")}</h2>
           <p className="muted">{t("dashboard.subtitle")}</p>
         </div>
-        <StatusBadge tone={audit.ok ? "success" : "warn"}>
-          {audit.ok ? t("dashboard.adminConnected") : t("dashboard.adminOffline")}
+        <StatusBadge tone={dashboard.ok ? "success" : "warn"}>
+          {dashboard.ok ? t("dashboard.adminConnected") : t("dashboard.adminOffline")}
         </StatusBadge>
       </div>
+      {!dashboard.ok ? <p className="notice">{dashboard.error}</p> : null}
 
       <div className="grid metrics">
-        {metrics.map((metric, index) => (
-          <MetricCard
-            key={metric.title}
-            {...metric}
-            delta={metricText[index]?.delta ?? metric.delta}
-            title={metricText[index]?.title ?? metric.title}
-          />
+        {metrics.map((metric) => (
+          <MetricCard key={metric.title} {...metric} />
         ))}
       </div>
 
@@ -45,28 +58,26 @@ export default async function DashboardPage() {
         <section className="card">
           <p className="eyebrow">{t("dashboard.populationHeat")}</p>
           <h3>{t("dashboard.hotMaps")}</h3>
-          <Bars
-            rows={hotMaps.map((row, index) => ({
-              ...row,
-              label:
-                [
-                  t("map.bichonProvince"),
-                  t("map.ancientMine3f"),
-                  t("map.woomaTemple"),
-                  t("map.redMoonValley")
-                ][index] ?? row.label
-            }))}
-          />
+          {data?.hotMaps.length ? (
+            <Bars
+              rows={data.hotMaps.map((row) => ({
+                label: row.mapTitle,
+                value: row.percent,
+                suffix: `%, ${formatNumber(row.characterCount)}`
+              }))}
+            />
+          ) : (
+            <p className="notice">{t("dashboard.emptyHotMaps")}</p>
+          )}
         </section>
         <section className="card">
-          <p className="eyebrow">{t("dashboard.worldBoss")}</p>
-          <h3>{t("dashboard.bossName")}</h3>
-          <p className="metric-value">17:42</p>
-          <p className="muted">{t("dashboard.bossNote")}</p>
+          <p className="eyebrow">{t("dashboard.source")}</p>
+          <h3>{data?.source ?? t("common.unavailable")}</h3>
+          <p className="metric-value">{formatNumber(data?.onlineNow)}</p>
+          <p className="muted">{data?.onlineSource ?? t("dashboard.noOnlineSource")}</p>
           <div className="rune-divider" />
           <div className="actions">
-            <StatusBadge tone="warn">{t("dashboard.highAttention")}</StatusBadge>
-            <StatusBadge>{t("dashboard.instanceReady")}</StatusBadge>
+            <StatusBadge>{t("dashboard.realReadModel")}</StatusBadge>
           </div>
         </section>
       </div>
@@ -84,14 +95,14 @@ export default async function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {servers.map(([realm, online, latency, status]) => (
-                <tr key={realm}>
-                  <td>{realm}</td>
-                  <td>{online}</td>
-                  <td>{latency}</td>
+              {(data?.services ?? []).map((service) => (
+                <tr key={service.name}>
+                  <td>{service.name}</td>
+                  <td>{t(serviceConfigStatusKey(service.configured, service.status))}</td>
+                  <td>{service.latencyMs === undefined ? "-" : `${service.latencyMs}ms`}</td>
                   <td>
-                    <StatusBadge tone={status === "Warn" ? "warn" : "success"}>
-                      {translateAdminStatus(t, status)}
+                    <StatusBadge tone={statusTone(service.status)}>
+                      {translateAdminStatus(t, service.status)}
                     </StatusBadge>
                   </td>
                 </tr>
@@ -103,10 +114,9 @@ export default async function DashboardPage() {
           <p className="eyebrow">{t("dashboard.commandEvidence")}</p>
           <h3>{t("dashboard.auditOutbox")}</h3>
           <p className="metric-value">
-            {audit.ok ? audit.data.length : 0} / {outbox.ok ? outbox.data.length : 0}
+            {formatNumber(data?.auditRecordCount)} / {formatNumber(data?.outboxReceiptCount)}
           </p>
           <p className="muted">{t("dashboard.auditOutboxNote")}</p>
-          {!audit.ok ? <p className="notice">{audit.error}</p> : null}
         </section>
       </div>
     </AdminShell>

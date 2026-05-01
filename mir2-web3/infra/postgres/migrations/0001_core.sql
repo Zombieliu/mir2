@@ -180,3 +180,127 @@ ALTER TABLE admin_outbox
 
 CREATE INDEX IF NOT EXISTS idx_admin_outbox_pending
     ON admin_outbox(status, next_attempt_at_ms, created_at_ms);
+
+CREATE TABLE IF NOT EXISTS admin_system_mail_receipts (
+    outbox_id TEXT PRIMARY KEY,
+    command_id TEXT REFERENCES admin_commands(command_id) ON DELETE RESTRICT,
+    target_kind TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    attachment_count INTEGER NOT NULL,
+    accepted_at_ms BIGINT NOT NULL,
+    delivery_mode TEXT NOT NULL,
+    delivered_count INTEGER NOT NULL,
+    mail_ids_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_system_mail_receipts_recent
+    ON admin_system_mail_receipts(accepted_at_ms DESC);
+CREATE INDEX IF NOT EXISTS idx_admin_system_mail_receipts_command
+    ON admin_system_mail_receipts(command_id);
+
+CREATE TABLE IF NOT EXISTS admin_activities (
+    activity_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    activity_type TEXT NOT NULL,
+    status TEXT NOT NULL,
+    signal TEXT NOT NULL DEFAULT '',
+    start_at_ms BIGINT,
+    reward TEXT NOT NULL DEFAULT '',
+    condition TEXT NOT NULL DEFAULT '',
+    realms_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_by TEXT NOT NULL DEFAULT '',
+    created_at_ms BIGINT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS reward TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS condition TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS realms_json JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_activities
+    ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS idx_admin_activities_status
+    ON admin_activities(status, updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_market_price_feeds (
+    item TEXT PRIMARY KEY,
+    latest_price BIGINT NOT NULL,
+    sample_count INTEGER NOT NULL,
+    source TEXT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_market_price_feeds_updated
+    ON admin_market_price_feeds(updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_trade_graph_edges (
+    edge_id TEXT PRIMARY KEY,
+    from_player_id TEXT NOT NULL,
+    to_player_id TEXT NOT NULL,
+    signal TEXT NOT NULL,
+    risk TEXT NOT NULL,
+    evidence TEXT NOT NULL DEFAULT '',
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_trade_graph_edges_updated
+    ON admin_trade_graph_edges(updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_zone_runtime_records (
+    zone_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    status TEXT NOT NULL,
+    host TEXT NOT NULL DEFAULT '',
+    process_id TEXT NOT NULL DEFAULT '',
+    map_count INTEGER NOT NULL DEFAULT 0,
+    player_count INTEGER NOT NULL DEFAULT 0,
+    tick_rate INTEGER NOT NULL DEFAULT 0,
+    uptime_seconds BIGINT NOT NULL DEFAULT 0,
+    source TEXT NOT NULL DEFAULT '',
+    updated_at_ms BIGINT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_zone_runtime_status
+    ON admin_zone_runtime_records(status, updated_at_ms DESC);
+
+CREATE TABLE IF NOT EXISTS admin_operators (
+    operator_id TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL,
+    status TEXT NOT NULL,
+    permissions_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+    token_hash TEXT NOT NULL DEFAULT '',
+    created_by TEXT NOT NULL DEFAULT '',
+    created_at_ms BIGINT NOT NULL,
+    updated_at_ms BIGINT NOT NULL,
+    last_authenticated_at_ms BIGINT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS token_hash TEXT NOT NULL DEFAULT '';
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS updated_at_ms BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE admin_operators
+    ADD COLUMN IF NOT EXISTS last_authenticated_at_ms BIGINT;
+
+CREATE INDEX IF NOT EXISTS idx_admin_operators_role
+    ON admin_operators(role, status);
+CREATE INDEX IF NOT EXISTS idx_admin_operators_token_hash
+    ON admin_operators(token_hash)
+    WHERE token_hash <> '';
