@@ -1,6 +1,6 @@
 # Architecture Adoption Plan
 
-Last updated: 2026-04-28
+Last updated: 2026-05-05
 
 Purpose: define what parts of the target MMORPG architecture should be added now, what should be introduced behind interfaces, and what should remain documented until scale or product need justifies it.
 
@@ -10,6 +10,7 @@ This plan complements:
 - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
 - `docs/POST-1TO1-EVOLUTION-PLAN.md`
 - `docs/PARITY-TRUTH-AUDIT.md`
+- `docs/ARCHITECTURE-IMPLEMENTATION-STATUS.md`
 
 ## Guiding Rule
 
@@ -95,7 +96,7 @@ Gateway / Account / World / Mail service boundaries
 
 1. Keep parity baseline green and truthfully marked as Candidate where appropriate.
 2. Add local dev infra compose for Postgres, Redis, NATS, Redpanda, and ClickHouse.
-3. Define storage boundaries for account, character, inventory, storage, mail, and admin audit.
+3. Define runtime/storage boundaries for world commands, account, character, inventory, storage, mail, and admin audit. The first runtime boundary now exists as `WorldRuntime` / `WorldCommand` with an in-process runtime adapter, gateway sessions now open through `ZoneRegistry`, `SessionRouter` defines the route-policy hook, and the default in-process zone shares player presence plus per-map NPC/monster/drop snapshot layers across sessions. Shared ground-drop removal is tombstoned at the zone layer for both high-level and protocol pickup paths to prevent stale per-session snapshots from resurrecting picked-up drops; removed non-player map entity ids are tombstoned the same way. This is still transitional shared state; combat, AI, remote pickup inventory gain, NPC services, and world ticks still need promotion into true shared zone authority.
 4. Add Postgres schema draft and migration strategy. Done for the first core
    schema in `infra/postgres/migrations/0001_core.sql`.
 5. Implement Postgres repositories behind existing local interfaces. Done for

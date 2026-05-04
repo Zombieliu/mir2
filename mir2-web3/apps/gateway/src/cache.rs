@@ -20,6 +20,8 @@ pub struct GatewaySessionCacheKey {
 pub struct GatewaySessionCacheRecord {
     pub key: GatewaySessionCacheKey,
     pub character_name: String,
+    #[serde(default, rename = "zoneId")]
+    pub zone_id: Option<String>,
     pub map_file_name: Option<String>,
     pub player_object_id: Option<u32>,
     pub player_hp: Option<i32>,
@@ -469,6 +471,7 @@ pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCa
             character_index: identity.character_index,
         },
         character_name: identity.character_name,
+        zone_id: Some(session.zone_id().as_str().to_string()),
         map_file_name: snapshot.map_file_name,
         player_object_id: snapshot.player_object_id,
         player_hp: snapshot.player_hp,
@@ -548,6 +551,7 @@ mod tests {
         assert_eq!(cached.key.account_id, "demo");
         assert_eq!(cached.key.character_index, 0);
         assert_eq!(cached.character_name, "Scout");
+        assert_eq!(cached.zone_id.as_deref(), Some("primary"));
         assert_eq!(cached.map_file_name.as_deref(), Some("0"));
         assert_eq!(cached.gold, session.world_snapshot().gold);
     }

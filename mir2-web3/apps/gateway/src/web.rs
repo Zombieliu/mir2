@@ -23,11 +23,12 @@ use crate::cache::{
     SharedGatewaySessionCache,
 };
 use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
 #[derive(Clone)]
 struct WebState {
     config: Arc<GatewayConfig>,
+    zone_registry: Arc<ZoneRegistry>,
     session_cache: SharedGatewaySessionCache,
 }
 
@@ -337,6 +338,7 @@ struct AdminErrorResponse {
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
     let state = WebState {
         config: Arc::new(config),
+        zone_registry: Arc::new(ZoneRegistry::in_process()),
         session_cache: default_gateway_session_cache_from_env(),
     };
 
@@ -418,7 +420,8 @@ async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Resp
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
-    let mut session = GatewaySession::new((*state.config).clone());
+    let mut session =
+        GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry);
     handle_socket_inner(socket, &mut session, Arc::clone(&state.session_cache)).await;
     let _ = catch_gateway_panic("web refresh_active_external_mail", || {
         session.refresh_active_external_mail()
@@ -572,16 +575,27 @@ fn move_log_for_action(action: &SessionAction) -> Option<String> {
             "MoveTo target=({x},{y}) mode={}",
             if *running { "run" } else { "walk" }
         )),
-        SessionAction::Packet(ClientPacket::Walk { direction }) => Some(format!("Walk direction={direction:?}")),
-        SessionAction::Packet(ClientPacket::Run { direction }) => Some(format!("Run direction={direction:?}")),
-        SessionAction::Packet(ClientPacket::Turn { direction }) => Some(format!("Turn direction={direction:?}")),
+        SessionAction::Packet(ClientPacket::Walk { direction }) => {
+            Some(format!("Walk direction={direction:?}"))
+        }
+        SessionAction::Packet(ClientPacket::Run { direction }) => {
+            Some(format!("Run direction={direction:?}"))
+        }
+        SessionAction::Packet(ClientPacket::Turn { direction }) => {
+            Some(format!("Turn direction={direction:?}"))
+        }
         _ => None,
     }
 }
 
 fn move_logging_enabled() -> bool {
     env::var("MIR2_GATEWAY_MOVE_LOG")
-        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .map(|value| {
+            matches!(
+                value.to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
         .unwrap_or(false)
 }
 
@@ -2141,6 +2155,7 @@ mod tests {
         let default_character = config.default_character.clone();
         let state = super::WebState {
             config: Arc::new(config),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
         };
 
