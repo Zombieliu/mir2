@@ -1,5 +1,6 @@
 mod config;
 mod runtime;
+mod world_runtime;
 
 pub use config::{
     ban_account_in_store, deliver_stage5_system_mail, AccountBanReceipt, AccountBanStatus,
@@ -14,3 +15,4 @@ pub use config::{
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldSnapshot,
 };
 pub use runtime::{ActiveSessionIdentity, SimulationSession};
+pub use world_runtime::{InProcessWorldRuntime, WorldCommand, WorldRuntime, ZoneRuntimeHandle};

@@ -1,8 +1,13 @@
 use std::any::Any;
+use std::fmt;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use mir2_protocol::{ClientPacket, Point, ServerPacket};
-use mir2_simulation::{ActiveSessionIdentity, SimulationConfig, SimulationSession, WorldSnapshot};
+use mir2_simulation::{
+    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldSnapshot, ZoneRuntimeHandle,
+};
+
+use crate::routing::{ZoneId, ZoneRegistry};
 
 pub type GatewayConfig = SimulationConfig;
 
@@ -31,96 +36,145 @@ fn panic_payload_message(payload: &(dyn Any + Send)) -> String {
     }
 }
 
-#[derive(Debug)]
 pub struct GatewaySession {
-    simulation: SimulationSession,
+    zone_id: ZoneId,
+    runtime: ZoneRuntimeHandle,
+}
+
+impl fmt::Debug for GatewaySession {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("GatewaySession")
+            .field("zone_id", &self.zone_id)
+            .field("runtime", &"WorldRuntime")
+            .finish()
+    }
 }
 
 impl GatewaySession {
     pub fn new(config: GatewayConfig) -> Self {
-        Self {
-            simulation: SimulationSession::new(config),
-        }
+        Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
+    }
+
+    pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
+        let routed = registry.open_session(config);
+        Self::with_routed_world_runtime(routed.zone_id, routed.runtime)
+    }
+
+    pub fn with_routed_world_runtime(zone_id: ZoneId, runtime: ZoneRuntimeHandle) -> Self {
+        Self { zone_id, runtime }
+    }
+
+    pub fn zone_id(&self) -> &ZoneId {
+        &self.zone_id
     }
 
     pub fn on_connect(&self) -> Vec<ServerPacket> {
-        self.simulation.on_connect()
+        self.runtime.on_connect()
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
-        self.simulation.handle_packet(packet)
+        self.execute_infallible(WorldCommand::ClientPacket(packet))
     }
 
     pub fn move_to(&mut self, x: i32, y: i32, running: bool) -> Vec<ServerPacket> {
-        self.simulation.move_to_with_mode(Point { x, y }, running)
+        self.execute_infallible(WorldCommand::MoveTo {
+            position: Point { x, y },
+            running,
+        })
     }
 
     pub fn attack(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.attack(object_id)
+        self.execute_infallible(WorldCommand::Attack { object_id })
     }
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.interact(object_id)
+        self.execute_infallible(WorldCommand::Interact { object_id })
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
-        self.simulation.select_npc_dialog_target(target)
+        self.execute_infallible(WorldCommand::SelectNpcDialog {
+            target: target.to_string(),
+        })
     }
 
     pub fn submit_npc_input(&mut self, value: &str) -> Vec<ServerPacket> {
-        self.simulation.submit_npc_input(value)
+        self.execute_infallible(WorldCommand::SubmitNpcInput {
+            value: value.to_string(),
+        })
     }
 
     pub fn pick_up(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.pick_up(object_id)
+        self.execute_infallible(WorldCommand::PickUp { object_id })
     }
 
     pub fn use_item(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.use_item(key)
+        self.execute_infallible(WorldCommand::UseItem {
+            key: key.to_string(),
+        })
     }
 
     pub fn drop_item(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.drop_item(key)
+        self.execute_infallible(WorldCommand::DropItem {
+            key: key.to_string(),
+        })
     }
 
     pub fn delete_character(&mut self, character_index: i32) -> Vec<ServerPacket> {
-        self.simulation.delete_character(character_index)
+        self.execute_infallible(WorldCommand::DeleteCharacter { character_index })
     }
 
     pub fn cast_skill(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.cast_skill(key)
+        self.execute_infallible(WorldCommand::CastSkill {
+            key: key.to_string(),
+        })
     }
 
     pub fn transfer_map(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.transfer_map(key)
+        self.execute_infallible(WorldCommand::TransferMap {
+            key: key.to_string(),
+        })
     }
 
     pub fn stage5_command(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
-        self.simulation.stage5_command(action, args)
+        self.execute_infallible(WorldCommand::Stage5Command {
+            action: action.to_string(),
+            args,
+        })
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
-        self.simulation.tick()
+        self.execute_infallible(WorldCommand::Tick)
     }
 
     pub fn set_language(&mut self, language: &str) -> Result<(), String> {
-        self.simulation.set_language_code(language).map(|_| ())
+        self.runtime
+            .execute(WorldCommand::SetLanguage {
+                language: language.to_string(),
+            })
+            .map(|_| ())
     }
 
     pub fn world_snapshot(&self) -> WorldSnapshot {
-        self.simulation.world_snapshot()
+        self.runtime.world_snapshot()
     }
 
     pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
-        self.simulation.active_identity()
+        self.runtime.active_identity()
     }
 
     pub fn save_active_character(&self) {
-        self.simulation.save_active_character();
+        self.runtime.save_active_character();
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
-        self.simulation.refresh_active_external_mail()
+        self.runtime.refresh_active_external_mail()
+    }
+
+    fn execute_infallible(&mut self, command: WorldCommand) -> Vec<ServerPacket> {
+        self.runtime
+            .execute(command)
+            .expect("non-language world runtime command should not fail")
     }
 }
 

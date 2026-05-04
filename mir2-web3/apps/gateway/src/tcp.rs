@@ -6,29 +6,35 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
 use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
 pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
     let listener = TcpListener::bind(addr).await?;
     let config = Arc::new(config);
+    let zone_registry = Arc::new(ZoneRegistry::in_process());
 
     eprintln!("mir2-gateway tcp listening on {addr}");
 
     loop {
         let (stream, peer) = listener.accept().await?;
         let config = Arc::clone(&config);
+        let zone_registry = Arc::clone(&zone_registry);
 
         tokio::spawn(async move {
-            if let Err(error) = handle_client(stream, config).await {
+            if let Err(error) = handle_client(stream, config, zone_registry).await {
                 eprintln!("tcp client error from {peer}: {error}");
             }
         });
     }
 }
 
-async fn handle_client(mut stream: TcpStream, config: Arc<GatewayConfig>) -> io::Result<()> {
+async fn handle_client(
+    mut stream: TcpStream,
+    config: Arc<GatewayConfig>,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
     let peer = stream.peer_addr().ok();
-    let mut session = GatewaySession::new((*config).clone());
+    let mut session = GatewaySession::new_with_zone_registry((*config).clone(), &zone_registry);
     let result = handle_client_inner(&mut stream, &mut session, peer).await;
     let _ = catch_gateway_panic("tcp save_active_character", || {
         session.save_active_character()
