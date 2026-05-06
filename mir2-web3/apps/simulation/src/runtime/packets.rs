@@ -16,9 +16,9 @@ use mir2_protocol::{
 };
 
 use crate::config::{
-    CharacterRecord, EquipmentSlot, GroundDropSnapshot, ItemContainer, MapTransferSnapshot,
-    SimulationConfig, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
-    WorldEntitySpriteSnapshot, WorldSnapshot,
+    CharacterRecord, EquipmentSlot, GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer,
+    MapTransferSnapshot, SimulationConfig, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
 
 use super::components::{
@@ -144,6 +144,10 @@ pub(super) fn handle_chat_packet(world: &mut World, message: String) -> Vec<Serv
         return Vec::new();
     }
 
+    if let Some(remaining_seconds) = active_chat_ban_remaining_seconds(world) {
+        return vec![chat_ban_remaining_message(world, remaining_seconds)];
+    }
+
     if message.trim().eq_ignore_ascii_case("@ADDSTORAGE") {
         return expand_storage_rental_impl(world);
     }
@@ -160,6 +164,51 @@ pub(super) fn handle_chat_packet(world: &mut World, message: String) -> Vec<Serv
         text: format!("{player_name}: {message}"),
         chat_type: mir2_protocol::ChatType::Normal,
     }]
+}
+
+fn active_chat_ban_remaining_seconds(world: &mut World) -> Option<u64> {
+    let now = unix_now_ms();
+    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
+    if !player_runtime.chat_banned {
+        return None;
+    }
+    match player_runtime.chat_ban_until_ms {
+        Some(until_ms) if until_ms > now => Some((until_ms - now).div_ceil(1_000).max(1)),
+        Some(_) => {
+            player_runtime.chat_banned = false;
+            player_runtime.chat_ban_until_ms = None;
+            None
+        }
+        None => Some(1),
+    }
+}
+
+fn chat_ban_remaining_message(world: &World, remaining_seconds: u64) -> ServerPacket {
+    let days = remaining_seconds / 86_400;
+    let hours = (remaining_seconds % 86_400) / 3_600;
+    let minutes = (remaining_seconds % 3_600) / 60;
+    let seconds = remaining_seconds % 60;
+    if days > 0 {
+        system_message_key_args(
+            world,
+            "server.ChatBanRemainingTimeByDay",
+            [days, hours, minutes, seconds],
+        )
+    } else if hours > 0 {
+        system_message_key_args(
+            world,
+            "server.ChatBanRemainingTimeByHour",
+            [hours, minutes, seconds],
+        )
+    } else if minutes > 0 {
+        system_message_key_args(
+            world,
+            "server.ChatBanRemainingTimeByMinutes",
+            [minutes, seconds],
+        )
+    } else {
+        system_message_key_args(world, "server.ChatBanRemainingTimeBySecond", [seconds])
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -1146,11 +1195,45 @@ pub(super) fn collect_ground_drops(
                 Some(key) => localized_text_or_fallback(language, key, &payload.source_monster),
                 None => payload.source_monster.clone(),
             },
+            loot: ground_drop_loot_snapshot(&payload.loot),
         });
     }
 
     drops.sort_by_key(|drop| drop.object_id);
     drops
+}
+
+fn ground_drop_loot_snapshot(loot: &DropLoot) -> GroundDropLootSnapshot {
+    match loot {
+        DropLoot::Gold(amount) => GroundDropLootSnapshot::Gold { amount: *amount },
+        DropLoot::InventoryItem {
+            key,
+            name,
+            description,
+            weight,
+            durability_current,
+            durability_max,
+            added_attack,
+            added_defence,
+            added_stats,
+            cursed,
+            socket_slots,
+            show_group_pickup,
+        } => GroundDropLootSnapshot::InventoryItem {
+            key: key.clone(),
+            name: name.clone(),
+            description: description.clone(),
+            weight: *weight,
+            durability_current: *durability_current,
+            durability_max: *durability_max,
+            added_attack: *added_attack,
+            added_defence: *added_defence,
+            added_stats: added_stats.clone(),
+            cursed: *cursed,
+            socket_slots: *socket_slots,
+            show_group_pickup: *show_group_pickup,
+        },
+    }
 }
 
 #[allow(deprecated)]

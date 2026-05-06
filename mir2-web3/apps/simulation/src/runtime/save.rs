@@ -137,6 +137,9 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         max_experience: player_runtime.max_experience.max(1),
         gold: player_runtime.gold,
         credit: player_runtime.credit,
+        pk_points: player_runtime.pk_points,
+        chat_banned: player_runtime.chat_banned,
+        chat_ban_until_ms: player_runtime.chat_ban_until_ms,
         inventory_items_json: encode_state_vec(&resources.inventory_items),
         belt_items_json: encode_state_vec(&resources.belt_items),
         storage_items_json: encode_state_vec(&resources.storage_items),
@@ -641,6 +644,9 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         player_runtime.max_experience = save.max_experience.max(1);
         player_runtime.gold = save.gold;
         player_runtime.credit = save.credit;
+        player_runtime.pk_points = save.pk_points;
+        player_runtime.chat_banned = save.chat_banned;
+        player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;
     }
     let mut resources = world.resource_mut::<InventoryResource>();
     resources.inventory_items = decode_state_vec(&save.inventory_items_json).unwrap_or_default();

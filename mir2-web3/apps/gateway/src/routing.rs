@@ -70,6 +70,33 @@ impl SessionRouter for SingleZoneSessionRouter {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct MapZoneSessionRouter {
+    map_routes: BTreeMap<String, ZoneId>,
+}
+
+impl MapZoneSessionRouter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_route(mut self, map_file_name: impl Into<String>, zone_id: ZoneId) -> Self {
+        self.map_routes.insert(map_file_name.into(), zone_id);
+        self
+    }
+}
+
+impl SessionRouter for MapZoneSessionRouter {
+    fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
+        request
+            .map_file_name
+            .as_ref()
+            .and_then(|map_file_name| self.map_routes.get(map_file_name))
+            .cloned()
+            .unwrap_or_else(|| default_zone_id.clone())
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct InProcessZoneRuntimeFactory;
 
@@ -244,12 +271,12 @@ impl SharedInProcessZoneState {
         self.maps.get(map_file_name).cloned()
     }
 
-    fn remove_pickable_drop(
+    fn take_pickable_drop(
         &mut self,
         map_file_name: &str,
         object_id: Option<u32>,
         picker: &WorldEntitySnapshot,
-    ) -> Option<u32> {
+    ) -> Option<GroundDropSnapshot> {
         let Some(map) = self.maps.get_mut(map_file_name) else {
             return None;
         };
@@ -267,22 +294,37 @@ impl SharedInProcessZoneState {
         if drop.x != picker.x || drop.y != picker.y {
             return None;
         }
-        map.ground_drops.remove(&object_id);
+        let drop = map.ground_drops.remove(&object_id)?;
         map.removed_drop_ids.insert(object_id);
-        Some(object_id)
+        Some(drop)
+    }
+
+    fn restore_drop(&mut self, map_file_name: &str, drop: GroundDropSnapshot) {
+        let map = self.maps.entry(map_file_name.to_string()).or_default();
+        map.removed_drop_ids.remove(&drop.object_id);
+        map.ground_drops.insert(drop.object_id, drop);
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct SharedInProcessZoneRuntimeFactory {
-    state: Arc<Mutex<SharedInProcessZoneState>>,
+    states: Arc<Mutex<BTreeMap<ZoneId, Arc<Mutex<SharedInProcessZoneState>>>>>,
 }
 
 impl SharedInProcessZoneRuntimeFactory {
     pub fn new() -> Self {
         Self {
-            state: Arc::new(Mutex::new(SharedInProcessZoneState::new())),
+            states: Arc::new(Mutex::new(BTreeMap::new())),
         }
+    }
+
+    fn state_for_zone(&self, zone_id: &ZoneId) -> Arc<Mutex<SharedInProcessZoneState>> {
+        self.states
+            .lock()
+            .expect("shared zone factory mutex should not be poisoned")
+            .entry(zone_id.clone())
+            .or_insert_with(|| Arc::new(Mutex::new(SharedInProcessZoneState::new())))
+            .clone()
     }
 }
 
@@ -293,10 +335,10 @@ impl Default for SharedInProcessZoneRuntimeFactory {
 }
 
 impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
-    fn create_runtime(&self, config: GatewayConfig, _zone_id: &ZoneId) -> ZoneRuntimeHandle {
+    fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         Box::new(SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
-            zone_state: Arc::clone(&self.state),
+            zone_state: self.state_for_zone(zone_id),
             presence_key: None,
             last_shared_entity_ids_by_map: BTreeMap::new(),
             last_shared_drop_ids_by_map: BTreeMap::new(),
@@ -412,15 +454,33 @@ impl SharedInProcessZoneSessionRuntime {
         else {
             return Vec::new();
         };
-        let removed = self
+        let Some(drop) = self
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned")
-            .remove_pickable_drop(map_file_name, object_id, self_entity);
-        if let Some(object_id) = removed {
-            vec![ServerPacket::ObjectRemove { object_id }]
+            .take_pickable_drop(map_file_name, object_id, self_entity)
+        else {
+            return Vec::new();
+        };
+
+        let mut packets = self.inner.apply_shared_ground_drop_pickup(&drop);
+        let gained = packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::GainedGold { .. } | ServerPacket::GainedItem { .. }
+            )
+        });
+        if gained {
+            packets.push(ServerPacket::ObjectRemove {
+                object_id: drop.object_id,
+            });
+            packets
         } else {
-            Vec::new()
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .restore_drop(map_file_name, drop);
+            packets
         }
     }
 }
@@ -595,8 +655,9 @@ impl fmt::Debug for ZoneRegistry {
 #[cfg(test)]
 mod tests {
     use super::{
-        InProcessZoneRuntimeFactory, SessionRouteRequest, SessionRouter, SharedInProcessZoneState,
-        SharedSessionRouter, SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
+        InProcessZoneRuntimeFactory, MapZoneSessionRouter, SessionRouteRequest,
+        SharedInProcessZoneRuntimeFactory, SharedInProcessZoneState, SharedSessionRouter,
+        SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
     };
     use crate::{GatewayConfig, GatewaySession};
     use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
@@ -630,7 +691,8 @@ mod tests {
         let registry = ZoneRegistry::with_router(
             ZoneId::primary(),
             Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
-            Arc::new(MapOverrideRouter) as SharedSessionRouter,
+            Arc::new(MapZoneSessionRouter::new().with_route("0", ZoneId::new("bichon-0")))
+                as SharedSessionRouter,
         );
 
         let routed = registry.open_session_for(
@@ -645,6 +707,48 @@ mod tests {
 
         assert_eq!(routed.zone_id, ZoneId::new("bichon-0"));
         assert_eq!(default_routed.zone_id, ZoneId::primary());
+    }
+
+    #[test]
+    fn shared_in_process_factory_isolates_state_by_zone_id() {
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(MapZoneSessionRouter::new().with_route("0", ZoneId::new("bichon-0")))
+                as SharedSessionRouter,
+        );
+        let mut bichon = GatewaySession::with_routed_world_runtime(
+            ZoneId::new("bichon-0"),
+            registry
+                .open_session_for(
+                    GatewayConfig::default(),
+                    SessionRouteRequest {
+                        account_id: Some("demo".to_string()),
+                        character_index: Some(0),
+                        map_file_name: Some("0".to_string()),
+                    },
+                )
+                .runtime,
+        );
+        let mut primary = GatewaySession::with_routed_world_runtime(
+            ZoneId::primary(),
+            registry.open_session(GatewayConfig::default()).runtime,
+        );
+
+        start_demo_character(&mut bichon);
+        start_new_character(&mut primary, "second", "Blade");
+
+        let bichon_snapshot = bichon.world_snapshot();
+        let primary_snapshot = primary.world_snapshot();
+
+        assert!(!bichon_snapshot
+            .entities
+            .iter()
+            .any(|entity| { entity.kind == WorldEntityKind::Player && entity.name == "Blade" }));
+        assert!(!primary_snapshot
+            .entities
+            .iter()
+            .any(|entity| { entity.kind == WorldEntityKind::Player && entity.name == "Scout" }));
     }
 
     #[test]
@@ -788,10 +892,19 @@ mod tests {
 
         let packets = second.pick_up(shared_drop.object_id);
 
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectRemove { object_id } if *object_id == shared_drop.object_id
         )));
+        let second_snapshot = second.world_snapshot();
+        assert!(second_snapshot
+            .inventory_items
+            .iter()
+            .chain(second_snapshot.belt_items.iter())
+            .any(|item| item.name == shared_drop.name));
         assert!(!second
             .world_snapshot()
             .ground_drops
@@ -832,10 +945,46 @@ mod tests {
 
         let packets = second.handle_packet(ClientPacket::PickUp);
 
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectRemove { object_id } if *object_id == shared_drop.object_id
         )));
+        let second_snapshot = second.world_snapshot();
+        assert!(second_snapshot
+            .inventory_items
+            .iter()
+            .chain(second_snapshot.belt_items.iter())
+            .any(|item| item.name == shared_drop.name));
+        assert!(!first
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .any(|drop| drop.object_id == shared_drop.object_id));
+    }
+
+    #[test]
+    fn shared_in_process_registry_gains_remote_picked_up_shared_gold() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let starting_gold = second.world_snapshot().gold;
+
+        first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let shared_drop = second
+            .world_snapshot()
+            .ground_drops
+            .first()
+            .cloned()
+            .expect("second session should see the shared gold drop");
+        second.transfer_map(&format!("crystal:0:{}:{}", shared_drop.x, shared_drop.y));
+
+        let packets = second.pick_up(shared_drop.object_id);
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 100 })));
+        assert_eq!(second.world_snapshot().gold, starting_gold + 100);
         assert!(!first
             .world_snapshot()
             .ground_drops
@@ -909,19 +1058,6 @@ mod tests {
             disposition: WorldEntityDisposition::Neutral,
             sprite: None,
             quest_ids: Vec::new(),
-        }
-    }
-
-    #[derive(Debug)]
-    struct MapOverrideRouter;
-
-    impl SessionRouter for MapOverrideRouter {
-        fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
-            if request.map_file_name.as_deref() == Some("0") {
-                ZoneId::new("bichon-0")
-            } else {
-                default_zone_id.clone()
-            }
         }
     }
 }

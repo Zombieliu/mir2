@@ -835,6 +835,7 @@ impl SimulationSession {
             price,
             sold: false,
             cancelled: false,
+            expired: false,
         });
         Vec::new()
     }
@@ -851,12 +852,9 @@ impl SimulationSession {
         let language = current_language(self.app.world());
         let (index, price, item_key) = {
             let stage5 = self.app.world().resource::<Stage5SystemsResource>();
-            let Some(index) = stage5
-                .stage5_systems
-                .auction
-                .iter()
-                .position(|listing| listing.id == id && !listing.sold && !listing.cancelled)
-            else {
+            let Some(index) = stage5.stage5_systems.auction.iter().position(|listing| {
+                listing.id == id && !listing.sold && !listing.cancelled && !listing.expired
+            }) else {
                 return vec![system_message(&localized_text_or_fallback(
                     language,
                     "server.NotFound",
@@ -921,7 +919,7 @@ impl SimulationSession {
             .stage5_systems
             .auction
             .iter_mut()
-            .find(|listing| listing.id == id && !listing.sold)
+            .find(|listing| listing.id == id && !listing.sold && !listing.expired)
         {
             listing.cancelled = true;
         }

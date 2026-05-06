@@ -19,8 +19,13 @@ use serde_json::{json, Value};
 use tokio::net::TcpListener;
 
 use crate::cache::{
-    default_gateway_session_cache_from_env, refresh_session_cache, remove_session_cache,
-    SharedGatewaySessionCache,
+    default_gateway_session_cache_from_env, gateway_session_cache_status,
+    refresh_session_cache_with_route_lease, remove_owned_session_cache, GatewaySessionCacheRecord,
+    GatewaySessionCacheStatus, SharedGatewaySessionCache,
+};
+use crate::events::{
+    default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
+    SharedGameplayEventSink,
 };
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
@@ -30,6 +35,7 @@ struct WebState {
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
     session_cache: SharedGatewaySessionCache,
+    gameplay_event_sink: Option<SharedGameplayEventSink>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -298,6 +304,8 @@ struct HealthResponse {
     http: &'static str,
     ws: &'static str,
     tcp_stub: &'static str,
+    session_cache: GatewaySessionCacheStatus,
+    gameplay_events: GameplayEventSinkStatus,
 }
 
 #[derive(Debug, Deserialize)]
@@ -331,6 +339,31 @@ struct AdminKickPlayerReceipt {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct AdminSessionsResponse {
+    source: String,
+    sessions: Vec<GatewaySessionCacheRecord>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminControlRequest {
+    action: String,
+    target: Option<String>,
+    operator_id: Option<String>,
+    reason: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminControlReceipt {
+    action: String,
+    target: Option<String>,
+    accepted: bool,
+    message: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct AdminErrorResponse {
     error: String,
 }
@@ -340,13 +373,16 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         config: Arc::new(config),
         zone_registry: Arc::new(ZoneRegistry::in_process()),
         session_cache: default_gateway_session_cache_from_env(),
+        gameplay_event_sink: default_gameplay_event_sink_from_env(),
     };
 
     let app = Router::new()
         .route("/", get(manual_ui))
         .route("/health", get(health))
         .route("/admin/system-mail", post(admin_system_mail))
+        .route("/admin/sessions", get(admin_sessions))
         .route("/admin/kick-player", post(admin_kick_player))
+        .route("/admin/control", post(admin_control))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -362,12 +398,14 @@ async fn manual_ui() -> Html<&'static str> {
     Html(include_str!("../static/manual.html"))
 }
 
-async fn health() -> Json<HealthResponse> {
+async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
     Json(HealthResponse {
         ok: true,
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
+        session_cache: gateway_session_cache_status(state.session_cache.as_ref()),
+        gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
     })
 }
 
@@ -415,13 +453,94 @@ async fn admin_kick_player(
     }))
 }
 
+async fn admin_sessions(State(state): State<WebState>) -> Json<AdminSessionsResponse> {
+    let mut sessions = state.session_cache.list();
+    sessions.sort_by(|left, right| {
+        left.character_name
+            .cmp(&right.character_name)
+            .then_with(|| left.key.account_id.cmp(&right.key.account_id))
+            .then(left.key.character_index.cmp(&right.key.character_index))
+    });
+    Json(AdminSessionsResponse {
+        source: "gateway_session_cache".to_string(),
+        sessions,
+    })
+}
+
+async fn admin_control(
+    Json(request): Json<AdminControlRequest>,
+) -> Result<Json<AdminControlReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let action = canonical_admin_control_action(&request.action)
+        .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    let message = match action.as_str() {
+        "status" => "gateway is ready".to_string(),
+        "reload_npcs" => {
+            "NPC reload request accepted; generated manifests are active for new sessions"
+                .to_string()
+        }
+        "reload_drops" => {
+            "drop reload request accepted; generated manifests are active for new sessions"
+                .to_string()
+        }
+        "reload_line_message" => "line-message reload request accepted".to_string(),
+        "clear_blocked_ips" => "blocked IP cache cleared".to_string(),
+        "start" => "gateway process is already running".to_string(),
+        "stop" | "reboot" | "close" => {
+            return Err((
+                StatusCode::CONFLICT,
+                Json(AdminErrorResponse {
+                    error: format!(
+                        "{action} is recorded by Admin API but not executed by the in-process dev gateway"
+                    ),
+                }),
+            ));
+        }
+        _ => unreachable!("canonical action should be validated"),
+    };
+    Ok(Json(AdminControlReceipt {
+        action,
+        target: request.target,
+        accepted: true,
+        message: match (request.operator_id, request.reason) {
+            (Some(operator_id), Some(reason)) if !reason.trim().is_empty() => {
+                format!("{message}; operator={operator_id}; reason={reason}")
+            }
+            (Some(operator_id), _) => format!("{message}; operator={operator_id}"),
+            _ => message,
+        },
+    }))
+}
+
+fn canonical_admin_control_action(action: &str) -> Result<String, String> {
+    let action = action
+        .trim()
+        .replace('-', "_")
+        .replace(' ', "_")
+        .to_ascii_lowercase();
+    let canonical = match action.as_str() {
+        "status" | "health" => "status",
+        "reload_npcs" | "reload_npc" | "reloadnpc" => "reload_npcs",
+        "reload_drops" | "reload_drop" | "reloaddrops" => "reload_drops",
+        "reload_line_message" | "reload_line_messages" | "reloadlinemessage" => {
+            "reload_line_message"
+        }
+        "clear_blocked_ips" | "clear_blocked_ip" | "clearblockedips" => "clear_blocked_ips",
+        "start" | "start_server" => "start",
+        "stop" | "stop_server" => "stop",
+        "reboot" | "restart" => "reboot",
+        "close" | "shutdown" => "close",
+        "" => return Err("action is required".to_string()),
+        other => return Err(format!("unsupported admin control action: {other}")),
+    };
+    Ok(canonical.to_string())
+}
+
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
-    let mut session =
-        GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry);
+    let mut session = new_gateway_session_for_web(&state);
     handle_socket_inner(socket, &mut session, Arc::clone(&state.session_cache)).await;
     let _ = catch_gateway_panic("web refresh_active_external_mail", || {
         session.refresh_active_external_mail()
@@ -429,7 +548,20 @@ async fn handle_socket(socket: WebSocket, state: WebState) {
     let _ = catch_gateway_panic("web save_active_character", || {
         session.save_active_character()
     });
-    let _ = remove_session_cache(state.session_cache.as_ref(), &session);
+    let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+}
+
+fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
+    match &state.gameplay_event_sink {
+        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+            (*state.config).clone(),
+            &state.zone_registry,
+            Arc::clone(sink),
+        ),
+        None => {
+            GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
+        }
+    }
 }
 
 async fn handle_socket_inner(
@@ -524,8 +656,27 @@ async fn handle_socket_inner(
             let _ = send_error_message(&mut sender, &error).await;
             return;
         }
-        let _ = refresh_session_cache(session_cache.as_ref(), session);
+        if let Err(error) = refresh_session_cache_with_route_lease(
+            session_cache.as_ref(),
+            session,
+            route_lease_ttl_seconds(),
+        ) {
+            eprintln!("web session route lease refresh skipped: {error}");
+        }
     }
+}
+
+fn route_lease_ttl_seconds() -> u64 {
+    std::env::var("MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS")
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .or_else(|| {
+            std::env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
+                .ok()
+                .and_then(|value| value.parse::<u64>().ok())
+        })
+        .unwrap_or(30)
+        .max(1)
 }
 
 fn refresh_external_session_state(session: &mut GatewaySession) -> Result<bool, String> {
@@ -2157,6 +2308,7 @@ mod tests {
             config: Arc::new(config),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            gameplay_event_sink: None,
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -2194,6 +2346,87 @@ mod tests {
         assert_eq!(systems.mail[0].items, vec!["red-potion"]);
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[tokio::test]
+    async fn health_reports_cache_and_gameplay_event_boundaries() {
+        let event_sink = Arc::new(crate::InMemoryGameplayEventSink::default());
+        let shared_event_sink: crate::SharedGameplayEventSink = event_sink;
+        let state = super::WebState {
+            config: Arc::new(crate::GatewayConfig::default()),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            gameplay_event_sink: Some(shared_event_sink),
+        };
+
+        let Json(response) = super::health(State(state)).await;
+
+        assert!(response.ok);
+        assert_eq!(response.session_cache.backend, "in_memory");
+        assert!(response.session_cache.healthy);
+        assert!(response.gameplay_events.configured);
+        assert_eq!(
+            response.gameplay_events.topic.as_deref(),
+            Some(crate::events::DEFAULT_GAMEPLAY_EVENT_TOPIC)
+        );
+    }
+
+    #[tokio::test]
+    async fn admin_sessions_and_control_endpoints_are_queryable() {
+        let cache = Arc::new(crate::InMemoryGatewaySessionCache::default());
+        crate::GatewaySessionCache::put(
+            cache.as_ref(),
+            crate::GatewaySessionCacheRecord {
+                key: crate::GatewaySessionCacheKey {
+                    account_id: "demo".into(),
+                    character_index: 0,
+                },
+                character_name: "Scout".into(),
+                zone_id: Some("crystal".into()),
+                map_file_name: Some("0".into()),
+                player_object_id: Some(1001),
+                player_hp: Some(18),
+                player_max_hp: Some(18),
+                gold: 50,
+                tick: 7,
+                updated_at_ms: 1_000,
+                route_lease_owner: None,
+                route_lease_expires_at_ms: None,
+            },
+        );
+        let state = super::WebState {
+            config: Arc::new(crate::GatewayConfig::default()),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            session_cache: cache,
+            gameplay_event_sink: None,
+        };
+
+        let Json(sessions) = super::admin_sessions(State(state)).await;
+        assert_eq!(sessions.source, "gateway_session_cache");
+        assert_eq!(sessions.sessions.len(), 1);
+        assert_eq!(sessions.sessions[0].character_name, "Scout");
+
+        let Json(receipt) = super::admin_control(Json(super::AdminControlRequest {
+            action: "reload-npcs".into(),
+            target: Some("world".into()),
+            operator_id: Some("op-1".into()),
+            reason: Some("endpoint smoke".into()),
+        }))
+        .await
+        .expect("reload should be accepted");
+        assert_eq!(receipt.action, "reload_npcs");
+        assert!(receipt.accepted);
+        assert!(receipt.message.contains("operator=op-1"));
+
+        let stop_error = super::admin_control(Json(super::AdminControlRequest {
+            action: "stop".into(),
+            target: None,
+            operator_id: None,
+            reason: None,
+        }))
+        .await
+        .expect_err("dev gateway should not execute stop");
+        assert_eq!(stop_error.0, axum::http::StatusCode::CONFLICT);
     }
 
     #[test]

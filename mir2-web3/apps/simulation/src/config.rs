@@ -13,7 +13,9 @@ use mir2_game_data::{
     starter_map_collision, starter_scene, DecorObjectTemplate, MapBounds, SceneBootstrap,
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
-use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point, SelectInfo};
+use mir2_protocol::{
+    MapInformation, MirClass, MirDirection, MirGender, Point, SelectInfo, UserItemStat,
+};
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -184,8 +186,123 @@ struct AccountStoreSourceVersions {
     saves: BTreeMap<String, BTreeMap<i32, i64>>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountStoreRepositoryStatus {
+    pub backend: String,
+    pub mode: AccountStoreDatabaseMode,
+    pub configured: bool,
+    pub location: String,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct AccountStoreRepositorySave {
+    pub account_versions: BTreeMap<String, i64>,
+    pub save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
+}
+
+impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
+    fn from(value: AccountStoreSourceVersions) -> Self {
+        Self {
+            account_versions: value.accounts,
+            save_versions: value.saves,
+        }
+    }
+}
+
+impl AccountStoreRepositorySave {
+    fn into_source_versions(self) -> AccountStoreSourceVersions {
+        AccountStoreSourceVersions {
+            accounts: self.account_versions,
+            saves: self.save_versions,
+        }
+    }
+}
+
+pub trait AccountStoreRepository: Send + Sync {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String>;
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String>;
+    fn status(&self) -> AccountStoreRepositoryStatus;
+}
+
+#[derive(Debug, Clone)]
+pub struct FileAccountStoreRepository {
+    path: PathBuf,
+}
+
+impl FileAccountStoreRepository {
+    pub fn new(path: impl Into<PathBuf>) -> Self {
+        Self { path: path.into() }
+    }
+}
+
+impl AccountStoreRepository for FileAccountStoreRepository {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String> {
+        Ok(AccountStore::load_or_new(&self.path, default_character))
+    }
+
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
+        save_account_store_snapshot_to_path(store, &self.path)?;
+        Ok(AccountStoreRepositorySave::default())
+    }
+
+    fn status(&self) -> AccountStoreRepositoryStatus {
+        AccountStoreRepositoryStatus {
+            backend: "file".to_string(),
+            mode: AccountStoreDatabaseMode::Mirror,
+            configured: true,
+            location: self.path.display().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PostgresAccountStoreRepository {
+    database_url: String,
+    mode: AccountStoreDatabaseMode,
+}
+
+impl PostgresAccountStoreRepository {
+    pub fn new(database_url: impl Into<String>, mode: AccountStoreDatabaseMode) -> Self {
+        Self {
+            database_url: database_url.into(),
+            mode,
+        }
+    }
+}
+
+impl AccountStoreRepository for PostgresAccountStoreRepository {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String> {
+        load_account_store_from_postgres(self.database_url.clone(), default_character)
+    }
+
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
+        save_account_store_to_postgres(self.database_url.clone(), store.clone(), self.mode)
+            .map(AccountStoreRepositorySave::from)
+    }
+
+    fn status(&self) -> AccountStoreRepositoryStatus {
+        AccountStoreRepositoryStatus {
+            backend: "postgres".to_string(),
+            mode: self.mode,
+            configured: !self.database_url.trim().is_empty(),
+            location: redact_database_url(&self.database_url),
+        }
+    }
+}
+
 const fn legacy_account_store_schema_version() -> u16 {
     1
+}
+
+fn redact_database_url(database_url: &str) -> String {
+    let Some((scheme, rest)) = database_url.split_once("://") else {
+        return "<configured>".to_string();
+    };
+    let Some(at_index) = rest.rfind('@') else {
+        return format!("{scheme}://<configured>");
+    };
+    format!("{scheme}://<redacted>@{}", &rest[at_index + 1..])
 }
 
 fn write_file_atomically(path: &Path, data: &[u8]) -> io::Result<()> {
@@ -398,6 +515,12 @@ pub struct CharacterSaveRecord {
     pub gold: u32,
     #[serde(default)]
     pub credit: u32,
+    #[serde(default)]
+    pub pk_points: i32,
+    #[serde(default)]
+    pub chat_banned: bool,
+    #[serde(default)]
+    pub chat_ban_until_ms: Option<u64>,
     pub inventory_items_json: Vec<String>,
     pub belt_items_json: Vec<String>,
     #[serde(default)]
@@ -453,6 +576,9 @@ impl CharacterSaveRecord {
             max_experience: default_max_experience(),
             gold: 1280,
             credit: 0,
+            pk_points: 0,
+            chat_banned: false,
+            chat_ban_until_ms: None,
             inventory_items_json: Vec::new(),
             belt_items_json: Vec::new(),
             storage_items_json: Vec::new(),
@@ -697,6 +823,51 @@ mod tests {
             })
             .count();
         assert_eq!(temp_files, 0);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn file_account_store_repository_loads_saves_and_reports_status() {
+        let dir = unique_temp_dir("repository-file");
+        let path = dir.join("accounts.json");
+        let repository = FileAccountStoreRepository::new(path.clone());
+        let mut store = repository
+            .load(default_character())
+            .expect("file repository should load default store");
+        store
+            .accounts
+            .insert("repo".to_string(), AccountRecord::empty());
+
+        repository
+            .save(&store)
+            .expect("file repository should save store");
+        let reloaded = repository
+            .load(default_character())
+            .expect("file repository should reload store");
+        let status = repository.status();
+
+        assert!(reloaded.accounts.contains_key("repo"));
+        assert_eq!(status.backend, "file");
+        assert_eq!(status.mode, AccountStoreDatabaseMode::Mirror);
+        assert_eq!(status.location, path.display().to_string());
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn simulation_config_reports_configured_account_store_repositories() {
+        let dir = unique_temp_dir("repository-status");
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default()
+            .with_account_store_path(path)
+            .with_account_store_database_url("postgres://user:secret@db:5432/mir2");
+
+        let statuses = config.account_store_repository_statuses();
+
+        assert_eq!(statuses.len(), 2);
+        assert_eq!(statuses[0].backend, "file");
+        assert_eq!(statuses[1].backend, "postgres");
+        assert_eq!(statuses[1].mode, AccountStoreDatabaseMode::Mirror);
+        assert_eq!(statuses[1].location, "postgres://<redacted>@db:5432/mir2");
         let _ = fs::remove_dir_all(dir);
     }
 
@@ -1069,7 +1240,8 @@ pub enum MonsterSpawnSource {
     CrystalStarterRegion,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum AccountStoreDatabaseMode {
     Mirror,
     SourceOfTruth,
@@ -1191,10 +1363,15 @@ impl SimulationConfig {
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {
         let path = path.into();
-        self.account_store = Arc::new(Mutex::new(AccountStore::load_or_new(
-            &path,
-            self.default_character.clone(),
-        )));
+        let repository = FileAccountStoreRepository::new(path.clone());
+        self.account_store = Arc::new(Mutex::new(
+            repository
+                .load(self.default_character.clone())
+                .unwrap_or_else(|error| {
+                    eprintln!("failed to load file account store, using default: {error}");
+                    AccountStore::new(self.default_character.clone())
+                }),
+        ));
         self.account_store_path = Some(path);
         self
     }
@@ -1211,14 +1388,16 @@ impl SimulationConfig {
     pub fn with_postgres_account_store(mut self, database_url: impl Into<String>) -> Self {
         let database_url = database_url.into();
         if !database_url.trim().is_empty() {
-            let store = load_account_store_from_postgres(
+            let repository = PostgresAccountStoreRepository::new(
                 database_url.clone(),
-                self.default_character.clone(),
-            )
-            .unwrap_or_else(|error| {
-                eprintln!("failed to load postgres account store, using default: {error}");
-                AccountStore::new(self.default_character.clone())
-            });
+                AccountStoreDatabaseMode::SourceOfTruth,
+            );
+            let store = repository
+                .load(self.default_character.clone())
+                .unwrap_or_else(|error| {
+                    eprintln!("failed to load postgres account store, using default: {error}");
+                    AccountStore::new(self.default_character.clone())
+                });
             self.account_store = Arc::new(Mutex::new(store));
             self.account_store_path = None;
             self.account_store_database_url = Some(database_url);
@@ -1236,14 +1415,13 @@ impl SimulationConfig {
             store.clone()
         };
         if let Some(path) = self.account_store_path.as_deref() {
-            save_account_store_snapshot_to_path(&store, path)?;
+            FileAccountStoreRepository::new(path).save(&store)?;
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
-            let source_versions = save_account_store_to_postgres(
-                database_url.to_string(),
-                store,
-                self.account_store_database_mode,
-            )?;
+            let source_versions =
+                PostgresAccountStoreRepository::new(database_url, self.account_store_database_mode)
+                    .save(&store)?
+                    .into_source_versions();
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
                 let mut store = self
                     .account_store
@@ -1254,6 +1432,31 @@ impl SimulationConfig {
             }
         }
         Ok(())
+    }
+
+    pub fn account_store_repository_statuses(&self) -> Vec<AccountStoreRepositoryStatus> {
+        let mut statuses = Vec::new();
+        if let Some(path) = self.account_store_path.as_ref() {
+            statuses.push(FileAccountStoreRepository::new(path.clone()).status());
+        }
+        if let Some(database_url) = self.account_store_database_url.as_ref() {
+            statuses.push(
+                PostgresAccountStoreRepository::new(
+                    database_url.clone(),
+                    self.account_store_database_mode,
+                )
+                .status(),
+            );
+        }
+        if statuses.is_empty() {
+            statuses.push(AccountStoreRepositoryStatus {
+                backend: "memory".to_string(),
+                mode: AccountStoreDatabaseMode::Mirror,
+                configured: true,
+                location: "process".to_string(),
+            });
+        }
+        statuses
     }
 
     pub fn backup_account_store(&self, backup_path: impl AsRef<Path>) -> Result<(), String> {
@@ -1861,6 +2064,29 @@ pub struct GroundDropSnapshot {
     pub y: i32,
     pub quantity: u32,
     pub source_monster: String,
+    pub loot: GroundDropLootSnapshot,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum GroundDropLootSnapshot {
+    Gold {
+        amount: u32,
+    },
+    InventoryItem {
+        key: String,
+        name: String,
+        description: String,
+        weight: u16,
+        durability_current: Option<u16>,
+        durability_max: Option<u16>,
+        added_attack: i32,
+        added_defence: i32,
+        added_stats: Vec<UserItemStat>,
+        cursed: bool,
+        socket_slots: u8,
+        show_group_pickup: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -2255,6 +2481,8 @@ pub struct Stage5AuctionListing {
     pub price: u32,
     pub sold: bool,
     pub cancelled: bool,
+    #[serde(default)]
+    pub expired: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]

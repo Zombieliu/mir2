@@ -2,14 +2,27 @@ import { AdminShell } from "../components/admin-shell";
 import { Bars } from "../components/bars";
 import { MetricCard } from "../components/metric-card";
 import { StatusBadge } from "../components/status-badge";
-import { adminGet, type AdminDashboardReadModel } from "../lib/admin-api";
+import {
+  adminGet,
+  type AdminDashboardReadModel,
+  type GameplayEventCommandSummary,
+  type GameplayEventSummaryResponse
+} from "../lib/admin-api";
 import { formatNumber, serviceConfigStatusKey, statusTone } from "../lib/format";
 import { getAdminI18n, translateAdminStatus } from "../lib/i18n";
 
 export default async function DashboardPage() {
   const { t } = await getAdminI18n();
-  const dashboard = await adminGet<AdminDashboardReadModel>("/admin/read/dashboard");
+  const [dashboard, gameplaySummary] = await Promise.all([
+    adminGet<AdminDashboardReadModel>("/admin/read/dashboard"),
+    adminGet<GameplayEventSummaryResponse>(
+      "/admin/gameplay-events/summary?windowSeconds=300&limit=5&maxLagSeconds=180&minEvents=1"
+    )
+  ]);
   const data = dashboard.ok ? dashboard.data : undefined;
+  const gameplay = gameplaySummary.ok ? gameplaySummary.data : undefined;
+  const gameplayHealthy = gameplaySummary.ok && Boolean(gameplay?.ready) && !gameplay?.degraded;
+  const gameplayAlerts = gameplay?.alerts ?? [];
   const metrics = [
     {
       title: t("metric.accounts"),
@@ -111,6 +124,70 @@ export default async function DashboardPage() {
           </table>
         </section>
         <section className="card">
+          <div className="section-head">
+            <div>
+              <p className="eyebrow">{t("dashboard.gameplayEvents")}</p>
+              <h3>{t("dashboard.gameplayReadiness")}</h3>
+            </div>
+            <StatusBadge tone={gameplayHealthy ? "success" : "warn"}>
+              {gameplayHealthy
+                ? t("dashboard.eventStreamReady")
+                : !gameplaySummary.ok || gameplay?.degraded
+                  ? t("dashboard.eventStreamDegraded")
+                  : t("dashboard.eventStreamAlert")}
+            </StatusBadge>
+          </div>
+          <div className="event-summary-grid">
+            <div>
+              <p className="metric-title">{t("dashboard.commandVolume")}</p>
+              <p className="metric-value">{formatNumber(gameplay?.totalCount)}</p>
+            </div>
+            <div>
+              <p className="metric-title">{t("dashboard.eventLag")}</p>
+              <p className="metric-value">{formatLag(gameplay?.lagMs)}</p>
+            </div>
+          </div>
+          <p className="muted">
+            {gameplay?.lastOccurredAtMs
+              ? t("dashboard.lastGameplayEvent", { value: formatTimestamp(gameplay.lastOccurredAtMs) })
+              : t("dashboard.noGameplayEvents")}
+          </p>
+          {!gameplaySummary.ok ? <p className="notice">{gameplaySummary.error}</p> : null}
+          {gameplay?.degraded && gameplay.error ? <p className="notice">{gameplay.error}</p> : null}
+          {gameplayAlerts.length ? (
+            <div className="alert-list">
+              {gameplayAlerts.map((alert) => (
+                <p className="notice" key={`${alert.level}-${alert.code}`}>
+                  {alert.message}
+                </p>
+              ))}
+            </div>
+          ) : null}
+          {gameplay?.commands.length ? (
+            <table className="table compact-table">
+              <thead>
+                <tr>
+                  <th>{t("table.command")}</th>
+                  <th>{t("table.events")}</th>
+                  <th>{t("table.tick")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gameplay.commands.map((command) => (
+                  <tr key={command.commandKind}>
+                    <td>{formatCommandKind(command)}</td>
+                    <td>{formatNumber(command.eventCount)}</td>
+                    <td>{formatNumber(command.maxSnapshotTick)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+        </section>
+      </div>
+
+      <div className="grid two" style={{ marginTop: 16 }}>
+        <section className="card">
           <p className="eyebrow">{t("dashboard.commandEvidence")}</p>
           <h3>{t("dashboard.auditOutbox")}</h3>
           <p className="metric-value">
@@ -121,4 +198,29 @@ export default async function DashboardPage() {
       </div>
     </AdminShell>
   );
+}
+
+function formatLag(value: number | undefined) {
+  if (value === undefined) {
+    return "-";
+  }
+  if (value < 1_000) {
+    return `${value}ms`;
+  }
+  if (value < 60_000) {
+    return `${Math.round(value / 1_000)}s`;
+  }
+  return `${Math.round(value / 60_000)}m`;
+}
+
+function formatTimestamp(value: number) {
+  return new Date(value).toLocaleString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
+function formatCommandKind(command: GameplayEventCommandSummary) {
+  return command.commandKind.replace(/^client\./, "");
 }
