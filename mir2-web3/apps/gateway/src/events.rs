@@ -317,6 +317,7 @@ fn command_kind_label(kind: &WorldCommandKind) -> String {
         WorldCommandKind::CastSkill => "runtime.castSkill".to_string(),
         WorldCommandKind::TransferMap => "runtime.transferMap".to_string(),
         WorldCommandKind::Stage5Command(action) => format!("stage5.{action}"),
+        WorldCommandKind::ItemRentalRequest => "runtime.itemRentalRequest".to_string(),
         WorldCommandKind::SetLanguage => "runtime.setLanguage".to_string(),
         WorldCommandKind::Tick => "runtime.tick".to_string(),
     }

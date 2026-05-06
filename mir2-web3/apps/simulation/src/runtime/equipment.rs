@@ -39,7 +39,7 @@ use super::npc::{
     current_crystal_npc_service_in_range, ActiveNpcServiceState,
 };
 use super::resources::{
-    BuffResource, InventoryResource, PlayerPermissionResource, PlayerRuntimeResource,
+    BuffResource, InventoryResource, MountResource, PlayerPermissionResource, PlayerRuntimeResource,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -893,6 +893,53 @@ pub(super) fn feed_mount_with_crystal_food(
         max_dura: mount.durability_max,
         current_dura: mount.durability_current,
     })
+}
+
+pub(super) fn toggle_mount_ride_from_use_item(
+    world: &mut World,
+    packet_ack: Option<(u64, MirGridType)>,
+) -> Option<Vec<ServerPacket>> {
+    let Some((unique_id, MirGridType::Equipment)) = packet_ack else {
+        return None;
+    };
+    if Some(unique_id) != equipment_slot_unique_id(EquipmentSlot::Mount) {
+        return None;
+    }
+    let Some(mount) = world
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|equipment| equipment.slot == EquipmentSlot::Mount)
+        .cloned()
+    else {
+        return Some(vec![ServerPacket::UseItem {
+            unique_id,
+            success: false,
+            grid: MirGridType::Equipment,
+        }]);
+    };
+    let mount_type = mount
+        .shape
+        .and_then(|shape| i16::try_from(shape).ok())
+        .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+    let riding_mount = {
+        let mut mount_resource = world.resource_mut::<MountResource>();
+        mount_resource.mount_type = mount_type;
+        mount_resource.riding_mount = !mount_resource.riding_mount;
+        mount_resource.riding_mount
+    };
+    Some(vec![
+        ServerPacket::UseItem {
+            unique_id,
+            success: true,
+            grid: MirGridType::Equipment,
+        },
+        ServerPacket::MountUpdate {
+            object_id: current_player_object_id(world).unwrap_or_default(),
+            mount_type,
+            riding_mount,
+        },
+    ])
 }
 
 pub(super) struct EquipItemMutationResult {

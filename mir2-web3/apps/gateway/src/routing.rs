@@ -4,9 +4,9 @@ use std::sync::{Arc, Mutex};
 
 use mir2_protocol::{ClientPacket, ServerPacket};
 use mir2_simulation::{
-    ActiveSessionIdentity, GroundDropSnapshot, InProcessWorldRuntime, WorldCommand,
-    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime, WorldSnapshot,
-    ZoneRuntimeHandle,
+    ActiveSessionIdentity, GroundDropSnapshot, InProcessWorldRuntime, SharedTradeOffer,
+    WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
+    WorldSnapshot, ZoneRuntimeHandle,
 };
 
 use crate::GatewayConfig;
@@ -163,6 +163,9 @@ struct SharedInProcessZoneState {
     next_zone_object_id: u32,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
+    trade_offers: BTreeMap<ZonePresenceKey, SharedTradeOffer>,
+    pending_trade_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
+    pending_trade_rollbacks: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
 }
 
 impl SharedInProcessZoneState {
@@ -171,6 +174,9 @@ impl SharedInProcessZoneState {
             next_zone_object_id: 50_000,
             players: BTreeMap::new(),
             maps: BTreeMap::new(),
+            trade_offers: BTreeMap::new(),
+            pending_trade_deliveries: BTreeMap::new(),
+            pending_trade_rollbacks: BTreeMap::new(),
         }
     }
 
@@ -303,6 +309,46 @@ impl SharedInProcessZoneState {
         let map = self.maps.entry(map_file_name.to_string()).or_default();
         map.removed_drop_ids.remove(&drop.object_id);
         map.ground_drops.insert(drop.object_id, drop);
+    }
+
+    fn player_key_by_name(&self, name: &str) -> Option<ZonePresenceKey> {
+        self.players
+            .iter()
+            .find(|(_, presence)| presence.entity.name.eq_ignore_ascii_case(name))
+            .map(|(key, _)| key.clone())
+    }
+
+    fn take_pending_trade_deliveries(&mut self, key: &ZonePresenceKey) -> Vec<SharedTradeOffer> {
+        self.pending_trade_deliveries
+            .remove(key)
+            .unwrap_or_default()
+    }
+
+    fn take_pending_trade_rollbacks(&mut self, key: &ZonePresenceKey) -> Vec<SharedTradeOffer> {
+        self.pending_trade_rollbacks.remove(key).unwrap_or_default()
+    }
+
+    fn cancel_trade_offers_for_presence(
+        &mut self,
+        key: &ZonePresenceKey,
+        character_name: &str,
+    ) -> Option<SharedTradeOffer> {
+        let own_offer = self.trade_offers.remove(key);
+        let owner_keys = self
+            .trade_offers
+            .iter()
+            .filter(|(_, offer)| offer.partner_name.eq_ignore_ascii_case(character_name))
+            .map(|(owner_key, _)| owner_key.clone())
+            .collect::<Vec<_>>();
+        for owner_key in owner_keys {
+            if let Some(offer) = self.trade_offers.remove(&owner_key) {
+                self.pending_trade_rollbacks
+                    .entry(owner_key)
+                    .or_default()
+                    .push(offer);
+            }
+        }
+        own_offer
     }
 }
 
@@ -442,6 +488,111 @@ impl SharedInProcessZoneSessionRuntime {
             .remove_player(&key);
     }
 
+    fn current_presence_key(&self) -> Option<ZonePresenceKey> {
+        self.presence_key.clone().or_else(|| {
+            self.inner
+                .active_identity()
+                .map(|identity| ZonePresenceKey {
+                    account_id: identity.account_id,
+                    character_index: identity.character_index,
+                })
+        })
+    }
+
+    fn apply_pending_shared_trade_packets(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let (deliveries, rollbacks) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            (
+                zone_state.take_pending_trade_deliveries(&key),
+                zone_state.take_pending_trade_rollbacks(&key),
+            )
+        };
+        let mut packets = Vec::new();
+        for offer in deliveries {
+            packets.extend(self.inner.apply_shared_trade_delivery(&offer));
+        }
+        for offer in rollbacks {
+            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+        }
+        packets
+    }
+
+    fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let character_name = self
+            .inner
+            .active_identity()
+            .map(|identity| identity.character_name)
+            .unwrap_or_default();
+        let own_offer = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .cancel_trade_offers_for_presence(&key, &character_name);
+        own_offer
+            .map(|offer| self.inner.rollback_shared_trade_offer(&offer))
+            .unwrap_or_default()
+    }
+
+    fn execute_shared_trade_confirm(&mut self, locked: bool) -> Vec<ServerPacket> {
+        if !locked {
+            let packets = self.cancel_pending_shared_trade_offers();
+            if packets.is_empty() {
+                return self.inner.shared_trade_cancel(true);
+            }
+            return packets;
+        }
+
+        let (mut packets, offer) = self.inner.shared_trade_confirm();
+        let Some(offer) = offer else {
+            return packets;
+        };
+        let Some(self_key) = self.current_presence_key() else {
+            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+            return packets;
+        };
+
+        let mut deliver_to_self = Vec::new();
+        let mut rollback_self = None;
+        {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let partner_key = zone_state.player_key_by_name(&offer.partner_name);
+            if let Some(partner_key) = partner_key {
+                if let Some(partner_offer) = zone_state.trade_offers.remove(&partner_key) {
+                    zone_state
+                        .pending_trade_deliveries
+                        .entry(partner_key)
+                        .or_default()
+                        .push(offer.clone());
+                    deliver_to_self.push(partner_offer);
+                } else {
+                    zone_state.trade_offers.insert(self_key, offer.clone());
+                }
+            } else {
+                rollback_self = Some(offer.clone());
+            }
+        }
+
+        if let Some(offer) = rollback_self {
+            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+        }
+        for offer in deliver_to_self {
+            packets.extend(self.inner.apply_shared_trade_delivery(&offer));
+        }
+        packets
+    }
+
     fn pick_up_shared_drop(&mut self, object_id: Option<u32>) -> Vec<ServerPacket> {
         let snapshot = self.inner.world_snapshot();
         let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
@@ -483,10 +634,30 @@ impl SharedInProcessZoneSessionRuntime {
             packets
         }
     }
+
+    fn adjacent_remote_player_name(&self) -> Option<String> {
+        let snapshot = self.inner.world_snapshot();
+        let map_file_name = snapshot.map_file_name.as_deref()?;
+        let self_entity = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)?;
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .remote_player_entities(Some(map_file_name), self.presence_key.as_ref())
+            .into_iter()
+            .find(|entity| {
+                (entity.x - self_entity.x).abs() <= 1 && (entity.y - self_entity.y).abs() <= 1
+            })
+            .map(|entity| entity.name)
+    }
 }
 
 impl Drop for SharedInProcessZoneSessionRuntime {
     fn drop(&mut self) {
+        let _ = self.apply_pending_shared_trade_packets();
+        let _ = self.cancel_pending_shared_trade_offers();
         self.remove_presence();
     }
 }
@@ -501,12 +672,52 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::ClientPacket(ClientPacket::Disconnect | ClientPacket::LogOut)
         );
+        let is_trade_cancel = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::TradeCancel)
+        );
+        let shared_trade_confirm = match &command {
+            WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked }) => Some(*locked),
+            _ => None,
+        };
+        let shared_rental_partner = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::ItemRentalRequest)
+        )
+        .then(|| self.adjacent_remote_player_name())
+        .flatten();
+        let shared_trade_partner = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::TradeRequest)
+        )
+        .then(|| self.adjacent_remote_player_name())
+        .flatten();
         let shared_pickup_object_id = match &command {
             WorldCommand::PickUp { object_id } => Some(Some(*object_id)),
             WorldCommand::ClientPacket(ClientPacket::PickUp) => Some(None),
             _ => None,
         };
-        let packets = self.inner.execute(command)?;
+        let mut packets = self.apply_pending_shared_trade_packets();
+        if removes_presence {
+            packets.extend(self.cancel_pending_shared_trade_offers());
+        }
+        let command_packets = if let Some(locked) = shared_trade_confirm {
+            self.execute_shared_trade_confirm(locked)
+        } else if is_trade_cancel {
+            let cancel_packets = self.cancel_pending_shared_trade_offers();
+            if cancel_packets.is_empty() {
+                self.inner.shared_trade_cancel(false)
+            } else {
+                cancel_packets
+            }
+        } else if let Some(partner_name) = shared_rental_partner {
+            self.inner.item_rental_request(&partner_name, false)
+        } else if let Some(partner_name) = shared_trade_partner {
+            self.inner.trade_request(&partner_name)
+        } else {
+            self.inner.execute(command)?
+        };
+        packets.extend(command_packets);
         let packets = if packets.is_empty() {
             shared_pickup_object_id
                 .map(|object_id| self.pick_up_shared_drop(object_id))
@@ -990,6 +1201,147 @@ mod tests {
             .ground_drops
             .iter()
             .any(|drop| drop.object_id == shared_drop.object_id));
+    }
+
+    #[test]
+    fn shared_in_process_registry_uses_adjacent_remote_player_for_item_rental_request() {
+        let (mut first, _second) = started_shared_zone_sessions();
+
+        let packets = first.handle_packet(ClientPacket::ItemRentalRequest);
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRentalRequest {
+                name,
+                renting: false
+            } if name == "Blade"
+        )));
+    }
+
+    #[test]
+    fn shared_in_process_registry_uses_adjacent_remote_player_for_trade_request() {
+        let (mut first, _second) = started_shared_zone_sessions();
+
+        let packets = first.handle_packet(ClientPacket::TradeRequest);
+
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::TradeRequest { name } if name == "Blade"
+        )));
+        assert!(first
+            .handle_packet(ClientPacket::TradeReply {
+                accept_invite: true,
+            })
+            .iter()
+            .any(|packet| matches!(
+                packet,
+                ServerPacket::TradeAccept { name } if name == "Blade"
+            )));
+    }
+
+    #[test]
+    fn shared_in_process_registry_commits_two_sided_trade_delivery() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .first()
+            .cloned()
+            .expect("second session should see funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+
+        let first_starting_gold = first.world_snapshot().gold;
+        let second_starting_gold = second.world_snapshot().gold;
+        let first_red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: first_red_slot,
+            to: 0,
+        });
+        let first_confirm = first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert!(first_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 30 })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        let second_confirm = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert!(second_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(second_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(second_confirm.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 40 + 30);
+
+        let first_delivery = first.handle_packet(ClientPacket::KeepAlive { time: 1 });
+        assert!(first_delivery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30 + 40);
+    }
+
+    #[test]
+    fn shared_in_process_registry_rolls_back_pending_trade_when_partner_cancels() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let first_starting_gold = first.world_snapshot().gold;
+        let first_red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: first_red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        second.handle_packet(ClientPacket::TradeCancel);
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 2 });
+
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(rollback.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+    }
+
+    fn inventory_slot_for_key(session: &GatewaySession, key: &str) -> i32 {
+        session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .find(|item| item.key == key)
+            .map(|item| i32::from(item.slot))
+            .unwrap_or_else(|| panic!("{key} should exist in inventory"))
+    }
+
+    fn has_inventory_key(session: &GatewaySession, key: &str) -> bool {
+        session
+            .world_snapshot()
+            .inventory_items
+            .iter()
+            .any(|item| item.key == key)
     }
 
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {

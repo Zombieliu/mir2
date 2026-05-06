@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use bevy_ecs::prelude::World;
@@ -482,8 +483,10 @@ impl SimulationSession {
             .trade = Some(Stage5TradeState {
             partner: partner.clone(),
             offered_items: Vec::new(),
+            offered_slots: BTreeMap::new(),
             offered_gold: 0,
             accepted: false,
+            locked: false,
             completed: false,
         });
         Vec::new()
@@ -1049,7 +1052,11 @@ impl SimulationSession {
             .hero = Some(Stage5HeroState {
             name: name.clone(),
             level: 1,
+            class: mir2_protocol::MirClass::Warrior,
+            gender: mir2_protocol::MirGender::Male,
             behaviour: 0,
+            experience: 0,
+            spawned: true,
         });
         Vec::new()
     }

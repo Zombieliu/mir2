@@ -2905,7 +2905,11 @@ pub(super) fn crystal_npc_revive_hero(world: &mut World) {
     resources.stage5_systems.hero = Some(Stage5HeroState {
         name: hero_name,
         level: 1,
+        class: mir2_protocol::MirClass::Warrior,
+        gender: mir2_protocol::MirGender::Male,
         behaviour: 0,
+        experience: 0,
+        spawned: true,
     });
 }
 

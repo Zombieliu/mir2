@@ -11,7 +11,8 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
-    ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket, Spell,
+    ClientIntelligentCreature, ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point,
+    ServerPacket, Spell,
 };
 use mir2_simulation::{deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind};
 use serde::{Deserialize, Serialize};
@@ -89,6 +90,11 @@ enum BrowserCommand {
         gender: String,
         class: String,
     },
+    NewHero {
+        name: String,
+        gender: String,
+        class: String,
+    },
     StartGame {
         #[serde(alias = "characterIndex")]
         character_index: i32,
@@ -153,7 +159,8 @@ enum BrowserCommand {
     },
     PickUpTile,
     UseItem {
-        key: String,
+        #[serde(default)]
+        key: Option<String>,
         #[serde(alias = "uniqueId", default)]
         unique_id: Option<u64>,
         #[serde(default)]
@@ -209,6 +216,14 @@ enum BrowserCommand {
         to: i32,
     },
     TakeBackItem {
+        from: i32,
+        to: i32,
+    },
+    TakeBackHeroItem {
+        from: i32,
+        to: i32,
+    },
+    TransferHeroItem {
         from: i32,
         to: i32,
     },
@@ -289,6 +304,188 @@ enum BrowserCommand {
         #[serde(alias = "canUse", default)]
         can_use: Option<bool>,
     },
+    SetHeroBehaviour {
+        behaviour: u8,
+    },
+    ChangeHero {
+        #[serde(alias = "listIndex")]
+        list_index: i32,
+    },
+    ConsignItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        price: u32,
+        #[serde(alias = "marketType", default)]
+        market_type: u8,
+    },
+    MarketSearch {
+        #[serde(alias = "matchText")]
+        match_text: String,
+        #[serde(alias = "itemType", default)]
+        item_type: u8,
+        #[serde(alias = "userMode", default)]
+        user_mode: bool,
+        #[serde(alias = "minShape", default)]
+        min_shape: i16,
+        #[serde(alias = "maxShape", default = "default_market_max_shape")]
+        max_shape: i16,
+        #[serde(alias = "marketType", default)]
+        market_type: u8,
+    },
+    MarketRefresh,
+    MarketPage {
+        page: i32,
+    },
+    MarketBuy {
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+        #[serde(alias = "bidPrice", default)]
+        bid_price: u32,
+    },
+    MarketGetBack {
+        mode: u8,
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+    },
+    MarketSellNow {
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+    },
+    MarriageRequest,
+    MarriageReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    ChangeMarriage,
+    DivorceRequest,
+    DivorceReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    AddMentor {
+        name: String,
+    },
+    MentorReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    AllowMentor,
+    CancelMentor,
+    DepositTradeItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveTradeItem {
+        from: i32,
+        to: i32,
+    },
+    TradeRequest,
+    TradeReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    TradeGold {
+        amount: u32,
+    },
+    TradeConfirm {
+        locked: bool,
+    },
+    TradeCancel,
+    FishingCast {
+        #[serde(alias = "castOut")]
+        cast_out: bool,
+    },
+    FishingChangeAutocast {
+        #[serde(alias = "autoCast")]
+        auto_cast: bool,
+    },
+    SendMail {
+        name: String,
+        message: String,
+        gold: u32,
+        #[serde(alias = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    ReadMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    CollectParcel {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    DeleteMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    LockMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+        lock: bool,
+    },
+    MailLockedItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
+    },
+    MailCost {
+        gold: u32,
+        #[serde(alias = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    UpdateIntelligentCreature {
+        creature: ClientIntelligentCreature,
+        #[serde(alias = "summonMe")]
+        summon_me: bool,
+        #[serde(alias = "unsummonMe")]
+        unsummon_me: bool,
+        #[serde(alias = "releaseMe")]
+        release_me: bool,
+    },
+    IntelligentCreaturePickup {
+        #[serde(alias = "mouseMode")]
+        mouse_mode: bool,
+        location: Point,
+    },
+    RequestIntelligentCreatureUpdates {
+        update: bool,
+    },
+    AddFriend {
+        name: String,
+        blocked: bool,
+    },
+    RemoveFriend {
+        #[serde(alias = "characterIndex")]
+        character_index: i32,
+    },
+    RefreshFriends,
+    AddMemo {
+        #[serde(alias = "characterIndex")]
+        character_index: i32,
+        memo: String,
+    },
+    GetRentedItems,
+    ItemRentalRequest,
+    ItemRentalFee {
+        amount: u32,
+    },
+    ItemRentalPeriod {
+        days: u32,
+    },
+    DepositRentalItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveRentalItem {
+        from: i32,
+        to: i32,
+    },
+    CancelItemRental,
+    ItemRentalLockFee,
+    ItemRentalLockItem,
+    ConfirmItemRental,
     CastSkill {
         key: String,
     },
@@ -870,6 +1067,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             gender: parse_gender(&gender)?,
             class: parse_class(&class)?,
         })),
+        BrowserCommand::NewHero {
+            name,
+            gender,
+            class,
+        } => Ok(SessionAction::Packet(ClientPacket::NewHero {
+            name,
+            gender: parse_gender(&gender)?,
+            class: parse_class(&class)?,
+        })),
         BrowserCommand::StartGame { character_index } => {
             Ok(SessionAction::Packet(ClientPacket::StartGame {
                 character_index,
@@ -942,8 +1148,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                     unique_id: u64::from(slot),
                     grid: parse_grid(grid.as_deref().unwrap_or("inventory"))?,
                 }))
-            } else {
+            } else if let Some(key) = key {
                 Ok(SessionAction::UseItem { key })
+            } else {
+                Err("useItem requires key, uniqueId, or slot".to_string())
             }
         }
         BrowserCommand::MoveItem { grid, from, to } => {
@@ -1009,6 +1217,18 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         }
         BrowserCommand::TakeBackItem { from, to } => {
             Ok(SessionAction::Packet(ClientPacket::TakeBackItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::TakeBackHeroItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::TakeBackHeroItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::TransferHeroItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::TransferHeroItem {
                 from,
                 to,
             }))
@@ -1113,6 +1333,247 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 None => -1,
             }),
         })),
+        BrowserCommand::SetHeroBehaviour { behaviour } => {
+            Ok(SessionAction::Packet(ClientPacket::SetHeroBehaviour {
+                behaviour,
+            }))
+        }
+        BrowserCommand::ChangeHero { list_index } => {
+            Ok(SessionAction::Packet(ClientPacket::ChangeHero {
+                list_index,
+            }))
+        }
+        BrowserCommand::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        } => Ok(SessionAction::Packet(ClientPacket::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        })),
+        BrowserCommand::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        } => Ok(SessionAction::Packet(ClientPacket::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        })),
+        BrowserCommand::MarketRefresh => Ok(SessionAction::Packet(ClientPacket::MarketRefresh)),
+        BrowserCommand::MarketPage { page } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketPage { page }))
+        }
+        BrowserCommand::MarketBuy {
+            auction_id,
+            bid_price,
+        } => Ok(SessionAction::Packet(ClientPacket::MarketBuy {
+            auction_id,
+            bid_price,
+        })),
+        BrowserCommand::MarketGetBack { mode, auction_id } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketGetBack {
+                mode,
+                auction_id,
+            }))
+        }
+        BrowserCommand::MarketSellNow { auction_id } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketSellNow {
+                auction_id,
+            }))
+        }
+        BrowserCommand::MarriageRequest => Ok(SessionAction::Packet(ClientPacket::MarriageRequest)),
+        BrowserCommand::MarriageReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::MarriageReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::ChangeMarriage => Ok(SessionAction::Packet(ClientPacket::ChangeMarriage)),
+        BrowserCommand::DivorceRequest => Ok(SessionAction::Packet(ClientPacket::DivorceRequest)),
+        BrowserCommand::DivorceReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::DivorceReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::AddMentor { name } => {
+            Ok(SessionAction::Packet(ClientPacket::AddMentor { name }))
+        }
+        BrowserCommand::MentorReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::MentorReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::AllowMentor => Ok(SessionAction::Packet(ClientPacket::AllowMentor)),
+        BrowserCommand::CancelMentor => Ok(SessionAction::Packet(ClientPacket::CancelMentor)),
+        BrowserCommand::DepositTradeItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::DepositTradeItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::RetrieveTradeItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::RetrieveTradeItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::TradeRequest => Ok(SessionAction::Packet(ClientPacket::TradeRequest)),
+        BrowserCommand::TradeReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::TradeGold { amount } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeGold { amount }))
+        }
+        BrowserCommand::TradeConfirm { locked } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeConfirm { locked }))
+        }
+        BrowserCommand::TradeCancel => Ok(SessionAction::Packet(ClientPacket::TradeCancel)),
+        BrowserCommand::FishingCast { cast_out } => {
+            Ok(SessionAction::Packet(ClientPacket::FishingCast {
+                cast_out,
+            }))
+        }
+        BrowserCommand::FishingChangeAutocast { auto_cast } => {
+            Ok(SessionAction::Packet(ClientPacket::FishingChangeAutocast {
+                auto_cast,
+            }))
+        }
+        BrowserCommand::SendMail {
+            name,
+            message,
+            gold,
+            items_idx,
+            stamped,
+        } => Ok(SessionAction::Packet(ClientPacket::SendMail {
+            name,
+            message,
+            gold,
+            items_idx,
+            stamped,
+        })),
+        BrowserCommand::ReadMail { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::ReadMail { mail_id }))
+        }
+        BrowserCommand::CollectParcel { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::CollectParcel {
+                mail_id,
+            }))
+        }
+        BrowserCommand::DeleteMail { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::DeleteMail { mail_id }))
+        }
+        BrowserCommand::LockMail { mail_id, lock } => {
+            Ok(SessionAction::Packet(ClientPacket::LockMail {
+                mail_id,
+                lock,
+            }))
+        }
+        BrowserCommand::MailLockedItem { unique_id, locked } => {
+            Ok(SessionAction::Packet(ClientPacket::MailLockedItem {
+                unique_id,
+                locked,
+            }))
+        }
+        BrowserCommand::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        } => Ok(SessionAction::Packet(ClientPacket::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        })),
+        BrowserCommand::UpdateIntelligentCreature {
+            creature,
+            summon_me,
+            unsummon_me,
+            release_me,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::UpdateIntelligentCreature {
+                creature,
+                summon_me,
+                unsummon_me,
+                release_me,
+            },
+        )),
+        BrowserCommand::IntelligentCreaturePickup {
+            mouse_mode,
+            location,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::IntelligentCreaturePickup {
+                mouse_mode,
+                location,
+            },
+        )),
+        BrowserCommand::RequestIntelligentCreatureUpdates { update } => Ok(SessionAction::Packet(
+            ClientPacket::RequestIntelligentCreatureUpdates { update },
+        )),
+        BrowserCommand::AddFriend { name, blocked } => {
+            Ok(SessionAction::Packet(ClientPacket::AddFriend {
+                name,
+                blocked,
+            }))
+        }
+        BrowserCommand::RemoveFriend { character_index } => {
+            Ok(SessionAction::Packet(ClientPacket::RemoveFriend {
+                character_index,
+            }))
+        }
+        BrowserCommand::RefreshFriends => Ok(SessionAction::Packet(ClientPacket::RefreshFriends)),
+        BrowserCommand::AddMemo {
+            character_index,
+            memo,
+        } => Ok(SessionAction::Packet(ClientPacket::AddMemo {
+            character_index,
+            memo,
+        })),
+        BrowserCommand::GetRentedItems => Ok(SessionAction::Packet(ClientPacket::GetRentedItems)),
+        BrowserCommand::ItemRentalRequest => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalRequest))
+        }
+        BrowserCommand::ItemRentalFee { amount } => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalFee {
+                amount,
+            }))
+        }
+        BrowserCommand::ItemRentalPeriod { days } => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalPeriod {
+                days,
+            }))
+        }
+        BrowserCommand::DepositRentalItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::DepositRentalItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::RetrieveRentalItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::RetrieveRentalItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::CancelItemRental => {
+            Ok(SessionAction::Packet(ClientPacket::CancelItemRental))
+        }
+        BrowserCommand::ItemRentalLockFee => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalLockFee))
+        }
+        BrowserCommand::ItemRentalLockItem => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalLockItem))
+        }
+        BrowserCommand::ConfirmItemRental => {
+            Ok(SessionAction::Packet(ClientPacket::ConfirmItemRental))
+        }
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
         BrowserCommand::Stage5Command { action, args } => {
@@ -1283,6 +1744,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "NewCharacter",
             "payload": { "result": result }
         }),
+        ServerPacket::NewHero { result } => json!({
+            "type": "packet",
+            "packet": "NewHero",
+            "payload": { "result": result }
+        }),
         ServerPacket::NewCharacterSuccess { char_info } => json!({
             "type": "packet",
             "packet": "NewCharacterSuccess",
@@ -1433,6 +1899,24 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "elementOrbEffect": info.element_orb_effect,
                 "elementOrbLevel": info.element_orb_level,
                 "elementOrbMax": info.element_orb_max,
+                "buffs": info.buffs,
+                "levelEffects": info.level_effects
+            }
+        }),
+        ServerPacket::ObjectHero { info } => json!({
+            "type": "packet",
+            "packet": "ObjectHero",
+            "payload": {
+                "objectId": info.object_id,
+                "name": info.name,
+                "class": format!("{:?}", info.class),
+                "gender": format!("{:?}", info.gender),
+                "level": info.level,
+                "location": {
+                    "x": info.location.x,
+                    "y": info.location.y
+                },
+                "direction": format!("{:?}", info.direction),
                 "buffs": info.buffs,
                 "levelEffects": info.level_effects
             }
@@ -1820,6 +2304,17 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "info": info
             }
         }),
+        ServerPacket::NewHeroInfo {
+            info,
+            storage_index,
+        } => json!({
+            "type": "packet",
+            "packet": "NewHeroInfo",
+            "payload": {
+                "info": info,
+                "storageIndex": storage_index
+            }
+        }),
         ServerPacket::MoveItem {
             grid,
             from,
@@ -1911,6 +2406,24 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
         ServerPacket::StoreItem { from, to, success } => json!({
             "type": "packet",
             "packet": "StoreItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TakeBackHeroItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "TakeBackHeroItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TransferHeroItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "TransferHeroItem",
             "payload": {
                 "from": from,
                 "to": to,
@@ -2142,6 +2655,14 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "currentDura": current_dura
             }
         }),
+        ServerPacket::HeroHealthChanged { hp, mp } => json!({
+            "type": "packet",
+            "packet": "HeroHealthChanged",
+            "payload": {
+                "hp": hp,
+                "mp": mp
+            }
+        }),
         ServerPacket::NewNpcInfo { info } => json!({
             "type": "packet",
             "packet": "NewNpcInfo",
@@ -2187,6 +2708,26 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 },
                 "direction": format!("{:?}", info.direction),
                 "kind": info.kind
+            }
+        }),
+        ServerPacket::GainHeroExperience { amount } => json!({
+            "type": "packet",
+            "packet": "GainHeroExperience",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::HeroLevelChanged {
+            level,
+            experience,
+            max_experience,
+        } => json!({
+            "type": "packet",
+            "packet": "HeroLevelChanged",
+            "payload": {
+                "level": level,
+                "experience": experience,
+                "maxExperience": max_experience
             }
         }),
         ServerPacket::ObjectHide { object_id } => json!({
@@ -2239,6 +2780,76 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "percent": info.percent
             }
         }),
+        ServerPacket::ObjectProjectile {
+            spell,
+            source_id,
+            destination_id,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectProjectile",
+            "payload": {
+                "spell": format!("{:?}", spell),
+                "sourceId": source_id,
+                "destinationId": destination_id
+            }
+        }),
+        ServerPacket::RangeAttack {
+            target_id,
+            target,
+            spell,
+        } => json!({
+            "type": "packet",
+            "packet": "RangeAttack",
+            "payload": {
+                "targetId": target_id,
+                "target": {"x": target.x, "y": target.y},
+                "spell": format!("{:?}", spell)
+            }
+        }),
+        ServerPacket::Pushed {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "Pushed",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectPushed {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectPushed",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::MapEffect {
+            location,
+            effect,
+            value,
+        } => json!({
+            "type": "packet",
+            "packet": "MapEffect",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "effect": effect,
+                "value": value
+            }
+        }),
+        ServerPacket::AllowObserve { allow } => json!({
+            "type": "packet",
+            "packet": "AllowObserve",
+            "payload": {
+                "allow": allow
+            }
+        }),
         ServerPacket::AddBuff { buff } => json!({
             "type": "packet",
             "packet": "AddBuff",
@@ -2264,6 +2875,27 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "objectId": object_id
             }
         }),
+        ServerPacket::PauseBuff {
+            buff_type,
+            object_id,
+            paused,
+        } => json!({
+            "type": "packet",
+            "packet": "PauseBuff",
+            "payload": {
+                "buffType": buff_type,
+                "objectId": object_id,
+                "paused": paused
+            }
+        }),
+        ServerPacket::ObjectHidden { object_id, hidden } => json!({
+            "type": "packet",
+            "packet": "ObjectHidden",
+            "payload": {
+                "objectId": object_id,
+                "hidden": hidden
+            }
+        }),
         ServerPacket::ObjectRangeAttack { info } => json!({
             "type": "packet",
             "packet": "ObjectRangeAttack",
@@ -2282,6 +2914,54 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "attackType": info.attack_type,
                 "spell": info.spell,
                 "level": info.level
+            }
+        }),
+        ServerPacket::UserDash {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserDash",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectDash {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDash",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::UserDashFail {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserDashFail",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectDashFail {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDashFail",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
             }
         }),
         ServerPacket::RefreshItem { item } => json!({
@@ -2305,6 +2985,466 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "param": info.param
             }
         }),
+        ServerPacket::ConsignItem { unique_id, success } => json!({
+            "type": "packet",
+            "packet": "ConsignItem",
+            "payload": {
+                "uniqueId": unique_id,
+                "success": success
+            }
+        }),
+        ServerPacket::MarketFail { reason } => json!({
+            "type": "packet",
+            "packet": "MarketFail",
+            "payload": {
+                "reason": reason
+            }
+        }),
+        ServerPacket::MarketSuccess { message } => json!({
+            "type": "packet",
+            "packet": "MarketSuccess",
+            "payload": {
+                "message": message
+            }
+        }),
+        ServerPacket::HeroCreateRequest { can_create_class } => json!({
+            "type": "packet",
+            "packet": "HeroCreateRequest",
+            "payload": {
+                "canCreateClass": can_create_class
+            }
+        }),
+        ServerPacket::UpdateHeroSpawnState { state } => json!({
+            "type": "packet",
+            "packet": "UpdateHeroSpawnState",
+            "payload": {
+                "state": state
+            }
+        }),
+        ServerPacket::UnlockHeroAutoPot => json!({
+            "type": "packet",
+            "packet": "UnlockHeroAutoPot",
+            "payload": {}
+        }),
+        ServerPacket::SetHeroBehaviour { behaviour } => json!({
+            "type": "packet",
+            "packet": "SetHeroBehaviour",
+            "payload": {
+                "behaviour": behaviour
+            }
+        }),
+        ServerPacket::ManageHeroes {
+            maximum_count,
+            current_hero,
+            heroes,
+        } => json!({
+            "type": "packet",
+            "packet": "ManageHeroes",
+            "payload": {
+                "maximumCount": maximum_count,
+                "currentHero": current_hero,
+                "heroes": heroes
+            }
+        }),
+        ServerPacket::ChangeHero { from_index } => json!({
+            "type": "packet",
+            "packet": "ChangeHero",
+            "payload": {
+                "fromIndex": from_index
+            }
+        }),
+        ServerPacket::MarriageRequest { name } => json!({
+            "type": "packet",
+            "packet": "MarriageRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::DivorceRequest { name } => json!({
+            "type": "packet",
+            "packet": "DivorceRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::MentorRequest { name, level } => json!({
+            "type": "packet",
+            "packet": "MentorRequest",
+            "payload": {
+                "name": name,
+                "level": level
+            }
+        }),
+        ServerPacket::DepositTradeItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositTradeItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveTradeItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveTradeItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TradeRequest { name } => json!({
+            "type": "packet",
+            "packet": "TradeRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::TradeAccept { name } => json!({
+            "type": "packet",
+            "packet": "TradeAccept",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::TradeGold { amount } => json!({
+            "type": "packet",
+            "packet": "TradeGold",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::TradeItem { trade_items } => json!({
+            "type": "packet",
+            "packet": "TradeItem",
+            "payload": {
+                "tradeItems": trade_items
+            }
+        }),
+        ServerPacket::TradeConfirm => json!({
+            "type": "packet",
+            "packet": "TradeConfirm",
+            "payload": {}
+        }),
+        ServerPacket::TradeCancel { unlock } => json!({
+            "type": "packet",
+            "packet": "TradeCancel",
+            "payload": {
+                "unlock": unlock
+            }
+        }),
+        ServerPacket::MountUpdate {
+            object_id,
+            mount_type,
+            riding_mount,
+        } => json!({
+            "type": "packet",
+            "packet": "MountUpdate",
+            "payload": {
+                "objectId": object_id,
+                "mountType": mount_type,
+                "ridingMount": riding_mount
+            }
+        }),
+        ServerPacket::FishingUpdate {
+            object_id,
+            fishing,
+            progress_percent,
+            chance_percent,
+            fishing_point,
+            found_fish,
+        } => json!({
+            "type": "packet",
+            "packet": "FishingUpdate",
+            "payload": {
+                "objectId": object_id,
+                "fishing": fishing,
+                "progressPercent": progress_percent,
+                "chancePercent": chance_percent,
+                "fishingPoint": {
+                    "x": fishing_point.x,
+                    "y": fishing_point.y
+                },
+                "foundFish": found_fish
+            }
+        }),
+        ServerPacket::RemoveDelayedExplosion { object_id } => json!({
+            "type": "packet",
+            "packet": "RemoveDelayedExplosion",
+            "payload": {
+                "objectId": object_id
+            }
+        }),
+        ServerPacket::ObjectDeco {
+            object_id,
+            location,
+            image,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDeco",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "image": image
+            }
+        }),
+        ServerPacket::ObjectSneaking {
+            object_id,
+            sneaking_active,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectSneaking",
+            "payload": {
+                "objectId": object_id,
+                "sneakingActive": sneaking_active
+            }
+        }),
+        ServerPacket::ObjectLevelEffects {
+            object_id,
+            level_effects,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectLevelEffects",
+            "payload": {
+                "objectId": object_id,
+                "levelEffects": level_effects
+            }
+        }),
+        ServerPacket::SetBindingShot {
+            object_id,
+            enabled,
+            value,
+        } => json!({
+            "type": "packet",
+            "packet": "SetBindingShot",
+            "payload": {
+                "objectId": object_id,
+                "enabled": enabled,
+                "value": value
+            }
+        }),
+        ServerPacket::SendOutputMessage {
+            message,
+            output_type,
+        } => json!({
+            "type": "packet",
+            "packet": "SendOutputMessage",
+            "payload": {
+                "message": message,
+                "outputType": output_type
+            }
+        }),
+        ServerPacket::NPCAwakening => json!({
+            "type": "packet",
+            "packet": "NPCAwakening",
+            "payload": {}
+        }),
+        ServerPacket::NPCDisassemble => json!({
+            "type": "packet",
+            "packet": "NPCDisassemble",
+            "payload": {}
+        }),
+        ServerPacket::NPCDowngrade => json!({
+            "type": "packet",
+            "packet": "NPCDowngrade",
+            "payload": {}
+        }),
+        ServerPacket::NPCReset => json!({
+            "type": "packet",
+            "packet": "NPCReset",
+            "payload": {}
+        }),
+        ServerPacket::AwakeningLockedItem { unique_id, locked } => json!({
+            "type": "packet",
+            "packet": "AwakeningLockedItem",
+            "payload": {
+                "uniqueId": unique_id,
+                "locked": locked
+            }
+        }),
+        ServerPacket::Awakening { result, remove_id } => json!({
+            "type": "packet",
+            "packet": "Awakening",
+            "payload": {
+                "result": result,
+                "removeId": remove_id
+            }
+        }),
+        ServerPacket::ReceiveMail { mail } => json!({
+            "type": "packet",
+            "packet": "ReceiveMail",
+            "payload": {
+                "mail": mail
+            }
+        }),
+        ServerPacket::MailLockedItem { unique_id, locked } => json!({
+            "type": "packet",
+            "packet": "MailLockedItem",
+            "payload": {
+                "uniqueId": unique_id,
+                "locked": locked
+            }
+        }),
+        ServerPacket::MailSendRequest => json!({
+            "type": "packet",
+            "packet": "MailSendRequest",
+            "payload": {}
+        }),
+        ServerPacket::MailSent { result } => json!({
+            "type": "packet",
+            "packet": "MailSent",
+            "payload": {
+                "result": result
+            }
+        }),
+        ServerPacket::ParcelCollected { result } => json!({
+            "type": "packet",
+            "packet": "ParcelCollected",
+            "payload": {
+                "result": result
+            }
+        }),
+        ServerPacket::MailCost { cost } => json!({
+            "type": "packet",
+            "packet": "MailCost",
+            "payload": {
+                "cost": cost
+            }
+        }),
+        ServerPacket::FriendUpdate { friends } => json!({
+            "type": "packet",
+            "packet": "FriendUpdate",
+            "payload": {
+                "friends": friends
+            }
+        }),
+        ServerPacket::NewIntelligentCreature { creature } => json!({
+            "type": "packet",
+            "packet": "NewIntelligentCreature",
+            "payload": {
+                "creature": creature
+            }
+        }),
+        ServerPacket::UpdateIntelligentCreatureList {
+            creature_list,
+            creature_summoned,
+            summoned_creature_type,
+            pearl_count,
+        } => json!({
+            "type": "packet",
+            "packet": "UpdateIntelligentCreatureList",
+            "payload": {
+                "creatureList": creature_list,
+                "creatureSummoned": creature_summoned,
+                "summonedCreatureType": summoned_creature_type,
+                "pearlCount": pearl_count
+            }
+        }),
+        ServerPacket::IntelligentCreatureEnableRename => json!({
+            "type": "packet",
+            "packet": "IntelligentCreatureEnableRename",
+            "payload": {}
+        }),
+        ServerPacket::IntelligentCreaturePickup { object_id } => json!({
+            "type": "packet",
+            "packet": "IntelligentCreaturePickup",
+            "payload": {
+                "objectId": object_id
+            }
+        }),
+        ServerPacket::GetRentedItems { rented_items } => json!({
+            "type": "packet",
+            "packet": "GetRentedItems",
+            "payload": {
+                "rentedItems": rented_items
+            }
+        }),
+        ServerPacket::ItemRentalRequest { name, renting } => json!({
+            "type": "packet",
+            "packet": "ItemRentalRequest",
+            "payload": {
+                "name": name,
+                "renting": renting
+            }
+        }),
+        ServerPacket::ItemRentalFee { amount } => json!({
+            "type": "packet",
+            "packet": "ItemRentalFee",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::ItemRentalPeriod { days } => json!({
+            "type": "packet",
+            "packet": "ItemRentalPeriod",
+            "payload": {
+                "days": days
+            }
+        }),
+        ServerPacket::DepositRentalItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositRentalItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveRentalItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveRentalItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::UpdateRentalItem { loan_item } => json!({
+            "type": "packet",
+            "packet": "UpdateRentalItem",
+            "payload": {
+                "loanItem": loan_item
+            }
+        }),
+        ServerPacket::CancelItemRental => json!({
+            "type": "packet",
+            "packet": "CancelItemRental",
+            "payload": {}
+        }),
+        ServerPacket::ItemRentalLock {
+            success,
+            gold_locked,
+            item_locked,
+        } => json!({
+            "type": "packet",
+            "packet": "ItemRentalLock",
+            "payload": {
+                "success": success,
+                "goldLocked": gold_locked,
+                "itemLocked": item_locked
+            }
+        }),
+        ServerPacket::ItemRentalPartnerLock {
+            gold_locked,
+            item_locked,
+        } => json!({
+            "type": "packet",
+            "packet": "ItemRentalPartnerLock",
+            "payload": {
+                "goldLocked": gold_locked,
+                "itemLocked": item_locked
+            }
+        }),
+        ServerPacket::CanConfirmItemRental => json!({
+            "type": "packet",
+            "packet": "CanConfirmItemRental",
+            "payload": {}
+        }),
+        ServerPacket::ConfirmItemRental => json!({
+            "type": "packet",
+            "packet": "ConfirmItemRental",
+            "payload": {}
+        }),
         ServerPacket::NewQuestInfo { payload } => json!({
             "type": "packet",
             "packet": "NewQuestInfo",
@@ -2317,6 +3457,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "NewRecipeInfo",
             "payload": {
                 "rawPayloadLength": payload.len()
+            }
+        }),
+        ServerPacket::ResizeInventory { size } => json!({
+            "type": "packet",
+            "packet": "ResizeInventory",
+            "payload": {
+                "size": size
             }
         }),
         ServerPacket::ResizeStorage {
@@ -2464,6 +3611,10 @@ fn default_drop_count() -> u16 {
     1
 }
 
+fn default_market_max_shape() -> i16 {
+    5_000
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
@@ -2473,8 +3624,10 @@ mod tests {
     use axum::extract::State;
     use axum::Json;
     use mir2_protocol::{
-        ClientBuff, ClientPacket, MirDirection, MirGridType, ObjectManaInfo, Point, ServerPacket,
-        Spell, UserItem, UserItemStat,
+        ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
+        ClientPacket, IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass,
+        MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, ServerPacket, Spell, UserItem,
+        UserItemStat,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -2506,6 +3659,52 @@ mod tests {
             is_shop_item: false,
             sealed_info: None,
             gm_made: false,
+        }
+    }
+
+    fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
+        ClientIntelligentCreature {
+            pet_type: 1,
+            icon: 44,
+            custom_name: "Buddy".to_string(),
+            fullness: 50,
+            slot_index,
+            expire_binary_datetime: 638000000000000000,
+            blackstone_time: 12_000,
+            pet_mode: 1,
+            creature_rules: IntelligentCreatureRules {
+                minimal_fullness: 1,
+                mouse_pickup_enabled: true,
+                mouse_pickup_range: 6,
+                auto_pickup_enabled: false,
+                auto_pickup_range: 0,
+                semi_auto_pickup_enabled: true,
+                semi_auto_pickup_range: 4,
+                can_produce_blackstone: true,
+            },
+            filter: IntelligentCreatureItemFilter {
+                pet_pickup_all: false,
+                pet_pickup_gold: true,
+                pet_pickup_weapons: false,
+                pet_pickup_armours: false,
+                pet_pickup_helmets: false,
+                pet_pickup_boots: false,
+                pet_pickup_belts: false,
+                pet_pickup_accessories: false,
+                pet_pickup_others: true,
+            },
+            pickup_grade: 2,
+            maintain_food_time: 24_000,
+        }
+    }
+
+    fn sample_hero_info(index: i32) -> ClientHeroInformation {
+        ClientHeroInformation {
+            index,
+            name: format!("Hero{index}"),
+            level: 12,
+            class: MirClass::Taoist,
+            gender: MirGender::Female,
         }
     }
 
@@ -2960,8 +4159,25 @@ mod tests {
                 .expect("use item command should deserialize");
 
         match command {
-            BrowserCommand::UseItem { key, .. } => assert_eq!(key, "red-potion"),
+            BrowserCommand::UseItem { key, .. } => assert_eq!(key.as_deref(), Some("red-potion")),
             other => panic!("unexpected command: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn use_item_with_unique_id_maps_to_packet() {
+        let command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"useItem","uniqueId":1024,"grid":"equipment"}"#,
+        )
+        .expect("use item command should deserialize");
+        match super::browser_command_to_action(command)
+            .expect("use item command should map to a session action")
+        {
+            SessionAction::Packet(ClientPacket::UseItem { unique_id, grid }) => {
+                assert_eq!(unique_id, 1024);
+                assert_eq!(grid, MirGridType::Equipment);
+            }
+            other => panic!("unexpected action: {other:?}"),
         }
     }
 
@@ -3383,6 +4599,520 @@ mod tests {
         });
         assert_eq!(remove_buff["packet"], "RemoveBuff");
         assert_eq!(remove_buff["payload"]["objectId"], 1_001);
+    }
+
+    #[test]
+    fn hero_commands_map_to_crystal_protocol_packets() {
+        let new_hero = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"newHero","name":"Aide","gender":"female","class":"taoist"}"#,
+        )
+        .expect("new hero command should deserialize");
+        match super::browser_command_to_action(new_hero).expect("new hero maps") {
+            SessionAction::Packet(ClientPacket::NewHero {
+                name,
+                gender,
+                class,
+            }) => {
+                assert_eq!(name, "Aide");
+                assert_eq!(gender, MirGender::Female);
+                assert_eq!(class, MirClass::Taoist);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let take_back = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"takeBackHeroItem","from":3,"to":1}"#,
+        )
+        .expect("take back hero item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(take_back).expect("take back maps"),
+            SessionAction::Packet(ClientPacket::TakeBackHeroItem { from: 3, to: 1 })
+        ));
+
+        let transfer = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"transferHeroItem","from":1,"to":3}"#,
+        )
+        .expect("transfer hero item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(transfer).expect("transfer maps"),
+            SessionAction::Packet(ClientPacket::TransferHeroItem { from: 1, to: 3 })
+        ));
+
+        let behaviour =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"setHeroBehaviour","behaviour":2}"#)
+                .expect("set hero behaviour command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(behaviour).expect("behaviour maps"),
+            SessionAction::Packet(ClientPacket::SetHeroBehaviour { behaviour: 2 })
+        ));
+
+        let change =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"changeHero","listIndex":1}"#)
+                .expect("change hero command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(change).expect("change maps"),
+            SessionAction::Packet(ClientPacket::ChangeHero { list_index: 1 })
+        ));
+    }
+
+    #[test]
+    fn hero_packets_are_exposed_as_browser_events() {
+        let new_hero = super::server_packet_to_event(&ServerPacket::NewHero { result: 0 });
+        assert_eq!(new_hero["packet"], "NewHero");
+        assert_eq!(new_hero["payload"]["result"], 0);
+
+        let hero_info = super::server_packet_to_event(&ServerPacket::NewHeroInfo {
+            info: sample_hero_info(0),
+            storage_index: -1,
+        });
+        assert_eq!(hero_info["packet"], "NewHeroInfo");
+        assert_eq!(hero_info["payload"]["info"]["name"], "Hero0");
+        assert_eq!(hero_info["payload"]["storageIndex"], -1);
+
+        let take_back = super::server_packet_to_event(&ServerPacket::TakeBackHeroItem {
+            from: 3,
+            to: 1,
+            success: false,
+        });
+        assert_eq!(take_back["packet"], "TakeBackHeroItem");
+        assert_eq!(take_back["payload"]["success"], false);
+
+        let create = super::server_packet_to_event(&ServerPacket::HeroCreateRequest {
+            can_create_class: vec![true, true, true, false, false],
+        });
+        assert_eq!(create["packet"], "HeroCreateRequest");
+        assert_eq!(create["payload"]["canCreateClass"][0], true);
+
+        let manage = super::server_packet_to_event(&ServerPacket::ManageHeroes {
+            maximum_count: 3,
+            current_hero: Some(sample_hero_info(0)),
+            heroes: Some(vec![Some(sample_hero_info(1)), None]),
+        });
+        assert_eq!(manage["packet"], "ManageHeroes");
+        assert_eq!(manage["payload"]["maximumCount"], 3);
+        assert_eq!(manage["payload"]["currentHero"]["name"], "Hero0");
+
+        let behaviour =
+            super::server_packet_to_event(&ServerPacket::SetHeroBehaviour { behaviour: 2 });
+        assert_eq!(behaviour["packet"], "SetHeroBehaviour");
+        assert_eq!(behaviour["payload"]["behaviour"], 2);
+
+        let change = super::server_packet_to_event(&ServerPacket::ChangeHero { from_index: 1 });
+        assert_eq!(change["packet"], "ChangeHero");
+        assert_eq!(change["payload"]["fromIndex"], 1);
+
+        let spawn_state =
+            super::server_packet_to_event(&ServerPacket::UpdateHeroSpawnState { state: 3 });
+        assert_eq!(spawn_state["packet"], "UpdateHeroSpawnState");
+        assert_eq!(spawn_state["payload"]["state"], 3);
+
+        let gain =
+            super::server_packet_to_event(&ServerPacket::GainHeroExperience { amount: 1_500 });
+        assert_eq!(gain["packet"], "GainHeroExperience");
+        assert_eq!(gain["payload"]["amount"], 1_500);
+
+        let level = super::server_packet_to_event(&ServerPacket::HeroLevelChanged {
+            level: 42,
+            experience: 12_345,
+            max_experience: 20_000,
+        });
+        assert_eq!(level["packet"], "HeroLevelChanged");
+        assert_eq!(level["payload"]["level"], 42);
+        assert_eq!(level["payload"]["experience"], 12_345);
+        assert_eq!(level["payload"]["maxExperience"], 20_000);
+    }
+
+    #[test]
+    fn market_relationship_commands_map_to_crystal_protocol_packets() {
+        let consign = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"consignItem","uniqueId":77,"price":1500,"marketType":0}"#,
+        )
+        .expect("consign command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(consign).expect("consign maps"),
+            SessionAction::Packet(ClientPacket::ConsignItem {
+                unique_id: 77,
+                price: 1_500,
+                market_type: 0
+            })
+        ));
+
+        let search = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marketSearch","matchText":"blade","itemType":5,"userMode":true,"minShape":1,"maxShape":99,"marketType":0}"#,
+        )
+        .expect("market search command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(search).expect("search maps"),
+            SessionAction::Packet(ClientPacket::MarketSearch {
+                ref match_text,
+                item_type: 5,
+                user_mode: true,
+                min_shape: 1,
+                max_shape: 99,
+                market_type: 0
+            }) if match_text == "blade"
+        ));
+
+        let buy = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marketBuy","auctionId":88,"bidPrice":2000}"#,
+        )
+        .expect("market buy command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(buy).expect("buy maps"),
+            SessionAction::Packet(ClientPacket::MarketBuy {
+                auction_id: 88,
+                bid_price: 2_000
+            })
+        ));
+
+        let marriage = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marriageReply","acceptInvite":true}"#,
+        )
+        .expect("marriage reply command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(marriage).expect("marriage maps"),
+            SessionAction::Packet(ClientPacket::MarriageReply {
+                accept_invite: true
+            })
+        ));
+
+        let mentor =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"addMentor","name":"Master"}"#)
+                .expect("add mentor command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(mentor).expect("mentor maps"),
+            SessionAction::Packet(ClientPacket::AddMentor { ref name }) if name == "Master"
+        ));
+    }
+
+    #[test]
+    fn market_relationship_packets_are_exposed_as_browser_events() {
+        let consign = super::server_packet_to_event(&ServerPacket::ConsignItem {
+            unique_id: 77,
+            success: false,
+        });
+        assert_eq!(consign["packet"], "ConsignItem");
+        assert_eq!(consign["payload"]["success"], false);
+
+        let fail = super::server_packet_to_event(&ServerPacket::MarketFail { reason: 1 });
+        assert_eq!(fail["packet"], "MarketFail");
+        assert_eq!(fail["payload"]["reason"], 1);
+
+        let success = super::server_packet_to_event(&ServerPacket::MarketSuccess {
+            message: "Listed".to_string(),
+        });
+        assert_eq!(success["packet"], "MarketSuccess");
+        assert_eq!(success["payload"]["message"], "Listed");
+
+        let marriage = super::server_packet_to_event(&ServerPacket::MarriageRequest {
+            name: "Partner".to_string(),
+        });
+        assert_eq!(marriage["packet"], "MarriageRequest");
+        assert_eq!(marriage["payload"]["name"], "Partner");
+
+        let mentor = super::server_packet_to_event(&ServerPacket::MentorRequest {
+            name: "Master".to_string(),
+            level: 45,
+        });
+        assert_eq!(mentor["packet"], "MentorRequest");
+        assert_eq!(mentor["payload"]["level"], 45);
+    }
+
+    #[test]
+    fn fishing_commands_map_to_crystal_protocol_packets() {
+        let cast_command =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"fishingCast","castOut":true}"#)
+                .expect("fishing cast command should deserialize");
+        let action = super::browser_command_to_action(cast_command)
+            .expect("fishing cast command should map to a session action");
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::FishingCast { cast_out: true })
+        ));
+
+        let autocast_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"fishingChangeAutocast","autoCast":true}"#,
+        )
+        .expect("fishing autocast command should deserialize");
+        let action = super::browser_command_to_action(autocast_command)
+            .expect("fishing autocast command should map to a session action");
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::FishingChangeAutocast { auto_cast: true })
+        ));
+    }
+
+    #[test]
+    fn trade_commands_map_to_crystal_protocol_packets() {
+        let deposit = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"depositTradeItem","from":4,"to":0}"#,
+        )
+        .expect("deposit trade command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(deposit).expect("deposit trade maps"),
+            SessionAction::Packet(ClientPacket::DepositTradeItem { from: 4, to: 0 })
+        ));
+
+        let reply =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeReply","acceptInvite":true}"#)
+                .expect("trade reply command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(reply).expect("trade reply maps"),
+            SessionAction::Packet(ClientPacket::TradeReply {
+                accept_invite: true
+            })
+        ));
+
+        let gold = serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeGold","amount":100}"#)
+            .expect("trade gold command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(gold).expect("trade gold maps"),
+            SessionAction::Packet(ClientPacket::TradeGold { amount: 100 })
+        ));
+
+        let confirm =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeConfirm","locked":true}"#)
+                .expect("trade confirm command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(confirm).expect("trade confirm maps"),
+            SessionAction::Packet(ClientPacket::TradeConfirm { locked: true })
+        ));
+
+        let cancel = serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeCancel"}"#)
+            .expect("trade cancel command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(cancel).expect("trade cancel maps"),
+            SessionAction::Packet(ClientPacket::TradeCancel)
+        ));
+    }
+
+    #[test]
+    fn trade_packets_are_exposed_as_browser_events() {
+        let request = super::server_packet_to_event(&ServerPacket::TradeRequest {
+            name: "Scout".to_string(),
+        });
+        assert_eq!(request["packet"], "TradeRequest");
+        assert_eq!(request["payload"]["name"], "Scout");
+
+        let gold = super::server_packet_to_event(&ServerPacket::TradeGold { amount: 100 });
+        assert_eq!(gold["packet"], "TradeGold");
+        assert_eq!(gold["payload"]["amount"], 100);
+
+        let cancel = super::server_packet_to_event(&ServerPacket::TradeCancel { unlock: true });
+        assert_eq!(cancel["packet"], "TradeCancel");
+        assert_eq!(cancel["payload"]["unlock"], true);
+
+        let confirm = super::server_packet_to_event(&ServerPacket::TradeConfirm);
+        assert_eq!(confirm["packet"], "TradeConfirm");
+        assert!(confirm["payload"].is_object());
+    }
+
+    #[test]
+    fn mail_friend_commands_map_to_crystal_protocol_packets() {
+        let send = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"sendMail","name":"Blade","message":"Delivery","gold":2500,"itemsIdx":[7,8,0,0,0],"stamped":true}"#,
+        )
+        .expect("send mail command should deserialize");
+        match super::browser_command_to_action(send).expect("send mail maps") {
+            SessionAction::Packet(ClientPacket::SendMail {
+                name,
+                message,
+                gold,
+                items_idx,
+                stamped,
+            }) => {
+                assert_eq!(name, "Blade");
+                assert_eq!(message, "Delivery");
+                assert_eq!(gold, 2_500);
+                assert_eq!(items_idx, [7, 8, 0, 0, 0]);
+                assert!(stamped);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let lock = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"mailLockedItem","uniqueId":7,"locked":true}"#,
+        )
+        .expect("mail locked item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(lock).expect("mail lock maps"),
+            SessionAction::Packet(ClientPacket::MailLockedItem {
+                unique_id: 7,
+                locked: true
+            })
+        ));
+
+        let cost = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"mailCost","gold":2500,"itemsIdx":[7,8,0,0,0],"stamped":false}"#,
+        )
+        .expect("mail cost command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(cost).expect("mail cost maps"),
+            SessionAction::Packet(ClientPacket::MailCost {
+                gold: 2_500,
+                items_idx: [7, 8, 0, 0, 0],
+                stamped: false
+            })
+        ));
+
+        let friend = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"addFriend","name":"Blade","blocked":false}"#,
+        )
+        .expect("add friend command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(friend).expect("add friend maps"),
+            SessionAction::Packet(ClientPacket::AddFriend {
+                ref name,
+                blocked: false
+            }) if name == "Blade"
+        ));
+
+        let memo = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"addMemo","characterIndex":42,"memo":"party lead"}"#,
+        )
+        .expect("add memo command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(memo).expect("add memo maps"),
+            SessionAction::Packet(ClientPacket::AddMemo {
+                character_index: 42,
+                ref memo
+            }) if memo == "party lead"
+        ));
+    }
+
+    #[test]
+    fn mail_friend_packets_are_exposed_as_browser_events() {
+        let receive = super::server_packet_to_event(&ServerPacket::ReceiveMail {
+            mail: vec![ClientMail {
+                mail_id: 11,
+                sender_name: "GM".to_string(),
+                message: "Welcome".to_string(),
+                opened: false,
+                locked: true,
+                can_reply: false,
+                collected: false,
+                date_sent_binary_datetime: 638000000000000000,
+                gold: 2_500,
+                items: vec![sample_user_item(7, 1)],
+            }],
+        });
+        assert_eq!(receive["packet"], "ReceiveMail");
+        assert_eq!(receive["payload"]["mail"][0]["senderName"], "GM");
+        assert_eq!(receive["payload"]["mail"][0]["items"][0]["unique_id"], 7);
+
+        let sent = super::server_packet_to_event(&ServerPacket::MailSent { result: -1 });
+        assert_eq!(sent["packet"], "MailSent");
+        assert_eq!(sent["payload"]["result"], -1);
+
+        let cost = super::server_packet_to_event(&ServerPacket::MailCost { cost: 200 });
+        assert_eq!(cost["packet"], "MailCost");
+        assert_eq!(cost["payload"]["cost"], 200);
+
+        let friends = super::server_packet_to_event(&ServerPacket::FriendUpdate {
+            friends: vec![ClientFriend {
+                index: 42,
+                name: "Blade".to_string(),
+                memo: "party lead".to_string(),
+                blocked: false,
+                online: true,
+            }],
+        });
+        assert_eq!(friends["packet"], "FriendUpdate");
+        assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
+    }
+
+    #[test]
+    fn intelligent_creature_commands_map_to_crystal_protocol_packets() {
+        let request = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"requestIntelligentCreatureUpdates","update":true}"#,
+        )
+        .expect("request intelligent creature command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(request).expect("request maps"),
+            SessionAction::Packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true })
+        ));
+
+        let pickup = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"intelligentCreaturePickup","mouseMode":true,"location":{"x":330,"y":270}}"#,
+        )
+        .expect("intelligent creature pickup command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(pickup).expect("pickup maps"),
+            SessionAction::Packet(ClientPacket::IntelligentCreaturePickup {
+                mouse_mode: true,
+                location: Point { x: 330, y: 270 }
+            })
+        ));
+
+        let update = serde_json::from_value::<BrowserCommand>(serde_json::json!({
+            "type": "updateIntelligentCreature",
+            "creature": sample_intelligent_creature(0),
+            "summonMe": true,
+            "unsummonMe": false,
+            "releaseMe": false
+        }))
+        .expect("update intelligent creature command should deserialize");
+        match super::browser_command_to_action(update).expect("update maps") {
+            SessionAction::Packet(ClientPacket::UpdateIntelligentCreature {
+                creature,
+                summon_me,
+                unsummon_me,
+                release_me,
+            }) => {
+                assert_eq!(creature.custom_name, "Buddy");
+                assert!(summon_me);
+                assert!(!unsummon_me);
+                assert!(!release_me);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn intelligent_creature_packets_are_exposed_as_browser_events() {
+        let update = super::server_packet_to_event(&ServerPacket::UpdateIntelligentCreatureList {
+            creature_list: vec![sample_intelligent_creature(0)],
+            creature_summoned: true,
+            summoned_creature_type: 1,
+            pearl_count: 3,
+        });
+        assert_eq!(update["packet"], "UpdateIntelligentCreatureList");
+        assert_eq!(update["payload"]["creatureList"][0]["customName"], "Buddy");
+        assert_eq!(update["payload"]["creatureSummoned"], true);
+        assert_eq!(update["payload"]["pearlCount"], 3);
+
+        let rename = super::server_packet_to_event(&ServerPacket::IntelligentCreatureEnableRename);
+        assert_eq!(rename["packet"], "IntelligentCreatureEnableRename");
+
+        let pickup = super::server_packet_to_event(&ServerPacket::IntelligentCreaturePickup {
+            object_id: 1_001,
+        });
+        assert_eq!(pickup["packet"], "IntelligentCreaturePickup");
+        assert_eq!(pickup["payload"]["objectId"], 1_001);
+    }
+
+    #[test]
+    fn mount_and_fishing_packets_are_exposed_as_browser_events() {
+        let mount = super::server_packet_to_event(&ServerPacket::MountUpdate {
+            object_id: 1_001,
+            mount_type: 12,
+            riding_mount: true,
+        });
+        assert_eq!(mount["packet"], "MountUpdate");
+        assert_eq!(mount["payload"]["mountType"], 12);
+        assert_eq!(mount["payload"]["ridingMount"], true);
+
+        let fishing = super::server_packet_to_event(&ServerPacket::FishingUpdate {
+            object_id: 1_001,
+            fishing: true,
+            progress_percent: 33,
+            chance_percent: 12,
+            fishing_point: Point { x: 331, y: 270 },
+            found_fish: false,
+        });
+        assert_eq!(fishing["packet"], "FishingUpdate");
+        assert_eq!(fishing["payload"]["progressPercent"], 33);
+        assert_eq!(fishing["payload"]["fishingPoint"]["x"], 331);
     }
 
     #[test]

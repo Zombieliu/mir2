@@ -1092,6 +1092,265 @@ impl UserItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientFriend {
+    pub index: i32,
+    pub name: String,
+    pub memo: String,
+    pub blocked: bool,
+    pub online: bool,
+}
+
+impl ClientFriend {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            memo: reader.read_string()?,
+            blocked: reader.read_bool()?,
+            online: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.memo)?;
+        writer.write_bool(self.blocked);
+        writer.write_bool(self.online);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMail {
+    pub mail_id: u64,
+    pub sender_name: String,
+    pub message: String,
+    pub opened: bool,
+    pub locked: bool,
+    pub can_reply: bool,
+    pub collected: bool,
+    pub date_sent_binary_datetime: i64,
+    pub gold: u32,
+    pub items: Vec<UserItem>,
+}
+
+impl ClientMail {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let mail_id = reader.read_u64()?;
+        let sender_name = reader.read_string()?;
+        let message = reader.read_string()?;
+        let opened = reader.read_bool()?;
+        let locked = reader.read_bool()?;
+        let can_reply = reader.read_bool()?;
+        let collected = reader.read_bool()?;
+        let date_sent_binary_datetime = reader.read_i64()?;
+        let gold = reader.read_u32()?;
+        let item_count = read_non_negative_count(reader, "client_mail_items")?;
+        let mut items = Vec::with_capacity(item_count);
+        for _ in 0..item_count {
+            items.push(UserItem::decode(reader)?);
+        }
+
+        Ok(Self {
+            mail_id,
+            sender_name,
+            message,
+            opened,
+            locked,
+            can_reply,
+            collected,
+            date_sent_binary_datetime,
+            gold,
+            items,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.mail_id);
+        writer.write_string(&self.sender_name)?;
+        writer.write_string(&self.message)?;
+        writer.write_bool(self.opened);
+        writer.write_bool(self.locked);
+        writer.write_bool(self.can_reply);
+        writer.write_bool(self.collected);
+        writer.write_i64(self.date_sent_binary_datetime);
+        writer.write_u32(self.gold);
+        writer.write_i32(self.items.len() as i32);
+        for item in &self.items {
+            item.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IntelligentCreatureRules {
+    pub minimal_fullness: i32,
+    pub mouse_pickup_enabled: bool,
+    pub mouse_pickup_range: i32,
+    pub auto_pickup_enabled: bool,
+    pub auto_pickup_range: i32,
+    pub semi_auto_pickup_enabled: bool,
+    pub semi_auto_pickup_range: i32,
+    pub can_produce_blackstone: bool,
+}
+
+impl IntelligentCreatureRules {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            minimal_fullness: reader.read_i32()?,
+            mouse_pickup_enabled: reader.read_bool()?,
+            mouse_pickup_range: reader.read_i32()?,
+            auto_pickup_enabled: reader.read_bool()?,
+            auto_pickup_range: reader.read_i32()?,
+            semi_auto_pickup_enabled: reader.read_bool()?,
+            semi_auto_pickup_range: reader.read_i32()?,
+            can_produce_blackstone: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_i32(self.minimal_fullness);
+        writer.write_bool(self.mouse_pickup_enabled);
+        writer.write_i32(self.mouse_pickup_range);
+        writer.write_bool(self.auto_pickup_enabled);
+        writer.write_i32(self.auto_pickup_range);
+        writer.write_bool(self.semi_auto_pickup_enabled);
+        writer.write_i32(self.semi_auto_pickup_range);
+        writer.write_bool(self.can_produce_blackstone);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IntelligentCreatureItemFilter {
+    pub pet_pickup_all: bool,
+    pub pet_pickup_gold: bool,
+    pub pet_pickup_weapons: bool,
+    pub pet_pickup_armours: bool,
+    pub pet_pickup_helmets: bool,
+    pub pet_pickup_boots: bool,
+    pub pet_pickup_belts: bool,
+    pub pet_pickup_accessories: bool,
+    pub pet_pickup_others: bool,
+}
+
+impl IntelligentCreatureItemFilter {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            pet_pickup_all: reader.read_bool()?,
+            pet_pickup_gold: reader.read_bool()?,
+            pet_pickup_weapons: reader.read_bool()?,
+            pet_pickup_armours: reader.read_bool()?,
+            pet_pickup_helmets: reader.read_bool()?,
+            pet_pickup_boots: reader.read_bool()?,
+            pet_pickup_belts: reader.read_bool()?,
+            pet_pickup_accessories: reader.read_bool()?,
+            pet_pickup_others: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_bool(self.pet_pickup_all);
+        writer.write_bool(self.pet_pickup_gold);
+        writer.write_bool(self.pet_pickup_weapons);
+        writer.write_bool(self.pet_pickup_armours);
+        writer.write_bool(self.pet_pickup_helmets);
+        writer.write_bool(self.pet_pickup_boots);
+        writer.write_bool(self.pet_pickup_belts);
+        writer.write_bool(self.pet_pickup_accessories);
+        writer.write_bool(self.pet_pickup_others);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientIntelligentCreature {
+    pub pet_type: u8,
+    pub icon: i32,
+    pub custom_name: String,
+    pub fullness: i32,
+    pub slot_index: i32,
+    pub expire_binary_datetime: i64,
+    pub blackstone_time: i64,
+    pub pet_mode: u8,
+    pub creature_rules: IntelligentCreatureRules,
+    pub filter: IntelligentCreatureItemFilter,
+    pub pickup_grade: u8,
+    pub maintain_food_time: i64,
+}
+
+impl ClientIntelligentCreature {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            pet_type: reader.read_u8()?,
+            icon: reader.read_i32()?,
+            custom_name: reader.read_string()?,
+            fullness: reader.read_i32()?,
+            slot_index: reader.read_i32()?,
+            expire_binary_datetime: reader.read_i64()?,
+            blackstone_time: reader.read_i64()?,
+            pet_mode: reader.read_u8()?,
+            creature_rules: IntelligentCreatureRules::decode(reader)?,
+            filter: IntelligentCreatureItemFilter::decode(reader)?,
+            pickup_grade: reader.read_u8()?,
+            maintain_food_time: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u8(self.pet_type);
+        writer.write_i32(self.icon);
+        writer.write_string(&self.custom_name)?;
+        writer.write_i32(self.fullness);
+        writer.write_i32(self.slot_index);
+        writer.write_i64(self.expire_binary_datetime);
+        writer.write_i64(self.blackstone_time);
+        writer.write_u8(self.pet_mode);
+        self.creature_rules.encode(writer);
+        self.filter.encode(writer);
+        writer.write_u8(self.pickup_grade);
+        writer.write_i64(self.maintain_food_time);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientHeroInformation {
+    pub index: i32,
+    pub name: String,
+    pub level: u16,
+    pub class: MirClass,
+    pub gender: MirGender,
+}
+
+impl ClientHeroInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            level: reader.read_u16()?,
+            class: MirClass::try_from(reader.read_u8()?)?,
+            gender: MirGender::try_from(reader.read_u8()?)?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_u16(self.level);
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UserItemStat {
     pub stat: u8,
     pub value: i32,
@@ -1226,6 +1485,33 @@ impl UserItemRentalInformation {
         writer.write_i16(self.binding_flags);
         writer.write_i64(self.expiry_binary_datetime);
         writer.write_bool(self.rental_locked);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ItemRentalInformation {
+    pub item_id: u64,
+    pub item_name: String,
+    pub renting_player_name: String,
+    pub item_return_date_binary_datetime: i64,
+}
+
+impl ItemRentalInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item_id: reader.read_u64()?,
+            item_name: reader.read_string()?,
+            renting_player_name: reader.read_string()?,
+            item_return_date_binary_datetime: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.item_id);
+        writer.write_string(&self.item_name)?;
+        writer.write_string(&self.renting_player_name)?;
+        writer.write_i64(self.item_return_date_binary_datetime);
         Ok(())
     }
 }

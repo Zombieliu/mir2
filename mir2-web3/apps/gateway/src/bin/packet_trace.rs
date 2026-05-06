@@ -823,6 +823,165 @@ fn client_packet_detail(packet: &ClientPacket) -> Option<Value> {
         | ClientPacket::StartGame { character_index } => Some(json!({
             "characterIndex": character_index
         })),
+        ClientPacket::DepositTradeItem { from, to }
+        | ClientPacket::RetrieveTradeItem { from, to }
+        | ClientPacket::TakeBackHeroItem { from, to }
+        | ClientPacket::TransferHeroItem { from, to } => Some(json!({
+            "from": from,
+            "to": to
+        })),
+        ClientPacket::NewHero {
+            name,
+            gender,
+            class,
+        } => Some(json!({
+            "name": name,
+            "gender": format!("{gender:?}"),
+            "class": format!("{class:?}")
+        })),
+        ClientPacket::SetHeroBehaviour { behaviour } => Some(json!({
+            "behaviour": behaviour
+        })),
+        ClientPacket::ChangeHero { list_index } => Some(json!({
+            "listIndex": list_index
+        })),
+        ClientPacket::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        } => Some(json!({
+            "uniqueId": unique_id,
+            "price": price,
+            "marketType": market_type
+        })),
+        ClientPacket::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        } => Some(json!({
+            "matchText": match_text,
+            "itemType": item_type,
+            "userMode": user_mode,
+            "minShape": min_shape,
+            "maxShape": max_shape,
+            "marketType": market_type
+        })),
+        ClientPacket::MarketPage { page } => Some(json!({
+            "page": page
+        })),
+        ClientPacket::MarketBuy {
+            auction_id,
+            bid_price,
+        } => Some(json!({
+            "auctionId": auction_id,
+            "bidPrice": bid_price
+        })),
+        ClientPacket::MarketGetBack { mode, auction_id } => Some(json!({
+            "mode": mode,
+            "auctionId": auction_id
+        })),
+        ClientPacket::MarketSellNow { auction_id } => Some(json!({
+            "auctionId": auction_id
+        })),
+        ClientPacket::MarriageReply { accept_invite }
+        | ClientPacket::DivorceReply { accept_invite }
+        | ClientPacket::MentorReply { accept_invite } => Some(json!({
+            "acceptInvite": accept_invite
+        })),
+        ClientPacket::AddMentor { name } => Some(json!({
+            "name": name
+        })),
+        ClientPacket::TradeReply { accept_invite } => Some(json!({
+            "acceptInvite": accept_invite
+        })),
+        ClientPacket::TradeGold { amount } => Some(json!({
+            "amount": amount
+        })),
+        ClientPacket::TradeConfirm { locked } => Some(json!({
+            "locked": locked
+        })),
+        ClientPacket::FishingCast { cast_out } => Some(json!({
+            "castOut": cast_out
+        })),
+        ClientPacket::FishingChangeAutocast { auto_cast } => Some(json!({
+            "autoCast": auto_cast
+        })),
+        ClientPacket::SendMail {
+            name,
+            gold,
+            items_idx,
+            stamped,
+            ..
+        } => Some(json!({
+            "name": name,
+            "gold": gold,
+            "itemsIdx": items_idx,
+            "stamped": stamped
+        })),
+        ClientPacket::ReadMail { mail_id }
+        | ClientPacket::CollectParcel { mail_id }
+        | ClientPacket::DeleteMail { mail_id } => Some(json!({
+            "mailId": mail_id
+        })),
+        ClientPacket::LockMail { mail_id, lock } => Some(json!({
+            "mailId": mail_id,
+            "lock": lock
+        })),
+        ClientPacket::MailLockedItem { unique_id, locked } => Some(json!({
+            "uniqueId": unique_id,
+            "locked": locked
+        })),
+        ClientPacket::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        } => Some(json!({
+            "gold": gold,
+            "itemsIdx": items_idx,
+            "stamped": stamped
+        })),
+        ClientPacket::UpdateIntelligentCreature {
+            creature,
+            summon_me,
+            unsummon_me,
+            release_me,
+        } => Some(json!({
+            "customName": creature.custom_name,
+            "slotIndex": creature.slot_index,
+            "summonMe": summon_me,
+            "unsummonMe": unsummon_me,
+            "releaseMe": release_me
+        })),
+        ClientPacket::IntelligentCreaturePickup {
+            mouse_mode,
+            location,
+        } => Some(json!({
+            "mouseMode": mouse_mode,
+            "location": {
+                "x": location.x,
+                "y": location.y
+            }
+        })),
+        ClientPacket::RequestIntelligentCreatureUpdates { update } => Some(json!({
+            "update": update
+        })),
+        ClientPacket::AddFriend { name, blocked } => Some(json!({
+            "name": name,
+            "blocked": blocked
+        })),
+        ClientPacket::RemoveFriend { character_index } => Some(json!({
+            "characterIndex": character_index
+        })),
+        ClientPacket::AddMemo {
+            character_index,
+            memo,
+        } => Some(json!({
+            "characterIndex": character_index,
+            "memo": memo
+        })),
         _ => None,
     }
 }
@@ -1002,6 +1161,158 @@ fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
             "spell": info.spell as u8,
             "direction": format!("{:?}", info.direction),
             "param": info.param
+        })),
+        ServerPacket::TradeRequest { name } | ServerPacket::TradeAccept { name } => Some(json!({
+            "name": name
+        })),
+        ServerPacket::TradeGold { amount } => Some(json!({
+            "amount": amount
+        })),
+        ServerPacket::TradeItem { trade_items } => Some(json!({
+            "tradeItemCount": trade_items.len(),
+            "tradeItems": trade_items
+        })),
+        ServerPacket::TradeCancel { unlock } => Some(json!({
+            "unlock": unlock
+        })),
+        ServerPacket::NewHeroInfo {
+            info,
+            storage_index,
+        } => Some(json!({
+            "index": info.index,
+            "name": info.name,
+            "level": info.level,
+            "class": format!("{:?}", info.class),
+            "gender": format!("{:?}", info.gender),
+            "storageIndex": storage_index
+        })),
+        ServerPacket::TakeBackHeroItem { from, to, success }
+        | ServerPacket::TransferHeroItem { from, to, success } => Some(json!({
+            "from": from,
+            "to": to,
+            "success": success
+        })),
+        ServerPacket::HeroHealthChanged { hp, mp } => Some(json!({
+            "hp": hp,
+            "mp": mp
+        })),
+        ServerPacket::GainHeroExperience { amount } => Some(json!({
+            "amount": amount
+        })),
+        ServerPacket::HeroLevelChanged {
+            level,
+            experience,
+            max_experience,
+        } => Some(json!({
+            "level": level,
+            "experience": experience,
+            "maxExperience": max_experience
+        })),
+        ServerPacket::HeroCreateRequest { can_create_class } => Some(json!({
+            "canCreateClass": can_create_class
+        })),
+        ServerPacket::NewHero { result } => Some(json!({
+            "result": result
+        })),
+        ServerPacket::UpdateHeroSpawnState { state } => Some(json!({
+            "state": state
+        })),
+        ServerPacket::SetHeroBehaviour { behaviour } => Some(json!({
+            "behaviour": behaviour
+        })),
+        ServerPacket::ManageHeroes {
+            maximum_count,
+            current_hero,
+            heroes,
+        } => Some(json!({
+            "maximumCount": maximum_count,
+            "currentHero": current_hero,
+            "heroSlots": heroes.as_ref().map(|heroes| heroes.len()).unwrap_or_default()
+        })),
+        ServerPacket::ChangeHero { from_index } => Some(json!({
+            "fromIndex": from_index
+        })),
+        ServerPacket::ConsignItem { unique_id, success } => Some(json!({
+            "uniqueId": unique_id,
+            "success": success
+        })),
+        ServerPacket::MarketFail { reason } => Some(json!({
+            "reason": reason
+        })),
+        ServerPacket::MarketSuccess { message } => Some(json!({
+            "message": message
+        })),
+        ServerPacket::MarriageRequest { name } | ServerPacket::DivorceRequest { name } => {
+            Some(json!({
+                "name": name
+            }))
+        }
+        ServerPacket::MentorRequest { name, level } => Some(json!({
+            "name": name,
+            "level": level
+        })),
+        ServerPacket::MountUpdate {
+            object_id,
+            mount_type,
+            riding_mount,
+        } => Some(json!({
+            "objectId": object_id,
+            "mountType": mount_type,
+            "ridingMount": riding_mount
+        })),
+        ServerPacket::FishingUpdate {
+            object_id,
+            fishing,
+            progress_percent,
+            chance_percent,
+            fishing_point,
+            found_fish,
+        } => Some(json!({
+            "objectId": object_id,
+            "fishing": fishing,
+            "progressPercent": progress_percent,
+            "chancePercent": chance_percent,
+            "fishingPoint": {
+                "x": fishing_point.x,
+                "y": fishing_point.y
+            },
+            "foundFish": found_fish
+        })),
+        ServerPacket::ReceiveMail { mail } => Some(json!({
+            "mailCount": mail.len()
+        })),
+        ServerPacket::MailLockedItem { unique_id, locked } => Some(json!({
+            "uniqueId": unique_id,
+            "locked": locked
+        })),
+        ServerPacket::MailSent { result } | ServerPacket::ParcelCollected { result } => {
+            Some(json!({
+                "result": result
+            }))
+        }
+        ServerPacket::MailCost { cost } => Some(json!({
+            "cost": cost
+        })),
+        ServerPacket::FriendUpdate { friends } => Some(json!({
+            "friendCount": friends.len()
+        })),
+        ServerPacket::NewIntelligentCreature { creature } => Some(json!({
+            "customName": creature.custom_name,
+            "slotIndex": creature.slot_index
+        })),
+        ServerPacket::UpdateIntelligentCreatureList {
+            creature_list,
+            creature_summoned,
+            summoned_creature_type,
+            pearl_count,
+        } => Some(json!({
+            "creatureCount": creature_list.len(),
+            "creatureSummoned": creature_summoned,
+            "summonedCreatureType": summoned_creature_type,
+            "pearlCount": pearl_count
+        })),
+        ServerPacket::IntelligentCreaturePickup { object_id } => Some(json!({
+            "objectId": object_id
         })),
         ServerPacket::ObjectMana { info } => Some(json!({
             "objectId": info.object_id,
