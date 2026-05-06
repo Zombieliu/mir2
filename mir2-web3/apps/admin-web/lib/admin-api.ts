@@ -65,6 +65,34 @@ export type AdminTimelineResponse = {
   records: AdminTimelineItem[];
 };
 
+export type GameplayEventCommandSummary = {
+  commandKind: string;
+  eventCount: number;
+  lastOccurredAtMs: number;
+  maxSnapshotTick: number;
+};
+
+export type GameplayEventReadinessAlert = {
+  level: string;
+  code: string;
+  message: string;
+};
+
+export type GameplayEventSummaryResponse = {
+  degraded: boolean;
+  ready: boolean;
+  error?: string;
+  generatedAtMs: number;
+  windowSeconds: number;
+  maxLagMs: number;
+  minEventCount: number;
+  totalCount: number;
+  lastOccurredAtMs?: number;
+  lagMs?: number;
+  alerts: GameplayEventReadinessAlert[];
+  commands: GameplayEventCommandSummary[];
+};
+
 export type AdminAuthMeResponse = {
   source: string;
   operator: {
@@ -160,6 +188,9 @@ export type AdminPlayerSummary = {
   mp: number;
   gold: number;
   credit: number;
+  pkPoints: number;
+  chatBanned: boolean;
+  chatBanUntilMs?: number;
   status: string;
   online: boolean;
   onlineSource?: string;
@@ -175,6 +206,33 @@ export type AdminPlayersReadModel = {
   players: AdminPlayerSummary[];
 };
 
+export type AdminAccountSummary = {
+  accountId: string;
+  passwordConfigured: boolean;
+  characterCount: number;
+  storageSize: number;
+  hasStoragePassword: boolean;
+  isBanned: boolean;
+  banReason?: string;
+  banUntilMs?: number;
+  bannedAtMs?: number;
+  storeVersion?: number;
+};
+
+export type AdminAccountsReadModel = {
+  source: string;
+  generatedAtMs: number;
+  accounts: AdminAccountSummary[];
+};
+
+export type AdminAccountDetail = {
+  summary: AdminAccountSummary;
+  characters: AdminPlayerSummary[];
+  hasExpandedStorage: boolean;
+  expandedStorageExpiryTimeBinaryDatetime: number;
+  storagePasswordLastSetBinaryDatetime: number;
+};
+
 export type AdminPlayerDetail = {
   summary: AdminPlayerSummary;
   inventoryCount: number;
@@ -183,6 +241,11 @@ export type AdminPlayerDetail = {
   equipmentCount: number;
   questStateCount: number;
   skillStateCount: number;
+  npcFlagCount: number;
+  activeNpcFlags: Array<{
+    index: number;
+    active: boolean;
+  }>;
   mailCount: number;
   unclaimedMailCount: number;
   auctionListingCount: number;
@@ -221,6 +284,79 @@ export type AdminEconomyReadModel = {
     updatedAtMs: number;
   }>;
   priceFeedConfigured: boolean;
+};
+
+export type AdminMarketReadModel = {
+  source: string;
+  generatedAtMs: number;
+  listings: Array<{
+    ownerPlayerId: string;
+    accountId: string;
+    characterIndex: number;
+    characterName: string;
+    listingId: number;
+    seller: string;
+    itemKey: string;
+    price: number;
+    sold: boolean;
+    cancelled: boolean;
+    expired: boolean;
+  }>;
+};
+
+export type AdminGuildsReadModel = {
+  source: string;
+  generatedAtMs: number;
+  guilds: Array<{
+    guildName: string;
+    memberCount: number;
+    members: string[];
+    ranks: string[];
+    chatLog: string[];
+  }>;
+};
+
+export type AdminNameListsReadModel = {
+  source: string;
+  generatedAtMs: number;
+  root: string;
+  lists: Array<{
+    listName: string;
+    path: string;
+    playerCount: number;
+    players: string[];
+  }>;
+};
+
+export type AdminContentReadModel = {
+  generatedAtMs: number;
+  categories: Array<{
+    category: string;
+    source: string;
+    totalRecords: number;
+    status: string;
+    editable: boolean;
+  }>;
+  bundles: Array<{
+    bundleId: string;
+    category: string;
+    recordKey: string;
+    path: string;
+    updatedAtMs: number;
+  }>;
+};
+
+export type AdminControlReadModel = {
+  generatedAtMs: number;
+  gatewayControlConfigured: boolean;
+  controlActions: string[];
+  logs: Array<{
+    name: string;
+    path: string;
+    configured: boolean;
+    lines: string[];
+    error?: string;
+  }>;
 };
 
 export type AdminActivitiesReadModel = {
@@ -317,7 +453,7 @@ export async function operatorHeaders() {
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_ban,character_read,character_kick,inventory_read,inventory_grant_item,currency_grant,mail_send_system,content_publish,audit_read,approval_manage,permission_manage"
+      "account_read,account_write,account_ban,character_read,character_write,character_kick,character_message,inventory_read,inventory_grant_item,currency_grant,mail_send_system,world_broadcast,server_control,market_moderate,guild_moderate,namelist_manage,content_read,content_publish,audit_read,approval_manage,permission_manage"
   };
   if (token) {
     headers.authorization = `Bearer ${token}`;

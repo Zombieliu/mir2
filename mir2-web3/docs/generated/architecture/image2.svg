@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120">
+  <defs>
+    <style>
+      .bg{fill:#f6f8fb}
+      .panel{fill:#fff;stroke:#d7deea;stroke-width:2;rx:12}
+      .box{fill:#fff;stroke:#b9c4d4;stroke-width:2;rx:10}
+      .app{fill:#edf6ff;stroke:#4f9ee8;stroke-width:2;rx:10}
+      .data{fill:#f3fbef;stroke:#6eb34f;stroke-width:2;rx:10}
+      .bus{fill:#fff7e6;stroke:#e9aa2d;stroke-width:2;rx:10}
+      .guard{fill:#fff0ee;stroke:#d66b5e;stroke-width:2;rx:10}
+      .note{fill:#eef2f7;stroke:#c9d2df;stroke-width:1.5;rx:16}
+      .title{font:700 36px Arial, sans-serif;fill:#182235}
+      .subtitle{font:18px Arial, sans-serif;fill:#5d6b7f}
+      .h{font:700 22px Arial, sans-serif;fill:#182235}
+      .t{font:16px Arial, sans-serif;fill:#344054}
+      .s{font:14px Arial, sans-serif;fill:#667085}
+      .xs{font:12px Arial, sans-serif;fill:#667085}
+      .edge{stroke:#667085;stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+      .private{stroke:#14845f;stroke-width:2.6;fill:none;marker-end:url(#greenArrow)}
+      .blocked{stroke:#d66b5e;stroke-width:2.4;fill:none;stroke-dasharray:8 7}
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#667085"/>
+    </marker>
+    <marker id="greenArrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#14845f"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1800" height="1120"/>
+  <text class="title" x="70" y="70">Mir2 Web3 Current Architecture - Home Staging Server</text>
+  <text class="subtitle" x="70" y="103">Windows desktop as internal staging: WSL2 apps, Docker infra, Tailscale-first access, optional Cloudflare Tunnel later.</text>
+
+  <rect class="panel" x="70" y="145" width="420" height="640"/>
+  <text class="h" x="100" y="185">Access</text>
+  <rect class="box" x="105" y="220" width="320" height="88"/>
+  <text class="h" x="130" y="253">Operators</text>
+  <text class="s" x="130" y="277">Admin Web login</text>
+  <text class="xs" x="130" y="296">Tailscale / Cloudflare Access</text>
+
+  <rect class="box" x="105" y="345" width="320" height="88"/>
+  <text class="h" x="130" y="378">Closed Testers</text>
+  <text class="s" x="130" y="402">Player Web + Gateway WebSocket</text>
+  <text class="xs" x="130" y="421">Tailscale first; public tunnel later</text>
+
+  <rect class="app" x="105" y="485" width="320" height="88"/>
+  <text class="h" x="130" y="518">Tailscale</text>
+  <text class="s" x="130" y="542">Recommended first remote mode</text>
+  <text class="xs" x="130" y="561">No router port forwarding</text>
+
+  <rect class="box" x="105" y="610" width="320" height="88"/>
+  <text class="h" x="130" y="643">Cloudflare Tunnel</text>
+  <text class="s" x="130" y="667">Optional later</text>
+  <text class="xs" x="130" y="686">Protect Admin, expose Gateway /ws only</text>
+
+  <rect class="panel" x="560" y="145" width="650" height="640"/>
+  <text class="h" x="590" y="185">Windows Desktop: home-staging-1</text>
+  <rect class="note" x="590" y="205" width="560" height="42"/>
+  <text class="s" x="615" y="232">Windows host + WSL2 Ubuntu + Docker Desktop WSL2 backend</text>
+
+  <rect class="app" x="620" y="285" width="240" height="92"/>
+  <text class="h" x="650" y="318">Admin Web</text>
+  <text class="s" x="650" y="342">Next.js :3020</text>
+  <text class="xs" x="650" y="362">operator UI</text>
+
+  <rect class="app" x="920" y="285" width="240" height="92"/>
+  <text class="h" x="950" y="318">Admin API</text>
+  <text class="s" x="950" y="342">Rust Axum :7420</text>
+  <text class="xs" x="950" y="362">auth, RBAC, approval, audit</text>
+
+  <rect class="app" x="620" y="455" width="240" height="92"/>
+  <text class="h" x="650" y="488">Player Web</text>
+  <text class="s" x="650" y="512">Next.js :3010</text>
+  <text class="xs" x="650" y="532">NEXT_PUBLIC_MIR2_GATEWAY_WS_URL</text>
+
+  <rect class="app" x="920" y="455" width="240" height="92"/>
+  <text class="h" x="950" y="488">Gateway</text>
+  <text class="s" x="950" y="512">Rust :7110 /ws</text>
+  <text class="xs" x="950" y="532">private /admin endpoints</text>
+
+  <rect class="app" x="920" y="610" width="240" height="76"/>
+  <text class="h" x="950" y="643">Simulation</text>
+  <text class="s" x="950" y="667">authoritative runtime</text>
+
+  <rect class="guard" x="620" y="625" width="240" height="76"/>
+  <text class="h" x="650" y="658">Reverse Proxy</text>
+  <text class="s" x="650" y="682">optional: /ws only</text>
+
+  <rect class="panel" x="1280" y="145" width="450" height="640"/>
+  <text class="h" x="1310" y="185">Private Infra</text>
+
+  <rect class="data" x="1320" y="225" width="320" height="74"/>
+  <text class="h" x="1350" y="257">Postgres</text>
+  <text class="s" x="1350" y="280">admin data + account source store</text>
+
+  <rect class="data" x="1320" y="335" width="320" height="74"/>
+  <text class="h" x="1350" y="367">Redis</text>
+  <text class="s" x="1350" y="390">session / routing cache</text>
+
+  <rect class="bus" x="1320" y="445" width="320" height="74"/>
+  <text class="h" x="1350" y="477">NATS JetStream</text>
+  <text class="s" x="1350" y="500">admin outbox notifications</text>
+
+  <rect class="bus" x="1320" y="555" width="320" height="74"/>
+  <text class="h" x="1350" y="587">Redpanda</text>
+  <text class="s" x="1350" y="610">admin event stream</text>
+
+  <rect class="data" x="1320" y="665" width="320" height="74"/>
+  <text class="h" x="1350" y="697">ClickHouse</text>
+  <text class="s" x="1350" y="720">Audit / Timeline event reads</text>
+
+  <path class="private" d="M425 264 H620"/>
+  <text class="xs" x="465" y="250">private operator access</text>
+  <path class="private" d="M425 389 H620"/>
+  <text class="xs" x="468" y="375">tester access</text>
+
+  <path class="edge" d="M860 331 H920"/>
+  <text class="xs" x="866" y="318">server actions</text>
+  <path class="edge" d="M860 501 H920"/>
+  <text class="xs" x="866" y="488">WebSocket /ws</text>
+  <path class="edge" d="M1040 547 V610"/>
+  <text class="xs" x="1054" y="586">runtime</text>
+  <path class="edge" d="M1040 455 V377"/>
+  <text class="xs" x="1054" y="426">heartbeat + admin calls</text>
+
+  <path class="edge" d="M1160 331 H1320"/>
+  <text class="xs" x="1198" y="318">commands / audit / operators</text>
+  <path class="edge" d="M1160 501 H1320"/>
+  <text class="xs" x="1200" y="488">session cache</text>
+  <path class="edge" d="M1160 345 C1240 380 1240 482 1320 482"/>
+  <text class="xs" x="1190" y="420">outbox publish</text>
+  <path class="edge" d="M1160 365 C1230 430 1235 592 1320 592"/>
+  <text class="xs" x="1190" y="540">event stream</text>
+  <path class="edge" d="M1320 702 C1240 700 1230 360 1160 360"/>
+  <text class="xs" x="1190" y="728">events/timeline read</text>
+
+  <path class="edge" d="M105 654 C475 760 580 720 620 670"/>
+  <text class="xs" x="255" y="742">optional public Gateway path goes through proxy</text>
+  <path class="edge" d="M860 663 H920"/>
+  <text class="xs" x="868" y="650">/ws only</text>
+  <path class="blocked" d="M860 700 C1050 770 1240 770 1320 740"/>
+  <text class="xs" x="970" y="788">block public Gateway /admin/* and all infra ports</text>
+
+  <rect class="panel" x="70" y="825" width="1660" height="210"/>
+  <text class="h" x="100" y="865">Operational Rules</text>
+  <text class="t" x="120" y="905">1. First remote mode is Tailscale-only. Cloudflare Tunnel comes later after private smoke is stable.</text>
+  <text class="t" x="120" y="940">2. Public testers only need Player Web and Gateway /ws. Admin API and infra ports stay private.</text>
+  <text class="t" x="120" y="975">3. Postgres is authoritative for staging. Redis is disposable; Redpanda and ClickHouse are analytics/read-side.</text>
+  <text class="t" x="120" y="1010">4. This is staging/internal controlled use. Production still needs IdP/session auth, TLS/network policy, secret rotation, monitoring, rate limits, and backup rehearsal.</text>
+</svg>

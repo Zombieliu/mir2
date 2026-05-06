@@ -6,7 +6,7 @@ use mir2_game_data::{
 };
 use mir2_protocol::{ChatType, MirDirection, ObjectGoldInfo, Point, ServerPacket, UserItemStat};
 
-use crate::config::{ItemContainer, QuestStage};
+use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage};
 
 use super::components::{
     current_player_is_dead, entity_by_object_id, entity_name, entity_object_id, entity_position,
@@ -2152,11 +2152,104 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    pub fn apply_shared_ground_drop_pickup(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> Vec<ServerPacket> {
+        let packets = self.apply_shared_ground_drop_pickup_impl(drop);
+        self.finalize_packets(packets)
+    }
+
     pub(super) fn pick_up_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
 
         pick_up_ground_drop(self.app.world_mut(), object_id)
+    }
+
+    pub(super) fn apply_shared_ground_drop_pickup_impl(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> Vec<ServerPacket> {
+        let world = self.app.world_mut();
+        if !is_in_world(world) {
+            return Vec::new();
+        }
+
+        match &drop.loot {
+            GroundDropLootSnapshot::Gold { amount } => {
+                if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount) {
+                    return Vec::new();
+                }
+                world.resource_mut::<PlayerRuntimeResource>().gold += *amount;
+                vec![ServerPacket::GainedGold { gold: *amount }]
+            }
+            GroundDropLootSnapshot::InventoryItem {
+                key,
+                name,
+                description,
+                weight,
+                durability_current,
+                durability_max,
+                added_attack,
+                added_defence,
+                added_stats,
+                cursed,
+                socket_slots,
+                show_group_pickup,
+            } => {
+                {
+                    let resources = world.resource::<InventoryResource>();
+                    if !can_gain_item_quantity(resources, ItemContainer::Bag1, key, drop.quantity) {
+                        return vec![system_message_key(world, "server.YouCannotCarryAnymore")];
+                    }
+                }
+
+                let player = player_entity(world).expect("player should exist");
+                let player_name = world
+                    .entity(player)
+                    .get::<DisplayName>()
+                    .map(|name| name.resolve(current_language(world)))
+                    .unwrap_or_else(|| "Player".to_string());
+                let gained_item = add_or_increment_item_with_random_metadata(
+                    world,
+                    ItemContainer::Bag1,
+                    key,
+                    name,
+                    description,
+                    8,
+                    drop.quantity,
+                    *weight,
+                    *durability_current,
+                    *durability_max,
+                    *added_attack,
+                    *added_defence,
+                    added_stats.clone(),
+                    *cursed,
+                    *socket_slots,
+                );
+                let mut packets = vec![ServerPacket::GainedItem {
+                    item: user_item_from_item_state(&gained_item),
+                }];
+                if *show_group_pickup
+                    && !world
+                        .resource::<GroupResource>()
+                        .group_member_object_ids
+                        .is_empty()
+                {
+                    let message = format_localized_text(
+                        current_language(world),
+                        "server.FriendlyPickedUpItem",
+                        [player_name.as_str(), drop.name.as_str()],
+                    );
+                    packets.push(ServerPacket::Chat {
+                        message,
+                        chat_type: ChatType::System,
+                    });
+                }
+                packets
+            }
+        }
     }
 }

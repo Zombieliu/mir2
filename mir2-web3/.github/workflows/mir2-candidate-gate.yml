@@ -1,0 +1,40 @@
+name: Mir2 Candidate Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  local-candidate-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust 1.89
+        run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            apps/admin-web/package-lock.json
+            apps/web/package-lock.json
+
+      - name: Install Admin Web dependencies
+        run: npm ci --prefix apps/admin-web
+
+      - name: Install Player Web dependencies
+        run: npm ci --prefix apps/web
+
+      - name: Run local Candidate gate
+        run: MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh

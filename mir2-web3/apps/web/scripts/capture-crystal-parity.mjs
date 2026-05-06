@@ -152,6 +152,15 @@ async function main() {
         await click(client, ".game-shop-cell-buy .sprite-button");
         await delay(1_000);
       }
+      if (args.previewGameShop === "true") {
+        await click(client, ".game-shop-section.all .sprite-button");
+        await delay(100);
+        await clickGameShopCategory(client, "Mount");
+        await delay(100);
+        await click(client, ".game-shop-cell-preview .sprite-button");
+        await waitUntil(client, "document.querySelector('.game-shop-viewer')", "game shop preview viewer", 5_000);
+        await delay(500);
+      }
     }
     if (args.openMail === "true") {
       await click(client, ".mini-map-button.mail button");
@@ -402,6 +411,20 @@ async function click(client, selector) {
   if (!ok) throw new Error(`Could not click ${selector}`);
 }
 
+async function clickGameShopCategory(client, categoryName) {
+  const ok = await client.evaluate(`
+    (() => {
+      const category = ${JSON.stringify(categoryName)};
+      const node = Array.from(document.querySelectorAll(".game-shop-categories button"))
+        .find((button) => (button.textContent ?? "").trim() === category);
+      if (!node) return false;
+      node.click();
+      return true;
+    })()
+  `);
+  if (!ok) throw new Error(`Could not click game shop category ${categoryName}`);
+}
+
 async function waitUntil(client, expression, label, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   let lastValue = null;
@@ -526,6 +549,10 @@ async function readState(client) {
           iconSources: icons.slice(0, 8).map((icon) => icon.getAttribute("src")),
           buyButtonCount: document.querySelectorAll(".game-shop-cell-buy .sprite-button").length,
           previewButtonCount: document.querySelectorAll(".game-shop-cell-preview .sprite-button").length,
+          previewViewerVisible: Boolean(document.querySelector(".game-shop-viewer")),
+          previewViewerBounds: rect(document.querySelector(".game-shop-viewer")?.getBoundingClientRect()),
+          previewViewerItemName: document.querySelector(".game-shop-viewer")?.getAttribute("data-item-name") ?? null,
+          previewViewerDirection: document.querySelector(".game-shop-viewer")?.getAttribute("data-direction") ?? null,
           paymentGoldBox: document.querySelector(".game-shop-payment.gold img")?.getAttribute("src") ?? null,
           paymentCreditBox: document.querySelector(".game-shop-payment.credit img")?.getAttribute("src") ?? null,
           sentCommandTail: sentCommands.slice(-8),

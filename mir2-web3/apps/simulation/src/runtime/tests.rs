@@ -33955,6 +33955,60 @@ fn addstorage_chat_command_extends_existing_expiry() {
 }
 
 #[test]
+fn chat_packet_respects_persisted_chat_ban() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut player = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        player.chat_banned = true;
+        player.chat_ban_until_ms = Some(u64::MAX);
+    }
+
+    let packets = session.handle_packet(ClientPacket::Chat {
+        message: "hello".to_string(),
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            message,
+        } if message.contains("banned from chatting")
+    )));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+}
+
+#[test]
+fn expired_chat_ban_clears_and_allows_chat() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut player = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        player.chat_banned = true;
+        player.chat_ban_until_ms = Some(1);
+    }
+
+    let packets = session.handle_packet(ClientPacket::Chat {
+        message: "hello".to_string(),
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectChat { .. })));
+    let player = session.app.world().resource::<PlayerRuntimeResource>();
+    assert!(!player.chat_banned);
+    assert_eq!(player.chat_ban_until_ms, None);
+}
+
+#[test]
 fn expired_expanded_storage_is_inactive_on_start_game_but_keeps_backing_size() {
     let config = SimulationConfig::default();
     {
@@ -36744,6 +36798,46 @@ fn stage5_trade_shop_and_auction_are_transactional() {
         .iter()
         .any(|item| item.key == "training-splinter"));
     assert_eq!(after_auction.gold, starting_gold - 85);
+}
+
+#[test]
+fn stage5_expired_auction_cannot_be_bought() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let not_found_message = mir2_game_data::localized_text_or_fallback(
+        mir2_game_data::LanguageCode::English,
+        "server.NotFound",
+        "server.NotFound",
+    );
+    let starting_gold = session.world_snapshot().gold;
+
+    session.stage5_command(
+        "auction.list",
+        vec!["expired-auction".to_string(), "50".to_string()],
+    );
+    {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.auction[0].expired = true;
+    }
+
+    let packets = session.stage5_command("auction.buy", vec!["1".to_string()]);
+    let after_buy = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat { message, .. } if message == &not_found_message
+    )));
+    assert_eq!(after_buy.gold, starting_gold);
+    assert!(after_buy.stage5_systems.auction.iter().any(|listing| {
+        listing.id == 1 && listing.expired && !listing.sold && !listing.cancelled
+    }));
+    assert!(!after_buy
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "expired-auction"));
 }
 
 #[test]

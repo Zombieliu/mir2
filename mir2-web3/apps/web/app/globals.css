@@ -1921,6 +1921,131 @@ img {
 .game-shop-page-button.previous { left: 600px; }
 .game-shop-page-button.next { left: 660px; }
 
+.game-shop-viewer {
+  position: absolute;
+  width: 250px;
+  height: 310px;
+  background: rgba(10, 8, 6, 0.95);
+  border: 1px solid rgba(168, 137, 84, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.85);
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.game-shop-viewer-close {
+  position: absolute;
+  left: 230px;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(177, 151, 95, 0.8);
+  background: #2a160d;
+  color: #f2d38c;
+  font: 10px Arial, sans-serif;
+  line-height: 10px;
+  padding: 0;
+}
+
+.game-shop-viewer-stage {
+  position: absolute;
+  left: 18px;
+  top: 32px;
+  width: 214px;
+  height: 222px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(64, 43, 22, 0.72), rgba(0, 0, 0, 0.2) 54%, rgba(0, 0, 0, 0.74));
+}
+
+.game-shop-viewer-item-icon {
+  position: absolute;
+  left: 91px;
+  top: 96px;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  z-index: 3;
+}
+
+.game-shop-viewer-figure {
+  position: absolute;
+  left: 79px;
+  top: 46px;
+  width: 56px;
+  height: 132px;
+  transform-origin: 50% 100%;
+}
+
+.game-shop-viewer-figure[data-direction="1"],
+.game-shop-viewer-figure[data-direction="8"] {
+  transform: translateX(-8px) scaleX(0.86);
+}
+
+.game-shop-viewer-figure[data-direction="3"],
+.game-shop-viewer-figure[data-direction="4"] {
+  transform: translateX(8px) scaleX(0.86);
+}
+
+.game-shop-viewer-head {
+  position: absolute;
+  left: 19px;
+  top: 0;
+  width: 18px;
+  height: 20px;
+  background: #b78a62;
+  border: 1px solid #4c2c1c;
+}
+
+.game-shop-viewer-body {
+  position: absolute;
+  left: 10px;
+  top: 22px;
+  width: 36px;
+  height: 76px;
+  background: linear-gradient(180deg, #75533a, #332217);
+  border: 1px solid #21150e;
+}
+
+.game-shop-viewer-item-glow {
+  position: absolute;
+  left: 3px;
+  top: 70px;
+  width: 50px;
+  height: 34px;
+  border: 1px solid rgba(235, 206, 126, 0.55);
+}
+
+.game-shop-viewer-name {
+  position: absolute;
+  left: 12px;
+  top: 260px;
+  width: 226px;
+  height: 16px;
+  overflow: hidden;
+  color: #fff4c8;
+  font: 12px Arial, sans-serif;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.game-shop-viewer-controls {
+  position: absolute;
+  left: 0;
+  top: 282px;
+  width: 250px;
+  height: 14px;
+}
+
+.game-shop-viewer-left,
+.game-shop-viewer-right {
+  position: absolute;
+  top: 0;
+}
+
+.game-shop-viewer-left { left: 81px; }
+.game-shop-viewer-right { left: 160px; }
+
 .window-frame,
 .character-page {
   pointer-events: none;

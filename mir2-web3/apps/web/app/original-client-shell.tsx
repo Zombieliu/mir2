@@ -485,7 +485,7 @@ type GameShopPaymentType = "gold" | "credit";
 
 const GAME_SHOP_ITEMS_PER_PAGE = 8;
 const GAME_SHOP_CLASS_FILTERS: GameShopClassFilter[] = ["all", "warrior", "assassin", "taoist", "wizard", "archer"];
-const GAME_SHOP_PREVIEW_ITEM_TYPES = new Set([1, 2, 13, 37]);
+const GAME_SHOP_PREVIEW_ITEM_TYPES = new Set([1, 2, 19, 37]);
 const BIG_MAP_NPC_INDEX = new Map(
   CRYSTAL_BIG_MAP_NPCS.map((npc) => [bigMapNpcKey(npc.map, npc.name, npc.x, npc.y), npc]),
 );
@@ -2554,6 +2554,7 @@ function GameShopWindow({
   const [page, setPage] = useState(0);
   const [paymentType, setPaymentType] = useState<GameShopPaymentType>("gold");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [preview, setPreview] = useState<{ item: CrystalGameShopEntry; cellLeft: number } | null>(null);
 
   const sectionItems = useMemo(
     () => applyGameShopSectionFilter(CRYSTAL_GAME_SHOP_ITEMS, sectionFilter),
@@ -2617,6 +2618,10 @@ function GameShopWindow({
       ...current,
       [gameShopIndex]: Math.max(1, Math.min(99, nextQuantity)),
     }));
+  };
+
+  const showPreview = (item: CrystalGameShopEntry, cellLeft: number) => {
+    setPreview({ item, cellLeft });
   };
 
   return (
@@ -2688,10 +2693,20 @@ function GameShopWindow({
             quantity={quantities[item.game_shop_index] ?? 1}
             onQuantityChange={(nextQuantity) => setQuantity(item.game_shop_index, nextQuantity)}
             onBuy={() => onBuy(item.game_shop_index, quantities[item.game_shop_index] ?? 1, paymentType)}
+            onPreview={(cellLeft) => showPreview(item, cellLeft)}
             t={t}
           />
         ))}
       </div>
+      {preview ? (
+        <GameShopViewer
+          item={preview.item}
+          left={preview.cellLeft < 350 ? 416 : 151}
+          top={115}
+          t={t}
+          onClose={() => setPreview(null)}
+        />
+      ) : null}
       <div className="game-shop-total credits">{credits}</div>
       <div className="game-shop-total gold">{gold}</div>
       <button type="button" className="game-shop-payment gold" onClick={() => setPaymentType("gold")}>
@@ -2719,6 +2734,7 @@ function GameShopCell({
   quantity,
   onQuantityChange,
   onBuy,
+  onPreview,
   t,
 }: {
   item: CrystalGameShopEntry;
@@ -2726,6 +2742,7 @@ function GameShopCell({
   quantity: number;
   onQuantityChange: (quantity: number) => void;
   onBuy: () => void;
+  onPreview: (cellLeft: number) => void;
   t: TranslateFn;
 }) {
   const info = gameShopItemInfo(item.item_index);
@@ -2760,11 +2777,74 @@ function GameShopCell({
       <div className="game-shop-cell-gold-price">{item.gold_price * quantity}</div>
       {hasPreview ? (
         <div className="game-shop-cell-preview">
-          <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => undefined} />
+          <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => onPreview(left)} />
         </div>
       ) : null}
       <div className={hasPreview ? "game-shop-cell-buy with-preview" : "game-shop-cell-buy"}>
         <SpriteButton sprite={ORIGINAL_UI.gameShop.buyButton} label={t("ui.buy", [], "Buy")} onClick={onBuy} />
+      </div>
+    </div>
+  );
+}
+
+function GameShopViewer({
+  item,
+  left,
+  top,
+  t,
+  onClose,
+}: {
+  item: CrystalGameShopEntry;
+  left: number;
+  top: number;
+  t: TranslateFn;
+  onClose: () => void;
+}) {
+  const [direction, setDirection] = useState(6);
+  const info = gameShopItemInfo(item.item_index);
+
+  return (
+    <div
+      className="game-shop-viewer"
+      style={{ left, top }}
+      data-item-name={item.item_name}
+      data-game-shop-index={item.game_shop_index}
+      data-direction={direction}
+    >
+      <button type="button" className="game-shop-viewer-close" onClick={onClose} aria-label={t("ui.close")}>
+        x
+      </button>
+      <div className="game-shop-viewer-stage">
+        {info ? (
+          <img
+            className="game-shop-viewer-item-icon"
+            src={originalItemIconPath(info.image)}
+            alt=""
+            draggable={false}
+          />
+        ) : null}
+        <div className="game-shop-viewer-figure" data-direction={direction}>
+          <div className="game-shop-viewer-head" />
+          <div className="game-shop-viewer-body" />
+          <div className="game-shop-viewer-item-glow" />
+        </div>
+      </div>
+      <div className="game-shop-viewer-name">{truncateGameShopName(item.item_name)}</div>
+      <div className="game-shop-viewer-controls">
+        <div className="game-shop-viewer-left">
+          <SpriteButton
+            sprite={ORIGINAL_UI.gameShop.previousButton}
+            label={t("ui.previous", [], "Previous")}
+            onClick={() => setDirection((current) => (current === 1 ? 8 : current - 1))}
+          />
+        </div>
+        <div className="game-shop-viewer-right">
+          <SpriteButton
+            sprite={ORIGINAL_UI.gameShop.nextButton}
+            label={t("ui.next", [], "Next")}
+            onClick={() => setDirection((current) => (current === 8 ? 1 : current + 1))}
+          />
+        </div>
       </div>
     </div>
   );

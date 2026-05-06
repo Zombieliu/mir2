@@ -1,5 +1,7 @@
-use crate::{ActiveSessionIdentity, SimulationConfig, SimulationSession, WorldSnapshot};
-use mir2_protocol::{ClientPacket, Point, ServerPacket};
+use crate::{
+    ActiveSessionIdentity, GroundDropSnapshot, SimulationConfig, SimulationSession, WorldSnapshot,
+};
+use mir2_protocol::{client_packet_name, ClientPacket, Point, ServerPacket};
 
 #[derive(Debug)]
 pub enum WorldCommand {
@@ -20,9 +22,85 @@ pub enum WorldCommand {
     Tick,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum WorldCommandKind {
+    ClientPacket(&'static str),
+    MoveTo,
+    Attack,
+    Interact,
+    SelectNpcDialog,
+    SubmitNpcInput,
+    PickUp,
+    UseItem,
+    DropItem,
+    DeleteCharacter,
+    CastSkill,
+    TransferMap,
+    Stage5Command(String),
+    SetLanguage,
+    Tick,
+}
+
+impl WorldCommand {
+    pub fn kind(&self) -> WorldCommandKind {
+        match self {
+            Self::ClientPacket(packet) => {
+                WorldCommandKind::ClientPacket(client_packet_name(packet))
+            }
+            Self::MoveTo { .. } => WorldCommandKind::MoveTo,
+            Self::Attack { .. } => WorldCommandKind::Attack,
+            Self::Interact { .. } => WorldCommandKind::Interact,
+            Self::SelectNpcDialog { .. } => WorldCommandKind::SelectNpcDialog,
+            Self::SubmitNpcInput { .. } => WorldCommandKind::SubmitNpcInput,
+            Self::PickUp { .. } => WorldCommandKind::PickUp,
+            Self::UseItem { .. } => WorldCommandKind::UseItem,
+            Self::DropItem { .. } => WorldCommandKind::DropItem,
+            Self::DeleteCharacter { .. } => WorldCommandKind::DeleteCharacter,
+            Self::CastSkill { .. } => WorldCommandKind::CastSkill,
+            Self::TransferMap { .. } => WorldCommandKind::TransferMap,
+            Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
+            Self::SetLanguage { .. } => WorldCommandKind::SetLanguage,
+            Self::Tick => WorldCommandKind::Tick,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WorldCommandOutcome {
+    pub command_kind: WorldCommandKind,
+    pub packet_count: usize,
+    pub snapshot_tick: u64,
+    pub active_identity: Option<ActiveSessionIdentity>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct WorldCommandExecution {
+    pub packets: Vec<ServerPacket>,
+    pub outcome: WorldCommandOutcome,
+}
+
 pub trait WorldRuntime: Send + Sync {
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
+    fn execute_with_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let command_kind = command.kind();
+        let packets = self.execute(command)?;
+        let snapshot = self.world_snapshot();
+        let packet_count = packets.len();
+        Ok(WorldCommandExecution {
+            packets,
+            outcome: WorldCommandOutcome {
+                command_kind,
+                packet_count,
+                snapshot_tick: snapshot.tick,
+                active_identity: self.active_identity(),
+            },
+        })
+    }
+
     fn world_snapshot(&self) -> WorldSnapshot;
     fn active_identity(&self) -> Option<ActiveSessionIdentity>;
     fn save_active_character(&self);
@@ -45,6 +123,13 @@ impl InProcessWorldRuntime {
 
     pub fn into_session(self) -> SimulationSession {
         self.session
+    }
+
+    pub fn apply_shared_ground_drop_pickup(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> Vec<ServerPacket> {
+        self.session.apply_shared_ground_drop_pickup(drop)
     }
 }
 
@@ -104,7 +189,7 @@ impl WorldRuntime for InProcessWorldRuntime {
 
 #[cfg(test)]
 mod tests {
-    use super::{InProcessWorldRuntime, WorldCommand, WorldRuntime};
+    use super::{InProcessWorldRuntime, WorldCommand, WorldCommandKind, WorldRuntime};
     use crate::SimulationConfig;
     use mir2_protocol::{ClientPacket, ServerPacket};
 
@@ -146,5 +231,41 @@ mod tests {
             .expect_err("invalid language should be rejected");
 
         assert_eq!(error, "unsupported language: not-a-language");
+    }
+
+    #[test]
+    fn world_runtime_execution_reports_command_outcome() {
+        let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("login command should succeed");
+
+        let execution = runtime
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("start game should report outcome");
+
+        assert_eq!(
+            execution.outcome.command_kind,
+            WorldCommandKind::ClientPacket("StartGame")
+        );
+        assert_eq!(execution.outcome.packet_count, execution.packets.len());
+        assert!(execution.outcome.packet_count > 0);
+        assert_eq!(
+            execution.outcome.snapshot_tick,
+            runtime.world_snapshot().tick
+        );
+        assert_eq!(
+            execution
+                .outcome
+                .active_identity
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
     }
 }

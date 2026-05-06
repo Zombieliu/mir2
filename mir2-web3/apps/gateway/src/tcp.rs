@@ -5,6 +5,7 @@ use mir2_protocol::{decode_client_packet, encode_server_packet, ServerPacket};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
 use crate::session::catch_gateway_panic;
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
@@ -12,6 +13,7 @@ pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
     let listener = TcpListener::bind(addr).await?;
     let config = Arc::new(config);
     let zone_registry = Arc::new(ZoneRegistry::in_process());
+    let gameplay_event_sink = default_gameplay_event_sink_from_env();
 
     eprintln!("mir2-gateway tcp listening on {addr}");
 
@@ -19,9 +21,12 @@ pub async fn run_tcp_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
         let (stream, peer) = listener.accept().await?;
         let config = Arc::clone(&config);
         let zone_registry = Arc::clone(&zone_registry);
+        let gameplay_event_sink = gameplay_event_sink.clone();
 
         tokio::spawn(async move {
-            if let Err(error) = handle_client(stream, config, zone_registry).await {
+            if let Err(error) =
+                handle_client(stream, config, zone_registry, gameplay_event_sink).await
+            {
                 eprintln!("tcp client error from {peer}: {error}");
             }
         });
@@ -32,9 +37,17 @@ async fn handle_client(
     mut stream: TcpStream,
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
+    gameplay_event_sink: Option<SharedGameplayEventSink>,
 ) -> io::Result<()> {
     let peer = stream.peer_addr().ok();
-    let mut session = GatewaySession::new_with_zone_registry((*config).clone(), &zone_registry);
+    let mut session = match gameplay_event_sink {
+        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+            (*config).clone(),
+            &zone_registry,
+            sink,
+        ),
+        None => GatewaySession::new_with_zone_registry((*config).clone(), &zone_registry),
+    };
     let result = handle_client_inner(&mut stream, &mut session, peer).await;
     let _ = catch_gateway_panic("tcp save_active_character", || {
         session.save_active_character()

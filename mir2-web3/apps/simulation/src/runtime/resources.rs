@@ -87,6 +87,9 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) max_experience: i64,
     pub(super) gold: u32,
     pub(super) credit: u32,
+    pub(super) pk_points: i32,
+    pub(super) chat_banned: bool,
+    pub(super) chat_ban_until_ms: Option<u64>,
 }
 
 impl PlayerRuntimeResource {
@@ -107,6 +110,9 @@ impl PlayerRuntimeResource {
             max_experience: 100,
             gold: 0,
             credit: 0,
+            pk_points: 0,
+            chat_banned: false,
+            chat_ban_until_ms: None,
         }
     }
 }

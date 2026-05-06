@@ -24,7 +24,7 @@ export function statusTone(status: string): "default" | "success" | "warn" | "da
   if (normalized === "banned" || normalized === "critical" || normalized === "unavailable") {
     return "danger";
   }
-  if (normalized === "warn" || normalized === "high" || normalized === "notconfigured") {
+  if (normalized === "warn" || normalized === "high" || normalized === "notconfigured" || normalized === "chatbanned") {
     return "warn";
   }
   return "default";
