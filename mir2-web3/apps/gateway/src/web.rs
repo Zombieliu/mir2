@@ -262,6 +262,33 @@ enum BrowserCommand {
         #[serde(alias = "characterIndex")]
         character_index: i32,
     },
+    MagicKey {
+        spell: String,
+        key: u8,
+        #[serde(alias = "oldKey", default)]
+        old_key: u8,
+    },
+    Magic {
+        #[serde(alias = "objectId", default)]
+        object_id: u32,
+        spell: String,
+        direction: String,
+        #[serde(alias = "targetId", default)]
+        target_id: u32,
+        #[serde(default)]
+        x: i32,
+        #[serde(default)]
+        y: i32,
+        #[serde(alias = "spellTargetLock", default)]
+        spell_target_lock: bool,
+    },
+    SpellToggle {
+        spell: String,
+        #[serde(alias = "toggleState", default)]
+        toggle_state: Option<i8>,
+        #[serde(alias = "canUse", default)]
+        can_use: Option<bool>,
+    },
     CastSkill {
         key: String,
     },
@@ -1049,6 +1076,43 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 character_index,
             }))
         }
+        BrowserCommand::MagicKey {
+            spell,
+            key,
+            old_key,
+        } => Ok(SessionAction::Packet(ClientPacket::MagicKey {
+            spell: parse_spell_name(&spell)?,
+            key,
+            old_key,
+        })),
+        BrowserCommand::Magic {
+            object_id,
+            spell,
+            direction,
+            target_id,
+            x,
+            y,
+            spell_target_lock,
+        } => Ok(SessionAction::Packet(ClientPacket::Magic {
+            object_id,
+            spell: parse_spell_name(&spell)?,
+            direction: parse_direction(&direction)?,
+            target_id,
+            location: Point { x, y },
+            spell_target_lock,
+        })),
+        BrowserCommand::SpellToggle {
+            spell,
+            toggle_state,
+            can_use,
+        } => Ok(SessionAction::Packet(ClientPacket::SpellToggle {
+            spell: parse_spell_name(&spell)?,
+            toggle_state: toggle_state.unwrap_or_else(|| match can_use {
+                Some(true) => 1,
+                Some(false) => 0,
+                None => -1,
+            }),
+        })),
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
         BrowserCommand::Stage5Command { action, args } => {
@@ -1537,6 +1601,115 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "payload": {
                 "uniqueId": unique_id,
                 "expiryDateBinaryDatetime": expiry_date_binary_datetime
+            }
+        }),
+        ServerPacket::NewMagic { magic, hero } => json!({
+            "type": "packet",
+            "packet": "NewMagic",
+            "payload": {
+                "magic": magic,
+                "hero": hero
+            }
+        }),
+        ServerPacket::RemoveMagic { place_id } => json!({
+            "type": "packet",
+            "packet": "RemoveMagic",
+            "payload": {
+                "placeId": place_id
+            }
+        }),
+        ServerPacket::MagicLeveled {
+            object_id,
+            spell,
+            level,
+            experience,
+        } => json!({
+            "type": "packet",
+            "packet": "MagicLeveled",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "level": level,
+                "experience": experience
+            }
+        }),
+        ServerPacket::Magic {
+            spell,
+            target_id,
+            target,
+            cast,
+            level,
+            secondary_target_ids,
+        } => json!({
+            "type": "packet",
+            "packet": "Magic",
+            "payload": {
+                "spell": format!("{spell:?}"),
+                "targetId": target_id,
+                "target": { "x": target.x, "y": target.y },
+                "cast": cast,
+                "level": level,
+                "secondaryTargetIds": secondary_target_ids
+            }
+        }),
+        ServerPacket::MagicDelay {
+            object_id,
+            spell,
+            delay,
+        } => json!({
+            "type": "packet",
+            "packet": "MagicDelay",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "delay": delay
+            }
+        }),
+        ServerPacket::MagicCast { spell } => json!({
+            "type": "packet",
+            "packet": "MagicCast",
+            "payload": {
+                "spell": format!("{spell:?}")
+            }
+        }),
+        ServerPacket::ObjectMagic {
+            object_id,
+            location,
+            direction,
+            spell,
+            target_id,
+            target,
+            cast,
+            level,
+            self_broadcast,
+            secondary_target_ids,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectMagic",
+            "payload": {
+                "objectId": object_id,
+                "location": { "x": location.x, "y": location.y },
+                "direction": format!("{direction:?}"),
+                "spell": format!("{spell:?}"),
+                "targetId": target_id,
+                "target": { "x": target.x, "y": target.y },
+                "cast": cast,
+                "level": level,
+                "selfBroadcast": self_broadcast,
+                "secondaryTargetIds": secondary_target_ids
+            }
+        }),
+        ServerPacket::SpellToggle {
+            object_id,
+            spell,
+            can_use,
+        } => json!({
+            "type": "packet",
+            "packet": "SpellToggle",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "canUse": can_use
             }
         }),
         ServerPacket::SellItem {
@@ -2058,6 +2231,39 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "expire": info.expire
             }
         }),
+        ServerPacket::ObjectMana { info } => json!({
+            "type": "packet",
+            "packet": "ObjectMana",
+            "payload": {
+                "objectId": info.object_id,
+                "percent": info.percent
+            }
+        }),
+        ServerPacket::AddBuff { buff } => json!({
+            "type": "packet",
+            "packet": "AddBuff",
+            "payload": {
+                "buffType": buff.buff_type,
+                "visible": buff.visible,
+                "objectId": buff.object_id,
+                "expireTime": buff.expire_time,
+                "infinite": buff.infinite,
+                "paused": buff.paused,
+                "stats": buff.stats,
+                "values": buff.values
+            }
+        }),
+        ServerPacket::RemoveBuff {
+            buff_type,
+            object_id,
+        } => json!({
+            "type": "packet",
+            "packet": "RemoveBuff",
+            "payload": {
+                "buffType": buff_type,
+                "objectId": object_id
+            }
+        }),
         ServerPacket::ObjectRangeAttack { info } => json!({
             "type": "packet",
             "packet": "ObjectRangeAttack",
@@ -2246,6 +2452,14 @@ fn parse_spell(value: u8) -> Result<Spell, String> {
     Spell::try_from(value).map_err(|_| format!("unsupported spell: {value}"))
 }
 
+fn parse_spell_name(value: &str) -> Result<Spell, String> {
+    let trimmed = value.trim();
+    if let Ok(value) = trimmed.parse::<u8>() {
+        return parse_spell(value);
+    }
+    Spell::from_crystal_name(trimmed).ok_or_else(|| format!("unsupported spell: {value}"))
+}
+
 fn default_drop_count() -> u16 {
     1
 }
@@ -2258,7 +2472,10 @@ mod tests {
     };
     use axum::extract::State;
     use axum::Json;
-    use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItem, UserItemStat};
+    use mir2_protocol::{
+        ClientBuff, ClientPacket, MirDirection, MirGridType, ObjectManaInfo, Point, ServerPacket,
+        Spell, UserItem, UserItemStat,
+    };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
     };
@@ -3031,6 +3248,141 @@ mod tests {
             }
             _ => panic!("unexpected action"),
         }
+    }
+
+    #[test]
+    fn magic_commands_map_to_crystal_protocol_packets() {
+        let key_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"magicKey","spell":"Fury","key":5,"oldKey":0}"#,
+        )
+        .expect("magic key command should deserialize");
+        let action = super::browser_command_to_action(key_command)
+            .expect("magic key command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::MagicKey {
+                spell,
+                key,
+                old_key,
+            }) => {
+                assert_eq!(spell, Spell::Fury);
+                assert_eq!(key, 5);
+                assert_eq!(old_key, 0);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let magic_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"magic","objectId":1001,"spell":"Healing","direction":"downLeft","targetId":1001,"x":333,"y":267,"spellTargetLock":true}"#,
+        )
+        .expect("magic command should deserialize");
+        let action = super::browser_command_to_action(magic_command)
+            .expect("magic command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::Magic {
+                object_id,
+                spell,
+                direction,
+                target_id,
+                location,
+                spell_target_lock,
+            }) => {
+                assert_eq!(object_id, 1_001);
+                assert_eq!(spell, Spell::Healing);
+                assert_eq!(direction, MirDirection::DownLeft);
+                assert_eq!(target_id, 1_001);
+                assert_eq!(location, Point { x: 333, y: 267 });
+                assert!(spell_target_lock);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let toggle_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"spellToggle","spell":"Slaying","canUse":true}"#,
+        )
+        .expect("spell toggle command should deserialize");
+        let action = super::browser_command_to_action(toggle_command)
+            .expect("spell toggle command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::SpellToggle {
+                spell,
+                toggle_state,
+            }) => {
+                assert_eq!(spell, Spell::Slaying);
+                assert_eq!(toggle_state, 1);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn magic_packets_are_exposed_as_browser_events() {
+        let magic = super::server_packet_to_event(&ServerPacket::Magic {
+            spell: Spell::Fury,
+            target_id: 0,
+            target: Point { x: 333, y: 267 },
+            cast: true,
+            level: 3,
+            secondary_target_ids: vec![2],
+        });
+        assert_eq!(magic["packet"], "Magic");
+        assert_eq!(magic["payload"]["spell"], "Fury");
+        assert_eq!(magic["payload"]["secondaryTargetIds"][0], 2);
+
+        let object_magic = super::server_packet_to_event(&ServerPacket::ObjectMagic {
+            object_id: 1_001,
+            location: Point { x: 332, y: 267 },
+            direction: MirDirection::Right,
+            spell: Spell::Fury,
+            target_id: 0,
+            target: Point { x: 333, y: 267 },
+            cast: true,
+            level: 3,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        });
+        assert_eq!(object_magic["packet"], "ObjectMagic");
+        assert_eq!(object_magic["payload"]["objectId"], 1_001);
+        assert_eq!(object_magic["payload"]["direction"], "Right");
+
+        let toggle = super::server_packet_to_event(&ServerPacket::SpellToggle {
+            object_id: 1_001,
+            spell: Spell::Slaying,
+            can_use: true,
+        });
+        assert_eq!(toggle["packet"], "SpellToggle");
+        assert_eq!(toggle["payload"]["canUse"], true);
+
+        let mana = super::server_packet_to_event(&ServerPacket::ObjectMana {
+            info: ObjectManaInfo {
+                object_id: 1_001,
+                percent: 88,
+            },
+        });
+        assert_eq!(mana["packet"], "ObjectMana");
+        assert_eq!(mana["payload"]["percent"], 88);
+
+        let add_buff = super::server_packet_to_event(&ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: 5,
+                visible: true,
+                object_id: 1_001,
+                expire_time: 60_000,
+                infinite: false,
+                paused: false,
+                stats: vec![UserItemStat { stat: 14, value: 4 }],
+                values: Vec::new(),
+            },
+        });
+        assert_eq!(add_buff["packet"], "AddBuff");
+        assert_eq!(add_buff["payload"]["buffType"], 5);
+        assert_eq!(add_buff["payload"]["stats"][0]["stat"], 14);
+
+        let remove_buff = super::server_packet_to_event(&ServerPacket::RemoveBuff {
+            buff_type: 5,
+            object_id: 1_001,
+        });
+        assert_eq!(remove_buff["packet"], "RemoveBuff");
+        assert_eq!(remove_buff["payload"]["objectId"], 1_001);
     }
 
     #[test]

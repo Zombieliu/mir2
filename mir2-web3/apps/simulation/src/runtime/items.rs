@@ -42,8 +42,8 @@ use super::monsters::deterministic_roll;
 use super::movement::{crystal_random_same_map_teleport_packets, town_teleport_packets};
 use super::npc_script::gain_credit;
 use super::packets::{
-    object_health_info_for_entity, object_revived_info_for_entity, prepend_optional_packet,
-    use_item_ack,
+    object_health_info_for_entity, object_mana_info_for_entity, object_revived_info_for_entity,
+    prepend_optional_packet, use_item_ack,
 };
 use super::resources::{
     BuffResource, InventoryResource, PlayerPermissionResource, PlayerRuntimeResource,
@@ -53,7 +53,7 @@ use super::session::{
     current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
     system_message_key, SimulationSession,
 };
-use super::skills::crystal_book_skill_state;
+use super::skills::{client_magic_for_skill_state, crystal_book_skill_state, SkillState};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
@@ -1235,6 +1235,16 @@ pub(super) fn use_dynamic_crystal_template_item(
                 crystal_item_stat_value(template, CRYSTAL_STAT_HP),
                 crystal_item_stat_value(template, CRYSTAL_STAT_MP),
             );
+            if let Some(player) = player_entity(world) {
+                if let Some(info) = object_health_info_for_entity(world, player, 0) {
+                    packets.push(ServerPacket::ObjectHealth { info });
+                }
+                if crystal_item_stat_value(template, CRYSTAL_STAT_MP) > 0 {
+                    if let Some(info) = object_mana_info_for_entity(world, player) {
+                        packets.push(ServerPacket::ObjectMana { info });
+                    }
+                }
+            }
             consume_item_at_use_location(world, location);
             Some(prepend_optional_packet(
                 use_item_ack(packet_ack, true),
@@ -1244,7 +1254,8 @@ pub(super) fn use_dynamic_crystal_template_item(
         (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_BUFF)
         | (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_EXP)
         | (CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_POTION_SHAPE_DROP) => {
-            if !apply_crystal_template_consumable_buffs(world, template) {
+            packets.extend(apply_crystal_template_consumable_buffs(world, template));
+            if packets.is_empty() {
                 return Some(prepend_optional_packet(
                     use_item_ack(packet_ack, false),
                     packets,
@@ -1538,8 +1549,11 @@ pub(super) fn use_item(
 
     if let Some(template) = item_template.as_ref() {
         if template.item_type == CRYSTAL_ITEM_TYPE_BOOK {
-            if !crystal_learn_book_skill(world, template) {
+            let Some(skill) = crystal_learn_book_skill(world, template) else {
                 return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
+            };
+            if let Some(magic) = client_magic_for_skill_state(&skill, runtime_tick(world)) {
+                packets.push(ServerPacket::NewMagic { magic, hero: false });
             }
             consume_item_at_use_location(world, location);
             return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
@@ -1872,17 +1886,20 @@ pub(super) fn crystal_use_item_eligibility(
     CrystalUseItemEligibility::Allowed
 }
 
-pub(super) fn crystal_learn_book_skill(world: &mut World, template: &CrystalItemTemplate) -> bool {
+pub(super) fn crystal_learn_book_skill(
+    world: &mut World,
+    template: &CrystalItemTemplate,
+) -> Option<SkillState> {
     let Some(skill) = crystal_book_skill_state(template) else {
-        return false;
+        return None;
     };
 
     let mut skills = world.resource_mut::<SkillResource>();
     if crystal_skill_is_known(&skills, &skill.key) {
-        return false;
+        return None;
     }
-    skills.skills.push(skill);
-    true
+    skills.skills.push(skill.clone());
+    Some(skill)
 }
 
 pub(super) fn crystal_item_template_for_item_key(key: &str) -> Option<CrystalItemTemplate> {

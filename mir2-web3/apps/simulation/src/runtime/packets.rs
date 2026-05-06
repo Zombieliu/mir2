@@ -10,9 +10,9 @@ use mir2_game_data::{
 };
 use mir2_protocol::{
     ClientPacket, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, NpcInfo,
-    ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectMovement,
-    ObjectPlayerInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point, ServerPacket,
-    ServerPacketId, Spell, StruckInfo, UserInformation, UserItem,
+    ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
+    ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point,
+    ServerPacket, ServerPacketId, Spell, StruckInfo, UserInformation, UserItem,
 };
 
 use crate::config::{
@@ -68,6 +68,9 @@ use super::resources::{
 };
 use super::save::*;
 use super::session::SimulationSession;
+use super::skills::{
+    assign_magic_key, cast_skill_with_context, skill_key_for_crystal_spell, SkillCastContext,
+};
 
 pub(super) fn system_message(message: &str) -> ServerPacket {
     ServerPacket::Chat {
@@ -424,10 +427,27 @@ pub(super) fn object_health_info_for_entity(
     })
 }
 
+pub(super) fn object_mana_info_for_entity(world: &World, entity: Entity) -> Option<ObjectManaInfo> {
+    let entry = world.entity(entity);
+    let object_id = entry.get::<ObjectId>()?.0;
+    let vitals = entry.get::<PlayerVitals>()?;
+
+    Some(ObjectManaInfo {
+        object_id,
+        percent: mana_percent(vitals.mp, 100),
+    })
+}
+
 pub(super) fn health_percent(hp: i32, max_hp: i32) -> u8 {
     let max_hp = max_hp.max(1);
     let percent = ((hp.max(0) * 100) / max_hp).clamp(0, 100);
     u8::try_from(percent).expect("health percent should fit")
+}
+
+pub(super) fn mana_percent(mp: i32, max_mp: i32) -> u8 {
+    let max_mp = max_mp.max(1);
+    let percent = ((mp.max(0) * 100) / max_mp).clamp(0, 100);
+    u8::try_from(percent).expect("mana percent should fit")
 }
 
 pub(super) fn object_died_info_for_entity(
@@ -532,6 +552,21 @@ pub(super) fn should_emit_object_packet(
             next_visible,
             self_object_id,
         ),
+        ServerPacket::ObjectMana { info } => should_emit_tracked_object(
+            info.object_id,
+            previous_visible,
+            next_visible,
+            self_object_id,
+        ),
+        ServerPacket::AddBuff { buff } => should_emit_tracked_object(
+            buff.object_id,
+            previous_visible,
+            next_visible,
+            self_object_id,
+        ),
+        ServerPacket::RemoveBuff { object_id, .. } => {
+            should_emit_tracked_object(*object_id, previous_visible, next_visible, self_object_id)
+        }
         _ => true,
     }
 }
@@ -1797,6 +1832,70 @@ impl SimulationSession {
                 ServerPacket::RepairItem { unique_id },
                 repair_item_impl(self.app.world_mut(), unique_id, true),
             ),
+            ClientPacket::MagicKey {
+                spell,
+                key,
+                old_key,
+            } => {
+                if is_in_world(self.app.world()) {
+                    assign_magic_key(self.app.world_mut(), spell, key, old_key);
+                }
+                Vec::new()
+            }
+            ClientPacket::Magic {
+                spell,
+                direction,
+                target_id,
+                location,
+                ..
+            } => {
+                if !is_in_world(self.app.world()) {
+                    return Vec::new();
+                }
+                let Some(skill_key) = skill_key_for_crystal_spell(spell) else {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                };
+                if let Some(player) = player_entity(self.app.world()) {
+                    self.app
+                        .world_mut()
+                        .entity_mut(player)
+                        .insert(Facing(direction));
+                }
+                let packets = cast_skill_with_context(
+                    self.app.world_mut(),
+                    &skill_key,
+                    Some(SkillCastContext {
+                        direction,
+                        target_id,
+                        target: location,
+                    }),
+                );
+                if packets.is_empty() {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
+                let mut response = vec![ServerPacket::UserLocation {
+                    location: current_location(self.app.world()),
+                }];
+                response.extend(packets);
+                response
+            }
+            ClientPacket::SpellToggle {
+                spell,
+                toggle_state,
+            } => {
+                if !is_in_world(self.app.world()) {
+                    return Vec::new();
+                }
+                vec![ServerPacket::SpellToggle {
+                    object_id: current_player_object_id(self.app.world()).unwrap_or_default(),
+                    spell,
+                    can_use: toggle_state > 0,
+                }]
+            }
             ClientPacket::CombineItem {
                 grid,
                 id_from,

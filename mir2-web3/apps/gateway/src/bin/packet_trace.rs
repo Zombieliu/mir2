@@ -380,10 +380,11 @@ fn matrix_capture_priority(trace_flow: &str) -> usize {
     match trace_flow {
         "core_bootstrap" => 0,
         "combat_basic" => 1,
-        "inventory_storage" => 2,
-        "storage_password" => 3,
-        "movement_chat_keepalive" => 4,
-        "account_lifecycle" => 5,
+        "magic_basic" => 2,
+        "inventory_storage" => 3,
+        "storage_password" => 4,
+        "movement_chat_keepalive" => 5,
+        "account_lifecycle" => 6,
         _ => 10,
     }
 }
@@ -1002,6 +1003,27 @@ fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
             "direction": format!("{:?}", info.direction),
             "param": info.param
         })),
+        ServerPacket::ObjectMana { info } => Some(json!({
+            "objectId": info.object_id,
+            "percent": info.percent
+        })),
+        ServerPacket::AddBuff { buff } => Some(json!({
+            "buffType": buff.buff_type,
+            "visible": buff.visible,
+            "objectId": buff.object_id,
+            "expireTime": buff.expire_time,
+            "infinite": buff.infinite,
+            "paused": buff.paused,
+            "stats": buff.stats,
+            "values": buff.values
+        })),
+        ServerPacket::RemoveBuff {
+            buff_type,
+            object_id,
+        } => Some(json!({
+            "buffType": buff_type,
+            "objectId": object_id
+        })),
         ServerPacket::NewQuestInfo { payload } => Some(json!({
             "rawPayloadLength": payload.len()
         })),
@@ -1193,6 +1215,9 @@ fn stable_ordered_packet(entry: &TraceEntry) -> bool {
             | "ObjectSpell"
             | "ObjectStruck"
             | "ObjectHealth"
+            | "ObjectMana"
+            | "AddBuff"
+            | "RemoveBuff"
             | "Struck"
             | "ObjectDied"
             | "NPCUpdate"
@@ -1344,6 +1369,11 @@ fn trace_flows() -> Vec<TraceFlow> {
             packets: combat_basic_packets,
         },
         TraceFlow {
+            name: "magic_basic",
+            description: "Login, StartGame, MagicKey, Magic, SpellToggle",
+            packets: magic_basic_packets,
+        },
+        TraceFlow {
             name: "storage_password",
             description:
                 "Login, StartGame, SetStoragePassword, UnlockStorage, RemoveStoragePassword",
@@ -1455,6 +1485,30 @@ fn combat_basic_packets(fixture: &Fixture) -> Vec<ClientPacket> {
         },
         ClientPacket::Harvest {
             direction: MirDirection::Right,
+        },
+    ]);
+    packets
+}
+
+fn magic_basic_packets(fixture: &Fixture) -> Vec<ClientPacket> {
+    let mut packets = logged_in_packets(fixture);
+    packets.extend([
+        ClientPacket::MagicKey {
+            spell: Spell::Fury,
+            key: 7,
+            old_key: 0,
+        },
+        ClientPacket::Magic {
+            object_id: 0,
+            spell: Spell::Fury,
+            direction: MirDirection::Right,
+            target_id: 0,
+            location: Point { x: 334, y: 267 },
+            spell_target_lock: false,
+        },
+        ClientPacket::SpellToggle {
+            spell: Spell::Slaying,
+            toggle_state: 1,
         },
     ]);
     packets
@@ -1649,6 +1703,7 @@ mod tests {
             "movement_chat_keepalive",
             "inventory_storage",
             "combat_basic",
+            "magic_basic",
             "storage_password",
         ] {
             assert!(names.contains(expected), "missing flow {expected}");

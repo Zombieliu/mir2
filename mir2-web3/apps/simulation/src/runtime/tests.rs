@@ -13,9 +13,9 @@ use super::{
     InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState, MonsterRespawnSchedule,
     MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, NpcInteractionContext,
     NpcStateResource, ObjectId, PlayerPermissionResource, PlayerRuntimeResource, PlayerVitals,
-    Position, QuestResource, RuntimeConfigResource, SessionResource, SimulationSession,
-    SkillResource, SpawnSlotRef, Stage5SystemsResource, SummonedMonster, WoomaTaurusState,
-    WorldObject, YimoogiState, BASE_STORAGE_SLOTS, EXPANDED_STORAGE_SLOTS,
+    Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
+    SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource, SummonedMonster,
+    WoomaTaurusState, WorldObject, YimoogiState, BASE_STORAGE_SLOTS, EXPANDED_STORAGE_SLOTS,
 };
 use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
@@ -28528,7 +28528,10 @@ fn consumable_item_restores_hp() {
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
 
-    let tick_packets = session.tick();
+    let mut tick_packets = Vec::new();
+    for _ in 0..4 {
+        tick_packets.extend(session.tick());
+    }
     let healed_hp = session.world_snapshot().player_hp.expect("player hp");
 
     assert!(healed_hp > damaged_hp);
@@ -35199,6 +35202,13 @@ fn use_item_packet_crystal_book_learns_skill_when_eligible() {
         .known_skills
         .iter()
         .any(|skill| skill.key == fireball_key));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::NewMagic {
+            magic,
+            hero: false
+        } if magic.spell == Spell::FireBall && magic.level == 0
+    )));
     assert!(!session
         .world_snapshot()
         .inventory_items
@@ -35595,12 +35605,52 @@ fn casting_skill_applies_buff_and_cooldown() {
         .active_buffs
         .iter()
         .any(|buff| buff.key == "battle-focus"));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectMana { info } if info.percent < 100
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.buff_type == 5
+                && buff.visible
+                && buff.stats.iter().any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_DC && stat.value == 4)
+    )));
     assert!(snapshot
         .known_skills
         .iter()
         .find(|skill| skill.key == "battle-focus")
         .map(|skill| skill.cooldown_remaining_ticks > 0)
         .unwrap_or(false));
+}
+
+#[test]
+fn buff_expiry_emits_crystal_remove_buff_packet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.cast_skill("battle-focus");
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let mut removed = false;
+    for _ in 0..10 {
+        let packets = session.tick();
+        removed |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::RemoveBuff {
+                    buff_type: 5,
+                    object_id: packet_object_id,
+                } if *packet_object_id == object_id
+            )
+        });
+    }
+
+    assert!(removed);
+    assert!(!session
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "battle-focus"));
 }
 
 #[test]
@@ -35638,8 +35688,12 @@ fn casting_unwired_skill_rejects_without_runtime_chat_or_cooldown() {
             name: "Unwired Skill".to_string(),
             description: String::new(),
             level: 1,
+            experience: 0,
+            hotkey: 0,
             cooldown_ticks: 10,
+            delay_ms: 10_000,
             cooldown_ends_at: 0,
+            cast_time_ms: 0,
         });
 
     let packets = session.cast_skill("unwired-skill");
@@ -35686,6 +35740,250 @@ fn casting_skill_requires_mp() {
             .unwrap_or_default(),
         0
     );
+}
+
+#[test]
+fn magic_packet_casts_crystal_skill_and_emits_magic_packets() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_position(&mut session, Point { x: 333, y: 267 });
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::Fury,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: Point { x: 334, y: 267 },
+        spell_target_lock: false,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location } if location.direction == MirDirection::Right
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::Fury,
+            cast: true,
+            level: 3,
+            ..
+        }
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectMagic {
+            object_id: packet_object_id,
+            direction: MirDirection::Right,
+            spell: Spell::Fury,
+            cast: true,
+            level: 3,
+            ..
+        } if *packet_object_id == object_id
+    )));
+    assert!(snapshot
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "battle-focus"));
+}
+
+#[test]
+fn magic_packet_casts_manifest_skill_and_schedules_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let wasp = find_monster_entity_by(&session, |name, _, _| name == "Field Wasp");
+    set_entity_position(
+        &mut session,
+        wasp,
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+    );
+    let target_object_id = entity_object_id(session.app.world(), wasp).expect("field wasp id");
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("FireBall", 1).expect("fireball magic"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = super::entity_player_vitals(
+        session.app.world(),
+        super::player_entity(session.app.world()).expect("player"),
+    )
+    .expect("player vitals")
+    .mp;
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::FireBall,
+        direction: MirDirection::UpRight,
+        target_id: target_object_id,
+        location: Point { x: 334, y: 266 },
+        spell_target_lock: true,
+    });
+    assert!(
+        !session
+            .app
+            .world()
+            .resource::<RuntimeQueueResource>()
+            .pending_combat_actions
+            .is_empty(),
+        "magic cast should queue target damage"
+    );
+    let immediate_snapshot = session.world_snapshot();
+    let mut tick_packets = Vec::new();
+    for _ in 0..4 {
+        tick_packets.extend(session.tick());
+    }
+    let ending_mp = super::entity_player_vitals(
+        session.app.world(),
+        super::player_entity(session.app.world()).expect("player"),
+    )
+    .expect("player vitals")
+    .mp;
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::FireBall,
+            target_id: packet_target_id,
+            cast: true,
+            level: 1,
+            ..
+        } if *packet_target_id == target_object_id
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectMana { .. })));
+    assert!(ending_mp < starting_mp);
+    assert!(
+        tick_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == target_object_id && info.percent < 100
+        )),
+        "tick packets: {tick_packets:?}"
+    );
+    assert!(immediate_snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.key == "fireball")
+        .map(|skill| skill.cooldown_remaining_ticks > 0)
+        .unwrap_or(false));
+}
+
+#[test]
+fn magic_packet_progresses_user_magic_and_emits_level_packets() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
+    let magic = mir2_game_data::crystal_magic_by_spell("FireBall").expect("FireBall magic");
+    let mut fireball = super::crystal_skill_state("FireBall", 0).expect("fireball magic");
+    fireball.experience = magic.need1.saturating_sub(1);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(fireball);
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target_id: 3_002,
+        location: Point { x: 334, y: 267 },
+        spell_target_lock: true,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MagicDelay {
+            object_id: packet_object_id,
+            spell: Spell::FireBall,
+            delay
+        } if *packet_object_id == object_id && *delay > 0
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MagicLeveled {
+            object_id: packet_object_id,
+            spell: Spell::FireBall,
+            level: 1,
+            ..
+        } if *packet_object_id == object_id
+    )));
+    let fireball = snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.key == "fireball")
+        .expect("fireball skill snapshot");
+    assert_eq!(fireball.level, 1);
+    assert!(fireball.delay_ms > 0);
+    assert!(fireball.cast_time_ms >= 0);
+}
+
+#[test]
+fn magic_key_assigns_crystal_hotkey_and_clears_duplicate() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    session.handle_packet(ClientPacket::MagicKey {
+        spell: Spell::Healing,
+        key: 5,
+        old_key: 0,
+    });
+    session.handle_packet(ClientPacket::MagicKey {
+        spell: Spell::Fury,
+        key: 5,
+        old_key: 0,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(
+        snapshot
+            .known_skills
+            .iter()
+            .find(|skill| skill.key == "minor-heal")
+            .map(|skill| skill.hotkey),
+        Some(0)
+    );
+    assert_eq!(
+        snapshot
+            .known_skills
+            .iter()
+            .find(|skill| skill.key == "battle-focus")
+            .map(|skill| skill.hotkey),
+        Some(5)
+    );
+}
+
+#[test]
+fn spell_toggle_packet_emits_crystal_ack() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let packets = session.handle_packet(ClientPacket::SpellToggle {
+        spell: Spell::Slaying,
+        toggle_state: 1,
+    });
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::SpellToggle {
+            object_id: packet_object_id,
+            spell: Spell::Slaying,
+            can_use: true,
+        } if *packet_object_id == object_id
+    )));
 }
 
 #[test]

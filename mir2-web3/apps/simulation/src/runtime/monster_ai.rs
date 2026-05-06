@@ -3899,9 +3899,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     }
 
     let tick = advance_runtime_tick(world);
-    tick_buffs(world);
     process_crystal_npc_goods_expiry(world);
     let mut packets = Vec::new();
+    tick_buffs(world, &mut packets);
     sync_expired_expanded_storage(world, &mut packets);
     tick_crystal_normal_potion_restore(world, &mut packets);
     tick_ground_drop_expiry(world, tick);

@@ -3,11 +3,11 @@ use crate::frame::{decode_frame, encode_frame};
 use crate::ids::{ClientPacketId, ServerPacketId};
 use crate::io::{PacketReader, PacketWriter};
 use crate::types::{
-    ChatType, ItemInfo, MapInformation, MirClass, MirDirection, MirGender, MirGridType,
-    MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo,
-    ObjectHealthInfo, ObjectItemInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo,
-    ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point, SelectInfo, Spell, StruckInfo,
-    UserInformation, UserItem, UserLocation,
+    ChatType, ClientBuff, ClientMagic, ItemInfo, MapInformation, MirClass, MirDirection, MirGender,
+    MirGridType, MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
+    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
+    Point, SelectInfo, Spell, StruckInfo, UserInformation, UserItem, UserLocation,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -151,6 +151,23 @@ pub enum ClientPacket {
     SRepairItem {
         unique_id: u64,
     },
+    MagicKey {
+        spell: Spell,
+        key: u8,
+        old_key: u8,
+    },
+    Magic {
+        object_id: u32,
+        spell: Spell,
+        direction: MirDirection,
+        target_id: u32,
+        location: Point,
+        spell_target_lock: bool,
+    },
+    SpellToggle {
+        spell: Spell,
+        toggle_state: i8,
+    },
     CombineItem {
         grid: MirGridType,
         id_from: u64,
@@ -206,6 +223,9 @@ impl ClientPacket {
             Self::SellItem { .. } => ClientPacketId::SellItem,
             Self::RepairItem { .. } => ClientPacketId::RepairItem,
             Self::SRepairItem { .. } => ClientPacketId::SRepairItem,
+            Self::MagicKey { .. } => ClientPacketId::MagicKey,
+            Self::Magic { .. } => ClientPacketId::Magic,
+            Self::SpellToggle { .. } => ClientPacketId::SpellToggle,
             Self::CombineItem { .. } => ClientPacketId::CombineItem,
             Self::UnlockStorage { .. } => ClientPacketId::UnlockStorage,
             Self::SetStoragePassword { .. } => ClientPacketId::SetStoragePassword,
@@ -391,6 +411,37 @@ impl ClientPacket {
             Self::RepairItem { unique_id } | Self::SRepairItem { unique_id } => {
                 writer.write_u64(*unique_id);
             }
+            Self::MagicKey {
+                spell,
+                key,
+                old_key,
+            } => {
+                writer.write_u8(*spell as u8);
+                writer.write_u8(*key);
+                writer.write_u8(*old_key);
+            }
+            Self::Magic {
+                object_id,
+                spell,
+                direction,
+                target_id,
+                location,
+                spell_target_lock,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u8(*spell as u8);
+                writer.write_u8(*direction as u8);
+                writer.write_u32(*target_id);
+                location.encode(writer);
+                writer.write_bool(*spell_target_lock);
+            }
+            Self::SpellToggle {
+                spell,
+                toggle_state,
+            } => {
+                writer.write_u8(*spell as u8);
+                writer.write_u8(*toggle_state as u8);
+            }
             Self::UnlockStorage { password } => writer.write_string(password)?,
             Self::SetStoragePassword {
                 current_password,
@@ -570,6 +621,23 @@ impl ClientPacket {
             },
             ClientPacketId::SRepairItem => Self::SRepairItem {
                 unique_id: reader.read_u64()?,
+            },
+            ClientPacketId::MagicKey => Self::MagicKey {
+                spell: Spell::try_from(reader.read_u8()?)?,
+                key: reader.read_u8()?,
+                old_key: reader.read_u8()?,
+            },
+            ClientPacketId::Magic => Self::Magic {
+                object_id: reader.read_u32()?,
+                spell: Spell::try_from(reader.read_u8()?)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+                target_id: reader.read_u32()?,
+                location: Point::decode(reader)?,
+                spell_target_lock: reader.read_bool()?,
+            },
+            ClientPacketId::SpellToggle => Self::SpellToggle {
+                spell: Spell::try_from(reader.read_u8()?)?,
+                toggle_state: reader.read_u8()? as i8,
             },
             ClientPacketId::UnlockStorage => Self::UnlockStorage {
                 password: reader.read_string()?,
@@ -878,6 +946,52 @@ pub enum ServerPacket {
         unique_id: u64,
         expiry_date_binary_datetime: i64,
     },
+    NewMagic {
+        magic: ClientMagic,
+        hero: bool,
+    },
+    RemoveMagic {
+        place_id: i32,
+    },
+    MagicLeveled {
+        object_id: u32,
+        spell: Spell,
+        level: u8,
+        experience: u16,
+    },
+    Magic {
+        spell: Spell,
+        target_id: u32,
+        target: Point,
+        cast: bool,
+        level: u8,
+        secondary_target_ids: Vec<u32>,
+    },
+    MagicDelay {
+        object_id: u32,
+        spell: Spell,
+        delay: i64,
+    },
+    MagicCast {
+        spell: Spell,
+    },
+    ObjectMagic {
+        object_id: u32,
+        location: Point,
+        direction: MirDirection,
+        spell: Spell,
+        target_id: u32,
+        target: Point,
+        cast: bool,
+        level: u8,
+        self_broadcast: bool,
+        secondary_target_ids: Vec<u32>,
+    },
+    SpellToggle {
+        object_id: u32,
+        spell: Spell,
+        can_use: bool,
+    },
     SellItem {
         unique_id: u64,
         count: u16,
@@ -898,8 +1012,18 @@ pub enum ServerPacket {
     ObjectHealth {
         info: ObjectHealthInfo,
     },
+    ObjectMana {
+        info: ObjectManaInfo,
+    },
     ObjectRangeAttack {
         info: ObjectRangeAttackInfo,
+    },
+    AddBuff {
+        buff: ClientBuff,
+    },
+    RemoveBuff {
+        buff_type: u8,
+        object_id: u32,
     },
     RefreshItem {
         item: UserItem,
@@ -1021,10 +1145,21 @@ impl ServerPacket {
             Self::ItemRepaired { .. } => ServerPacketId::ItemRepaired,
             Self::ItemSlotSizeChanged { .. } => ServerPacketId::ItemSlotSizeChanged,
             Self::ItemSealChanged { .. } => ServerPacketId::ItemSealChanged,
+            Self::NewMagic { .. } => ServerPacketId::NewMagic,
+            Self::RemoveMagic { .. } => ServerPacketId::RemoveMagic,
+            Self::MagicLeveled { .. } => ServerPacketId::MagicLeveled,
+            Self::Magic { .. } => ServerPacketId::Magic,
+            Self::MagicDelay { .. } => ServerPacketId::MagicDelay,
+            Self::MagicCast { .. } => ServerPacketId::MagicCast,
+            Self::ObjectMagic { .. } => ServerPacketId::ObjectMagic,
+            Self::SpellToggle { .. } => ServerPacketId::SpellToggle,
             Self::ObjectRevived { .. } => ServerPacketId::ObjectRevived,
             Self::ObjectEffect { .. } => ServerPacketId::ObjectEffect,
             Self::ObjectHealth { .. } => ServerPacketId::ObjectHealth,
+            Self::ObjectMana { .. } => ServerPacketId::ObjectMana,
             Self::ObjectRangeAttack { .. } => ServerPacketId::ObjectRangeAttack,
+            Self::AddBuff { .. } => ServerPacketId::AddBuff,
+            Self::RemoveBuff { .. } => ServerPacketId::RemoveBuff,
             Self::RefreshItem { .. } => ServerPacketId::RefreshItem,
             Self::ObjectSpell { .. } => ServerPacketId::ObjectSpell,
             Self::NewQuestInfo { .. } => ServerPacketId::NewQuestInfo,
@@ -1322,6 +1457,85 @@ impl ServerPacket {
                 writer.write_u64(*unique_id);
                 writer.write_i64(*expiry_date_binary_datetime);
             }
+            Self::NewMagic { magic, hero } => {
+                magic.encode(writer)?;
+                writer.write_bool(*hero);
+            }
+            Self::RemoveMagic { place_id } => writer.write_i32(*place_id),
+            Self::MagicLeveled {
+                object_id,
+                spell,
+                level,
+                experience,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u8(*spell as u8);
+                writer.write_u8(*level);
+                writer.write_u16(*experience);
+            }
+            Self::Magic {
+                spell,
+                target_id,
+                target,
+                cast,
+                level,
+                secondary_target_ids,
+            } => {
+                writer.write_u8(*spell as u8);
+                writer.write_u32(*target_id);
+                target.encode(writer);
+                writer.write_bool(*cast);
+                writer.write_u8(*level);
+                writer.write_i32(secondary_target_ids.len() as i32);
+                for target_id in secondary_target_ids {
+                    writer.write_u32(*target_id);
+                }
+            }
+            Self::MagicDelay {
+                object_id,
+                spell,
+                delay,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u8(*spell as u8);
+                writer.write_i64(*delay);
+            }
+            Self::MagicCast { spell } => writer.write_u8(*spell as u8),
+            Self::ObjectMagic {
+                object_id,
+                location,
+                direction,
+                spell,
+                target_id,
+                target,
+                cast,
+                level,
+                self_broadcast,
+                secondary_target_ids,
+            } => {
+                writer.write_u32(*object_id);
+                location.encode(writer);
+                writer.write_u8(*direction as u8);
+                writer.write_u8(*spell as u8);
+                writer.write_u32(*target_id);
+                target.encode(writer);
+                writer.write_bool(*cast);
+                writer.write_u8(*level);
+                writer.write_bool(*self_broadcast);
+                writer.write_i32(secondary_target_ids.len() as i32);
+                for target_id in secondary_target_ids {
+                    writer.write_u32(*target_id);
+                }
+            }
+            Self::SpellToggle {
+                object_id,
+                spell,
+                can_use,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u8(*spell as u8);
+                writer.write_bool(*can_use);
+            }
             Self::SellItem {
                 unique_id,
                 count,
@@ -1335,7 +1549,16 @@ impl ServerPacket {
             Self::ObjectRevived { info } => info.encode(writer),
             Self::ObjectEffect { info } => info.encode(writer),
             Self::ObjectHealth { info } => info.encode(writer),
+            Self::ObjectMana { info } => info.encode(writer),
             Self::ObjectRangeAttack { info } => info.encode(writer),
+            Self::AddBuff { buff } => buff.encode(writer),
+            Self::RemoveBuff {
+                buff_type,
+                object_id,
+            } => {
+                writer.write_u8(*buff_type);
+                writer.write_u32(*object_id);
+            }
             Self::RefreshItem { item } => item.encode(writer)?,
             Self::ObjectSpell { info } => info.encode(writer),
             Self::NewQuestInfo { payload } => writer.write_bytes(payload),
@@ -1720,6 +1943,92 @@ impl ServerPacket {
                 unique_id: reader.read_u64()?,
                 expiry_date_binary_datetime: reader.read_i64()?,
             },
+            ServerPacketId::NewMagic => Self::NewMagic {
+                magic: ClientMagic::decode(reader)?,
+                hero: reader.read_bool()?,
+            },
+            ServerPacketId::RemoveMagic => Self::RemoveMagic {
+                place_id: reader.read_i32()?,
+            },
+            ServerPacketId::MagicLeveled => Self::MagicLeveled {
+                object_id: reader.read_u32()?,
+                spell: Spell::try_from(reader.read_u8()?)?,
+                level: reader.read_u8()?,
+                experience: reader.read_u16()?,
+            },
+            ServerPacketId::Magic => {
+                let spell = Spell::try_from(reader.read_u8()?)?;
+                let target_id = reader.read_u32()?;
+                let target = Point::decode(reader)?;
+                let cast = reader.read_bool()?;
+                let level = reader.read_u8()?;
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "magic_secondary_target_ids",
+                        value: count,
+                    });
+                }
+                let mut secondary_target_ids = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    secondary_target_ids.push(reader.read_u32()?);
+                }
+                Self::Magic {
+                    spell,
+                    target_id,
+                    target,
+                    cast,
+                    level,
+                    secondary_target_ids,
+                }
+            }
+            ServerPacketId::MagicDelay => Self::MagicDelay {
+                object_id: reader.read_u32()?,
+                spell: Spell::try_from(reader.read_u8()?)?,
+                delay: reader.read_i64()?,
+            },
+            ServerPacketId::MagicCast => Self::MagicCast {
+                spell: Spell::try_from(reader.read_u8()?)?,
+            },
+            ServerPacketId::ObjectMagic => {
+                let object_id = reader.read_u32()?;
+                let location = Point::decode(reader)?;
+                let direction = MirDirection::try_from(reader.read_u8()?)?;
+                let spell = Spell::try_from(reader.read_u8()?)?;
+                let target_id = reader.read_u32()?;
+                let target = Point::decode(reader)?;
+                let cast = reader.read_bool()?;
+                let level = reader.read_u8()?;
+                let self_broadcast = reader.read_bool()?;
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "object_magic_secondary_target_ids",
+                        value: count,
+                    });
+                }
+                let mut secondary_target_ids = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    secondary_target_ids.push(reader.read_u32()?);
+                }
+                Self::ObjectMagic {
+                    object_id,
+                    location,
+                    direction,
+                    spell,
+                    target_id,
+                    target,
+                    cast,
+                    level,
+                    self_broadcast,
+                    secondary_target_ids,
+                }
+            }
+            ServerPacketId::SpellToggle => Self::SpellToggle {
+                object_id: reader.read_u32()?,
+                spell: Spell::try_from(reader.read_u8()?)?,
+                can_use: reader.read_bool()?,
+            },
             ServerPacketId::SellItem => Self::SellItem {
                 unique_id: reader.read_u64()?,
                 count: reader.read_u16()?,
@@ -1740,8 +2049,18 @@ impl ServerPacket {
             ServerPacketId::ObjectHealth => Self::ObjectHealth {
                 info: ObjectHealthInfo::decode(reader)?,
             },
+            ServerPacketId::ObjectMana => Self::ObjectMana {
+                info: ObjectManaInfo::decode(reader)?,
+            },
             ServerPacketId::ObjectRangeAttack => Self::ObjectRangeAttack {
                 info: ObjectRangeAttackInfo::decode(reader)?,
+            },
+            ServerPacketId::AddBuff => Self::AddBuff {
+                buff: ClientBuff::decode(reader)?,
+            },
+            ServerPacketId::RemoveBuff => Self::RemoveBuff {
+                buff_type: reader.read_u8()?,
+                object_id: reader.read_u32()?,
             },
             ServerPacketId::RefreshItem => Self::RefreshItem {
                 item: UserItem::decode(reader)?,
@@ -1829,6 +2148,133 @@ fn decode_select_info_vec(reader: &mut PacketReader<'_>) -> Result<Vec<SelectInf
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn magic_client_packets_round_trip_with_crystal_ids() {
+        let packets = vec![
+            ClientPacket::MagicKey {
+                spell: Spell::Fury,
+                key: 7,
+                old_key: 0,
+            },
+            ClientPacket::Magic {
+                object_id: 1_001,
+                spell: Spell::Healing,
+                direction: MirDirection::DownLeft,
+                target_id: 2_002,
+                location: Point { x: 330, y: 270 },
+                spell_target_lock: true,
+            },
+            ClientPacket::SpellToggle {
+                spell: Spell::Slaying,
+                toggle_state: -1,
+            },
+        ];
+
+        assert_eq!(packets[0].packet_id() as i16, 57);
+        assert_eq!(packets[1].packet_id() as i16, 58);
+        assert_eq!(packets[2].packet_id() as i16, 69);
+
+        for packet in packets {
+            let encoded = encode_client_packet(&packet).expect("client packet should encode");
+            let decoded = decode_client_packet(&encoded).expect("client packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn magic_server_packets_round_trip_with_crystal_ids() {
+        let magic = ClientMagic {
+            name: "Fury".to_string(),
+            spell: Spell::Fury,
+            base_cost: 10,
+            level_cost: 4,
+            icon: 76,
+            level1: 45,
+            level2: 48,
+            level3: 51,
+            need1: 8_000,
+            need2: 14_000,
+            need3: 20_000,
+            level: 3,
+            key: 7,
+            experience: 123,
+            delay: 240_000,
+            range: 0,
+            cast_time: 42,
+        };
+        let packets = vec![
+            ServerPacket::NewMagic { magic, hero: false },
+            ServerPacket::RemoveMagic { place_id: 2 },
+            ServerPacket::MagicLeveled {
+                object_id: 1_001,
+                spell: Spell::Fury,
+                level: 3,
+                experience: 123,
+            },
+            ServerPacket::Magic {
+                spell: Spell::Healing,
+                target_id: 1_001,
+                target: Point { x: 330, y: 270 },
+                cast: true,
+                level: 2,
+                secondary_target_ids: vec![1_002, 1_003],
+            },
+            ServerPacket::MagicDelay {
+                object_id: 1_001,
+                spell: Spell::Fury,
+                delay: 240_000,
+            },
+            ServerPacket::MagicCast { spell: Spell::Fury },
+            ServerPacket::ObjectMagic {
+                object_id: 1_001,
+                location: Point { x: 329, y: 269 },
+                direction: MirDirection::Down,
+                spell: Spell::Fury,
+                target_id: 0,
+                target: Point { x: 330, y: 270 },
+                cast: true,
+                level: 3,
+                self_broadcast: false,
+                secondary_target_ids: vec![1_002],
+            },
+            ServerPacket::SpellToggle {
+                object_id: 1_001,
+                spell: Spell::Slaying,
+                can_use: true,
+            },
+            ServerPacket::ObjectMana {
+                info: ObjectManaInfo {
+                    object_id: 1_001,
+                    percent: 76,
+                },
+            },
+            ServerPacket::AddBuff {
+                buff: ClientBuff {
+                    buff_type: 5,
+                    visible: true,
+                    object_id: 1_001,
+                    expire_time: 60_000,
+                    infinite: false,
+                    paused: false,
+                    stats: vec![crate::types::UserItemStat { stat: 14, value: 4 }],
+                    values: vec![7],
+                },
+            },
+            ServerPacket::RemoveBuff {
+                buff_type: 5,
+                object_id: 1_001,
+            },
+        ];
+
+        let expected_ids = [117, 118, 119, 120, 121, 122, 123, 138, 140, 144, 145];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
 
     #[test]
     fn storage_password_client_packets_round_trip_with_crystal_ids() {

@@ -3,12 +3,12 @@ use bevy_ecs::prelude::World;
 use mir2_game_data::{
     localized_text_or_fallback, starter_server_data, CrystalItemTemplate, LanguageCode,
 };
-use mir2_protocol::{ServerPacket, UserItemStat};
+use mir2_protocol::{ClientBuff, ServerPacket, UserItemStat};
 
 use super::components::{player_entity, PlayerVitals};
 use super::crystal_compat::*;
 use super::items::{crystal_item_stat_value, user_item_stat_total};
-use super::packets::object_health_info_for_entity;
+use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
 use super::resources::{BuffResource, PlayerRuntimeResource, PotionRecoveryResource};
 
 #[derive(Debug, Clone)]
@@ -93,12 +93,142 @@ pub(super) fn apply_or_refresh_buff(world: &mut World, next: BuffState) {
     }
 }
 
-pub(super) fn tick_buffs(world: &mut World) {
+pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
     let tick = super::session::runtime_tick(world);
+    let object_id = player_entity(world)
+        .and_then(|player| {
+            world
+                .entity(player)
+                .get::<super::components::ObjectId>()
+                .copied()
+        })
+        .map(|object_id| object_id.0)
+        .unwrap_or_default();
+    let expired_types = world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .filter(|buff| buff.expires_at_tick <= tick)
+        .filter_map(|buff| crystal_buff_type_for_key(&buff.key))
+        .collect::<Vec<_>>();
     world
         .resource_mut::<BuffResource>()
         .buffs
         .retain(|buff| buff.expires_at_tick > tick);
+    packets.extend(
+        expired_types
+            .into_iter()
+            .map(|buff_type| ServerPacket::RemoveBuff {
+                buff_type,
+                object_id,
+            }),
+    );
+}
+
+pub(super) fn client_buff_packet_for_state(
+    world: &World,
+    buff: &BuffState,
+) -> Option<ServerPacket> {
+    Some(ServerPacket::AddBuff {
+        buff: client_buff_for_state(world, buff)?,
+    })
+}
+
+pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<ClientBuff> {
+    let tick = super::session::runtime_tick(world);
+    let player = player_entity(world)?;
+    let object_id = world.entity(player).get::<super::components::ObjectId>()?.0;
+    let mut stats = buff.stats.clone();
+    stats.sort_by_key(|stat| stat.stat);
+
+    Some(ClientBuff {
+        buff_type: crystal_buff_type_for_key(&buff.key)?,
+        visible: crystal_buff_visible_for_key(&buff.key),
+        object_id,
+        expire_time: buff
+            .expires_at_tick
+            .saturating_sub(tick)
+            .saturating_mul(1_000)
+            .min(i64::MAX as u64) as i64,
+        infinite: false,
+        paused: false,
+        stats,
+        values: Vec::new(),
+    })
+}
+
+pub(super) fn crystal_buff_type_for_key(key: &str) -> Option<u8> {
+    Some(match key {
+        "temporal-flux" => 1,
+        "hiding" => 2,
+        "haste" => 3,
+        "swift-feet" => 4,
+        "battle-focus" | "fury" => 5,
+        "soul-shield" => 6,
+        "blessed-armour" | "blessed-armor" => 7,
+        "light-body" => 8,
+        "ultimate-enhancer" => 9,
+        "protection-field" => 10,
+        "rage" => 11,
+        "curse" => 12,
+        "moon-light" => 13,
+        "dark-body" => 14,
+        "concentration" => 15,
+        "vampire-shot" => 16,
+        "poison-shot" => 17,
+        "counter-attack" => 18,
+        "mental-state" => 19,
+        "energy-shield" => 20,
+        "magic-booster" => 21,
+        "pet-enhancer" => 22,
+        "immortal-skin" => 23,
+        "magic-shield" => 24,
+        "elemental-barrier" => 25,
+        "general" => 101,
+        "exp" => 102,
+        "drop" => 103,
+        "gold" => 104,
+        "bag-weight" => 105,
+        "transform" => 106,
+        "lover" => 107,
+        "mentee" => 108,
+        "mentor" => 109,
+        "guild" => 110,
+        "prison" => 111,
+        "rested" => 112,
+        "skill" => 113,
+        "clear-ring" => 114,
+        "newbie" => 115,
+        "impact" => 200,
+        "magic" => 201,
+        "taoist" => 202,
+        "storm" => 203,
+        "health-aid" => 204,
+        "mana-aid" => 205,
+        "defence" => 206,
+        "magic-defence" => 207,
+        "wonder-drug" => 208,
+        "knapsack" => 209,
+        _ => return None,
+    })
+}
+
+fn crystal_buff_visible_for_key(key: &str) -> bool {
+    matches!(
+        key,
+        "swift-feet"
+            | "battle-focus"
+            | "fury"
+            | "moon-light"
+            | "dark-body"
+            | "vampire-shot"
+            | "poison-shot"
+            | "counter-attack"
+            | "energy-shield"
+            | "magic-booster"
+            | "pet-enhancer"
+            | "immortal-skin"
+    )
 }
 
 pub(super) fn restore_current_player_vitals(world: &mut World, heal_hp: i32, heal_mp: i32) {
@@ -168,6 +298,11 @@ pub(super) fn tick_crystal_normal_potion_restore(
     if let Some(player) = player_entity(world) {
         if let Some(info) = object_health_info_for_entity(world, player, 0) {
             packets.push(ServerPacket::ObjectHealth { info });
+        }
+        if mp_tick > 0 {
+            if let Some(info) = object_mana_info_for_entity(world, player) {
+                packets.push(ServerPacket::ObjectMana { info });
+            }
         }
     }
 }
@@ -295,7 +430,7 @@ pub(super) fn crystal_template_consumable_buffs(
     }
 }
 
-pub(super) fn apply_or_stack_duration_buff(world: &mut World, next: BuffState) {
+pub(super) fn apply_or_stack_duration_buff(world: &mut World, next: BuffState) -> BuffState {
     let current_tick = super::session::runtime_tick(world);
     let mut buffs = world.resource_mut::<BuffResource>();
     let duration_ticks = next.expires_at_tick.saturating_sub(current_tick);
@@ -304,23 +439,29 @@ pub(super) fn apply_or_stack_duration_buff(world: &mut World, next: BuffState) {
             .expires_at_tick
             .max(current_tick)
             .saturating_add(duration_ticks);
+        existing.clone()
     } else {
-        buffs.buffs.push(next);
+        buffs.buffs.push(next.clone());
+        next
     }
 }
 
 pub(super) fn apply_crystal_template_consumable_buffs(
     world: &mut World,
     template: &CrystalItemTemplate,
-) -> bool {
+) -> Vec<ServerPacket> {
     let tick = super::session::runtime_tick(world);
     let buffs = crystal_template_consumable_buffs(template, tick);
     if buffs.is_empty() {
-        return false;
+        return Vec::new();
     }
 
+    let mut packets = Vec::new();
     for buff in buffs {
-        apply_or_stack_duration_buff(world, buff);
+        let applied = apply_or_stack_duration_buff(world, buff);
+        if let Some(packet) = client_buff_packet_for_state(world, &applied) {
+            packets.push(packet);
+        }
     }
-    true
+    packets
 }
