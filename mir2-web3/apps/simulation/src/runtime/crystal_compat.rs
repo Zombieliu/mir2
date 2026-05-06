@@ -259,6 +259,7 @@ pub(super) const CRYSTAL_STAT_HP: u8 = 12;
 pub(super) const CRYSTAL_STAT_MP: u8 = 13;
 pub(super) const CRYSTAL_STAT_ATTACK_SPEED: u8 = 14;
 pub(super) const CRYSTAL_STAT_LUCK: u8 = 15;
+pub(super) const CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT: u8 = 124;
 pub(super) const CRYSTAL_STAT_REFLECT: u8 = 19;
 pub(super) const CRYSTAL_STAT_STRONG: u8 = 20;
 pub(super) const CRYSTAL_STAT_FREEZING: u8 = 22;

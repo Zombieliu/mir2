@@ -2361,6 +2361,9 @@ pub(super) fn crystal_npc_give_skill(world: &mut World, parts: &[&str]) {
         if existing.cooldown_ticks == 0 {
             existing.cooldown_ticks = skill.cooldown_ticks;
         }
+        if existing.delay_ms == 0 {
+            existing.delay_ms = skill.delay_ms;
+        }
         return;
     }
     skills.skills.push(skill);

@@ -2136,6 +2136,11 @@ pub struct SkillSnapshot {
     pub key: String,
     pub name: String,
     pub description: String,
+    pub level: u8,
+    pub experience: u16,
+    pub hotkey: u8,
+    pub delay_ms: i64,
+    pub cast_time_ms: i64,
     pub cooldown_remaining_ticks: u32,
 }
 

@@ -198,11 +198,135 @@ impl TryFrom<u8> for MirGridType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Spell {
     None = 0,
+    Fencing = 1,
+    Slaying = 2,
+    Thrusting = 3,
+    HalfMoon = 4,
+    ShoulderDash = 5,
+    TwinDrakeBlade = 6,
+    Entrapment = 7,
+    FlamingSword = 8,
+    LionRoar = 9,
+    CrossHalfMoon = 10,
+    BladeAvalanche = 11,
+    ProtectionField = 12,
+    Rage = 13,
+    CounterAttack = 14,
+    SlashingBurst = 15,
+    Fury = 16,
+    ImmortalSkin = 17,
+    FireBall = 31,
+    Repulsion = 32,
+    ElectricShock = 33,
+    GreatFireBall = 34,
+    HellFire = 35,
+    ThunderBolt = 36,
+    Teleport = 37,
+    FireBang = 38,
+    FireWall = 39,
+    Lightning = 40,
+    FrostCrunch = 41,
+    ThunderStorm = 42,
+    MagicShield = 43,
+    TurnUndead = 44,
+    Vampirism = 45,
+    IceStorm = 46,
+    FlameDisruptor = 47,
+    Mirroring = 48,
+    FlameField = 49,
+    Blizzard = 50,
+    MagicBooster = 51,
+    MeteorStrike = 52,
+    IceThrust = 53,
+    FastMove = 54,
+    StormEscape = 55,
     Healing = 61,
+    SpiritSword = 62,
+    Poisoning = 63,
+    SoulFireBall = 64,
+    SummonSkeleton = 65,
+    Hiding = 67,
+    MassHiding = 68,
+    SoulShield = 69,
+    Revelation = 70,
+    BlessedArmour = 71,
+    EnergyRepulsor = 72,
     TrapHexagon = 73,
+    Purification = 74,
+    MassHealing = 75,
+    Hallucination = 76,
+    UltimateEnhancer = 77,
+    SummonShinsu = 78,
+    Reincarnation = 79,
+    SummonHolyDeva = 80,
+    Curse = 81,
+    Plague = 82,
+    PoisonCloud = 83,
+    EnergyShield = 84,
+    PetEnhancer = 85,
+    HealingCircle = 86,
+    FatalSword = 91,
+    DoubleSlash = 92,
+    Haste = 93,
+    FlashDash = 94,
+    LightBody = 95,
+    HeavenlySword = 96,
+    FireBurst = 97,
+    Trap = 98,
+    PoisonSword = 99,
+    MoonLight = 100,
+    MPEater = 101,
+    SwiftFeet = 102,
+    DarkBody = 103,
+    Hemorrhage = 104,
+    CrescentSlash = 105,
+    MoonMist = 106,
+    CatTongue = 107,
+    Focus = 121,
+    StraightShot = 122,
+    DoubleShot = 123,
+    ExplosiveTrap = 124,
+    DelayedExplosion = 125,
+    Meditation = 126,
+    BackStep = 127,
+    ElementalShot = 128,
+    Concentration = 129,
+    Stonetrap = 130,
+    ElementalBarrier = 131,
+    SummonVampire = 132,
+    VampireShot = 133,
+    SummonToad = 134,
+    PoisonShot = 135,
+    CrippleShot = 136,
+    SummonSnakes = 137,
+    NapalmShot = 138,
+    OneWithNature = 139,
+    BindingShot = 140,
+    MentalState = 141,
+    Blink = 151,
+    Portal = 152,
+    BattleCry = 153,
+    FireBounce = 154,
+    MeteorShower = 155,
+    DigOutZombie = 200,
+    Rubble = 201,
+    MapLightning = 202,
+    MapLava = 203,
+    MapQuake1 = 204,
+    MapQuake2 = 205,
     DigOutArmadillo = 206,
     GeneralMeowMeowThunder = 207,
+    StoneGolemQuake = 208,
+    EarthGolemPile = 209,
+    TreeQueenRoot = 210,
+    TreeQueenMassRoots = 211,
+    TreeQueenGroundRoots = 212,
     TucsonGeneralRock = 213,
+    FlyingStatueIceTornado = 214,
+    DarkOmaKingNuke = 215,
+    HornedSorcererDustTornado = 216,
+    HornedCommanderRockFall = 217,
+    HornedCommanderRockSpike = 218,
 }
 
 impl TryFrom<u8> for Spell {
@@ -211,15 +335,277 @@ impl TryFrom<u8> for Spell {
     fn try_from(value: u8) -> Result<Self> {
         match value {
             0 => Ok(Self::None),
+            1 => Ok(Self::Fencing),
+            2 => Ok(Self::Slaying),
+            3 => Ok(Self::Thrusting),
+            4 => Ok(Self::HalfMoon),
+            5 => Ok(Self::ShoulderDash),
+            6 => Ok(Self::TwinDrakeBlade),
+            7 => Ok(Self::Entrapment),
+            8 => Ok(Self::FlamingSword),
+            9 => Ok(Self::LionRoar),
+            10 => Ok(Self::CrossHalfMoon),
+            11 => Ok(Self::BladeAvalanche),
+            12 => Ok(Self::ProtectionField),
+            13 => Ok(Self::Rage),
+            14 => Ok(Self::CounterAttack),
+            15 => Ok(Self::SlashingBurst),
+            16 => Ok(Self::Fury),
+            17 => Ok(Self::ImmortalSkin),
+            31 => Ok(Self::FireBall),
+            32 => Ok(Self::Repulsion),
+            33 => Ok(Self::ElectricShock),
+            34 => Ok(Self::GreatFireBall),
+            35 => Ok(Self::HellFire),
+            36 => Ok(Self::ThunderBolt),
+            37 => Ok(Self::Teleport),
+            38 => Ok(Self::FireBang),
+            39 => Ok(Self::FireWall),
+            40 => Ok(Self::Lightning),
+            41 => Ok(Self::FrostCrunch),
+            42 => Ok(Self::ThunderStorm),
+            43 => Ok(Self::MagicShield),
+            44 => Ok(Self::TurnUndead),
+            45 => Ok(Self::Vampirism),
+            46 => Ok(Self::IceStorm),
+            47 => Ok(Self::FlameDisruptor),
+            48 => Ok(Self::Mirroring),
+            49 => Ok(Self::FlameField),
+            50 => Ok(Self::Blizzard),
+            51 => Ok(Self::MagicBooster),
+            52 => Ok(Self::MeteorStrike),
+            53 => Ok(Self::IceThrust),
+            54 => Ok(Self::FastMove),
+            55 => Ok(Self::StormEscape),
             61 => Ok(Self::Healing),
+            62 => Ok(Self::SpiritSword),
+            63 => Ok(Self::Poisoning),
+            64 => Ok(Self::SoulFireBall),
+            65 => Ok(Self::SummonSkeleton),
+            67 => Ok(Self::Hiding),
+            68 => Ok(Self::MassHiding),
+            69 => Ok(Self::SoulShield),
+            70 => Ok(Self::Revelation),
+            71 => Ok(Self::BlessedArmour),
+            72 => Ok(Self::EnergyRepulsor),
             73 => Ok(Self::TrapHexagon),
+            74 => Ok(Self::Purification),
+            75 => Ok(Self::MassHealing),
+            76 => Ok(Self::Hallucination),
+            77 => Ok(Self::UltimateEnhancer),
+            78 => Ok(Self::SummonShinsu),
+            79 => Ok(Self::Reincarnation),
+            80 => Ok(Self::SummonHolyDeva),
+            81 => Ok(Self::Curse),
+            82 => Ok(Self::Plague),
+            83 => Ok(Self::PoisonCloud),
+            84 => Ok(Self::EnergyShield),
+            85 => Ok(Self::PetEnhancer),
+            86 => Ok(Self::HealingCircle),
+            91 => Ok(Self::FatalSword),
+            92 => Ok(Self::DoubleSlash),
+            93 => Ok(Self::Haste),
+            94 => Ok(Self::FlashDash),
+            95 => Ok(Self::LightBody),
+            96 => Ok(Self::HeavenlySword),
+            97 => Ok(Self::FireBurst),
+            98 => Ok(Self::Trap),
+            99 => Ok(Self::PoisonSword),
+            100 => Ok(Self::MoonLight),
+            101 => Ok(Self::MPEater),
+            102 => Ok(Self::SwiftFeet),
+            103 => Ok(Self::DarkBody),
+            104 => Ok(Self::Hemorrhage),
+            105 => Ok(Self::CrescentSlash),
+            106 => Ok(Self::MoonMist),
+            107 => Ok(Self::CatTongue),
+            121 => Ok(Self::Focus),
+            122 => Ok(Self::StraightShot),
+            123 => Ok(Self::DoubleShot),
+            124 => Ok(Self::ExplosiveTrap),
+            125 => Ok(Self::DelayedExplosion),
+            126 => Ok(Self::Meditation),
+            127 => Ok(Self::BackStep),
+            128 => Ok(Self::ElementalShot),
+            129 => Ok(Self::Concentration),
+            130 => Ok(Self::Stonetrap),
+            131 => Ok(Self::ElementalBarrier),
+            132 => Ok(Self::SummonVampire),
+            133 => Ok(Self::VampireShot),
+            134 => Ok(Self::SummonToad),
+            135 => Ok(Self::PoisonShot),
+            136 => Ok(Self::CrippleShot),
+            137 => Ok(Self::SummonSnakes),
+            138 => Ok(Self::NapalmShot),
+            139 => Ok(Self::OneWithNature),
+            140 => Ok(Self::BindingShot),
+            141 => Ok(Self::MentalState),
+            151 => Ok(Self::Blink),
+            152 => Ok(Self::Portal),
+            153 => Ok(Self::BattleCry),
+            154 => Ok(Self::FireBounce),
+            155 => Ok(Self::MeteorShower),
+            200 => Ok(Self::DigOutZombie),
+            201 => Ok(Self::Rubble),
+            202 => Ok(Self::MapLightning),
+            203 => Ok(Self::MapLava),
+            204 => Ok(Self::MapQuake1),
+            205 => Ok(Self::MapQuake2),
             206 => Ok(Self::DigOutArmadillo),
             207 => Ok(Self::GeneralMeowMeowThunder),
+            208 => Ok(Self::StoneGolemQuake),
+            209 => Ok(Self::EarthGolemPile),
+            210 => Ok(Self::TreeQueenRoot),
+            211 => Ok(Self::TreeQueenMassRoots),
+            212 => Ok(Self::TreeQueenGroundRoots),
             213 => Ok(Self::TucsonGeneralRock),
+            214 => Ok(Self::FlyingStatueIceTornado),
+            215 => Ok(Self::DarkOmaKingNuke),
+            216 => Ok(Self::HornedSorcererDustTornado),
+            217 => Ok(Self::HornedCommanderRockFall),
+            218 => Ok(Self::HornedCommanderRockSpike),
             other => Err(PacketCodecError::InvalidEnumValue {
                 type_name: "Spell",
                 value: other,
             }),
+        }
+    }
+}
+
+impl Spell {
+    pub fn from_crystal_name(name: &str) -> Option<Self> {
+        match name {
+            "None" => Some(Self::None),
+            "Fencing" => Some(Self::Fencing),
+            "Slaying" => Some(Self::Slaying),
+            "Thrusting" => Some(Self::Thrusting),
+            "HalfMoon" => Some(Self::HalfMoon),
+            "ShoulderDash" => Some(Self::ShoulderDash),
+            "TwinDrakeBlade" => Some(Self::TwinDrakeBlade),
+            "Entrapment" => Some(Self::Entrapment),
+            "FlamingSword" => Some(Self::FlamingSword),
+            "LionRoar" => Some(Self::LionRoar),
+            "CrossHalfMoon" => Some(Self::CrossHalfMoon),
+            "BladeAvalanche" => Some(Self::BladeAvalanche),
+            "ProtectionField" => Some(Self::ProtectionField),
+            "Rage" => Some(Self::Rage),
+            "CounterAttack" => Some(Self::CounterAttack),
+            "SlashingBurst" => Some(Self::SlashingBurst),
+            "Fury" => Some(Self::Fury),
+            "ImmortalSkin" => Some(Self::ImmortalSkin),
+            "FireBall" => Some(Self::FireBall),
+            "Repulsion" => Some(Self::Repulsion),
+            "ElectricShock" => Some(Self::ElectricShock),
+            "GreatFireBall" => Some(Self::GreatFireBall),
+            "HellFire" => Some(Self::HellFire),
+            "ThunderBolt" => Some(Self::ThunderBolt),
+            "Teleport" => Some(Self::Teleport),
+            "FireBang" => Some(Self::FireBang),
+            "FireWall" => Some(Self::FireWall),
+            "Lightning" => Some(Self::Lightning),
+            "FrostCrunch" => Some(Self::FrostCrunch),
+            "ThunderStorm" => Some(Self::ThunderStorm),
+            "MagicShield" => Some(Self::MagicShield),
+            "TurnUndead" => Some(Self::TurnUndead),
+            "Vampirism" => Some(Self::Vampirism),
+            "IceStorm" => Some(Self::IceStorm),
+            "FlameDisruptor" => Some(Self::FlameDisruptor),
+            "Mirroring" => Some(Self::Mirroring),
+            "FlameField" => Some(Self::FlameField),
+            "Blizzard" => Some(Self::Blizzard),
+            "MagicBooster" => Some(Self::MagicBooster),
+            "MeteorStrike" => Some(Self::MeteorStrike),
+            "IceThrust" => Some(Self::IceThrust),
+            "FastMove" => Some(Self::FastMove),
+            "StormEscape" => Some(Self::StormEscape),
+            "Healing" => Some(Self::Healing),
+            "SpiritSword" => Some(Self::SpiritSword),
+            "Poisoning" => Some(Self::Poisoning),
+            "SoulFireBall" => Some(Self::SoulFireBall),
+            "SummonSkeleton" => Some(Self::SummonSkeleton),
+            "Hiding" => Some(Self::Hiding),
+            "MassHiding" => Some(Self::MassHiding),
+            "SoulShield" => Some(Self::SoulShield),
+            "Revelation" => Some(Self::Revelation),
+            "BlessedArmour" => Some(Self::BlessedArmour),
+            "EnergyRepulsor" => Some(Self::EnergyRepulsor),
+            "TrapHexagon" => Some(Self::TrapHexagon),
+            "Purification" => Some(Self::Purification),
+            "MassHealing" => Some(Self::MassHealing),
+            "Hallucination" => Some(Self::Hallucination),
+            "UltimateEnhancer" => Some(Self::UltimateEnhancer),
+            "SummonShinsu" => Some(Self::SummonShinsu),
+            "Reincarnation" => Some(Self::Reincarnation),
+            "SummonHolyDeva" => Some(Self::SummonHolyDeva),
+            "Curse" => Some(Self::Curse),
+            "Plague" => Some(Self::Plague),
+            "PoisonCloud" => Some(Self::PoisonCloud),
+            "EnergyShield" => Some(Self::EnergyShield),
+            "PetEnhancer" => Some(Self::PetEnhancer),
+            "HealingCircle" => Some(Self::HealingCircle),
+            "FatalSword" => Some(Self::FatalSword),
+            "DoubleSlash" => Some(Self::DoubleSlash),
+            "Haste" => Some(Self::Haste),
+            "FlashDash" => Some(Self::FlashDash),
+            "LightBody" => Some(Self::LightBody),
+            "HeavenlySword" => Some(Self::HeavenlySword),
+            "FireBurst" => Some(Self::FireBurst),
+            "Trap" => Some(Self::Trap),
+            "PoisonSword" => Some(Self::PoisonSword),
+            "MoonLight" => Some(Self::MoonLight),
+            "MPEater" => Some(Self::MPEater),
+            "SwiftFeet" => Some(Self::SwiftFeet),
+            "DarkBody" => Some(Self::DarkBody),
+            "Hemorrhage" => Some(Self::Hemorrhage),
+            "CrescentSlash" => Some(Self::CrescentSlash),
+            "MoonMist" => Some(Self::MoonMist),
+            "CatTongue" => Some(Self::CatTongue),
+            "Focus" => Some(Self::Focus),
+            "StraightShot" => Some(Self::StraightShot),
+            "DoubleShot" => Some(Self::DoubleShot),
+            "ExplosiveTrap" => Some(Self::ExplosiveTrap),
+            "DelayedExplosion" => Some(Self::DelayedExplosion),
+            "Meditation" => Some(Self::Meditation),
+            "BackStep" => Some(Self::BackStep),
+            "ElementalShot" => Some(Self::ElementalShot),
+            "Concentration" => Some(Self::Concentration),
+            "Stonetrap" => Some(Self::Stonetrap),
+            "ElementalBarrier" => Some(Self::ElementalBarrier),
+            "SummonVampire" => Some(Self::SummonVampire),
+            "VampireShot" => Some(Self::VampireShot),
+            "SummonToad" => Some(Self::SummonToad),
+            "PoisonShot" => Some(Self::PoisonShot),
+            "CrippleShot" => Some(Self::CrippleShot),
+            "SummonSnakes" => Some(Self::SummonSnakes),
+            "NapalmShot" => Some(Self::NapalmShot),
+            "OneWithNature" => Some(Self::OneWithNature),
+            "BindingShot" => Some(Self::BindingShot),
+            "MentalState" => Some(Self::MentalState),
+            "Blink" => Some(Self::Blink),
+            "Portal" => Some(Self::Portal),
+            "BattleCry" => Some(Self::BattleCry),
+            "FireBounce" => Some(Self::FireBounce),
+            "MeteorShower" => Some(Self::MeteorShower),
+            "DigOutZombie" => Some(Self::DigOutZombie),
+            "Rubble" => Some(Self::Rubble),
+            "MapLightning" => Some(Self::MapLightning),
+            "MapLava" => Some(Self::MapLava),
+            "MapQuake1" => Some(Self::MapQuake1),
+            "MapQuake2" => Some(Self::MapQuake2),
+            "DigOutArmadillo" => Some(Self::DigOutArmadillo),
+            "GeneralMeowMeowThunder" => Some(Self::GeneralMeowMeowThunder),
+            "StoneGolemQuake" => Some(Self::StoneGolemQuake),
+            "EarthGolemPile" => Some(Self::EarthGolemPile),
+            "TreeQueenRoot" => Some(Self::TreeQueenRoot),
+            "TreeQueenMassRoots" => Some(Self::TreeQueenMassRoots),
+            "TreeQueenGroundRoots" => Some(Self::TreeQueenGroundRoots),
+            "TucsonGeneralRock" => Some(Self::TucsonGeneralRock),
+            "FlyingStatueIceTornado" => Some(Self::FlyingStatueIceTornado),
+            "DarkOmaKingNuke" => Some(Self::DarkOmaKingNuke),
+            "HornedSorcererDustTornado" => Some(Self::HornedSorcererDustTornado),
+            "HornedCommanderRockFall" => Some(Self::HornedCommanderRockFall),
+            "HornedCommanderRockSpike" => Some(Self::HornedCommanderRockSpike),
+            _ => None,
         }
     }
 }
@@ -241,6 +627,72 @@ impl Point {
     pub fn encode(&self, writer: &mut PacketWriter) {
         writer.write_i32(self.x);
         writer.write_i32(self.y);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientMagic {
+    pub name: String,
+    pub spell: Spell,
+    pub base_cost: u8,
+    pub level_cost: u8,
+    pub icon: u8,
+    pub level1: u8,
+    pub level2: u8,
+    pub level3: u8,
+    pub need1: u16,
+    pub need2: u16,
+    pub need3: u16,
+    pub level: u8,
+    pub key: u8,
+    pub experience: u16,
+    pub delay: i64,
+    pub range: u8,
+    pub cast_time: i64,
+}
+
+impl ClientMagic {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            name: reader.read_string()?,
+            spell: Spell::try_from(reader.read_u8()?)?,
+            base_cost: reader.read_u8()?,
+            level_cost: reader.read_u8()?,
+            icon: reader.read_u8()?,
+            level1: reader.read_u8()?,
+            level2: reader.read_u8()?,
+            level3: reader.read_u8()?,
+            need1: reader.read_u16()?,
+            need2: reader.read_u16()?,
+            need3: reader.read_u16()?,
+            level: reader.read_u8()?,
+            key: reader.read_u8()?,
+            experience: reader.read_u16()?,
+            delay: reader.read_i64()?,
+            range: reader.read_u8()?,
+            cast_time: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.spell as u8);
+        writer.write_u8(self.base_cost);
+        writer.write_u8(self.level_cost);
+        writer.write_u8(self.icon);
+        writer.write_u8(self.level1);
+        writer.write_u8(self.level2);
+        writer.write_u8(self.level3);
+        writer.write_u16(self.need1);
+        writer.write_u16(self.need2);
+        writer.write_u16(self.need3);
+        writer.write_u8(self.level);
+        writer.write_u8(self.key);
+        writer.write_u16(self.experience);
+        writer.write_i64(self.delay);
+        writer.write_u8(self.range);
+        writer.write_i64(self.cast_time);
+        Ok(())
     }
 }
 
@@ -643,6 +1095,95 @@ impl UserItem {
 pub struct UserItemStat {
     pub stat: u8,
     pub value: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientBuff {
+    pub buff_type: u8,
+    pub visible: bool,
+    pub object_id: u32,
+    pub expire_time: i64,
+    pub infinite: bool,
+    pub paused: bool,
+    pub stats: Vec<UserItemStat>,
+    pub values: Vec<i32>,
+}
+
+impl ClientBuff {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let buff_type = reader.read_u8()?;
+        let visible = reader.read_bool()?;
+        let object_id = reader.read_u32()?;
+        let expire_time = reader.read_i64()?;
+        let infinite = reader.read_bool()?;
+        let paused = reader.read_bool()?;
+        let stats = decode_stat_values(reader, "client_buff_stats")?;
+        let value_count = reader.read_i32()?;
+        if value_count < 0 {
+            return Err(PacketCodecError::NegativeLength {
+                field: "client_buff_values",
+                value: value_count,
+            });
+        }
+        let mut values = Vec::with_capacity(value_count as usize);
+        for _ in 0..value_count {
+            values.push(reader.read_i32()?);
+        }
+
+        Ok(Self {
+            buff_type,
+            visible,
+            object_id,
+            expire_time,
+            infinite,
+            paused,
+            stats,
+            values,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u8(self.buff_type);
+        writer.write_bool(self.visible);
+        writer.write_u32(self.object_id);
+        writer.write_i64(self.expire_time);
+        writer.write_bool(self.infinite);
+        writer.write_bool(self.paused);
+        encode_stat_values(writer, &self.stats);
+        writer.write_i32(self.values.len() as i32);
+        for value in &self.values {
+            writer.write_i32(*value);
+        }
+    }
+}
+
+fn decode_stat_values(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<UserItemStat>> {
+    let count = reader.read_i32()?;
+    if count < 0 {
+        return Err(PacketCodecError::NegativeLength {
+            field,
+            value: count,
+        });
+    }
+    let mut values = Vec::with_capacity(count as usize);
+    for _ in 0..count {
+        values.push(UserItemStat {
+            stat: reader.read_u8()?,
+            value: reader.read_i32()?,
+        });
+    }
+    Ok(values)
+}
+
+fn encode_stat_values(writer: &mut PacketWriter, stats: &[UserItemStat]) {
+    writer.write_i32(stats.len() as i32);
+    for stat in stats {
+        writer.write_u8(stat.stat);
+        writer.write_i32(stat.value);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1273,6 +1814,26 @@ impl ObjectHealthInfo {
         writer.write_u32(self.object_id);
         writer.write_u8(self.percent);
         writer.write_u8(self.expire);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ObjectManaInfo {
+    pub object_id: u32,
+    pub percent: u8,
+}
+
+impl ObjectManaInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            object_id: reader.read_u32()?,
+            percent: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u32(self.object_id);
+        writer.write_u8(self.percent);
     }
 }
 

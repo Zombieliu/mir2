@@ -18,10 +18,10 @@ pub use trace::{
     PacketTraceDirection, PacketTraceEntry,
 };
 pub use types::{
-    ChatType, ItemInfo, MapInformation, MirClass, MirDirection, MirGender, MirGridType,
-    MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo,
-    ObjectHealthInfo, ObjectItemInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo,
-    ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point, SelectInfo, Spell, StruckInfo,
-    UserInformation, UserItem, UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo,
-    UserItemStat, UserLocation,
+    ChatType, ClientBuff, ClientMagic, ItemInfo, MapInformation, MirClass, MirDirection, MirGender,
+    MirGridType, MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
+    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
+    Point, SelectInfo, Spell, StruckInfo, UserInformation, UserItem, UserItemExpireInfo,
+    UserItemRentalInformation, UserItemSealedInfo, UserItemStat, UserLocation,
 };

@@ -1924,6 +1924,9 @@ export default function HomePage() {
       case "ObjectHealth":
         applyObjectHealthPacket(payload);
         break;
+      case "ObjectMana":
+        applyObjectManaPacket(payload);
+        break;
       case "Chat":
         appendLog(
           stringOrFallback(payload.message, ""),
@@ -2320,6 +2323,19 @@ export default function HomePage() {
         }),
       };
     });
+  }
+
+  function applyObjectManaPacket(payload: Record<string, unknown>) {
+    const objectId = stringifyId(payload.objectId);
+    const percent = numberOrUndefined(payload.percent);
+
+    if (typeof percent !== "number") return;
+
+    setWorld((current) => ({
+      ...current,
+      playerMp:
+        current.playerObjectId === objectId ? Math.max(0, Math.min(100, Math.round(percent))) : current.playerMp,
+    }));
   }
 
   function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot) {
