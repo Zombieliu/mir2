@@ -1,6 +1,7 @@
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{LanguageCode, MapBounds};
 use mir2_protocol::{MapInformation, MirDirection, Point};
+use serde::{Deserialize, Serialize};
 
 use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
 
@@ -178,6 +179,65 @@ impl InventoryResource {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub(super) struct ItemRentalRecordState {
+    pub(super) item_id: u64,
+    pub(super) item_name: String,
+    pub(super) renting_player_name: String,
+    pub(super) item_return_date_binary_datetime: i64,
+}
+
+#[derive(Debug, Clone)]
+pub(super) struct ActiveItemRentalState {
+    pub(super) partner_name: String,
+    pub(super) fee: u32,
+    pub(super) days: u32,
+    pub(super) deposited_item: Option<ItemState>,
+    pub(super) deposited_from: Option<i32>,
+    pub(super) gold_locked: bool,
+    pub(super) item_locked: bool,
+}
+
+#[derive(Resource, Debug, Clone)]
+pub(super) struct ItemRentalResource {
+    pub(super) rented_items: Vec<ItemRentalRecordState>,
+    pub(super) has_rented_item: bool,
+    pub(super) active: Option<ActiveItemRentalState>,
+    pub(super) default_partner_name: String,
+}
+
+impl ItemRentalResource {
+    pub(super) fn new() -> Self {
+        Self {
+            rented_items: Vec::new(),
+            has_rented_item: false,
+            active: None,
+            default_partner_name: "Crystal Partner".to_string(),
+        }
+    }
+}
+
+#[derive(Resource, Debug, Clone)]
+pub(super) struct FishingResource {
+    pub(super) fishing: bool,
+    pub(super) auto_cast: bool,
+    pub(super) progress_percent: i32,
+    pub(super) chance_percent: i32,
+    pub(super) found_fish: bool,
+}
+
+impl FishingResource {
+    pub(super) fn new() -> Self {
+        Self {
+            fishing: false,
+            auto_cast: false,
+            progress_percent: 0,
+            chance_percent: 0,
+            found_fish: false,
+        }
+    }
+}
+
 #[derive(Resource, Debug, Clone)]
 pub(super) struct QuestResource {
     pub(super) quests: Vec<QuestState>,
@@ -208,6 +268,21 @@ pub(super) struct BuffResource {
 impl BuffResource {
     pub(super) fn new() -> Self {
         Self { buffs: Vec::new() }
+    }
+}
+
+#[derive(Resource, Debug, Clone)]
+pub(super) struct MountResource {
+    pub(super) mount_type: i16,
+    pub(super) riding_mount: bool,
+}
+
+impl MountResource {
+    pub(super) fn new() -> Self {
+        Self {
+            mount_type: -1,
+            riding_mount: false,
+        }
     }
 }
 

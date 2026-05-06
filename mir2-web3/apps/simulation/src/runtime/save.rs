@@ -28,8 +28,8 @@ use super::map::{
 use super::packets::*;
 use super::quests::QuestState;
 use super::resources::{
-    current_language, BuffResource, InventoryResource, MapRuntimeResource, NpcStateResource,
-    ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
+    current_language, BuffResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
+    NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
     PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
     SessionResource, SkillResource, Stage5SystemsResource,
 };
@@ -71,6 +71,8 @@ pub(super) fn default_save_for_character(
     save.npc_saved_values_json = Vec::new();
     save.npc_buy_back_items_json = Vec::new();
     save.npc_used_goods_items_json = Vec::new();
+    save.item_rental_records_json = Vec::new();
+    save.has_rented_item = false;
     save.stage5_systems_json = Some(
         serde_json::to_string(&Stage5SystemsState::default())
             .expect("stage5 systems state should serialize"),
@@ -114,6 +116,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let quests = world.resource::<QuestResource>();
     let skills = world.resource::<SkillResource>();
     let npc_state = world.resource::<NpcStateResource>();
+    let rental = world.resource::<ItemRentalResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
     let character = world
         .resource::<SessionResource>()
@@ -151,6 +154,8 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         npc_saved_values_json: encode_state_vec(&npc_state.npc_saved_values),
         npc_buy_back_items_json: encode_state_vec(&npc_state.npc_buy_back_items),
         npc_used_goods_items_json: encode_state_vec(&npc_state.npc_used_goods_items),
+        item_rental_records_json: encode_state_vec(&rental.rented_items),
+        has_rented_item: rental.has_rented_item,
         stage5_systems_json: Some(
             serde_json::to_string(&stage5.stage5_systems)
                 .expect("stage5 systems state should serialize"),
@@ -492,6 +497,8 @@ pub(super) fn crystal_new_character_save(character: CharacterRecord) -> Characte
     save.equipment_items_explicit_empty = true;
     save.quest_states_json = Vec::new();
     save.skill_states_json = Vec::new();
+    save.item_rental_records_json = Vec::new();
+    save.has_rented_item = false;
     save.stage5_systems_json = Some(
         serde_json::to_string(&Stage5SystemsState::default())
             .expect("stage5 systems state should serialize"),
@@ -700,6 +707,12 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     world.resource_mut::<SkillResource>().skills =
         decode_state_vec(&save.skill_states_json).unwrap_or_default();
     world.resource_mut::<BuffResource>().buffs = Vec::new();
+    {
+        let mut rental = world.resource_mut::<ItemRentalResource>();
+        rental.rented_items = decode_state_vec(&save.item_rental_records_json).unwrap_or_default();
+        rental.has_rented_item = save.has_rented_item;
+        rental.active = None;
+    }
     super::session::set_runtime_tick(world, 0);
     world.resource_mut::<ObjectIdAllocatorResource>().reset();
 }
@@ -876,6 +889,12 @@ impl SimulationSession {
                         .hair,
                     &resources.inventory_items,
                     &resources.equipment_items,
+                    self.app
+                        .world()
+                        .resource::<Stage5SystemsResource>()
+                        .stage5_systems
+                        .hero
+                        .as_ref(),
                 ),
             },
         ]);

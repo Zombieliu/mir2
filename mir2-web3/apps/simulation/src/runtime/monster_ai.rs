@@ -15,6 +15,7 @@ use super::components::{
 use super::crystal_compat::*;
 use super::drops::tick_ground_drop_expiry;
 use super::equipment::total_defence_bonus;
+use super::fishing::tick_fishing;
 use super::inventory::sync_expired_expanded_storage;
 use super::monsters::*;
 use super::movement::*;
@@ -3905,6 +3906,8 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     sync_expired_expanded_storage(world, &mut packets);
     tick_crystal_normal_potion_restore(world, &mut packets);
     tick_ground_drop_expiry(world, tick);
+    tick_stage5_intelligent_creatures(world, tick, &mut packets);
+    tick_fishing(world, &mut packets);
     resolve_pending_combat_actions(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
     resolve_pending_monster_spawns(world, tick);

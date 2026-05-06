@@ -24,8 +24,9 @@ use super::crystal_compat::*;
 use super::drops::drop_item_packet;
 use super::equipment::{
     equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
-    repair_equipped_durability, repair_equipped_weapon_with_oil, slugify_name, try_equip_item,
-    try_luck_weapon, CrystalLuckWeaponOutcome, EquipmentState,
+    repair_equipped_durability, repair_equipped_weapon_with_oil, slugify_name,
+    toggle_mount_ride_from_use_item, try_equip_item, try_luck_weapon, CrystalLuckWeaponOutcome,
+    EquipmentState,
 };
 use super::inventory::{
     add_minutes_to_binary_datetime, binary_datetime_ticks, consume_item_at_use_location,
@@ -1461,6 +1462,10 @@ pub(super) fn use_item(
     key: &str,
     packet_ack: Option<(u64, MirGridType)>,
 ) -> Vec<ServerPacket> {
+    if let Some(packets) = toggle_mount_ride_from_use_item(world, packet_ack) {
+        return packets;
+    }
+
     let location = {
         let resources = world.resource::<InventoryResource>();
         find_use_item_location(resources, key, packet_ack)

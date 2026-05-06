@@ -163,11 +163,14 @@ pub(super) const DEFAULT_CRYSTAL_CLIENT_ROOT: &str = r"E:\mir2\Crystal\Build\Cli
 pub(super) const CRYSTAL_BIND_DONT_DROP: i16 = 0x0002;
 pub(super) const CRYSTAL_BIND_DONT_SELL: i16 = 0x0004;
 pub(super) const CRYSTAL_BIND_DONT_STORE: i16 = 0x0008;
+pub(super) const CRYSTAL_BIND_DONT_TRADE: i16 = 0x0010;
 pub(super) const CRYSTAL_BIND_DONT_REPAIR: i16 = 0x0020;
 pub(super) const CRYSTAL_BIND_DONT_UPGRADE: i16 = 0x0040;
 pub(super) const CRYSTAL_BIND_DESTROY_ON_DROP: i16 = 0x0080;
 pub(super) const CRYSTAL_BIND_ON_EQUIP: i16 = 0x0200;
 pub(super) const CRYSTAL_BIND_NO_SREPAIR: i16 = 0x0400;
+pub(super) const CRYSTAL_BIND_UNABLE_TO_RENT: i16 = 0x1000;
+pub(super) const CRYSTAL_BIND_UNABLE_TO_DISASSEMBLE: i16 = 0x2000;
 
 pub(super) const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
 pub(super) const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;

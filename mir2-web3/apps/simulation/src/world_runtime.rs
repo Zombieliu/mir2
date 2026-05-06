@@ -1,3 +1,4 @@
+use crate::runtime::SharedTradeOffer;
 use crate::{
     ActiveSessionIdentity, GroundDropSnapshot, SimulationConfig, SimulationSession, WorldSnapshot,
 };
@@ -18,6 +19,7 @@ pub enum WorldCommand {
     CastSkill { key: String },
     TransferMap { key: String },
     Stage5Command { action: String, args: Vec<String> },
+    ItemRentalRequest { partner_name: String, renting: bool },
     SetLanguage { language: String },
     Tick,
 }
@@ -37,6 +39,7 @@ pub enum WorldCommandKind {
     CastSkill,
     TransferMap,
     Stage5Command(String),
+    ItemRentalRequest,
     SetLanguage,
     Tick,
 }
@@ -59,6 +62,7 @@ impl WorldCommand {
             Self::CastSkill { .. } => WorldCommandKind::CastSkill,
             Self::TransferMap { .. } => WorldCommandKind::TransferMap,
             Self::Stage5Command { action, .. } => WorldCommandKind::Stage5Command(action.clone()),
+            Self::ItemRentalRequest { .. } => WorldCommandKind::ItemRentalRequest,
             Self::SetLanguage { .. } => WorldCommandKind::SetLanguage,
             Self::Tick => WorldCommandKind::Tick,
         }
@@ -131,6 +135,30 @@ impl InProcessWorldRuntime {
     ) -> Vec<ServerPacket> {
         self.session.apply_shared_ground_drop_pickup(drop)
     }
+
+    pub fn item_rental_request(&mut self, partner_name: &str, renting: bool) -> Vec<ServerPacket> {
+        self.session.item_rental_request(partner_name, renting)
+    }
+
+    pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
+        self.session.trade_request(partner_name)
+    }
+
+    pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
+        self.session.shared_trade_confirm()
+    }
+
+    pub fn shared_trade_cancel(&mut self, unlock: bool) -> Vec<ServerPacket> {
+        self.session.shared_trade_cancel(unlock)
+    }
+
+    pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        self.session.apply_shared_trade_delivery(offer)
+    }
+
+    pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        self.session.rollback_shared_trade_offer(offer)
+    }
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
@@ -161,6 +189,10 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Stage5Command { action, args } => {
                 self.session.stage5_command(&action, args)
             }
+            WorldCommand::ItemRentalRequest {
+                partner_name,
+                renting,
+            } => self.session.item_rental_request(&partner_name, renting),
             WorldCommand::SetLanguage { language } => {
                 self.session.set_language_code(&language)?;
                 Vec::new()

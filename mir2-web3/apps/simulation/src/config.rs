@@ -14,7 +14,8 @@ use mir2_game_data::{
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
-    MapInformation, MirClass, MirDirection, MirGender, Point, SelectInfo, UserItemStat,
+    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
+    SelectInfo, UserItemStat,
 };
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
@@ -539,6 +540,10 @@ pub struct CharacterSaveRecord {
     #[serde(default)]
     pub npc_used_goods_items_json: Vec<String>,
     #[serde(default)]
+    pub item_rental_records_json: Vec<String>,
+    #[serde(default)]
+    pub has_rented_item: bool,
+    #[serde(default)]
     pub stage5_systems_json: Option<String>,
 }
 
@@ -590,6 +595,8 @@ impl CharacterSaveRecord {
             npc_saved_values_json: Vec::new(),
             npc_buy_back_items_json: Vec::new(),
             npc_used_goods_items_json: Vec::new(),
+            item_rental_records_json: Vec::new(),
+            has_rented_item: false,
             stage5_systems_json: None,
         }
     }
@@ -2173,6 +2180,8 @@ pub struct Stage5SystemsState {
     pub appearance: Stage5AppearanceState,
     #[serde(default)]
     pub name_lists: Vec<String>,
+    #[serde(default)]
+    pub intelligent_creatures: Vec<ClientIntelligentCreature>,
 }
 
 impl Default for Stage5SystemsState {
@@ -2190,6 +2199,7 @@ impl Default for Stage5SystemsState {
             profession: Stage5ProfessionState::default(),
             appearance: Stage5AppearanceState::default(),
             name_lists: Vec::new(),
+            intelligent_creatures: Vec::new(),
         }
     }
 }
@@ -2225,6 +2235,8 @@ pub struct Stage5GuildState {
 pub struct Stage5SocialState {
     pub friends: Vec<String>,
     pub blocked: Vec<String>,
+    #[serde(default)]
+    pub memos: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2472,8 +2484,12 @@ fn stage5_mail_character_matches(
 pub struct Stage5TradeState {
     pub partner: String,
     pub offered_items: Vec<String>,
+    #[serde(default)]
+    pub offered_slots: BTreeMap<u8, u8>,
     pub offered_gold: u32,
     pub accepted: bool,
+    #[serde(default)]
+    pub locked: bool,
     pub completed: bool,
 }
 
@@ -2535,7 +2551,23 @@ pub struct Stage5AppearanceState {
 pub struct Stage5HeroState {
     pub name: String,
     pub level: u16,
+    #[serde(default = "default_stage5_hero_class")]
+    pub class: MirClass,
+    #[serde(default = "default_stage5_hero_gender")]
+    pub gender: MirGender,
     pub behaviour: u8,
+    #[serde(default)]
+    pub experience: u32,
+    #[serde(default)]
+    pub spawned: bool,
+}
+
+fn default_stage5_hero_class() -> MirClass {
+    MirClass::Warrior
+}
+
+fn default_stage5_hero_gender() -> MirGender {
+    MirGender::Male
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
