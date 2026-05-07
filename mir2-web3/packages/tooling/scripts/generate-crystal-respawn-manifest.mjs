@@ -150,6 +150,8 @@ function main() {
         no_throw_item: map.no_throw_item,
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
+        no_mount: map.no_mount,
+        need_bridle: map.need_bridle,
         safe_zones: map.safe_zones,
         safe_zone_spells: objectInfo.safe_zone_spells,
         movement_count: map.movements.length,
@@ -377,8 +379,8 @@ function parseMaps(reader) {
     }
 
     reader.readUInt8();
-    reader.readBoolean();
-    reader.readBoolean();
+    const no_mount = reader.readBoolean();
+    const need_bridle = reader.readBoolean();
     reader.readBoolean();
     reader.readUInt16();
     reader.readBoolean();
@@ -406,6 +408,8 @@ function parseMaps(reader) {
       no_throw_item,
       no_drop_player,
       no_drop_monster,
+      no_mount,
+      need_bridle,
       safe_zones,
       movements,
       respawns,

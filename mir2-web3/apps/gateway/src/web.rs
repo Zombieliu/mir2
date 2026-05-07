@@ -11,6 +11,7 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
+    packet_payload_hex, server_packet_display_name, server_packet_raw_display_name,
     ClientIntelligentCreature, ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point,
     ServerPacket, Spell,
 };
@@ -1660,12 +1661,65 @@ async fn send_error_message(
 
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
-        ServerPacket::Raw { packet_id, payload } => json!({
+        ServerPacket::Raw { packet_id, payload } => {
+            let packet_name = server_packet_raw_display_name(*packet_id);
+            json!({
+                "type": "packet",
+                "packet": packet_name,
+                "payload": raw_payload_detail(
+                    &packet_name,
+                    *packet_id as i16,
+                    payload
+                )
+            })
+        }
+        ServerPacket::TimeOfDay { lights } => json!({
             "type": "packet",
-            "packet": format!("{:?}", packet_id),
+            "packet": "TimeOfDay",
+            "payload": { "lights": lights }
+        }),
+        ServerPacket::ChangeAMode { mode } => json!({
+            "type": "packet",
+            "packet": "ChangeAMode",
+            "payload": { "mode": mode }
+        }),
+        ServerPacket::ChangePMode { mode } => json!({
+            "type": "packet",
+            "packet": "ChangePMode",
+            "payload": { "mode": mode }
+        }),
+        ServerPacket::BaseStatsInfo { stats } => json!({
+            "type": "packet",
+            "packet": "BaseStatsInfo",
+            "payload": { "stats": stats }
+        }),
+        ServerPacket::HeroBaseStatsInfo { stats } => json!({
+            "type": "packet",
+            "packet": "HeroBaseStatsInfo",
+            "payload": { "stats": stats }
+        }),
+        ServerPacket::HeroInformation { info } => json!({
+            "type": "packet",
+            "packet": "HeroInformation",
+            "payload": { "info": info }
+        }),
+        ServerPacket::NPCMarket {
+            listings,
+            pages,
+            user_mode,
+        } => json!({
+            "type": "packet",
+            "packet": "NPCMarket",
             "payload": {
-                "rawPayloadLength": payload.len()
+                "listings": listings,
+                "pages": pages,
+                "userMode": user_mode
             }
+        }),
+        ServerPacket::NPCMarketPage { listings } => json!({
+            "type": "packet",
+            "packet": "NPCMarketPage",
+            "payload": { "listings": listings }
         }),
         ServerPacket::Connected => json!({
             "type": "packet",
@@ -2196,6 +2250,64 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "canUse": can_use
             }
         }),
+        ServerPacket::SwitchGroup { allow_group } => json!({
+            "type": "packet",
+            "packet": "SwitchGroup",
+            "payload": {
+                "allowGroup": allow_group
+            }
+        }),
+        ServerPacket::DeleteGroup => json!({
+            "type": "packet",
+            "packet": "DeleteGroup",
+            "payload": {}
+        }),
+        ServerPacket::DeleteMember { name } => json!({
+            "type": "packet",
+            "packet": "DeleteMember",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::GroupInvite { name } => json!({
+            "type": "packet",
+            "packet": "GroupInvite",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::AddMember { name } => json!({
+            "type": "packet",
+            "packet": "AddMember",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::GroupMembersMap {
+            player_name,
+            player_map,
+        } => json!({
+            "type": "packet",
+            "packet": "GroupMembersMap",
+            "payload": {
+                "playerName": player_name,
+                "playerMap": player_map
+            }
+        }),
+        ServerPacket::SendMemberLocation {
+            member_name,
+            member_location,
+        } => json!({
+            "type": "packet",
+            "packet": "SendMemberLocation",
+            "payload": {
+                "memberName": member_name,
+                "memberLocation": {
+                    "x": member_location.x,
+                    "y": member_location.y
+                }
+            }
+        }),
         ServerPacket::SellItem {
             unique_id,
             count,
@@ -2392,6 +2504,36 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "uniqueId": unique_id,
                 "to": to,
                 "success": success
+            }
+        }),
+        ServerPacket::DepositRefineItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositRefineItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveRefineItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveRefineItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RefineCancel => json!({
+            "type": "packet",
+            "packet": "RefineCancel",
+            "payload": {}
+        }),
+        ServerPacket::RefineItem { unique_id } => json!({
+            "type": "packet",
+            "packet": "RefineItem",
+            "payload": {
+                "uniqueId": unique_id
             }
         }),
         ServerPacket::TakeBackItem { from, to, success } => json!({
@@ -2696,6 +2838,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "direction": format!("{:?}", info.direction),
                 "questIds": info.quest_ids
             }
+        }),
+        ServerPacket::NPCResponse { page } => json!({
+            "type": "packet",
+            "packet": "NPCResponse",
+            "payload": { "page": page }
         }),
         ServerPacket::ObjectDied { info } => json!({
             "type": "packet",
@@ -3053,6 +3200,16 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "fromIndex": from_index
             }
         }),
+        ServerPacket::DefaultNPC { object_id } => json!({
+            "type": "packet",
+            "packet": "DefaultNPC",
+            "payload": { "objectId": object_id }
+        }),
+        ServerPacket::NPCUpdate { npc_id } => json!({
+            "type": "packet",
+            "packet": "NPCUpdate",
+            "payload": { "npcId": npc_id }
+        }),
         ServerPacket::MarriageRequest { name } => json!({
             "type": "packet",
             "packet": "MarriageRequest",
@@ -3234,6 +3391,73 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "outputType": output_type
             }
         }),
+        ServerPacket::OpenDoor { door_index, close } => json!({
+            "type": "packet",
+            "packet": "Opendoor",
+            "payload": {
+                "doorIndex": door_index,
+                "close": close
+            }
+        }),
+        ServerPacket::OpenBrowser { url } => json!({
+            "type": "packet",
+            "packet": "OpenBrowser",
+            "payload": {
+                "url": url
+            }
+        }),
+        ServerPacket::PlaySound { sound } => json!({
+            "type": "packet",
+            "packet": "PlaySound",
+            "payload": {
+                "sound": sound
+            }
+        }),
+        ServerPacket::SetTimer {
+            key,
+            timer_type,
+            seconds,
+        } => json!({
+            "type": "packet",
+            "packet": "SetTimer",
+            "payload": {
+                "key": key,
+                "timerType": timer_type,
+                "seconds": seconds
+            }
+        }),
+        ServerPacket::ExpireTimer { key } => json!({
+            "type": "packet",
+            "packet": "ExpireTimer",
+            "payload": {
+                "key": key
+            }
+        }),
+        ServerPacket::Roll {
+            roll_type,
+            page,
+            result,
+            auto_roll,
+        } => json!({
+            "type": "packet",
+            "packet": "Roll",
+            "payload": {
+                "rollType": roll_type,
+                "page": page,
+                "result": result,
+                "autoRoll": auto_roll
+            }
+        }),
+        ServerPacket::SetCompass { location } => json!({
+            "type": "packet",
+            "packet": "SetCompass",
+            "payload": {
+                "location": {
+                    "x": location.x,
+                    "y": location.y
+                }
+            }
+        }),
         ServerPacket::NPCAwakening => json!({
             "type": "packet",
             "packet": "NPCAwakening",
@@ -3316,6 +3540,57 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "FriendUpdate",
             "payload": {
                 "friends": friends
+            }
+        }),
+        ServerPacket::LoverUpdate {
+            name,
+            date_binary_datetime,
+            map_name,
+            married_days,
+        } => json!({
+            "type": "packet",
+            "packet": "LoverUpdate",
+            "payload": {
+                "name": name,
+                "dateBinaryDatetime": date_binary_datetime,
+                "mapName": map_name,
+                "marriedDays": married_days
+            }
+        }),
+        ServerPacket::MentorUpdate {
+            name,
+            level,
+            online,
+            mentee_exp,
+        } => json!({
+            "type": "packet",
+            "packet": "MentorUpdate",
+            "payload": {
+                "name": name,
+                "level": level,
+                "online": online,
+                "menteeExp": mentee_exp
+            }
+        }),
+        ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        } => json!({
+            "type": "packet",
+            "packet": "GuildBuffList",
+            "payload": {
+                "remove": remove,
+                "activeBuffs": active_buffs,
+                "guildBuffs": guild_buffs
+            }
+        }),
+        ServerPacket::GameShopInfo { item, stock_level } => json!({
+            "type": "packet",
+            "packet": "GameShopInfo",
+            "payload": {
+                "item": item,
+                "stockLevel": stock_level
             }
         }),
         ServerPacket::NewIntelligentCreature { creature } => json!({
@@ -3445,19 +3720,54 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "ConfirmItemRental",
             "payload": {}
         }),
-        ServerPacket::NewQuestInfo { payload } => json!({
+        ServerPacket::ChangeQuest {
+            quest_id,
+            task_list,
+            taken,
+            completed,
+            new,
+            quest_state,
+            track_quest,
+        } => json!({
             "type": "packet",
-            "packet": "NewQuestInfo",
+            "packet": "ChangeQuest",
             "payload": {
-                "rawPayloadLength": payload.len()
+                "questId": quest_id,
+                "taskList": task_list,
+                "taken": taken,
+                "completed": completed,
+                "new": new,
+                "questState": quest_state,
+                "trackQuest": track_quest
             }
         }),
-        ServerPacket::NewRecipeInfo { payload } => json!({
+        ServerPacket::CompleteQuest { completed_quests } => json!({
+            "type": "packet",
+            "packet": "CompleteQuest",
+            "payload": {
+                "completedQuests": completed_quests
+            }
+        }),
+        ServerPacket::ShareQuest {
+            quest_index,
+            sharer_name,
+        } => json!({
+            "type": "packet",
+            "packet": "ShareQuest",
+            "payload": {
+                "questIndex": quest_index,
+                "sharerName": sharer_name
+            }
+        }),
+        ServerPacket::NewQuestInfo { info } => json!({
+            "type": "packet",
+            "packet": "NewQuestInfo",
+            "payload": { "info": info }
+        }),
+        ServerPacket::NewRecipeInfo { info } => json!({
             "type": "packet",
             "packet": "NewRecipeInfo",
-            "payload": {
-                "rawPayloadLength": payload.len()
-            }
+            "payload": { "info": info }
         }),
         ServerPacket::ResizeInventory { size } => json!({
             "type": "packet",
@@ -3525,7 +3835,70 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "LogOutFailed",
             "payload": {}
         }),
+        other => {
+            let (packet_name, payload) = typed_packet_event_detail(other);
+            json!({
+                "type": "packet",
+                "packet": packet_name,
+                "payload": payload
+            })
+        }
     }
+}
+
+fn typed_packet_event_detail(packet: &ServerPacket) -> (String, Value) {
+    let encoded = match serde_json::to_value(packet) {
+        Ok(value) => value,
+        Err(error) => {
+            return (
+                server_packet_display_name(packet),
+                json!({
+                    "typed": true,
+                    "summary": format!("{:?}", packet),
+                    "serializationError": error.to_string()
+                }),
+            );
+        }
+    };
+
+    match encoded {
+        Value::Object(variants) => {
+            let Some((packet_name, payload)) = variants.into_iter().next() else {
+                return (server_packet_display_name(packet), json!({ "typed": true }));
+            };
+            let payload = match payload {
+                Value::Object(mut payload) => {
+                    payload.insert("typed".to_string(), Value::Bool(true));
+                    Value::Object(payload)
+                }
+                Value::Null => json!({ "typed": true }),
+                value => json!({
+                "typed": true,
+                "value": value
+                }),
+            };
+            (packet_name, payload)
+        }
+        Value::String(packet_name) => (packet_name, json!({ "typed": true })),
+        Value::Null => (server_packet_display_name(packet), json!({ "typed": true })),
+        value => (
+            server_packet_display_name(packet),
+            json!({
+                "typed": true,
+                "value": value
+            }),
+        ),
+    }
+}
+
+fn raw_payload_detail(packet_name: &str, packet_id: i16, payload: &[u8]) -> Value {
+    json!({
+        "packetName": packet_name,
+        "packetId": packet_id,
+        "payloadLength": payload.len(),
+        "payloadHex": packet_payload_hex(payload),
+        "rawPayloadLength": payload.len()
+    })
 }
 
 fn movement_json(
@@ -3625,13 +3998,14 @@ mod tests {
     use axum::Json;
     use mir2_protocol::{
         ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
-        ClientPacket, IntelligentCreatureItemFilter, IntelligentCreatureRules, MirClass,
-        MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, ServerPacket, Spell, UserItem,
-        UserItemStat,
+        ClientMapInfo, ClientPacket, IntelligentCreatureItemFilter, IntelligentCreatureRules,
+        MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, RankCharacterInfo,
+        ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
     };
+    use serde_json::json;
     use std::sync::Arc;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -4020,6 +4394,70 @@ mod tests {
         assert_eq!(user_storage["payload"]["storage"][0]["unique_id"], 90);
         assert_eq!(user_storage["payload"]["storage"][0]["count"], 2);
         assert!(user_storage["payload"]["storage"][1].is_null());
+    }
+
+    #[test]
+    fn raw_server_events_expose_copyable_payload_fields() {
+        let raw = super::server_packet_to_event(&ServerPacket::Raw {
+            packet_id: ServerPacketId::TimeOfDay,
+            payload: vec![0x00, 0x11, 0x22, 0xaa],
+        });
+        assert_eq!(raw["packet"], "TimeOfDay");
+        assert_eq!(
+            raw["payload"]["packetId"],
+            json!(ServerPacketId::TimeOfDay as i16)
+        );
+        assert_eq!(raw["payload"]["packetName"], "TimeOfDay");
+        assert_eq!(raw["payload"]["payloadLength"], 4);
+        assert_eq!(raw["payload"]["payloadHex"], "001122aa");
+        assert_eq!(raw["payload"]["rawPayloadLength"], 4);
+    }
+
+    #[test]
+    fn newly_typed_server_events_expose_structured_payload_fields() {
+        let map = super::server_packet_to_event(&ServerPacket::NewMapInfo {
+            map_index: 77,
+            info: ClientMapInfo {
+                title: "CastleGi-Ryoong".into(),
+                width: 120,
+                height: 220,
+                big_map: 121,
+                movements: vec![],
+                npcs: vec![],
+            },
+        });
+        assert_eq!(map["packet"], "NewMapInfo");
+        assert_eq!(map["payload"]["typed"], true);
+        assert_eq!(map["payload"]["mapIndex"], 77);
+        assert_eq!(map["payload"]["info"]["title"], "CastleGi-Ryoong");
+        assert_eq!(map["payload"]["info"]["bigMap"], 121);
+        assert!(!map["payload"].as_object().unwrap().contains_key("summary"));
+
+        let rankings = super::server_packet_to_event(&ServerPacket::Rankings {
+            rank_type: 2,
+            my_rank: 5,
+            listing_details: vec![RankCharacterInfo {
+                player_id: 9001,
+                name: "RankedHero".into(),
+                level: 45,
+                class: MirClass::Taoist,
+            }],
+            listings: vec![123_456],
+            count: 1,
+        });
+        assert_eq!(rankings["packet"], "Rankings");
+        assert_eq!(rankings["payload"]["typed"], true);
+        assert_eq!(rankings["payload"]["rankType"], 2);
+        assert_eq!(rankings["payload"]["myRank"], 5);
+        assert_eq!(
+            rankings["payload"]["listingDetails"][0]["name"],
+            "RankedHero"
+        );
+        assert_eq!(rankings["payload"]["listings"][0], 123_456);
+
+        let unit = super::server_packet_to_event(&ServerPacket::ReturnToLogin);
+        assert_eq!(unit["packet"], "ReturnToLogin");
+        assert_eq!(unit["payload"], json!({ "typed": true }));
     }
 
     #[test]
@@ -4599,6 +5037,155 @@ mod tests {
         });
         assert_eq!(remove_buff["packet"], "RemoveBuff");
         assert_eq!(remove_buff["payload"]["objectId"], 1_001);
+    }
+
+    #[test]
+    fn simple_bootstrap_social_packets_are_exposed_as_browser_events() {
+        let time = super::server_packet_to_event(&ServerPacket::TimeOfDay { lights: 4 });
+        assert_eq!(time["packet"], "TimeOfDay");
+        assert_eq!(time["payload"]["lights"], 4);
+
+        let attack = super::server_packet_to_event(&ServerPacket::ChangeAMode { mode: 2 });
+        assert_eq!(attack["packet"], "ChangeAMode");
+        assert_eq!(attack["payload"]["mode"], 2);
+
+        let npc_response = super::server_packet_to_event(&ServerPacket::NPCResponse {
+            page: vec!["@main".to_string(), "Welcome".to_string()],
+        });
+        assert_eq!(npc_response["packet"], "NPCResponse");
+        assert_eq!(npc_response["payload"]["page"][1], "Welcome");
+
+        let default_npc =
+            super::server_packet_to_event(&ServerPacket::DefaultNPC { object_id: 1_001 });
+        assert_eq!(default_npc["packet"], "DefaultNPC");
+        assert_eq!(default_npc["payload"]["objectId"], 1_001);
+
+        let npc_update = super::server_packet_to_event(&ServerPacket::NPCUpdate { npc_id: 1_002 });
+        assert_eq!(npc_update["packet"], "NPCUpdate");
+        assert_eq!(npc_update["payload"]["npcId"], 1_002);
+
+        let lover = super::server_packet_to_event(&ServerPacket::LoverUpdate {
+            name: "Partner".to_string(),
+            date_binary_datetime: 42,
+            map_name: "Bichon".to_string(),
+            married_days: 7,
+        });
+        assert_eq!(lover["packet"], "LoverUpdate");
+        assert_eq!(lover["payload"]["mapName"], "Bichon");
+
+        let mentor = super::server_packet_to_event(&ServerPacket::MentorUpdate {
+            name: "Mentor".to_string(),
+            level: 45,
+            online: true,
+            mentee_exp: 1_234,
+        });
+        assert_eq!(mentor["packet"], "MentorUpdate");
+        assert_eq!(mentor["payload"]["online"], true);
+        assert_eq!(mentor["payload"]["menteeExp"], 1_234);
+    }
+
+    #[test]
+    fn group_utility_packets_are_exposed_as_browser_events() {
+        let switch =
+            super::server_packet_to_event(&ServerPacket::SwitchGroup { allow_group: true });
+        assert_eq!(switch["packet"], "SwitchGroup");
+        assert_eq!(switch["payload"]["allowGroup"], true);
+
+        let add = super::server_packet_to_event(&ServerPacket::AddMember {
+            name: "Scout".to_string(),
+        });
+        assert_eq!(add["packet"], "AddMember");
+        assert_eq!(add["payload"]["name"], "Scout");
+
+        let member_map = super::server_packet_to_event(&ServerPacket::GroupMembersMap {
+            player_name: "Scout".to_string(),
+            player_map: "Bichon Province".to_string(),
+        });
+        assert_eq!(member_map["packet"], "GroupMembersMap");
+        assert_eq!(member_map["payload"]["playerMap"], "Bichon Province");
+
+        let location = super::server_packet_to_event(&ServerPacket::SendMemberLocation {
+            member_name: "Scout".to_string(),
+            member_location: Point { x: 330, y: 270 },
+        });
+        assert_eq!(location["packet"], "SendMemberLocation");
+        assert_eq!(location["payload"]["memberLocation"]["x"], 330);
+
+        let door = super::server_packet_to_event(&ServerPacket::OpenDoor {
+            door_index: 4,
+            close: false,
+        });
+        assert_eq!(door["packet"], "Opendoor");
+        assert_eq!(door["payload"]["doorIndex"], 4);
+
+        let timer = super::server_packet_to_event(&ServerPacket::SetTimer {
+            key: "quest".to_string(),
+            timer_type: 1,
+            seconds: 60,
+        });
+        assert_eq!(timer["packet"], "SetTimer");
+        assert_eq!(timer["payload"]["seconds"], 60);
+
+        let compass = super::server_packet_to_event(&ServerPacket::SetCompass {
+            location: Point { x: 331, y: 271 },
+        });
+        assert_eq!(compass["packet"], "SetCompass");
+        assert_eq!(compass["payload"]["location"]["y"], 271);
+    }
+
+    #[test]
+    fn quest_packets_are_exposed_as_browser_events() {
+        let change = super::server_packet_to_event(&ServerPacket::ChangeQuest {
+            quest_id: 1001,
+            task_list: vec!["Collect Wasp Stinger 0/1".to_string()],
+            taken: true,
+            completed: false,
+            new: true,
+            quest_state: 0,
+            track_quest: true,
+        });
+        assert_eq!(change["packet"], "ChangeQuest");
+        assert_eq!(change["payload"]["questId"], 1001);
+        assert_eq!(change["payload"]["taskList"][0], "Collect Wasp Stinger 0/1");
+
+        let complete = super::server_packet_to_event(&ServerPacket::CompleteQuest {
+            completed_quests: vec![1001],
+        });
+        assert_eq!(complete["packet"], "CompleteQuest");
+        assert_eq!(complete["payload"]["completedQuests"][0], 1001);
+
+        let share = super::server_packet_to_event(&ServerPacket::ShareQuest {
+            quest_index: 1001,
+            sharer_name: "Scout".to_string(),
+        });
+        assert_eq!(share["packet"], "ShareQuest");
+        assert_eq!(share["payload"]["sharerName"], "Scout");
+    }
+
+    #[test]
+    fn refine_packets_are_exposed_as_browser_events() {
+        let deposit = super::server_packet_to_event(&ServerPacket::DepositRefineItem {
+            from: 4,
+            to: 0,
+            success: true,
+        });
+        assert_eq!(deposit["packet"], "DepositRefineItem");
+        assert_eq!(deposit["payload"]["success"], true);
+
+        let retrieve = super::server_packet_to_event(&ServerPacket::RetrieveRefineItem {
+            from: 0,
+            to: 4,
+            success: true,
+        });
+        assert_eq!(retrieve["packet"], "RetrieveRefineItem");
+        assert_eq!(retrieve["payload"]["to"], 4);
+
+        let cancel = super::server_packet_to_event(&ServerPacket::RefineCancel);
+        assert_eq!(cancel["packet"], "RefineCancel");
+
+        let refine = super::server_packet_to_event(&ServerPacket::RefineItem { unique_id: 4 });
+        assert_eq!(refine["packet"], "RefineItem");
+        assert_eq!(refine["payload"]["uniqueId"], 4);
     }
 
     #[test]

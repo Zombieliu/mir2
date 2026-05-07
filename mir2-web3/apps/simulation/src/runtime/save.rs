@@ -5,7 +5,7 @@ use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_quest_packet_payloads, format_localized_text, localized_text_or_fallback,
 };
-use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
+use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket, ServerPacketId};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
@@ -901,7 +901,7 @@ impl SimulationSession {
         packets.extend(
             crystal_quest_packet_payloads()
                 .into_iter()
-                .map(|payload| ServerPacket::NewQuestInfo { payload }),
+                .map(|payload| decode_crystal_payload(ServerPacketId::NewQuestInfo, payload)),
         );
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
         packets.extend(start_game_account_social_and_shop_packets());

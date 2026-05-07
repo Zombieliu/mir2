@@ -696,7 +696,198 @@ impl ClientMagic {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMovementInfo {
+    pub destination: i32,
+    pub title: String,
+    pub location: Point,
+    pub icon: i32,
+}
+
+impl ClientMovementInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            destination: reader.read_i32()?,
+            title: reader.read_string()?,
+            location: Point::decode(reader)?,
+            icon: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.destination);
+        writer.write_string(&self.title)?;
+        self.location.encode(writer);
+        writer.write_i32(self.icon);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientNpcInfo {
+    pub index: i32,
+    pub file_name: String,
+    pub name: String,
+    pub map_index: i32,
+    pub location: Point,
+    pub image: u16,
+    pub rate: u16,
+    pub show_on_big_map: bool,
+    pub big_map_icon: i32,
+    pub object_id: u32,
+    pub icon: i32,
+    pub can_teleport_to: bool,
+}
+
+impl ClientNpcInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            file_name: reader.read_string()?,
+            name: reader.read_string()?,
+            map_index: reader.read_i32()?,
+            location: Point::decode(reader)?,
+            image: reader.read_u16()?,
+            rate: reader.read_u16()?,
+            show_on_big_map: reader.read_bool()?,
+            big_map_icon: reader.read_i32()?,
+            object_id: reader.read_u32()?,
+            icon: reader.read_i32()?,
+            can_teleport_to: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.file_name)?;
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.map_index);
+        self.location.encode(writer);
+        writer.write_u16(self.image);
+        writer.write_u16(self.rate);
+        writer.write_bool(self.show_on_big_map);
+        writer.write_i32(self.big_map_icon);
+        writer.write_u32(self.object_id);
+        writer.write_i32(self.icon);
+        writer.write_bool(self.can_teleport_to);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMapInfo {
+    pub title: String,
+    pub width: i32,
+    pub height: i32,
+    pub big_map: i32,
+    pub movements: Vec<ClientMovementInfo>,
+    pub npcs: Vec<ClientNpcInfo>,
+}
+
+impl ClientMapInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let title = reader.read_string()?;
+        let width = reader.read_i32()?;
+        let height = reader.read_i32()?;
+        let big_map = reader.read_i32()?;
+
+        let movement_count = read_non_negative_count(reader, "client_map_movements")?;
+        let mut movements = Vec::with_capacity(movement_count);
+        for _ in 0..movement_count {
+            movements.push(ClientMovementInfo::decode(reader)?);
+        }
+
+        let npc_count = read_non_negative_count(reader, "client_map_npcs")?;
+        let mut npcs = Vec::with_capacity(npc_count);
+        for _ in 0..npc_count {
+            npcs.push(ClientNpcInfo::decode(reader)?);
+        }
+
+        Ok(Self {
+            title,
+            width,
+            height,
+            big_map,
+            movements,
+            npcs,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.title)?;
+        writer.write_i32(self.width);
+        writer.write_i32(self.height);
+        writer.write_i32(self.big_map);
+        writer.write_i32(self.movements.len() as i32);
+        for movement in &self.movements {
+            movement.encode(writer)?;
+        }
+        writer.write_i32(self.npcs.len() as i32);
+        for npc in &self.npcs {
+            npc.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldMapIcon {
+    pub image_index: i32,
+    pub title: String,
+    pub map_index: i32,
+}
+
+impl WorldMapIcon {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            image_index: reader.read_i32()?,
+            title: reader.read_string()?,
+            map_index: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.image_index);
+        writer.write_string(&self.title)?;
+        writer.write_i32(self.map_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldMapSetup {
+    pub enabled: bool,
+    pub icons: Vec<WorldMapIcon>,
+}
+
+impl WorldMapSetup {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let enabled = reader.read_bool()?;
+        let count = read_non_negative_count(reader, "world_map_icons")?;
+        let mut icons = Vec::with_capacity(count);
+        for _ in 0..count {
+            icons.push(WorldMapIcon::decode(reader)?);
+        }
+        Ok(Self { enabled, icons })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_bool(self.enabled);
+        writer.write_i32(self.icons.len() as i32);
+        for icon in &self.icons {
+            icon.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SelectInfo {
     pub index: i32,
     pub name: String,
@@ -729,7 +920,8 @@ impl SelectInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserInformation {
     pub object_id: u32,
     pub real_id: u32,
@@ -1124,6 +1316,74 @@ impl ClientFriend {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PlayerInspectInfo {
+    pub name: String,
+    pub guild_name: String,
+    pub guild_rank: String,
+    pub equipment: Vec<Option<UserItem>>,
+    pub class: MirClass,
+    pub gender: MirGender,
+    pub hair: u8,
+    pub level: u16,
+    pub lover_name: String,
+    pub allow_observe: bool,
+    pub is_hero: bool,
+}
+
+impl PlayerInspectInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let name = reader.read_string()?;
+        let guild_name = reader.read_string()?;
+        let guild_rank = reader.read_string()?;
+        let count = read_non_negative_count(reader, "player_inspect_equipment")?;
+        let mut equipment = Vec::with_capacity(count);
+        for _ in 0..count {
+            if reader.read_bool()? {
+                equipment.push(Some(UserItem::decode(reader)?));
+            } else {
+                equipment.push(None);
+            }
+        }
+
+        Ok(Self {
+            name,
+            guild_name,
+            guild_rank,
+            equipment,
+            class: MirClass::try_from(reader.read_u8()?)?,
+            gender: MirGender::try_from(reader.read_u8()?)?,
+            hair: reader.read_u8()?,
+            level: reader.read_u16()?,
+            lover_name: reader.read_string()?,
+            allow_observe: reader.read_bool()?,
+            is_hero: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.guild_name)?;
+        writer.write_string(&self.guild_rank)?;
+        writer.write_i32(self.equipment.len() as i32);
+        for item in &self.equipment {
+            writer.write_bool(item.is_some());
+            if let Some(item) = item {
+                item.encode(writer)?;
+            }
+        }
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        writer.write_u8(self.hair);
+        writer.write_u16(self.level);
+        writer.write_string(&self.lover_name)?;
+        writer.write_bool(self.allow_observe);
+        writer.write_bool(self.is_hero);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ClientMail {
     pub mail_id: u64,
     pub sender_name: String,
@@ -1414,6 +1674,689 @@ impl ClientBuff {
             writer.write_i32(*value);
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BaseStat {
+    pub stat: u8,
+    pub formula_type: u8,
+    pub base: i32,
+    pub gain: f32,
+    pub gain_rate: f32,
+    pub max: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BaseStats {
+    pub job: MirClass,
+    pub stats: Vec<BaseStat>,
+    pub caps: Vec<UserItemStat>,
+}
+
+impl BaseStats {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let job = MirClass::try_from(reader.read_u8()?)?;
+        let stat_count = read_non_negative_count(reader, "base_stats")?;
+        let mut stats = Vec::with_capacity(stat_count);
+        for _ in 0..stat_count {
+            stats.push(BaseStat {
+                stat: reader.read_u8()?,
+                formula_type: reader.read_u8()?,
+                base: reader.read_i32()?,
+                gain: reader.read_f32()?,
+                gain_rate: reader.read_f32()?,
+                max: reader.read_i32()?,
+            });
+        }
+        let caps = decode_stat_values(reader, "base_stats_caps")?;
+        Ok(Self { job, stats, caps })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u8(self.job as u8);
+        writer.write_i32(self.stats.len() as i32);
+        for stat in &self.stats {
+            writer.write_u8(stat.stat);
+            writer.write_u8(stat.formula_type);
+            writer.write_i32(stat.base);
+            writer.write_f32(stat.gain);
+            writer.write_f32(stat.gain_rate);
+            writer.write_i32(stat.max);
+        }
+        encode_stat_values(writer, &self.caps);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HeroUserInformation {
+    pub object_id: u32,
+    pub name: String,
+    pub class: MirClass,
+    pub gender: MirGender,
+    pub level: u16,
+    pub hair: u8,
+    pub hp: i32,
+    pub mp: i32,
+    pub experience: i64,
+    pub max_experience: i64,
+    pub inventory: Option<Vec<Option<UserItem>>>,
+    pub equipment: Option<Vec<Option<UserItem>>>,
+    pub magics: Vec<ClientMagic>,
+    pub auto_pot: bool,
+    pub auto_hp_percent: u8,
+    pub auto_mp_percent: u8,
+    pub hp_item_index: i32,
+    pub mp_item_index: i32,
+}
+
+impl HeroUserInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let object_id = reader.read_u32()?;
+        let name = reader.read_string()?;
+        let class = MirClass::try_from(reader.read_u8()?)?;
+        let gender = MirGender::try_from(reader.read_u8()?)?;
+        let level = reader.read_u16()?;
+        let hair = reader.read_u8()?;
+        let hp = reader.read_i32()?;
+        let mp = reader.read_i32()?;
+        let experience = reader.read_i64()?;
+        let max_experience = reader.read_i64()?;
+        let (_, inventory) = decode_optional_item_section(reader, "hero_inventory")?;
+        let (_, equipment) = decode_optional_item_section(reader, "hero_equipment")?;
+        let magic_count = read_non_negative_count(reader, "hero_magics")?;
+        let mut magics = Vec::with_capacity(magic_count);
+        for _ in 0..magic_count {
+            magics.push(ClientMagic::decode(reader)?);
+        }
+        Ok(Self {
+            object_id,
+            name,
+            class,
+            gender,
+            level,
+            hair,
+            hp,
+            mp,
+            experience,
+            max_experience,
+            inventory,
+            equipment,
+            magics,
+            auto_pot: reader.read_bool()?,
+            auto_hp_percent: reader.read_u8()?,
+            auto_mp_percent: reader.read_u8()?,
+            hp_item_index: reader.read_i32()?,
+            mp_item_index: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u32(self.object_id);
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        writer.write_u16(self.level);
+        writer.write_u8(self.hair);
+        writer.write_i32(self.hp);
+        writer.write_i32(self.mp);
+        writer.write_i64(self.experience);
+        writer.write_i64(self.max_experience);
+        encode_optional_item_section(writer, self.inventory.is_some(), self.inventory.as_deref())?;
+        encode_optional_item_section(writer, self.equipment.is_some(), self.equipment.as_deref())?;
+        writer.write_i32(self.magics.len() as i32);
+        for magic in &self.magics {
+            magic.encode(writer)?;
+        }
+        writer.write_bool(self.auto_pot);
+        writer.write_u8(self.auto_hp_percent);
+        writer.write_u8(self.auto_mp_percent);
+        writer.write_i32(self.hp_item_index);
+        writer.write_i32(self.mp_item_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientAuction {
+    pub auction_id: u64,
+    pub item: UserItem,
+    pub seller: String,
+    pub price: u32,
+    pub consignment_date_binary_datetime: i64,
+    pub item_type: u8,
+}
+
+impl ClientAuction {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            auction_id: reader.read_u64()?,
+            item: UserItem::decode(reader)?,
+            seller: reader.read_string()?,
+            price: reader.read_u32()?,
+            consignment_date_binary_datetime: reader.read_i64()?,
+            item_type: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.auction_id);
+        self.item.encode(writer)?;
+        writer.write_string(&self.seller)?;
+        writer.write_u32(self.price);
+        writer.write_i64(self.consignment_date_binary_datetime);
+        writer.write_u8(self.item_type);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameShopItem {
+    pub item_index: i32,
+    pub g_index: i32,
+    pub info: ItemInfo,
+    pub gold_price: u32,
+    pub credit_price: u32,
+    pub count: u16,
+    pub class: String,
+    pub category: String,
+    pub stock: i32,
+    pub i_stock: bool,
+    pub deal: bool,
+    pub top_item: bool,
+    pub date_binary_datetime: i64,
+    pub can_buy_credit: bool,
+    pub can_buy_gold: bool,
+}
+
+impl GameShopItem {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item_index: reader.read_i32()?,
+            g_index: reader.read_i32()?,
+            info: ItemInfo::decode(reader)?,
+            gold_price: reader.read_u32()?,
+            credit_price: reader.read_u32()?,
+            count: reader.read_u16()?,
+            class: reader.read_string()?,
+            category: reader.read_string()?,
+            stock: reader.read_i32()?,
+            i_stock: reader.read_bool()?,
+            deal: reader.read_bool()?,
+            top_item: reader.read_bool()?,
+            date_binary_datetime: reader.read_i64()?,
+            can_buy_credit: reader.read_bool()?,
+            can_buy_gold: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.item_index);
+        writer.write_i32(self.g_index);
+        self.info.encode(writer)?;
+        writer.write_u32(self.gold_price);
+        writer.write_u32(self.credit_price);
+        writer.write_u16(self.count);
+        writer.write_string(&self.class)?;
+        writer.write_string(&self.category)?;
+        writer.write_i32(self.stock);
+        writer.write_bool(self.i_stock);
+        writer.write_bool(self.deal);
+        writer.write_bool(self.top_item);
+        writer.write_i64(self.date_binary_datetime);
+        writer.write_bool(self.can_buy_credit);
+        writer.write_bool(self.can_buy_gold);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GuildBuff {
+    pub id: i32,
+    pub active: bool,
+    pub active_time_remaining: i32,
+}
+
+impl GuildBuff {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            id: reader.read_i32()?,
+            active: reader.read_bool()?,
+            active_time_remaining: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_i32(self.id);
+        writer.write_bool(self.active);
+        writer.write_i32(self.active_time_remaining);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GuildBuffInfo {
+    pub id: i32,
+    pub icon: i32,
+    pub name: String,
+    pub level_requirement: u8,
+    pub points_requirement: u8,
+    pub time_limit: i32,
+    pub activation_cost: i32,
+    pub stats: Vec<UserItemStat>,
+}
+
+impl GuildBuffInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            id: reader.read_i32()?,
+            icon: reader.read_i32()?,
+            name: reader.read_string()?,
+            level_requirement: reader.read_u8()?,
+            points_requirement: reader.read_u8()?,
+            time_limit: reader.read_i32()?,
+            activation_cost: reader.read_i32()?,
+            stats: decode_stat_values(reader, "guild_buff_info_stats")?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.id);
+        writer.write_i32(self.icon);
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.level_requirement);
+        writer.write_u8(self.points_requirement);
+        writer.write_i32(self.time_limit);
+        writer.write_i32(self.activation_cost);
+        encode_stat_values(writer, &self.stats);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildMember {
+    pub name: String,
+    pub id: i32,
+    pub last_login_binary_datetime: i64,
+    pub has_voted: bool,
+    pub online: bool,
+}
+
+impl GuildMember {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            name: reader.read_string()?,
+            id: reader.read_i32()?,
+            last_login_binary_datetime: reader.read_i64()?,
+            has_voted: reader.read_bool()?,
+            online: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.id);
+        writer.write_i64(self.last_login_binary_datetime);
+        writer.write_bool(self.has_voted);
+        writer.write_bool(self.online);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRank {
+    pub name: String,
+    pub options: u8,
+    pub index: i32,
+    pub members: Vec<GuildMember>,
+}
+
+impl GuildRank {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let name = reader.read_string()?;
+        let options = reader.read_u8()?;
+        let index = reader.read_i32()?;
+        let count = read_non_negative_count(reader, "guild_rank_members")?;
+        let mut members = Vec::with_capacity(count);
+        for _ in 0..count {
+            members.push(GuildMember::decode(reader)?);
+        }
+
+        Ok(Self {
+            name,
+            options,
+            index,
+            members,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.options);
+        writer.write_i32(self.index);
+        writer.write_i32(self.members.len() as i32);
+        for member in &self.members {
+            member.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildStorageItem {
+    pub item: UserItem,
+    pub user_id: i64,
+}
+
+impl GuildStorageItem {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: UserItem::decode(reader)?,
+            user_id: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_i64(self.user_id);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AwakeningMaterial {
+    pub item: ItemInfo,
+    pub count: u8,
+}
+
+impl AwakeningMaterial {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: ItemInfo::decode(reader)?,
+            count: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_u8(self.count);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RankCharacterInfo {
+    pub player_id: i64,
+    pub name: String,
+    pub level: i32,
+    pub class: MirClass,
+}
+
+impl RankCharacterInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            player_id: reader.read_i64()?,
+            name: reader.read_string()?,
+            level: reader.read_i32()?,
+            class: MirClass::try_from(reader.read_u8()?)?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i64(self.player_id);
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.level);
+        writer.write_u8(self.class as u8);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Notice {
+    pub title: String,
+    pub message: String,
+}
+
+impl Notice {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            title: reader.read_string()?,
+            message: reader.read_string()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.title)?;
+        writer.write_string(&self.message)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientGtMap {
+    pub index: i32,
+    pub name: String,
+    pub owner: String,
+    pub leader: String,
+    pub leader2: String,
+    pub price: i32,
+    pub days: i32,
+    pub begin: i32,
+}
+
+impl ClientGtMap {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            owner: reader.read_string()?,
+            leader: reader.read_string()?,
+            leader2: reader.read_string()?,
+            price: reader.read_i32()?,
+            days: reader.read_i32()?,
+            begin: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.owner)?;
+        writer.write_string(&self.leader)?;
+        writer.write_string(&self.leader2)?;
+        writer.write_i32(self.price);
+        writer.write_i32(self.days);
+        writer.write_i32(self.begin);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QuestItemReward {
+    pub item: ItemInfo,
+    pub count: u16,
+}
+
+impl QuestItemReward {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: ItemInfo::decode(reader)?,
+            count: reader.read_u16()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_u16(self.count);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientQuestInfo {
+    pub index: i32,
+    pub npc_index: u32,
+    pub name: String,
+    pub group: String,
+    pub description: Vec<String>,
+    pub task_description: Vec<String>,
+    pub return_description: Vec<String>,
+    pub completion_description: Vec<String>,
+    pub min_level_needed: i32,
+    pub max_level_needed: i32,
+    pub quest_needed: i32,
+    pub class_needed: u8,
+    pub quest_type: u8,
+    pub time_limit_in_seconds: i32,
+    pub reward_gold: u32,
+    pub reward_exp: u32,
+    pub reward_credit: u32,
+    pub rewards_fixed_item: Vec<QuestItemReward>,
+    pub rewards_select_item: Vec<QuestItemReward>,
+    pub finish_npc_index: u32,
+}
+
+impl ClientQuestInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            npc_index: reader.read_u32()?,
+            name: reader.read_string()?,
+            group: reader.read_string()?,
+            description: decode_string_vec(reader, "quest_description")?,
+            task_description: decode_string_vec(reader, "quest_task_description")?,
+            return_description: decode_string_vec(reader, "quest_return_description")?,
+            completion_description: decode_string_vec(reader, "quest_completion_description")?,
+            min_level_needed: reader.read_i32()?,
+            max_level_needed: reader.read_i32()?,
+            quest_needed: reader.read_i32()?,
+            class_needed: reader.read_u8()?,
+            quest_type: reader.read_u8()?,
+            time_limit_in_seconds: reader.read_i32()?,
+            reward_gold: reader.read_u32()?,
+            reward_exp: reader.read_u32()?,
+            reward_credit: reader.read_u32()?,
+            rewards_fixed_item: decode_quest_rewards(reader, "quest_fixed_rewards")?,
+            rewards_select_item: decode_quest_rewards(reader, "quest_select_rewards")?,
+            finish_npc_index: reader.read_u32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_u32(self.npc_index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.group)?;
+        encode_string_vec(writer, &self.description)?;
+        encode_string_vec(writer, &self.task_description)?;
+        encode_string_vec(writer, &self.return_description)?;
+        encode_string_vec(writer, &self.completion_description)?;
+        writer.write_i32(self.min_level_needed);
+        writer.write_i32(self.max_level_needed);
+        writer.write_i32(self.quest_needed);
+        writer.write_u8(self.class_needed);
+        writer.write_u8(self.quest_type);
+        writer.write_i32(self.time_limit_in_seconds);
+        writer.write_u32(self.reward_gold);
+        writer.write_u32(self.reward_exp);
+        writer.write_u32(self.reward_credit);
+        encode_quest_rewards(writer, &self.rewards_fixed_item)?;
+        encode_quest_rewards(writer, &self.rewards_select_item)?;
+        writer.write_u32(self.finish_npc_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientRecipeInfo {
+    pub gold: u32,
+    pub chance: u8,
+    pub item: UserItem,
+    pub tools: Vec<UserItem>,
+    pub ingredients: Vec<UserItem>,
+}
+
+impl ClientRecipeInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            gold: reader.read_u32()?,
+            chance: reader.read_u8()?,
+            item: UserItem::decode(reader)?,
+            tools: decode_user_item_vec(reader, "recipe_tools")?,
+            ingredients: decode_user_item_vec(reader, "recipe_ingredients")?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u32(self.gold);
+        writer.write_u8(self.chance);
+        self.item.encode(writer)?;
+        encode_user_item_vec(writer, &self.tools)?;
+        encode_user_item_vec(writer, &self.ingredients)?;
+        Ok(())
+    }
+}
+
+fn decode_string_vec(reader: &mut PacketReader<'_>, field: &'static str) -> Result<Vec<String>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(reader.read_string()?);
+    }
+    Ok(values)
+}
+
+fn encode_string_vec(writer: &mut PacketWriter, values: &[String]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        writer.write_string(value)?;
+    }
+    Ok(())
+}
+
+fn decode_quest_rewards(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<QuestItemReward>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(QuestItemReward::decode(reader)?);
+    }
+    Ok(values)
+}
+
+fn encode_quest_rewards(writer: &mut PacketWriter, values: &[QuestItemReward]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        value.encode(writer)?;
+    }
+    Ok(())
+}
+
+fn decode_user_item_vec(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<UserItem>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(UserItem::decode(reader)?);
+    }
+    Ok(values)
+}
+
+fn encode_user_item_vec(writer: &mut PacketWriter, values: &[UserItem]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        value.encode(writer)?;
+    }
+    Ok(())
 }
 
 fn decode_stat_values(
@@ -1730,7 +2673,8 @@ impl ItemInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectPlayerInfo {
     pub object_id: u32,
     pub name: String,
@@ -1835,7 +2779,8 @@ impl ObjectPlayerInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MonsterInfo {
     pub object_id: u32,
     pub name: String,
@@ -1910,7 +2855,8 @@ impl MonsterInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NpcInfo {
     pub object_id: u32,
     pub name: String,
@@ -2123,7 +3069,8 @@ impl ObjectManaInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectSpellInfo {
     pub object_id: u32,
     pub location: Point,
@@ -2205,7 +3152,8 @@ impl MapInformation {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserLocation {
     pub position: Point,
     pub direction: MirDirection,
@@ -2225,7 +3173,8 @@ impl UserLocation {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectMovement {
     pub object_id: u32,
     pub position: Point,
@@ -2248,7 +3197,8 @@ impl ObjectMovement {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectAttackInfo {
     pub object_id: u32,
     pub location: Point,
@@ -2280,7 +3230,8 @@ impl ObjectAttackInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StruckInfo {
     pub attacker_id: u32,
 }
@@ -2297,7 +3248,8 @@ impl StruckInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectStruckInfo {
     pub object_id: u32,
     pub attacker_id: u32,
@@ -2323,7 +3275,8 @@ impl ObjectStruckInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectRangeAttackInfo {
     pub object_id: u32,
     pub location: Point,

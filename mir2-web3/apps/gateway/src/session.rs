@@ -260,9 +260,7 @@ fn next_gateway_session_id() -> String {
 mod tests {
     use super::{GatewayConfig, GatewaySession};
     use crate::{CharacterRecord, InMemoryGameplayEventSink, SharedGameplayEventSink};
-    use mir2_protocol::{
-        ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket, ServerPacketId,
-    };
+    use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
     use mir2_simulation::{WorldCommand, WorldCommandKind};
     use std::sync::Arc;
 
@@ -398,15 +396,7 @@ mod tests {
             .expect("bootstrap should include user information");
         let base_stats_index = packets
             .iter()
-            .position(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::Raw {
-                        packet_id: ServerPacketId::BaseStatsInfo,
-                        ..
-                    }
-                )
-            })
+            .position(|packet| matches!(packet, ServerPacket::BaseStatsInfo { .. }))
             .expect("bootstrap should include base stats");
         assert!(map_index < user_index);
         assert!(user_index < base_stats_index);

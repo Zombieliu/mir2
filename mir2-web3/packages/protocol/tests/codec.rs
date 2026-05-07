@@ -9,9 +9,10 @@ use mir2_protocol::trace::{
     trace_client_packets, trace_server_packets, PacketTraceDirection, PacketTraceEntry,
 };
 use mir2_protocol::types::{
-    ChatType, ItemInfo, MapInformation, MirClass, MirDirection, MirGender, MirGridType,
-    MonsterInfo, NpcInfo, ObjectEffectInfo, ObjectMovement, ObjectPlayerInfo, ObjectSpellInfo,
-    Point, Spell, UserInformation, UserItem, UserItemStat,
+    ChatType, ClientQuestInfo, ClientRecipeInfo, ItemInfo, MapInformation, MirClass, MirDirection,
+    MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectEffectInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectSpellInfo, Point, QuestItemReward, Spell, UserInformation, UserItem,
+    UserItemStat,
 };
 
 fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
@@ -106,13 +107,13 @@ fn packet_trace_entries_capture_stable_packet_ids_and_names() {
                 sequence: 0,
                 direction: PacketTraceDirection::Client,
                 packet_id: ClientPacketId::StartGame as i16,
-                packet: "StartGame",
+                packet: "StartGame".to_string(),
             },
             PacketTraceEntry {
                 sequence: 1,
                 direction: PacketTraceDirection::Client,
                 packet_id: ClientPacketId::Attack as i16,
-                packet: "Attack",
+                packet: "Attack".to_string(),
             },
         ]
     );
@@ -288,35 +289,71 @@ fn item_info_packets_use_crystal_payloads() {
 }
 
 #[test]
-fn quest_and_recipe_info_packets_preserve_raw_payloads() {
+fn quest_and_recipe_info_packets_use_typed_crystal_payloads() {
     for (packet, packet_id) in [
         (
             ServerPacket::NewQuestInfo {
-                payload: vec![1, 2, 3],
+                info: ClientQuestInfo {
+                    index: 1,
+                    npc_index: 10,
+                    name: "Quest".to_string(),
+                    group: "Starter".to_string(),
+                    description: vec!["Desc".to_string()],
+                    task_description: vec!["Task".to_string()],
+                    return_description: Vec::new(),
+                    completion_description: vec!["Done".to_string()],
+                    min_level_needed: 1,
+                    max_level_needed: 0,
+                    quest_needed: 0,
+                    class_needed: 31,
+                    quest_type: 0,
+                    time_limit_in_seconds: 0,
+                    reward_gold: 10,
+                    reward_exp: 20,
+                    reward_credit: 0,
+                    rewards_fixed_item: vec![QuestItemReward {
+                        item: sample_item_info(),
+                        count: 1,
+                    }],
+                    rewards_select_item: Vec::new(),
+                    finish_npc_index: 10,
+                },
             },
             ServerPacketId::NewQuestInfo,
         ),
         (
             ServerPacket::NewRecipeInfo {
-                payload: vec![4, 5, 6],
+                info: ClientRecipeInfo {
+                    gold: 50,
+                    chance: 90,
+                    item: sample_user_item(1, 1),
+                    tools: vec![sample_user_item(2, 1)],
+                    ingredients: vec![sample_user_item(3, 2)],
+                },
             },
             ServerPacketId::NewRecipeInfo,
         ),
-        (
-            ServerPacket::Raw {
-                packet_id: ServerPacketId::GameShopInfo,
-                payload: vec![7, 8, 9],
-            },
-            ServerPacketId::GameShopInfo,
-        ),
     ] {
-        let bytes = encode_server_packet(&packet).expect("raw packet should encode");
-        let frame = decode_frame(&bytes).expect("raw packet frame should decode");
-        let decoded = decode_server_packet(&bytes).expect("raw packet should roundtrip");
+        let bytes = encode_server_packet(&packet).expect("typed packet should encode");
+        let frame = decode_frame(&bytes).expect("typed packet frame should decode");
+        let decoded = decode_server_packet(&bytes).expect("typed packet should roundtrip");
 
         assert_eq!(frame.packet_id, packet_id as i16);
         assert_eq!(decoded, packet);
     }
+}
+
+#[test]
+fn raw_server_packets_preserve_payload_when_encoding_frames() {
+    let packet = ServerPacket::Raw {
+        packet_id: ServerPacketId::Connected,
+        payload: vec![7, 8, 9],
+    };
+    let bytes = encode_server_packet(&packet).expect("raw packet should encode");
+    let frame = decode_frame(&bytes).expect("raw packet frame should decode");
+
+    assert_eq!(frame.packet_id, ServerPacketId::Connected as i16);
+    assert_eq!(frame.payload, vec![7, 8, 9]);
 }
 
 #[test]

@@ -5,22 +5,24 @@ use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index,
-    crystal_map_respawns_by_file_name, crystal_npc_info_manifest, crystal_recipe_bootstrap_packets,
-    format_localized_text, localized_text_or_fallback, LanguageCode,
+    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
+    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
+    localized_text_or_fallback, LanguageCode,
 };
 use mir2_protocol::{
-    ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientPacket,
-    MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo,
-    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
-    ObjectPlayerInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point, ServerPacket,
-    ServerPacketId, Spell, StruckInfo, UserInformation, UserItem,
+    decode_server_packet, encode_frame, ClientFriend, ClientHeroInformation,
+    ClientIntelligentCreature, ClientMail, ClientPacket, MirClass, MirDirection, MirGender,
+    MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
+    ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo,
+    ObjectSpellInfo, ObjectStruckInfo, Point, ServerPacket, ServerPacketId, Spell, StruckInfo,
+    UserInformation, UserItem,
 };
 
 use crate::config::{
     CharacterRecord, EquipmentSlot, GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer,
-    MapTransferSnapshot, SimulationConfig, Stage5HeroState, Stage5MailMessage, Stage5TradeState,
-    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
-    WorldSnapshot,
+    MapTransferSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing, Stage5HeroState,
+    Stage5MailMessage, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
 
 use super::components::{
@@ -29,7 +31,12 @@ use super::components::{
     GroundDrop, HarvestMonsterState, Monster, MonsterAgent, MonsterAiState, MonsterVitals, Npc,
     NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SummonedMonster,
 };
-use super::crystal_compat::{BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD};
+use super::crystal_compat::{
+    BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD, CRYSTAL_ITEM_TYPE_ARMOUR,
+    CRYSTAL_ITEM_TYPE_BELT, CRYSTAL_ITEM_TYPE_BOOTS, CRYSTAL_ITEM_TYPE_BRACELET,
+    CRYSTAL_ITEM_TYPE_HELMET, CRYSTAL_ITEM_TYPE_NECKLACE, CRYSTAL_ITEM_TYPE_RING,
+    CRYSTAL_ITEM_TYPE_WEAPON,
+};
 use super::drops::*;
 use super::drops::{
     crystal_drop_name_colour_argb, crystal_item_grade_for_key,
@@ -64,6 +71,7 @@ use super::npc::{
     buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
     sell_item_impl,
 };
+use super::quests::{complete_quest, ensure_runtime_quest, quest_template_by_id, set_quest_stage};
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
     get_rented_items_impl, item_rental_fee_impl, item_rental_lock_fee_impl,
@@ -71,17 +79,17 @@ use super::rental::{
     retrieve_rental_item_impl,
 };
 use super::resources::{
-    is_in_world, BuffResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
-    NpcStateResource, PlayerPermissionResource, PlayerRuntimeResource, QuestResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
-    Stage5SystemsResource,
+    intelligent_creature_default_rules, is_in_world, BuffResource, InventoryResource,
+    ItemRentalResource, MapRuntimeResource, NpcStateResource, PlayerPermissionResource,
+    PlayerRuntimeResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::save::*;
 use super::session::SimulationSession;
 use super::skills::{
     assign_magic_key, cast_skill_with_context, skill_key_for_crystal_spell, SkillCastContext,
 };
-use super::stage5::{push_unique, stage5_item_name};
+use super::stage5::{push_unique, push_unique_u8, stage5_item_name, stage5_player_name};
 
 pub(super) fn system_message(message: &str) -> ServerPacket {
     ServerPacket::Chat {
@@ -507,6 +515,861 @@ fn stage5_trade_item_keys_for_slots(world: &World, slots: &BTreeMap<u8, u8>) -> 
     offered_items
 }
 
+fn current_group_map_name(world: &World) -> String {
+    world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .title
+        .clone()
+}
+
+fn ensure_stage5_group_self_member(world: &mut World) -> String {
+    let player_name = stage5_player_name(world);
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    push_unique(
+        &mut stage5.stage5_systems.group.members,
+        player_name.clone(),
+    );
+    player_name
+}
+
+fn stage5_group_switch_packet(world: &mut World, allow_group: bool) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let had_group = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let had_group = !stage5.stage5_systems.group.members.is_empty();
+        stage5.stage5_systems.group.allow_group = allow_group;
+        if !allow_group {
+            stage5.stage5_systems.group.members.clear();
+        }
+        had_group
+    };
+    let mut packets = vec![ServerPacket::SwitchGroup { allow_group }];
+    if !allow_group && had_group {
+        packets.push(ServerPacket::DeleteGroup);
+    }
+    packets
+}
+
+fn stage5_group_add_member_packet(world: &mut World, name: String) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let target_name = name.trim().to_string();
+    if target_name.is_empty() {
+        return Vec::new();
+    }
+    let allow_group = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .group
+        .allow_group;
+    if !allow_group {
+        return vec![ServerPacket::SwitchGroup { allow_group: false }];
+    }
+    let player_name = ensure_stage5_group_self_member(world);
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        push_unique(
+            &mut stage5.stage5_systems.group.members,
+            target_name.clone(),
+        );
+    }
+    let member_map = current_group_map_name(world);
+    let member_location = current_location(world).position;
+    vec![
+        ServerPacket::SwitchGroup { allow_group: true },
+        ServerPacket::AddMember { name: player_name },
+        ServerPacket::AddMember {
+            name: target_name.clone(),
+        },
+        ServerPacket::GroupMembersMap {
+            player_name: target_name.clone(),
+            player_map: member_map,
+        },
+        ServerPacket::SendMemberLocation {
+            member_name: target_name,
+            member_location,
+        },
+    ]
+}
+
+fn stage5_group_del_member_packet(world: &mut World, name: String) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let target_name = name.trim().to_string();
+    if target_name.is_empty() {
+        return Vec::new();
+    }
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let members = &mut stage5.stage5_systems.group.members;
+    let before = members.len();
+    members.retain(|member| !member.eq_ignore_ascii_case(&target_name));
+    if members.len() == before {
+        return Vec::new();
+    }
+    if members.len() <= 1 {
+        members.clear();
+        return vec![ServerPacket::DeleteGroup];
+    }
+    vec![ServerPacket::DeleteMember { name: target_name }]
+}
+
+fn stage5_group_invite_reply_packet(world: &mut World, accept_invite: bool) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if !accept_invite {
+        return vec![ServerPacket::DeleteGroup];
+    }
+    let player_name = ensure_stage5_group_self_member(world);
+    vec![
+        ServerPacket::SwitchGroup { allow_group: true },
+        ServerPacket::AddMember { name: player_name },
+    ]
+}
+
+const CRYSTAL_QUEST_STATE_ADD: u8 = 0;
+const CRYSTAL_QUEST_STATE_UPDATE: u8 = 1;
+const CRYSTAL_QUEST_STATE_REMOVE: u8 = 2;
+
+fn stage5_quest_task_list(world: &World, quest_id: i32) -> Vec<String> {
+    let language = world.resource::<SessionResource>().language;
+    let Some(snapshot) = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == quest_id)
+        .map(|quest| quest.snapshot(language))
+    else {
+        return Vec::new();
+    };
+    let mut tasks = Vec::new();
+    for task in [
+        snapshot.objective,
+        snapshot.progress_label,
+        snapshot.tracker,
+    ] {
+        if !task.trim().is_empty() {
+            push_unique(&mut tasks, task);
+        }
+    }
+    tasks
+}
+
+fn stage5_quest_stage(world: &World, quest_id: i32) -> Option<QuestStage> {
+    world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == quest_id)
+        .map(|quest| quest.stage)
+}
+
+fn stage5_completed_quest_ids(world: &World) -> Vec<i32> {
+    world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .filter(|quest| quest.stage == QuestStage::Completed)
+        .map(|quest| quest.quest_id)
+        .collect()
+}
+
+fn stage5_quest_change_packet(
+    world: &World,
+    quest_id: i32,
+    quest_state: u8,
+    track_quest: bool,
+    is_new: bool,
+) -> ServerPacket {
+    let stage = stage5_quest_stage(world, quest_id).unwrap_or(QuestStage::Available);
+    ServerPacket::ChangeQuest {
+        quest_id,
+        task_list: stage5_quest_task_list(world, quest_id),
+        taken: matches!(stage, QuestStage::InProgress | QuestStage::ReadyToTurnIn),
+        completed: matches!(stage, QuestStage::ReadyToTurnIn | QuestStage::Completed),
+        new: is_new,
+        quest_state,
+        track_quest,
+    }
+}
+
+fn stage5_quest_remove_packet(quest_id: i32, completed: bool) -> ServerPacket {
+    ServerPacket::ChangeQuest {
+        quest_id,
+        task_list: Vec::new(),
+        taken: false,
+        completed,
+        new: false,
+        quest_state: CRYSTAL_QUEST_STATE_REMOVE,
+        track_quest: false,
+    }
+}
+
+fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if quest_template_by_id(quest_id).is_none() {
+        return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
+    }
+    match ensure_runtime_quest(world, quest_id) {
+        QuestStage::Available => {
+            set_quest_stage(world, quest_id, QuestStage::InProgress);
+            vec![stage5_quest_change_packet(
+                world,
+                quest_id,
+                CRYSTAL_QUEST_STATE_ADD,
+                true,
+                true,
+            )]
+        }
+        QuestStage::InProgress | QuestStage::ReadyToTurnIn => vec![stage5_quest_change_packet(
+            world,
+            quest_id,
+            CRYSTAL_QUEST_STATE_UPDATE,
+            true,
+            false,
+        )],
+        QuestStage::Completed => vec![system_message_key(world, "server.QuestAlreadyCompleted")],
+    }
+}
+
+fn stage5_finish_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if ensure_runtime_quest(world, quest_id) != QuestStage::ReadyToTurnIn {
+        return Vec::new();
+    }
+    complete_quest(world, quest_id);
+    if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
+        return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
+    }
+    vec![
+        stage5_quest_remove_packet(quest_id, true),
+        ServerPacket::CompleteQuest {
+            completed_quests: stage5_completed_quest_ids(world),
+        },
+    ]
+}
+
+fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Some(stage) = stage5_quest_stage(world, quest_id) else {
+        return Vec::new();
+    };
+    if matches!(stage, QuestStage::Available | QuestStage::Completed) {
+        return Vec::new();
+    }
+    {
+        let mut quests = world.resource_mut::<QuestResource>();
+        if let Some(quest) = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == quest_id)
+        {
+            quest.stage = QuestStage::Available;
+            quest.current = 0;
+        }
+    }
+    if let Some(template) = quest_template_by_id(quest_id) {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .retain(|item| {
+                item.container != ItemContainer::Quest || item.key != template.quest_item.key
+            });
+    }
+    vec![stage5_quest_remove_packet(quest_id, false)]
+}
+
+fn stage5_share_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if quest_template_by_id(quest_id).is_none() {
+        return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
+    }
+    let sharer_name = stage5_player_name(world);
+    let has_target = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .group
+        .members
+        .iter()
+        .any(|member| !member.eq_ignore_ascii_case(&sharer_name));
+    if !has_target {
+        return vec![system_message_key(world, "server.QuestNotShared")];
+    }
+    vec![ServerPacket::ShareQuest {
+        quest_index: quest_id,
+        sharer_name,
+    }]
+}
+
+fn stage5_market_success_key_args<I, S>(world: &World, key: &str, args: I) -> ServerPacket
+where
+    I: IntoIterator<Item = S>,
+    S: ToString,
+{
+    ServerPacket::MarketSuccess {
+        message: format_localized_text(super::session::current_language(world), key, args),
+    }
+}
+
+fn stage5_market_listing_count_packet(world: &World, match_text: &str) -> Vec<ServerPacket> {
+    let normalized = match_text.replace(' ', "").to_ascii_lowercase();
+    let count = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .iter()
+        .filter(|listing| !listing.sold && !listing.cancelled && !listing.expired)
+        .filter(|listing| {
+            normalized.is_empty()
+                || listing
+                    .item_key
+                    .replace('-', "")
+                    .to_ascii_lowercase()
+                    .contains(&normalized)
+                || stage5_item_name(&listing.item_key)
+                    .replace(' ', "")
+                    .to_ascii_lowercase()
+                    .contains(&normalized)
+        })
+        .count();
+    vec![ServerPacket::MarketSuccess {
+        message: format!("{count} market listings matched."),
+    }]
+}
+
+fn stage5_consign_item_packet(
+    world: &mut World,
+    unique_id: u64,
+    price: u32,
+    _market_type: u8,
+) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if price == 0 {
+        return vec![
+            ServerPacket::ConsignItem {
+                unique_id,
+                success: false,
+            },
+            ServerPacket::MarketFail { reason: 1 },
+        ];
+    }
+    let Some(item) = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item_matches_inventory_unique_id(item, unique_id))
+        .cloned()
+    else {
+        return vec![
+            ServerPacket::ConsignItem {
+                unique_id,
+                success: false,
+            },
+            ServerPacket::MarketFail { reason: 1 },
+        ];
+    };
+    let seller = stage5_player_name(world);
+    let id = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        stage5
+            .stage5_systems
+            .auction
+            .iter()
+            .map(|listing| listing.id)
+            .max()
+            .unwrap_or(0)
+            + 1
+    };
+    world
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .retain(|candidate| !item_matches_inventory_unique_id(candidate, unique_id));
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .push(Stage5AuctionListing {
+            id,
+            seller,
+            item_key: item.key.clone(),
+            price,
+            sold: false,
+            cancelled: false,
+            expired: false,
+        });
+    vec![
+        ServerPacket::ConsignItem {
+            unique_id,
+            success: true,
+        },
+        ServerPacket::MarketSuccess {
+            message: format!("Listed {} for {price} Gold.", item.name),
+        },
+    ]
+}
+
+fn stage5_market_buy_packet(
+    world: &mut World,
+    auction_id: u64,
+    bid_price: u32,
+) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Ok(listing_id) = u32::try_from(auction_id) else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let buyer = stage5_player_name(world);
+    let Some(index) = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .iter()
+        .position(|listing| listing.id == listing_id && !listing.cancelled)
+    else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let listing = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction[index]
+        .clone();
+    if listing.sold {
+        return vec![ServerPacket::MarketFail { reason: 2 }];
+    }
+    if listing.expired {
+        return vec![ServerPacket::MarketFail { reason: 3 }];
+    }
+    if listing.seller.eq_ignore_ascii_case(&buyer) {
+        return vec![ServerPacket::MarketFail { reason: 6 }];
+    }
+    let price = if bid_price > 0 {
+        bid_price
+    } else {
+        listing.price
+    };
+    if world.resource::<PlayerRuntimeResource>().gold < price {
+        return vec![ServerPacket::MarketFail { reason: 4 }];
+    }
+    {
+        let inventory = world.resource::<InventoryResource>();
+        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
+            return vec![ServerPacket::MarketFail { reason: 5 }];
+        }
+    }
+    world.resource_mut::<PlayerRuntimeResource>().gold -= price;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction[index]
+        .sold = true;
+    add_or_increment_item(
+        world,
+        ItemContainer::Bag1,
+        &listing.item_key,
+        &stage5_item_name(&listing.item_key),
+        "Stage 5 market purchase.",
+        21,
+        1,
+        1,
+    );
+    vec![
+        ServerPacket::LoseGold { gold: price },
+        stage5_market_success_key_args(
+            world,
+            "server.BoughtItemForGold",
+            [stage5_item_name(&listing.item_key), price.to_string()],
+        ),
+    ]
+}
+
+fn stage5_market_get_back_packet(
+    world: &mut World,
+    _mode: u8,
+    auction_id: u64,
+) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let seller = stage5_player_name(world);
+    let listing_index = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        if auction_id == 0 {
+            stage5
+                .stage5_systems
+                .auction
+                .iter()
+                .position(|listing| listing.seller.eq_ignore_ascii_case(&seller))
+        } else {
+            let Ok(listing_id) = u32::try_from(auction_id) else {
+                return vec![ServerPacket::MarketFail { reason: 7 }];
+            };
+            stage5.stage5_systems.auction.iter().position(|listing| {
+                listing.id == listing_id && listing.seller.eq_ignore_ascii_case(&seller)
+            })
+        }
+    };
+    let Some(index) = listing_index else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let listing = world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .remove(index);
+    if listing.sold {
+        world.resource_mut::<PlayerRuntimeResource>().gold += listing.price;
+        return vec![
+            ServerPacket::GainedGold {
+                gold: listing.price,
+            },
+            stage5_market_success_key_args(
+                world,
+                "server.SoldItemEarningsCommission",
+                [
+                    stage5_item_name(&listing.item_key),
+                    listing.price.to_string(),
+                    listing.price.to_string(),
+                    "0".to_string(),
+                ],
+            ),
+        ];
+    }
+    {
+        let inventory = world.resource::<InventoryResource>();
+        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
+            world
+                .resource_mut::<Stage5SystemsResource>()
+                .stage5_systems
+                .auction
+                .push(listing);
+            return vec![ServerPacket::MarketFail { reason: 5 }];
+        }
+    }
+    add_or_increment_item(
+        world,
+        ItemContainer::Bag1,
+        &listing.item_key,
+        &stage5_item_name(&listing.item_key),
+        "Stage 5 market return.",
+        21,
+        1,
+        1,
+    );
+    vec![ServerPacket::MarketSuccess {
+        message: format!(
+            "Returned {} from market.",
+            stage5_item_name(&listing.item_key)
+        ),
+    }]
+}
+
+fn stage5_market_sell_now_packet(world: &mut World, auction_id: u64) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Ok(listing_id) = u32::try_from(auction_id) else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let seller = stage5_player_name(world);
+    let has_listing = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .iter()
+        .any(|listing| listing.id == listing_id && listing.seller.eq_ignore_ascii_case(&seller));
+    vec![ServerPacket::MarketFail {
+        reason: if has_listing { 9 } else { 7 },
+    }]
+}
+
+fn stage5_refine_slot(value: i32) -> Option<u8> {
+    u8::try_from(value).ok().filter(|slot| *slot < 16)
+}
+
+fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Some(from_slot) = stage5_refine_slot(from) else {
+        return vec![ServerPacket::DepositRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    };
+    let Some(to_slot) = stage5_refine_slot(to) else {
+        return vec![ServerPacket::DepositRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    };
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .contains_key(&to_slot)
+    {
+        return vec![ServerPacket::DepositRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    }
+    let Some(item) = ({
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        inventory
+            .inventory_items
+            .iter()
+            .position(|item| inventory_item_matches_index(item, from_slot))
+            .map(|index| inventory.inventory_items.remove(index))
+    }) else {
+        return vec![ServerPacket::DepositRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    };
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .insert(to_slot, item.key);
+    vec![ServerPacket::DepositRefineItem {
+        from,
+        to,
+        success: true,
+    }]
+}
+
+fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Some(from_slot) = stage5_refine_slot(from) else {
+        return vec![ServerPacket::RetrieveRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    };
+    let Some(item_key) = world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .remove(&from_slot)
+    else {
+        return vec![ServerPacket::RetrieveRefineItem {
+            from,
+            to,
+            success: false,
+        }];
+    };
+    let preferred_slot = u8::try_from(to).unwrap_or(0);
+    add_or_increment_item(
+        world,
+        ItemContainer::Bag1,
+        &item_key,
+        &stage5_item_name(&item_key),
+        "Stage 5 refine return.",
+        preferred_slot,
+        1,
+        1,
+    );
+    vec![ServerPacket::RetrieveRefineItem {
+        from,
+        to,
+        success: true,
+    }]
+}
+
+fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let returned = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.refine.refining = false;
+        stage5.stage5_systems.refine.ready = false;
+        stage5.stage5_systems.refine.current_item = None;
+        std::mem::take(&mut stage5.stage5_systems.refine.slots)
+    };
+    let mut packets = vec![ServerPacket::RefineCancel];
+    for (slot, item_key) in returned {
+        add_or_increment_item(
+            world,
+            ItemContainer::Bag1,
+            &item_key,
+            &stage5_item_name(&item_key),
+            "Stage 5 refine cancel return.",
+            slot,
+            1,
+            1,
+        );
+        packets.push(ServerPacket::RetrieveRefineItem {
+            from: i32::from(slot),
+            to: i32::from(slot),
+            success: true,
+        });
+    }
+    packets
+}
+
+fn stage5_refine_item_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let Some(item_key) = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item_matches_inventory_unique_id(item, unique_id))
+        .map(|item| item.key.clone())
+    else {
+        return vec![ServerPacket::NPCCollectRefine { success: false }];
+    };
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.refine.current_item = Some(item_key);
+        stage5.stage5_systems.refine.refining = true;
+        stage5.stage5_systems.refine.ready = true;
+        stage5.stage5_systems.refine.slots.clear();
+    }
+    vec![ServerPacket::RefineItem { unique_id }]
+}
+
+fn stage5_check_refine_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let mut inventory = world.resource_mut::<InventoryResource>();
+    let Some(item) = inventory
+        .inventory_items
+        .iter_mut()
+        .find(|item| item_matches_inventory_unique_id(item, unique_id))
+    else {
+        return vec![ServerPacket::NPCCollectRefine { success: false }];
+    };
+    item.added_attack += 1;
+    drop(inventory);
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine = Default::default();
+    vec![
+        ServerPacket::RefineItem { unique_id },
+        system_message("Refine check succeeded."),
+    ]
+}
+
+fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    push_unique_u8(
+        &mut world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .conquest
+            .open_gates,
+        door_index,
+    );
+    vec![ServerPacket::OpenDoor {
+        door_index,
+        close: false,
+    }]
+}
+
+fn request_map_info_packet(world: &World, map_index: i32) -> Vec<ServerPacket> {
+    let mut info = world.resource::<MapRuntimeResource>().current_map.clone();
+    if let Some(map) = crystal_map_respawns_by_index(map_index) {
+        info.map_index = map.map_index;
+        info.file_name = map.map_file_name;
+        info.title = map.map_title;
+        info.mini_map = map.mini_map;
+        info.big_map = map.big_map;
+        info.lights = map.light;
+    }
+    vec![ServerPacket::MapInformation { info }]
+}
+
+fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
+    let Some(monster) = crystal_monster_by_index(monster_index) else {
+        return Vec::new();
+    };
+    vec![ServerPacket::NewMonsterInfo {
+        info: MonsterInfo {
+            object_id: 0,
+            name: monster.name,
+            name_colour_argb: -1,
+            location: Point { x: 0, y: 0 },
+            image: monster.image,
+            direction: MirDirection::Down,
+            effect: monster.effect,
+            ai: monster.ai,
+            light: monster.light,
+            dead: false,
+            skeleton: false,
+            poison: 0,
+            hidden: false,
+            shock_time: 0,
+            binding_shot_center: false,
+            extra: false,
+            extra_byte: 0,
+            master_object_id: 0,
+            rarity: if monster.is_boss { 1 } else { 0 },
+            buffs: Vec::new(),
+        },
+    }]
+}
+
+fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
+    let Some(npc) = crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .find(|npc| npc.npc_index == npc_index)
+    else {
+        return Vec::new();
+    };
+    let mut quest_ids = npc.collect_quest_indexes;
+    for quest_id in npc.finish_quest_indexes {
+        if !quest_ids.contains(&quest_id) {
+            quest_ids.push(quest_id);
+        }
+    }
+    vec![ServerPacket::NewNpcInfo {
+        info: NpcInfo {
+            object_id: npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
+            name: npc.name,
+            name_colour_argb: -1,
+            image: npc.image,
+            colour_argb: -1,
+            location: npc.location,
+            direction: MirDirection::Down,
+            quest_ids,
+        },
+    }]
+}
+
 pub(super) fn stage5_trade_request_packet(
     world: &mut World,
     partner_name: Option<String>,
@@ -802,6 +1665,7 @@ fn stage5_update_intelligent_creature_packet(
     if unsummon_me {
         creature.pet_mode = 0;
     }
+    creature.creature_rules = intelligent_creature_default_rules(creature.pet_type);
     let was_new = {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
         let creatures = &mut stage5.stage5_systems.intelligent_creatures;
@@ -829,20 +1693,42 @@ fn stage5_update_intelligent_creature_packet(
 pub(super) fn stage5_intelligent_creature_pickup_packet(
     world: &mut World,
     location: Point,
+    mouse_mode: Option<bool>,
 ) -> Vec<ServerPacket> {
-    let has_active_creature = world
+    let Some(active_creature) = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
         .intelligent_creatures
         .iter()
-        .any(|creature| creature.pet_mode != 0);
-    if !has_active_creature {
+        .find(|creature| creature.pet_mode != 0)
+    else {
+        return Vec::new();
+    };
+    if active_creature.fullness < active_creature.creature_rules.minimal_fullness.max(0) {
         return Vec::new();
     }
     let Some(player) = player_entity(world) else {
         return Vec::new();
     };
     let picker_object_id = entity_object_id(world, player).expect("player object id");
+    let player_position = entity_position(world, player).unwrap_or(location.clone());
+    let target_location = match mouse_mode {
+        Some(true) => {
+            if !active_creature.creature_rules.mouse_pickup_enabled {
+                return Vec::new();
+            }
+            location
+        }
+        Some(false) => {
+            if !active_creature.creature_rules.semi_auto_pickup_enabled
+                || active_creature.pet_mode != 1
+            {
+                return Vec::new();
+            }
+            player_position
+        }
+        None => location,
+    };
     let Some((object_id, drop_entity)) = world
         .iter_entities()
         .filter_map(|entity| {
@@ -851,7 +1737,7 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
             }
             let object_id = entity.get::<ObjectId>()?.0;
             let position = entity.get::<Position>()?.0.clone();
-            (position == location).then_some((object_id, entity.id()))
+            (position == target_location).then_some((object_id, entity.id()))
         })
         .min_by_key(|(object_id, _)| *object_id)
     else {
@@ -864,6 +1750,9 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
         let entity = world.entity(drop_entity);
         entity.get::<DropPayload>().expect("drop payload").clone()
     };
+    if !stage5_intelligent_creature_filter_allows_drop(active_creature, &payload) {
+        return Vec::new();
+    }
     let mut packets = vec![ServerPacket::IntelligentCreaturePickup { object_id }];
     match payload.loot {
         DropLoot::Gold(amount) => {
@@ -960,7 +1849,9 @@ pub(super) fn tick_stage5_intelligent_creatures(
         packets.push(stage5_intelligent_creature_list_packet(world));
     }
     if let Some(location) = stage5_intelligent_creature_auto_pickup_location(world) {
-        packets.extend(stage5_intelligent_creature_pickup_packet(world, location));
+        packets.extend(stage5_intelligent_creature_pickup_packet(
+            world, location, None,
+        ));
     }
 }
 
@@ -1014,12 +1905,33 @@ fn stage5_intelligent_creature_filter_allows_drop(
     creature: &ClientIntelligentCreature,
     payload: &DropPayload,
 ) -> bool {
-    if creature.filter.pet_pickup_all {
-        return true;
-    }
     match &payload.loot {
-        DropLoot::Gold(_) => creature.filter.pet_pickup_gold,
-        DropLoot::InventoryItem { .. } => creature.filter.pet_pickup_others,
+        DropLoot::Gold(_) => creature.filter.pet_pickup_all || creature.filter.pet_pickup_gold,
+        DropLoot::InventoryItem { key, .. } => {
+            if creature.pickup_grade > 0 {
+                let drop_grade = crystal_item_grade_for_key(key);
+                if drop_grade < creature.pickup_grade {
+                    return false;
+                }
+            }
+            if creature.filter.pet_pickup_all {
+                return true;
+            }
+            let Some(template) = crystal_item_template_for_item_key(key) else {
+                return creature.filter.pet_pickup_others;
+            };
+            match template.item_type {
+                CRYSTAL_ITEM_TYPE_WEAPON => creature.filter.pet_pickup_weapons,
+                CRYSTAL_ITEM_TYPE_ARMOUR => creature.filter.pet_pickup_armours,
+                CRYSTAL_ITEM_TYPE_HELMET => creature.filter.pet_pickup_helmets,
+                CRYSTAL_ITEM_TYPE_BOOTS => creature.filter.pet_pickup_boots,
+                CRYSTAL_ITEM_TYPE_BELT => creature.filter.pet_pickup_belts,
+                CRYSTAL_ITEM_TYPE_NECKLACE
+                | CRYSTAL_ITEM_TYPE_BRACELET
+                | CRYSTAL_ITEM_TYPE_RING => creature.filter.pet_pickup_accessories,
+                _ => creature.filter.pet_pickup_others,
+            }
+        }
     }
 }
 
@@ -1552,36 +2464,40 @@ pub(super) fn start_game_recipe_info_packets(
                 info: item_info_from_crystal_template(template),
             });
         }
-        packets.push(ServerPacket::NewRecipeInfo {
-            payload: recipe.payload,
-        });
+        packets.push(decode_crystal_payload(
+            ServerPacketId::NewRecipeInfo,
+            recipe.payload,
+        ));
     }
     packets
 }
 
 pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> {
     let mut packets = vec![
-        raw_server_packet(ServerPacketId::CompleteQuest, &[0, 0, 0, 0]),
+        ServerPacket::CompleteQuest {
+            completed_quests: Vec::new(),
+        },
         ServerPacket::ReceiveMail { mail: Vec::new() },
         ServerPacket::FriendUpdate {
             friends: Vec::new(),
         },
-        raw_server_packet(
-            ServerPacketId::LoverUpdate,
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ),
-        raw_server_packet(
-            ServerPacketId::MentorUpdate,
-            &[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        ),
+        ServerPacket::LoverUpdate {
+            name: String::new(),
+            date_binary_datetime: 0,
+            map_name: String::new(),
+            married_days: 0,
+        },
+        ServerPacket::MentorUpdate {
+            name: String::new(),
+            level: 0,
+            online: false,
+            mentee_exp: 0,
+        },
     ];
     packets.extend(
         crystal_game_shop_info_packet_payloads()
             .into_iter()
-            .map(|payload| ServerPacket::Raw {
-                packet_id: ServerPacketId::GameShopInfo,
-                payload,
-            }),
+            .map(|payload| decode_crystal_payload(ServerPacketId::GameShopInfo, payload)),
     );
     packets
 }
@@ -1589,32 +2505,38 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
 pub(super) fn start_game_base_stats_packet(class: MirClass) -> Vec<ServerPacket> {
     let mut packets = Vec::new();
     if let Some(payload) = crystal_base_stats_info_packet_payload(class) {
-        packets.push(ServerPacket::Raw {
-            packet_id: ServerPacketId::BaseStatsInfo,
+        packets.push(decode_crystal_payload(
+            ServerPacketId::BaseStatsInfo,
             payload,
-        });
+        ));
     }
     packets
 }
 
 pub(super) fn start_game_post_visible_crystal_bootstrap_packets() -> Vec<ServerPacket> {
     vec![
-        raw_server_packet(ServerPacketId::TimeOfDay, &[4]),
-        raw_server_packet(ServerPacketId::ChangeAMode, &[0]),
-        raw_server_packet(ServerPacketId::ChangePMode, &[0]),
-        raw_server_packet(ServerPacketId::SwitchGroup, &[0]),
-        raw_server_packet(ServerPacketId::DefaultNPC, &[0, 0, 0, 0]),
-        ServerPacket::Raw {
-            packet_id: ServerPacketId::GuildBuffList,
-            payload: crystal_guild_buff_list_packet_payload(),
-        },
-        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
-        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
-        raw_server_packet(ServerPacketId::NPCUpdate, &[0, 0, 0, 0]),
-        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
-        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
-        raw_server_packet(ServerPacketId::NPCResponse, &[0, 0, 0, 0]),
+        ServerPacket::TimeOfDay { lights: 4 },
+        ServerPacket::ChangeAMode { mode: 0 },
+        ServerPacket::ChangePMode { mode: 0 },
+        ServerPacket::SwitchGroup { allow_group: false },
+        ServerPacket::DefaultNPC { object_id: 0 },
+        decode_crystal_payload(
+            ServerPacketId::GuildBuffList,
+            crystal_guild_buff_list_packet_payload(),
+        ),
+        ServerPacket::NPCUpdate { npc_id: 0 },
+        ServerPacket::NPCUpdate { npc_id: 0 },
+        ServerPacket::NPCUpdate { npc_id: 0 },
+        ServerPacket::NPCResponse { page: Vec::new() },
+        ServerPacket::NPCResponse { page: Vec::new() },
+        ServerPacket::NPCResponse { page: Vec::new() },
     ]
+}
+
+pub(super) fn decode_crystal_payload(packet_id: ServerPacketId, payload: Vec<u8>) -> ServerPacket {
+    let frame = encode_frame(packet_id as i16, &payload)
+        .expect("generated Crystal packet payload should fit into a protocol frame");
+    decode_server_packet(&frame).expect("generated Crystal packet payload should decode")
 }
 
 pub(super) fn start_game_static_visible_object_packets(
@@ -2406,13 +3328,6 @@ pub(super) fn visible_object_bundle_for_entity(
     None
 }
 
-pub(super) fn raw_server_packet(packet_id: ServerPacketId, payload: &[u8]) -> ServerPacket {
-    ServerPacket::Raw {
-        packet_id,
-        payload: payload.to_vec(),
-    }
-}
-
 pub(super) fn prepend_packet(
     packet: ServerPacket,
     mut packets: Vec<ServerPacket>,
@@ -2515,15 +3430,20 @@ impl SimulationSession {
                 remove_storage_password_impl(self.app.world_mut(), &current_password)
             }
             ClientPacket::GetRentedItems => get_rented_items_impl(self.app.world()),
-            ClientPacket::DepositRefineItem { .. }
-            | ClientPacket::RetrieveRefineItem { .. }
-            | ClientPacket::RefineCancel
-            | ClientPacket::RefineItem { .. }
-            | ClientPacket::CheckRefine { .. }
-            | ClientPacket::ReplaceWedRing { .. }
-            | ClientPacket::RequestMapInfo { .. }
-            | ClientPacket::RequestMonsterInfo { .. }
-            | ClientPacket::RequestNpcInfo { .. }
+            ClientPacket::DepositRefineItem { from, to } => {
+                stage5_deposit_refine_item_packet(self.app.world_mut(), from, to)
+            }
+            ClientPacket::RetrieveRefineItem { from, to } => {
+                stage5_retrieve_refine_item_packet(self.app.world_mut(), from, to)
+            }
+            ClientPacket::RefineCancel => stage5_refine_cancel_packet(self.app.world_mut()),
+            ClientPacket::RefineItem { unique_id } => {
+                stage5_refine_item_packet(self.app.world_mut(), unique_id)
+            }
+            ClientPacket::CheckRefine { unique_id } => {
+                stage5_check_refine_packet(self.app.world_mut(), unique_id)
+            }
+            ClientPacket::ReplaceWedRing { .. }
             | ClientPacket::TeleportToNpc { .. }
             | ClientPacket::SearchMap { .. }
             | ClientPacket::Inspect { .. }
@@ -2533,10 +3453,6 @@ impl SimulationSession {
             | ClientPacket::ChangeTrade { .. }
             | ClientPacket::CallNpc { .. }
             | ClientPacket::BuyItemBack { .. }
-            | ClientPacket::SwitchGroup { .. }
-            | ClientPacket::AddMember { .. }
-            | ClientPacket::DelMember { .. }
-            | ClientPacket::GroupInvite { .. }
             | ClientPacket::SetAutoPotValue { .. }
             | ClientPacket::SetAutoPotItem { .. }
             | ClientPacket::TownRevive
@@ -2551,10 +3467,6 @@ impl SimulationSession {
             | ClientPacket::GuildStorageItemChange { .. }
             | ClientPacket::GuildWarReturn { .. }
             | ClientPacket::EquipSlotItem { .. }
-            | ClientPacket::AcceptQuest { .. }
-            | ClientPacket::FinishQuest { .. }
-            | ClientPacket::AbandonQuest { .. }
-            | ClientPacket::ShareQuest { .. }
             | ClientPacket::AcceptReincarnation
             | ClientPacket::CancelReincarnation
             | ClientPacket::AwakeningNeedMaterials { .. }
@@ -2568,7 +3480,6 @@ impl SimulationSession {
             | ClientPacket::GameShopBuy { .. }
             | ClientPacket::ReportIssue { .. }
             | ClientPacket::GetRanking { .. }
-            | ClientPacket::OpenDoor { .. }
             | ClientPacket::GuildTerritoryPage { .. }
             | ClientPacket::PurchaseGuildTerritory { .. } => Vec::new(),
             ClientPacket::CraftItem { .. } => vec![ServerPacket::CraftItem { success: false }],
@@ -2592,19 +3503,38 @@ impl SimulationSession {
                     success: false,
                 }]
             }
-            ClientPacket::ConsignItem { unique_id, .. } => vec![
-                ServerPacket::ConsignItem {
-                    unique_id,
-                    success: false,
-                },
-                ServerPacket::MarketFail { reason: 1 },
-            ],
-            ClientPacket::MarketSearch { .. }
-            | ClientPacket::MarketRefresh
-            | ClientPacket::MarketPage { .. }
-            | ClientPacket::MarketBuy { .. }
-            | ClientPacket::MarketGetBack { .. }
-            | ClientPacket::MarketSellNow { .. } => vec![ServerPacket::MarketFail { reason: 1 }],
+            ClientPacket::ConsignItem {
+                unique_id,
+                price,
+                market_type,
+            } => stage5_consign_item_packet(self.app.world_mut(), unique_id, price, market_type),
+            ClientPacket::MarketSearch { match_text, .. } => {
+                stage5_market_listing_count_packet(self.app.world(), &match_text)
+            }
+            ClientPacket::MarketRefresh => stage5_market_listing_count_packet(self.app.world(), ""),
+            ClientPacket::MarketPage { .. } => {
+                stage5_market_listing_count_packet(self.app.world(), "")
+            }
+            ClientPacket::MarketBuy {
+                auction_id,
+                bid_price,
+            } => stage5_market_buy_packet(self.app.world_mut(), auction_id, bid_price),
+            ClientPacket::MarketGetBack { mode, auction_id } => {
+                stage5_market_get_back_packet(self.app.world_mut(), mode, auction_id)
+            }
+            ClientPacket::MarketSellNow { auction_id } => {
+                stage5_market_sell_now_packet(self.app.world_mut(), auction_id)
+            }
+            ClientPacket::OpenDoor { door_index } => {
+                stage5_open_door_packet(self.app.world_mut(), door_index)
+            }
+            ClientPacket::RequestMapInfo { map_index } => {
+                request_map_info_packet(self.app.world(), map_index)
+            }
+            ClientPacket::RequestMonsterInfo { monster_index } => {
+                request_monster_info_packet(monster_index)
+            }
+            ClientPacket::RequestNpcInfo { npc_index } => request_npc_info_packet(npc_index),
             ClientPacket::MarriageRequest
             | ClientPacket::MarriageReply { .. }
             | ClientPacket::ChangeMarriage
@@ -2625,6 +3555,30 @@ impl SimulationSession {
                 stage5_trade_confirm_packet(self.app.world_mut(), locked)
             }
             ClientPacket::TradeCancel => stage5_trade_cancel_packet(self.app.world_mut()),
+            ClientPacket::SwitchGroup { allow_group } => {
+                stage5_group_switch_packet(self.app.world_mut(), allow_group)
+            }
+            ClientPacket::AddMember { name } => {
+                stage5_group_add_member_packet(self.app.world_mut(), name)
+            }
+            ClientPacket::DelMember { name } => {
+                stage5_group_del_member_packet(self.app.world_mut(), name)
+            }
+            ClientPacket::GroupInvite { accept_invite } => {
+                stage5_group_invite_reply_packet(self.app.world_mut(), accept_invite)
+            }
+            ClientPacket::AcceptQuest { quest_index, .. } => {
+                stage5_accept_quest_packet(self.app.world_mut(), quest_index)
+            }
+            ClientPacket::FinishQuest { quest_index, .. } => {
+                stage5_finish_quest_packet(self.app.world_mut(), quest_index)
+            }
+            ClientPacket::AbandonQuest { quest_index } => {
+                stage5_abandon_quest_packet(self.app.world_mut(), quest_index)
+            }
+            ClientPacket::ShareQuest { quest_index } => {
+                stage5_share_quest_packet(self.app.world_mut(), quest_index)
+            }
             ClientPacket::FishingCast { cast_out } => {
                 fishing_cast_impl(self.app.world_mut(), cast_out)
             }
@@ -2676,9 +3630,14 @@ impl SimulationSession {
                 unsummon_me,
                 release_me,
             ),
-            ClientPacket::IntelligentCreaturePickup { location, .. } => {
-                stage5_intelligent_creature_pickup_packet(self.app.world_mut(), location)
-            }
+            ClientPacket::IntelligentCreaturePickup {
+                mouse_mode,
+                location,
+            } => stage5_intelligent_creature_pickup_packet(
+                self.app.world_mut(),
+                location,
+                Some(mouse_mode),
+            ),
             ClientPacket::AddFriend { name, blocked } => {
                 stage5_add_friend_packet(self.app.world_mut(), name, blocked)
             }

@@ -33,6 +33,7 @@ use super::items::{
     merged_user_item_stats, upsert_user_item_stat, user_item_from_item_state,
     user_item_rental_information, ItemState,
 };
+use super::map::{current_map_disallows_mount, current_map_requires_bridle};
 use super::monsters::deterministic_roll;
 use super::npc::{
     active_crystal_storage_service, crystal_npc_script_item_types,
@@ -922,11 +923,18 @@ pub(super) fn toggle_mount_ride_from_use_item(
         .shape
         .and_then(|shape| i16::try_from(shape).ok())
         .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
-    let riding_mount = {
+    let map_disallows_mount = current_map_disallows_mount(world);
+    let map_requires_bridle = current_map_requires_bridle(world);
+    let (riding_mount, mount_type) = {
         let mut mount_resource = world.resource_mut::<MountResource>();
         mount_resource.mount_type = mount_type;
-        mount_resource.riding_mount = !mount_resource.riding_mount;
-        mount_resource.riding_mount
+        let wants_ride = !mount_resource.riding_mount;
+        let can_ride = !wants_ride
+            || (mount_resource.has_saddle
+                && !map_disallows_mount
+                && (!map_requires_bridle || mount_resource.has_reins));
+        mount_resource.riding_mount = wants_ride && can_ride;
+        (mount_resource.riding_mount, mount_resource.mount_type)
     };
     Some(vec![
         ServerPacket::UseItem {

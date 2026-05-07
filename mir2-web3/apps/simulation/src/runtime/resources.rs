@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{LanguageCode, MapBounds};
-use mir2_protocol::{MapInformation, MirDirection, Point};
+use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
@@ -33,6 +33,167 @@ pub(super) fn is_in_world(world: &World) -> bool {
 
 pub(super) fn runtime_tick(world: &World) -> u64 {
     world.resource::<RuntimeClockResource>().tick
+}
+
+pub(super) fn intelligent_creature_default_rules(pet_type: u8) -> IntelligentCreatureRules {
+    let mut rules = IntelligentCreatureRules {
+        minimal_fullness: 1000,
+        mouse_pickup_enabled: false,
+        mouse_pickup_range: 0,
+        auto_pickup_enabled: false,
+        auto_pickup_range: 0,
+        semi_auto_pickup_enabled: false,
+        semi_auto_pickup_range: 0,
+        can_produce_blackstone: false,
+    };
+
+    match pet_type {
+        // BabyPig
+        0 => {
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 3;
+            rules.minimal_fullness = 4000;
+        }
+        // Chick
+        1 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 7;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 7;
+            rules.can_produce_blackstone = true;
+        }
+        // Kitten
+        2 => {
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 3;
+            rules.minimal_fullness = 6000;
+        }
+        // BabySkeleton
+        3 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 7;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 7;
+            rules.can_produce_blackstone = true;
+        }
+        // Baekdon
+        4 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 7;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 7;
+            rules.can_produce_blackstone = true;
+        }
+        // Wimaen
+        5 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 7;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 5;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 5;
+            rules.minimal_fullness = 5000;
+        }
+        // BlackKitten
+        6 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 7;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 5;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 5;
+            rules.minimal_fullness = 5000;
+        }
+        // BabyDragon
+        7 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 7;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 5;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 5;
+            rules.minimal_fullness = 7000;
+        }
+        // OlympicFlame
+        8 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // BabySnowMan
+        9 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // Frog
+        10 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // BabyMonkey
+        11 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // AngryBird
+        12 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // Foxey
+        13 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        // MedicalRat
+        14 => {
+            rules.mouse_pickup_enabled = true;
+            rules.mouse_pickup_range = 11;
+            rules.auto_pickup_enabled = true;
+            rules.auto_pickup_range = 11;
+            rules.semi_auto_pickup_enabled = true;
+            rules.semi_auto_pickup_range = 11;
+            rules.can_produce_blackstone = true;
+        }
+        _ => {}
+    }
+
+    rules
 }
 
 pub(super) fn set_runtime_tick(world: &mut World, tick: u64) {
@@ -224,6 +385,9 @@ pub(super) struct FishingResource {
     pub(super) progress_percent: i32,
     pub(super) chance_percent: i32,
     pub(super) found_fish: bool,
+    pub(super) fishing_attribute: i8,
+    pub(super) rod_has_hook: bool,
+    pub(super) rod_has_reel: bool,
 }
 
 impl FishingResource {
@@ -234,6 +398,9 @@ impl FishingResource {
             progress_percent: 0,
             chance_percent: 0,
             found_fish: false,
+            fishing_attribute: 0,
+            rod_has_hook: true,
+            rod_has_reel: true,
         }
     }
 }
@@ -275,6 +442,8 @@ impl BuffResource {
 pub(super) struct MountResource {
     pub(super) mount_type: i16,
     pub(super) riding_mount: bool,
+    pub(super) has_saddle: bool,
+    pub(super) has_reins: bool,
 }
 
 impl MountResource {
@@ -282,6 +451,8 @@ impl MountResource {
         Self {
             mount_type: -1,
             riding_mount: false,
+            has_saddle: true,
+            has_reins: false,
         }
     }
 }

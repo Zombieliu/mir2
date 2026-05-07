@@ -1,7 +1,8 @@
 use crate::error::{PacketCodecError, Result};
+use serde::{Deserialize, Serialize};
 
 #[repr(i16)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ClientPacketId {
     ClientVersion = 0,
     Disconnect = 1,
@@ -322,7 +323,7 @@ impl TryFrom<i16> for ClientPacketId {
 }
 
 #[repr(i16)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ServerPacketId {
     Connected = 0,
     ClientVersion = 1,

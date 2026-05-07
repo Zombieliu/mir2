@@ -14,16 +14,21 @@ pub use packets::{
     ClientPacket, ServerPacket,
 };
 pub use trace::{
-    client_packet_name, server_packet_name, trace_client_packets, trace_server_packets,
-    PacketTraceDirection, PacketTraceEntry,
+    client_packet_name, packet_payload_hex, server_packet_display_name, server_packet_name,
+    server_packet_raw_display_name, server_packet_raw_name, trace_client_packets,
+    trace_server_packets, PacketTraceDirection, PacketTraceEntry,
 };
 pub use types::{
-    ChatType, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
-    ClientMagic, ClientMail, IntelligentCreatureItemFilter, IntelligentCreatureRules, ItemInfo,
+    AwakeningMaterial, BaseStat, BaseStats, ChatType, ClientAuction, ClientBuff, ClientFriend,
+    ClientGtMap, ClientHeroInformation, ClientIntelligentCreature, ClientMagic, ClientMail,
+    ClientMapInfo, ClientMovementInfo, ClientNpcInfo, ClientQuestInfo, ClientRecipeInfo,
+    GameShopItem, GuildBuff, GuildBuffInfo, GuildMember, GuildRank, GuildStorageItem,
+    HeroUserInformation, IntelligentCreatureItemFilter, IntelligentCreatureRules, ItemInfo,
     ItemRentalInformation, MapInformation, MirClass, MirDirection, MirGender, MirGridType,
-    MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo,
-    ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo,
-    ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point, SelectInfo,
-    Spell, StruckInfo, UserInformation, UserItem, UserItemExpireInfo, UserItemRentalInformation,
-    UserItemSealedInfo, UserItemStat, UserLocation,
+    MonsterInfo, Notice, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
+    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
+    PlayerInspectInfo, Point, QuestItemReward, RankCharacterInfo, SelectInfo, Spell, StruckInfo,
+    UserInformation, UserItem, UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo,
+    UserItemStat, UserLocation, WorldMapIcon, WorldMapSetup,
 };

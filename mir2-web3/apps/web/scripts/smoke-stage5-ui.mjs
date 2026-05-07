@@ -8,6 +8,8 @@ const BASE_URL = process.env.MIR2_WEB_BASE_URL ?? process.argv[2] ?? "http://127
 const OUTPUT_DIR = path.resolve(process.cwd(), "..", "..", "docs", "stage5-screenshots");
 const CHROME_PATH = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const DEBUG_PORT = Number(process.env.MIR2_CHROME_DEBUG_PORT ?? 9400 + (process.pid % 1000));
+const ACCOUNT_MODE = process.env.MIR2_STAGE5_ACCOUNT_MODE ?? "demo";
+const USE_DEMO_ACCOUNT = ACCOUNT_MODE !== "new";
 const VIEWPORTS = {
   desktop: { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false },
   compact: { width: 820, height: 640, deviceScaleFactor: 1, mobile: false },
@@ -139,6 +141,8 @@ async function main() {
   const systemMenuFlow = [];
   const systemMenuQaTransferFlow = [];
   const systemMenuTransferFlow = [];
+  const systemMenuFeatureFlow = [];
+  const systemMenuSocialFlow = [];
   const hudButtonFlow = [];
   const spellCastFlow = [];
   const minimapFlow = [];
@@ -166,7 +170,8 @@ async function main() {
     loginFlow.push(await readLoginState(client, "initial"));
     screenshots.push(await screenshot(client, "stage5-login.png"));
 
-    const accountId = `stage5-${process.pid}-${Date.now()}`;
+    const accountId = USE_DEMO_ACCOUNT ? "demo" : `stage5-${process.pid}-${Date.now()}`;
+    const accountPassword = USE_DEMO_ACCOUNT ? "demo" : "stage5-pass";
     await clickLanguageButton(client, ".login-language-selector", "简体中文");
     await waitForLoginState(client, (state) => state.activeLanguageLabel === "简体中文", "login zh-CN language", 5_000);
     loginFlow.push(await readLoginState(client, "zhCnLanguage"));
@@ -176,7 +181,7 @@ async function main() {
     loginFlow.push(await readLoginState(client, "englishLanguageRestored"));
 
     await setInputValue(client, ".login-input.account", accountId);
-    await setInputValue(client, ".login-input.password", "stage5-pass");
+    await setInputValue(client, ".login-input.password", accountPassword);
     loginFlow.push(await readLoginState(client, "credentialsFilled"));
     await clickSelector(client, ".login-button.view button");
     await waitForLoginState(client, (state) => state.accountPanelVisible === true, "view key panel", 5_000);
@@ -186,9 +191,11 @@ async function main() {
     await waitForLoginState(client, (state) => state.accountPanelVisible === false, "view key closed", 5_000);
     loginFlow.push(await readLoginState(client, "viewKeyClosed"));
 
-    await clickSelector(client, ".login-button.account button");
-    await delay(1_200);
-    loginFlow.push(await readLoginState(client, "accountCreated"));
+    if (!USE_DEMO_ACCOUNT) {
+      await clickSelector(client, ".login-button.account button");
+      await delay(1_200);
+      loginFlow.push(await readLoginState(client, "accountCreated"));
+    }
     await focusSelector(client, ".login-input.password");
     await pressKey(client, "Enter", "Enter", 13);
     const enterSubmitted = await waitForSelectorOptional(client, ".select-overlay", 3_000);
@@ -228,69 +235,257 @@ async function main() {
     await waitForSelectState(client, (state) => state.deletePanelVisible === false, "delete cancelled", 5_000);
     selectFlow.push(await readSelectState(client, "deleteCancelled"));
 
-    const beforeCreateSelect = await readSelectState(client, "beforeUiNewCharacter");
-    await clickSelector(client, ".select-action.new button");
-    await waitForSelectState(
-      client,
-      (state) => state.characterCount > beforeCreateSelect.characterCount,
-      "UI new character",
-      8_000,
-    );
-    selectFlow.push(await readSelectState(client, "afterUiNewCharacter"));
-    screenshots.push(await screenshot(client, "stage5-select-new-character-ui.png"));
-
-    const afterCreateSelect = await readSelectState(client, "afterUiNewCharacterReady");
-    if (afterCreateSelect.characterCount > 1) {
-      await clickSelectSlot(client, afterCreateSelect.characterCount - 1);
+    if (USE_DEMO_ACCOUNT) {
+      await clickSelectSlot(client, 0);
       await waitForSelectState(
         client,
-        (state) => state.selectedCharacterIndex === afterCreateSelect.characterCount - 1,
-        "UI selected new character slot",
+        (state) => state.selectedCharacterIndex === 0,
+        "demo character slot selected",
         5_000,
       );
-      selectFlow.push(await readSelectState(client, "newCharacterSlotSelected"));
-      screenshots.push(await screenshot(client, "stage5-select-slot-selected.png"));
-
-      await clickSelector(client, ".select-action.delete button");
-      await waitForSelectState(client, (state) => state.deletePanelVisible === true, "delete created confirm", 5_000);
-      selectFlow.push(await readSelectState(client, "deleteCreatedConfirm"));
-      screenshots.push(await screenshot(client, "stage5-select-delete-created-confirm.png"));
-      await clickSelector(client, ".select-delete-actions button:first-child");
-      await waitForSelectState(
-        client,
-        (state) => state.characterCount === afterCreateSelect.characterCount - 1 && state.deletePanelVisible === false,
-        "UI delete created character",
-        8_000,
-      );
-      const afterDeleteCreatedSelect = await readSelectState(client, "afterUiDeleteCharacter");
-      selectFlow.push(afterDeleteCreatedSelect);
-      screenshots.push(await screenshot(client, "stage5-select-delete-created-result.png"));
-
+      selectFlow.push(await readSelectState(client, "demoCharacterSlotSelected"));
+    } else {
+      const beforeCreateSelect = await readSelectState(client, "beforeUiNewCharacter");
       await clickSelector(client, ".select-action.new button");
       await waitForSelectState(
         client,
-        (state) => state.characterCount > afterDeleteCreatedSelect.characterCount,
-        "UI recreate character",
+        (state) => state.characterCount > beforeCreateSelect.characterCount,
+        "UI new character",
         8_000,
       );
-      const afterRecreateSelect = await readSelectState(client, "afterUiRecreateCharacter");
-      selectFlow.push(afterRecreateSelect);
-      screenshots.push(await screenshot(client, "stage5-select-new-character-ui-restored.png"));
-      await clickSelectSlot(client, afterRecreateSelect.characterCount - 1);
-      await waitForSelectState(
-        client,
-        (state) => state.selectedCharacterIndex === afterRecreateSelect.characterCount - 1,
-        "UI selected recreated character slot",
-        5_000,
-      );
-      selectFlow.push(await readSelectState(client, "recreatedCharacterSlotSelected"));
+      selectFlow.push(await readSelectState(client, "afterUiNewCharacter"));
+      screenshots.push(await screenshot(client, "stage5-select-new-character-ui.png"));
+
+      const afterCreateSelect = await readSelectState(client, "afterUiNewCharacterReady");
+      if (afterCreateSelect.characterCount > 1) {
+        await clickSelectSlot(client, afterCreateSelect.characterCount - 1);
+        await waitForSelectState(
+          client,
+          (state) => state.selectedCharacterIndex === afterCreateSelect.characterCount - 1,
+          "UI selected new character slot",
+          5_000,
+        );
+        selectFlow.push(await readSelectState(client, "newCharacterSlotSelected"));
+        screenshots.push(await screenshot(client, "stage5-select-slot-selected.png"));
+
+        await clickSelector(client, ".select-action.delete button");
+        await waitForSelectState(client, (state) => state.deletePanelVisible === true, "delete created confirm", 5_000);
+        selectFlow.push(await readSelectState(client, "deleteCreatedConfirm"));
+        screenshots.push(await screenshot(client, "stage5-select-delete-created-confirm.png"));
+        await clickSelector(client, ".select-delete-actions button:first-child");
+        await waitForSelectState(
+          client,
+          (state) => state.characterCount === afterCreateSelect.characterCount - 1 && state.deletePanelVisible === false,
+          "UI delete created character",
+          8_000,
+        );
+        const afterDeleteCreatedSelect = await readSelectState(client, "afterUiDeleteCharacter");
+        selectFlow.push(afterDeleteCreatedSelect);
+        screenshots.push(await screenshot(client, "stage5-select-delete-created-result.png"));
+
+        await clickSelector(client, ".select-action.new button");
+        await waitForSelectState(
+          client,
+          (state) => state.characterCount > afterDeleteCreatedSelect.characterCount,
+          "UI recreate character",
+          8_000,
+        );
+        const afterRecreateSelect = await readSelectState(client, "afterUiRecreateCharacter");
+        selectFlow.push(afterRecreateSelect);
+        screenshots.push(await screenshot(client, "stage5-select-new-character-ui-restored.png"));
+        await clickSelectSlot(client, afterRecreateSelect.characterCount - 1);
+        await waitForSelectState(
+          client,
+          (state) => state.selectedCharacterIndex === afterRecreateSelect.characterCount - 1,
+          "UI selected recreated character slot",
+          5_000,
+        );
+        selectFlow.push(await readSelectState(client, "recreatedCharacterSlotSelected"));
+      }
     }
 
     await clickSelector(client, ".select-action.start button");
     await waitForSelector(client, ".game-ui-scene", 15_000);
     await waitForSelector(client, ".hud-button.inventory button", 10_000);
-    await waitForStage5State(client, (state) => state?.mapFileName === "0", "starter map", 15_000);
+    await waitForStage5State(
+      client,
+      (state) => state?.screen === "game" && state?.player !== null,
+      "game scene",
+      15_000,
+    );
     screenshots.push(await screenshot(client, "stage5-game.png"));
+
+    if (process.env.MIR2_STAGE5_SMOKE_FAST_MENU === "1") {
+      await clickSelector(client, ".hud-button.menu button");
+      await waitForSystemMenuState(client, (state) => state.open === true, "open", 5_000);
+      systemMenuFlow.push(await readSystemMenuState(client, "open"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-fast.png"));
+
+      await clickSystemMenuActionByKey(client, "creature");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "creature",
+        "creature feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "creatureFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelOpen"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "creature feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelClosed"));
+
+      await clickSystemMenuActionByKey(client, "ride");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "mount",
+        "mount feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "mountFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelOpen"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "mount feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
+
+      await clickSystemMenuActionByKey(client, "fishing");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "fishing",
+        "fishing feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "fishing feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+
+      const socialPanels = [
+        { key: "ranking", tab: "class" },
+        { key: "friend", tab: "blocks" },
+        { key: "mentor", tab: "requests" },
+        { key: "relationship", tab: "affinity" },
+        { key: "group", tab: "loot" },
+        { key: "guild", tab: "members" },
+      ];
+
+      for (const socialPanel of socialPanels) {
+        await clickSystemMenuActionByKey(client, socialPanel.key);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelType === socialPanel.key,
+          `${socialPanel.key} panel open`,
+          5_000,
+        );
+        const openState = await readSystemMenuState(client, `${socialPanel.key}PanelOpen`);
+        systemMenuSocialFlow.push(openState);
+
+        await clickSystemMenuSocialTabByKey(client, socialPanel.tab);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelTabKey === socialPanel.tab,
+          `${socialPanel.key} panel tab`,
+          5_000,
+        );
+        const tabState = await readSystemMenuState(client, `${socialPanel.key}PanelTab`);
+        systemMenuSocialFlow.push(tabState);
+
+        const selectedEntryName =
+          tabState.systemMenuSocialEntryNames[Math.min(1, Math.max(tabState.systemMenuSocialEntryNames.length - 1, 0))] ??
+          tabState.systemMenuSocialPanelSelectedRow;
+        if (selectedEntryName) {
+          await clickSystemMenuSocialEntryByName(client, selectedEntryName);
+          await waitForSystemMenuState(
+            client,
+            (state) => state.systemMenuSocialPanelSelectedRow === selectedEntryName,
+            `${socialPanel.key} panel row`,
+            5_000,
+          );
+        }
+
+        const actionLabel = tabState.systemMenuSocialActionLabels[0];
+        if (actionLabel) {
+          await clickSystemMenuSocialActionByLabel(client, actionLabel);
+          await waitForSystemMenuState(
+            client,
+            (state) =>
+              state.systemMenuSocialPanelStatus !== null &&
+              state.systemMenuSocialPanelStatus.includes(actionLabel),
+            `${socialPanel.key} panel action`,
+            5_000,
+          );
+        }
+
+        systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelAction`));
+        screenshots.push(await screenshot(client, `stage5-system-menu-${socialPanel.key}.png`));
+        await clickSystemMenuFeaturePanelClose(client);
+        await waitForSystemMenuState(
+          client,
+          (state) =>
+            state.open === true &&
+            state.systemMenuFeaturePanelVisible === false &&
+            state.systemMenuSocialPanelVisible === false,
+          `${socialPanel.key} panel closed`,
+          5_000,
+        );
+        systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelClosed`));
+      }
+
+      if (!(await readSystemMenuState(client, "beforeQaTransferReopen")).open) {
+        await clickSelector(client, ".hud-button.menu button");
+      }
+      await waitForSystemMenuState(client, (state) => state.open === true, "reopen qa transfer", 5_000);
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferPanel"));
+      await setSystemMenuQaTransferInputs(client, { map: "0", x: 330, y: 270 });
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferFilled"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-qa-transfer.png"));
+      await clickSelector(client, ".system-menu-qa-transfer button[type='submit']");
+      await waitForSystemMenuState(client, (state) => state.open === false, "qa transfer closed", 5_000);
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferSubmitted"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-qa-transfer-result.png"));
+
+      console.log(
+        JSON.stringify(
+          {
+            screenshots: screenshots.length,
+            systemMenu: systemMenuFlow.length,
+            systemMenuFeature: systemMenuFeatureFlow.length,
+            systemMenuSocial: systemMenuSocialFlow.length,
+            systemMenuQaTransfer: systemMenuQaTransferFlow.length,
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
 
     await clickSelector(client, ".hud-button.inventory button");
     await waitForSelector(client, ".inventory-window", 10_000);
@@ -654,12 +849,21 @@ async function main() {
       throw new Error(`Cannot verify storage store without Dagger: ${JSON.stringify(beforeStorageStore)}`);
     }
     storageStoreFlow.push(beforeStorageStore);
+    if (!(await client.evaluate('Boolean(document.querySelector(".storage-window"))'))) {
+      await clickSelector(client, ".inventory-tab.tab-three button");
+      await waitForSelector(client, ".storage-window", 10_000);
+    }
     await clickButtonByImageAlt(client, "Store Item");
-    await waitForStorageTransferState(client, (state) => state.storageWindowVisible === true, "store mode open", 5_000);
-    await clickInventoryItemByName(client, "Dagger");
     await waitForStorageTransferState(
       client,
-      (state) => state.feedbackText.includes("Dagger") && state.hintTexts.some((hint) => hint.includes("select target slot")),
+      (state) => state.storageWindowVisible === true && state.statusText.includes("Choose an inventory item"),
+      "store mode open",
+      5_000,
+    );
+    await contextMenuInventoryItemByName(client, "Dagger");
+    await waitForStorageTransferState(
+      client,
+      (state) => state.feedbackText.includes("Dagger") && state.statusText.includes("warehouse slot"),
       "store item selected",
       5_000,
     );
@@ -730,7 +934,7 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-character-char-restored.png"));
 
     if (!(await client.evaluate('Boolean(document.querySelector(".storage-window"))'))) {
-      await clickButtonByImageAlt(client, "Store Item");
+      await clickSelector(client, ".inventory-tab.tab-three button");
     }
     await waitForSelector(client, ".storage-window", 10_000);
     screenshots.push(await screenshot(client, "stage5-storage.png"));
@@ -743,10 +947,18 @@ async function main() {
     }
     storageTakeBackFlow.push(beforeStorageTakeBack);
     await clickButtonByImageAlt(client, "Take Back");
-    await clickStorageItemByName(client, "Red Potion");
     await waitForStorageTransferState(
       client,
-      (state) => state.feedbackText.includes("Red Potion") && state.hintTexts.some((hint) => hint.includes("select target slot")),
+      (state) => state.storageWindowVisible === true && state.statusText.includes("warehouse item"),
+      "takeBack mode open",
+      5_000,
+    );
+    await clickStorageSlot(client, 0);
+    await waitForStorageTransferState(
+      client,
+      (state) =>
+        state.feedbackText.includes("Red Potion") ||
+        state.statusText.includes("warehouse item"),
       "takeBackItemSelected",
       5_000,
     );
@@ -796,7 +1008,7 @@ async function main() {
     if ((await readNpcDialogState(client, "linkOptional")).links.length > 0) {
       screenshots.push(await screenshot(client, "stage5-npc-links.png"));
     }
-    await clickOptional(client, ".npc-dialog-close");
+    await clickOptional(client, ".npc-dialog-close, .npc-dialog-actions .sprite-button:last-child");
     await waitForNpcDialogState(client, (state) => state.open === false, "closed", 5_000);
     npcDialogFlow.push(await readNpcDialogState(client, "closed"));
 
@@ -1000,43 +1212,149 @@ async function main() {
     systemMenuFlow.push(await readSystemMenuState(client, "open"));
     screenshots.push(await screenshot(client, "stage5-system-menu.png"));
 
-    await clickSystemMenuAction(client, 0);
-    await waitForSelector(client, ".character-window", 5_000);
-    systemMenuFlow.push(await readSystemMenuState(client, "characterAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-character.png"));
-    await clickOptional(client, ".character-close button");
-
-    await clickSelector(client, ".hud-button.menu button");
-    await waitForSystemMenuState(client, (state) => state.open === true, "reopen inventory", 5_000);
-    await clickSystemMenuAction(client, 1);
-    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "system menu inventory", 5_000);
-    systemMenuFlow.push(await readSystemMenuState(client, "inventoryAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-inventory.png"));
-    await clickOptional(client, ".inventory-close button");
-
-    await clickSelector(client, ".hud-button.menu button");
-    await waitForSystemMenuState(client, (state) => state.open === true, "reopen quest", 5_000);
-    await clickSystemMenuAction(client, 2);
-    await waitForInventoryState(
+    await clickSystemMenuActionByKey(client, "creature");
+    await waitForSystemMenuState(
       client,
-      (state) => state.activeTab === "quest" && state.storageWindowVisible === true,
-      "system menu quest",
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "creature",
+      "creature feature panel open",
       5_000,
     );
-    systemMenuFlow.push(await readSystemMenuState(client, "questAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-quest.png"));
-    await clickAllOptional(client, ".storage-close button, .inventory-close button");
-    await clickOptional(client, ".inventory-close button");
-    await waitUntil(
-      async () =>
-        !Boolean(
-          await client.evaluate('Boolean(document.querySelector(".inventory-window, .storage-window"))'),
-        ),
+    systemMenuFlow.push(await readSystemMenuState(client, "creatureFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-creature.png"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "creature feature panel closed",
       5_000,
-      "inventory and storage closed",
     );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelClosed"));
 
-    await clickSelector(client, ".hud-button.menu button");
+    await clickSystemMenuActionByKey(client, "ride");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "mount",
+      "mount feature panel open",
+      5_000,
+    );
+    systemMenuFlow.push(await readSystemMenuState(client, "mountFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-mount.png"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "mount feature panel closed",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
+
+    await clickSystemMenuActionByKey(client, "fishing");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "fishing",
+      "fishing feature panel open",
+      5_000,
+    );
+    systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-fishing.png"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "fishing feature panel closed",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+
+    const socialPanels = [
+      { key: "ranking", tab: "class" },
+      { key: "friend", tab: "blocks" },
+      { key: "mentor", tab: "requests" },
+      { key: "relationship", tab: "affinity" },
+      { key: "group", tab: "loot" },
+      { key: "guild", tab: "members" },
+    ];
+
+    for (const socialPanel of socialPanels) {
+      await clickSystemMenuActionByKey(client, socialPanel.key);
+      await waitForSystemMenuState(
+        client,
+        (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelType === socialPanel.key,
+        `${socialPanel.key} panel open`,
+        5_000,
+      );
+      const openState = await readSystemMenuState(client, `${socialPanel.key}PanelOpen`);
+      systemMenuSocialFlow.push(openState);
+
+      await clickSystemMenuSocialTabByKey(client, socialPanel.tab);
+      await waitForSystemMenuState(
+        client,
+        (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelTabKey === socialPanel.tab,
+        `${socialPanel.key} panel tab`,
+        5_000,
+      );
+      const tabState = await readSystemMenuState(client, `${socialPanel.key}PanelTab`);
+      systemMenuSocialFlow.push(tabState);
+
+      const selectedEntryName =
+        tabState.systemMenuSocialEntryNames[Math.min(1, Math.max(tabState.systemMenuSocialEntryNames.length - 1, 0))] ??
+        tabState.systemMenuSocialPanelSelectedRow;
+      if (selectedEntryName) {
+        await clickSystemMenuSocialEntryByName(client, selectedEntryName);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelSelectedRow === selectedEntryName,
+          `${socialPanel.key} panel row`,
+          5_000,
+        );
+      }
+
+      const actionLabel = tabState.systemMenuSocialActionLabels[0];
+      if (actionLabel) {
+        await clickSystemMenuSocialActionByLabel(client, actionLabel);
+        await waitForSystemMenuState(
+          client,
+          (state) =>
+            state.systemMenuSocialPanelStatus !== null &&
+            state.systemMenuSocialPanelStatus.includes(actionLabel),
+          `${socialPanel.key} panel action`,
+          5_000,
+        );
+      }
+
+      systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelAction`));
+      screenshots.push(await screenshot(client, `stage5-system-menu-${socialPanel.key}.png`));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false &&
+          state.systemMenuSocialPanelVisible === false,
+        `${socialPanel.key} panel closed`,
+        5_000,
+      );
+      systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelClosed`));
+    }
+
+    if (!(await readSystemMenuState(client, "beforeQaTransferReopen")).open) {
+      await clickSelector(client, ".hud-button.menu button");
+    }
     await waitForSystemMenuState(client, (state) => state.open === true, "reopen qa transfer", 5_000);
     systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferPanel"));
     await setSystemMenuQaTransferInputs(client, { map: "0", x: 330, y: 270 });
@@ -1252,6 +1570,8 @@ async function main() {
         storagePassword: storagePasswordFlow.length,
         chat: chatFlow.length,
         systemMenu: systemMenuFlow.length,
+        systemMenuFeature: systemMenuFeatureFlow.length,
+        systemMenuSocial: systemMenuSocialFlow.length,
         stage5Systems: stage5SystemsFlow.length,
         login: loginFlow.length,
         select: selectFlow.length,
@@ -1289,6 +1609,8 @@ async function main() {
       systemMenuFlow,
       systemMenuQaTransferFlow,
       systemMenuTransferFlow,
+      systemMenuFeatureFlow,
+      systemMenuSocialFlow,
       hudButtonFlow,
       spellCastFlow,
       minimapFlow,
@@ -2383,6 +2705,8 @@ async function readSystemMenuState(client, label) {
     (() => {
       const panel = document.querySelector(".system-menu-panel");
       const rect = panel?.getBoundingClientRect();
+      const featurePanel = document.querySelector(".system-feature-panel");
+      const socialPanel = document.querySelector(".system-social-panel");
       const qaInputs = Array.from(document.querySelectorAll(".system-menu-qa-transfer input")).map((input) => ({
         label: input.closest("label")?.querySelector("span")?.textContent?.trim() ?? "",
         value: input.value ?? "",
@@ -2390,12 +2714,31 @@ async function readSystemMenuState(client, label) {
       return {
         label: ${JSON.stringify(label)},
         open: Boolean(panel),
+        actionKeys: Array.from(document.querySelectorAll(".system-menu-icon[data-system-menu-action]")).map(
+          (node) => node.getAttribute("data-system-menu-action") ?? "",
+        ),
         characterWindowVisible: Boolean(document.querySelector(".character-window")),
         inventoryWindowVisible: Boolean(document.querySelector(".inventory-window")),
         storageWindowVisible: Boolean(document.querySelector(".storage-window")),
         activeInventoryTab: window.__mir2Stage5?.state?.activeInventoryTab ?? null,
         actionLabels: Array.from(document.querySelectorAll(".system-menu-actions button")).map((button) =>
           button.textContent?.trim() ?? ""
+        ),
+        systemMenuFeaturePanelVisible: Boolean(featurePanel),
+        systemMenuFeaturePanelType: featurePanel?.getAttribute("data-system-feature-panel") ?? null,
+        systemMenuSocialPanelVisible: Boolean(socialPanel),
+        systemMenuSocialPanelType: socialPanel?.getAttribute("data-system-social-panel") ?? null,
+        systemMenuSocialPanelTabKey: socialPanel?.getAttribute("data-system-social-tab") ?? null,
+        systemMenuSocialPanelSelectedRow: socialPanel?.getAttribute("data-system-social-selected-row") ?? null,
+        systemMenuSocialPanelStatus: socialPanel?.getAttribute("data-system-social-status") ?? null,
+        systemMenuSocialTabKeys: Array.from(document.querySelectorAll(".system-social-tabs button")).map(
+          (button) => button.getAttribute("data-social-tab-key") ?? "",
+        ),
+        systemMenuSocialEntryNames: Array.from(document.querySelectorAll(".system-social-entry")).map(
+          (button) => button.getAttribute("data-social-entry-name") ?? "",
+        ),
+        systemMenuSocialActionLabels: Array.from(document.querySelectorAll(".system-social-actions button")).map(
+          (button) => button.getAttribute("data-social-action-label") ?? "",
         ),
         transferLabels: Array.from(document.querySelectorAll(".system-menu-transfer-list button")).map((button) =>
           button.textContent?.trim() ?? ""
@@ -2446,6 +2789,81 @@ async function clickSystemMenuAction(client, index) {
     })()
   `);
   if (!clicked) throw new Error(`Could not click system menu action ${index}`);
+}
+
+async function clickSystemMenuActionByKey(client, actionKey) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const icon = Array.from(document.querySelectorAll(".system-menu-icon[data-system-menu-action]")).find(
+        (entry) => entry.getAttribute("data-system-menu-action") === ${JSON.stringify(actionKey)}
+      );
+      const button = icon?.querySelector("button");
+      if (!button || typeof button.click !== "function") return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu action ${actionKey}`);
+}
+
+async function clickSystemMenuActionByLabel(client, label) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-menu-actions button")).find(
+        (entry) => (entry.textContent ?? "").trim() === ${JSON.stringify(label)}
+      );
+      if (!button || typeof button.click !== "function") return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu action with label ${label}`);
+}
+
+async function clickSystemMenuFeaturePanelClose(client) {
+  await clickSelector(client, ".system-feature-close, .system-feature-panel .overlay-panel-head button");
+}
+
+async function clickSystemMenuSocialTabByKey(client, tabKey) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-tabs button")).find(
+        (entry) => entry.getAttribute("data-social-tab-key") === ${JSON.stringify(tabKey)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social tab ${tabKey}`);
+}
+
+async function clickSystemMenuSocialEntryByName(client, entryName) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-entry")).find(
+        (entry) => entry.getAttribute("data-social-entry-name") === ${JSON.stringify(entryName)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social entry ${entryName}`);
+}
+
+async function clickSystemMenuSocialActionByLabel(client, actionLabel) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-actions button")).find(
+        (entry) => entry.getAttribute("data-social-action-label") === ${JSON.stringify(actionLabel)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social action ${actionLabel}`);
 }
 
 async function clickSystemMenuTransfer(client, index) {
@@ -3054,7 +3472,12 @@ async function clickButtonByImageAlt(client, alt) {
     (() => {
       const image = Array.from(document.querySelectorAll("img"))
         .find((entry) => entry.alt === ${JSON.stringify(alt)});
-      const button = image?.closest("button");
+      const button = image?.closest("button") ?? Array.from(document.querySelectorAll("button"))
+        .find((entry) =>
+          entry.getAttribute("aria-label") === ${JSON.stringify(alt)} ||
+          entry.getAttribute("title") === ${JSON.stringify(alt)} ||
+          entry.textContent.trim() === ${JSON.stringify(alt)}
+        );
       if (!button) return false;
       button.click();
       return true;

@@ -1239,6 +1239,8 @@ pub struct MapDropRuleRecord {
     pub no_throw_item: bool,
     pub no_drop_player: bool,
     pub no_drop_monster: bool,
+    pub no_mount: bool,
+    pub need_bridle: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2171,6 +2173,8 @@ pub struct Stage5SystemsState {
     pub mail: Vec<Stage5MailMessage>,
     pub trade: Option<Stage5TradeState>,
     pub auction: Vec<Stage5AuctionListing>,
+    #[serde(default)]
+    pub refine: Stage5RefineState,
     pub conquest: Stage5ConquestState,
     #[serde(default)]
     pub guild_territory: Stage5GuildTerritoryState,
@@ -2193,6 +2197,7 @@ impl Default for Stage5SystemsState {
             mail: Vec::new(),
             trade: None,
             auction: Vec::new(),
+            refine: Stage5RefineState::default(),
             conquest: Stage5ConquestState::default(),
             guild_territory: Stage5GuildTerritoryState::default(),
             hero: None,
@@ -2207,13 +2212,20 @@ impl Default for Stage5SystemsState {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5GroupState {
+    #[serde(default = "default_stage5_allow_group")]
+    pub allow_group: bool,
     pub members: Vec<String>,
     pub loot_mode: String,
+}
+
+const fn default_stage5_allow_group() -> bool {
+    true
 }
 
 impl Default for Stage5GroupState {
     fn default() -> Self {
         Self {
+            allow_group: true,
             members: Vec::new(),
             loot_mode: "free".to_string(),
         }
@@ -2504,6 +2516,15 @@ pub struct Stage5AuctionListing {
     pub cancelled: bool,
     #[serde(default)]
     pub expired: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Stage5RefineState {
+    pub slots: BTreeMap<u8, String>,
+    pub current_item: Option<String>,
+    pub refining: bool,
+    pub ready: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
