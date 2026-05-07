@@ -6,7 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{
-    client_packet_name, decode_frame, decode_server_packet, encode_client_packet, ClientPacket,
+    client_packet_name, decode_frame, decode_server_packet, encode_client_packet,
+    packet_payload_hex, server_packet_display_name, server_packet_raw_display_name, ClientPacket,
     MirClass, MirDirection, MirGender, MirGridType, PacketTraceDirection, Point, ServerPacket,
     ServerPacketId, Spell,
 };
@@ -770,7 +771,7 @@ fn trace_server_entry(sequence: usize, elapsed_ms: u128, frame: &[u8]) -> TraceE
             elapsed_ms,
             direction: PacketTraceDirection::Server,
             packet_id,
-            packet: mir2_protocol::server_packet_name(&packet).to_string(),
+            packet: server_packet_display_name(&packet),
             payload_len: frame.len().saturating_sub(4),
             payload_hash: payload_hash(frame),
             payload_hex: trace_payload_hex(frame),
@@ -988,8 +989,63 @@ fn client_packet_detail(packet: &ClientPacket) -> Option<Value> {
 
 fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
     match packet {
-        ServerPacket::Raw { payload, .. } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::Raw { packet_id, payload } => Some(raw_payload_detail(
+            &server_packet_raw_display_name(*packet_id),
+            *packet_id as i16,
+            payload,
+        )),
+        ServerPacket::BaseStatsInfo { stats } | ServerPacket::HeroBaseStatsInfo { stats } => {
+            Some(json!({
+                "job": format!("{:?}", stats.job),
+                "statCount": stats.stats.len(),
+                "capCount": stats.caps.len()
+            }))
+        }
+        ServerPacket::HeroInformation { info } => Some(json!({
+            "objectId": info.object_id,
+            "name": info.name,
+            "class": format!("{:?}", info.class),
+            "gender": format!("{:?}", info.gender),
+            "level": info.level,
+            "hp": info.hp,
+            "mp": info.mp,
+            "inventorySlots": info.inventory.as_ref().map_or(0, Vec::len),
+            "equipmentSlots": info.equipment.as_ref().map_or(0, Vec::len),
+            "magicCount": info.magics.len(),
+            "autoPot": info.auto_pot,
+            "autoHpPercent": info.auto_hp_percent,
+            "autoMpPercent": info.auto_mp_percent
+        })),
+        ServerPacket::NPCMarket {
+            listings,
+            pages,
+            user_mode,
+        } => Some(json!({
+            "listingCount": listings.len(),
+            "pages": pages,
+            "userMode": user_mode
+        })),
+        ServerPacket::NPCMarketPage { listings } => Some(json!({
+            "listingCount": listings.len()
+        })),
+        ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        } => Some(json!({
+            "remove": remove,
+            "activeBuffCount": active_buffs.len(),
+            "guildBuffCount": guild_buffs.len()
+        })),
+        ServerPacket::GameShopInfo { item, stock_level } => Some(json!({
+            "itemIndex": item.item_index,
+            "gameShopIndex": item.g_index,
+            "name": item.info.name,
+            "goldPrice": item.gold_price,
+            "creditPrice": item.credit_price,
+            "count": item.count,
+            "category": item.category,
+            "stockLevel": stock_level
         })),
         ServerPacket::ClientVersion { result }
         | ServerPacket::NewAccount { result }
@@ -1335,14 +1391,34 @@ fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
             "buffType": buff_type,
             "objectId": object_id
         })),
-        ServerPacket::NewQuestInfo { payload } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::NewQuestInfo { info } => Some(json!({
+            "index": info.index,
+            "name": info.name,
+            "group": info.group,
+            "npcIndex": info.npc_index,
+            "finishNpcIndex": info.finish_npc_index,
+            "fixedRewardCount": info.rewards_fixed_item.len(),
+            "selectRewardCount": info.rewards_select_item.len()
         })),
-        ServerPacket::NewRecipeInfo { payload } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::NewRecipeInfo { info } => Some(json!({
+            "gold": info.gold,
+            "chance": info.chance,
+            "itemIndex": info.item.item_index,
+            "toolCount": info.tools.len(),
+            "ingredientCount": info.ingredients.len()
         })),
         _ => None,
     }
+}
+
+fn raw_payload_detail(packet_name: &str, packet_id: i16, payload: &[u8]) -> Value {
+    json!({
+        "packetName": packet_name,
+        "packetId": packet_id,
+        "payloadLength": payload.len(),
+        "payloadHex": packet_payload_hex(payload),
+        "rawPayloadLength": payload.len()
+    })
 }
 
 fn user_item_slots_detail(items: Option<&[Option<mir2_protocol::UserItem>]>) -> Value {
@@ -1392,17 +1468,7 @@ fn trace_payload_hex(frame: &[u8]) -> Option<String> {
     if !env_flag("MIR2_PACKET_TRACE_CAPTURE_PAYLOAD_HEX") {
         return None;
     }
-    Some(hex_lower(frame.get(4..).unwrap_or_default()))
-}
-
-fn hex_lower(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut output = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        output.push(HEX[(byte >> 4) as usize] as char);
-        output.push(HEX[(byte & 0x0f) as usize] as char);
-    }
-    output
+    Some(packet_payload_hex(frame.get(4..).unwrap_or_default()))
 }
 
 fn diff_traces(local: &EndpointTrace, crystal: &EndpointTrace) -> TraceDiff {
@@ -2253,6 +2319,20 @@ mod tests {
             payload_hash(&[5, 0, 1, 0, 0xaa]),
             "fnv1a64:af64274c86026bfd"
         );
+    }
+
+    #[test]
+    fn raw_server_packet_detail_includes_copyable_payload_fields() {
+        let detail = super::server_packet_detail(&ServerPacket::Raw {
+            packet_id: ServerPacketId::MailSent,
+            payload: vec![0x00, 0x01, 0x02, 0x03],
+        })
+        .expect("detail exists for raw packets");
+        assert_eq!(detail["packetId"], json!(ServerPacketId::MailSent as i16));
+        assert_eq!(detail["packetName"], "MailSent");
+        assert_eq!(detail["payloadLength"], 4);
+        assert_eq!(detail["payloadHex"], "00010203");
+        assert_eq!(detail["rawPayloadLength"], 4);
     }
 
     #[test]

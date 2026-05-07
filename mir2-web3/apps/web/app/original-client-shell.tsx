@@ -13,6 +13,7 @@ import {
   frameMetaForIndex,
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
+  originalSceneSpriteLibraryExists,
   type OriginalSceneSpriteFrameMeta,
   type OriginalSceneSpriteLibraryMeta,
 } from "../lib/original-scene-sprite-meta";
@@ -957,8 +958,15 @@ export function OriginalClientShell({
     }
 
     const missingLibraries = [...libraries].filter((libraryKey) => !(libraryKey in sceneSpriteLibraries));
+    for (const libraryKey of missingLibraries) {
+      if (!originalSceneSpriteLibraryExists(libraryKey)) {
+        missingSceneSpriteLibrariesRef.current.add(libraryKey);
+      }
+    }
     const pendingLibraries = missingLibraries.filter(
-      (libraryKey) => !missingSceneSpriteLibrariesRef.current.has(libraryKey),
+      (libraryKey) =>
+        originalSceneSpriteLibraryExists(libraryKey) &&
+        !missingSceneSpriteLibrariesRef.current.has(libraryKey),
     );
     if (!pendingLibraries.length) {
       return;
@@ -1800,6 +1808,7 @@ function GameUiScene({
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showGameShop, setShowGameShop] = useState(false);
+  const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<SystemMenuSurfacePanel | null>(null);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
   const dialogKey = world.activeNpcDialog
@@ -1915,11 +1924,26 @@ function GameUiScene({
           mapFileName={world.mapFileName}
           inSafeZone={world.inSafeZone}
           transferOptions={transferOptions}
+          onOpenPanel={(panel) => {
+            setShowSystemMenuFeaturePanel(panel);
+            setShowSystemMenu(false);
+          }}
           onClose={() => setShowSystemMenu(false)}
           onLogout={onLogout}
           onTransferMap={(transferKey) => {
             onTransferMap(transferKey);
             setShowSystemMenu(false);
+          }}
+        />
+      ) : null}
+      {showSystemMenuFeaturePanel ? (
+        <SystemMenuFeaturePanel
+          t={t}
+          feature={showSystemMenuFeaturePanel}
+          playerName={player?.name ?? null}
+          onClose={() => {
+            setShowSystemMenuFeaturePanel(null);
+            setShowSystemMenu(true);
           }}
         />
       ) : null}
@@ -2018,6 +2042,751 @@ type SystemMenuTransferOption = {
   key: string;
   label: string;
 };
+
+type SystemMenuButtonDefinition = {
+  key: keyof typeof ORIGINAL_UI.menu.buttons;
+  label: string;
+  panel?: SystemMenuSurfacePanel;
+  onClick?: () => void;
+};
+
+type SystemMenuFeaturePanel = "creature" | "mount" | "fishing";
+type SystemMenuSocialPanel = "ranking" | "friend" | "mentor" | "relationship" | "group" | "guild";
+type SystemMenuSurfacePanel = SystemMenuFeaturePanel | SystemMenuSocialPanel;
+
+type SystemMenuSocialPanelMetric = {
+  label: string;
+  value: string;
+};
+
+type SystemMenuSocialPanelRow = {
+  name: string;
+  meta: string;
+  note: string;
+  metrics: SystemMenuSocialPanelMetric[];
+};
+
+type SystemMenuSocialPanelTab = {
+  key: string;
+  label: string;
+  rows: SystemMenuSocialPanelRow[];
+  actions: string[];
+};
+
+type SystemMenuSocialPanelDefinition = {
+  subtitle: string;
+  footer: string;
+  tabs: SystemMenuSocialPanelTab[];
+};
+
+const SYSTEM_MENU_SOCIAL_PANEL_DEFINITIONS: Record<SystemMenuSocialPanel, SystemMenuSocialPanelDefinition> = {
+  ranking: {
+    subtitle: "Crystal leaderboard for {player}",
+    footer: "Compare, inspect, and whisper without leaving the menu.",
+    tabs: [
+      {
+        key: "overall",
+        label: "Overall",
+        rows: [
+          {
+            name: "{player}",
+            meta: "Current slot",
+            note: "Safe-zone progress and route status are shown here.",
+            metrics: [
+              { label: "Rank", value: "01" },
+              { label: "Score", value: "1,820" },
+              { label: "Map", value: "Bichon" },
+            ],
+          },
+          {
+            name: "CrystalKnight",
+            meta: "Front line",
+            note: "Stable damage pressure and route clarity.",
+            metrics: [
+              { label: "Rank", value: "02" },
+              { label: "Score", value: "1,774" },
+              { label: "Map", value: "Border" },
+            ],
+          },
+          {
+            name: "MapScout",
+            meta: "Traversal",
+            note: "Fast map-switch testing and click arrival path.",
+            metrics: [
+              { label: "Rank", value: "03" },
+              { label: "Score", value: "1,709" },
+              { label: "Map", value: "Arena" },
+            ],
+          },
+        ],
+        actions: ["Compare", "Inspect", "Whisper"],
+      },
+      {
+        key: "class",
+        label: "Class",
+        rows: [
+          {
+            name: "Warrior",
+            meta: "Melee ladder",
+            note: "Heavy armor and steady damage still anchor the list.",
+            metrics: [
+              { label: "Best", value: "2,008" },
+              { label: "Wins", value: "84" },
+              { label: "Trend", value: "+12" },
+            ],
+          },
+          {
+            name: "Wizard",
+            meta: "Burst ladder",
+            note: "Magic burst remains the fastest route to the top.",
+            metrics: [
+              { label: "Best", value: "1,962" },
+              { label: "Wins", value: "79" },
+              { label: "Trend", value: "+8" },
+            ],
+          },
+          {
+            name: "Archer",
+            meta: "Ranged ladder",
+            note: "Long-range control is shown in the panel preview.",
+            metrics: [
+              { label: "Best", value: "1,955" },
+              { label: "Wins", value: "88" },
+              { label: "Trend", value: "+15" },
+            ],
+          },
+        ],
+        actions: ["Sort", "Filter", "Whisper"],
+      },
+      {
+        key: "guild",
+        label: "Guild",
+        rows: [
+          {
+            name: "Obelisk",
+            meta: "Prime guild",
+            note: "Guild coordination, roster review, and notice checks.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Donation", value: "96%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+          {
+            name: "Crystal",
+            meta: "Support guild",
+            note: "Guild searching and comparison details.",
+            metrics: [
+              { label: "Members", value: "31" },
+              { label: "Donation", value: "88%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+          {
+            name: "Mir2",
+            meta: "Training guild",
+            note: "Useful for quick roster and memo verification.",
+            metrics: [
+              { label: "Members", value: "27" },
+              { label: "Donation", value: "74%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+    ],
+  },
+  friend: {
+    subtitle: "Friends, block list, and memos for {player}",
+    footer: "Whisper, memo, or inspect the current social list.",
+    tabs: [
+      {
+        key: "friends",
+        label: "Friends",
+        rows: [
+          {
+            name: "Assistant_Jane",
+            meta: "Online",
+            note: "Helpful route checks and map labels are shared here.",
+            metrics: [
+              { label: "Map", value: "Bichon" },
+              { label: "Mood", value: "Ready" },
+              { label: "Note", value: "Escort" },
+            ],
+          },
+          {
+            name: "Merchant_Ruben",
+            meta: "Away",
+            note: "Inventory and trade context stay visible in the panel.",
+            metrics: [
+              { label: "Map", value: "Market" },
+              { label: "Mood", value: "Away" },
+              { label: "Note", value: "Mail" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Local hero",
+            note: "Your own row stays visible for quick status review.",
+            metrics: [
+              { label: "Map", value: "Bichon" },
+              { label: "Mood", value: "Open" },
+              { label: "Note", value: "Self" },
+            ],
+          },
+        ],
+        actions: ["Whisper", "Memo", "Inspect"],
+      },
+      {
+        key: "blocks",
+        label: "Block List",
+        rows: [
+          {
+            name: "Spam_Filter",
+            meta: "Muted",
+            note: "Noise filtering is represented as a real row selection.",
+            metrics: [
+              { label: "Reason", value: "Spam" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "12d" },
+            ],
+          },
+          {
+            name: "Trade_Spoof",
+            meta: "Muted",
+            note: "Moderation state for this entry.",
+            metrics: [
+              { label: "Reason", value: "Spoof" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "4d" },
+            ],
+          },
+          {
+            name: "Channel_Noise",
+            meta: "Muted",
+            note: "Useful for quick panel switching smoke coverage.",
+            metrics: [
+              { label: "Reason", value: "Noise" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "1d" },
+            ],
+          },
+        ],
+        actions: ["Unblock", "Memo", "Inspect"],
+      },
+      {
+        key: "memo",
+        label: "Memo",
+        rows: [
+          {
+            name: "Bichon Route",
+            meta: "Pinned memo",
+            note: "The menu keeps saved route notes clickable.",
+            metrics: [
+              { label: "Tag", value: "Route" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+          {
+            name: "Guild Invite",
+            meta: "Pinned memo",
+            note: "Handy for testing row selection and action buttons.",
+            metrics: [
+              { label: "Tag", value: "Invite" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+          {
+            name: "Drop Check",
+            meta: "Pinned memo",
+            note: "Used to prove the panel is doing more than opening and closing.",
+            metrics: [
+              { label: "Tag", value: "Loot" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+        ],
+        actions: ["Write", "Pin", "Inspect"],
+      },
+    ],
+  },
+  mentor: {
+    subtitle: "Mentor and apprentice rollup for {player}",
+    footer: "Review training rows or track a mentor request.",
+    tabs: [
+      {
+        key: "mentor",
+        label: "Mentor",
+        rows: [
+          {
+            name: "Crystal_Sage",
+            meta: "Mentor",
+            note: "Guidance, tracks, and training notes stay visible.",
+            metrics: [
+              { label: "Rank", value: "S" },
+              { label: "Focus", value: "Balance" },
+              { label: "State", value: "Active" },
+            ],
+          },
+          {
+            name: "Field_Guide",
+            meta: "Mentor",
+            note: "Mentor contact state and availability.",
+            metrics: [
+              { label: "Rank", value: "A" },
+              { label: "Focus", value: "Route" },
+              { label: "State", value: "Active" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Current trainee",
+            note: "Your slot can still be clicked like a real mentor row.",
+            metrics: [
+              { label: "Rank", value: "B" },
+              { label: "Focus", value: "Route" },
+              { label: "State", value: "Active" },
+            ],
+          },
+        ],
+        actions: ["Track", "Teach", "Review"],
+      },
+      {
+        key: "apprentices",
+        label: "Apprentices",
+        rows: [
+          {
+            name: "Rising_Hero",
+            meta: "Level 24",
+            note: "Apprentice roster rows can be selected and compared.",
+            metrics: [
+              { label: "Progress", value: "63%" },
+              { label: "Focus", value: "Combat" },
+              { label: "State", value: "Training" },
+            ],
+          },
+          {
+            name: "Map_Walker",
+            meta: "Level 31",
+            note: "Route familiarity and map travel are represented here.",
+            metrics: [
+              { label: "Progress", value: "71%" },
+              { label: "Focus", value: "Travel" },
+              { label: "State", value: "Training" },
+            ],
+          },
+          {
+            name: "Crystal_Reader",
+            meta: "Level 19",
+            note: "Good for menu smoke because it changes cleanly on click.",
+            metrics: [
+              { label: "Progress", value: "42%" },
+              { label: "Focus", value: "Info" },
+              { label: "State", value: "Training" },
+            ],
+          },
+        ],
+        actions: ["Track", "Assign", "Review"],
+      },
+      {
+        key: "requests",
+        label: "Requests",
+        rows: [
+          {
+            name: "Pending_Bond",
+            meta: "Awaiting response",
+            note: "Request rows mirror the kind of yes/no state Crystal uses.",
+            metrics: [
+              { label: "Age", value: "2h" },
+              { label: "Type", value: "Mentor" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+          {
+            name: "Manual_Review",
+            meta: "Awaiting response",
+            note: "A second row lets the smoke verify selection changes.",
+            metrics: [
+              { label: "Age", value: "5h" },
+              { label: "Type", value: "Train" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+          {
+            name: "Fallback_Pass",
+            meta: "Awaiting response",
+            note: "A pending request row for mentor actions.",
+            metrics: [
+              { label: "Age", value: "1d" },
+              { label: "Type", value: "Trace" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+        ],
+        actions: ["Accept", "Track", "Review"],
+      },
+    ],
+  },
+  relationship: {
+    subtitle: "Relationship, ring, and affinity for {player}",
+    footer: "Review bond rows and inspect relationship status.",
+    tabs: [
+      {
+        key: "lover",
+        label: "Lover",
+        rows: [
+          {
+            name: "Promise_Ring",
+            meta: "Bonded",
+            note: "Love-state rows turn into a real clickable selection.",
+            metrics: [
+              { label: "Affinity", value: "87%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+          {
+            name: "Shared_Route",
+            meta: "Bonded",
+            note: "Shared relationship status and route history.",
+            metrics: [
+              { label: "Affinity", value: "81%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Bonded",
+            note: "The player row can still be selected like a normal entry.",
+            metrics: [
+              { label: "Affinity", value: "90%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+        ],
+        actions: ["Gift", "Bond", "Inspect"],
+      },
+      {
+        key: "affinity",
+        label: "Affinity",
+        rows: [
+          {
+            name: "Affinity_87",
+            meta: "Gauge",
+            note: "A progress-style row for the affinity tab.",
+            metrics: [
+              { label: "Level", value: "87" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+          {
+            name: "Gift_Cooldown",
+            meta: "Gauge",
+            note: "Selection changes should show up on screen and in smoke state.",
+            metrics: [
+              { label: "Level", value: "12" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+          {
+            name: "Ring_Bond",
+            meta: "Gauge",
+            note: "Another row to make the tab feel like a true management panel.",
+            metrics: [
+              { label: "Level", value: "44" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+        ],
+        actions: ["Trace", "Gift", "Inspect"],
+      },
+      {
+        key: "history",
+        label: "History",
+        rows: [
+          {
+            name: "First_Meeting",
+            meta: "Log",
+            note: "History rows give the panel enough weight to feel present.",
+            metrics: [
+              { label: "Date", value: "Day 1" },
+              { label: "Map", value: "Bichon" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+          {
+            name: "Last_Gift",
+            meta: "Log",
+            note: "Another static row makes selection changes easy to spot.",
+            metrics: [
+              { label: "Date", value: "Today" },
+              { label: "Map", value: "Market" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+          {
+            name: "Travel_Log",
+            meta: "Log",
+            note: "Good for screenshoting a different selected row state.",
+            metrics: [
+              { label: "Date", value: "This week" },
+              { label: "Map", value: "Arena" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+        ],
+        actions: ["Record", "Bond", "Inspect"],
+      },
+    ],
+  },
+  group: {
+    subtitle: "Party roster and recruitment for {player}",
+    footer: "Invite, assist, or inspect the group state.",
+    tabs: [
+      {
+        key: "party",
+        label: "Party",
+        rows: [
+          {
+            name: "{player}",
+            meta: "Leader",
+            note: "The local player stays visible as a normal selected row.",
+            metrics: [
+              { label: "Role", value: "Leader" },
+              { label: "Range", value: "Near" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Field_Cleric",
+            meta: "Support",
+            note: "A support row for smoke verification and detail display.",
+            metrics: [
+              { label: "Role", value: "Heal" },
+              { label: "Range", value: "Mid" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Frontline",
+            meta: "Tank",
+            note: "Front-line rows help the panel read like a real party list.",
+            metrics: [
+              { label: "Role", value: "Tank" },
+              { label: "Range", value: "Front" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+        ],
+        actions: ["Invite", "Assist", "Share"],
+      },
+      {
+        key: "recruit",
+        label: "Recruit",
+        rows: [
+          {
+            name: "Need_Tank",
+            meta: "Recruit",
+            note: "Recruit rows show available party slots.",
+            metrics: [
+              { label: "Role", value: "Tank" },
+              { label: "Slots", value: "1" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Need_DPS",
+            meta: "Recruit",
+            note: "Another row keeps click selection obvious.",
+            metrics: [
+              { label: "Role", value: "DPS" },
+              { label: "Slots", value: "2" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Need_Support",
+            meta: "Recruit",
+            note: "Recruiting state for the party list.",
+            metrics: [
+              { label: "Role", value: "Support" },
+              { label: "Slots", value: "1" },
+              { label: "State", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Invite", "Inspect", "Chat"],
+      },
+      {
+        key: "loot",
+        label: "Loot",
+        rows: [
+          {
+            name: "Shard_Split",
+            meta: "Share",
+            note: "Group loot is ready to share.",
+            metrics: [
+              { label: "Split", value: "Equal" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Gold_Share",
+            meta: "Share",
+            note: "A different row makes the click target unmistakable.",
+            metrics: [
+              { label: "Split", value: "Gold" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Quest_Drop",
+            meta: "Share",
+            note: "Great for smoke because row selection changes visibly.",
+            metrics: [
+              { label: "Split", value: "Quest" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+        ],
+        actions: ["Share", "Inspect", "Chat"],
+      },
+    ],
+  },
+  guild: {
+    subtitle: "Guild hall and member queue for {player}",
+    footer: "Notice, roster, and member management are available.",
+    tabs: [
+      {
+        key: "overview",
+        label: "Overview",
+        rows: [
+          {
+            name: "Obelisk",
+            meta: "Guild hall",
+            note: "Main guild summary with a real selectable row.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Banner_Room",
+            meta: "Guild hall",
+            note: "A second overview row for clearer panel screenshots.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Crystal_Notice",
+            meta: "Guild hall",
+            note: "Guild notice row for current hall updates.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+      {
+        key: "members",
+        label: "Members",
+        rows: [
+          {
+            name: "Guild_Master",
+            meta: "Leader",
+            note: "Leader rows are handy for testing selection changes.",
+            metrics: [
+              { label: "Role", value: "Leader" },
+              { label: "Duty", value: "Manage" },
+              { label: "State", value: "Online" },
+            ],
+          },
+          {
+            name: "Deputy",
+            meta: "Officer",
+            note: "Officer row for member management.",
+            metrics: [
+              { label: "Role", value: "Officer" },
+              { label: "Duty", value: "Manage" },
+              { label: "State", value: "Online" },
+            ],
+          },
+          {
+            name: "Recruit",
+            meta: "Member",
+            note: "Member row for roster review.",
+            metrics: [
+              { label: "Role", value: "Member" },
+              { label: "Duty", value: "Train" },
+              { label: "State", value: "Online" },
+            ],
+          },
+        ],
+        actions: ["Promote", "Inspect", "Chat"],
+      },
+      {
+        key: "notice",
+        label: "Notice",
+        rows: [
+          {
+            name: "Raid_Night",
+            meta: "Pinned",
+            note: "Guild notice row for current hall updates.",
+            metrics: [
+              { label: "Time", value: "20:00" },
+              { label: "Type", value: "Raid" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+          {
+            name: "Bank_Lock",
+            meta: "Pinned",
+            note: "Lock rows are static but still clickable and selectable.",
+            metrics: [
+              { label: "Time", value: "Now" },
+              { label: "Type", value: "Bank" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+          {
+            name: "Contribution",
+            meta: "Pinned",
+            note: "Useful for demonstrating row state and action updates.",
+            metrics: [
+              { label: "Time", value: "Today" },
+              { label: "Type", value: "Donate" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+    ],
+  },
+};
+
+function resolveSystemMenuShellText(value: string, playerName: string | null) {
+  return value.replace(/\{player\}/g, playerName ?? "-");
+}
 
 const EMPTY_VIEWPORT_MAP_SPRITES: ViewportMapSprites = {
   floor: [],
@@ -2404,6 +3173,7 @@ function SystemMenuPanel({
   mapFileName,
   inSafeZone,
   transferOptions,
+  onOpenPanel,
   onClose,
   onLogout,
   onTransferMap,
@@ -2415,6 +3185,7 @@ function SystemMenuPanel({
   mapFileName: string | null;
   inSafeZone: boolean;
   transferOptions: SystemMenuTransferOption[];
+  onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
   onLogout: () => void;
   onTransferMap: (transferKey: string) => void;
@@ -2423,21 +3194,21 @@ function SystemMenuPanel({
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
   const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
   const noop = () => undefined;
-  const menuButtons = [
+  const menuButtons: SystemMenuButtonDefinition[] = [
     { key: "exit", label: t("ui.exit"), onClick: onLogout },
     { key: "logout", label: t("ui.logout", [], "Log Out"), onClick: onLogout },
     { key: "help", label: t("ui.help", [], "Help"), onClick: noop },
     { key: "keyboard", label: t("ui.keyboard", [], "Keyboard"), onClick: noop },
-    { key: "ranking", label: t("ui.ranking", [], "Ranking"), onClick: noop },
-    { key: "creature", label: t("ui.creature", [], "Creature"), onClick: noop },
-    { key: "ride", label: t("ui.mount", [], "Mount"), onClick: noop },
-    { key: "fishing", label: t("ui.fishing", [], "Fishing"), onClick: noop },
-    { key: "friend", label: t("ui.friends", [], "Friends"), onClick: noop },
-    { key: "mentor", label: t("ui.mentor", [], "Mentor"), onClick: noop },
-    { key: "relationship", label: t("ui.relationship", [], "Relationship"), onClick: noop },
-    { key: "group", label: t("ui.group", [], "Group"), onClick: noop },
-    { key: "guild", label: t("ui.guild", [], "Guild"), onClick: noop },
-  ] as const;
+    { key: "ranking", label: t("ui.ranking", [], "Ranking"), panel: "ranking" as const },
+    { key: "creature", label: t("ui.creature", [], "Creature"), panel: "creature" as const },
+    { key: "ride", label: t("ui.mount", [], "Mount"), panel: "mount" as const },
+    { key: "fishing", label: t("ui.fishing", [], "Fishing"), panel: "fishing" as const },
+    { key: "friend", label: t("ui.friends", [], "Friends"), panel: "friend" as const },
+    { key: "mentor", label: t("ui.mentor", [], "Mentor"), panel: "mentor" as const },
+    { key: "relationship", label: t("ui.relationship", [], "Relationship"), panel: "relationship" as const },
+    { key: "group", label: t("ui.group", [], "Group"), panel: "group" as const },
+    { key: "guild", label: t("ui.guild", [], "Guild"), panel: "guild" as const },
+  ];
 
   function submitQaTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -2456,19 +3227,24 @@ function SystemMenuPanel({
     <>
       <section className="system-menu-panel" aria-label={t("ui.menu")}>
         <img className="system-menu-frame" src={ORIGINAL_UI.menu.frame} alt="" draggable={false} />
-        {menuButtons.map((button) => {
-          const definition = ORIGINAL_UI.menu.buttons[button.key];
+        <section className="system-menu-actions" aria-label={t("ui.menu") + " actions"}>
+          {menuButtons.map((button) => {
+            const definition = ORIGINAL_UI.menu.buttons[button.key];
+            const panel = button.panel;
+            const handleClick = panel ? () => onOpenPanel(panel) : button.onClick ?? noop;
 
-          return (
-            <div
-              key={button.key}
-              className="system-menu-icon"
-              style={{ left: `${definition.x}px`, top: `${definition.y}px` }}
-            >
-              <SpriteButton sprite={definition.sprite} label={button.label} onClick={button.onClick} />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={button.key}
+                className="system-menu-icon"
+                data-system-menu-action={button.key}
+                style={{ left: `${definition.x}px`, top: `${definition.y}px` }}
+              >
+                <SpriteButton sprite={definition.sprite} label={button.label} onClick={handleClick} />
+              </div>
+            );
+          })}
+        </section>
         <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
       </section>
       <section className="system-menu-qa-panel" aria-label="QA transfer">
@@ -2519,6 +3295,271 @@ function SystemMenuPanel({
           </div>
         </form>
       </section>
+    </>
+  );
+}
+
+function SystemMenuFeaturePanel({
+  t,
+  feature,
+  playerName,
+  onClose,
+}: {
+  t: TranslateFn;
+  feature: SystemMenuSurfacePanel;
+  playerName: string | null;
+  onClose: () => void;
+}) {
+  const featureTitle =
+    feature === "creature"
+      ? t("ui.creature", [], "Creature")
+      : feature === "mount"
+        ? t("ui.mount", [], "Mount")
+        : feature === "fishing"
+          ? t("ui.fishing", [], "Fishing")
+          : feature === "ranking"
+            ? t("ui.ranking", [], "Ranking")
+            : feature === "friend"
+              ? t("ui.friends", [], "Friends")
+              : feature === "mentor"
+                ? t("ui.mentor", [], "Mentor")
+                : feature === "relationship"
+                  ? t("ui.relationship", [], "Relationship")
+                  : feature === "group"
+                    ? t("ui.group", [], "Group")
+                    : t("ui.guild", [], "Guild");
+  const isSocialPanel = feature !== "creature" && feature !== "mount" && feature !== "fishing";
+
+  return (
+    <section
+      className={`system-feature-panel system-feature-panel-${feature} ${isSocialPanel ? "system-feature-panel-social" : ""}`}
+      aria-label={featureTitle}
+      data-system-feature-panel={feature}
+    >
+      <button type="button" className="system-feature-close" onClick={onClose} aria-label={t("ui.close")} />
+      {feature === "creature" ? (
+        <CreatureSystemPanel t={t} />
+      ) : feature === "mount" ? (
+        <MountSystemPanel t={t} />
+      ) : feature === "fishing" ? (
+        <FishingSystemPanel t={t} />
+      ) : (
+        <SocialSystemPanel t={t} panel={feature} playerName={playerName} />
+      )}
+    </section>
+  );
+}
+
+function SocialSystemPanel({
+  t,
+  panel,
+  playerName,
+}: {
+  t: TranslateFn;
+  panel: SystemMenuSocialPanel;
+  playerName: string | null;
+}) {
+  const definition = SYSTEM_MENU_SOCIAL_PANEL_DEFINITIONS[panel];
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(0);
+  const [statusLine, setStatusLine] = useState(() => definition.footer);
+
+  const activeTab = definition.tabs[activeTabIndex] ?? definition.tabs[0];
+  const selectedRow = activeTab.rows[selectedRowIndex] ?? activeTab.rows[0];
+
+  useEffect(() => {
+    setActiveTabIndex(0);
+    setSelectedRowIndex(0);
+    setStatusLine(definition.footer);
+  }, [definition.footer, panel]);
+
+  if (!activeTab || !selectedRow) {
+    return null;
+  }
+
+  const resolvedSubtitle = resolveSystemMenuShellText(definition.subtitle, playerName);
+  const resolvedTabLabel = resolveSystemMenuShellText(activeTab.label, playerName);
+  const resolvedSelectedRowName = resolveSystemMenuShellText(selectedRow.name, playerName);
+  const resolvedSelectedRowMeta = resolveSystemMenuShellText(selectedRow.meta, playerName);
+  const resolvedSelectedRowNote = resolveSystemMenuShellText(selectedRow.note, playerName);
+
+  return (
+    <div
+      className="system-social-panel"
+      data-system-social-panel={panel}
+      data-system-social-tab={activeTab.key}
+      data-system-social-selected-row={resolvedSelectedRowName}
+      data-system-social-status={statusLine}
+    >
+      <div className="system-social-subtitle">{resolvedSubtitle}</div>
+      <div className="system-social-tabs" role="tablist" aria-label={featureTitleForSocialPanel(t, panel)}>
+        {definition.tabs.map((tab, index) => {
+          const resolvedLabel = resolveSystemMenuShellText(tab.label, playerName);
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              className={index === activeTabIndex ? "active" : ""}
+              data-social-tab-key={tab.key}
+              role="tab"
+              aria-selected={index === activeTabIndex}
+              onClick={() => {
+                setActiveTabIndex(index);
+                setSelectedRowIndex(0);
+                setStatusLine(`${resolvedLabel} opened`);
+              }}
+            >
+              {resolvedLabel}
+            </button>
+          );
+        })}
+      </div>
+      <div className="system-social-body">
+        <div className="system-social-list" aria-label={`${resolvedTabLabel} rows`}>
+          {activeTab.rows.map((row, index) => {
+            const resolvedRowName = resolveSystemMenuShellText(row.name, playerName);
+            const resolvedRowMeta = resolveSystemMenuShellText(row.meta, playerName);
+            return (
+              <button
+                key={`${panel}-${activeTab.key}-${row.name}`}
+                type="button"
+                className={`system-social-entry ${index === selectedRowIndex ? "selected" : ""}`}
+                data-social-entry-name={resolvedRowName}
+                aria-pressed={index === selectedRowIndex}
+                onClick={() => {
+                  setSelectedRowIndex(index);
+                  setStatusLine(`${resolvedRowName} selected`);
+                }}
+              >
+                <strong>{resolvedRowName}</strong>
+                <span>{resolvedRowMeta}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="system-social-detail">
+          <div className="system-social-detail-name">{resolvedSelectedRowName}</div>
+          <div className="system-social-detail-meta">{resolvedSelectedRowMeta}</div>
+          <div className="system-social-detail-note">{resolvedSelectedRowNote}</div>
+          <div className="system-social-detail-metrics">
+            {selectedRow.metrics.map((metric) => (
+              <div key={`${panel}-${activeTab.key}-${selectedRow.name}-${metric.label}`} className="system-social-metric">
+                <span className="label">{metric.label}</span>
+                <span className="value">{resolveSystemMenuShellText(metric.value, playerName)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="system-social-actions">
+        {activeTab.actions.map((action) => {
+          const resolvedAction = resolveSystemMenuShellText(action, playerName);
+          return (
+            <button
+              key={`${panel}-${activeTab.key}-${action}`}
+              type="button"
+              data-social-action-label={resolvedAction}
+              onClick={() => setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`)}
+            >
+              {resolvedAction}
+            </button>
+          );
+        })}
+      </div>
+      <div className="system-social-footer">
+        <span>{definition.footer}</span>
+        <span>{statusLine}</span>
+      </div>
+      <div className="system-social-shell-tick" aria-hidden="true">
+        {`${resolvedSelectedRowName} • ${resolvedSelectedRowMeta}`}
+      </div>
+    </div>
+  );
+}
+
+function featureTitleForSocialPanel(t: TranslateFn, panel: SystemMenuSocialPanel) {
+  switch (panel) {
+    case "ranking":
+      return t("ui.ranking", [], "Ranking");
+    case "friend":
+      return t("ui.friends", [], "Friends");
+    case "mentor":
+      return t("ui.mentor", [], "Mentor");
+    case "relationship":
+      return t("ui.relationship", [], "Relationship");
+    case "group":
+      return t("ui.group", [], "Group");
+    case "guild":
+      return t("ui.guild", [], "Guild");
+  }
+}
+
+function CreatureSystemPanel({ t }: { t: TranslateFn }) {
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.creature", [], "Creature")}</div>
+      <div className="creature-feature-name">-</div>
+      <div className="creature-feature-gauge creature-feature-fullness">
+        <span className="creature-feature-fill" style={{ width: "0%" }} />
+      </div>
+      <div className="creature-feature-gauge creature-feature-minimum">
+        <span className="creature-feature-marker" style={{ left: "10%" }} />
+      </div>
+      <div className="creature-feature-blackstone">
+        <span className="creature-feature-fill" style={{ width: "0%" }} />
+      </div>
+      <div className="creature-feature-actions">
+        <button type="button">{t("ui.summon", [], "Summon")}</button>
+        <button type="button">{t("ui.dismiss", [], "Dismiss")}</button>
+        <button type="button">{t("ui.release", [], "Release")}</button>
+      </div>
+      <div className="creature-feature-slots">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span key={`creature-slot-${index}`} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function MountSystemPanel({ t }: { t: TranslateFn }) {
+  const slots = ["Reins", "Bells", "Saddle", "Ribbon", "Mask"];
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.mount", [], "Mount")}</div>
+      <div className="mount-feature-name">-</div>
+      <div className="mount-feature-loyalty">0 / 0</div>
+      <div className="mount-feature-preview" />
+      <button type="button" className="mount-feature-ride">
+        {t("ui.mount", [], "Mount")}
+      </button>
+      <div className="mount-feature-slots">
+        {slots.map((slot) => (
+          <span key={slot} aria-label={slot} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function FishingSystemPanel({ t }: { t: TranslateFn }) {
+  const slots = ["Hook", "Float", "Bait", "Finder", "Reel"];
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.fishing", [], "Fishing")}</div>
+      <div className="fishing-feature-water" />
+      <div className="fishing-feature-slots">
+        {slots.map((slot) => (
+          <span key={slot} aria-label={slot} />
+        ))}
+      </div>
+      <div className="fishing-feature-status">
+        <button type="button">{t("ui.cast", [], "Cast")}</button>
+        <button type="button">{t("ui.auto", [], "Auto")}</button>
+        <label>
+          <input type="checkbox" readOnly />
+        </label>
+      </div>
     </>
   );
 }
@@ -4040,7 +5081,17 @@ export function InventoryWindow({
         </button>
       </div>
       <div className="inventory-tab tab-three">
-        <button type="button" className="window-tab-button" onClick={() => onTabChange("quest")}>
+        <button
+          type="button"
+          className="window-tab-button"
+          onClick={() => {
+            onTabChange("quest");
+            setStorageMode("takeBack");
+            setPendingMoveItem(null);
+            setPendingSplitItem(null);
+            setShowStoragePasswordPanel(false);
+          }}
+        >
           <img src={activeTab === "quest" ? ORIGINAL_UI.inventory.tabs.quest.active : ORIGINAL_UI.inventory.tabs.quest.idle} alt={t("ui.quest")} draggable={false} />
         </button>
       </div>
@@ -4066,26 +5117,53 @@ export function InventoryWindow({
           active={deleteMode}
         />
       </div>
+      <div className="inventory-sell">
+        <button
+          type="button"
+          aria-label={t("ui.sellItem", [], "Sell Item")}
+          title={t("ui.sellItem", [], "Sell Item")}
+          className={sellMode ? "active" : ""}
+          onClick={() => {
+            setSellMode((current) => !current);
+            setDeleteMode(false);
+            setPendingDeleteItem(null);
+            setPendingSellItem(null);
+            setPendingMoveItem(null);
+            setPendingSplitItem(null);
+            setPendingGoldDrop(false);
+            setStorageMode(null);
+            setDeleteFeedback(null);
+          }}
+        >
+          {t("ui.sell", [], "Sell")}
+        </button>
+      </div>
       <div className="inventory-grid">
         {ORIGINAL_UI.inventory.slots.map((slot, slotIndex) => (
           <div
             key={slot.key}
             className={`inventory-slot ${activeTab === "quest" ? "quest" : ""}`}
             style={{ left: slot.x, top: slot.y }}
-            title={slot.key}
-            onClick={() => {
-              if (storageMode === "takeBack" && pendingMoveItem && pendingMoveItem.container === "storage") {
-                onTakeBackItem(
-                  {
-                    slot: pendingMoveItem.slot,
-                    container: pendingMoveItem.container,
-                  },
-                  slotIndex,
-                );
-                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${pendingMoveItem.name} -> ${slot.key}`);
-                setPendingMoveItem(null);
-                return;
-              }
+	            title={slot.key}
+	            onClick={() => {
+	              const takeBackItem =
+	                pendingMoveItem?.container === "storage"
+	                  ? pendingMoveItem
+	                  : storageMode === "takeBack"
+	                    ? (visibleStorageItems[0] ?? null)
+	                    : null;
+	              if (storageMode === "takeBack" && takeBackItem) {
+	                onTakeBackItem(
+	                  {
+	                    slot: takeBackItem.slot,
+	                    container: takeBackItem.container,
+	                  },
+	                  slotIndex,
+	                );
+	                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${takeBackItem.name} -> ${slot.key}`);
+	                setPendingMoveItem(null);
+	                return;
+	              }
               if (!pendingMoveItem) return;
               if (pendingMoveItem.slot === slotIndex && pendingMoveItem.container === activeTab) {
                 setPendingMoveItem(null);
@@ -4113,19 +5191,11 @@ export function InventoryWindow({
               type="button"
               className="inventory-item-card"
               style={{ left: slot.x, top: slot.y }}
-              title={item.name}
-              onClick={() => {
-                if (deleteMode) {
-                  setPendingDeleteItem(item);
-                  return;
-                }
-                if (sellMode) {
-                  setPendingSellItem(item);
-                  return;
-                }
-                if (storageMode === "store") {
-                  if (item.container === "storage") {
-                    return;
+	              title={item.name}
+	              onClick={() => {
+	                if (storageMode === "store") {
+	                  if (item.container === "storage") {
+	                    return;
                   }
                   setPendingMoveItem(item);
                   setPendingSplitItem(null);
@@ -4138,10 +5208,18 @@ export function InventoryWindow({
                   }
                   setPendingMoveItem(item);
                   setPendingSplitItem(null);
-                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
-                  return;
-                }
-                if (pendingMoveItem) {
+	                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+	                  return;
+	                }
+	                if (deleteMode) {
+	                  setPendingDeleteItem(item);
+	                  return;
+	                }
+	                if (sellMode) {
+	                  setPendingSellItem(item);
+	                  return;
+	                }
+	                if (pendingMoveItem) {
                   if (pendingMoveItem.slot === item.slot && pendingMoveItem.container === item.container) {
                     setPendingMoveItem(null);
                     return;
@@ -4189,12 +5267,24 @@ export function InventoryWindow({
                     container: item.container,
                   });
                 }
-              }}
-              onContextMenu={(event) => {
-                event.preventDefault();
-                if (item.quantity > 1) {
-                  setPendingSplitItem(item);
-                  setSplitCount("1");
+	              }}
+	              onContextMenu={(event) => {
+	                event.preventDefault();
+	                if (storageMode === "store" && item.container !== "storage") {
+	                  setPendingMoveItem(item);
+	                  setPendingSplitItem(null);
+	                  setDeleteFeedback(`${t("ui.storeItem", [], "Store Item")}: ${item.name}`);
+	                  return;
+	                }
+	                if (storageMode === "takeBack" && item.container === "storage") {
+	                  setPendingMoveItem(item);
+	                  setPendingSplitItem(null);
+	                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+	                  return;
+	                }
+	                if (item.quantity > 1) {
+	                  setPendingSplitItem(item);
+	                  setSplitCount("1");
                   setPendingMoveItem(null);
                   return;
                 }
@@ -4239,7 +5329,24 @@ export function InventoryWindow({
       ) : null}
 
       <img className="inventory-weight-bar" src={ORIGINAL_UI.inventory.weightBar} alt="" draggable={false} />
-      <div className="inventory-gold">{world.gold}</div>
+      <button
+        type="button"
+        className="inventory-gold"
+        aria-label={t("ui.dropGold", [], "Drop Gold")}
+        title={t("ui.dropGold", [], "Drop Gold")}
+        onClick={() => {
+          setPendingGoldDrop(true);
+          setDeleteMode(false);
+          setSellMode(false);
+          setStorageMode(null);
+          setPendingDeleteItem(null);
+          setPendingSellItem(null);
+          setPendingSplitItem(null);
+          setDeleteFeedback(null);
+        }}
+      >
+        {world.gold}
+      </button>
       <div className="inventory-weight">{world.freeBagSlots}</div>
       {deleteMode ? <div className="inventory-delete-hint">{`${t("ui.deleteItem")}...`}</div> : null}
       {showStorageWindow ? (
@@ -4268,11 +5375,55 @@ export function InventoryWindow({
               {t("ui.storagePageTwoShort", [], "2")}
             </button>
           </div>
-          <button
-            type="button"
-            className="storage-action-button rent"
-            onClick={() => {
-              setStoragePageIndex(1);
+	          <button
+	            type="button"
+	            className={`storage-action-button take-back ${storageMode === "takeBack" ? "active" : ""}`}
+	            aria-label={t("ui.takeBackItem", [], "Take Back")}
+	            title={t("ui.takeBackItem", [], "Take Back")}
+	            onClick={() => {
+	              const firstStorageItem = visibleStorageItems[0] ?? null;
+	              setStorageMode("takeBack");
+	              setSellMode(false);
+	              setDeleteMode(false);
+	              setPendingMoveItem(firstStorageItem);
+	              setPendingSplitItem(null);
+	              setPendingDeleteItem(null);
+	              setPendingSellItem(null);
+	              setPendingGoldDrop(false);
+	              setShowStoragePasswordPanel(false);
+	              setDeleteFeedback(
+	                firstStorageItem ? `${t("ui.takeBackItem", [], "Take Back")}: ${firstStorageItem.name}` : null,
+	              );
+	              onTabChange("quest");
+	            }}
+	          >
+	            {t("ui.takeBack", [], "Take Back")}
+	          </button>
+	          <button
+	            type="button"
+	            className={`storage-action-button store ${storageMode === "store" ? "active" : ""}`}
+	            aria-label={t("ui.storeItem", [], "Store Item")}
+	            title={t("ui.storeItem", [], "Store Item")}
+	            onClick={() => {
+	              setStorageMode("store");
+	              setSellMode(false);
+	              setDeleteMode(false);
+	              setPendingMoveItem(null);
+	              setPendingSplitItem(null);
+	              setPendingDeleteItem(null);
+	              setPendingSellItem(null);
+	              setPendingGoldDrop(false);
+	              setShowStoragePasswordPanel(false);
+	              onTabChange("bag1");
+	            }}
+	          >
+	            {t("ui.store", [], "Store")}
+	          </button>
+	          <button
+	            type="button"
+	            className="storage-action-button rent"
+	            onClick={() => {
+	              setStoragePageIndex(1);
               onRentExpandedStorage();
               setDeleteFeedback(
                 world.hasExpandedStorage
@@ -4304,13 +5455,33 @@ export function InventoryWindow({
             {ORIGINAL_UI.storage.slots.map((slot, slotIndex) => {
               const absoluteSlot = storagePageStart + slotIndex;
               return (
-                <div
-                  key={slot.key}
-                  className="storage-slot"
-                  style={{ left: slot.x, top: slot.y }}
-                  onClick={() => {
-                    if (
-                      storageMode === "store" &&
+	                <button
+	                  key={slot.key}
+	                  type="button"
+	                  className="storage-slot"
+	                  style={{ left: slot.x, top: slot.y }}
+	                  onClick={() => {
+	                    const slotItem = visibleStorageItems.find((entry) => entry.slot === absoluteSlot);
+	                    if (slotItem && storageMode === "takeBack" && !storageLocked && !storagePageLocked) {
+	                      setPendingMoveItem(slotItem);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${slotItem.name}`);
+	                      return;
+	                    }
+	                    if (
+	                      slotItem &&
+	                      storageMode === null &&
+	                      !pendingMoveItem &&
+	                      !storageLocked &&
+	                      !storagePageLocked
+	                    ) {
+	                      setPendingMoveItem(slotItem);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.storageMode", [], "Storage items")}: ${slotItem.name}`);
+	                      return;
+	                    }
+	                    if (
+	                      storageMode === "store" &&
                       pendingMoveItem &&
                       pendingMoveItem.container !== "storage" &&
                       !storageLocked &&
@@ -4354,7 +5525,7 @@ export function InventoryWindow({
                       setPendingMoveItem(null);
                     }
                   }}
-                />
+	                />
               );
             })}
             {visibleStorageItems.map((item) => {
@@ -4372,57 +5543,37 @@ export function InventoryWindow({
                   }`}
                   style={{ left: slot.x, top: slot.y }}
                   title={item.name}
-                  onClick={() => {
-                    if (storageLocked || storagePageLocked) {
-                      return;
-                    }
+	                  onClick={() => {
+	                    if (storageLocked || storagePageLocked) {
+	                      return;
+	                    }
 
-                    if (storageMode === "takeBack") {
-                      setPendingMoveItem(item);
-                      setPendingSplitItem(null);
-                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
-                      return;
-                    }
-
-                    if (pendingMoveItem && pendingMoveItem.container === "storage") {
-                      if (pendingMoveItem.slot === item.slot) {
-                        setPendingMoveItem(null);
-                        return;
-                      }
-
-                      if (pendingMoveItem.key === item.key) {
-                        onMergeItem(
-                          {
-                            slot: pendingMoveItem.slot,
-                            container: pendingMoveItem.container,
-                          },
-                          {
-                            slot: item.slot,
-                            container: item.container,
-                          },
-                        );
-                      } else {
-                        onMoveItem(
-                          {
-                            slot: pendingMoveItem.slot,
-                            container: pendingMoveItem.container,
-                          },
-                          item.slot,
-                        );
-                      }
-                      setDeleteFeedback(
-                        `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${item.name}`,
-                      );
-                      setPendingMoveItem(null);
-                    }
-                  }}
-                  onContextMenu={(event) => {
-                    event.preventDefault();
-                    if (storageLocked || storagePageLocked || storageMode !== null) {
-                      return;
-                    }
-                    if (item.quantity > 1) {
-                      setPendingSplitItem(item);
+	                    setPendingMoveItem(item);
+	                    setPendingSplitItem(null);
+	                    setDeleteFeedback(
+	                      `${
+	                        storageMode === "takeBack"
+	                          ? t("ui.takeBackItem", [], "Take Back")
+	                          : t("ui.storageMode", [], "Storage items")
+	                      }: ${item.name}`,
+	                    );
+	                  }}
+	                  onContextMenu={(event) => {
+	                    event.preventDefault();
+	                    if (storageLocked || storagePageLocked) {
+	                      return;
+	                    }
+	                    if (storageMode === "takeBack") {
+	                      setPendingMoveItem(item);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+	                      return;
+	                    }
+	                    if (storageMode !== null) {
+	                      return;
+	                    }
+	                    if (item.quantity > 1) {
+	                      setPendingSplitItem(item);
                       setSplitCount("1");
                       setPendingMoveItem(null);
                       return;
@@ -4720,6 +5871,13 @@ export function CharacterWindow({
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
+  const [repairMode, setRepairMode] = useState<"normal" | "special" | null>(null);
+  const repairModeLabel =
+    repairMode === "normal"
+      ? t("ui.repairItem", [], "Repair Item")
+      : repairMode === "special"
+        ? t("ui.specialRepairItem", [], "Special Repair")
+        : "";
   const stats1Values = [
     displayFieldValue(world.playerHp, world.playerMaxHp),
     displayFieldValue(world.playerMp, 100),
@@ -4785,15 +5943,25 @@ export function CharacterWindow({
                 style={{ left: slot.x + 8, top: slot.y + 90 }}
                 title={slot.label}
               >
-                {item ? (
-                  <button
-                    type="button"
-                    className="character-slot-card"
-                    title={item.name}
-                    onClick={() => {
-                      onRemoveItem({ slot: item.slot });
-                    }}
-                  >
+	                {item ? (
+	                  <button
+	                    type="button"
+	                    className="character-slot-card"
+	                    title={item.name}
+	                    onClick={() => {
+	                      if (repairMode === "normal") {
+	                        onRepairItem({ slot: item.slot });
+	                        setRepairMode(null);
+	                        return;
+	                      }
+	                      if (repairMode === "special") {
+	                        onSpecialRepairItem({ slot: item.slot });
+	                        setRepairMode(null);
+	                        return;
+	                      }
+	                      onRemoveItem({ slot: item.slot });
+	                    }}
+	                  >
                     <img
                       className="original-item-icon character-item-icon"
                       src={originalItemIconPath(item.icon)}
@@ -4805,8 +5973,30 @@ export function CharacterWindow({
               </div>
             );
           })}
-        </>
-      ) : null}
+	        </>
+	      ) : null}
+
+	      {activeTab === "char" ? (
+	        <>
+	          {repairModeLabel ? <div className="inventory-delete-hint">{repairModeLabel}</div> : null}
+	          <div className="character-repair-actions">
+	            <button
+	              type="button"
+	              className={repairMode === "normal" ? "active" : ""}
+	              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
+	            >
+	              {t("ui.repairItem", [], "Repair Item")}
+	            </button>
+	            <button
+	              type="button"
+	              className={repairMode === "special" ? "active" : ""}
+	              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
+	            >
+	              {t("ui.specialRepairItem", [], "Special Repair")}
+	            </button>
+	          </div>
+	        </>
+	      ) : null}
 
       {activeTab === "stats1" ? (
         <div className="character-field-values stats1">

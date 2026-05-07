@@ -10,8 +10,8 @@ use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{
-    decode_frame, decode_server_packet, encode_client_packet, server_packet_name, ClientPacket,
-    MirDirection,
+    decode_frame, decode_server_packet, encode_client_packet, server_packet_display_name,
+    ClientPacket, MirDirection,
 };
 use serde::Serialize;
 
@@ -283,7 +283,7 @@ fn read_available(stream: &mut TcpStream, result: &mut ClientResult) {
                 result.packets_received += 1;
                 if let Ok(frame) = decode_frame(&bytes) {
                     if decode_server_packet(&bytes)
-                        .map(|packet| server_packet_name(&packet))
+                        .map(|packet| server_packet_display_name(&packet))
                         .is_err()
                     {
                         eprintln!("tcp load decode error for packet {}", frame.packet_id);

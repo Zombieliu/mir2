@@ -1,10 +1,10 @@
 {
-  "baseUrl": "http://127.0.0.1:3002",
-  "generatedAt": "2026-04-28T10:57:42.227Z",
+  "baseUrl": "http://127.0.0.1:13010",
+  "generatedAt": "2026-05-06T23:54:51.095Z",
   "summary": {
-    "screenshotCount": 88,
+    "screenshotCount": 83,
     "compactPanelCount": 8,
-    "compactTextNodeCount": 32,
+    "compactTextNodeCount": 23,
     "criticalConsoleErrorCount": 0,
     "flowCounts": {
       "inventory": 4,
@@ -12,9 +12,10 @@
       "storagePassword": 4,
       "chat": 7,
       "systemMenu": 4,
+      "systemMenuFeature": 6,
       "stage5Systems": 3,
-      "login": 8,
-      "select": 13,
+      "login": 7,
+      "select": 8,
       "belt": 4
     }
   },
@@ -76,16 +77,16 @@
     {
       "selector": ".mini-map-panel",
       "missing": false,
-      "left": 711.0800170898438,
+      "left": 709.52001953125,
       "top": 21.260011672973633,
-      "right": 810.9199829101562,
+      "right": 809.3599853515625,
       "bottom": 141.38000679016113,
       "width": 99.8399658203125,
       "height": 120.1199951171875
     }
   ],
   "compactTextLayout": {
-    "checked": 32,
+    "checked": 23,
     "overflowing": []
   },
   "compactPanelLayout": [
@@ -137,12 +138,12 @@
       "label": "systemMenu",
       "selector": ".system-menu-panel",
       "missing": false,
-      "left": 603.4400024414062,
-      "top": 29.840011596679688,
-      "right": 796.8800048828125,
-      "bottom": 497.8400115966797,
-      "width": 193.44000244140625,
-      "height": 468
+      "left": 781.2799682617188,
+      "top": 292.70001220703125,
+      "right": 809.3599853515625,
+      "bottom": 512.6600341796875,
+      "width": 28.08001708984375,
+      "height": 219.96002197265625
     },
     {
       "label": "chatSettings",
@@ -159,23 +160,23 @@
       "label": "mail",
       "selector": ".mail-panel",
       "missing": false,
-      "left": 572.239990234375,
-      "top": 142.16000366210938,
-      "right": 795.3200073242188,
-      "bottom": 215.48001098632812,
-      "width": 223.08001708984375,
-      "height": 73.32000732421875
+      "left": 449,
+      "top": 24.3800106048584,
+      "right": 692.3599853515625,
+      "bottom": 370.70001792907715,
+      "width": 243.3599853515625,
+      "height": 346.32000732421875
     },
     {
       "label": "report",
       "selector": ".report-panel",
       "missing": false,
       "left": 194.72000122070312,
-      "top": 373.82000732421875,
+      "top": 379.2799987792969,
       "right": 391.2799987792969,
       "bottom": 538.4000244140625,
       "width": 196.55999755859375,
-      "height": 164.58001708984375
+      "height": 159.12002563476562
     }
   ],
   "screenshots": [
@@ -186,11 +187,6 @@
     "docs/stage5-screenshots/stage5-select-language-es.png",
     "docs/stage5-screenshots/stage5-select-credits.png",
     "docs/stage5-screenshots/stage5-select-delete-confirm.png",
-    "docs/stage5-screenshots/stage5-select-new-character-ui.png",
-    "docs/stage5-screenshots/stage5-select-slot-selected.png",
-    "docs/stage5-screenshots/stage5-select-delete-created-confirm.png",
-    "docs/stage5-screenshots/stage5-select-delete-created-result.png",
-    "docs/stage5-screenshots/stage5-select-new-character-ui-restored.png",
     "docs/stage5-screenshots/stage5-game.png",
     "docs/stage5-screenshots/stage5-inventory.png",
     "docs/stage5-screenshots/stage5-inventory-use-red-potion.png",
@@ -235,7 +231,7 @@
     "docs/stage5-screenshots/stage5-combat.png",
     "docs/stage5-screenshots/stage5-map-transfer-1.png",
     "docs/stage5-screenshots/stage5-minimap-collapsed.png",
-    "docs/stage5-screenshots/stage5-minimap-expanded.png",
+    "docs/stage5-screenshots/stage5-minimap-bigmap.png",
     "docs/stage5-screenshots/stage5-minimap-mail.png",
     "docs/stage5-screenshots/stage5-systems.png",
     "docs/stage5-screenshots/stage5-systems-advanced.png",
@@ -246,9 +242,9 @@
     "docs/stage5-screenshots/stage5-chat-collapsed.png",
     "docs/stage5-screenshots/stage5-chat-report.png",
     "docs/stage5-screenshots/stage5-system-menu.png",
-    "docs/stage5-screenshots/stage5-system-menu-character.png",
-    "docs/stage5-screenshots/stage5-system-menu-inventory.png",
-    "docs/stage5-screenshots/stage5-system-menu-quest.png",
+    "docs/stage5-screenshots/stage5-system-menu-creature.png",
+    "docs/stage5-screenshots/stage5-system-menu-mount.png",
+    "docs/stage5-screenshots/stage5-system-menu-fishing.png",
     "docs/stage5-screenshots/stage5-system-menu-qa-transfer.png",
     "docs/stage5-screenshots/stage5-system-menu-qa-transfer-result.png",
     "docs/stage5-screenshots/stage5-system-menu-transfer-list-result.png",
@@ -321,12 +317,12 @@
         }
       ],
       "rect": {
-        "left": 432.44000244140625,
-        "top": 151.55999755859375,
-        "right": 678.9199829101562,
-        "bottom": 335.6400146484375,
-        "width": 246.47998046875,
-        "height": 184.08001708984375
+        "left": 410,
+        "top": 86,
+        "right": 726,
+        "bottom": 322,
+        "width": 316,
+        "height": 236
       }
     },
     {
@@ -346,12 +342,12 @@
         }
       ],
       "rect": {
-        "left": 432.44000244140625,
-        "top": 151.55999755859375,
-        "right": 678.9199829101562,
-        "bottom": 335.6400146484375,
-        "width": 246.47998046875,
-        "height": 184.08001708984375
+        "left": 410,
+        "top": 86,
+        "right": 726,
+        "bottom": 322,
+        "width": 316,
+        "height": 236
       }
     },
     {
@@ -360,22 +356,22 @@
       "inventoryWindowVisible": true,
       "storageWindowVisible": true,
       "visibleItemCards": 0,
-      "questEntryCount": 1,
+      "questEntryCount": 0,
       "items": [],
       "rect": {
-        "left": 428.5400085449219,
-        "top": 148.44000244140625,
-        "right": 675.02001953125,
-        "bottom": 332.52001953125,
-        "width": 246.48001098632812,
-        "height": 184.08001708984375
+        "left": 405,
+        "top": 82,
+        "right": 721,
+        "bottom": 318,
+        "width": 316,
+        "height": 236
       }
     },
     {
       "label": "bag1Restored",
       "activeTab": "bag1",
       "inventoryWindowVisible": true,
-      "storageWindowVisible": false,
+      "storageWindowVisible": true,
       "visibleItemCards": 6,
       "questEntryCount": 0,
       "items": [
@@ -423,12 +419,12 @@
         }
       ],
       "rect": {
-        "left": 432.44000244140625,
-        "top": 151.55999755859375,
-        "right": 678.9199829101562,
-        "bottom": 335.6400146484375,
-        "width": 246.47998046875,
-        "height": 184.08001708984375
+        "left": 405,
+        "top": 82,
+        "right": 721,
+        "bottom": 318,
+        "width": 316,
+        "height": 236
       }
     }
   ],
@@ -1178,31 +1174,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1227,31 +1223,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         }
       ]
@@ -1266,31 +1262,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1315,31 +1311,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1366,31 +1362,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1415,31 +1411,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1466,31 +1462,31 @@
         {
           "name": "Cloth Armour",
           "slot": "armour",
-          "durabilityCurrent": 8,
+          "durabilityCurrent": 0,
           "durabilityMax": 14
         },
         {
           "name": "Copper Necklace",
           "slot": "necklace",
-          "durabilityCurrent": 4,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Wood Bracelet",
           "slot": "braceletLeft",
-          "durabilityCurrent": 5,
+          "durabilityCurrent": 0,
           "durabilityMax": 10
         },
         {
           "name": "Straw Sandals",
           "slot": "boots",
-          "durabilityCurrent": 1,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
           "name": "Rope Belt",
           "slot": "belt",
-          "durabilityCurrent": 2,
+          "durabilityCurrent": 0,
           "durabilityMax": 8
         },
         {
@@ -1554,12 +1550,12 @@
         }
       ],
       "rect": {
-        "left": 691.3999633789062,
-        "top": 97.7400131225586,
-        "right": 897.3200073242188,
-        "bottom": 394.14000701904297,
-        "width": 205.9200439453125,
-        "height": 296.3999938964844
+        "left": 742,
+        "top": 17,
+        "right": 1006,
+        "bottom": 397,
+        "width": 264,
+        "height": 380
       }
     },
     {
@@ -1607,12 +1603,12 @@
         }
       ],
       "rect": {
-        "left": 691.3999633789062,
-        "top": 97.7400131225586,
-        "right": 897.3200073242188,
-        "bottom": 394.14000701904297,
-        "width": 205.9200439453125,
-        "height": 296.3999938964844
+        "left": 742,
+        "top": 17,
+        "right": 1006,
+        "bottom": 397,
+        "width": 264,
+        "height": 380
       }
     },
     {
@@ -1660,12 +1656,12 @@
         }
       ],
       "rect": {
-        "left": 691.3999633789062,
-        "top": 97.7400131225586,
-        "right": 897.3200073242188,
-        "bottom": 394.14000701904297,
-        "width": 205.9200439453125,
-        "height": 296.3999938964844
+        "left": 742,
+        "top": 17,
+        "right": 1006,
+        "bottom": 397,
+        "width": 264,
+        "height": 380
       }
     },
     {
@@ -1674,7 +1670,7 @@
       "characterWindowVisible": true,
       "equipmentCardCount": 0,
       "statsValueCount": 0,
-      "spellValueCount": 6,
+      "spellValueCount": 7,
       "knownSkills": [
         {
           "key": "minor-heal",
@@ -1713,12 +1709,12 @@
         }
       ],
       "rect": {
-        "left": 691.3999633789062,
-        "top": 97.7400131225586,
-        "right": 897.3200073242188,
-        "bottom": 394.14000701904297,
-        "width": 205.9200439453125,
-        "height": 296.3999938964844
+        "left": 742,
+        "top": 17,
+        "right": 1006,
+        "bottom": 397,
+        "width": 264,
+        "height": 380
       }
     },
     {
@@ -1766,12 +1762,12 @@
         }
       ],
       "rect": {
-        "left": 691.3999633789062,
-        "top": 97.7400131225586,
-        "right": 897.3200073242188,
-        "bottom": 394.14000701904297,
-        "width": 205.9200439453125,
-        "height": 296.3999938964844
+        "left": 742,
+        "top": 17,
+        "right": 1006,
+        "bottom": 397,
+        "width": 264,
+        "height": 380
       }
     }
   ],
@@ -1784,15 +1780,15 @@
       "pageLocked": false,
       "storageItemCards": 2,
       "storageSlots": 80,
-      "statusText": "",
+      "statusText": "Choose a warehouse item, then click an inventory slot.",
       "rentalText": "",
       "rect": {
-        "left": 441.0199890136719,
-        "top": 212.40000915527344,
-        "right": 740.5399780273438,
-        "bottom": 480.7200164794922,
-        "width": 299.5199890136719,
-        "height": 268.32000732421875
+        "left": 421,
+        "top": 164,
+        "right": 805,
+        "bottom": 508,
+        "width": 384,
+        "height": 344
       }
     },
     {
@@ -1803,15 +1799,15 @@
       "pageLocked": true,
       "storageItemCards": 0,
       "storageSlots": 80,
-      "statusText": "",
+      "statusText": "Choose a warehouse item, then click an inventory slot.",
       "rentalText": "Expanded storage is locked.",
       "rect": {
-        "left": 441.0199890136719,
-        "top": 212.40000915527344,
-        "right": 740.5399780273438,
-        "bottom": 480.7200164794922,
-        "width": 299.5199890136719,
-        "height": 268.32000732421875
+        "left": 421,
+        "top": 164,
+        "right": 805,
+        "bottom": 508,
+        "width": 384,
+        "height": 344
       }
     },
     {
@@ -1822,15 +1818,15 @@
       "pageLocked": false,
       "storageItemCards": 0,
       "storageSlots": 80,
-      "statusText": "",
-      "rentalText": "Expanded storage expires on 05/28/2026, 06:56 PM",
+      "statusText": "Choose a warehouse item, then click an inventory slot.",
+      "rentalText": "Expanded storage expires on 06/06/2026, 07:53 AM",
       "rect": {
-        "left": 441.0199890136719,
-        "top": 212.40000915527344,
-        "right": 740.5399780273438,
-        "bottom": 480.7200164794922,
-        "width": 299.5199890136719,
-        "height": 268.32000732421875
+        "left": 421,
+        "top": 164,
+        "right": 805,
+        "bottom": 508,
+        "width": 384,
+        "height": 344
       }
     },
     {
@@ -1841,15 +1837,15 @@
       "pageLocked": false,
       "storageItemCards": 2,
       "storageSlots": 80,
-      "statusText": "",
+      "statusText": "Choose a warehouse item, then click an inventory slot.",
       "rentalText": "",
       "rect": {
-        "left": 441.0199890136719,
-        "top": 212.40000915527344,
-        "right": 740.5399780273438,
-        "bottom": 480.7200164794922,
-        "width": 299.5199890136719,
-        "height": 268.32000732421875
+        "left": 421,
+        "top": 164,
+        "right": 805,
+        "bottom": 508,
+        "width": 384,
+        "height": 344
       }
     }
   ],
@@ -1878,8 +1874,10 @@
         "Cancel"
       ],
       "chatLines": [
-        "[6:56:45 PM] loading starter scene blueprint",
-        "[6:56:47 PM] Storage expanded to 160 slots."
+        "[Mode: Peaceful]",
+        "[Pet: Attack and Move]",
+        "Online Players: 1",
+        "Storage expanded to 160 slots."
       ]
     },
     {
@@ -1906,8 +1904,10 @@
         "Cancel"
       ],
       "chatLines": [
-        "[6:56:45 PM] loading starter scene blueprint",
-        "[6:56:47 PM] Storage expanded to 160 slots."
+        "[Mode: Peaceful]",
+        "[Pet: Attack and Move]",
+        "Online Players: 1",
+        "Storage expanded to 160 slots."
       ]
     },
     {
@@ -1934,9 +1934,10 @@
         "Cancel"
       ],
       "chatLines": [
-        "[6:56:45 PM] loading starter scene blueprint",
-        "[6:56:47 PM] Storage expanded to 160 slots.",
-        "[6:56:49 PM] Storage password service is not available."
+        "[Pet: Attack and Move]",
+        "Online Players: 1",
+        "Storage expanded to 160 slots.",
+        "Storage password service is not available."
       ]
     },
     {
@@ -1953,8 +1954,10 @@
       "inputValues": [],
       "actionLabels": [],
       "chatLines": [
-        "[6:56:47 PM] Storage expanded to 160 slots.",
-        "[6:56:49 PM] Storage password service is not available."
+        "[Pet: Attack and Move]",
+        "Online Players: 1",
+        "Storage expanded to 160 slots.",
+        "Storage password service is not available."
       ]
     }
   ],
@@ -2123,10 +2126,7 @@
       "storageItemCards": 2,
       "storageSlots": 80,
       "feedbackText": "Store Item: Dagger",
-      "hintTexts": [
-        "Store Item...",
-        "Inventory: Dagger -> select target slot"
-      ],
+      "hintTexts": [],
       "statusText": "Choose an inventory item, then click a warehouse slot."
     },
     {
@@ -2215,9 +2215,7 @@
         "storageItemCards": 2,
         "storageSlots": 80,
         "feedbackText": "Store Item: Dagger -> 1",
-        "hintTexts": [
-          "Store Item..."
-        ],
+        "hintTexts": [],
         "statusText": "Choose an inventory item, then click a warehouse slot."
       },
       "result": "preserved-without-service"
@@ -2303,58 +2301,8 @@
   "storageTakeBackFlow": [
     {
       "label": "beforeStorageTakeBack",
-      "activeTab": "bag1",
-      "inventoryItems": [
-        {
-          "key": "red-potion",
-          "name": "Red Potion",
-          "slot": 0,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "blue-potion",
-          "name": "Blue Potion",
-          "slot": 1,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "training-manual",
-          "name": "Training Manual",
-          "slot": 2,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "bronze-helmet",
-          "name": "Bronze Helmet",
-          "slot": 3,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "leather-armour",
-          "name": "Leather Armour",
-          "slot": 5,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "wooden-sword",
-          "name": "Wooden Sword",
-          "slot": 10,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "dagger",
-          "name": "Dagger",
-          "slot": 4,
-          "container": "bag1",
-          "quantity": 1
-        }
-      ],
+      "activeTab": "quest",
+      "inventoryItems": [],
       "storageItems": [
         {
           "key": "stored-red-potion",
@@ -2376,64 +2324,14 @@
       "storageSlots": 80,
       "feedbackText": "",
       "hintTexts": [
-        "Store Item..."
+        "Choose a warehouse item, then click an inventory slot."
       ],
-      "statusText": "Choose an inventory item, then click a warehouse slot."
+      "statusText": "Choose a warehouse item, then click an inventory slot."
     },
     {
       "label": "takeBackItemSelected",
-      "activeTab": "bag1",
-      "inventoryItems": [
-        {
-          "key": "red-potion",
-          "name": "Red Potion",
-          "slot": 0,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "blue-potion",
-          "name": "Blue Potion",
-          "slot": 1,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "training-manual",
-          "name": "Training Manual",
-          "slot": 2,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "bronze-helmet",
-          "name": "Bronze Helmet",
-          "slot": 3,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "leather-armour",
-          "name": "Leather Armour",
-          "slot": 5,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "wooden-sword",
-          "name": "Wooden Sword",
-          "slot": 10,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "dagger",
-          "name": "Dagger",
-          "slot": 4,
-          "container": "bag1",
-          "quantity": 1
-        }
-      ],
+      "activeTab": "quest",
+      "inventoryItems": [],
       "storageItems": [
         {
           "key": "stored-red-potion",
@@ -2455,65 +2353,14 @@
       "storageSlots": 80,
       "feedbackText": "Take Back: Red Potion",
       "hintTexts": [
-        "Take Back...",
-        "Inventory: Red Potion -> select target slot"
+        "Choose a warehouse item, then click an inventory slot."
       ],
       "statusText": "Choose a warehouse item, then click an inventory slot."
     },
     {
       "label": "afterStorageTakeBack",
-      "activeTab": "bag1",
-      "inventoryItems": [
-        {
-          "key": "red-potion",
-          "name": "Red Potion",
-          "slot": 0,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "blue-potion",
-          "name": "Blue Potion",
-          "slot": 1,
-          "container": "bag1",
-          "quantity": 3
-        },
-        {
-          "key": "training-manual",
-          "name": "Training Manual",
-          "slot": 2,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "bronze-helmet",
-          "name": "Bronze Helmet",
-          "slot": 3,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "leather-armour",
-          "name": "Leather Armour",
-          "slot": 5,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "wooden-sword",
-          "name": "Wooden Sword",
-          "slot": 10,
-          "container": "bag1",
-          "quantity": 1
-        },
-        {
-          "key": "dagger",
-          "name": "Dagger",
-          "slot": 4,
-          "container": "bag1",
-          "quantity": 1
-        }
-      ],
+      "activeTab": "quest",
+      "inventoryItems": [],
       "storageItems": [
         {
           "key": "stored-red-potion",
@@ -2535,7 +2382,7 @@
       "storageSlots": 80,
       "feedbackText": "Take Back: Red Potion -> slot-6-0",
       "hintTexts": [
-        "Take Back..."
+        "Choose a warehouse item, then click an inventory slot."
       ],
       "statusText": "Choose a warehouse item, then click an inventory slot.",
       "result": "preserved-without-service"
@@ -2627,24 +2474,26 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found"
+        "Trade successful.",
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
         "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
         "chat-feed-line system channel-system"
       ],
-      "nonEmptyLineCount": 3,
-      "knobTop": "16px",
+      "nonEmptyLineCount": 4,
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2658,27 +2507,23 @@
         "",
         "",
         "",
-        "",
-        "",
         ""
       ],
       "visibleLineClasses": [
         "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal",
-        "chat-feed-line  channel-normal",
-        "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal"
       ],
       "nonEmptyLineCount": 0,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2689,24 +2534,26 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found"
+        "Trade successful.",
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
         "chat-feed-line system channel-system",
+        "chat-feed-line system channel-system",
         "chat-feed-line system channel-system"
       ],
-      "nonEmptyLineCount": 3,
-      "knobTop": "16px",
+      "nonEmptyLineCount": 4,
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2717,10 +2564,10 @@
       "settingsOpen": true,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found",
-        "[6:57:16 PM] Guild filter check"
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2729,14 +2576,14 @@
         "chat-feed-line  channel-guild"
       ],
       "nonEmptyLineCount": 4,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2747,10 +2594,10 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found",
-        "[6:57:16 PM] Guild filter check"
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2759,14 +2606,14 @@
         "chat-feed-line  channel-guild"
       ],
       "nonEmptyLineCount": 4,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2777,10 +2624,10 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found",
-        "[6:57:16 PM] Guild filter check"
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2789,14 +2636,14 @@
         "chat-feed-line  channel-guild"
       ],
       "nonEmptyLineCount": 4,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2807,10 +2654,10 @@
       "settingsOpen": false,
       "reportOpen": true,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found",
-        "[6:57:16 PM] Guild filter check"
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2819,14 +2666,14 @@
         "chat-feed-line  channel-guild"
       ],
       "nonEmptyLineCount": 4,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     }
   ],
@@ -2839,20 +2686,22 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:16 PM] Guild filter check"
+        "Guild ready",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
+        "chat-feed-line  channel-guild",
         "chat-feed-line  channel-guild"
       ],
-      "nonEmptyLineCount": 1,
+      "nonEmptyLineCount": 2,
       "knobTop": "16px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2866,27 +2715,23 @@
         "",
         "",
         "",
-        "",
-        "",
         ""
       ],
       "visibleLineClasses": [
         "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal",
-        "chat-feed-line  channel-normal",
-        "chat-feed-line  channel-normal",
         "chat-feed-line  channel-normal"
       ],
       "nonEmptyLineCount": 0,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     },
     {
@@ -2897,10 +2742,10 @@
       "settingsOpen": false,
       "reportOpen": false,
       "visibleLineTexts": [
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] Not Found",
-        "[6:57:16 PM] Guild filter check"
+        "You bought shop-ui-potion for 25 Gold",
+        "You don't have enough currency for your purchase.",
+        "Not Found",
+        "Guild filter check"
       ],
       "visibleLineClasses": [
         "chat-feed-line system channel-system",
@@ -2909,14 +2754,14 @@
         "chat-feed-line  channel-guild"
       ],
       "nonEmptyLineCount": 4,
-      "knobTop": "16px",
+      "knobTop": "44px",
       "rect": {
-        "left": 292.0400085449219,
-        "top": 607.8599853515625,
-        "right": 785,
-        "bottom": 660.9000244140625,
-        "width": 492.9599914550781,
-        "height": 53.0400390625
+        "left": 230,
+        "top": 671,
+        "right": 862,
+        "bottom": 739,
+        "width": 632,
+        "height": 68
       }
     }
   ],
@@ -2924,16 +2769,42 @@
     {
       "label": "open",
       "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [
-        "Character",
-        "Inventory",
-        "Quest",
-        "Exit"
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [
         "Bichon Province (0)",
         "Woomyon Woods S (1)",
@@ -2965,24 +2836,27 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIRQ3O4WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
       "rect": {
-        "left": 705.4400024414062,
-        "top": 93.84001159667969,
-        "right": 898.8800048828125,
-        "bottom": 561.8399505615234,
-        "width": 193.44000244140625,
-        "height": 467.99993896484375
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
       }
     },
     {
-      "label": "characterAction",
+      "label": "creatureFeatureAction",
       "open": false,
-      "characterWindowVisible": true,
+      "actionKeys": [],
+      "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "creature",
       "transferLabels": [],
       "qaTransferTitle": "",
       "qaInputs": [],
@@ -2995,13 +2869,16 @@
       "rect": null
     },
     {
-      "label": "inventoryAction",
+      "label": "mountFeatureAction",
       "open": false,
+      "actionKeys": [],
       "characterWindowVisible": false,
-      "inventoryWindowVisible": true,
+      "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "mount",
       "transferLabels": [],
       "qaTransferTitle": "",
       "qaInputs": [],
@@ -3014,13 +2891,16 @@
       "rect": null
     },
     {
-      "label": "questAction",
+      "label": "fishingFeatureAction",
       "open": false,
+      "actionKeys": [],
       "characterWindowVisible": false,
-      "inventoryWindowVisible": true,
-      "storageWindowVisible": true,
-      "activeInventoryTab": "quest",
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
       "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "fishing",
       "transferLabels": [],
       "qaTransferTitle": "",
       "qaInputs": [],
@@ -3037,16 +2917,42 @@
     {
       "label": "qaTransferPanel",
       "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [
-        "Character",
-        "Inventory",
-        "Quest",
-        "Exit"
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [
         "Bichon Province (0)",
         "Woomyon Woods S (1)",
@@ -3078,29 +2984,55 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIRQ3O4WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
       "rect": {
-        "left": 705.4400024414062,
-        "top": 93.84001159667969,
-        "right": 898.8800048828125,
-        "bottom": 561.8399505615234,
-        "width": 193.44000244140625,
-        "height": 467.99993896484375
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
       }
     },
     {
       "label": "qaTransferFilled",
       "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [
-        "Character",
-        "Inventory",
-        "Quest",
-        "Exit"
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [
         "Bichon Province (0)",
         "Woomyon Woods S (1)",
@@ -3132,24 +3064,27 @@
         "x": 315,
         "y": 82
       },
-      "metaText": "MIRQ3O4WoomyonWoods(S) [1]Safe Zone",
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
       "rect": {
-        "left": 705.4400024414062,
-        "top": 93.84001159667969,
-        "right": 898.8800048828125,
-        "bottom": 561.8399505615234,
-        "width": 193.44000244140625,
-        "height": 467.99993896484375
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
       }
     },
     {
       "label": "qaTransferSubmitted",
       "open": false,
+      "actionKeys": [],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [],
       "qaTransferTitle": "",
       "qaInputs": [],
@@ -3166,16 +3101,42 @@
     {
       "label": "transferListOpen",
       "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [
-        "Character",
-        "Inventory",
-        "Quest",
-        "Exit"
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [
         "Bichon Province (0)",
         "Woomyon Woods S (1)",
@@ -3207,24 +3168,27 @@
         "x": 330,
         "y": 270
       },
-      "metaText": "MIRQ3O4BichonProvince [0]Safe Zone",
+      "metaText": "ScoutBichonProvince [0]Safe Zone",
       "rect": {
-        "left": 705.4400024414062,
-        "top": 93.84001159667969,
-        "right": 898.8800048828125,
-        "bottom": 561.8399505615234,
-        "width": 193.44000244140625,
-        "height": 467.99993896484375
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
       }
     },
     {
       "label": "transferListSubmitted",
       "open": false,
+      "actionKeys": [],
       "characterWindowVisible": false,
       "inventoryWindowVisible": false,
       "storageWindowVisible": false,
       "activeInventoryTab": "bag1",
       "actionLabels": [],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
       "transferLabels": [],
       "qaTransferTitle": "",
       "qaInputs": [],
@@ -3237,6 +3201,314 @@
       "rect": null
     }
   ],
+  "systemMenuFeatureFlow": [
+    {
+      "label": "creatureFeaturePanelOpen",
+      "open": false,
+      "actionKeys": [],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "creature",
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    },
+    {
+      "label": "creatureFeaturePanelClosed",
+      "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "1"
+        },
+        {
+          "label": "X",
+          "value": "315"
+        },
+        {
+          "label": "Y",
+          "value": "82"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
+      }
+    },
+    {
+      "label": "mountFeaturePanelOpen",
+      "open": false,
+      "actionKeys": [],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "mount",
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    },
+    {
+      "label": "mountFeaturePanelClosed",
+      "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "1"
+        },
+        {
+          "label": "X",
+          "value": "315"
+        },
+        {
+          "label": "Y",
+          "value": "82"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
+      }
+    },
+    {
+      "label": "fishingFeaturePanelOpen",
+      "open": false,
+      "actionKeys": [],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [],
+      "systemMenuFeaturePanelVisible": true,
+      "systemMenuFeaturePanelType": "fishing",
+      "transferLabels": [],
+      "qaTransferTitle": "",
+      "qaInputs": [],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "",
+      "rect": null
+    },
+    {
+      "label": "fishingFeaturePanelClosed",
+      "open": true,
+      "actionKeys": [
+        "exit",
+        "logout",
+        "help",
+        "keyboard",
+        "ranking",
+        "creature",
+        "ride",
+        "fishing",
+        "friend",
+        "mentor",
+        "relationship",
+        "group",
+        "guild"
+      ],
+      "characterWindowVisible": false,
+      "inventoryWindowVisible": false,
+      "storageWindowVisible": false,
+      "activeInventoryTab": "bag1",
+      "actionLabels": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "systemMenuFeaturePanelVisible": false,
+      "systemMenuFeaturePanelType": null,
+      "transferLabels": [
+        "Bichon Province (0)",
+        "Woomyon Woods S (1)",
+        "Serpent Valley (2)",
+        "n0 (QA)",
+        "HellFire 1F (HF1)",
+        "HellFire 2F (HF2)",
+        "HellFire 3F (HF3)",
+        "Penal Cavern (D1801)",
+        "HellFire Kings Room (HKR)"
+      ],
+      "qaTransferTitle": "QA Jump",
+      "qaInputs": [
+        {
+          "label": "Map",
+          "value": "1"
+        },
+        {
+          "label": "X",
+          "value": "315"
+        },
+        {
+          "label": "Y",
+          "value": "82"
+        }
+      ],
+      "currentMapFileName": "1",
+      "playerPosition": {
+        "x": 315,
+        "y": 82
+      },
+      "metaText": "ScoutWoomyonWoods(S) [1]Safe Zone",
+      "rect": {
+        "left": 988,
+        "top": 349,
+        "right": 1024,
+        "bottom": 631,
+        "width": 36,
+        "height": 282
+      }
+    }
+  ],
   "hudButtonFlow": [
     {
       "label": "skillToSpells",
@@ -3244,7 +3516,7 @@
       "inventoryWindowVisible": false,
       "activeCharacterTab": "spells",
       "activeInventoryTab": "bag1",
-      "spellValueCount": 6,
+      "spellValueCount": 7,
       "statsValueCount": 0
     },
     {
@@ -3315,7 +3587,7 @@
         {
           "key": "battle-focus",
           "name": "Battle Focus",
-          "cooldownRemainingTicks": 12
+          "cooldownRemainingTicks": 240
         },
         {
           "key": "summon-shinsu",
@@ -3361,15 +3633,16 @@
       "panelVisible": true,
       "sceneHidden": false,
       "mailOpen": false,
+      "bigMapOpen": false,
       "nameText": "WoomyonWoods(S) Safe Zone",
       "coordsText": "315:82",
       "panelRect": {
-        "left": 813.0800170898438,
-        "top": 85.260009765625,
-        "right": 912.9199829101562,
-        "bottom": 205.3800048828125,
-        "width": 99.8399658203125,
-        "height": 120.1199951171875
+        "left": 896,
+        "top": 1,
+        "right": 1024,
+        "bottom": 155,
+        "width": 128,
+        "height": 154
       }
     },
     {
@@ -3377,47 +3650,50 @@
       "panelVisible": true,
       "sceneHidden": true,
       "mailOpen": false,
+      "bigMapOpen": false,
       "nameText": "WoomyonWoods(S) Safe Zone",
       "coordsText": "315:82",
       "panelRect": {
-        "left": 813.0800170898438,
-        "top": 85.260009765625,
-        "right": 912.9199829101562,
-        "bottom": 205.3800048828125,
-        "width": 99.8399658203125,
-        "height": 120.1199951171875
+        "left": 896,
+        "top": 1,
+        "right": 1024,
+        "bottom": 155,
+        "width": 128,
+        "height": 154
       }
     },
     {
-      "label": "expandedAfterBigMap",
+      "label": "bigMapOpen",
       "panelVisible": true,
-      "sceneHidden": false,
+      "sceneHidden": true,
       "mailOpen": false,
+      "bigMapOpen": true,
       "nameText": "WoomyonWoods(S) Safe Zone",
       "coordsText": "315:82",
       "panelRect": {
-        "left": 813.0800170898438,
-        "top": 85.260009765625,
-        "right": 912.9199829101562,
-        "bottom": 205.3800048828125,
-        "width": 99.8399658203125,
-        "height": 120.1199951171875
+        "left": 896,
+        "top": 1,
+        "right": 1024,
+        "bottom": 155,
+        "width": 128,
+        "height": 154
       }
     },
     {
       "label": "mailOpen",
       "panelVisible": true,
-      "sceneHidden": false,
+      "sceneHidden": true,
       "mailOpen": true,
+      "bigMapOpen": true,
       "nameText": "WoomyonWoods(S) Safe Zone",
       "coordsText": "315:82",
       "panelRect": {
-        "left": 813.0800170898438,
-        "top": 85.260009765625,
-        "right": 912.9199829101562,
-        "bottom": 205.3800048828125,
-        "width": 99.8399658203125,
-        "height": 120.1199951171875
+        "left": 896,
+        "top": 1,
+        "right": 1024,
+        "bottom": 155,
+        "width": 128,
+        "height": 154
       }
     }
   ],
@@ -3429,15 +3705,16 @@
       "rows": [],
       "emptyText": "No mail",
       "footers": [
+        "1 / 1",
         "0/0"
       ],
       "rect": {
-        "left": 674.239990234375,
-        "top": 206.16000366210938,
-        "right": 897.3200073242188,
-        "bottom": 279.4800109863281,
-        "width": 223.08001708984375,
-        "height": 73.32000732421875
+        "left": 562,
+        "top": 5,
+        "right": 874,
+        "bottom": 449,
+        "width": 312,
+        "height": 444
       }
     },
     {
@@ -3456,21 +3733,23 @@
       "open": true,
       "title": "Report",
       "rows": [
-        "[6:57:16 PM] Guild filter check",
-        "[6:57:14 PM] Not Found",
-        "[6:57:14 PM] You don't have enough currency for your purchase.",
-        "[6:57:14 PM] You bought shop-ui-potion for 25 Gold"
+        "Guild filter check",
+        "Not Found",
+        "You don't have enough currency for your purchase.",
+        "You bought shop-ui-potion for 25 Gold",
+        "Trade successful.",
+        "Guild ready"
       ],
       "footers": [
-        "4/6"
+        "6/6"
       ],
       "rect": {
-        "left": 296.7200012207031,
-        "top": 461.2200012207031,
-        "right": 493.2799987792969,
-        "bottom": 602.4000244140625,
-        "width": 196.55999755859375,
-        "height": 141.18002319335938
+        "left": 236,
+        "top": 460,
+        "right": 488,
+        "bottom": 664,
+        "width": 252,
+        "height": 204
       }
     },
     {
@@ -3486,7 +3765,7 @@
     {
       "label": "open",
       "open": true,
-      "caption": "Village Guide",
+      "caption": "",
       "title": "Field Assignment",
       "bodyLines": [
         "Good. The road is not safe unless you can hold your own.",
@@ -3497,12 +3776,12 @@
       "inputVisible": false,
       "inputPrompt": "",
       "rect": {
-        "left": 306.08001708984375,
-        "top": 402.7200012207031,
-        "right": 586.8800048828125,
-        "bottom": 518.1600341796875,
-        "width": 280.79998779296875,
-        "height": 115.44003295898438
+        "left": 2,
+        "top": 0,
+        "right": 434,
+        "bottom": 228,
+        "width": 432,
+        "height": 228
       }
     },
     {
@@ -3543,7 +3822,7 @@
           "objectId": "3002",
           "kind": "monster",
           "name": "Field Wasp",
-          "x": 329,
+          "x": 328,
           "y": 270,
           "hp": 60,
           "maxHp": 60,
@@ -3591,7 +3870,7 @@
         }
       ],
       "visibleMonsterLabels": [
-        "Field Wasp60/60Attack · 1 tiles",
+        "Field Wasp",
         "Training Dummy"
       ]
     }
@@ -3614,68 +3893,68 @@
       "labelRects": [
         {
           "text": "1",
-          "left": 307.6400146484375,
-          "top": 570.4199829101562,
-          "right": 327.9200134277344,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 250,
+          "top": 623,
+          "right": 276,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "2",
-          "left": 334.94000244140625,
-          "top": 570.4199829101562,
-          "right": 355.2200012207031,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 285,
+          "top": 623,
+          "right": 311,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "3",
-          "left": 362.239990234375,
-          "top": 570.4199829101562,
-          "right": 382.52001953125,
-          "bottom": 581.3399658203125,
-          "width": 20.280029296875,
-          "height": 10.91998291015625
+          "left": 320,
+          "top": 623,
+          "right": 346,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "4",
-          "left": 389.5400085449219,
-          "top": 570.4199829101562,
-          "right": 409.82000732421875,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 355,
+          "top": 623,
+          "right": 381,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "5",
-          "left": 416.8399963378906,
-          "top": 570.4199829101562,
-          "right": 437.1199951171875,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 390,
+          "top": 623,
+          "right": 416,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "6",
-          "left": 444.1400146484375,
-          "top": 570.4199829101562,
-          "right": 464.4200134277344,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 425,
+          "top": 623,
+          "right": 451,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         }
       ],
       "labelsWithinDialog": true,
       "overlapsQuestTracker": false,
       "rect": {
-        "left": 292.0400085449219,
-        "top": 566.52001953125,
-        "right": 479.239990234375,
-        "bottom": 596.1600341796875,
-        "width": 187.19998168945312,
-        "height": 29.6400146484375
+        "left": 230,
+        "top": 618,
+        "right": 470,
+        "bottom": 656,
+        "width": 240,
+        "height": 38
       }
     },
     {
@@ -3695,68 +3974,68 @@
       "labelRects": [
         {
           "text": "1",
-          "left": 299.84002685546875,
-          "top": 258.41998291015625,
-          "right": 320.1199951171875,
-          "bottom": 269.34002685546875,
-          "width": 20.27996826171875,
-          "height": 10.9200439453125
+          "left": 240,
+          "top": 223,
+          "right": 266,
+          "bottom": 237,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "2",
-          "left": 299.84002685546875,
-          "top": 285.7200012207031,
-          "right": 320.1199951171875,
-          "bottom": 296.6400146484375,
-          "width": 20.27996826171875,
-          "height": 10.920013427734375
+          "left": 240,
+          "top": 258,
+          "right": 266,
+          "bottom": 272,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "3",
-          "left": 299.84002685546875,
-          "top": 313.02001953125,
-          "right": 320.1199951171875,
-          "bottom": 323.94000244140625,
-          "width": 20.27996826171875,
-          "height": 10.91998291015625
+          "left": 240,
+          "top": 293,
+          "right": 266,
+          "bottom": 307,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "4",
-          "left": 299.84002685546875,
-          "top": 340.32000732421875,
-          "right": 320.1199951171875,
-          "bottom": 351.239990234375,
-          "width": 20.27996826171875,
-          "height": 10.91998291015625
+          "left": 240,
+          "top": 328,
+          "right": 266,
+          "bottom": 342,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "5",
-          "left": 299.84002685546875,
-          "top": 367.6199951171875,
-          "right": 320.1199951171875,
-          "bottom": 378.5400085449219,
-          "width": 20.27996826171875,
-          "height": 10.920013427734375
+          "left": 240,
+          "top": 363,
+          "right": 266,
+          "bottom": 377,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "6",
-          "left": 299.84002685546875,
-          "top": 394.9200134277344,
-          "right": 320.1199951171875,
-          "bottom": 405.8399963378906,
-          "width": 20.27996826171875,
-          "height": 10.91998291015625
+          "left": 240,
+          "top": 398,
+          "right": 266,
+          "bottom": 412,
+          "width": 26,
+          "height": 14
         }
       ],
       "labelsWithinDialog": true,
       "overlapsQuestTracker": false,
       "rect": {
-        "left": 298.280029296875,
-        "top": 240.48001098632812,
-        "right": 329.4800109863281,
-        "bottom": 428.4599914550781,
-        "width": 31.199981689453125,
-        "height": 187.97998046875
+        "left": 238,
+        "top": 200,
+        "right": 278,
+        "bottom": 441,
+        "width": 40,
+        "height": 241
       }
     },
     {
@@ -3776,68 +4055,68 @@
       "labelRects": [
         {
           "text": "1",
-          "left": 307.6400146484375,
-          "top": 570.4199829101562,
-          "right": 327.9200134277344,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 250,
+          "top": 623,
+          "right": 276,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "2",
-          "left": 334.94000244140625,
-          "top": 570.4199829101562,
-          "right": 355.2200012207031,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 285,
+          "top": 623,
+          "right": 311,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "3",
-          "left": 362.239990234375,
-          "top": 570.4199829101562,
-          "right": 382.52001953125,
-          "bottom": 581.3399658203125,
-          "width": 20.280029296875,
-          "height": 10.91998291015625
+          "left": 320,
+          "top": 623,
+          "right": 346,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "4",
-          "left": 389.5400085449219,
-          "top": 570.4199829101562,
-          "right": 409.82000732421875,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 355,
+          "top": 623,
+          "right": 381,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "5",
-          "left": 416.8399963378906,
-          "top": 570.4199829101562,
-          "right": 437.1199951171875,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 390,
+          "top": 623,
+          "right": 416,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         },
         {
           "text": "6",
-          "left": 444.1400146484375,
-          "top": 570.4199829101562,
-          "right": 464.4200134277344,
-          "bottom": 581.3399658203125,
-          "width": 20.279998779296875,
-          "height": 10.91998291015625
+          "left": 425,
+          "top": 623,
+          "right": 451,
+          "bottom": 637,
+          "width": 26,
+          "height": 14
         }
       ],
       "labelsWithinDialog": true,
       "overlapsQuestTracker": false,
       "rect": {
-        "left": 292.0400085449219,
-        "top": 566.52001953125,
-        "right": 479.239990234375,
-        "bottom": 596.1600341796875,
-        "width": 187.19998168945312,
-        "height": 29.6400146484375
+        "left": 230,
+        "top": 618,
+        "right": 470,
+        "bottom": 656,
+        "width": 240,
+        "height": 38
       }
     },
     {
@@ -4094,7 +4373,7 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-25300-1777373796524",
+      "accountValue": "demo",
       "passwordFilled": true,
       "accountPanelVisible": false,
       "accountPanelText": "",
@@ -4120,10 +4399,10 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-25300-1777373796524",
+      "accountValue": "demo",
       "passwordFilled": true,
       "accountPanelVisible": true,
-      "accountPanelText": "View Keystage5-25300-1777373796524Close",
+      "accountPanelText": "View KeydemoClose",
       "feedbackText": "",
       "runtimeStampVisible": true,
       "buttons": [
@@ -4146,38 +4425,12 @@
         "简体中文",
         "Español"
       ],
-      "accountValue": "stage5-25300-1777373796524",
+      "accountValue": "demo",
       "passwordFilled": true,
       "accountPanelVisible": false,
       "accountPanelText": "",
       "feedbackText": "",
       "runtimeStampVisible": true,
-      "buttons": [
-        "Login",
-        "New Account",
-        "Quick Enter",
-        "View Key",
-        "Close"
-      ]
-    },
-    {
-      "label": "accountCreated",
-      "screen": "login",
-      "language": "en",
-      "wsState": "open",
-      "loginBusy": false,
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "accountValue": "stage5-25300-1777373796524",
-      "passwordFilled": true,
-      "accountPanelVisible": false,
-      "accountPanelText": "",
-      "feedbackText": "",
-      "runtimeStampVisible": false,
       "buttons": [
         "Login",
         "New Account",
@@ -4209,14 +4462,14 @@
       "label": "initial",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "stage5-25300-1777373796524",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4233,8 +4486,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "stage5-25300-1777373796524",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4269,7 +4522,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "stage5-25300-1777373796524",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4282,14 +4535,14 @@
       "label": "spanishLanguage",
       "screen": "select",
       "language": "es",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Aventurero",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4306,8 +4559,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Aventurero",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Guerrero"
         },
         {
@@ -4342,7 +4595,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Aventurero",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Iniciar juego",
         "Nuevo personaje",
@@ -4355,14 +4608,14 @@
       "label": "englishLanguageRestored",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4379,8 +4632,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4415,7 +4668,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4428,14 +4681,14 @@
       "label": "creditsPanel",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4452,8 +4705,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4485,10 +4738,10 @@
         }
       ],
       "creditsPanelVisible": true,
-      "creditsPanelText": "CreditsLegend of Mir 2stage5-25300-1777373796524Close",
+      "creditsPanelText": "CreditsLegend of Mir 2demoClose",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4501,14 +4754,14 @@
       "label": "creditsClosed",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4525,8 +4778,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4561,7 +4814,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4574,14 +4827,14 @@
       "label": "deleteConfirm",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4598,8 +4851,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4633,8 +4886,8 @@
       "creditsPanelVisible": false,
       "creditsPanelText": "",
       "deletePanelVisible": true,
-      "deletePanelText": "Delete CharacterAdventurerConfirmClose",
-      "selectedSlotName": "Adventurer",
+      "deletePanelText": "Delete CharacterScoutConfirmClose",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4647,14 +4900,14 @@
       "label": "deleteCancelled",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4671,8 +4924,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -4707,7 +4960,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -4717,257 +4970,17 @@
       ]
     },
     {
-      "label": "afterUiNewCharacter",
+      "label": "demoCharacterSlotSelected",
       "screen": "select",
       "language": "en",
-      "accountId": "stage5-25300-1777373796524",
-      "selectedCharacterIndex": 0,
-      "characterCount": 2,
-      "characters": [
-        {
-          "index": 0,
-          "name": "Adventurer",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        },
-        {
-          "index": 2,
-          "name": "MIRQE7L",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        }
-      ],
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "slots": [
-        {
-          "index": 0,
-          "disabled": false,
-          "empty": false,
-          "selected": true,
-          "name": "Adventurer",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 1,
-          "disabled": false,
-          "empty": false,
-          "selected": false,
-          "name": "MIRQE7L",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 2,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        },
-        {
-          "index": 3,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        }
-      ],
-      "creditsPanelVisible": false,
-      "creditsPanelText": "",
-      "deletePanelVisible": false,
-      "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
-      "actionLabels": [
-        "Start Game",
-        "New Character",
-        "Delete Character",
-        "Credits",
-        "Exit"
-      ]
-    },
-    {
-      "label": "newCharacterSlotSelected",
-      "screen": "select",
-      "language": "en",
-      "accountId": "stage5-25300-1777373796524",
-      "selectedCharacterIndex": 1,
-      "characterCount": 2,
-      "characters": [
-        {
-          "index": 0,
-          "name": "Adventurer",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        },
-        {
-          "index": 2,
-          "name": "MIRQE7L",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        }
-      ],
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "slots": [
-        {
-          "index": 0,
-          "disabled": false,
-          "empty": false,
-          "selected": false,
-          "name": "Adventurer",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 1,
-          "disabled": false,
-          "empty": false,
-          "selected": true,
-          "name": "MIRQE7L",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 2,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        },
-        {
-          "index": 3,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        }
-      ],
-      "creditsPanelVisible": false,
-      "creditsPanelText": "",
-      "deletePanelVisible": false,
-      "deletePanelText": "",
-      "selectedSlotName": "MIRQE7L",
-      "actionLabels": [
-        "Start Game",
-        "New Character",
-        "Delete Character",
-        "Credits",
-        "Exit"
-      ]
-    },
-    {
-      "label": "deleteCreatedConfirm",
-      "screen": "select",
-      "language": "en",
-      "accountId": "stage5-25300-1777373796524",
-      "selectedCharacterIndex": 1,
-      "characterCount": 2,
-      "characters": [
-        {
-          "index": 0,
-          "name": "Adventurer",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        },
-        {
-          "index": 2,
-          "name": "MIRQE7L",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        }
-      ],
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "slots": [
-        {
-          "index": 0,
-          "disabled": false,
-          "empty": false,
-          "selected": false,
-          "name": "Adventurer",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 1,
-          "disabled": false,
-          "empty": false,
-          "selected": true,
-          "name": "MIRQE7L",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 2,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        },
-        {
-          "index": 3,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        }
-      ],
-      "creditsPanelVisible": false,
-      "creditsPanelText": "",
-      "deletePanelVisible": true,
-      "deletePanelText": "Delete CharacterMIRQE7LConfirmClose",
-      "selectedSlotName": "MIRQE7L",
-      "actionLabels": [
-        "Start Game",
-        "New Character",
-        "Delete Character",
-        "Credits",
-        "Exit"
-      ]
-    },
-    {
-      "label": "afterUiDeleteCharacter",
-      "screen": "select",
-      "language": "en",
-      "accountId": "stage5-25300-1777373796524",
+      "accountId": "demo",
       "selectedCharacterIndex": 0,
       "characterCount": 1,
       "characters": [
         {
           "index": 0,
-          "name": "Adventurer",
-          "level": 1,
+          "name": "Scout",
+          "level": 7,
           "classKey": "warrior",
           "gender": "male"
         }
@@ -4984,8 +4997,8 @@
           "disabled": false,
           "empty": false,
           "selected": true,
-          "name": "Adventurer",
-          "level": "1",
+          "name": "Scout",
+          "level": "7",
           "job": "Warrior"
         },
         {
@@ -5020,167 +5033,7 @@
       "creditsPanelText": "",
       "deletePanelVisible": false,
       "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
-      "actionLabels": [
-        "Start Game",
-        "New Character",
-        "Delete Character",
-        "Credits",
-        "Exit"
-      ]
-    },
-    {
-      "label": "afterUiRecreateCharacter",
-      "screen": "select",
-      "language": "en",
-      "accountId": "stage5-25300-1777373796524",
-      "selectedCharacterIndex": 0,
-      "characterCount": 2,
-      "characters": [
-        {
-          "index": 0,
-          "name": "Adventurer",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        },
-        {
-          "index": 3,
-          "name": "MIRQ3O4",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        }
-      ],
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "slots": [
-        {
-          "index": 0,
-          "disabled": false,
-          "empty": false,
-          "selected": true,
-          "name": "Adventurer",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 1,
-          "disabled": false,
-          "empty": false,
-          "selected": false,
-          "name": "MIRQ3O4",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 2,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        },
-        {
-          "index": 3,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        }
-      ],
-      "creditsPanelVisible": false,
-      "creditsPanelText": "",
-      "deletePanelVisible": false,
-      "deletePanelText": "",
-      "selectedSlotName": "Adventurer",
-      "actionLabels": [
-        "Start Game",
-        "New Character",
-        "Delete Character",
-        "Credits",
-        "Exit"
-      ]
-    },
-    {
-      "label": "recreatedCharacterSlotSelected",
-      "screen": "select",
-      "language": "en",
-      "accountId": "stage5-25300-1777373796524",
-      "selectedCharacterIndex": 1,
-      "characterCount": 2,
-      "characters": [
-        {
-          "index": 0,
-          "name": "Adventurer",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        },
-        {
-          "index": 3,
-          "name": "MIRQ3O4",
-          "level": 1,
-          "classKey": "warrior",
-          "gender": "male"
-        }
-      ],
-      "activeLanguageLabel": "English",
-      "languageLabels": [
-        "English",
-        "简体中文",
-        "Español"
-      ],
-      "slots": [
-        {
-          "index": 0,
-          "disabled": false,
-          "empty": false,
-          "selected": false,
-          "name": "Adventurer",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 1,
-          "disabled": false,
-          "empty": false,
-          "selected": true,
-          "name": "MIRQ3O4",
-          "level": "1",
-          "job": "Warrior"
-        },
-        {
-          "index": 2,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        },
-        {
-          "index": 3,
-          "disabled": true,
-          "empty": true,
-          "selected": false,
-          "name": "",
-          "level": "",
-          "job": ""
-        }
-      ],
-      "creditsPanelVisible": false,
-      "creditsPanelText": "",
-      "deletePanelVisible": false,
-      "deletePanelText": "",
-      "selectedSlotName": "MIRQ3O4",
+      "selectedSlotName": "Scout",
       "actionLabels": [
         "Start Game",
         "New Character",
@@ -5206,7 +5059,8 @@
       },
       "social": {
         "blocked": [],
-        "friends": []
+        "friends": [],
+        "memos": {}
       },
       "mail": [],
       "trade": null,
@@ -5229,7 +5083,7 @@
         "ore": 0
       },
       "gold": 1280,
-      "credit": null,
+      "credit": 0,
       "inventoryItems": [
         {
           "key": "red-potion",
@@ -5295,16 +5149,16 @@
       "group": {
         "lootMode": "roundRobin",
         "members": [
-          "MIRQ3O4",
+          "Scout",
           "Miner"
         ]
       },
       "guild": {
         "chatLog": [
-          "MIRQ3O4: Guild ready"
+          "Scout: Guild ready"
         ],
         "members": [
-          "MIRQ3O4"
+          "Scout"
         ],
         "name": "BichonGuard",
         "permissions": [
@@ -5319,14 +5173,15 @@
         "blocked": [],
         "friends": [
           "Miner"
-        ]
+        ],
+        "memos": {}
       },
       "mail": [
         {
           "body": "Take this",
           "claimed": true,
           "deleted": false,
-          "from": "MIRQ3O4",
+          "from": "Scout",
           "gold": 5,
           "id": 1,
           "items": [],
@@ -5337,8 +5192,10 @@
       "trade": {
         "accepted": true,
         "completed": true,
+        "locked": false,
         "offeredGold": 1,
         "offeredItems": [],
+        "offeredSlots": {},
         "partner": "Trader"
       },
       "auction": [],
@@ -5360,8 +5217,12 @@
       },
       "hero": {
         "behaviour": 0,
+        "class": "Warrior",
+        "experience": 0,
+        "gender": "Male",
         "level": 1,
-        "name": "Aide"
+        "name": "Aide",
+        "spawned": true
       },
       "profession": {
         "craftedItems": [
@@ -5371,7 +5232,7 @@
         "ore": 1
       },
       "gold": 1284,
-      "credit": null,
+      "credit": 0,
       "inventoryItems": [
         {
           "key": "red-potion",
@@ -5444,16 +5305,16 @@
       "group": {
         "lootMode": "roundRobin",
         "members": [
-          "MIRQ3O4",
+          "Scout",
           "Miner"
         ]
       },
       "guild": {
         "chatLog": [
-          "MIRQ3O4: Guild ready"
+          "Scout: Guild ready"
         ],
         "members": [
-          "MIRQ3O4"
+          "Scout"
         ],
         "name": "BichonGuard",
         "permissions": [
@@ -5468,14 +5329,15 @@
         "blocked": [],
         "friends": [
           "Miner"
-        ]
+        ],
+        "memos": {}
       },
       "mail": [
         {
           "body": "Take this",
           "claimed": true,
           "deleted": true,
-          "from": "MIRQ3O4",
+          "from": "Scout",
           "gold": 5,
           "id": 1,
           "items": [],
@@ -5487,18 +5349,20 @@
       "auction": [
         {
           "cancelled": false,
+          "expired": false,
           "id": 1,
           "itemKey": "auction-ui-relic",
           "price": 35,
-          "seller": "MIRQ3O4",
+          "seller": "Scout",
           "sold": true
         },
         {
           "cancelled": true,
+          "expired": false,
           "id": 2,
           "itemKey": "auction-cancel-ui",
           "price": 45,
-          "seller": "MIRQ3O4",
+          "seller": "Scout",
           "sold": false
         }
       ],
@@ -5519,8 +5383,12 @@
       },
       "hero": {
         "behaviour": 2,
+        "class": "Warrior",
+        "experience": 0,
+        "gender": "Male",
         "level": 1,
-        "name": "Aide"
+        "name": "Aide",
+        "spawned": true
       },
       "profession": {
         "craftedItems": [
@@ -5531,7 +5399,7 @@
         "ore": 2
       },
       "gold": 1224,
-      "credit": null,
+      "credit": 0,
       "inventoryItems": [
         {
           "key": "red-potion",
@@ -5628,18 +5496,20 @@
     "auction": [
       {
         "cancelled": false,
+        "expired": false,
         "id": 1,
         "itemKey": "auction-ui-relic",
         "price": 35,
-        "seller": "MIRQ3O4",
+        "seller": "Scout",
         "sold": true
       },
       {
         "cancelled": true,
+        "expired": false,
         "id": 2,
         "itemKey": "auction-cancel-ui",
         "price": 45,
-        "seller": "MIRQ3O4",
+        "seller": "Scout",
         "sold": false
       }
     ],
@@ -5661,17 +5531,17 @@
     "group": {
       "lootMode": "roundRobin",
       "members": [
-        "MIRQ3O4",
+        "Scout",
         "Miner"
       ]
     },
     "guild": {
       "chatLog": [
-        "MIRQ3O4: Guild ready",
-        "MIRQ3O4: Guild filter check"
+        "Scout: Guild ready",
+        "Scout: Guild filter check"
       ],
       "members": [
-        "MIRQ3O4"
+        "Scout"
       ],
       "name": "BichonGuard",
       "permissions": [
@@ -5690,15 +5560,20 @@
     },
     "hero": {
       "behaviour": 2,
+      "class": "Warrior",
+      "experience": 0,
+      "gender": "Male",
       "level": 1,
-      "name": "Aide"
+      "name": "Aide",
+      "spawned": true
     },
+    "intelligentCreatures": [],
     "mail": [
       {
         "body": "Take this",
         "claimed": true,
         "deleted": true,
-        "from": "MIRQ3O4",
+        "from": "Scout",
         "gold": 5,
         "id": 1,
         "items": [],
@@ -5719,7 +5594,8 @@
       "blocked": [],
       "friends": [
         "Miner"
-      ]
+      ],
+      "memos": {}
     },
     "trade": null
   },

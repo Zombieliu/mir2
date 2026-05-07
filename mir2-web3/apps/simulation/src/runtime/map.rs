@@ -163,6 +163,36 @@ pub(super) fn current_map_disallows_monster_drop(world: &World) -> bool {
             .unwrap_or(false)
 }
 
+pub(super) fn current_map_manifest_disallows_mount(map: &MapRuntimeResource) -> bool {
+    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+        .map(|map| map.no_mount)
+        .unwrap_or(false)
+}
+
+pub(super) fn current_map_disallows_mount(world: &World) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    current_map_manifest_disallows_mount(map)
+        || current_map_drop_rule(config, map)
+            .map(|rule| rule.no_mount)
+            .unwrap_or(false)
+}
+
+pub(super) fn current_map_manifest_requires_bridle(map: &MapRuntimeResource) -> bool {
+    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+        .map(|map| map.need_bridle)
+        .unwrap_or(false)
+}
+
+pub(super) fn current_map_requires_bridle(world: &World) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    current_map_manifest_requires_bridle(map)
+        || current_map_drop_rule(config, map)
+            .map(|rule| rule.need_bridle)
+            .unwrap_or(false)
+}
+
 pub(super) fn transfer_for_key(
     config: &SimulationConfig,
     map: &MapRuntimeResource,

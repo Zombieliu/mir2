@@ -3,14 +3,17 @@ use crate::frame::{decode_frame, encode_frame};
 use crate::ids::{ClientPacketId, ServerPacketId};
 use crate::io::{PacketReader, PacketWriter};
 use crate::types::{
-    ChatType, ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature,
-    ClientMagic, ClientMail, ItemInfo, ItemRentalInformation, MapInformation, MirClass,
-    MirDirection, MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectAttackInfo, ObjectDiedInfo,
-    ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
-    ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo,
-    ObjectStruckInfo, Point, SelectInfo, Spell, StruckInfo, UserInformation, UserItem,
-    UserLocation,
+    AwakeningMaterial, BaseStats, ChatType, ClientAuction, ClientBuff, ClientFriend, ClientGtMap,
+    ClientHeroInformation, ClientIntelligentCreature, ClientMagic, ClientMail, ClientMapInfo,
+    ClientQuestInfo, ClientRecipeInfo, GameShopItem, GuildBuff, GuildBuffInfo, GuildRank,
+    GuildStorageItem, HeroUserInformation, ItemInfo, ItemRentalInformation, MapInformation,
+    MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, Notice, NpcInfo, ObjectAttackInfo,
+    ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo,
+    ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo,
+    ObjectSpellInfo, ObjectStruckInfo, PlayerInspectInfo, Point, RankCharacterInfo, SelectInfo,
+    Spell, StruckInfo, UserInformation, UserItem, UserLocation, WorldMapSetup,
 };
+use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ClientPacket {
@@ -1887,11 +1890,284 @@ impl ClientPacket {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all_fields = "camelCase")]
 pub enum ServerPacket {
     Raw {
         packet_id: ServerPacketId,
         payload: Vec<u8>,
+    },
+    TimeOfDay {
+        lights: u8,
+    },
+    ChangeAMode {
+        mode: u8,
+    },
+    ChangePMode {
+        mode: u8,
+    },
+    BaseStatsInfo {
+        stats: BaseStats,
+    },
+    HeroBaseStatsInfo {
+        stats: BaseStats,
+    },
+    HeroInformation {
+        info: HeroUserInformation,
+    },
+    NPCMarket {
+        listings: Vec<ClientAuction>,
+        pages: i32,
+        user_mode: bool,
+    },
+    NPCMarketPage {
+        listings: Vec<ClientAuction>,
+    },
+    NewMapInfo {
+        map_index: i32,
+        info: ClientMapInfo,
+    },
+    WorldMapSetup {
+        setup: WorldMapSetup,
+        teleport_to_npc_cost: i32,
+    },
+    SearchMapResult {
+        map_index: i32,
+        npc_index: u32,
+    },
+    UserSlotsRefresh {
+        inventory: Option<Vec<Option<UserItem>>>,
+        equipment: Option<Vec<Option<UserItem>>>,
+    },
+    NewChatItem {
+        item: UserItem,
+    },
+    PlayerUpdate {
+        object_id: u32,
+        light: u8,
+        weapon: i16,
+        weapon_effect: i16,
+        armour: i16,
+        wing_effect: u8,
+    },
+    PlayerInspect {
+        info: PlayerInspectInfo,
+    },
+    ReturnToLogin,
+    DamageIndicator {
+        damage: i32,
+        damage_type: u8,
+        object_id: u32,
+    },
+    HealthChanged {
+        hp: i32,
+        mp: i32,
+    },
+    Death {
+        location: Point,
+        direction: MirDirection,
+    },
+    ColourChanged {
+        name_colour_argb: i32,
+    },
+    ObjectColourChanged {
+        object_id: u32,
+        name_colour_argb: i32,
+    },
+    ObjectGuildNameChanged {
+        object_id: u32,
+        guild_name: String,
+    },
+    GainExperience {
+        amount: u32,
+    },
+    LevelChanged {
+        level: u16,
+        experience: i64,
+        max_experience: i64,
+    },
+    ObjectLeveled {
+        object_id: u32,
+    },
+    Poisoned {
+        poison: u16,
+    },
+    ObjectPoisoned {
+        object_id: u32,
+        poison: u16,
+    },
+    MapChanged {
+        map_index: i32,
+        file_name: String,
+        title: String,
+        mini_map: u16,
+        big_map: u16,
+        lights: u8,
+        location: Point,
+        direction: MirDirection,
+        map_dark_light: u8,
+        music: u16,
+        weather: u16,
+    },
+    ObjectName {
+        object_id: u32,
+        name: String,
+    },
+    Revived,
+    NPCConsign,
+    InTrapRock {
+        trapped: bool,
+    },
+    UserName {
+        id: u32,
+        name: String,
+    },
+    ChatItemStats {
+        chat_item_id: u64,
+        stats: Option<UserItem>,
+    },
+    GuildNoticeChange {
+        update: i32,
+        notice: Vec<String>,
+    },
+    GuildMemberChange {
+        name: String,
+        rank_index: u8,
+        status: u8,
+        ranks: Vec<GuildRank>,
+    },
+    GuildStatus {
+        guild_name: String,
+        guild_rank_name: String,
+        level: u8,
+        experience: i64,
+        max_experience: i64,
+        gold: u32,
+        spare_points: u8,
+        member_count: i32,
+        max_members: i32,
+        voting: bool,
+        item_count: u8,
+        buff_count: u8,
+        my_options: u8,
+        my_rank_id: i32,
+    },
+    GuildInvite {
+        name: String,
+    },
+    GuildExpGain {
+        amount: u32,
+    },
+    GuildNameRequest,
+    GuildStorageGoldChange {
+        amount: u32,
+        change_type: u8,
+        name: String,
+    },
+    GuildStorageItemChange {
+        change_type: u8,
+        to: i32,
+        from: i32,
+        user: i32,
+        item: Option<GuildStorageItem>,
+    },
+    GuildStorageList {
+        items: Vec<Option<GuildStorageItem>>,
+    },
+    GuildRequestWar,
+    SetAutoPotValue {
+        stat: u8,
+        value: u32,
+    },
+    SetAutoPotItem {
+        grid: u8,
+        item_index: i32,
+    },
+    NPCImageUpdate {
+        object_id: u32,
+        image: u16,
+        colour_argb: i32,
+    },
+    EquipSlotItem {
+        grid: MirGridType,
+        unique_id: u64,
+        to: i32,
+        grid_to: MirGridType,
+        success: bool,
+    },
+    GainedQuestItem {
+        item: UserItem,
+    },
+    DeleteQuestItem {
+        unique_id: u64,
+        count: u16,
+    },
+    CancelReincarnation,
+    RequestReincarnation,
+    UserBackStep {
+        location: Point,
+        direction: MirDirection,
+    },
+    UserDashAttack {
+        location: Point,
+        direction: MirDirection,
+    },
+    ObjectDashAttack {
+        object_id: u32,
+        location: Point,
+        direction: MirDirection,
+        distance: i32,
+    },
+    UserAttackMove {
+        location: Point,
+        direction: MirDirection,
+    },
+    SetConcentration {
+        object_id: u32,
+        enabled: bool,
+        interrupted: bool,
+    },
+    SetElemental {
+        object_id: u32,
+        enabled: bool,
+        casted: bool,
+        value: u32,
+        element_type: u32,
+        exp_last: u32,
+    },
+    AwakeningNeedMaterials {
+        materials: Option<Vec<Option<AwakeningMaterial>>>,
+    },
+    NPCPearlGoods {
+        list: Vec<UserItem>,
+        rate: f32,
+        panel_type: u8,
+    },
+    TransformUpdate {
+        object_id: u32,
+        transform_type: i16,
+    },
+    NPCRequestInput {
+        npc_id: u32,
+        page_name: String,
+    },
+    GameShopStock {
+        g_index: i32,
+        stock_level: i32,
+    },
+    Rankings {
+        rank_type: u8,
+        my_rank: i32,
+        listing_details: Vec<RankCharacterInfo>,
+        listings: Vec<i64>,
+        count: i32,
+    },
+    UpdateNotice {
+        notice: Notice,
+    },
+    GuildTerritoryPage {
+        length: i32,
+        listings: Vec<ClientGtMap>,
     },
     Connected,
     ClientVersion {
@@ -2024,6 +2300,20 @@ pub enum ServerPacket {
         unique_id: u64,
         to: i32,
         success: bool,
+    },
+    DepositRefineItem {
+        from: i32,
+        to: i32,
+        success: bool,
+    },
+    RetrieveRefineItem {
+        from: i32,
+        to: i32,
+        success: bool,
+    },
+    RefineCancel,
+    RefineItem {
+        unique_id: u64,
     },
     TakeBackItem {
         from: i32,
@@ -2161,6 +2451,9 @@ pub enum ServerPacket {
     ObjectNpc {
         info: NpcInfo,
     },
+    NPCResponse {
+        page: Vec<String>,
+    },
     ObjectHide {
         object_id: u32,
     },
@@ -2282,6 +2575,27 @@ pub enum ServerPacket {
         spell: Spell,
         can_use: bool,
     },
+    SwitchGroup {
+        allow_group: bool,
+    },
+    DeleteGroup,
+    DeleteMember {
+        name: String,
+    },
+    GroupInvite {
+        name: String,
+    },
+    AddMember {
+        name: String,
+    },
+    GroupMembersMap {
+        player_name: String,
+        player_map: String,
+    },
+    SendMemberLocation {
+        member_name: String,
+        member_location: Point,
+    },
     SellItem {
         unique_id: u64,
         count: u16,
@@ -2387,6 +2701,12 @@ pub enum ServerPacket {
     ChangeHero {
         from_index: i32,
     },
+    DefaultNPC {
+        object_id: u32,
+    },
+    NPCUpdate {
+        npc_id: u32,
+    },
     MarriageRequest {
         name: String,
     },
@@ -2451,6 +2771,33 @@ pub enum ServerPacket {
         message: String,
         output_type: u8,
     },
+    OpenDoor {
+        door_index: u8,
+        close: bool,
+    },
+    OpenBrowser {
+        url: String,
+    },
+    PlaySound {
+        sound: i32,
+    },
+    SetTimer {
+        key: String,
+        timer_type: u8,
+        seconds: i32,
+    },
+    ExpireTimer {
+        key: String,
+    },
+    Roll {
+        roll_type: i32,
+        page: String,
+        result: i32,
+        auto_roll: bool,
+    },
+    SetCompass {
+        location: Point,
+    },
     NPCAwakening,
     NPCDisassemble,
     NPCDowngrade,
@@ -2482,6 +2829,27 @@ pub enum ServerPacket {
     },
     FriendUpdate {
         friends: Vec<ClientFriend>,
+    },
+    LoverUpdate {
+        name: String,
+        date_binary_datetime: i64,
+        map_name: String,
+        married_days: i16,
+    },
+    MentorUpdate {
+        name: String,
+        level: u16,
+        online: bool,
+        mentee_exp: i64,
+    },
+    GuildBuffList {
+        remove: u8,
+        active_buffs: Vec<GuildBuff>,
+        guild_buffs: Vec<GuildBuffInfo>,
+    },
+    GameShopInfo {
+        item: GameShopItem,
+        stock_level: i32,
     },
     NewIntelligentCreature {
         creature: ClientIntelligentCreature,
@@ -2534,11 +2902,27 @@ pub enum ServerPacket {
     },
     CanConfirmItemRental,
     ConfirmItemRental,
+    ChangeQuest {
+        quest_id: i32,
+        task_list: Vec<String>,
+        taken: bool,
+        completed: bool,
+        new: bool,
+        quest_state: u8,
+        track_quest: bool,
+    },
+    CompleteQuest {
+        completed_quests: Vec<i32>,
+    },
+    ShareQuest {
+        quest_index: i32,
+        sharer_name: String,
+    },
     NewQuestInfo {
-        payload: Vec<u8>,
+        info: ClientQuestInfo,
     },
     NewRecipeInfo {
-        payload: Vec<u8>,
+        info: ClientRecipeInfo,
     },
     ResizeInventory {
         size: i32,
@@ -2568,6 +2952,72 @@ impl ServerPacket {
     pub fn packet_id(&self) -> ServerPacketId {
         match self {
             Self::Raw { packet_id, .. } => *packet_id,
+            Self::TimeOfDay { .. } => ServerPacketId::TimeOfDay,
+            Self::ChangeAMode { .. } => ServerPacketId::ChangeAMode,
+            Self::ChangePMode { .. } => ServerPacketId::ChangePMode,
+            Self::BaseStatsInfo { .. } => ServerPacketId::BaseStatsInfo,
+            Self::HeroBaseStatsInfo { .. } => ServerPacketId::HeroBaseStatsInfo,
+            Self::HeroInformation { .. } => ServerPacketId::HeroInformation,
+            Self::NPCMarket { .. } => ServerPacketId::NPCMarket,
+            Self::NPCMarketPage { .. } => ServerPacketId::NPCMarketPage,
+            Self::NewMapInfo { .. } => ServerPacketId::NewMapInfo,
+            Self::WorldMapSetup { .. } => ServerPacketId::WorldMapSetup,
+            Self::SearchMapResult { .. } => ServerPacketId::SearchMapResult,
+            Self::UserSlotsRefresh { .. } => ServerPacketId::UserSlotsRefresh,
+            Self::NewChatItem { .. } => ServerPacketId::NewChatItem,
+            Self::PlayerUpdate { .. } => ServerPacketId::PlayerUpdate,
+            Self::PlayerInspect { .. } => ServerPacketId::PlayerInspect,
+            Self::ReturnToLogin => ServerPacketId::ReturnToLogin,
+            Self::DamageIndicator { .. } => ServerPacketId::DamageIndicator,
+            Self::HealthChanged { .. } => ServerPacketId::HealthChanged,
+            Self::Death { .. } => ServerPacketId::Death,
+            Self::ColourChanged { .. } => ServerPacketId::ColourChanged,
+            Self::ObjectColourChanged { .. } => ServerPacketId::ObjectColourChanged,
+            Self::ObjectGuildNameChanged { .. } => ServerPacketId::ObjectGuildNameChanged,
+            Self::GainExperience { .. } => ServerPacketId::GainExperience,
+            Self::LevelChanged { .. } => ServerPacketId::LevelChanged,
+            Self::ObjectLeveled { .. } => ServerPacketId::ObjectLeveled,
+            Self::Poisoned { .. } => ServerPacketId::Poisoned,
+            Self::ObjectPoisoned { .. } => ServerPacketId::ObjectPoisoned,
+            Self::MapChanged { .. } => ServerPacketId::MapChanged,
+            Self::ObjectName { .. } => ServerPacketId::ObjectName,
+            Self::Revived => ServerPacketId::Revived,
+            Self::NPCConsign => ServerPacketId::NPCConsign,
+            Self::InTrapRock { .. } => ServerPacketId::InTrapRock,
+            Self::UserName { .. } => ServerPacketId::UserName,
+            Self::ChatItemStats { .. } => ServerPacketId::ChatItemStats,
+            Self::GuildNoticeChange { .. } => ServerPacketId::GuildNoticeChange,
+            Self::GuildMemberChange { .. } => ServerPacketId::GuildMemberChange,
+            Self::GuildStatus { .. } => ServerPacketId::GuildStatus,
+            Self::GuildInvite { .. } => ServerPacketId::GuildInvite,
+            Self::GuildExpGain { .. } => ServerPacketId::GuildExpGain,
+            Self::GuildNameRequest => ServerPacketId::GuildNameRequest,
+            Self::GuildStorageGoldChange { .. } => ServerPacketId::GuildStorageGoldChange,
+            Self::GuildStorageItemChange { .. } => ServerPacketId::GuildStorageItemChange,
+            Self::GuildStorageList { .. } => ServerPacketId::GuildStorageList,
+            Self::GuildRequestWar => ServerPacketId::GuildRequestWar,
+            Self::SetAutoPotValue { .. } => ServerPacketId::SetAutoPotValue,
+            Self::SetAutoPotItem { .. } => ServerPacketId::SetAutoPotItem,
+            Self::NPCImageUpdate { .. } => ServerPacketId::NPCImageUpdate,
+            Self::EquipSlotItem { .. } => ServerPacketId::EquipSlotItem,
+            Self::GainedQuestItem { .. } => ServerPacketId::GainedQuestItem,
+            Self::DeleteQuestItem { .. } => ServerPacketId::DeleteQuestItem,
+            Self::CancelReincarnation => ServerPacketId::CancelReincarnation,
+            Self::RequestReincarnation => ServerPacketId::RequestReincarnation,
+            Self::UserBackStep { .. } => ServerPacketId::UserBackStep,
+            Self::UserDashAttack { .. } => ServerPacketId::UserDashAttack,
+            Self::ObjectDashAttack { .. } => ServerPacketId::ObjectDashAttack,
+            Self::UserAttackMove { .. } => ServerPacketId::UserAttackMove,
+            Self::SetConcentration { .. } => ServerPacketId::SetConcentration,
+            Self::SetElemental { .. } => ServerPacketId::SetElemental,
+            Self::AwakeningNeedMaterials { .. } => ServerPacketId::AwakeningNeedMaterials,
+            Self::NPCPearlGoods { .. } => ServerPacketId::NPCPearlGoods,
+            Self::TransformUpdate { .. } => ServerPacketId::TransformUpdate,
+            Self::NPCRequestInput { .. } => ServerPacketId::NPCRequestInput,
+            Self::GameShopStock { .. } => ServerPacketId::GameShopStock,
+            Self::Rankings { .. } => ServerPacketId::Rankings,
+            Self::UpdateNotice { .. } => ServerPacketId::UpdateNotice,
+            Self::GuildTerritoryPage { .. } => ServerPacketId::GuildTerritoryPage,
             Self::Connected => ServerPacketId::Connected,
             Self::ClientVersion { .. } => ServerPacketId::ClientVersion,
             Self::Disconnect { .. } => ServerPacketId::Disconnect,
@@ -2639,6 +3089,7 @@ impl ServerPacket {
             Self::ObjectHarvest { .. } => ServerPacketId::ObjectHarvest,
             Self::ObjectHarvested { .. } => ServerPacketId::ObjectHarvested,
             Self::ObjectNpc { .. } => ServerPacketId::ObjectNpc,
+            Self::NPCResponse { .. } => ServerPacketId::NPCResponse,
             Self::ObjectHide { .. } => ServerPacketId::ObjectHide,
             Self::ObjectShow { .. } => ServerPacketId::ObjectShow,
             Self::ObjectTeleportOut { .. } => ServerPacketId::ObjectTeleportOut,
@@ -2660,6 +3111,10 @@ impl ServerPacket {
             Self::ItemRepaired { .. } => ServerPacketId::ItemRepaired,
             Self::ItemSlotSizeChanged { .. } => ServerPacketId::ItemSlotSizeChanged,
             Self::ItemSealChanged { .. } => ServerPacketId::ItemSealChanged,
+            Self::DepositRefineItem { .. } => ServerPacketId::DepositRefineItem,
+            Self::RetrieveRefineItem { .. } => ServerPacketId::RetrieveRefineItem,
+            Self::RefineCancel => ServerPacketId::RefineCancel,
+            Self::RefineItem { .. } => ServerPacketId::RefineItem,
             Self::NewMagic { .. } => ServerPacketId::NewMagic,
             Self::RemoveMagic { .. } => ServerPacketId::RemoveMagic,
             Self::MagicLeveled { .. } => ServerPacketId::MagicLeveled,
@@ -2672,6 +3127,13 @@ impl ServerPacket {
             Self::Pushed { .. } => ServerPacketId::Pushed,
             Self::ObjectPushed { .. } => ServerPacketId::ObjectPushed,
             Self::SpellToggle { .. } => ServerPacketId::SpellToggle,
+            Self::SwitchGroup { .. } => ServerPacketId::SwitchGroup,
+            Self::DeleteGroup => ServerPacketId::DeleteGroup,
+            Self::DeleteMember { .. } => ServerPacketId::DeleteMember,
+            Self::GroupInvite { .. } => ServerPacketId::GroupInvite,
+            Self::AddMember { .. } => ServerPacketId::AddMember,
+            Self::GroupMembersMap { .. } => ServerPacketId::GroupMembersMap,
+            Self::SendMemberLocation { .. } => ServerPacketId::SendMemberLocation,
             Self::ObjectRevived { .. } => ServerPacketId::ObjectRevived,
             Self::ObjectEffect { .. } => ServerPacketId::ObjectEffect,
             Self::ObjectHealth { .. } => ServerPacketId::ObjectHealth,
@@ -2699,6 +3161,8 @@ impl ServerPacket {
             Self::SetHeroBehaviour { .. } => ServerPacketId::SetHeroBehaviour,
             Self::ManageHeroes { .. } => ServerPacketId::ManageHeroes,
             Self::ChangeHero { .. } => ServerPacketId::ChangeHero,
+            Self::DefaultNPC { .. } => ServerPacketId::DefaultNPC,
+            Self::NPCUpdate { .. } => ServerPacketId::NPCUpdate,
             Self::MarriageRequest { .. } => ServerPacketId::MarriageRequest,
             Self::DivorceRequest { .. } => ServerPacketId::DivorceRequest,
             Self::MentorRequest { .. } => ServerPacketId::MentorRequest,
@@ -2716,6 +3180,13 @@ impl ServerPacket {
             Self::ObjectLevelEffects { .. } => ServerPacketId::ObjectLevelEffects,
             Self::SetBindingShot { .. } => ServerPacketId::SetBindingShot,
             Self::SendOutputMessage { .. } => ServerPacketId::SendOutputMessage,
+            Self::OpenDoor { .. } => ServerPacketId::OpenDoor,
+            Self::OpenBrowser { .. } => ServerPacketId::OpenBrowser,
+            Self::PlaySound { .. } => ServerPacketId::PlaySound,
+            Self::SetTimer { .. } => ServerPacketId::SetTimer,
+            Self::ExpireTimer { .. } => ServerPacketId::ExpireTimer,
+            Self::Roll { .. } => ServerPacketId::Roll,
+            Self::SetCompass { .. } => ServerPacketId::SetCompass,
             Self::NPCAwakening => ServerPacketId::NPCAwakening,
             Self::NPCDisassemble => ServerPacketId::NPCDisassemble,
             Self::NPCDowngrade => ServerPacketId::NPCDowngrade,
@@ -2729,6 +3200,10 @@ impl ServerPacket {
             Self::ParcelCollected { .. } => ServerPacketId::ParcelCollected,
             Self::MailCost { .. } => ServerPacketId::MailCost,
             Self::FriendUpdate { .. } => ServerPacketId::FriendUpdate,
+            Self::LoverUpdate { .. } => ServerPacketId::LoverUpdate,
+            Self::MentorUpdate { .. } => ServerPacketId::MentorUpdate,
+            Self::GuildBuffList { .. } => ServerPacketId::GuildBuffList,
+            Self::GameShopInfo { .. } => ServerPacketId::GameShopInfo,
             Self::NewIntelligentCreature { .. } => ServerPacketId::NewIntelligentCreature,
             Self::UpdateIntelligentCreatureList { .. } => {
                 ServerPacketId::UpdateIntelligentCreatureList
@@ -2749,6 +3224,9 @@ impl ServerPacket {
             Self::ItemRentalPartnerLock { .. } => ServerPacketId::ItemRentalPartnerLock,
             Self::CanConfirmItemRental => ServerPacketId::CanConfirmItemRental,
             Self::ConfirmItemRental => ServerPacketId::ConfirmItemRental,
+            Self::ChangeQuest { .. } => ServerPacketId::ChangeQuest,
+            Self::CompleteQuest { .. } => ServerPacketId::CompleteQuest,
+            Self::ShareQuest { .. } => ServerPacketId::ShareQuest,
             Self::NewQuestInfo { .. } => ServerPacketId::NewQuestInfo,
             Self::NewRecipeInfo { .. } => ServerPacketId::NewRecipeInfo,
             Self::ResizeInventory { .. } => ServerPacketId::ResizeInventory,
@@ -2763,6 +3241,415 @@ impl ServerPacket {
     fn encode_payload(&self, writer: &mut PacketWriter) -> Result<()> {
         match self {
             Self::Raw { payload, .. } => writer.write_bytes(payload),
+            Self::TimeOfDay { lights } => writer.write_u8(*lights),
+            Self::ChangeAMode { mode } | Self::ChangePMode { mode } => writer.write_u8(*mode),
+            Self::BaseStatsInfo { stats } | Self::HeroBaseStatsInfo { stats } => {
+                stats.encode(writer);
+            }
+            Self::HeroInformation { info } => info.encode(writer)?,
+            Self::NPCMarket {
+                listings,
+                pages,
+                user_mode,
+            } => {
+                writer.write_i32(listings.len() as i32);
+                for listing in listings {
+                    listing.encode(writer)?;
+                }
+                writer.write_i32(*pages);
+                writer.write_bool(*user_mode);
+            }
+            Self::NPCMarketPage { listings } => {
+                writer.write_i32(listings.len() as i32);
+                for listing in listings {
+                    listing.encode(writer)?;
+                }
+            }
+            Self::NewMapInfo { map_index, info } => {
+                writer.write_i32(*map_index);
+                info.encode(writer)?;
+            }
+            Self::WorldMapSetup {
+                setup,
+                teleport_to_npc_cost,
+            } => {
+                setup.encode(writer)?;
+                writer.write_i32(*teleport_to_npc_cost);
+            }
+            Self::SearchMapResult {
+                map_index,
+                npc_index,
+            } => {
+                writer.write_i32(*map_index);
+                writer.write_u32(*npc_index);
+            }
+            Self::UserSlotsRefresh {
+                inventory,
+                equipment,
+            } => {
+                encode_optional_user_item_slots(writer, inventory.as_deref())?;
+                encode_optional_user_item_slots(writer, equipment.as_deref())?;
+            }
+            Self::NewChatItem { item } => item.encode(writer)?,
+            Self::PlayerUpdate {
+                object_id,
+                light,
+                weapon,
+                weapon_effect,
+                armour,
+                wing_effect,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u8(*light);
+                writer.write_i16(*weapon);
+                writer.write_i16(*weapon_effect);
+                writer.write_i16(*armour);
+                writer.write_u8(*wing_effect);
+            }
+            Self::PlayerInspect { info } => info.encode(writer)?,
+            Self::ReturnToLogin | Self::Revived | Self::NPCConsign => {}
+            Self::DamageIndicator {
+                damage,
+                damage_type,
+                object_id,
+            } => {
+                writer.write_i32(*damage);
+                writer.write_u8(*damage_type);
+                writer.write_u32(*object_id);
+            }
+            Self::HealthChanged { hp, mp } => {
+                writer.write_i32(*hp);
+                writer.write_i32(*mp);
+            }
+            Self::Death {
+                location,
+                direction,
+            }
+            | Self::UserBackStep {
+                location,
+                direction,
+            }
+            | Self::UserDashAttack {
+                location,
+                direction,
+            }
+            | Self::UserAttackMove {
+                location,
+                direction,
+            } => {
+                location.encode(writer);
+                writer.write_u8(*direction as u8);
+            }
+            Self::ColourChanged { name_colour_argb } => writer.write_i32(*name_colour_argb),
+            Self::ObjectColourChanged {
+                object_id,
+                name_colour_argb,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_i32(*name_colour_argb);
+            }
+            Self::ObjectGuildNameChanged {
+                object_id,
+                guild_name,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_string(guild_name)?;
+            }
+            Self::GainExperience { amount } | Self::GuildExpGain { amount } => {
+                writer.write_u32(*amount)
+            }
+            Self::LevelChanged {
+                level,
+                experience,
+                max_experience,
+            } => {
+                writer.write_u16(*level);
+                writer.write_i64(*experience);
+                writer.write_i64(*max_experience);
+            }
+            Self::ObjectLeveled { object_id } => writer.write_u32(*object_id),
+            Self::Poisoned { poison } => writer.write_u16(*poison),
+            Self::ObjectPoisoned { object_id, poison } => {
+                writer.write_u32(*object_id);
+                writer.write_u16(*poison);
+            }
+            Self::MapChanged {
+                map_index,
+                file_name,
+                title,
+                mini_map,
+                big_map,
+                lights,
+                location,
+                direction,
+                map_dark_light,
+                music,
+                weather,
+            } => {
+                writer.write_i32(*map_index);
+                writer.write_string(file_name)?;
+                writer.write_string(title)?;
+                writer.write_u16(*mini_map);
+                writer.write_u16(*big_map);
+                writer.write_u8(*lights);
+                location.encode(writer);
+                writer.write_u8(*direction as u8);
+                writer.write_u8(*map_dark_light);
+                writer.write_u16(*music);
+                writer.write_u16(*weather);
+            }
+            Self::ObjectName { object_id, name }
+            | Self::UserName {
+                id: object_id,
+                name,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_string(name)?;
+            }
+            Self::InTrapRock { trapped } => writer.write_bool(*trapped),
+            Self::ChatItemStats {
+                chat_item_id,
+                stats,
+            } => {
+                writer.write_u64(*chat_item_id);
+                if let Some(stats) = stats {
+                    stats.encode(writer)?;
+                }
+            }
+            Self::GuildNoticeChange { update, notice } => {
+                if *update < 0 {
+                    writer.write_i32(*update);
+                } else {
+                    writer.write_i32(notice.len() as i32);
+                    for line in notice {
+                        writer.write_string(line)?;
+                    }
+                }
+            }
+            Self::GuildMemberChange {
+                name,
+                rank_index,
+                status,
+                ranks,
+            } => {
+                writer.write_string(name)?;
+                writer.write_u8(*rank_index);
+                writer.write_u8(*status);
+                if *status > 5 {
+                    writer.write_i32(ranks.len() as i32);
+                    for rank in ranks {
+                        rank.encode(writer)?;
+                    }
+                }
+            }
+            Self::GuildStatus {
+                guild_name,
+                guild_rank_name,
+                level,
+                experience,
+                max_experience,
+                gold,
+                spare_points,
+                member_count,
+                max_members,
+                voting,
+                item_count,
+                buff_count,
+                my_options,
+                my_rank_id,
+            } => {
+                writer.write_string(guild_name)?;
+                writer.write_string(guild_rank_name)?;
+                writer.write_u8(*level);
+                writer.write_i64(*experience);
+                writer.write_i64(*max_experience);
+                writer.write_u32(*gold);
+                writer.write_u8(*spare_points);
+                writer.write_i32(*member_count);
+                writer.write_i32(*max_members);
+                writer.write_bool(*voting);
+                writer.write_u8(*item_count);
+                writer.write_u8(*buff_count);
+                writer.write_u8(*my_options);
+                writer.write_i32(*my_rank_id);
+            }
+            Self::GuildInvite { name } => writer.write_string(name)?,
+            Self::GuildNameRequest | Self::GuildRequestWar => {}
+            Self::GuildStorageGoldChange {
+                amount,
+                change_type,
+                name,
+            } => {
+                writer.write_u32(*amount);
+                writer.write_u8(*change_type);
+                writer.write_string(name)?;
+            }
+            Self::GuildStorageItemChange {
+                change_type,
+                to,
+                from,
+                user,
+                item,
+            } => {
+                writer.write_u8(*change_type);
+                writer.write_i32(*to);
+                writer.write_i32(*from);
+                writer.write_i32(*user);
+                writer.write_bool(item.is_some());
+                if let Some(item) = item {
+                    writer.write_i64(item.user_id);
+                    item.item.encode(writer)?;
+                }
+            }
+            Self::GuildStorageList { items } => {
+                writer.write_i32(items.len() as i32);
+                for item in items {
+                    writer.write_bool(item.is_some());
+                    if let Some(item) = item {
+                        item.encode(writer)?;
+                    }
+                }
+            }
+            Self::SetAutoPotValue { stat, value } => {
+                writer.write_u8(*stat);
+                writer.write_u32(*value);
+            }
+            Self::SetAutoPotItem { grid, item_index } => {
+                writer.write_u8(*grid);
+                writer.write_i32(*item_index);
+            }
+            Self::NPCImageUpdate {
+                object_id,
+                image,
+                colour_argb,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_u16(*image);
+                writer.write_i32(*colour_argb);
+            }
+            Self::EquipSlotItem {
+                grid,
+                unique_id,
+                to,
+                grid_to,
+                success,
+            } => {
+                writer.write_u8(*grid as u8);
+                writer.write_u64(*unique_id);
+                writer.write_i32(*to);
+                writer.write_u8(*grid_to as u8);
+                writer.write_bool(*success);
+            }
+            Self::GainedQuestItem { item } => item.encode(writer)?,
+            Self::DeleteQuestItem { unique_id, count } => {
+                writer.write_u64(*unique_id);
+                writer.write_u16(*count);
+            }
+            Self::CancelReincarnation | Self::RequestReincarnation => {}
+            Self::ObjectDashAttack {
+                object_id,
+                location,
+                direction,
+                distance,
+            } => {
+                writer.write_u32(*object_id);
+                location.encode(writer);
+                writer.write_u8(*direction as u8);
+                writer.write_i32(*distance);
+            }
+            Self::SetConcentration {
+                object_id,
+                enabled,
+                interrupted,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_bool(*enabled);
+                writer.write_bool(*interrupted);
+            }
+            Self::SetElemental {
+                object_id,
+                enabled,
+                casted,
+                value,
+                element_type,
+                exp_last,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_bool(*enabled);
+                writer.write_bool(*casted);
+                writer.write_u32(*value);
+                writer.write_u32(*element_type);
+                writer.write_u32(*exp_last);
+            }
+            Self::AwakeningNeedMaterials { materials } => {
+                writer.write_bool(materials.is_some());
+                if let Some(materials) = materials {
+                    writer.write_i32(materials.len() as i32);
+                    for material in materials {
+                        writer.write_bool(material.is_some());
+                        if let Some(material) = material {
+                            material.encode(writer)?;
+                        }
+                    }
+                }
+            }
+            Self::NPCPearlGoods {
+                list,
+                rate,
+                panel_type,
+            } => {
+                writer.write_i32(list.len() as i32);
+                for item in list {
+                    item.encode(writer)?;
+                }
+                writer.write_f32(*rate);
+                writer.write_u8(*panel_type);
+            }
+            Self::TransformUpdate {
+                object_id,
+                transform_type,
+            } => {
+                writer.write_u32(*object_id);
+                writer.write_i16(*transform_type);
+            }
+            Self::NPCRequestInput { npc_id, page_name } => {
+                writer.write_u32(*npc_id);
+                writer.write_string(page_name)?;
+            }
+            Self::GameShopStock {
+                g_index,
+                stock_level,
+            } => {
+                writer.write_i32(*g_index);
+                writer.write_i32(*stock_level);
+            }
+            Self::Rankings {
+                rank_type,
+                my_rank,
+                listing_details,
+                listings,
+                count,
+            } => {
+                writer.write_u8(*rank_type);
+                writer.write_i32(*my_rank);
+                writer.write_i32(listing_details.len() as i32);
+                for details in listing_details {
+                    details.encode(writer)?;
+                }
+                writer.write_i32(listings.len() as i32);
+                for listing in listings {
+                    writer.write_i64(*listing);
+                }
+                writer.write_i32(*count);
+            }
+            Self::UpdateNotice { notice } => notice.encode(writer)?,
+            Self::GuildTerritoryPage { length, listings } => {
+                writer.write_i32(*length);
+                writer.write_i32(listings.len() as i32);
+                for listing in listings {
+                    listing.encode(writer)?;
+                }
+            }
             Self::Connected => {}
             Self::ClientVersion { result }
             | Self::NewAccount { result }
@@ -2937,7 +3824,9 @@ impl ServerPacket {
                 writer.write_i32(*to);
                 writer.write_bool(*success);
             }
-            Self::TakeBackItem { from, to, success }
+            Self::DepositRefineItem { from, to, success }
+            | Self::RetrieveRefineItem { from, to, success }
+            | Self::TakeBackItem { from, to, success }
             | Self::StoreItem { from, to, success }
             | Self::TakeBackHeroItem { from, to, success }
             | Self::TransferHeroItem { from, to, success } => {
@@ -2945,6 +3834,8 @@ impl ServerPacket {
                 writer.write_i32(*to);
                 writer.write_bool(*success);
             }
+            Self::RefineCancel => {}
+            Self::RefineItem { unique_id } => writer.write_u64(*unique_id),
             Self::CombineItem {
                 grid,
                 id_from,
@@ -3053,6 +3944,12 @@ impl ServerPacket {
                 movement.encode(writer);
             }
             Self::ObjectNpc { info } => info.encode(writer)?,
+            Self::NPCResponse { page } => {
+                writer.write_i32(page.len() as i32);
+                for line in page {
+                    writer.write_string(line)?;
+                }
+            }
             Self::ItemRepaired {
                 unique_id,
                 max_dura,
@@ -3207,6 +4104,25 @@ impl ServerPacket {
                 writer.write_u8(*spell as u8);
                 writer.write_bool(*can_use);
             }
+            Self::SwitchGroup { allow_group } => writer.write_bool(*allow_group),
+            Self::DeleteGroup => {}
+            Self::DeleteMember { name } | Self::GroupInvite { name } | Self::AddMember { name } => {
+                writer.write_string(name)?;
+            }
+            Self::GroupMembersMap {
+                player_name,
+                player_map,
+            } => {
+                writer.write_string(player_name)?;
+                writer.write_string(player_map)?;
+            }
+            Self::SendMemberLocation {
+                member_name,
+                member_location,
+            } => {
+                writer.write_string(member_name)?;
+                member_location.encode(writer);
+            }
             Self::SellItem {
                 unique_id,
                 count,
@@ -3293,6 +4209,8 @@ impl ServerPacket {
                 }
             }
             Self::ChangeHero { from_index } => writer.write_i32(*from_index),
+            Self::DefaultNPC { object_id } => writer.write_u32(*object_id),
+            Self::NPCUpdate { npc_id } => writer.write_u32(*npc_id),
             Self::MarriageRequest { name }
             | Self::DivorceRequest { name }
             | Self::TradeRequest { name }
@@ -3379,6 +4297,34 @@ impl ServerPacket {
                 writer.write_string(message)?;
                 writer.write_u8(*output_type);
             }
+            Self::OpenDoor { door_index, close } => {
+                writer.write_u8(*door_index);
+                writer.write_bool(*close);
+            }
+            Self::OpenBrowser { url } => writer.write_string(url)?,
+            Self::PlaySound { sound } => writer.write_i32(*sound),
+            Self::SetTimer {
+                key,
+                timer_type,
+                seconds,
+            } => {
+                writer.write_string(key)?;
+                writer.write_u8(*timer_type);
+                writer.write_i32(*seconds);
+            }
+            Self::ExpireTimer { key } => writer.write_string(key)?,
+            Self::Roll {
+                roll_type,
+                page,
+                result,
+                auto_roll,
+            } => {
+                writer.write_i32(*roll_type);
+                writer.write_string(page)?;
+                writer.write_i32(*result);
+                writer.write_bool(*auto_roll);
+            }
+            Self::SetCompass { location } => location.encode(writer),
             Self::NPCAwakening | Self::NPCDisassemble | Self::NPCDowngrade | Self::NPCReset => {}
             Self::AwakeningLockedItem { unique_id, locked } => {
                 writer.write_u64(*unique_id);
@@ -3408,6 +4354,47 @@ impl ServerPacket {
                 for friend in friends {
                     friend.encode(writer)?;
                 }
+            }
+            Self::LoverUpdate {
+                name,
+                date_binary_datetime,
+                map_name,
+                married_days,
+            } => {
+                writer.write_string(name)?;
+                writer.write_i64(*date_binary_datetime);
+                writer.write_string(map_name)?;
+                writer.write_i16(*married_days);
+            }
+            Self::MentorUpdate {
+                name,
+                level,
+                online,
+                mentee_exp,
+            } => {
+                writer.write_string(name)?;
+                writer.write_u16(*level);
+                writer.write_bool(*online);
+                writer.write_i64(*mentee_exp);
+            }
+            Self::GuildBuffList {
+                remove,
+                active_buffs,
+                guild_buffs,
+            } => {
+                writer.write_u8(*remove);
+                writer.write_i32(active_buffs.len() as i32);
+                for buff in active_buffs {
+                    buff.encode(writer);
+                }
+                writer.write_i32(guild_buffs.len() as i32);
+                for buff in guild_buffs {
+                    buff.encode(writer)?;
+                }
+            }
+            Self::GameShopInfo { item, stock_level } => {
+                item.encode(writer)?;
+                writer.write_i32(*stock_level);
             }
             Self::NewIntelligentCreature { creature } => creature.encode(writer)?,
             Self::UpdateIntelligentCreatureList {
@@ -3467,8 +4454,41 @@ impl ServerPacket {
                 writer.write_bool(*gold_locked);
                 writer.write_bool(*item_locked);
             }
-            Self::NewQuestInfo { payload } => writer.write_bytes(payload),
-            Self::NewRecipeInfo { payload } => writer.write_bytes(payload),
+            Self::ChangeQuest {
+                quest_id,
+                task_list,
+                taken,
+                completed,
+                new,
+                quest_state,
+                track_quest,
+            } => {
+                writer.write_i32(*quest_id);
+                writer.write_i32(task_list.len() as i32);
+                for task in task_list {
+                    writer.write_string(task)?;
+                }
+                writer.write_bool(*taken);
+                writer.write_bool(*completed);
+                writer.write_bool(*new);
+                writer.write_u8(*quest_state);
+                writer.write_bool(*track_quest);
+            }
+            Self::CompleteQuest { completed_quests } => {
+                writer.write_i32(completed_quests.len() as i32);
+                for quest_id in completed_quests {
+                    writer.write_i32(*quest_id);
+                }
+            }
+            Self::ShareQuest {
+                quest_index,
+                sharer_name,
+            } => {
+                writer.write_i32(*quest_index);
+                writer.write_string(sharer_name)?;
+            }
+            Self::NewQuestInfo { info } => info.encode(writer)?,
+            Self::NewRecipeInfo { info } => info.encode(writer)?,
             Self::ResizeInventory { size } => writer.write_i32(*size),
             Self::ResizeStorage {
                 size,
@@ -3505,26 +4525,438 @@ impl ServerPacket {
 
     fn decode_payload(packet_id: ServerPacketId, reader: &mut PacketReader<'_>) -> Result<Self> {
         let packet = match packet_id {
-            ServerPacketId::TimeOfDay
-            | ServerPacketId::ChangeAMode
-            | ServerPacketId::ChangePMode
-            | ServerPacketId::SwitchGroup
-            | ServerPacketId::BaseStatsInfo
-            | ServerPacketId::HeroBaseStatsInfo
-            | ServerPacketId::HeroInformation
-            | ServerPacketId::NPCMarket
-            | ServerPacketId::NPCMarketPage
-            | ServerPacketId::DefaultNPC
-            | ServerPacketId::NPCUpdate
-            | ServerPacketId::NPCResponse
-            | ServerPacketId::CompleteQuest
-            | ServerPacketId::LoverUpdate
-            | ServerPacketId::MentorUpdate
-            | ServerPacketId::GuildBuffList
-            | ServerPacketId::GameShopInfo => Self::Raw {
-                packet_id,
-                payload: reader.read_bytes(reader.remaining())?,
+            ServerPacketId::TimeOfDay => Self::TimeOfDay {
+                lights: reader.read_u8()?,
             },
+            ServerPacketId::ChangeAMode => Self::ChangeAMode {
+                mode: reader.read_u8()?,
+            },
+            ServerPacketId::ChangePMode => Self::ChangePMode {
+                mode: reader.read_u8()?,
+            },
+            ServerPacketId::BaseStatsInfo => Self::BaseStatsInfo {
+                stats: BaseStats::decode(reader)?,
+            },
+            ServerPacketId::HeroBaseStatsInfo => Self::HeroBaseStatsInfo {
+                stats: BaseStats::decode(reader)?,
+            },
+            ServerPacketId::HeroInformation => Self::HeroInformation {
+                info: HeroUserInformation::decode(reader)?,
+            },
+            ServerPacketId::NPCMarket => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "npc_market_listings",
+                        value: count,
+                    });
+                }
+                let mut listings = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    listings.push(ClientAuction::decode(reader)?);
+                }
+                Self::NPCMarket {
+                    listings,
+                    pages: reader.read_i32()?,
+                    user_mode: reader.read_bool()?,
+                }
+            }
+            ServerPacketId::NPCMarketPage => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "npc_market_page_listings",
+                        value: count,
+                    });
+                }
+                let mut listings = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    listings.push(ClientAuction::decode(reader)?);
+                }
+                Self::NPCMarketPage { listings }
+            }
+            ServerPacketId::NewMapInfo => Self::NewMapInfo {
+                map_index: reader.read_i32()?,
+                info: ClientMapInfo::decode(reader)?,
+            },
+            ServerPacketId::WorldMapSetup => Self::WorldMapSetup {
+                setup: WorldMapSetup::decode(reader)?,
+                teleport_to_npc_cost: reader.read_i32()?,
+            },
+            ServerPacketId::SearchMapResult => Self::SearchMapResult {
+                map_index: reader.read_i32()?,
+                npc_index: reader.read_u32()?,
+            },
+            ServerPacketId::UserSlotsRefresh => Self::UserSlotsRefresh {
+                inventory: decode_optional_user_item_slots(reader, "user_slots_inventory")?,
+                equipment: decode_optional_user_item_slots(reader, "user_slots_equipment")?,
+            },
+            ServerPacketId::NewChatItem => Self::NewChatItem {
+                item: UserItem::decode(reader)?,
+            },
+            ServerPacketId::PlayerUpdate => Self::PlayerUpdate {
+                object_id: reader.read_u32()?,
+                light: reader.read_u8()?,
+                weapon: reader.read_i16()?,
+                weapon_effect: reader.read_i16()?,
+                armour: reader.read_i16()?,
+                wing_effect: reader.read_u8()?,
+            },
+            ServerPacketId::PlayerInspect => Self::PlayerInspect {
+                info: PlayerInspectInfo::decode(reader)?,
+            },
+            ServerPacketId::ReturnToLogin => Self::ReturnToLogin,
+            ServerPacketId::DamageIndicator => Self::DamageIndicator {
+                damage: reader.read_i32()?,
+                damage_type: reader.read_u8()?,
+                object_id: reader.read_u32()?,
+            },
+            ServerPacketId::HealthChanged => Self::HealthChanged {
+                hp: reader.read_i32()?,
+                mp: reader.read_i32()?,
+            },
+            ServerPacketId::Death => Self::Death {
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+            },
+            ServerPacketId::ColourChanged => Self::ColourChanged {
+                name_colour_argb: reader.read_i32()?,
+            },
+            ServerPacketId::ObjectColourChanged => Self::ObjectColourChanged {
+                object_id: reader.read_u32()?,
+                name_colour_argb: reader.read_i32()?,
+            },
+            ServerPacketId::ObjectGuildNameChanged => Self::ObjectGuildNameChanged {
+                object_id: reader.read_u32()?,
+                guild_name: reader.read_string()?,
+            },
+            ServerPacketId::GainExperience => Self::GainExperience {
+                amount: reader.read_u32()?,
+            },
+            ServerPacketId::LevelChanged => Self::LevelChanged {
+                level: reader.read_u16()?,
+                experience: reader.read_i64()?,
+                max_experience: reader.read_i64()?,
+            },
+            ServerPacketId::ObjectLeveled => Self::ObjectLeveled {
+                object_id: reader.read_u32()?,
+            },
+            ServerPacketId::Poisoned => Self::Poisoned {
+                poison: reader.read_u16()?,
+            },
+            ServerPacketId::ObjectPoisoned => Self::ObjectPoisoned {
+                object_id: reader.read_u32()?,
+                poison: reader.read_u16()?,
+            },
+            ServerPacketId::MapChanged => Self::MapChanged {
+                map_index: reader.read_i32()?,
+                file_name: reader.read_string()?,
+                title: reader.read_string()?,
+                mini_map: reader.read_u16()?,
+                big_map: reader.read_u16()?,
+                lights: reader.read_u8()?,
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+                map_dark_light: reader.read_u8()?,
+                music: reader.read_u16()?,
+                weather: reader.read_u16()?,
+            },
+            ServerPacketId::ObjectName => Self::ObjectName {
+                object_id: reader.read_u32()?,
+                name: reader.read_string()?,
+            },
+            ServerPacketId::Revived => Self::Revived,
+            ServerPacketId::NPCConsign => Self::NPCConsign,
+            ServerPacketId::InTrapRock => Self::InTrapRock {
+                trapped: reader.read_bool()?,
+            },
+            ServerPacketId::UserName => Self::UserName {
+                id: reader.read_u32()?,
+                name: reader.read_string()?,
+            },
+            ServerPacketId::ChatItemStats => {
+                let chat_item_id = reader.read_u64()?;
+                let stats = if reader.remaining() == 0 {
+                    None
+                } else {
+                    Some(UserItem::decode(reader)?)
+                };
+                Self::ChatItemStats {
+                    chat_item_id,
+                    stats,
+                }
+            }
+            ServerPacketId::GuildNoticeChange => {
+                let update = reader.read_i32()?;
+                let mut notice = Vec::new();
+                if update > 0 {
+                    notice.reserve(update as usize);
+                    for _ in 0..update {
+                        notice.push(reader.read_string()?);
+                    }
+                }
+                Self::GuildNoticeChange { update, notice }
+            }
+            ServerPacketId::GuildMemberChange => {
+                let name = reader.read_string()?;
+                let rank_index = reader.read_u8()?;
+                let status = reader.read_u8()?;
+                let ranks = if status > 5 {
+                    let count = reader.read_i32()?;
+                    if count < 0 {
+                        return Err(PacketCodecError::NegativeLength {
+                            field: "guild_member_change_ranks",
+                            value: count,
+                        });
+                    }
+                    let mut ranks = Vec::with_capacity(count as usize);
+                    for _ in 0..count {
+                        ranks.push(GuildRank::decode(reader)?);
+                    }
+                    ranks
+                } else {
+                    Vec::new()
+                };
+                Self::GuildMemberChange {
+                    name,
+                    rank_index,
+                    status,
+                    ranks,
+                }
+            }
+            ServerPacketId::GuildStatus => Self::GuildStatus {
+                guild_name: reader.read_string()?,
+                guild_rank_name: reader.read_string()?,
+                level: reader.read_u8()?,
+                experience: reader.read_i64()?,
+                max_experience: reader.read_i64()?,
+                gold: reader.read_u32()?,
+                spare_points: reader.read_u8()?,
+                member_count: reader.read_i32()?,
+                max_members: reader.read_i32()?,
+                voting: reader.read_bool()?,
+                item_count: reader.read_u8()?,
+                buff_count: reader.read_u8()?,
+                my_options: reader.read_u8()?,
+                my_rank_id: reader.read_i32()?,
+            },
+            ServerPacketId::GuildInvite => Self::GuildInvite {
+                name: reader.read_string()?,
+            },
+            ServerPacketId::GuildExpGain => Self::GuildExpGain {
+                amount: reader.read_u32()?,
+            },
+            ServerPacketId::GuildNameRequest => Self::GuildNameRequest,
+            ServerPacketId::GuildStorageGoldChange => Self::GuildStorageGoldChange {
+                amount: reader.read_u32()?,
+                change_type: reader.read_u8()?,
+                name: reader.read_string()?,
+            },
+            ServerPacketId::GuildStorageItemChange => {
+                let change_type = reader.read_u8()?;
+                let to = reader.read_i32()?;
+                let from = reader.read_i32()?;
+                let user = reader.read_i32()?;
+                let item = if reader.read_bool()? {
+                    let user_id = reader.read_i64()?;
+                    Some(GuildStorageItem {
+                        user_id,
+                        item: UserItem::decode(reader)?,
+                    })
+                } else {
+                    None
+                };
+                Self::GuildStorageItemChange {
+                    change_type,
+                    to,
+                    from,
+                    user,
+                    item,
+                }
+            }
+            ServerPacketId::GuildStorageList => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "guild_storage_items",
+                        value: count,
+                    });
+                }
+                let mut items = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    if reader.read_bool()? {
+                        items.push(Some(GuildStorageItem::decode(reader)?));
+                    } else {
+                        items.push(None);
+                    }
+                }
+                Self::GuildStorageList { items }
+            }
+            ServerPacketId::GuildRequestWar => Self::GuildRequestWar,
+            ServerPacketId::SetAutoPotValue => Self::SetAutoPotValue {
+                stat: reader.read_u8()?,
+                value: reader.read_u32()?,
+            },
+            ServerPacketId::SetAutoPotItem => Self::SetAutoPotItem {
+                grid: reader.read_u8()?,
+                item_index: reader.read_i32()?,
+            },
+            ServerPacketId::NPCImageUpdate => Self::NPCImageUpdate {
+                object_id: reader.read_u32()?,
+                image: reader.read_u16()?,
+                colour_argb: reader.read_i32()?,
+            },
+            ServerPacketId::EquipSlotItem => Self::EquipSlotItem {
+                grid: MirGridType::try_from(reader.read_u8()?)?,
+                unique_id: reader.read_u64()?,
+                to: reader.read_i32()?,
+                grid_to: MirGridType::try_from(reader.read_u8()?)?,
+                success: reader.read_bool()?,
+            },
+            ServerPacketId::GainedQuestItem => Self::GainedQuestItem {
+                item: UserItem::decode(reader)?,
+            },
+            ServerPacketId::DeleteQuestItem => Self::DeleteQuestItem {
+                unique_id: reader.read_u64()?,
+                count: reader.read_u16()?,
+            },
+            ServerPacketId::CancelReincarnation => Self::CancelReincarnation,
+            ServerPacketId::RequestReincarnation => Self::RequestReincarnation,
+            ServerPacketId::UserBackStep => Self::UserBackStep {
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+            },
+            ServerPacketId::UserDashAttack => Self::UserDashAttack {
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+            },
+            ServerPacketId::ObjectDashAttack => Self::ObjectDashAttack {
+                object_id: reader.read_u32()?,
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+                distance: reader.read_i32()?,
+            },
+            ServerPacketId::UserAttackMove => Self::UserAttackMove {
+                location: Point::decode(reader)?,
+                direction: MirDirection::try_from(reader.read_u8()?)?,
+            },
+            ServerPacketId::SetConcentration => Self::SetConcentration {
+                object_id: reader.read_u32()?,
+                enabled: reader.read_bool()?,
+                interrupted: reader.read_bool()?,
+            },
+            ServerPacketId::SetElemental => Self::SetElemental {
+                object_id: reader.read_u32()?,
+                enabled: reader.read_bool()?,
+                casted: reader.read_bool()?,
+                value: reader.read_u32()?,
+                element_type: reader.read_u32()?,
+                exp_last: reader.read_u32()?,
+            },
+            ServerPacketId::AwakeningNeedMaterials => {
+                let materials = if reader.read_bool()? {
+                    let count = reader.read_i32()?;
+                    if count < 0 {
+                        return Err(PacketCodecError::NegativeLength {
+                            field: "awakening_materials",
+                            value: count,
+                        });
+                    }
+                    let mut materials = Vec::with_capacity(count as usize);
+                    for _ in 0..count {
+                        if reader.read_bool()? {
+                            materials.push(Some(AwakeningMaterial::decode(reader)?));
+                        } else {
+                            materials.push(None);
+                        }
+                    }
+                    Some(materials)
+                } else {
+                    None
+                };
+                Self::AwakeningNeedMaterials { materials }
+            }
+            ServerPacketId::NPCPearlGoods => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "npc_pearl_goods",
+                        value: count,
+                    });
+                }
+                let mut list = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    list.push(UserItem::decode(reader)?);
+                }
+                Self::NPCPearlGoods {
+                    list,
+                    rate: reader.read_f32()?,
+                    panel_type: reader.read_u8()?,
+                }
+            }
+            ServerPacketId::TransformUpdate => Self::TransformUpdate {
+                object_id: reader.read_u32()?,
+                transform_type: reader.read_i16()?,
+            },
+            ServerPacketId::NPCRequestInput => Self::NPCRequestInput {
+                npc_id: reader.read_u32()?,
+                page_name: reader.read_string()?,
+            },
+            ServerPacketId::GameShopStock => Self::GameShopStock {
+                g_index: reader.read_i32()?,
+                stock_level: reader.read_i32()?,
+            },
+            ServerPacketId::Rankings => {
+                let rank_type = reader.read_u8()?;
+                let my_rank = reader.read_i32()?;
+                let detail_count = reader.read_i32()?;
+                if detail_count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "ranking_details",
+                        value: detail_count,
+                    });
+                }
+                let mut listing_details = Vec::with_capacity(detail_count as usize);
+                for _ in 0..detail_count {
+                    listing_details.push(RankCharacterInfo::decode(reader)?);
+                }
+                let listing_count = reader.read_i32()?;
+                if listing_count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "ranking_listings",
+                        value: listing_count,
+                    });
+                }
+                let mut listings = Vec::with_capacity(listing_count as usize);
+                for _ in 0..listing_count {
+                    listings.push(reader.read_i64()?);
+                }
+                Self::Rankings {
+                    rank_type,
+                    my_rank,
+                    listing_details,
+                    listings,
+                    count: reader.read_i32()?,
+                }
+            }
+            ServerPacketId::UpdateNotice => Self::UpdateNotice {
+                notice: Notice::decode(reader)?,
+            },
+            ServerPacketId::GuildTerritoryPage => {
+                let length = reader.read_i32()?;
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "guild_territory_page",
+                        value: count,
+                    });
+                }
+                let mut listings = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    listings.push(ClientGtMap::decode(reader)?);
+                }
+                Self::GuildTerritoryPage { length, listings }
+            }
             ServerPacketId::Connected => Self::Connected,
             ServerPacketId::ClientVersion => Self::ClientVersion {
                 result: reader.read_u8()?,
@@ -3656,6 +5088,20 @@ impl ServerPacket {
                 unique_id: reader.read_u64()?,
                 to: reader.read_i32()?,
                 success: reader.read_bool()?,
+            },
+            ServerPacketId::DepositRefineItem => Self::DepositRefineItem {
+                from: reader.read_i32()?,
+                to: reader.read_i32()?,
+                success: reader.read_bool()?,
+            },
+            ServerPacketId::RetrieveRefineItem => Self::RetrieveRefineItem {
+                from: reader.read_i32()?,
+                to: reader.read_i32()?,
+                success: reader.read_bool()?,
+            },
+            ServerPacketId::RefineCancel => Self::RefineCancel,
+            ServerPacketId::RefineItem => Self::RefineItem {
+                unique_id: reader.read_u64()?,
             },
             ServerPacketId::TakeBackItem => Self::TakeBackItem {
                 from: reader.read_i32()?,
@@ -3800,6 +5246,20 @@ impl ServerPacket {
             ServerPacketId::ObjectNpc => Self::ObjectNpc {
                 info: NpcInfo::decode(reader)?,
             },
+            ServerPacketId::NPCResponse => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "npc_response_page",
+                        value: count,
+                    });
+                }
+                let mut page = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    page.push(reader.read_string()?);
+                }
+                Self::NPCResponse { page }
+            }
             ServerPacketId::ObjectHide => Self::ObjectHide {
                 object_id: reader.read_u32()?,
             },
@@ -3996,6 +5456,27 @@ impl ServerPacket {
                 spell: Spell::try_from(reader.read_u8()?)?,
                 can_use: reader.read_bool()?,
             },
+            ServerPacketId::SwitchGroup => Self::SwitchGroup {
+                allow_group: reader.read_bool()?,
+            },
+            ServerPacketId::DeleteGroup => Self::DeleteGroup,
+            ServerPacketId::DeleteMember => Self::DeleteMember {
+                name: reader.read_string()?,
+            },
+            ServerPacketId::GroupInvite => Self::GroupInvite {
+                name: reader.read_string()?,
+            },
+            ServerPacketId::AddMember => Self::AddMember {
+                name: reader.read_string()?,
+            },
+            ServerPacketId::GroupMembersMap => Self::GroupMembersMap {
+                player_name: reader.read_string()?,
+                player_map: reader.read_string()?,
+            },
+            ServerPacketId::SendMemberLocation => Self::SendMemberLocation {
+                member_name: reader.read_string()?,
+                member_location: Point::decode(reader)?,
+            },
             ServerPacketId::SellItem => Self::SellItem {
                 unique_id: reader.read_u64()?,
                 count: reader.read_u16()?,
@@ -4141,6 +5622,12 @@ impl ServerPacket {
             ServerPacketId::ChangeHero => Self::ChangeHero {
                 from_index: reader.read_i32()?,
             },
+            ServerPacketId::DefaultNPC => Self::DefaultNPC {
+                object_id: reader.read_u32()?,
+            },
+            ServerPacketId::NPCUpdate => Self::NPCUpdate {
+                npc_id: reader.read_u32()?,
+            },
             ServerPacketId::MarriageRequest => Self::MarriageRequest {
                 name: reader.read_string()?,
             },
@@ -4221,6 +5708,33 @@ impl ServerPacket {
                 message: reader.read_string()?,
                 output_type: reader.read_u8()?,
             },
+            ServerPacketId::OpenDoor => Self::OpenDoor {
+                door_index: reader.read_u8()?,
+                close: reader.read_bool()?,
+            },
+            ServerPacketId::OpenBrowser => Self::OpenBrowser {
+                url: reader.read_string()?,
+            },
+            ServerPacketId::PlaySound => Self::PlaySound {
+                sound: reader.read_i32()?,
+            },
+            ServerPacketId::SetTimer => Self::SetTimer {
+                key: reader.read_string()?,
+                timer_type: reader.read_u8()?,
+                seconds: reader.read_i32()?,
+            },
+            ServerPacketId::ExpireTimer => Self::ExpireTimer {
+                key: reader.read_string()?,
+            },
+            ServerPacketId::Roll => Self::Roll {
+                roll_type: reader.read_i32()?,
+                page: reader.read_string()?,
+                result: reader.read_i32()?,
+                auto_roll: reader.read_bool()?,
+            },
+            ServerPacketId::SetCompass => Self::SetCompass {
+                location: Point::decode(reader)?,
+            },
             ServerPacketId::NPCAwakening => Self::NPCAwakening,
             ServerPacketId::NPCDisassemble => Self::NPCDisassemble,
             ServerPacketId::NPCDowngrade => Self::NPCDowngrade,
@@ -4275,6 +5789,52 @@ impl ServerPacket {
                 }
                 Self::FriendUpdate { friends }
             }
+            ServerPacketId::LoverUpdate => Self::LoverUpdate {
+                name: reader.read_string()?,
+                date_binary_datetime: reader.read_i64()?,
+                map_name: reader.read_string()?,
+                married_days: reader.read_i16()?,
+            },
+            ServerPacketId::MentorUpdate => Self::MentorUpdate {
+                name: reader.read_string()?,
+                level: reader.read_u16()?,
+                online: reader.read_bool()?,
+                mentee_exp: reader.read_i64()?,
+            },
+            ServerPacketId::GuildBuffList => {
+                let remove = reader.read_u8()?;
+                let active_count = reader.read_i32()?;
+                if active_count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "guild_buff_active",
+                        value: active_count,
+                    });
+                }
+                let mut active_buffs = Vec::with_capacity(active_count as usize);
+                for _ in 0..active_count {
+                    active_buffs.push(GuildBuff::decode(reader)?);
+                }
+                let buff_count = reader.read_i32()?;
+                if buff_count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "guild_buff_info",
+                        value: buff_count,
+                    });
+                }
+                let mut guild_buffs = Vec::with_capacity(buff_count as usize);
+                for _ in 0..buff_count {
+                    guild_buffs.push(GuildBuffInfo::decode(reader)?);
+                }
+                Self::GuildBuffList {
+                    remove,
+                    active_buffs,
+                    guild_buffs,
+                }
+            }
+            ServerPacketId::GameShopInfo => Self::GameShopInfo {
+                item: GameShopItem::decode(reader)?,
+                stock_level: reader.read_i32()?,
+            },
             ServerPacketId::NewIntelligentCreature => Self::NewIntelligentCreature {
                 creature: ClientIntelligentCreature::decode(reader)?,
             },
@@ -4357,11 +5917,40 @@ impl ServerPacket {
             },
             ServerPacketId::CanConfirmItemRental => Self::CanConfirmItemRental,
             ServerPacketId::ConfirmItemRental => Self::ConfirmItemRental,
+            ServerPacketId::ChangeQuest => {
+                let quest_id = reader.read_i32()?;
+                let task_count = reader.read_i32()?.max(0);
+                let mut task_list = Vec::with_capacity(task_count as usize);
+                for _ in 0..task_count {
+                    task_list.push(reader.read_string()?);
+                }
+                Self::ChangeQuest {
+                    quest_id,
+                    task_list,
+                    taken: reader.read_bool()?,
+                    completed: reader.read_bool()?,
+                    new: reader.read_bool()?,
+                    quest_state: reader.read_u8()?,
+                    track_quest: reader.read_bool()?,
+                }
+            }
+            ServerPacketId::CompleteQuest => {
+                let count = reader.read_i32()?.max(0);
+                let mut completed_quests = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    completed_quests.push(reader.read_i32()?);
+                }
+                Self::CompleteQuest { completed_quests }
+            }
+            ServerPacketId::ShareQuest => Self::ShareQuest {
+                quest_index: reader.read_i32()?,
+                sharer_name: reader.read_string()?,
+            },
             ServerPacketId::NewQuestInfo => Self::NewQuestInfo {
-                payload: reader.read_bytes(reader.remaining())?,
+                info: ClientQuestInfo::decode(reader)?,
             },
             ServerPacketId::NewRecipeInfo => Self::NewRecipeInfo {
-                payload: reader.read_bytes(reader.remaining())?,
+                info: ClientRecipeInfo::decode(reader)?,
             },
             ServerPacketId::ResizeInventory => Self::ResizeInventory {
                 size: reader.read_i32()?,
@@ -4385,10 +5974,6 @@ impl ServerPacket {
                 characters: decode_select_info_vec(reader)?,
             },
             ServerPacketId::LogOutFailed => Self::LogOutFailed,
-            _ => Self::Raw {
-                packet_id,
-                payload: reader.read_bytes(reader.remaining())?,
-            },
         };
 
         Ok(packet)
@@ -4441,6 +6026,51 @@ fn decode_select_info_vec(reader: &mut PacketReader<'_>) -> Result<Vec<SelectInf
     Ok(values)
 }
 
+fn decode_optional_user_item_slots(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Option<Vec<Option<UserItem>>>> {
+    if !reader.read_bool()? {
+        return Ok(None);
+    }
+
+    let count = reader.read_i32()?;
+    if count < 0 {
+        return Err(PacketCodecError::NegativeLength {
+            field,
+            value: count,
+        });
+    }
+
+    let mut values = Vec::with_capacity(count as usize);
+    for _ in 0..count {
+        if reader.read_bool()? {
+            values.push(Some(UserItem::decode(reader)?));
+        } else {
+            values.push(None);
+        }
+    }
+    Ok(Some(values))
+}
+
+fn encode_optional_user_item_slots(
+    writer: &mut PacketWriter,
+    values: Option<&[Option<UserItem>]>,
+) -> Result<()> {
+    writer.write_bool(values.is_some());
+    let Some(values) = values else {
+        return Ok(());
+    };
+    writer.write_i32(values.len() as i32);
+    for item in values {
+        writer.write_bool(item.is_some());
+        if let Some(item) = item {
+            item.encode(writer)?;
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4469,6 +6099,43 @@ mod tests {
             is_shop_item: false,
             sealed_info: None,
             gm_made: false,
+        }
+    }
+
+    fn test_item_info(index: i32) -> ItemInfo {
+        ItemInfo {
+            index,
+            name: format!("Item{index}"),
+            item_type: 0,
+            grade: 0,
+            required_type: 0,
+            required_class: 0,
+            required_gender: 0,
+            item_set: 0,
+            shape: 1,
+            weight: 1,
+            light: 0,
+            required_amount: 0,
+            image: 1,
+            durability: 1_000,
+            stack_size: 1,
+            price: 10,
+            start_item: false,
+            effect: 0,
+            need_identify: false,
+            show_group_pickup: false,
+            class_based: false,
+            level_based: false,
+            can_mine: false,
+            global_drop_notify: false,
+            bind: 0,
+            unique: 0,
+            random_stats_id: 0,
+            can_fast_run: false,
+            can_awakening: false,
+            slots: 0,
+            stats: Vec::new(),
+            tooltip: None,
         }
     }
 
@@ -4554,7 +6221,7 @@ mod tests {
     }
 
     #[test]
-    fn crystal_packet_ids_cover_full_ranges_and_raw_server_fallback() {
+    fn crystal_packet_ids_cover_full_ranges_and_raw_server_frame_encoding() {
         for packet_id in 0..=152 {
             assert!(
                 ClientPacketId::try_from(packet_id).is_ok(),
@@ -4573,12 +6240,13 @@ mod tests {
         assert_eq!(ServerPacketId::ItemUpgraded as i16, 215);
 
         let packet = ServerPacket::Raw {
-            packet_id: ServerPacketId::GuildStatus,
+            packet_id: ServerPacketId::Connected,
             payload: vec![1, 2, 3, 4],
         };
         let encoded = encode_server_packet(&packet).expect("raw server packet should encode");
-        let decoded = decode_server_packet(&encoded).expect("raw server packet should decode");
-        assert_eq!(decoded, packet);
+        let frame = decode_frame(&encoded).expect("raw server packet frame should decode");
+        assert_eq!(frame.packet_id, ServerPacketId::Connected as i16);
+        assert_eq!(frame.payload, vec![1, 2, 3, 4]);
     }
 
     #[test]
@@ -4766,6 +6434,641 @@ mod tests {
         ];
 
         let expected_ids = [125, 126, 127, 128, 141, 142, 146, 147, 150, 151, 152, 153];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn simple_bootstrap_social_server_packets_round_trip_with_crystal_ids() {
+        let packets = vec![
+            ServerPacket::TimeOfDay { lights: 4 },
+            ServerPacket::ChangeAMode { mode: 1 },
+            ServerPacket::ChangePMode { mode: 2 },
+            ServerPacket::NPCResponse {
+                page: vec!["@main".to_string(), "Welcome".to_string()],
+            },
+            ServerPacket::DefaultNPC { object_id: 100 },
+            ServerPacket::NPCUpdate { npc_id: 101 },
+            ServerPacket::LoverUpdate {
+                name: "Partner".to_string(),
+                date_binary_datetime: 42,
+                map_name: "Bichon".to_string(),
+                married_days: 7,
+            },
+            ServerPacket::MentorUpdate {
+                name: "Mentor".to_string(),
+                level: 45,
+                online: true,
+                mentee_exp: 1234,
+            },
+        ];
+
+        let expected_ids = [61, 62, 63, 93, 186, 187, 246, 247];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn complex_bootstrap_market_guild_server_packets_round_trip_with_crystal_ids() {
+        let base_stats = BaseStats {
+            job: MirClass::Warrior,
+            stats: vec![crate::types::BaseStat {
+                stat: 12,
+                formula_type: 0,
+                base: 14,
+                gain: 4.0,
+                gain_rate: 4.5,
+                max: 0,
+            }],
+            caps: vec![crate::types::UserItemStat {
+                stat: 35,
+                value: 18,
+            }],
+        };
+        let auction = ClientAuction {
+            auction_id: 77,
+            item: test_user_item(77),
+            seller: "Seller".to_string(),
+            price: 1_000,
+            consignment_date_binary_datetime: 638_000_000_000_000_000,
+            item_type: 0,
+        };
+        let game_shop_item = GameShopItem {
+            item_index: 1,
+            g_index: 20,
+            info: test_item_info(1),
+            gold_price: 500,
+            credit_price: 25,
+            count: 2,
+            class: "All".to_string(),
+            category: "Potion".to_string(),
+            stock: 10,
+            i_stock: true,
+            deal: false,
+            top_item: true,
+            date_binary_datetime: 638_000_000_000_000_000,
+            can_buy_credit: true,
+            can_buy_gold: true,
+        };
+        let packets = vec![
+            ServerPacket::NPCMarket {
+                listings: vec![auction.clone()],
+                pages: 3,
+                user_mode: true,
+            },
+            ServerPacket::NPCMarketPage {
+                listings: vec![auction],
+            },
+            ServerPacket::BaseStatsInfo {
+                stats: base_stats.clone(),
+            },
+            ServerPacket::HeroBaseStatsInfo { stats: base_stats },
+            ServerPacket::HeroInformation {
+                info: HeroUserInformation {
+                    object_id: 1_001,
+                    name: "Hero".to_string(),
+                    class: MirClass::Taoist,
+                    gender: MirGender::Female,
+                    level: 22,
+                    hair: 3,
+                    hp: 300,
+                    mp: 200,
+                    experience: 12_345,
+                    max_experience: 67_890,
+                    inventory: Some(vec![Some(test_user_item(1)), None]),
+                    equipment: Some(vec![Some(test_user_item(2))]),
+                    magics: Vec::new(),
+                    auto_pot: true,
+                    auto_hp_percent: 70,
+                    auto_mp_percent: 60,
+                    hp_item_index: 1,
+                    mp_item_index: 2,
+                },
+            },
+            ServerPacket::GuildBuffList {
+                remove: 0,
+                active_buffs: vec![GuildBuff {
+                    id: 1,
+                    active: true,
+                    active_time_remaining: 600,
+                }],
+                guild_buffs: vec![GuildBuffInfo {
+                    id: 1,
+                    icon: 10,
+                    name: "Guard".to_string(),
+                    level_requirement: 2,
+                    points_requirement: 1,
+                    time_limit: 3_600,
+                    activation_cost: 100,
+                    stats: vec![crate::types::UserItemStat { stat: 1, value: 2 }],
+                }],
+            },
+            ServerPacket::GameShopInfo {
+                item: game_shop_item,
+                stock_level: 9,
+            },
+            ServerPacket::NewQuestInfo {
+                info: ClientQuestInfo {
+                    index: 1,
+                    npc_index: 1_001,
+                    name: "Field Wasp".to_string(),
+                    group: "Starter".to_string(),
+                    description: vec!["Help the town".to_string()],
+                    task_description: vec!["Defeat one Wasp".to_string()],
+                    return_description: vec!["Return to the guard".to_string()],
+                    completion_description: vec!["Good work".to_string()],
+                    min_level_needed: 1,
+                    max_level_needed: 0,
+                    quest_needed: 0,
+                    class_needed: 31,
+                    quest_type: 0,
+                    time_limit_in_seconds: 0,
+                    reward_gold: 100,
+                    reward_exp: 200,
+                    reward_credit: 0,
+                    rewards_fixed_item: vec![crate::types::QuestItemReward {
+                        item: test_item_info(2),
+                        count: 1,
+                    }],
+                    rewards_select_item: Vec::new(),
+                    finish_npc_index: 1_001,
+                },
+            },
+            ServerPacket::NewRecipeInfo {
+                info: ClientRecipeInfo {
+                    gold: 50,
+                    chance: 75,
+                    item: test_user_item(3),
+                    tools: vec![test_user_item(4)],
+                    ingredients: vec![test_user_item(5)],
+                },
+            },
+        ];
+
+        let expected_ids = [155, 156, 162, 163, 178, 248, 250, 204, 266];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn remaining_crystal_server_packets_round_trip_with_typed_payloads() {
+        let map_info = ClientMapInfo {
+            title: "Bichon Province".to_string(),
+            width: 800,
+            height: 600,
+            big_map: 1,
+            movements: vec![crate::types::ClientMovementInfo {
+                destination: 2,
+                title: "Border Village".to_string(),
+                location: Point { x: 330, y: 270 },
+                icon: 4,
+            }],
+            npcs: vec![crate::types::ClientNpcInfo {
+                index: 9,
+                file_name: "merchant".to_string(),
+                name: "Merchant".to_string(),
+                map_index: 0,
+                location: Point { x: 320, y: 260 },
+                image: 12,
+                rate: 10,
+                show_on_big_map: true,
+                big_map_icon: 3,
+                object_id: 99,
+                icon: 5,
+                can_teleport_to: true,
+            }],
+        };
+        let guild_member = crate::types::GuildMember {
+            name: "Member".to_string(),
+            id: 10,
+            last_login_binary_datetime: 638_000_000_000_000_000,
+            has_voted: true,
+            online: false,
+        };
+        let guild_rank = GuildRank {
+            name: "Leader".to_string(),
+            options: 0x7f,
+            index: 1,
+            members: vec![guild_member],
+        };
+        let guild_storage_item = GuildStorageItem {
+            item: test_user_item(30),
+            user_id: 55,
+        };
+        let packets = vec![
+            ServerPacket::NewMapInfo {
+                map_index: 0,
+                info: map_info,
+            },
+            ServerPacket::WorldMapSetup {
+                setup: WorldMapSetup {
+                    enabled: true,
+                    icons: vec![crate::types::WorldMapIcon {
+                        image_index: 1,
+                        title: "Bichon".to_string(),
+                        map_index: 0,
+                    }],
+                },
+                teleport_to_npc_cost: 500,
+            },
+            ServerPacket::SearchMapResult {
+                map_index: 0,
+                npc_index: 9,
+            },
+            ServerPacket::UserSlotsRefresh {
+                inventory: Some(vec![Some(test_user_item(31)), None]),
+                equipment: Some(vec![Some(test_user_item(32))]),
+            },
+            ServerPacket::NewChatItem {
+                item: test_user_item(33),
+            },
+            ServerPacket::PlayerUpdate {
+                object_id: 1_001,
+                light: 4,
+                weapon: 1,
+                weapon_effect: 2,
+                armour: 3,
+                wing_effect: 5,
+            },
+            ServerPacket::PlayerInspect {
+                info: PlayerInspectInfo {
+                    name: "Inspector".to_string(),
+                    guild_name: "Guild".to_string(),
+                    guild_rank: "Leader".to_string(),
+                    equipment: vec![Some(test_user_item(34)), None],
+                    class: MirClass::Wizard,
+                    gender: MirGender::Female,
+                    hair: 2,
+                    level: 42,
+                    lover_name: "Lover".to_string(),
+                    allow_observe: true,
+                    is_hero: false,
+                },
+            },
+            ServerPacket::ReturnToLogin,
+            ServerPacket::DamageIndicator {
+                damage: 123,
+                damage_type: 2,
+                object_id: 1_001,
+            },
+            ServerPacket::HealthChanged { hp: 100, mp: 90 },
+            ServerPacket::Death {
+                location: Point { x: 10, y: 11 },
+                direction: MirDirection::Down,
+            },
+            ServerPacket::ColourChanged {
+                name_colour_argb: -1,
+            },
+            ServerPacket::ObjectColourChanged {
+                object_id: 1_002,
+                name_colour_argb: -2,
+            },
+            ServerPacket::ObjectGuildNameChanged {
+                object_id: 1_003,
+                guild_name: "Guild".to_string(),
+            },
+            ServerPacket::GainExperience { amount: 1_000 },
+            ServerPacket::LevelChanged {
+                level: 43,
+                experience: 12_345,
+                max_experience: 67_890,
+            },
+            ServerPacket::ObjectLeveled { object_id: 1_004 },
+            ServerPacket::Poisoned { poison: 3 },
+            ServerPacket::ObjectPoisoned {
+                object_id: 1_005,
+                poison: 4,
+            },
+            ServerPacket::MapChanged {
+                map_index: 1,
+                file_name: "0.map".to_string(),
+                title: "Bichon".to_string(),
+                mini_map: 100,
+                big_map: 1,
+                lights: 2,
+                location: Point { x: 330, y: 270 },
+                direction: MirDirection::UpRight,
+                map_dark_light: 3,
+                music: 4,
+                weather: 5,
+            },
+            ServerPacket::ObjectName {
+                object_id: 1_006,
+                name: "Target".to_string(),
+            },
+            ServerPacket::Revived,
+            ServerPacket::NPCConsign,
+            ServerPacket::InTrapRock { trapped: true },
+            ServerPacket::UserName {
+                id: 1_007,
+                name: "KnownUser".to_string(),
+            },
+            ServerPacket::ChatItemStats {
+                chat_item_id: 77,
+                stats: Some(test_user_item(35)),
+            },
+            ServerPacket::GuildNoticeChange {
+                update: 2,
+                notice: vec!["Line1".to_string(), "Line2".to_string()],
+            },
+            ServerPacket::GuildMemberChange {
+                name: "Member".to_string(),
+                rank_index: 1,
+                status: 6,
+                ranks: vec![guild_rank],
+            },
+            ServerPacket::GuildStatus {
+                guild_name: "Guild".to_string(),
+                guild_rank_name: "Leader".to_string(),
+                level: 3,
+                experience: 100,
+                max_experience: 1_000,
+                gold: 500,
+                spare_points: 2,
+                member_count: 10,
+                max_members: 30,
+                voting: true,
+                item_count: 5,
+                buff_count: 1,
+                my_options: 0x7f,
+                my_rank_id: 1,
+            },
+            ServerPacket::GuildInvite {
+                name: "Invitee".to_string(),
+            },
+            ServerPacket::GuildExpGain { amount: 123 },
+            ServerPacket::GuildNameRequest,
+            ServerPacket::GuildStorageGoldChange {
+                amount: 100,
+                change_type: 1,
+                name: "Member".to_string(),
+            },
+            ServerPacket::GuildStorageItemChange {
+                change_type: 2,
+                to: 1,
+                from: 0,
+                user: 10,
+                item: Some(guild_storage_item.clone()),
+            },
+            ServerPacket::GuildStorageList {
+                items: vec![Some(guild_storage_item), None],
+            },
+            ServerPacket::GuildRequestWar,
+            ServerPacket::SetAutoPotValue { stat: 1, value: 75 },
+            ServerPacket::SetAutoPotItem {
+                grid: 1,
+                item_index: 2,
+            },
+            ServerPacket::NPCImageUpdate {
+                object_id: 1_008,
+                image: 12,
+                colour_argb: -3,
+            },
+            ServerPacket::EquipSlotItem {
+                grid: MirGridType::Equipment,
+                unique_id: 99,
+                to: 1,
+                grid_to: MirGridType::Inventory,
+                success: true,
+            },
+            ServerPacket::GainedQuestItem {
+                item: test_user_item(36),
+            },
+            ServerPacket::DeleteQuestItem {
+                unique_id: 36,
+                count: 1,
+            },
+            ServerPacket::CancelReincarnation,
+            ServerPacket::RequestReincarnation,
+            ServerPacket::UserBackStep {
+                location: Point { x: 12, y: 13 },
+                direction: MirDirection::Left,
+            },
+            ServerPacket::UserDashAttack {
+                location: Point { x: 14, y: 15 },
+                direction: MirDirection::Right,
+            },
+            ServerPacket::ObjectDashAttack {
+                object_id: 1_009,
+                location: Point { x: 16, y: 17 },
+                direction: MirDirection::Up,
+                distance: 3,
+            },
+            ServerPacket::UserAttackMove {
+                location: Point { x: 18, y: 19 },
+                direction: MirDirection::DownLeft,
+            },
+            ServerPacket::SetConcentration {
+                object_id: 1_010,
+                enabled: true,
+                interrupted: false,
+            },
+            ServerPacket::SetElemental {
+                object_id: 1_011,
+                enabled: true,
+                casted: true,
+                value: 10,
+                element_type: 2,
+                exp_last: 30,
+            },
+            ServerPacket::AwakeningNeedMaterials {
+                materials: Some(vec![
+                    Some(AwakeningMaterial {
+                        item: test_item_info(37),
+                        count: 2,
+                    }),
+                    None,
+                ]),
+            },
+            ServerPacket::NPCPearlGoods {
+                list: vec![test_user_item(38)],
+                rate: 1.25,
+                panel_type: 4,
+            },
+            ServerPacket::TransformUpdate {
+                object_id: 1_012,
+                transform_type: 5,
+            },
+            ServerPacket::NPCRequestInput {
+                npc_id: 1_013,
+                page_name: "@confirm".to_string(),
+            },
+            ServerPacket::GameShopStock {
+                g_index: 10,
+                stock_level: 3,
+            },
+            ServerPacket::Rankings {
+                rank_type: 1,
+                my_rank: 2,
+                listing_details: vec![RankCharacterInfo {
+                    player_id: 3,
+                    name: "Ranked".to_string(),
+                    level: 50,
+                    class: MirClass::Assassin,
+                }],
+                listings: vec![3],
+                count: 1,
+            },
+            ServerPacket::UpdateNotice {
+                notice: Notice {
+                    title: "Notice".to_string(),
+                    message: "Message".to_string(),
+                },
+            },
+            ServerPacket::GuildTerritoryPage {
+                length: 1,
+                listings: vec![ClientGtMap {
+                    index: 1,
+                    name: "Castle".to_string(),
+                    owner: "Guild".to_string(),
+                    leader: "Leader".to_string(),
+                    leader2: "Deputy".to_string(),
+                    price: 10_000,
+                    days: 7,
+                    begin: 0,
+                }],
+            },
+        ];
+
+        let expected_ids = [
+            18, 19, 20, 22, 36, 56, 57, 60, 75, 77, 80, 82, 83, 84, 85, 87, 89, 96, 97, 98, 129,
+            136, 154, 161, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 181, 182,
+            188, 199, 205, 206, 207, 208, 209, 211, 212, 213, 216, 217, 228, 243, 244, 249, 251,
+            252, 271, 276,
+        ];
+        assert_eq!(packets.len(), expected_ids.len());
+
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn group_utility_server_packets_round_trip_with_crystal_ids() {
+        let packets = vec![
+            ServerPacket::SwitchGroup { allow_group: true },
+            ServerPacket::DeleteGroup,
+            ServerPacket::DeleteMember {
+                name: "PartyMate".to_string(),
+            },
+            ServerPacket::GroupInvite {
+                name: "Leader".to_string(),
+            },
+            ServerPacket::AddMember {
+                name: "Scout".to_string(),
+            },
+            ServerPacket::OpenDoor {
+                door_index: 4,
+                close: false,
+            },
+            ServerPacket::OpenBrowser {
+                url: "https://example.invalid".to_string(),
+            },
+            ServerPacket::PlaySound { sound: 12 },
+            ServerPacket::SetTimer {
+                key: "quest".to_string(),
+                timer_type: 1,
+                seconds: 60,
+            },
+            ServerPacket::ExpireTimer {
+                key: "quest".to_string(),
+            },
+            ServerPacket::Roll {
+                roll_type: 2,
+                page: "@roll".to_string(),
+                result: 17,
+                auto_roll: true,
+            },
+            ServerPacket::SetCompass {
+                location: Point { x: 330, y: 270 },
+            },
+            ServerPacket::GroupMembersMap {
+                player_name: "Scout".to_string(),
+                player_map: "Bichon Province".to_string(),
+            },
+            ServerPacket::SendMemberLocation {
+                member_name: "Scout".to_string(),
+                member_location: Point { x: 331, y: 271 },
+            },
+        ];
+
+        let expected_ids = [
+            131, 132, 133, 134, 135, 253, 267, 268, 269, 270, 272, 273, 274, 275,
+        ];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn quest_server_packets_round_trip_with_crystal_ids() {
+        let packets = vec![
+            ServerPacket::ChangeQuest {
+                quest_id: 1001,
+                task_list: vec![
+                    "Collect Wasp Stinger 0/1".to_string(),
+                    "Return to Assistant".to_string(),
+                ],
+                taken: true,
+                completed: false,
+                new: true,
+                quest_state: 0,
+                track_quest: true,
+            },
+            ServerPacket::CompleteQuest {
+                completed_quests: vec![1001, 1002],
+            },
+            ServerPacket::ShareQuest {
+                quest_index: 1001,
+                sharer_name: "Scout".to_string(),
+            },
+        ];
+
+        let expected_ids = [201, 202, 203];
+        for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
+            assert_eq!(packet.packet_id() as i16, expected_id);
+            let encoded = encode_server_packet(&packet).expect("server packet should encode");
+            let decoded = decode_server_packet(&encoded).expect("server packet should decode");
+            assert_eq!(decoded, packet);
+        }
+    }
+
+    #[test]
+    fn refine_server_packets_round_trip_with_crystal_ids() {
+        let packets = vec![
+            ServerPacket::DepositRefineItem {
+                from: 4,
+                to: 0,
+                success: true,
+            },
+            ServerPacket::RetrieveRefineItem {
+                from: 0,
+                to: 4,
+                success: true,
+            },
+            ServerPacket::RefineCancel,
+            ServerPacket::RefineItem { unique_id: 4 },
+        ];
+
+        let expected_ids = [46, 47, 48, 49];
         for (packet, expected_id) in packets.into_iter().zip(expected_ids) {
             assert_eq!(packet.packet_id() as i16, expected_id);
             let encoded = encode_server_packet(&packet).expect("server packet should encode");

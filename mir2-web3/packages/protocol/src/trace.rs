@@ -3,6 +3,101 @@ use serde::{Deserialize, Serialize};
 use crate::ids::ServerPacketId;
 use crate::packets::{ClientPacket, ServerPacket};
 
+pub fn server_packet_raw_name(packet_id: ServerPacketId) -> &'static str {
+    match packet_id {
+        ServerPacketId::TimeOfDay => "TimeOfDay",
+        ServerPacketId::ChangeAMode => "ChangeAMode",
+        ServerPacketId::ChangePMode => "ChangePMode",
+        ServerPacketId::BaseStatsInfo => "BaseStatsInfo",
+        ServerPacketId::HeroBaseStatsInfo => "HeroBaseStatsInfo",
+        ServerPacketId::HeroInformation => "HeroInformation",
+        ServerPacketId::NPCMarket => "NPCMarket",
+        ServerPacketId::NPCMarketPage => "NPCMarketPage",
+        ServerPacketId::DefaultNPC => "DefaultNPC",
+        ServerPacketId::NPCUpdate => "NPCUpdate",
+        ServerPacketId::NPCResponse => "NPCResponse",
+        ServerPacketId::CompleteQuest => "CompleteQuest",
+        ServerPacketId::ReceiveMail => "ReceiveMail",
+        ServerPacketId::MailLockedItem => "MailLockedItem",
+        ServerPacketId::MailSendRequest => "MailSendRequest",
+        ServerPacketId::MailSent => "MailSent",
+        ServerPacketId::ParcelCollected => "ParcelCollected",
+        ServerPacketId::MailCost => "MailCost",
+        ServerPacketId::FriendUpdate => "FriendUpdate",
+        ServerPacketId::NewIntelligentCreature => "NewIntelligentCreature",
+        ServerPacketId::UpdateIntelligentCreatureList => "UpdateIntelligentCreatureList",
+        ServerPacketId::IntelligentCreatureEnableRename => "IntelligentCreatureEnableRename",
+        ServerPacketId::IntelligentCreaturePickup => "IntelligentCreaturePickup",
+        ServerPacketId::LoverUpdate => "LoverUpdate",
+        ServerPacketId::MentorUpdate => "MentorUpdate",
+        ServerPacketId::GuildBuffList => "GuildBuffList",
+        ServerPacketId::GameShopInfo => "GameShopInfo",
+        _ => "Raw",
+    }
+}
+
+pub fn server_packet_raw_display_name(packet_id: ServerPacketId) -> String {
+    let name = server_packet_raw_name(packet_id);
+    if name == "Raw" {
+        format!("{packet_id:?}")
+    } else {
+        name.to_string()
+    }
+}
+
+pub fn server_packet_display_name(packet: &ServerPacket) -> String {
+    let name = server_packet_name(packet);
+    if name == "Raw" {
+        format!("{:?}", packet.packet_id())
+    } else {
+        name.to_string()
+    }
+}
+
+pub fn packet_payload_hex(payload: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut output = String::with_capacity(payload.len() * 2);
+    for byte in payload {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::ClientMapInfo;
+
+    #[test]
+    fn packet_payload_hex_is_copyable_lowercase_hex() {
+        assert_eq!(packet_payload_hex(&[0x00, 0x0f, 0xa0, 0xff]), "000fa0ff");
+    }
+
+    #[test]
+    fn server_display_names_use_typed_enum_names_for_raw_fallback_ids() {
+        assert_eq!(
+            server_packet_raw_display_name(ServerPacketId::NewMapInfo),
+            "NewMapInfo"
+        );
+
+        let packet = ServerPacket::NewMapInfo {
+            map_index: 77,
+            info: ClientMapInfo {
+                title: "CastleGi-Ryoong".into(),
+                width: 120,
+                height: 220,
+                big_map: 121,
+                movements: vec![],
+                npcs: vec![],
+            },
+        };
+        assert_eq!(server_packet_name(&packet), "Raw");
+        assert_eq!(server_packet_display_name(&packet), "NewMapInfo");
+        assert_eq!(trace_server_packets(&[packet])[0].packet, "NewMapInfo");
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PacketTraceDirection {
@@ -16,7 +111,7 @@ pub struct PacketTraceEntry {
     pub sequence: usize,
     pub direction: PacketTraceDirection,
     pub packet_id: i16,
-    pub packet: &'static str,
+    pub packet: String,
 }
 
 pub fn trace_client_packets(packets: &[ClientPacket]) -> Vec<PacketTraceEntry> {
@@ -27,7 +122,7 @@ pub fn trace_client_packets(packets: &[ClientPacket]) -> Vec<PacketTraceEntry> {
             sequence,
             direction: PacketTraceDirection::Client,
             packet_id: packet.packet_id() as i16,
-            packet: client_packet_name(packet),
+            packet: client_packet_name(packet).to_string(),
         })
         .collect()
 }
@@ -40,7 +135,7 @@ pub fn trace_server_packets(packets: &[ServerPacket]) -> Vec<PacketTraceEntry> {
             sequence,
             direction: PacketTraceDirection::Server,
             packet_id: packet.packet_id() as i16,
-            packet: server_packet_name(packet),
+            packet: server_packet_display_name(packet),
         })
         .collect()
 }
@@ -207,37 +302,15 @@ pub fn client_packet_name(packet: &ClientPacket) -> &'static str {
 
 pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
     match packet {
-        ServerPacket::Raw { packet_id, .. } => match packet_id {
-            ServerPacketId::TimeOfDay => "TimeOfDay",
-            ServerPacketId::ChangeAMode => "ChangeAMode",
-            ServerPacketId::ChangePMode => "ChangePMode",
-            ServerPacketId::SwitchGroup => "SwitchGroup",
-            ServerPacketId::BaseStatsInfo => "BaseStatsInfo",
-            ServerPacketId::HeroBaseStatsInfo => "HeroBaseStatsInfo",
-            ServerPacketId::HeroInformation => "HeroInformation",
-            ServerPacketId::NPCMarket => "NPCMarket",
-            ServerPacketId::NPCMarketPage => "NPCMarketPage",
-            ServerPacketId::DefaultNPC => "DefaultNPC",
-            ServerPacketId::NPCUpdate => "NPCUpdate",
-            ServerPacketId::NPCResponse => "NPCResponse",
-            ServerPacketId::CompleteQuest => "CompleteQuest",
-            ServerPacketId::ReceiveMail => "ReceiveMail",
-            ServerPacketId::MailLockedItem => "MailLockedItem",
-            ServerPacketId::MailSendRequest => "MailSendRequest",
-            ServerPacketId::MailSent => "MailSent",
-            ServerPacketId::ParcelCollected => "ParcelCollected",
-            ServerPacketId::MailCost => "MailCost",
-            ServerPacketId::FriendUpdate => "FriendUpdate",
-            ServerPacketId::NewIntelligentCreature => "NewIntelligentCreature",
-            ServerPacketId::UpdateIntelligentCreatureList => "UpdateIntelligentCreatureList",
-            ServerPacketId::IntelligentCreatureEnableRename => "IntelligentCreatureEnableRename",
-            ServerPacketId::IntelligentCreaturePickup => "IntelligentCreaturePickup",
-            ServerPacketId::LoverUpdate => "LoverUpdate",
-            ServerPacketId::MentorUpdate => "MentorUpdate",
-            ServerPacketId::GuildBuffList => "GuildBuffList",
-            ServerPacketId::GameShopInfo => "GameShopInfo",
-            _ => "Raw",
-        },
+        ServerPacket::Raw { packet_id, .. } => server_packet_raw_name(*packet_id),
+        ServerPacket::TimeOfDay { .. } => "TimeOfDay",
+        ServerPacket::ChangeAMode { .. } => "ChangeAMode",
+        ServerPacket::ChangePMode { .. } => "ChangePMode",
+        ServerPacket::BaseStatsInfo { .. } => "BaseStatsInfo",
+        ServerPacket::HeroBaseStatsInfo { .. } => "HeroBaseStatsInfo",
+        ServerPacket::HeroInformation { .. } => "HeroInformation",
+        ServerPacket::NPCMarket { .. } => "NPCMarket",
+        ServerPacket::NPCMarketPage { .. } => "NPCMarketPage",
         ServerPacket::Connected => "Connected",
         ServerPacket::ClientVersion { .. } => "ClientVersion",
         ServerPacket::Disconnect { .. } => "Disconnect",
@@ -275,6 +348,10 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::MergeItem { .. } => "MergeItem",
         ServerPacket::RemoveItem { .. } => "RemoveItem",
         ServerPacket::RemoveSlotItem { .. } => "RemoveSlotItem",
+        ServerPacket::DepositRefineItem { .. } => "DepositRefineItem",
+        ServerPacket::RetrieveRefineItem { .. } => "RetrieveRefineItem",
+        ServerPacket::RefineCancel => "RefineCancel",
+        ServerPacket::RefineItem { .. } => "RefineItem",
         ServerPacket::TakeBackItem { .. } => "TakeBackItem",
         ServerPacket::StoreItem { .. } => "StoreItem",
         ServerPacket::SplitItem { .. } => "SplitItem",
@@ -305,6 +382,7 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::ObjectHarvest { .. } => "ObjectHarvest",
         ServerPacket::ObjectHarvested { .. } => "ObjectHarvested",
         ServerPacket::ObjectNpc { .. } => "ObjectNpc",
+        ServerPacket::NPCResponse { .. } => "NPCResponse",
         ServerPacket::ObjectHide { .. } => "ObjectHide",
         ServerPacket::ObjectShow { .. } => "ObjectShow",
         ServerPacket::ObjectTeleportOut { .. } => "ObjectTeleportOut",
@@ -340,6 +418,13 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::Pushed { .. } => "Pushed",
         ServerPacket::ObjectPushed { .. } => "ObjectPushed",
         ServerPacket::SpellToggle { .. } => "SpellToggle",
+        ServerPacket::SwitchGroup { .. } => "SwitchGroup",
+        ServerPacket::DeleteGroup => "DeleteGroup",
+        ServerPacket::DeleteMember { .. } => "DeleteMember",
+        ServerPacket::GroupInvite { .. } => "GroupInvite",
+        ServerPacket::AddMember { .. } => "AddMember",
+        ServerPacket::GroupMembersMap { .. } => "GroupMembersMap",
+        ServerPacket::SendMemberLocation { .. } => "SendMemberLocation",
         ServerPacket::ObjectRevived { .. } => "ObjectRevived",
         ServerPacket::ObjectEffect { .. } => "ObjectEffect",
         ServerPacket::ObjectHealth { .. } => "ObjectHealth",
@@ -367,6 +452,8 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::SetHeroBehaviour { .. } => "SetHeroBehaviour",
         ServerPacket::ManageHeroes { .. } => "ManageHeroes",
         ServerPacket::ChangeHero { .. } => "ChangeHero",
+        ServerPacket::DefaultNPC { .. } => "DefaultNPC",
+        ServerPacket::NPCUpdate { .. } => "NPCUpdate",
         ServerPacket::MarriageRequest { .. } => "MarriageRequest",
         ServerPacket::DivorceRequest { .. } => "DivorceRequest",
         ServerPacket::MentorRequest { .. } => "MentorRequest",
@@ -386,6 +473,13 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::ObjectLevelEffects { .. } => "ObjectLevelEffects",
         ServerPacket::SetBindingShot { .. } => "SetBindingShot",
         ServerPacket::SendOutputMessage { .. } => "SendOutputMessage",
+        ServerPacket::OpenDoor { .. } => "Opendoor",
+        ServerPacket::OpenBrowser { .. } => "OpenBrowser",
+        ServerPacket::PlaySound { .. } => "PlaySound",
+        ServerPacket::SetTimer { .. } => "SetTimer",
+        ServerPacket::ExpireTimer { .. } => "ExpireTimer",
+        ServerPacket::Roll { .. } => "Roll",
+        ServerPacket::SetCompass { .. } => "SetCompass",
         ServerPacket::NPCAwakening => "NPCAwakening",
         ServerPacket::NPCDisassemble => "NPCDisassemble",
         ServerPacket::NPCDowngrade => "NPCDowngrade",
@@ -399,6 +493,10 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::ParcelCollected { .. } => "ParcelCollected",
         ServerPacket::MailCost { .. } => "MailCost",
         ServerPacket::FriendUpdate { .. } => "FriendUpdate",
+        ServerPacket::LoverUpdate { .. } => "LoverUpdate",
+        ServerPacket::MentorUpdate { .. } => "MentorUpdate",
+        ServerPacket::GuildBuffList { .. } => "GuildBuffList",
+        ServerPacket::GameShopInfo { .. } => "GameShopInfo",
         ServerPacket::NewIntelligentCreature { .. } => "NewIntelligentCreature",
         ServerPacket::UpdateIntelligentCreatureList { .. } => "UpdateIntelligentCreatureList",
         ServerPacket::IntelligentCreatureEnableRename => "IntelligentCreatureEnableRename",
@@ -415,6 +513,9 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::ItemRentalPartnerLock { .. } => "ItemRentalPartnerLock",
         ServerPacket::CanConfirmItemRental => "CanConfirmItemRental",
         ServerPacket::ConfirmItemRental => "ConfirmItemRental",
+        ServerPacket::ChangeQuest { .. } => "ChangeQuest",
+        ServerPacket::CompleteQuest { .. } => "CompleteQuest",
+        ServerPacket::ShareQuest { .. } => "ShareQuest",
         ServerPacket::NewQuestInfo { .. } => "NewQuestInfo",
         ServerPacket::NewRecipeInfo { .. } => "NewRecipeInfo",
         ServerPacket::ResizeInventory { .. } => "ResizeInventory",
@@ -423,5 +524,6 @@ pub fn server_packet_name(packet: &ServerPacket) -> &'static str {
         ServerPacket::StoragePasswordResult { .. } => "StoragePasswordResult",
         ServerPacket::LogOutSuccess { .. } => "LogOutSuccess",
         ServerPacket::LogOutFailed => "LogOutFailed",
+        other => server_packet_raw_name(other.packet_id()),
     }
 }
