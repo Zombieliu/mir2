@@ -170,6 +170,8 @@ async function main() {
       path: `/original-map/${normalizedKey}/${frameIndex}.png`,
       width: frame.width,
       height: frame.height,
+      offsetX: frame.x,
+      offsetY: frame.y,
     };
   }
 }

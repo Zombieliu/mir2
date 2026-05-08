@@ -5,7 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
-import type { OriginalMapRegion, SceneBlueprint } from "./scene-types";
+import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
@@ -93,6 +93,8 @@ type ParsedFrame = {
   index: number;
   width: number;
   height: number;
+  x: number;
+  y: number;
   rgba: Buffer;
 };
 
@@ -585,7 +587,7 @@ async function exportMapRegion(
 
     const frames = layer.frames
       .map((frameIndex) => exportFrame(layer.libraryKey, library, frameIndex, pendingWrites))
-      .filter((frame): frame is { path: string; width: number; height: number } => frame !== null);
+      .filter((frame): frame is OriginalMapSpriteFrame => frame !== null);
     if (!frames.length) return null;
 
     const id = `sprite-${spriteIds.size + 1}`;
@@ -609,7 +611,7 @@ function exportFrame(
   library: ParsedLibrary,
   frameIndex: number,
   pendingWrites: Array<Promise<void>>,
-) {
+): OriginalMapSpriteFrame | null {
   const frame = library.frames[frameIndex];
   if (!frame || frame.width <= 0 || frame.height <= 0) return null;
 
@@ -629,6 +631,8 @@ function exportFrame(
     path: `/original-map/${normalizedKey}/${frameIndex}.png`,
     width: frame.width,
     height: frame.height,
+    offsetX: frame.x,
+    offsetY: frame.y,
   };
 }
 
@@ -804,9 +808,11 @@ function parseLibrary(filePath: string): ParsedLibrary {
 function parseFrame(buffer: Buffer, offset: number, index: number): ParsedFrame {
   const width = buffer.readInt16LE(offset);
   const height = buffer.readInt16LE(offset + 2);
+  const x = buffer.readInt16LE(offset + 4);
+  const y = buffer.readInt16LE(offset + 6);
   const length = buffer.readInt32LE(offset + 13);
   const raw = buffer.subarray(offset + 17, offset + 17 + length);
-  return { index, width, height, rgba: decodeFrame(width, height, raw) };
+  return { index, width, height, x, y, rgba: decodeFrame(width, height, raw) };
 }
 
 function detectMapType(bytes: Buffer) {

@@ -21,8 +21,9 @@ use mir2_protocol::{
 use crate::config::{
     CharacterRecord, EquipmentSlot, GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer,
     MapTransferSnapshot, QuestStage, SimulationConfig, Stage5AuctionListing, Stage5HeroState,
-    Stage5MailMessage, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
+    Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5TradeState,
+    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
+    WorldSnapshot,
 };
 
 use super::components::{
@@ -1370,6 +1371,255 @@ fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
     }]
 }
 
+fn stage5_lover_update_packet(world: &World) -> ServerPacket {
+    let relationship = &world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .relationship;
+    ServerPacket::LoverUpdate {
+        name: relationship.partner_name.clone(),
+        date_binary_datetime: relationship.married_date_binary_datetime,
+        map_name: relationship.map_name.clone(),
+        married_days: relationship.married_days,
+    }
+}
+
+fn stage5_mentor_update_packet(world: &World) -> ServerPacket {
+    let mentor = &world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .mentor;
+    ServerPacket::MentorUpdate {
+        name: mentor.name.clone(),
+        level: mentor.level,
+        online: mentor.online,
+        mentee_exp: mentor.mentee_exp,
+    }
+}
+
+fn stage5_marriage_request_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if !world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .relationship
+        .partner_name
+        .is_empty()
+    {
+        return vec![system_message_key(world, "server.YouAlreadyMarried")];
+    }
+    vec![system_message_key(
+        world,
+        "server.FacePlayerForMarriageRequest",
+    )]
+}
+
+fn stage5_marriage_reply_packet(world: &mut World, accept_invite: bool) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let pending = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .relationship
+        .pending_request_from
+        .clone();
+    let Some(partner_name) = pending else {
+        return Vec::new();
+    };
+    if !accept_invite {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .relationship
+            .pending_request_from = None;
+        return Vec::new();
+    }
+    let map_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .title
+        .clone();
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let relationship = &mut stage5.stage5_systems.relationship;
+        relationship.partner_name = partner_name;
+        relationship.map_name = map_name;
+        relationship.married_date_binary_datetime = storage_password_binary_datetime();
+        relationship.married_days = 0;
+        relationship.pending_request_from = None;
+    }
+    vec![stage5_lover_update_packet(world)]
+}
+
+fn stage5_change_marriage_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let allow = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let relationship = &mut stage5.stage5_systems.relationship;
+        relationship.allow_marriage = !relationship.allow_marriage;
+        relationship.allow_marriage
+    };
+    vec![system_message_key(
+        world,
+        if allow {
+            "server.YouAllowMarriageRequests"
+        } else {
+            "server.YouBlockMarriageRequests"
+        },
+    )]
+}
+
+fn stage5_divorce_request_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let partner_name = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .relationship
+        .partner_name
+        .clone();
+    if partner_name.is_empty() {
+        return vec![system_message_key(world, "server.YouNotMarried")];
+    }
+    vec![ServerPacket::DivorceRequest { name: partner_name }]
+}
+
+fn stage5_divorce_reply_packet(world: &mut World, accept_invite: bool) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    if !accept_invite {
+        return Vec::new();
+    }
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let relationship = &mut stage5.stage5_systems.relationship;
+        relationship.partner_name.clear();
+        relationship.map_name.clear();
+        relationship.married_days = 0;
+        relationship.married_date_binary_datetime = storage_password_binary_datetime();
+        relationship.pending_request_from = None;
+        relationship.pending_divorce_from = None;
+    }
+    vec![stage5_lover_update_packet(world)]
+}
+
+fn stage5_add_mentor_packet(world: &mut World, name: String) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let player_name = stage5_player_name(world);
+    if name.eq_ignore_ascii_case(&player_name) {
+        return vec![system_message_key(world, "server.YouCantMentorYourself")];
+    }
+    if name.trim().is_empty() {
+        return vec![system_message_key_args(
+            world,
+            "server.CannotFindPlayerByName",
+            [name],
+        )];
+    }
+    let current_mentor = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .mentor
+        .name
+        .clone();
+    if !current_mentor.is_empty() {
+        return vec![system_message_key(world, "server.YouAlreadyHaveMentor")];
+    }
+    vec![system_message_key_args(
+        world,
+        "server.CannotFindPlayerByName",
+        [name],
+    )]
+}
+
+fn stage5_mentor_reply_packet(world: &mut World, accept_invite: bool) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let pending = {
+        let mentor = &world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .mentor;
+        mentor
+            .pending_request_from
+            .clone()
+            .map(|name| (name, mentor.pending_request_level))
+    };
+    let Some((name, level)) = pending else {
+        return Vec::new();
+    };
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let mentor = &mut stage5.stage5_systems.mentor;
+        if accept_invite {
+            mentor.name = name;
+            mentor.level = level;
+            mentor.online = true;
+            mentor.mentee_exp = 0;
+        }
+        mentor.pending_request_from = None;
+        mentor.pending_request_level = 0;
+    }
+    if accept_invite {
+        vec![stage5_mentor_update_packet(world)]
+    } else {
+        Vec::new()
+    }
+}
+
+fn stage5_allow_mentor_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let allow = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let mentor = &mut stage5.stage5_systems.mentor;
+        mentor.allow_mentor = !mentor.allow_mentor;
+        mentor.allow_mentor
+    };
+    vec![system_message_key(
+        world,
+        if allow {
+            "server.AllowingMentorRequests"
+        } else {
+            "server.BlockingMentorRequests"
+        },
+    )]
+}
+
+fn stage5_cancel_mentor_packet(world: &mut World) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let had_mentor = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let mentor = &mut stage5.stage5_systems.mentor;
+        let had_mentor = !mentor.name.is_empty();
+        mentor.name.clear();
+        mentor.level = 0;
+        mentor.online = false;
+        mentor.mentee_exp = 0;
+        mentor.pending_request_from = None;
+        mentor.pending_request_level = 0;
+        had_mentor
+    };
+    if had_mentor {
+        vec![stage5_mentor_update_packet(world)]
+    } else {
+        vec![system_message_key(world, "server.NoMentorship")]
+    }
+}
+
 pub(super) fn stage5_trade_request_packet(
     world: &mut World,
     partner_name: Option<String>,
@@ -2089,6 +2339,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
 
     let player_object_id = current_player_object_id(world);
     let player_vitals = player_entity(world).and_then(|entity| entity_player_vitals(world, entity));
+    let mut stage5_systems = stage5.stage5_systems.clone();
+    stage5_systems.item_rental = item_rental_snapshot(world);
 
     WorldSnapshot {
         tick,
@@ -2173,9 +2425,38 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .filter(|buff| buff.expires_at_tick > tick)
             .map(|buff| buff.snapshot(tick, language))
             .collect(),
-        stage5_systems: stage5.stage5_systems.clone(),
+        stage5_systems,
         map_transfers: collect_map_transfer_snapshots(config, map),
         interaction_hints: build_interaction_hints(world, resources),
+    }
+}
+
+fn item_rental_snapshot(world: &World) -> Stage5ItemRentalSnapshot {
+    let rental = world.resource::<ItemRentalResource>();
+    let active = rental.active.as_ref();
+    Stage5ItemRentalSnapshot {
+        partner_name: active.map(|active| active.partner_name.clone()),
+        fee: active.map(|active| active.fee).unwrap_or(0),
+        days: active.map(|active| active.days).unwrap_or(0),
+        has_deposited_item: active
+            .and_then(|active| active.deposited_item.as_ref())
+            .is_some(),
+        deposited_item_name: active
+            .and_then(|active| active.deposited_item.as_ref())
+            .map(|item| item.name.clone()),
+        gold_locked: active.map(|active| active.gold_locked).unwrap_or(false),
+        item_locked: active.map(|active| active.item_locked).unwrap_or(false),
+        record_count: rental.rented_items.len(),
+        rented_items: rental
+            .rented_items
+            .iter()
+            .map(|item| Stage5ItemRentalRecordSnapshot {
+                item_id: item.item_id,
+                item_name: item.item_name.clone(),
+                renting_player_name: item.renting_player_name.clone(),
+                item_return_date_binary_datetime: item.item_return_date_binary_datetime,
+            })
+            .collect(),
     }
 }
 
@@ -3535,15 +3816,23 @@ impl SimulationSession {
                 request_monster_info_packet(monster_index)
             }
             ClientPacket::RequestNpcInfo { npc_index } => request_npc_info_packet(npc_index),
-            ClientPacket::MarriageRequest
-            | ClientPacket::MarriageReply { .. }
-            | ClientPacket::ChangeMarriage
-            | ClientPacket::DivorceRequest
-            | ClientPacket::DivorceReply { .. }
-            | ClientPacket::AddMentor { .. }
-            | ClientPacket::MentorReply { .. }
-            | ClientPacket::AllowMentor
-            | ClientPacket::CancelMentor => Vec::new(),
+            ClientPacket::MarriageRequest => stage5_marriage_request_packet(self.app.world_mut()),
+            ClientPacket::MarriageReply { accept_invite } => {
+                stage5_marriage_reply_packet(self.app.world_mut(), accept_invite)
+            }
+            ClientPacket::ChangeMarriage => stage5_change_marriage_packet(self.app.world_mut()),
+            ClientPacket::DivorceRequest => stage5_divorce_request_packet(self.app.world_mut()),
+            ClientPacket::DivorceReply { accept_invite } => {
+                stage5_divorce_reply_packet(self.app.world_mut(), accept_invite)
+            }
+            ClientPacket::AddMentor { name } => {
+                stage5_add_mentor_packet(self.app.world_mut(), name)
+            }
+            ClientPacket::MentorReply { accept_invite } => {
+                stage5_mentor_reply_packet(self.app.world_mut(), accept_invite)
+            }
+            ClientPacket::AllowMentor => stage5_allow_mentor_packet(self.app.world_mut()),
+            ClientPacket::CancelMentor => stage5_cancel_mentor_packet(self.app.world_mut()),
             ClientPacket::TradeRequest => stage5_trade_request_packet(self.app.world_mut(), None),
             ClientPacket::TradeReply { accept_invite } => {
                 stage5_trade_reply_packet(self.app.world_mut(), accept_invite)

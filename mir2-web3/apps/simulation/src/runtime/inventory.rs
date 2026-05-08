@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{AccountRecord, EquipmentSlot, ItemContainer, ItemGrade, SimulationConfig};
@@ -960,6 +961,132 @@ pub(super) fn item_index_for_client_reference(
         .position(|item| item_matches_client_reference(item, grid, unique_id))
 }
 
+fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
+    resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+        .chain(resources.storage_items.iter())
+        .any(|item| item_unique_id(item) == unique_id)
+}
+
+fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
+    let mut unique_id = minimum.max(1);
+    while inventory_unique_id_is_used(resources, unique_id) {
+        unique_id = unique_id.saturating_add(1);
+    }
+    unique_id
+}
+
+pub(super) fn allocate_item_unique_id(
+    resources: &InventoryResource,
+    container: ItemContainer,
+    slot: u8,
+) -> u64 {
+    let preferred = default_item_unique_id(container, slot);
+    if !inventory_unique_id_is_used(resources, preferred) {
+        return preferred;
+    }
+
+    let max_existing = resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+        .chain(resources.storage_items.iter())
+        .map(item_unique_id)
+        .max()
+        .unwrap_or(0);
+    next_available_unique_id(resources, max_existing.saturating_add(1))
+}
+
+fn normalize_item_list_unique_ids(
+    items: &mut [ItemState],
+    seen: &mut BTreeSet<u64>,
+    next_unique_id: &mut u64,
+) {
+    for item in items {
+        let current_unique_id = item_unique_id(item);
+        if seen.insert(current_unique_id) {
+            item.unique_id = current_unique_id;
+            continue;
+        }
+
+        let preferred = default_item_unique_id(item.container, item.slot);
+        let normalized_unique_id = if !seen.contains(&preferred) {
+            preferred
+        } else {
+            while seen.contains(&*next_unique_id) {
+                *next_unique_id = next_unique_id.saturating_add(1);
+            }
+            let allocated = *next_unique_id;
+            *next_unique_id = next_unique_id.saturating_add(1);
+            allocated
+        };
+        item.unique_id = normalized_unique_id;
+        seen.insert(normalized_unique_id);
+    }
+}
+
+pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) {
+    let mut seen = BTreeSet::new();
+    let mut next_unique_id = resources
+        .belt_items
+        .iter()
+        .map(item_unique_id)
+        .max()
+        .unwrap_or(0)
+        .saturating_add(1);
+    normalize_item_list_unique_ids(&mut resources.belt_items, &mut seen, &mut next_unique_id);
+
+    let mut seen = BTreeSet::new();
+    let mut next_unique_id = resources
+        .inventory_items
+        .iter()
+        .map(item_unique_id)
+        .max()
+        .unwrap_or(0)
+        .saturating_add(1);
+    normalize_item_list_unique_ids(
+        &mut resources.inventory_items,
+        &mut seen,
+        &mut next_unique_id,
+    );
+
+    let mut seen = BTreeSet::new();
+    let mut next_unique_id = resources
+        .storage_items
+        .iter()
+        .map(item_unique_id)
+        .max()
+        .unwrap_or(0)
+        .saturating_add(1);
+    normalize_item_list_unique_ids(&mut resources.storage_items, &mut seen, &mut next_unique_id);
+}
+
+pub(super) fn item_heal_values_for_key(key: &str) -> (i32, i32) {
+    match key {
+        "red-potion" | "belt-red-potion" | "stored-red-potion" => (35, 0),
+        "blue-potion" | "belt-blue-potion" => (0, 20),
+        _ => (0, 0),
+    }
+}
+
+fn normalize_item_list_known_metadata(items: &mut [ItemState]) {
+    for item in items {
+        let (heal_hp, heal_mp) = item_heal_values_for_key(&item.key);
+        if heal_hp > 0 || heal_mp > 0 {
+            item.heal_hp = heal_hp;
+            item.heal_mp = heal_mp;
+        }
+    }
+}
+
+pub(super) fn normalize_inventory_known_item_metadata(resources: &mut InventoryResource) {
+    normalize_item_list_known_metadata(&mut resources.belt_items);
+    normalize_item_list_known_metadata(&mut resources.inventory_items);
+    normalize_item_list_known_metadata(&mut resources.storage_items);
+}
+
 pub(super) fn item_key_for_client_reference(
     world: &World,
     unique_id: u64,
@@ -1335,7 +1462,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             name: name.to_string(),
             icon: item_icon_for_key(key),
             slot,
-            unique_id: default_item_unique_id(item_container, slot),
+            unique_id: allocate_item_unique_id(&resources, item_container, slot),
             container: item_container,
             quantity: stack_quantity,
             description: description.to_string(),
@@ -1577,6 +1704,9 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
         let mut item = resources.inventory_items.remove(index);
         item.slot = to_slot;
         item.container = ItemContainer::Storage;
+        if inventory_unique_id_is_used(&resources, item_unique_id(&item)) {
+            item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
+        }
         resources.storage_items.push(item);
     }
 
@@ -1637,6 +1767,9 @@ pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<
         let mut item = resources.storage_items.remove(index);
         item.slot = to_inventory_slot;
         item.container = to_container;
+        if inventory_unique_id_is_used(&resources, item_unique_id(&item)) {
+            item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
+        }
         resources.inventory_items.push(item);
     }
 
@@ -2073,7 +2206,7 @@ pub(super) fn split_item_impl(
             resources.storage_items[index].quantity -= u32::from(count);
             let mut split = resources.storage_items[index].clone();
             split.slot = next_slot;
-            split.unique_id = default_item_unique_id(split.container, next_slot);
+            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
             split.quantity = u32::from(count);
             let split_packet_item = user_item_from_item_state(&split);
             resources.storage_items.push(split);
@@ -2104,7 +2237,7 @@ pub(super) fn split_item_impl(
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
-            split.unique_id = default_item_unique_id(split.container, next_slot);
+            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
             split.quantity = u32::from(count);
             let split_packet_item = user_item_from_item_state(&split);
             match split.container {

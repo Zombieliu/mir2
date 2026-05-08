@@ -2031,6 +2031,7 @@ pub struct WorldItemSnapshot {
     pub key: String,
     pub name: String,
     pub icon: u16,
+    pub unique_id: u64,
     pub slot: u8,
     pub container: ItemContainer,
     pub quantity: u32,
@@ -2170,6 +2171,10 @@ pub struct Stage5SystemsState {
     pub group: Stage5GroupState,
     pub guild: Stage5GuildState,
     pub social: Stage5SocialState,
+    #[serde(default)]
+    pub relationship: Stage5RelationshipState,
+    #[serde(default)]
+    pub mentor: Stage5MentorState,
     pub mail: Vec<Stage5MailMessage>,
     pub trade: Option<Stage5TradeState>,
     pub auction: Vec<Stage5AuctionListing>,
@@ -2186,6 +2191,8 @@ pub struct Stage5SystemsState {
     pub name_lists: Vec<String>,
     #[serde(default)]
     pub intelligent_creatures: Vec<ClientIntelligentCreature>,
+    #[serde(default)]
+    pub item_rental: Stage5ItemRentalSnapshot,
 }
 
 impl Default for Stage5SystemsState {
@@ -2194,6 +2201,8 @@ impl Default for Stage5SystemsState {
             group: Stage5GroupState::default(),
             guild: Stage5GuildState::default(),
             social: Stage5SocialState::default(),
+            relationship: Stage5RelationshipState::default(),
+            mentor: Stage5MentorState::default(),
             mail: Vec::new(),
             trade: None,
             auction: Vec::new(),
@@ -2205,8 +2214,32 @@ impl Default for Stage5SystemsState {
             appearance: Stage5AppearanceState::default(),
             name_lists: Vec::new(),
             intelligent_creatures: Vec::new(),
+            item_rental: Stage5ItemRentalSnapshot::default(),
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5ItemRentalSnapshot {
+    pub partner_name: Option<String>,
+    pub fee: u32,
+    pub days: u32,
+    pub has_deposited_item: bool,
+    pub deposited_item_name: Option<String>,
+    pub gold_locked: bool,
+    pub item_locked: bool,
+    pub record_count: usize,
+    pub rented_items: Vec<Stage5ItemRentalRecordSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5ItemRentalRecordSnapshot {
+    pub item_id: u64,
+    pub item_name: String,
+    pub renting_player_name: String,
+    pub item_return_date_binary_datetime: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2249,6 +2282,80 @@ pub struct Stage5SocialState {
     pub blocked: Vec<String>,
     #[serde(default)]
     pub memos: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5RelationshipState {
+    #[serde(default = "default_stage5_allow_marriage")]
+    pub allow_marriage: bool,
+    #[serde(default)]
+    pub partner_name: String,
+    #[serde(default)]
+    pub married_date_binary_datetime: i64,
+    #[serde(default)]
+    pub map_name: String,
+    #[serde(default)]
+    pub married_days: i16,
+    #[serde(default)]
+    pub pending_request_from: Option<String>,
+    #[serde(default)]
+    pub pending_divorce_from: Option<String>,
+}
+
+const fn default_stage5_allow_marriage() -> bool {
+    true
+}
+
+impl Default for Stage5RelationshipState {
+    fn default() -> Self {
+        Self {
+            allow_marriage: true,
+            partner_name: String::new(),
+            married_date_binary_datetime: 0,
+            map_name: String::new(),
+            married_days: 0,
+            pending_request_from: None,
+            pending_divorce_from: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5MentorState {
+    #[serde(default = "default_stage5_allow_mentor")]
+    pub allow_mentor: bool,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub level: u16,
+    #[serde(default)]
+    pub online: bool,
+    #[serde(default)]
+    pub mentee_exp: i64,
+    #[serde(default)]
+    pub pending_request_from: Option<String>,
+    #[serde(default)]
+    pub pending_request_level: u16,
+}
+
+const fn default_stage5_allow_mentor() -> bool {
+    true
+}
+
+impl Default for Stage5MentorState {
+    fn default() -> Self {
+        Self {
+            allow_mentor: true,
+            name: String::new(),
+            level: 0,
+            online: false,
+            mentee_exp: 0,
+            pending_request_from: None,
+            pending_request_level: 0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

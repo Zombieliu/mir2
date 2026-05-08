@@ -107,6 +107,7 @@ impl ItemState {
             key: self.key.clone(),
             name: localized_item_name(language, &self.key, &self.name),
             icon: self.icon,
+            unique_id: item_unique_id(self),
             slot: self.slot,
             container: self.container,
             quantity: self.quantity,

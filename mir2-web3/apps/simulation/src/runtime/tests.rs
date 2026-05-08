@@ -24897,6 +24897,18 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
 }
 
 #[test]
+fn drop_gold_packet_silently_rejects_before_start_game() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+
+    let packets = session.handle_packet(ClientPacket::DropGold { amount: 100 });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.gold, 0);
+    assert!(snapshot.ground_drops.is_empty());
+    assert!(packets.is_empty());
+}
+
+#[test]
 fn drop_gold_packet_emits_lose_gold() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -25098,6 +25110,29 @@ fn dropped_inventory_item_can_be_removed_from_bag_and_spawned_on_ground() {
 }
 
 #[test]
+fn drop_item_packet_rejects_before_start_game_without_panic() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+
+    let packets = session.handle_packet(ClientPacket::DropItem {
+        unique_id: 1,
+        count: 1,
+        hero_inventory: false,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.player_hp, None);
+    assert_eq!(
+        packets,
+        vec![ServerPacket::DropItem {
+            unique_id: 1,
+            count: 1,
+            hero_inventory: false,
+            success: false,
+        }]
+    );
+}
+
+#[test]
 fn drop_item_packet_splits_stack_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -25156,6 +25191,32 @@ fn inventory_unique_ids_distinguish_bag_pages_for_same_slot() {
     assert_eq!(super::item_unique_id(bag2), 40);
     assert_ne!(super::item_unique_id(bag1), super::item_unique_id(bag2));
     assert_eq!(super::user_item_from_item_state(bag2).unique_id, 40);
+}
+
+#[test]
+fn world_snapshot_exposes_inventory_unique_ids_for_client_packets() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let item = resources
+            .inventory_items
+            .iter_mut()
+            .find(|item| item.key == "blue-potion" && item.container == ItemContainer::Bag1)
+            .expect("blue potion should exist");
+        item.unique_id = 9_101;
+    }
+
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(
+        snapshot
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "blue-potion" && item.container == ItemContainer::Bag1)
+            .map(|item| item.unique_id),
+        Some(9_101)
+    );
 }
 
 #[test]
@@ -32384,6 +32445,89 @@ fn taking_back_item_moves_storage_item_into_inventory_snapshot() {
 }
 
 #[test]
+fn taking_back_item_rekeys_dirty_duplicate_inventory_unique_id() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    activate_storage_service(&mut session);
+
+    let duplicate_unique_id = {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let duplicate_unique_id = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.slot == 2 && item.container == ItemContainer::Bag1)
+            .map(|item| item.unique_id)
+            .expect("bag item unique id");
+        let stored_item = resources
+            .storage_items
+            .iter_mut()
+            .find(|item| item.slot == 0)
+            .expect("stored item");
+        stored_item.unique_id = duplicate_unique_id;
+        duplicate_unique_id
+    };
+
+    let packets = session.handle_packet(ClientPacket::TakeBackItem { from: 0, to: 6 });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::TakeBackItem {
+            from: 0,
+            to: 6,
+            success: true
+        }
+    )));
+
+    let snapshot = session.world_snapshot();
+    let moved_item = snapshot
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "stored-red-potion" && item.slot == 6)
+        .expect("taken-back item");
+    assert_ne!(moved_item.unique_id, duplicate_unique_id);
+    assert_eq!(
+        snapshot
+            .inventory_items
+            .iter()
+            .filter(|item| item.unique_id == duplicate_unique_id)
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn stage5_craft_allocates_unique_id_when_preferred_slot_collides_with_storage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    activate_storage_service(&mut session);
+
+    let store_packets = session.handle_packet(ClientPacket::StoreItem { from: 4, to: 4 });
+    assert!(store_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::StoreItem {
+            from: 4,
+            to: 4,
+            success: true
+        }
+    )));
+
+    session.stage5_command("mine", vec!["1".to_string()]);
+    session.stage5_command("craft", vec!["crafted-blade".to_string()]);
+
+    let snapshot = session.world_snapshot();
+    let crafted_item = snapshot
+        .inventory_items
+        .iter()
+        .find(|item| item.key == "crafted-blade" && item.slot == 4)
+        .expect("crafted item should use the freed slot");
+    let stored_dagger = snapshot
+        .storage_items
+        .iter()
+        .find(|item| item.key == "dagger" && item.slot == 4)
+        .expect("stored dagger");
+    assert_ne!(crafted_item.unique_id, stored_dagger.unique_id);
+}
+
+#[test]
 fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -35199,6 +35343,72 @@ fn repair_item_packet_uses_unique_id_when_it_differs_from_slot() {
 }
 
 #[test]
+fn repair_item_packet_repairs_equipped_slot_id_with_cost_and_max_dura_loss() {
+    let mut session = SimulationSession::new(wicked_trader_config());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
+    set_player_gold(&mut session, 50_000);
+
+    let (unique_id, max_dura, current_dura, expected_cost, expected_max) = {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let equipment = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("equipped weapon");
+        equipment.durability_current = equipment.durability_max / 2;
+        let unique_id = super::equipment_slot_unique_id(equipment.slot).expect("weapon slot id");
+        let item = super::item_state_from_equipment_state(
+            equipment.clone(),
+            ItemContainer::Bag1,
+            u8::try_from(unique_id).unwrap_or_default(),
+        );
+        let template =
+            super::crystal_item_template_for_item_key(&item.key).expect("equipped template");
+        let expected_cost = super::crystal_npc_repair_cost(&item, &template, 2.0, false);
+        let expected_max = equipment
+            .durability_max
+            .saturating_sub((equipment.durability_max - equipment.durability_current) / 30);
+        (
+            unique_id,
+            equipment.durability_max,
+            equipment.durability_current,
+            expected_cost,
+            expected_max,
+        )
+    };
+    assert!(current_dura < max_dura);
+
+    let _ = session.interact(4990);
+    let _ = session.select_npc_dialog_target("@Repair");
+    let packets = session.handle_packet(ClientPacket::RepairItem { unique_id });
+    let resources = session.app.world().resource::<InventoryResource>();
+    let equipment = resources
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("equipped weapon should remain");
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RepairItem { unique_id: packet_id } if *packet_id == unique_id)));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_cost)));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ItemRepaired {
+            unique_id: packet_id,
+            max_dura: packet_max,
+            current_dura: packet_current
+        } if *packet_id == unique_id && *packet_max == expected_max && *packet_current == expected_max
+    )));
+    assert_eq!(player_gold(&session), 50_000 - expected_cost);
+    assert_eq!(equipment.durability_current, expected_max);
+    assert_eq!(equipment.durability_max, expected_max);
+}
+
+#[test]
 fn repair_item_rejection_edges_follow_crystal_order() {
     let mut session = SimulationSession::new(wicked_trader_config());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -35370,6 +35580,71 @@ fn srepair_item_packet_uses_triple_cost_without_max_dura_loss() {
         (item.durability_current, item.durability_max),
         (Some(max_dura), Some(max_dura))
     );
+}
+
+#[test]
+fn srepair_item_packet_repairs_equipped_slot_id_without_max_dura_loss() {
+    let mut session = SimulationSession::new(blacksmith_config());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
+    set_player_gold(&mut session, 50_000);
+
+    let (unique_id, max_dura, current_dura, expected_cost) = {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let equipment = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("equipped weapon");
+        equipment.durability_current = equipment.durability_max / 2;
+        let unique_id = super::equipment_slot_unique_id(equipment.slot).expect("weapon slot id");
+        let item = super::item_state_from_equipment_state(
+            equipment.clone(),
+            ItemContainer::Bag1,
+            u8::try_from(unique_id).unwrap_or_default(),
+        );
+        let template =
+            super::crystal_item_template_for_item_key(&item.key).expect("equipped template");
+        let rate = super::crystal_npc_info_by_script_key("BichonProvince/BichonWall/Blacksmith-0")
+            .map(|npc| npc.price_rate)
+            .unwrap_or(1.0);
+        let expected_cost = super::crystal_npc_repair_cost(&item, &template, rate, true);
+        (
+            unique_id,
+            equipment.durability_max,
+            equipment.durability_current,
+            expected_cost,
+        )
+    };
+    assert!(current_dura < max_dura);
+
+    let _ = session.interact(4988);
+    let _ = session.select_npc_dialog_target("@SRepair");
+    let packets = session.handle_packet(ClientPacket::SRepairItem { unique_id });
+    let resources = session.app.world().resource::<InventoryResource>();
+    let equipment = resources
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("equipped weapon should remain");
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RepairItem { unique_id: packet_id } if *packet_id == unique_id)));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_cost)));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ItemRepaired {
+            unique_id: packet_id,
+            max_dura: packet_max,
+            current_dura: packet_current
+        } if *packet_id == unique_id && *packet_max == max_dura && *packet_current == max_dura
+    )));
+    assert_eq!(player_gold(&session), 50_000 - expected_cost);
+    assert_eq!(equipment.durability_current, max_dura);
+    assert_eq!(equipment.durability_max, max_dura);
 }
 
 #[test]
@@ -38066,6 +38341,137 @@ fn stage5_item_add_socket_emits_item_slot_size_changed() {
 }
 
 #[test]
+fn stage5_qa_damage_equipment_emits_dura_changed_for_smoke_setup() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_crystal_item(&mut session, "Dagger", EquipmentSlot::Weapon);
+    let before = session
+        .world_snapshot()
+        .equipment_items
+        .into_iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("weapon should be equipped")
+        .durability_current;
+
+    let packets = session.stage5_command(
+        "qa.damageEquipment",
+        vec!["weapon".to_string(), "7".to_string()],
+    );
+    let snapshot = session.world_snapshot();
+    let after = snapshot
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("weapon should remain equipped")
+        .durability_current;
+
+    assert_eq!(after, before.saturating_sub(7));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DuraChanged {
+            unique_id: 0,
+            current_dura
+        } if *current_dura == after
+    )));
+}
+
+#[test]
+fn stage5_qa_damage_player_emits_health_for_smoke_setup() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = session.world_snapshot().player_hp.expect("player hp");
+
+    let packets = session.stage5_command("qa.damagePlayer", vec!["15".to_string()]);
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.player_hp, Some((before - 15).max(1)));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+}
+
+#[test]
+fn stage5_qa_give_item_seeds_usable_healing_metadata() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_current_player_hp(&mut session, 10);
+    let damaged_hp = session.world_snapshot().player_hp.expect("player hp");
+    let existing_unique_ids = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .map(|item| item.unique_id)
+        .collect::<Vec<_>>();
+
+    session.stage5_command(
+        "qa.giveItem",
+        vec!["red-potion".to_string(), "2".to_string()],
+    );
+    let seeded = session
+        .world_snapshot()
+        .inventory_items
+        .into_iter()
+        .find(|item| item.key == "red-potion" && !existing_unique_ids.contains(&item.unique_id))
+        .expect("QA red potion should be seeded");
+
+    let packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: seeded.unique_id,
+        grid: MirGridType::Inventory,
+    });
+    let immediate_snapshot = session.world_snapshot();
+
+    assert_eq!(immediate_snapshot.player_hp, Some(damaged_hp));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UseItem {
+            unique_id,
+            success: true,
+            grid: MirGridType::Inventory
+        } if *unique_id == seeded.unique_id
+    )));
+    assert_eq!(
+        immediate_snapshot
+            .inventory_items
+            .iter()
+            .find(|item| item.unique_id == seeded.unique_id)
+            .map(|item| item.quantity),
+        Some(1)
+    );
+
+    let tick_packets = session.tick();
+    let tick_snapshot = session.world_snapshot();
+
+    assert!(tick_snapshot.player_hp.expect("player hp") > damaged_hp);
+    assert!(tick_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+}
+
+#[test]
+fn stage5_qa_open_npc_dialog_opens_dialog_for_smoke_setup() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let packets = session.stage5_command("qa.openNpcDialog", Vec::new());
+    let snapshot = session.world_snapshot();
+    let dialog = snapshot
+        .active_npc_dialog
+        .expect("QA NPC dialog should be active");
+
+    assert_eq!(dialog.title, "InnKeeper_Brittney");
+    assert!(dialog.links.iter().any(|link| link.target == "@Storage"));
+    assert!(packets.iter().all(|packet| {
+        !matches!(
+            packet,
+            ServerPacket::Chat {
+                message,
+                ..
+            } if message.contains("Invalid")
+        )
+    }));
+}
+
+#[test]
 fn stage5_item_add_socket_rejects_without_source_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -40060,6 +40466,51 @@ fn stage5_conquest_event_hero_mining_and_crafting_flow() {
 }
 
 #[test]
+#[allow(deprecated)]
+fn stage5_event_spawn_uses_nearby_spawnable_tile_on_crystal_map() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:330:270");
+    let before_count = session
+        .app
+        .world()
+        .iter_entities()
+        .filter(|entity| {
+            entity
+                .get::<DisplayName>()
+                .is_some_and(|name| name.value == "BugBat")
+        })
+        .count();
+
+    session.stage5_command("event.spawn", vec!["BugBat".to_string(), "1".to_string()]);
+
+    let snapshot = session.world_snapshot();
+    assert!(snapshot
+        .stage5_systems
+        .conquest
+        .event_log
+        .iter()
+        .any(|entry| entry.contains("Event spawned 1x BugBat")));
+    assert!(snapshot
+        .entities
+        .iter()
+        .any(|entity| entity.name == "BugBat"));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .iter_entities()
+            .filter(|entity| {
+                entity
+                    .get::<DisplayName>()
+                    .is_some_and(|name| name.value == "BugBat")
+            })
+            .count(),
+        before_count + 1
+    );
+}
+
+#[test]
 fn fishing_packets_toggle_crystal_update_surface() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     assert!(session
@@ -41321,28 +41772,141 @@ fn request_info_packets_return_crystal_map_monster_and_npc_data() {
 }
 
 #[test]
-fn relationship_packets_preserve_crystal_disabled_surface() {
+fn relationship_packets_emit_crystal_hint_and_update_surfaces() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    assert!(session
-        .handle_packet(ClientPacket::MarriageRequest)
-        .is_empty());
-    assert!(session
-        .handle_packet(ClientPacket::MarriageReply {
-            accept_invite: true,
-        })
-        .is_empty());
-    assert!(session
-        .handle_packet(ClientPacket::AddMentor {
-            name: "Master".to_string(),
-        })
-        .is_empty());
-    assert!(session
-        .handle_packet(ClientPacket::MentorReply {
-            accept_invite: false,
-        })
-        .is_empty());
+    let face_player_message = mir2_game_data::localized_text_or_fallback(
+        super::current_language(session.app.world()),
+        "server.FacePlayerForMarriageRequest",
+        "server.FacePlayerForMarriageRequest",
+    );
+    let marriage_packets = session.handle_packet(ClientPacket::MarriageRequest);
+    assert!(marriage_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            message,
+            chat_type: ChatType::System
+        } if message == &face_player_message
+    )));
+
+    let allow_packets = session.handle_packet(ClientPacket::ChangeMarriage);
+    assert!(allow_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            ..
+        }
+    )));
+
+    let divorce_packets = session.handle_packet(ClientPacket::DivorceRequest);
+    assert!(divorce_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            ..
+        }
+    )));
+
+    {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.relationship.pending_request_from = Some("Beloved".to_string());
+    }
+    let reply_packets = session.handle_packet(ClientPacket::MarriageReply {
+        accept_invite: true,
+    });
+    assert!(reply_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoverUpdate {
+            name,
+            map_name,
+            married_days,
+            ..
+        } if name == "Beloved" && !map_name.is_empty() && *married_days == 0
+    )));
+
+    let divorce_reply_packets = session.handle_packet(ClientPacket::DivorceReply {
+        accept_invite: true,
+    });
+    assert!(divorce_reply_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoverUpdate {
+            name,
+            map_name,
+            married_days,
+            ..
+        } if name.is_empty() && map_name.is_empty() && *married_days == 0
+    )));
+}
+
+#[test]
+fn mentor_packets_emit_crystal_hint_and_update_surfaces() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let self_mentor_packets = session.handle_packet(ClientPacket::AddMentor {
+        name: "Scout".to_string(),
+    });
+    assert!(self_mentor_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            ..
+        }
+    )));
+
+    let allow_packets = session.handle_packet(ClientPacket::AllowMentor);
+    assert!(allow_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            ..
+        }
+    )));
+
+    let cancel_empty_packets = session.handle_packet(ClientPacket::CancelMentor);
+    assert!(cancel_empty_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            ..
+        }
+    )));
+
+    {
+        let mut stage5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        stage5.stage5_systems.mentor.pending_request_from = Some("Master".to_string());
+        stage5.stage5_systems.mentor.pending_request_level = 40;
+    }
+    let reply_packets = session.handle_packet(ClientPacket::MentorReply {
+        accept_invite: true,
+    });
+    assert!(reply_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MentorUpdate {
+            name,
+            level,
+            online: true,
+            mentee_exp: 0,
+        } if name == "Master" && *level == 40
+    )));
+
+    let cancel_packets = session.handle_packet(ClientPacket::CancelMentor);
+    assert!(cancel_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MentorUpdate {
+            name,
+            level: 0,
+            online: false,
+            mentee_exp: 0,
+        } if name.is_empty()
+    )));
 }
 
 #[test]
@@ -41425,6 +41989,15 @@ fn item_rental_packets_confirm_records_rented_item_and_binds_loan_payload() {
                 && rented_items[0].renting_player_name == "Crystal Partner"
     )));
     assert_eq!(session.world_snapshot().gold, starting_gold);
+    let snapshot = session.world_snapshot();
+    assert_eq!(snapshot.stage5_systems.item_rental.record_count, 1);
+    assert_eq!(
+        snapshot.stage5_systems.item_rental.rented_items[0].item_name,
+        "Dagger"
+    );
+    assert_eq!(snapshot.stage5_systems.item_rental.fee, 0);
+    assert!(!snapshot.stage5_systems.item_rental.gold_locked);
+    assert!(!snapshot.stage5_systems.item_rental.item_locked);
 
     let rented_items = session.handle_packet(ClientPacket::GetRentedItems);
     assert!(matches!(
@@ -41444,11 +42017,27 @@ fn item_rental_cancel_returns_deposit_and_refunds_locked_fee() {
     session.handle_packet(ClientPacket::DepositRentalItem { from: 4, to: 0 });
     session.handle_packet(ClientPacket::ItemRentalFee { amount: 100 });
     session.handle_packet(ClientPacket::ItemRentalLockFee);
+    let active_snapshot = session.world_snapshot().stage5_systems.item_rental;
+    assert_eq!(
+        active_snapshot.partner_name.as_deref(),
+        Some("Crystal Partner")
+    );
+    assert_eq!(active_snapshot.fee, 100);
+    assert_eq!(active_snapshot.days, 1);
+    assert_eq!(
+        active_snapshot.deposited_item_name.as_deref(),
+        Some("Dagger")
+    );
+    assert!(active_snapshot.has_deposited_item);
+    assert!(active_snapshot.gold_locked);
+    assert!(!active_snapshot.item_locked);
     let cancel_packets = session.handle_packet(ClientPacket::CancelItemRental);
 
     assert_eq!(cancel_packets, vec![ServerPacket::CancelItemRental]);
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.gold, starting_gold);
+    assert_eq!(snapshot.stage5_systems.item_rental.record_count, 0);
+    assert!(snapshot.stage5_systems.item_rental.partner_name.is_none());
     assert!(snapshot
         .inventory_items
         .iter()

@@ -5,6 +5,7 @@
   "scripts": {
     "export:crystal-ui": "node ./scripts/export-crystal-ui.mjs",
     "export:crystal-map": "node ./scripts/export-crystal-starter-map.mjs",
+    "generate:crystal-map-blend": "node ./scripts/generate-crystal-map-blend-assets.mjs",
     "audit:crystal-map-coverage": "node ./scripts/audit-crystal-map-coverage.mjs",
     "smoke:crystal-map-api": "node ./scripts/smoke-crystal-map-api.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",

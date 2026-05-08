@@ -5746,6 +5746,76 @@ mod tests {
     }
 
     #[test]
+    fn stage5_damage_equipment_browser_command_returns_dura_changed_event() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"stage5Command","action":"qa.damageEquipment","args":["weapon","2500"]}"#,
+        )
+        .expect("stage5 damage equipment command should deserialize");
+        let action = super::browser_command_to_action(command)
+            .expect("stage5 damage equipment command should map to a session action");
+
+        let responses = super::execute_session_action(&mut session, action)
+            .expect("stage5 damage equipment command should execute");
+        let damage_packet = responses
+            .iter()
+            .find(|packet| matches!(packet, ServerPacket::DuraChanged { .. }))
+            .expect("stage5 damage equipment should emit DuraChanged");
+        let event = super::server_packet_to_event(damage_packet);
+
+        assert_eq!(event["packet"], "DuraChanged");
+        assert_eq!(event["payload"]["uniqueId"], 0);
+        assert_eq!(event["payload"]["currentDura"], 0);
+    }
+
+    #[test]
+    fn stage5_damage_equipment_still_works_after_storage_password_flow() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session.handle_packet(ClientPacket::EquipItem {
+            unique_id: 4,
+            grid: MirGridType::Inventory,
+            to: 0,
+        });
+        session.transfer_map("crystal:0:317:260");
+        session.stage5_command("qa.openStorage", Vec::new());
+        session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "Safe123".to_string(),
+        });
+        session.handle_packet(ClientPacket::UnlockStorage {
+            password: "Safe123".to_string(),
+        });
+        session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: "Safe123".to_string(),
+            new_password: "Vault123".to_string(),
+        });
+        session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "Vault123".to_string(),
+        });
+
+        let responses =
+            session.stage5_command("qa.damageEquipment", vec!["weapon".into(), "2500".into()]);
+        let snapshot = session.world_snapshot();
+        let weapon = snapshot
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == mir2_simulation::EquipmentSlot::Weapon)
+            .expect("weapon should remain equipped");
+
+        assert_eq!(weapon.name, "Dagger");
+        assert_eq!(weapon.durability_current, 0);
+        assert!(responses.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DuraChanged {
+                unique_id: 0,
+                current_dura: 0
+            }
+        )));
+    }
+
+    #[test]
     fn select_npc_dialog_command_accepts_target_field() {
         let command =
             serde_json::from_str::<BrowserCommand>(r#"{"type":"selectNpcDialog","target":"@Buy"}"#)

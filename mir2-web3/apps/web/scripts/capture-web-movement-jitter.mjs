@@ -16,6 +16,8 @@ const outputDir = path.resolve(args.output ?? DEFAULT_OUTPUT_DIR);
 const prefix = args.prefix ?? `movement-jitter-${Date.now()}`;
 const account = args.account ?? process.env.MIR2_QA_ACCOUNT ?? DEFAULT_ACCOUNT;
 const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? DEFAULT_PASSWORD;
+const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_ACCOUNT, false);
+const characterName = args.characterName ?? defaultCharacterName();
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9500 + (process.pid % 1000));
 const sampleMs = numberArg(args.sampleMs, 50);
@@ -136,8 +138,8 @@ async function main() {
     await client.send("Page.enable");
     await setViewport(client, DEFAULT_VIEWPORT);
     await navigate(client, baseUrl);
-    await installSendProbe(client);
     await login(client);
+    await installSendProbe(client);
     await transferTo(client, startMap, startX, startY);
     await delay(800);
 
@@ -252,6 +254,8 @@ async function main() {
       ok: true,
       baseUrl,
       account,
+      createAccount,
+      characterName: createAccount ? characterName : undefined,
       interaction,
       startTarget: { map: startMap, x: startX, y: startY },
       startedAt: new Date().toISOString(),
@@ -435,9 +439,50 @@ async function login(client) {
   await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'login'", "login screen", 15_000);
   await fillInput(client, ".login-input.account", account);
   await fillInput(client, ".login-input.password", password);
+
+  if (createAccount) {
+    await click(client, ".login-button.account button");
+    await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "account creation socket", 15_000);
+    await delay(800);
+  }
+
   await click(client, ".login-button.ok button");
   await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 15_000);
-  await click(client, ".select-action.start button");
+
+  if (createAccount) {
+    const created = await client.evaluate(`
+      window.__mir2Stage5?.send?.(${JSON.stringify({
+        type: "newCharacter",
+        name: characterName,
+        gender: "male",
+        class: "warrior",
+      })}) === true
+    `);
+    if (!created) throw new Error(`Failed to create movement QA character ${characterName}`);
+
+    await waitUntil(
+      client,
+      `
+        Array.isArray(window.__mir2Stage5?.state?.characters)
+          && window.__mir2Stage5.state.characters.some((character) => character?.name === ${JSON.stringify(characterName)})
+      `,
+      "movement QA character creation",
+      15_000,
+    );
+
+    const started = await client.evaluate(`
+      (() => {
+        const state = window.__mir2Stage5?.state;
+        const character = state?.characters?.find((entry) => entry?.name === ${JSON.stringify(characterName)});
+        if (!character) return false;
+        return window.__mir2Stage5?.send?.({ type: "startGame", characterIndex: character.index ?? 0 }) === true;
+      })()
+    `);
+    if (!started) throw new Error(`Failed to start movement QA character ${characterName}`);
+  } else {
+    await click(client, ".select-action.start button");
+  }
+
   await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'game'", "game screen", 20_000);
   await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
 }
@@ -579,6 +624,12 @@ async function readMovementState(client) {
       const receivedMoves = Array.isArray(window.__mir2MovementReceivedPackets)
         ? window.__mir2MovementReceivedPackets
         : [];
+      const commandHistory = Array.isArray(window.__mir2CommandHistory)
+        ? window.__mir2CommandHistory
+        : [];
+      const gatewayEvents = Array.isArray(window.__mir2GatewayEventHistory)
+        ? window.__mir2GatewayEventHistory
+        : [];
       const rect = (value) => value ? ({
         left: Math.round(value.left * 100) / 100,
         top: Math.round(value.top * 100) / 100,
@@ -592,6 +643,7 @@ async function readMovementState(client) {
         player,
         predictedPlayer: state.predictedPlayer ?? null,
         movementPlan: state.movementPlan ?? null,
+        directionStepPending: state.directionStepPending ?? null,
         selfEntity: self ? { x: self.x, y: self.y, direction: self.direction, kind: self.kind, objectId: self.objectId } : null,
         sprite: rect(sprite),
         nameplate: rect(nameplate),
@@ -602,7 +654,13 @@ async function readMovementState(client) {
         stage: rect(stage),
         logsTail: (state.logs ?? []).slice(-5).map((line) => line.text ?? String(line)),
         sentMoveTail: sentMoves.slice(-8),
+        commandTail: commandHistory
+          .filter((entry) => ["moveTo", "walk", "run", "turn"].includes(entry?.type))
+          .slice(0, 8),
         receivedMoveTail: receivedMoves.slice(-8),
+        gatewayMoveTail: gatewayEvents
+          .filter((entry) => ["UserLocation", "ObjectWalk", "ObjectRun", "ObjectBackStep", "ObjectSitDown"].includes(entry?.packet))
+          .slice(0, 8),
       };
     })()
   `);
@@ -683,6 +741,7 @@ function compactSample(sample) {
     player: sample.player,
     predictedPlayer: sample.predictedPlayer,
     movementPlan: sample.movementPlan,
+    directionStepPending: sample.directionStepPending,
     sprite: sample.sprite,
     centerSprite: sample.centerSprite,
     centerSpriteKey: sample.centerSpriteKey,
@@ -695,6 +754,7 @@ function compactState(state) {
     player: state.player,
     predictedPlayer: state.predictedPlayer,
     movementPlan: state.movementPlan,
+    directionStepPending: state.directionStepPending,
     selfEntity: state.selfEntity,
     sprite: state.sprite,
     centerSprite: state.centerSprite,
@@ -702,6 +762,8 @@ function compactState(state) {
     nameplate: state.nameplate,
     floor: state.floor,
     floorKey: state.floorKey,
+    commandTail: state.commandTail,
+    gatewayMoveTail: state.gatewayMoveTail,
   };
 }
 
@@ -841,6 +903,17 @@ function numberArg(value, fallback) {
   if (value === undefined || value === null || value === "") return fallback;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function booleanArg(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "boolean") return value;
+  return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function defaultCharacterName() {
+  const suffix = `${process.pid.toString(36)}${Date.now().toString(36)}`.replace(/[^a-z0-9]/gi, "");
+  return `MV${suffix}`.slice(0, 10).toUpperCase();
 }
 
 function delay(ms) {
