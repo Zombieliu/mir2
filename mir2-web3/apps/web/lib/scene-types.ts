@@ -38,6 +38,8 @@ export type OriginalMapSpriteFrame = {
   path: string;
   width: number;
   height: number;
+  offsetX?: number;
+  offsetY?: number;
 };
 
 export type OriginalMapSprite = {

@@ -1269,6 +1269,81 @@ pub(super) fn repair_item_impl(
         return Vec::new();
     };
 
+    let repair_types = crystal_npc_script_item_types(&script);
+    let rate = crystal_npc_info_by_script_key(&service.script_key)
+        .map(|npc| npc.price_rate)
+        .unwrap_or(1.0);
+
+    let equipment_index = {
+        let resources = world.resource::<InventoryResource>();
+        resources
+            .equipment_items
+            .iter()
+            .position(|item| equipment_slot_unique_id(item.slot) == Some(unique_id))
+    };
+    if let Some(equipment_index) = equipment_index {
+        let equipment = {
+            let resources = world.resource::<InventoryResource>();
+            resources.equipment_items[equipment_index].clone()
+        };
+        let item = item_state_from_equipment_state(
+            equipment.clone(),
+            ItemContainer::Bag1,
+            u8::try_from(unique_id).unwrap_or_default(),
+        );
+        let Some(template) = crystal_item_template_for_item_key(&item.key) else {
+            return Vec::new();
+        };
+
+        if equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_DONT_REPAIR)
+            || (special
+                && equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_NO_SREPAIR))
+        {
+            return vec![super::session::system_message_key(
+                world,
+                "server.CannotRepairItem",
+            )];
+        }
+
+        if !repair_types.is_empty() && !repair_types.contains(&template.item_type) {
+            return vec![super::session::system_message_key(
+                world,
+                "server.CannotRepairItemHere",
+            )];
+        }
+
+        let cost = crystal_npc_repair_cost(&item, &template, rate, special);
+        {
+            if world.resource::<PlayerRuntimeResource>().gold < cost {
+                return Vec::new();
+            }
+        }
+
+        let (max_dura, current_dura) = {
+            world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
+            let mut resources = world.resource_mut::<InventoryResource>();
+            let item = &mut resources.equipment_items[equipment_index];
+            let current = item.durability_current;
+            let mut max = item.durability_max;
+            if !special {
+                let loss = max.saturating_sub(current) / 30;
+                max = max.saturating_sub(loss);
+                item.durability_max = max;
+            }
+            item.durability_current = max;
+            (max, max)
+        };
+
+        return vec![
+            ServerPacket::LoseGold { gold: cost },
+            ServerPacket::ItemRepaired {
+                unique_id,
+                max_dura,
+                current_dura,
+            },
+        ];
+    }
+
     let item_index = {
         let resources = world.resource::<InventoryResource>();
         resources
@@ -1297,7 +1372,6 @@ pub(super) fn repair_item_impl(
         )];
     }
 
-    let repair_types = crystal_npc_script_item_types(&script);
     if !repair_types.is_empty() && !repair_types.contains(&template.item_type) {
         return vec![super::session::system_message_key(
             world,
@@ -1305,9 +1379,6 @@ pub(super) fn repair_item_impl(
         )];
     }
 
-    let rate = crystal_npc_info_by_script_key(&service.script_key)
-        .map(|npc| npc.price_rate)
-        .unwrap_or(1.0);
     let cost = crystal_npc_repair_cost(&item, &template, rate, special);
     {
         if world.resource::<PlayerRuntimeResource>().gold < cost {

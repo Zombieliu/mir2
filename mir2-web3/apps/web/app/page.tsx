@@ -36,6 +36,7 @@ type UiLogChannel =
   | "normal"
   | "shout"
   | "whisper"
+  | "trade"
   | "group"
   | "guild"
   | "system"
@@ -129,6 +130,7 @@ type GatewayWorldItem = {
   key: string;
   name: string;
   icon: number;
+  uniqueId?: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -182,15 +184,19 @@ type Stage5SystemsState = {
   group?: { members?: string[]; lootMode?: string };
   guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
   social?: { friends?: string[]; blocked?: string[] };
+  relationship?: Record<string, unknown>;
+  mentor?: Record<string, unknown>;
   mail?: Array<Record<string, unknown>>;
   trade?: Record<string, unknown> | null;
   auction?: Array<Record<string, unknown>>;
   conquest?: { castleOwner?: string; activeWars?: string[]; eventLog?: string[]; taxRatePercent?: number; gold?: number; guards?: number[]; walls?: number[]; gates?: number[]; openGates?: number[] };
   guildTerritory?: { owned?: boolean; mapFileName?: string; rentalDaysLeft?: number; recallLog?: string[] };
   hero?: Record<string, unknown> | null;
+  itemRental?: Record<string, unknown>;
   profession?: { miningLevel?: number; ore?: number; craftedItems?: string[] };
   appearance?: { hair?: number };
   nameLists?: string[];
+  intelligentCreatures?: Array<Record<string, unknown>>;
 };
 
 type GatewayMapTransfer = {
@@ -293,6 +299,9 @@ type WorldEntity = {
   bigMapIcon?: number;
   showOnBigMap?: boolean;
   canTeleportTo?: boolean;
+  movementAnimation?: "walking" | "running";
+  movementStartedAt?: number;
+  movementUntil?: number;
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -320,6 +329,7 @@ type WorldItem = {
   key: string;
   name: string;
   icon: number;
+  uniqueId: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -330,6 +340,7 @@ type WorldItem = {
 
 type ItemCommandRef = {
   key: string;
+  uniqueId: number;
   slot: number;
   container: ItemContainer;
 };
@@ -339,11 +350,13 @@ type EquipmentCommandRef = {
 };
 
 type ItemMoveRef = {
+  uniqueId?: number;
   slot: number;
   container: ItemContainer;
 };
 
 type ItemMergeRef = {
+  uniqueId: number;
   slot: number;
   container: ItemContainer;
 };
@@ -543,8 +556,11 @@ const SCENE_CHUNK_WIDTH = Math.max(VIEWPORT_RANGE_X, 1);
 const SCENE_CHUNK_HEIGHT = Math.max(VIEWPORT_RANGE_Y, 1);
 const WALK_STEP_INTERVAL_MS = 600;
 const RUN_STEP_INTERVAL_MS = 600;
+const CRYSTAL_ENTITY_MOVE_ACTION_MS = 600;
 const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 1800;
 const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 10;
+const DEFAULT_GATEWAY_WS_URL =
+  process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws";
 const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
   { key: "crystal:0:330:270", label: "Bichon Province (0)" },
   { key: "crystal:1:315:82", label: "Woomyon Woods S (1)" },
@@ -556,6 +572,12 @@ const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
   { key: "crystal:D1801:200:200", label: "Penal Cavern (D1801)" },
   { key: "crystal:HKR:200:200", label: "HellFire Kings Room (HKR)" },
 ];
+
+function resolveGatewayWebSocketUrl() {
+  if (typeof window === "undefined") return DEFAULT_GATEWAY_WS_URL;
+  const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
+  return queryValue && /^wss?:\/\//.test(queryValue) ? queryValue : DEFAULT_GATEWAY_WS_URL;
+}
 
 type MovementPlan = {
   targetX: number;
@@ -578,6 +600,13 @@ type DirectionStepRequest = {
   requestedAt: number;
 };
 
+type DirectionStepPending = {
+  x: number;
+  y: number;
+  mode: "walk" | "run";
+  sentAt: number;
+};
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -591,9 +620,12 @@ export default function HomePage() {
   const directionStepNextAtRef = useRef(0);
   const directionStepVisualUntilRef = useRef(0);
   const queuedDirectionStepRef = useRef<DirectionStepRequest | null>(null);
+  const directionStepPendingRef = useRef<DirectionStepPending | null>(null);
   const predictedPlayerPositionRef = useRef<{ x: number; y: number } | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
+  const lastCommandRef = useRef<Record<string, unknown> | null>(null);
+  const worldSnapshotVersionRef = useRef(0);
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
@@ -613,6 +645,7 @@ export default function HomePage() {
   const [showCharacter, setShowCharacter] = useState(false);
   const [activeInventoryTab, setActiveInventoryTab] = useState<"bag1" | "bag2" | "quest">("bag1");
   const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
+  const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<{ x: number; y: number } | null>(null);
   const t = buildTranslator(language);
   const locale = languageLocale(language);
@@ -830,6 +863,12 @@ export default function HomePage() {
     if (!self || !predictedPlayerPosition) return;
     const visualUntil = movementPlanRef.current?.visualUntil ?? 0;
     const directionVisualUntil = directionStepVisualUntilRef.current;
+    const directionPending = directionStepPendingRef.current;
+    if (directionPending && self.x === directionPending.x && self.y === directionPending.y) {
+      directionStepPendingRef.current = null;
+      setPredictedPlayerPosition(null);
+      return;
+    }
     if (self.x !== predictedPlayerPosition.x || self.y !== predictedPlayerPosition.y) {
       if (
         Math.max(Math.abs(self.x - predictedPlayerPosition.x), Math.abs(self.y - predictedPlayerPosition.y)) >
@@ -839,6 +878,9 @@ export default function HomePage() {
         setPredictedPlayerPosition(null);
       }
       return;
+    }
+    if (!movementPlanRef.current && !directionStepPendingRef.current) {
+      setPredictedPlayerPosition(null);
     }
   }, [self, predictedPlayerPosition]);
 
@@ -851,6 +893,8 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!world.connected || wsState !== "open") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("autoTick") === "0") return;
 
     const timer = window.setInterval(() => {
       if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -866,6 +910,7 @@ export default function HomePage() {
     if (screen !== "game" || wsState !== "open") {
       movementPlanRef.current = null;
       queuedDirectionStepRef.current = null;
+      directionStepPendingRef.current = null;
       setPredictedPlayerPosition(null);
       return;
     }
@@ -1002,6 +1047,14 @@ export default function HomePage() {
 
   function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
     if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
+    lastCommandRef.current = command;
+    const debugWindow = window as typeof window & {
+      __mir2LastCommand?: Record<string, unknown>;
+      __mir2CommandHistory?: Array<Record<string, unknown>>;
+    };
+    const debugCommand = { ...command, at: Date.now() };
+    debugWindow.__mir2LastCommand = command;
+    debugWindow.__mir2CommandHistory = [debugCommand, ...(debugWindow.__mir2CommandHistory ?? [])].slice(0, 50);
     socketRef.current.send(JSON.stringify(command));
     if (!options?.quiet) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
@@ -1024,6 +1077,7 @@ export default function HomePage() {
           player: { x: number; y: number } | null;
           predictedPlayer: { x: number; y: number } | null;
           movementPlan: MovementPlan | null;
+          directionStepPending: DirectionStepPending | null;
           playerHp: number | undefined;
           playerMaxHp: number | undefined;
           playerMp: number | undefined;
@@ -1043,6 +1097,8 @@ export default function HomePage() {
           inventoryItems: WorldItem[];
           storageItems: WorldItem[];
           equipmentItems: EquipmentItem[];
+          questLog: QuestEntry[];
+          activeNpcDialog: NpcDialog | null;
           gold: number;
           activeInventoryTab: "bag1" | "bag2" | "quest";
           activeCharacterTab: "char" | "stats1" | "stats2" | "spells";
@@ -1050,10 +1106,14 @@ export default function HomePage() {
           hasStoragePassword: boolean;
           requireStoragePassword: boolean;
           storageSessionUnlocked: boolean;
+          storagePasswordLastSetBinaryDatetime: number;
           knownSkills: KnownSkill[];
           activeBuffs: ActiveBuff[];
           stage5Systems: Stage5SystemsState;
           credit: number;
+          lastCommand: Record<string, unknown> | null;
+          worldSnapshotVersion: number;
+          worldTick: number;
         };
       };
     };
@@ -1072,6 +1132,7 @@ export default function HomePage() {
         player: self ? { x: self.x, y: self.y } : null,
         predictedPlayer: predictedPlayerPosition,
         movementPlan: movementPlanRef.current,
+        directionStepPending: directionStepPendingRef.current,
         playerHp: world.playerHp,
         playerMaxHp: world.playerMaxHp,
         playerMp: world.playerMp,
@@ -1093,6 +1154,8 @@ export default function HomePage() {
         inventoryItems: world.inventoryItems,
         storageItems: world.storageItems,
         equipmentItems: world.equipmentItems,
+        questLog: world.questLog,
+        activeNpcDialog: world.activeNpcDialog,
         gold: world.gold,
         activeInventoryTab,
         activeCharacterTab,
@@ -1100,10 +1163,14 @@ export default function HomePage() {
         hasStoragePassword: world.hasStoragePassword,
         requireStoragePassword: world.requireStoragePassword,
         storageSessionUnlocked: world.storageSessionUnlocked,
+        storagePasswordLastSetBinaryDatetime: world.storagePasswordLastSetBinaryDatetime,
         knownSkills: world.knownSkills,
         activeBuffs: world.activeBuffs,
         stage5Systems: world.stage5Systems,
         credit: world.credit,
+        lastCommand: lastCommandRef.current,
+        worldSnapshotVersion: worldSnapshotVersionRef.current,
+        worldTick: world.worldTick,
       },
     };
     return () => {
@@ -1117,7 +1184,7 @@ export default function HomePage() {
       return;
     }
 
-    const socket = new WebSocket("ws://127.0.0.1:7110/ws");
+    const socket = new WebSocket(resolveGatewayWebSocketUrl());
     socketRef.current = socket;
     setWsState("connecting");
 
@@ -1307,9 +1374,17 @@ export default function HomePage() {
   }
 
   function useItem(item: ItemCommandRef) {
+    (window as typeof window & { __mir2LastUseItem?: Record<string, unknown> }).__mir2LastUseItem = {
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      at: Date.now(),
+    };
     send({
       type: "useItem",
       key: item.key,
+      uniqueId: item.uniqueId,
       slot: item.slot,
       grid: item.container === "belt" ? "belt" : item.container === "quest" ? "questInventory" : "inventory",
     });
@@ -1319,7 +1394,7 @@ export default function HomePage() {
     send({
       type: "dropItem",
       key: item.key,
-      uniqueId: item.slot,
+      uniqueId: item.uniqueId,
       count: 1,
       heroInventory: false,
     });
@@ -1328,7 +1403,7 @@ export default function HomePage() {
   function equipItem(item: ItemCommandRef, slot: EquipmentSlot) {
     send({
       type: "equipItem",
-      uniqueId: item.slot,
+      uniqueId: item.uniqueId,
       grid:
         item.container === "belt"
           ? "belt"
@@ -1356,6 +1431,10 @@ export default function HomePage() {
   }
 
   function moveItem(item: ItemMoveRef, toSlot: number) {
+    const from =
+      item.container === "bag1" || item.container === "bag2" || item.container === "quest"
+        ? (item.uniqueId ?? (item.container === "bag2" ? 40 + item.slot : item.slot))
+        : item.slot;
     send({
       type: "moveItem",
       grid:
@@ -1366,7 +1445,7 @@ export default function HomePage() {
           : item.container === "quest"
             ? "questInventory"
             : "inventory",
-      from: item.slot,
+      from,
       to: toSlot,
     });
   }
@@ -1390,15 +1469,15 @@ export default function HomePage() {
           : to.container === "quest"
             ? "questInventory"
             : "inventory",
-      idFrom: from.slot,
-      idTo: to.slot,
+      idFrom: from.uniqueId,
+      idTo: to.uniqueId,
     });
   }
 
   function splitItem(item: ItemCommandRef, count: number) {
     send({
       type: "splitItem",
-      uniqueId: item.slot,
+      uniqueId: item.uniqueId,
       grid:
         item.container === "belt"
           ? "belt"
@@ -1459,7 +1538,7 @@ export default function HomePage() {
   function sellItem(item: ItemCommandRef, count: number) {
     send({
       type: "sellItem",
-      uniqueId: item.slot,
+      uniqueId: item.uniqueId,
       count,
     });
   }
@@ -1508,6 +1587,14 @@ export default function HomePage() {
       action: paymentType === "credit" ? "gameShop.buyCredit" : "gameShop.buyGold",
       args: [String(gameShopIndex), String(quantity)],
     });
+  }
+
+  function runStage5Command(action: string, args: string[] = []) {
+    send({ type: "stage5Command", action, args });
+  }
+
+  function sendClientCommand(command: Record<string, unknown>) {
+    send(command);
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -1643,22 +1730,41 @@ export default function HomePage() {
       return false;
     }
 
+    const pending = directionStepPendingRef.current;
+    if (pending) {
+      if (serverSelf.x === pending.x && serverSelf.y === pending.y) {
+        directionStepPendingRef.current = null;
+        if (
+          predictedPlayerPositionRef.current?.x === pending.x &&
+          predictedPlayerPositionRef.current?.y === pending.y
+        ) {
+          setPredictedPlayerPosition(null);
+        }
+      } else if (now - pending.sentAt < MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+        return false;
+      } else {
+        directionStepPendingRef.current = null;
+        setPredictedPlayerPosition(null);
+      }
+    }
+
     queuedDirectionStepRef.current = null;
-    const predicted = predictedPlayerPositionRef.current;
-    const actionSelf =
-      predicted &&
-      Math.max(Math.abs(serverSelf.x - predicted.x), Math.abs(serverSelf.y - predicted.y)) <=
-        MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES
-        ? { ...serverSelf, x: predicted.x, y: predicted.y }
-        : serverSelf;
+    const actionSelf = serverSelf;
     const direction = directionFromPoint(actionSelf, { x: queued.x, y: queued.y }, actionSelf.direction ?? "Down");
     const nextPoint = stepPointTowardBy(actionSelf, { x: queued.x, y: queued.y }, queued.mode === "run" ? 2 : 1);
     directionStepNextAtRef.current = now + (queued.mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS);
     directionStepVisualUntilRef.current = directionStepNextAtRef.current;
     movementPlanRef.current = null;
     if (nextPoint.x !== actionSelf.x || nextPoint.y !== actionSelf.y) {
+      directionStepPendingRef.current = {
+        x: nextPoint.x,
+        y: nextPoint.y,
+        mode: queued.mode,
+        sentAt: now,
+      };
       setPredictedPlayerPosition(nextPoint);
     } else {
+      directionStepPendingRef.current = null;
       setPredictedPlayerPosition(null);
     }
     send({ type: queued.mode === "run" ? "run" : "walk", direction });
@@ -1666,11 +1772,29 @@ export default function HomePage() {
   }
 
   function handleGatewayEvent(event: GatewayEvent) {
+    const debugWindow = window as typeof window & {
+      __mir2LastGatewayEvent?: Record<string, unknown>;
+      __mir2GatewayEventHistory?: Array<Record<string, unknown>>;
+    };
+    const debugEvent = {
+      type: event.type,
+      packet: "packet" in event ? event.packet ?? null : null,
+      payload:
+        event.type === "worldSnapshot"
+          ? summarizeDebugWorldSnapshot(event.payload as GatewayWorldSnapshot)
+          : "payload" in event
+            ? event.payload ?? null
+            : null,
+      at: Date.now(),
+    };
+    debugWindow.__mir2LastGatewayEvent = debugEvent;
+    debugWindow.__mir2GatewayEventHistory = [debugEvent, ...(debugWindow.__mir2GatewayEventHistory ?? [])].slice(0, 50);
     if (event.type === "error") {
       appendLog(t("log.gatewayError", [event.message ?? t("error.unknown")]), "system");
       return;
     }
     if (event.type === "worldSnapshot") {
+      worldSnapshotVersionRef.current += 1;
       applyGatewayWorldSnapshot(event.payload as GatewayWorldSnapshot);
       return;
     }
@@ -1845,19 +1969,27 @@ export default function HomePage() {
           event.packet === "UserLocation" ? worldRef.current.playerObjectId ?? "0" : stringifyId(payload.objectId);
         const x = numberOrZero(payload.x);
         const y = numberOrZero(payload.y);
+        const movementPacket = event.packet;
+        const movementNow = Date.now();
         if (movementObjectId === worldRef.current.playerObjectId) {
           reconcileMovementPlanWithServer(x, y);
+          reconcileDirectionStepWithServer(x, y);
         }
         setWorld((current) => ({
           ...current,
           entities: current.entities.map((entity) =>
             entity.objectId === movementObjectId
-              ? {
-                  ...entity,
-                  x,
-                  y,
-                  direction: stringOrNull(payload.direction) ?? undefined,
-                }
+              ? withPacketMovementAnimation(
+                  {
+                    ...entity,
+                    x,
+                    y,
+                    direction: stringOrNull(payload.direction) ?? undefined,
+                  },
+                  entity,
+                  movementPacket,
+                  movementNow,
+                )
               : entity,
           ),
         }));
@@ -1888,8 +2020,27 @@ export default function HomePage() {
         setWorldGroundDropFromPacket(payload, stringOrFallback(payload.name, t("ui.item", [], "Item")));
         break;
       case "ObjectGold":
-        setWorldGroundDropFromPacket(payload, t("ui.gold", [], "Gold"));
+        setWorldGroundDropFromPacket(
+          payload,
+          typeof payload.gold === "number" ? `${payload.gold} ${t("ui.gold", [], "Gold")}` : t("ui.gold", [], "Gold"),
+        );
         break;
+      case "LoseGold": {
+        const gold = numberOrZero(payload.gold);
+        setWorld((current) => ({
+          ...current,
+          gold: Math.max(0, current.gold - gold),
+        }));
+        break;
+      }
+      case "GainedGold": {
+        const gold = numberOrZero(payload.gold);
+        setWorld((current) => ({
+          ...current,
+          gold: current.gold + gold,
+        }));
+        break;
+      }
       case "ObjectAttack":
         updateWorldEntityFromLocationPacket(payload);
         markWorldEntityAttack(payload);
@@ -1907,9 +2058,44 @@ export default function HomePage() {
         spawnRangeProjectile(payload);
         restoreObjectSelection(stringifyId(payload.targetId));
         break;
+      case "ObjectProjectile":
+        spawnRangeProjectile(payload);
+        restoreObjectSelection(stringifyId(payload.destinationId));
+        break;
+      case "Magic":
+      case "MagicCast":
+        markPlayerMagic(payload);
+        restoreObjectSelection(stringifyId(payload.targetId));
+        break;
+      case "MagicDelay":
+        applyMagicDelayPacket(payload);
+        break;
+      case "MagicLeveled":
+        applyMagicLeveledPacket(payload);
+        break;
       case "ObjectSpell":
+      case "ObjectMagic":
         updateWorldEntityFromLocationPacket(payload);
-        markWorldEntityAttack(payload);
+        markWorldEntityMagic(payload);
+        if (stringifyId(payload.targetId) !== "0") {
+          spawnRangeProjectile(payload);
+          restoreObjectSelection(stringifyId(payload.targetId));
+        }
+        break;
+      case "MapEffect":
+        appendLog(
+          t("ui.mapEffect", [String(numberOrZero(payload.effect))], `Map effect ${numberOrZero(payload.effect)}`),
+          "system",
+        );
+        break;
+      case "AddBuff":
+        applyAddBuffPacket(payload);
+        break;
+      case "RemoveBuff":
+        applyRemoveBuffPacket(payload);
+        break;
+      case "PauseBuff":
+        applyPauseBuffPacket(payload);
         break;
       case "Struck":
         markPlayerStruck(payload);
@@ -1927,6 +2113,55 @@ export default function HomePage() {
       case "ObjectMana":
         applyObjectManaPacket(payload);
         break;
+      case "UseItem": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const grid = stringOrFallback(payload.grid, "Inventory");
+        if (payload.success === true && typeof uniqueId === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: consumePacketItem(current.inventoryItems, grid, uniqueId, 1),
+            beltItems: consumePacketItem(current.beltItems, grid, uniqueId, 1),
+            storageItems: consumePacketItem(current.storageItems, grid, uniqueId, 1),
+          }));
+        }
+        break;
+      }
+      case "DropItem": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const count = numberOrZero(payload.count);
+        if (payload.success === true && typeof uniqueId === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: consumePacketItem(current.inventoryItems, "Inventory", uniqueId, Math.max(1, count)),
+          }));
+        }
+        break;
+      }
+      case "DuraChanged": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const currentDura = numberOrUndefined(payload.currentDura);
+        if (typeof uniqueId === "number" && typeof currentDura === "number") {
+          const equipmentSlot = equipmentSlotFromIndex(uniqueId);
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: current.inventoryItems.map((item) =>
+              item.uniqueId === uniqueId ? { ...item, durabilityCurrent: currentDura } : item,
+            ),
+            beltItems: current.beltItems.map((item) =>
+              item.uniqueId === uniqueId ? { ...item, durabilityCurrent: currentDura } : item,
+            ),
+            storageItems: current.storageItems.map((item) =>
+              item.uniqueId === uniqueId ? { ...item, durabilityCurrent: currentDura } : item,
+            ),
+            equipmentItems: equipmentSlot
+              ? current.equipmentItems.map((item) =>
+                  item.slot === equipmentSlot ? { ...item, durabilityCurrent: currentDura } : item,
+                )
+              : current.equipmentItems,
+          }));
+        }
+        break;
+      }
       case "Chat":
         appendLog(
           stringOrFallback(payload.message, ""),
@@ -1962,12 +2197,23 @@ export default function HomePage() {
             }
 
             const currentEntry = currentBySlot.get(slot);
-            const userItem = entry as { count?: unknown; current_dura?: unknown; max_dura?: unknown };
+            const userItem = entry as {
+              count?: unknown;
+              current_dura?: unknown;
+              max_dura?: unknown;
+              unique_id?: unknown;
+              uniqueId?: unknown;
+            };
             return [
               {
                 key: currentEntry?.key ?? `storage-slot-${slot}`,
                 name: currentEntry?.name ?? `Storage Item ${slot}`,
                 icon: currentEntry?.icon ?? 0,
+                uniqueId:
+                  numberOrUndefined(userItem.uniqueId) ??
+                  numberOrUndefined(userItem.unique_id) ??
+                  currentEntry?.uniqueId ??
+                  slot,
                 slot,
                 container: currentEntry?.container ?? "storage",
                 quantity: numberOrUndefined(userItem.count) ?? currentEntry?.quantity ?? 1,
@@ -1986,6 +2232,11 @@ export default function HomePage() {
         });
         break;
       }
+      case "NPCStorage":
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
+        setStorageServiceOpenVersion((current) => current + 1);
+        break;
       case "StoragePasswordResult": {
         const result = numberOrZero(payload.result);
         const removing = payload.removing === true;
@@ -2156,16 +2407,59 @@ export default function HomePage() {
 
     setWorld((current) => ({
       ...current,
+      entities: patchEntityInList(current.entities, objectId, (entity) => {
+        const animation = attackAnimationVariant(payload);
+        return {
+          ...entity,
+          x: typeof location?.x === "number" ? location.x : entity.x,
+          y: typeof location?.y === "number" ? location.y : entity.y,
+          direction: stringOrNull(payload.direction) ?? entity.direction,
+          attackAnimation: animation,
+          attackStartedAt: now,
+          attackUntil: now + crystalAttackActionDurationMs(entity, animation),
+        };
+      }),
+    }));
+  }
+
+  function markWorldEntityMagic(payload: Record<string, unknown>) {
+    const objectId = stringifyId(payload.objectId);
+    const location = payload.location as { x?: number; y?: number } | undefined;
+    const now = Date.now();
+
+    setWorld((current) => ({
+      ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
         ...entity,
         x: typeof location?.x === "number" ? location.x : entity.x,
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
-        attackAnimation: attackAnimationVariant(payload),
+        attackAnimation: "range",
         attackStartedAt: now,
-        attackUntil: now + 260,
+        attackUntil: now + crystalAttackActionDurationMs(entity, "range"),
       })),
     }));
+  }
+
+  function markPlayerMagic(payload: Record<string, unknown>) {
+    const now = Date.now();
+
+    setWorld((current) => {
+      const playerObjectId = current.playerObjectId;
+      if (!playerObjectId) {
+        return current;
+      }
+
+      return {
+        ...current,
+        entities: patchEntityInList(current.entities, playerObjectId, (entity) => ({
+          ...entity,
+          attackAnimation: "range",
+          attackStartedAt: now,
+          attackUntil: now + crystalAttackActionDurationMs(entity, "range"),
+        })),
+      };
+    });
   }
 
   function markWorldEntityStruck(payload: Record<string, unknown>) {
@@ -2181,7 +2475,7 @@ export default function HomePage() {
         y: typeof location?.y === "number" ? location.y : entity.y,
         direction: stringOrNull(payload.direction) ?? entity.direction,
         struckStartedAt: now,
-        struckUntil: now + 220,
+        struckUntil: now + crystalStruckActionDurationMs(entity),
       })),
     }));
   }
@@ -2198,15 +2492,15 @@ export default function HomePage() {
         ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
             ...entity,
             struckStartedAt: now,
-            struckUntil: now + 220,
+            struckUntil: now + crystalStruckActionDurationMs(entity),
           }))
         : current.entities,
     }));
   }
 
   function spawnRangeProjectile(payload: Record<string, unknown>) {
-    const attackerId = stringifyId(payload.objectId);
-    const targetId = stringifyId(payload.targetId);
+    const attackerId = stringifyId(payload.objectId ?? payload.sourceId);
+    const targetId = stringifyId(payload.targetId ?? payload.destinationId);
     if (attackerId === "0" || targetId === "0") {
       return;
     }
@@ -2219,6 +2513,8 @@ export default function HomePage() {
       }
 
       const startedAt = Date.now();
+      const animation = "range";
+      const durationMs = crystalAttackActionDurationMs(attacker, animation);
       const projectile: ProjectileState = {
         key: `${attackerId}:${targetId}:${startedAt}`,
         attackerId,
@@ -2228,7 +2524,7 @@ export default function HomePage() {
         toX: target.x,
         toY: target.y,
         startedAt,
-        expiresAt: startedAt + 280,
+        expiresAt: startedAt + durationMs,
       };
 
       return {
@@ -2237,8 +2533,8 @@ export default function HomePage() {
           ...entity,
           direction: stringOrNull(payload.direction) ?? entity.direction,
           attackStartedAt: startedAt,
-          attackAnimation: "range",
-          attackUntil: startedAt + 260,
+          attackAnimation: animation,
+          attackUntil: startedAt + durationMs,
         })),
         projectiles: [...current.projectiles.filter((entry) => entry.expiresAt > startedAt), projectile],
       };
@@ -2249,6 +2545,7 @@ export default function HomePage() {
   function markWorldEntityDead(payload: Record<string, unknown>) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
+    const now = Date.now();
 
     setWorld((current) => ({
       ...current,
@@ -2260,8 +2557,8 @@ export default function HomePage() {
         direction: stringOrNull(payload.direction) ?? entity.direction,
         hp: 0,
         dead: true,
-        dieStartedAt: Date.now(),
-        dieUntil: Date.now() + 420,
+        dieStartedAt: now,
+        dieUntil: now + crystalDeathActionDurationMs(entity),
         attackAnimation: undefined,
         attackStartedAt: undefined,
         attackUntil: undefined,
@@ -2275,6 +2572,7 @@ export default function HomePage() {
 
   function markWorldEntityRevived(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
+    const now = Date.now();
 
     setWorld((current) => ({
       ...current,
@@ -2288,9 +2586,92 @@ export default function HomePage() {
         dead: false,
         dieStartedAt: undefined,
         dieUntil: undefined,
-        reviveStartedAt: Date.now(),
-        reviveUntil: Date.now() + 420,
+        reviveStartedAt: now,
+        reviveUntil: now + crystalDeathActionDurationMs(entity),
       })),
+    }));
+  }
+
+  function applyMagicDelayPacket(payload: Record<string, unknown>) {
+    const spell = stringOrFallback(payload.spell, "");
+    const delay = numberOrZero(payload.delay);
+    if (!spell) return;
+
+    setWorld((current) => ({
+      ...current,
+      knownSkills: current.knownSkills.map((skill) =>
+        skillMatchesCrystalSpell(skill, spell) ? { ...skill, cooldownRemainingTicks: delay } : skill,
+      ),
+    }));
+  }
+
+  function applyMagicLeveledPacket(payload: Record<string, unknown>) {
+    const spell = stringOrFallback(payload.spell, "");
+    const level = numberOrUndefined(payload.level);
+    if (!spell || typeof level !== "number") return;
+
+    setWorld((current) => ({
+      ...current,
+      knownSkills: current.knownSkills.map((skill) =>
+        skillMatchesCrystalSpell(skill, spell)
+          ? { ...skill, description: `${skill.description.replace(/\s*\(Lv\.\s*\d+\)$/i, "")} (Lv. ${level})` }
+          : skill,
+      ),
+    }));
+  }
+
+  function applyAddBuffPacket(payload: Record<string, unknown>) {
+    const buffType = numberOrUndefined(payload.buffType);
+    const objectId = stringifyId(payload.objectId);
+    if (typeof buffType !== "number" || payload.visible === false) return;
+
+    setWorld((current) => {
+      if (current.playerObjectId && objectId !== "0" && objectId !== current.playerObjectId) {
+        return current;
+      }
+
+      const key = crystalBuffKey(objectId, buffType);
+      const remainingTicks = payload.infinite === true ? 0 : crystalBuffRemainingTicks(numberOrUndefined(payload.expireTime));
+      const nextBuff: ActiveBuff = {
+        key,
+        name: `Buff ${buffType}`,
+        description: payload.paused === true ? "Paused Crystal buff" : "Crystal buff",
+        remainingTicks,
+        attackBonus: 0,
+        defenceBonus: 0,
+      };
+
+      return {
+        ...current,
+        activeBuffs: [nextBuff, ...current.activeBuffs.filter((buff) => buff.key !== key)],
+      };
+    });
+  }
+
+  function applyRemoveBuffPacket(payload: Record<string, unknown>) {
+    const buffType = numberOrUndefined(payload.buffType);
+    const objectId = stringifyId(payload.objectId);
+    if (typeof buffType !== "number") return;
+    const key = crystalBuffKey(objectId, buffType);
+
+    setWorld((current) => ({
+      ...current,
+      activeBuffs: current.activeBuffs.filter((buff) => buff.key !== key),
+    }));
+  }
+
+  function applyPauseBuffPacket(payload: Record<string, unknown>) {
+    const buffType = numberOrUndefined(payload.buffType);
+    const objectId = stringifyId(payload.objectId);
+    const paused = payload.paused === true;
+    if (typeof buffType !== "number") return;
+    const key = crystalBuffKey(objectId, buffType);
+
+    setWorld((current) => ({
+      ...current,
+      activeBuffs: current.activeBuffs.map((buff) =>
+        buff.key === key ? { ...buff, description: paused ? "Paused Crystal buff" : "Crystal buff" } : buff,
+      ),
     }));
   }
 
@@ -2340,6 +2721,8 @@ export default function HomePage() {
 
   function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot) {
     const playerObjectId = snapshot.playerObjectId === null ? null : String(snapshot.playerObjectId);
+    const previousEntitiesById = new Map(worldRef.current.entities.map((entity) => [entity.objectId, entity]));
+    const snapshotNow = Date.now();
     const entities = snapshot.entities.map((entity) => ({
       objectId: String(entity.objectId),
       kind: entity.kind,
@@ -2364,6 +2747,12 @@ export default function HomePage() {
       bigMapIcon: entity.bigMapIcon ?? undefined,
       showOnBigMap: entity.showOnBigMap ?? undefined,
       canTeleportTo: entity.canTeleportTo ?? undefined,
+      ...preservedMovementAnimation(
+        previousEntitiesById.get(String(entity.objectId)),
+        entity.x,
+        entity.y,
+        snapshotNow,
+      ),
     }));
     const groundDrops = (snapshot.groundDrops ?? []).map((drop) => ({
       objectId: String(drop.objectId),
@@ -2378,6 +2767,7 @@ export default function HomePage() {
       key: item.key,
       name: item.name,
       icon: item.icon,
+      uniqueId: item.uniqueId ?? (item.container === "bag2" ? 40 + item.slot : item.slot),
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -2389,6 +2779,7 @@ export default function HomePage() {
       key: item.key,
       name: item.name,
       icon: item.icon,
+      uniqueId: item.uniqueId ?? item.slot,
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -2400,6 +2791,7 @@ export default function HomePage() {
       key: item.key,
       name: item.name,
       icon: item.icon,
+      uniqueId: item.uniqueId ?? item.slot,
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -2664,6 +3056,26 @@ export default function HomePage() {
     setPredictedPlayerPosition(null);
   }
 
+  function reconcileDirectionStepWithServer(x: number, y: number) {
+    const pending = directionStepPendingRef.current;
+    if (!pending) {
+      return;
+    }
+
+    if (x === pending.x && y === pending.y) {
+      directionStepPendingRef.current = null;
+      if (predictedPlayerPositionRef.current?.x === x && predictedPlayerPositionRef.current?.y === y) {
+        setPredictedPlayerPosition(null);
+      }
+      return;
+    }
+
+    if (Date.now() - pending.sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+      directionStepPendingRef.current = null;
+      setPredictedPlayerPosition(null);
+    }
+  }
+
   return (
     <OriginalClientShell
       language={language}
@@ -2690,6 +3102,7 @@ export default function HomePage() {
       showCharacter={showCharacter}
       activeInventoryTab={activeInventoryTab}
       activeCharacterTab={activeCharacterTab}
+      storageServiceOpenVersion={storageServiceOpenVersion}
       onAccountIdChange={setAccountId}
       onPasswordChange={setPassword}
       onLanguageChange={setLanguage}
@@ -2725,6 +3138,8 @@ export default function HomePage() {
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
+      onRunStage5Command={runStage5Command}
+      onSendClientCommand={sendClientCommand}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onToggleCharacter={() => setShowCharacter((current) => !current)}
       onToggleInventory={() => setShowInventory((current) => !current)}
@@ -2748,7 +3163,7 @@ export default function HomePage() {
       onPrimaryTargetAction={() => {
         if (!selectedEntity) return;
         if (selectedEntity.kind === "monster") return attackTarget(selectedEntity.objectId);
-        if (selectedEntity.kind === "npc") return interactTarget(selectedEntity.objectId);
+        if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
         send({ type: "turn", direction: directionToward(self, selectedEntity) });
       }}
       onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
@@ -2773,6 +3188,78 @@ function patchEntityInList(
   updater: (entity: WorldEntity) => WorldEntity,
 ) {
   return list.map((entity) => (entity.objectId === objectId ? updater(entity) : entity));
+}
+
+function withPacketMovementAnimation(
+  nextEntity: WorldEntity,
+  previousEntity: WorldEntity,
+  packet: string,
+  now: number,
+): WorldEntity {
+  const animation = packetMovementAnimation(packet, previousEntity, nextEntity);
+  if (!animation) {
+    return {
+      ...nextEntity,
+      movementAnimation: undefined,
+      movementStartedAt: undefined,
+      movementUntil: undefined,
+    };
+  }
+
+  return {
+    ...nextEntity,
+    movementAnimation: animation,
+    movementStartedAt: now,
+    movementUntil: now + CRYSTAL_ENTITY_MOVE_ACTION_MS,
+  };
+}
+
+function packetMovementAnimation(
+  packet: string,
+  previousEntity: WorldEntity,
+  nextEntity: WorldEntity,
+): "walking" | "running" | null {
+  switch (packet) {
+    case "ObjectRun":
+      return "running";
+    case "ObjectWalk":
+    case "ObjectBackStep":
+      return "walking";
+    case "UserLocation": {
+      const distance = Math.max(
+        Math.abs(nextEntity.x - previousEntity.x),
+        Math.abs(nextEntity.y - previousEntity.y),
+      );
+      if (distance <= 0) return null;
+      return distance > 1 ? "running" : "walking";
+    }
+    default:
+      return null;
+  }
+}
+
+function preservedMovementAnimation(
+  previousEntity: WorldEntity | undefined,
+  x: number,
+  y: number,
+  now: number,
+): Pick<WorldEntity, "movementAnimation" | "movementStartedAt" | "movementUntil"> {
+  if (
+    previousEntity?.movementAnimation &&
+    previousEntity.movementStartedAt !== undefined &&
+    previousEntity.movementUntil !== undefined &&
+    previousEntity.movementUntil > now &&
+    previousEntity.x === x &&
+    previousEntity.y === y
+  ) {
+    return {
+      movementAnimation: previousEntity.movementAnimation,
+      movementStartedAt: previousEntity.movementStartedAt,
+      movementUntil: previousEntity.movementUntil,
+    };
+  }
+
+  return {};
 }
 
 function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
@@ -2823,6 +3310,8 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
   switch (value.toLowerCase()) {
     case "shout":
       return "shout";
+    case "trade":
+      return "trade";
     case "whisperin":
     case "whisperout":
       return "whisper";
@@ -2919,15 +3408,127 @@ function equipmentSlotIndex(slot: EquipmentSlot): number {
       return 8;
     case "amulet":
       return 9;
-    case "boots":
-      return 10;
     case "belt":
+      return 10;
+    case "boots":
       return 11;
     case "stone":
       return 12;
     case "mount":
       return 13;
   }
+}
+
+function equipmentSlotFromIndex(index: number): EquipmentSlot | null {
+  switch (index) {
+    case 0:
+      return "weapon";
+    case 1:
+      return "armour";
+    case 2:
+      return "helmet";
+    case 3:
+      return "torch";
+    case 4:
+      return "necklace";
+    case 5:
+      return "braceletLeft";
+    case 6:
+      return "braceletRight";
+    case 7:
+      return "ringLeft";
+    case 8:
+      return "ringRight";
+    case 9:
+      return "amulet";
+    case 10:
+      return "belt";
+    case 11:
+      return "boots";
+    case 12:
+      return "stone";
+    case 13:
+      return "mount";
+    default:
+      return null;
+  }
+}
+
+function summarizeDebugWorldSnapshot(snapshot: GatewayWorldSnapshot) {
+  return {
+    tick: snapshot.tick,
+    gold: snapshot.gold,
+    playerHp: snapshot.playerHp,
+    playerMaxHp: snapshot.playerMaxHp,
+    inSafeZone: snapshot.inSafeZone,
+    inventoryItems: (snapshot.inventoryItems ?? []).map((item) => ({
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      quantity: item.quantity,
+    })),
+    beltItems: (snapshot.beltItems ?? []).map((item) => ({
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      quantity: item.quantity,
+    })),
+    storageItems: (snapshot.storageItems ?? []).map((item) => ({
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      quantity: item.quantity,
+    })),
+    groundDrops: (snapshot.groundDrops ?? []).map((drop) => ({
+      name: drop.name,
+      objectId: drop.objectId,
+      x: drop.x,
+      y: drop.y,
+      quantity: drop.quantity,
+    })),
+  };
+}
+
+function itemClientReference(item: WorldItem) {
+  if (typeof item.uniqueId === "number") {
+    return item.uniqueId;
+  }
+  switch (item.container) {
+    case "bag2":
+      return 40 + item.slot;
+    default:
+      return item.slot;
+  }
+}
+
+function itemMatchesPacketGrid(item: WorldItem, grid: string, uniqueId: number) {
+  const normalizedGrid = grid.toLowerCase();
+  if (normalizedGrid === "belt") {
+    return item.container === "belt" && itemClientReference(item) === uniqueId;
+  }
+  if (normalizedGrid === "questinventory" || normalizedGrid === "quest_inventory") {
+    return item.container === "quest" && itemClientReference(item) === uniqueId;
+  }
+  if (normalizedGrid === "storage") {
+    return item.container === "storage" && itemClientReference(item) === uniqueId;
+  }
+  return (item.container === "bag1" || item.container === "bag2") && itemClientReference(item) === uniqueId;
+}
+
+function consumePacketItem(items: WorldItem[], grid: string, uniqueId: number, count: number) {
+  let consumed = false;
+  const nextItems = items.flatMap((item) => {
+    if (consumed || !itemMatchesPacketGrid(item, grid, uniqueId)) {
+      return [item];
+    }
+    consumed = true;
+    if (item.quantity > count) {
+      return [{ ...item, quantity: item.quantity - count }];
+    }
+    return [];
+  });
+  return consumed ? nextItems : items;
 }
 
 function stringifyId(value: unknown) {
@@ -3133,6 +3734,10 @@ function shouldReloadCrystalScene(
 function attackAnimationVariant(
   payload: Record<string, unknown>,
 ): "melee1" | "melee2" | "melee3" | "melee4" | "range" {
+  if (typeof payload.spell === "string") {
+    return "range";
+  }
+
   switch (numberOrUndefined(payload.attackType)) {
     case 1:
       return "melee2";
@@ -3143,6 +3748,47 @@ function attackAnimationVariant(
     default:
       return "melee1";
   }
+}
+
+function crystalAttackActionDurationMs(
+  entity: WorldEntity,
+  animation: NonNullable<WorldEntity["attackAnimation"]>,
+) {
+  if (animation === "range" || animation === "melee3") {
+    return 800;
+  }
+
+  return entity.kind === "monster" ? 600 : 600;
+}
+
+function crystalStruckActionDurationMs(entity: WorldEntity) {
+  return entity.kind === "monster" ? 400 : 300;
+}
+
+function crystalDeathActionDurationMs(entity: WorldEntity) {
+  return entity.kind === "monster" ? 1000 : 400;
+}
+
+function skillMatchesCrystalSpell(skill: KnownSkill, spell: string) {
+  const normalizedSpell = normalizeCrystalToken(spell);
+  return normalizeCrystalToken(skill.key) === normalizedSpell || normalizeCrystalToken(skill.name) === normalizedSpell;
+}
+
+function crystalBuffKey(objectId: string, buffType: number) {
+  return `crystal-buff-${objectId}-${buffType}`;
+}
+
+function crystalBuffRemainingTicks(expireTime: number | undefined) {
+  if (typeof expireTime !== "number" || expireTime <= 0) {
+    return 0;
+  }
+
+  const now = Date.now();
+  return expireTime > now ? Math.max(0, Math.ceil((expireTime - now) / 1000)) : Math.max(0, Math.ceil(expireTime));
+}
+
+function normalizeCrystalToken(value: string) {
+  return value.replace(/[^a-z0-9]/gi, "").toLowerCase();
 }
 
 function stringOrNull(value: unknown) {

@@ -9,25 +9,38 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use crate::config::{
-    EquipmentSlot, ItemContainer, Stage5AuctionListing, Stage5HeroState, Stage5MailMessage,
-    Stage5TradeState, WorldEntityDisposition,
+    EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5HeroState,
+    Stage5MailMessage, Stage5TradeState, WorldEntityDisposition,
 };
 
-use super::components::{entity_position, player_entity};
+use super::components::{
+    entity_by_object_id, entity_position, player_entity, DisplayName, Npc, NpcAgent, ObjectId,
+    PlayerVitals, Position, WorldObject,
+};
 use super::crystal_compat::CRYSTAL_ITEM_SEAL_DELAY_MINUTES;
-use super::equipment::{equipment_slot_from_stage5_arg, equipment_slot_unique_id};
+use super::equipment::{
+    damage_equipment_item, equipment_slot_from_stage5_arg, equipment_slot_unique_id,
+    equipment_uses_durability,
+};
 use super::inventory::{
-    add_minutes_to_binary_datetime, add_or_increment_item, binary_datetime_ticks,
-    can_gain_item_quantity, crystal_duration_label_from_seconds, current_binary_datetime,
-    free_bag_slots, future_binary_datetime_minutes,
+    add_minutes_to_binary_datetime, add_or_increment_item, allocate_item_unique_id,
+    binary_datetime_ticks, can_gain_item_quantity, crystal_duration_label_from_seconds,
+    crystal_npc_storage_open_packets, current_binary_datetime, find_empty_inventory_item_slot,
+    free_bag_slots, future_binary_datetime_minutes, item_heal_values_for_key,
 };
 use super::items::{
-    crystal_item_key_for_template, crystal_seal_minutes_for_source_item,
-    crystal_socket_slot_limit_for_item_key, crystal_socket_source_valid_for_item,
+    crystal_equipment_slot_for_item_key, crystal_item_key_for_template,
+    crystal_seal_minutes_for_source_item, crystal_socket_slot_limit_for_item_key,
+    crystal_socket_source_valid_for_item, item_icon_for_key, ItemState,
 };
-use super::monsters::{crystal_dynamic_monster_template, spawn_runtime_monster};
+use super::monsters::{
+    crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, spawn_runtime_monster,
+};
+use super::npc::ActiveNpcServiceState;
+use super::packets::object_health_info_for_entity;
 use super::resources::{
-    InventoryResource, PlayerRuntimeResource, SessionResource, Stage5SystemsResource,
+    InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
+    RuntimeConfigResource, SessionResource, Stage5SystemsResource,
 };
 use super::session::{current_language, system_message, SimulationSession};
 
@@ -183,6 +196,11 @@ impl SimulationSession {
             "craft" => self.stage5_craft(args),
             "item.addSocket" => self.stage5_item_add_socket(args),
             "item.seal" => self.stage5_item_seal(args),
+            "qa.damageEquipment" => self.stage5_qa_damage_equipment(args),
+            "qa.damagePlayer" => self.stage5_qa_damage_player(args),
+            "qa.giveItem" => self.stage5_qa_give_item(args),
+            "qa.openNpcDialog" => self.stage5_qa_open_npc_dialog(),
+            "qa.openStorage" => self.stage5_qa_open_storage(),
             other => {
                 let language = current_language(self.app.world());
                 vec![system_message(&format_localized_text(
@@ -984,7 +1002,7 @@ impl SimulationSession {
         let monster_name = args
             .first()
             .cloned()
-            .unwrap_or_else(|| "Field Wasp".to_string());
+            .unwrap_or_else(|| "BugBat".to_string());
         let count = args
             .get(1)
             .and_then(|value| value.parse::<u8>().ok())
@@ -1011,12 +1029,36 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
+        let (config, map_file_name) = {
+            let world = self.app.world();
+            (
+                world.resource::<RuntimeConfigResource>().config.clone(),
+                world
+                    .resource::<MapRuntimeResource>()
+                    .current_map
+                    .file_name
+                    .clone(),
+            )
+        };
+        let mut spawn_points = crystal_spawn_candidates_on_map(&config, &map_file_name, &origin, 8)
+            .into_iter()
+            .filter(|point| point != &origin)
+            .collect::<Vec<_>>();
+        spawn_points.sort_by_key(|point| {
+            let dx = (point.x - origin.x).abs();
+            let dy = (point.y - origin.y).abs();
+            (dx.max(dy), dx + dy, point.y, point.x)
+        });
+
         let mut spawned = 0_u8;
         for index in 0..count {
-            let position = Point {
-                x: origin.x + 1 + i32::from(index),
-                y: origin.y,
-            };
+            let position = spawn_points
+                .get(usize::from(index))
+                .cloned()
+                .unwrap_or_else(|| Point {
+                    x: origin.x + 1 + i32::from(index),
+                    y: origin.y,
+                });
             if spawn_runtime_monster(
                 self.app.world_mut(),
                 &template,
@@ -1358,5 +1400,202 @@ impl SimulationSession {
                 )],
             )),
         ]
+    }
+
+    fn stage5_qa_damage_equipment(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let slot = args
+            .first()
+            .and_then(|value| equipment_slot_from_stage5_arg(value))
+            .unwrap_or(EquipmentSlot::Weapon);
+        let amount = args
+            .get(1)
+            .and_then(|value| value.parse::<u16>().ok())
+            .unwrap_or(1)
+            .max(1);
+        let language = current_language(self.app.world());
+        let mut resources = self.app.world_mut().resource_mut::<InventoryResource>();
+        let Some(item) = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == slot)
+        else {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
+        };
+        if !equipment_uses_durability(item) {
+            return Vec::new();
+        }
+        let _ = damage_equipment_item(item, amount);
+        let Some(unique_id) = equipment_slot_unique_id(item.slot) else {
+            return Vec::new();
+        };
+
+        vec![ServerPacket::DuraChanged {
+            unique_id,
+            current_dura: item.durability_current,
+        }]
+    }
+
+    fn stage5_qa_damage_player(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let amount = parse_u32_arg(&args, 0).unwrap_or(25).max(1) as i32;
+        let Some(player) = player_entity(self.app.world()) else {
+            return Vec::new();
+        };
+        let next_vitals = {
+            let mut entity = self.app.world_mut().entity_mut(player);
+            let mut vitals = entity
+                .get_mut::<PlayerVitals>()
+                .expect("current player should have vitals");
+            vitals.hp = (vitals.hp - amount).max(1);
+            *vitals
+        };
+        self.app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>()
+            .player_vitals = next_vitals;
+        object_health_info_for_entity(self.app.world(), player, 0)
+            .map(|info| vec![ServerPacket::ObjectHealth { info }])
+            .unwrap_or_default()
+    }
+
+    fn stage5_qa_give_item(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        let item_key = args
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "blue-potion".to_string());
+        let quantity = parse_u32_arg(&args, 1).unwrap_or(1).max(1);
+        let language = current_language(self.app.world());
+        let mut resources = self.app.world_mut().resource_mut::<InventoryResource>();
+        let Some((container, slot)) =
+            find_empty_inventory_item_slot(&resources.inventory_items, ItemContainer::Bag1)
+        else {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.YouCannotCarryAnymore",
+                "server.YouCannotCarryAnymore",
+            ))];
+        };
+        let unique_id = allocate_item_unique_id(&resources, container, slot);
+        let (heal_hp, heal_mp) = item_heal_values_for_key(&item_key);
+        resources.inventory_items.push(ItemState {
+            key: item_key.clone(),
+            name: stage5_item_name(&item_key),
+            icon: item_icon_for_key(&item_key),
+            slot,
+            unique_id,
+            container,
+            quantity,
+            description: "Stage 5 QA seeded item.".to_string(),
+            durability_current: None,
+            durability_max: None,
+            weight: 1,
+            equip_slot: crystal_equipment_slot_for_item_key(&item_key),
+            grade: ItemGrade::None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: 0,
+            gem_count: 0,
+            identified: None,
+            soul_bound_id: None,
+            sealed_expiry_time_binary_datetime: 0,
+            sealed_next_time_binary_datetime: 0,
+            rental_binding_flags: 0,
+            attack: 0,
+            defence: 0,
+            heal_hp,
+            heal_mp,
+        });
+        Vec::new()
+    }
+
+    fn stage5_qa_open_npc_dialog(&mut self) -> Vec<ServerPacket> {
+        let Some(player) = player_entity(self.app.world()) else {
+            return Vec::new();
+        };
+        let Some(position) = entity_position(self.app.world(), player) else {
+            return Vec::new();
+        };
+        let npc_position = Point {
+            x: position.x,
+            y: position.y.saturating_sub(1),
+        };
+        let world = self.app.world_mut();
+        if let Some(npc) = entity_by_object_id(world, 21) {
+            world.entity_mut(npc).insert((
+                Npc,
+                Position(npc_position),
+                DisplayName::literal("InnKeeper_Brittney"),
+                NpcAgent {
+                    image: 6,
+                    colour_argb: 0,
+                    quest_ids: Vec::new(),
+                    script_key: Some("BichonProvince/BichonWall/Warehouse1".to_string()),
+                },
+            ));
+        } else {
+            world.spawn((
+                WorldObject,
+                Npc,
+                ObjectId(21),
+                Position(npc_position),
+                DisplayName::literal("InnKeeper_Brittney"),
+                NpcAgent {
+                    image: 6,
+                    colour_argb: 0,
+                    quest_ids: Vec::new(),
+                    script_key: Some("BichonProvince/BichonWall/Warehouse1".to_string()),
+                },
+            ));
+        }
+        self.interact_impl(21)
+    }
+
+    fn stage5_qa_open_storage(&mut self) -> Vec<ServerPacket> {
+        let Some(player) = player_entity(self.app.world()) else {
+            return Vec::new();
+        };
+        let Some(position) = entity_position(self.app.world(), player) else {
+            return Vec::new();
+        };
+        let world = self.app.world_mut();
+        if let Some(npc) = entity_by_object_id(world, 21) {
+            world.entity_mut(npc).insert((
+                Npc,
+                Position(position),
+                DisplayName::literal("InnKeeper_Brittney"),
+                NpcAgent {
+                    image: 6,
+                    colour_argb: 0,
+                    quest_ids: Vec::new(),
+                    script_key: Some("BichonProvince/BichonWall/Warehouse1".to_string()),
+                },
+            ));
+        } else {
+            world.spawn((
+                WorldObject,
+                Npc,
+                ObjectId(21),
+                Position(position),
+                DisplayName::literal("InnKeeper_Brittney"),
+                NpcAgent {
+                    image: 6,
+                    colour_argb: 0,
+                    quest_ids: Vec::new(),
+                    script_key: Some("BichonProvince/BichonWall/Warehouse1".to_string()),
+                },
+            ));
+        }
+        world.resource_mut::<NpcStateResource>().active_npc_service = Some(ActiveNpcServiceState {
+            script_key: "BichonProvince/BichonWall/Warehouse1".to_string(),
+            label_key: "STORAGE".to_string(),
+            npc_object_id: 21,
+        });
+        world.resource_mut::<InventoryResource>().storage_unlocked = false;
+        crystal_npc_storage_open_packets(world)
     }
 }

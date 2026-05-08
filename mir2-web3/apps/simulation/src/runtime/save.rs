@@ -19,6 +19,7 @@ use super::components::{
 use super::crystal_compat::BASE_STORAGE_SLOTS;
 use super::equipment::seed_equipment_items;
 use super::inventory::{
+    normalize_inventory_known_item_metadata, normalize_inventory_unique_ids,
     refresh_storage_password_state, seed_belt_items, seed_inventory_items, seed_storage_items,
 };
 use super::map::{
@@ -665,6 +666,8 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         } else {
             decode_state_vec(&save.equipment_items_json).unwrap_or_default()
         };
+    normalize_inventory_known_item_metadata(&mut resources);
+    normalize_inventory_unique_ids(&mut resources);
     drop(resources);
     world.resource_mut::<Stage5SystemsResource>().stage5_systems = save
         .stage5_systems_json

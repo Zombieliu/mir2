@@ -470,6 +470,15 @@ async function readState(client) {
         width: value.width,
         height: value.height,
       }) : null;
+      const mapObjectSprites = Array.from(document.querySelectorAll(".scene-map-object-sprite")).map((node) => ({
+        path: node.getAttribute("data-map-sprite-path") ?? node.getAttribute("src") ?? "",
+        renderPath: node.getAttribute("data-map-render-path") ?? node.getAttribute("src") ?? "",
+        cellX: Number(node.getAttribute("data-map-cell-x")),
+        cellY: Number(node.getAttribute("data-map-cell-y")),
+        rect: rect(node.getBoundingClientRect()),
+        mixBlendMode: getComputedStyle(node).mixBlendMode,
+        zIndex: getComputedStyle(node).zIndex,
+      }));
       const entities = state.entities ?? [];
       const nameplateNodes = Array.from(document.querySelectorAll(".entity-nameplate"));
       const stageCursor = stage ? getComputedStyle(document.querySelector(".client-stage-frame")).cursor : null;
@@ -507,6 +516,13 @@ async function readState(client) {
         })),
         questMarkerCount: document.querySelectorAll(".entity-quest-icon").length,
         entityHealthBarCount: document.querySelectorAll(".entity-health-bar").length,
+        mapObjectSprites,
+        torchLightSprites: mapObjectSprites.filter((sprite) =>
+          /\\/original-map\\/WemadeMir2\\/Objects\\/27(2[3-9]|3[0-2])\\.png$/i.test(sprite.path),
+        ),
+        torchBodySprites: mapObjectSprites.filter((sprite) =>
+          /\\/original-map\\/WemadeMir2\\/Objects\\/2733\\.png$/i.test(sprite.path),
+        ),
         visibleChatLines: chatLines,
         nextDevPortalCount: nextDevPortals.length,
         nextDevIndicatorVisible: visibleNextDevPortals.length > 0,

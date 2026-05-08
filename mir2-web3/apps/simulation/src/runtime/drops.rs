@@ -1997,8 +1997,12 @@ pub(super) fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<Serv
 }
 
 pub(super) fn drop_gold_impl(world: &mut World, amount: u32) -> Vec<ServerPacket> {
-    let player = player_entity(world).expect("player should exist");
-    let player_position = entity_position(world, player).expect("player position");
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
 
     if world.resource::<PlayerRuntimeResource>().gold < amount {
         return Vec::new();
@@ -2082,8 +2086,12 @@ pub(super) fn drop_item_packet(
     }
 
     let destroy_on_drop = crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP);
-    let player = player_entity(world).expect("player should exist");
-    let player_position = entity_position(world, player).expect("player position");
+    let Some(player) = player_entity(world) else {
+        return vec![failed_packet];
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return vec![failed_packet];
+    };
 
     if !destroy_on_drop {
         if drop_ground_drop(
