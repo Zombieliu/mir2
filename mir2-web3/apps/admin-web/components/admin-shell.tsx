@@ -6,8 +6,14 @@ import { LanguageSwitcher } from "./language-switcher";
 
 const navItems = [
   { href: "/", labelKey: "shell.nav.dashboard", count: "Live" },
+  { href: "/console", labelKey: "shell.nav.console", count: "Ops" },
+  { href: "/accounts", labelKey: "shell.nav.accounts", count: "GM" },
   { href: "/players", labelKey: "shell.nav.players", count: "Read" },
   { href: "/economy", labelKey: "shell.nav.economy", count: "Read" },
+  { href: "/market", labelKey: "shell.nav.market", count: "Mod" },
+  { href: "/guilds", labelKey: "shell.nav.guilds", count: "Mod" },
+  { href: "/namelists", labelKey: "shell.nav.namelists", count: "NPC" },
+  { href: "/content", labelKey: "shell.nav.content", count: "DB" },
   { href: "/activities", labelKey: "shell.nav.activities", count: "Empty" },
   { href: "/servers", labelKey: "shell.nav.servers", count: "Health" },
   { href: "/risk", labelKey: "shell.nav.risk", count: "Bans" },

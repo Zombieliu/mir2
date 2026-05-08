@@ -34,6 +34,36 @@ Start optional observability:
 docker compose -f infra/docker-compose.dev.yml --profile observability up -d
 ```
 
+Run the repeatable local architecture gate before handing off production
+architecture slices:
+
+```bash
+bash infra/check-architecture-gates.sh
+```
+
+The gate covers gateway/admin/simulation formatting and contract checks, shared
+zone registry behavior, session-cache hit/miss/freshness/Redis/lease coverage,
+gameplay event publishing and ClickHouse schema compatibility, Admin API
+gameplay-event reads and readiness alerts, account-store repository adapters,
+Admin Web typecheck, Docker Compose config, and `git diff --check`.
+
+Run the broader automated Candidate gate when refreshing 100% Candidate
+evidence:
+
+```bash
+MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh
+```
+
+`local` runs the architecture gate, game-data tests, packet-trace bin tests,
+Admin Web typecheck, Player Web typecheck, and diff checks. `full` adds full
+Rust package suites plus Admin Web/Player Web builds and static Player Web
+smokes where the local runtime is available. `live` additionally requires
+`MIR2_WEB_BASE_URL` and `MIR2_GATEWAY_WS_URL`, then runs map API, Stage 5 UI, and
+Gateway WebSocket load evidence.
+
+The GitHub Actions workflow `.github/workflows/mir2-candidate-gate.yml` runs
+the `local` Candidate gate on pushes to `main` and pull requests.
+
 Local default endpoints:
 
 | Service | Endpoint | Purpose |
@@ -57,6 +87,9 @@ MIR2_GATEWAY_TCP_ADDR=127.0.0.1:7000 \
 MIR2_ACCOUNT_STORE_BACKEND=postgres \
 MIR2_ACCOUNT_STORE_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
 MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
+MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS=30 \
+MIR2_GAMEPLAY_EVENT_REDPANDA_URL=http://127.0.0.1:8082 \
+MIR2_GAMEPLAY_EVENT_TOPIC=gameplay.command.executed \
 ADMIN_API_BASE_URL=http://127.0.0.1:7420 \
 MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN=r254-gateway-token \
 MIR2_GATEWAY_ZONE_ID=gateway-r254-live \
@@ -100,6 +133,18 @@ Gateway heartbeat posts zone runtime state to `/admin/servers/zones` when
 Postgres auth, seed an operator token with `content_publish` for the gateway and
 an operator token with `permission_manage` for Admin Web before starting the
 strict `ADMIN_OPERATOR_AUTH_BACKEND=postgres` API.
+
+Gameplay command events can be checked through ClickHouse-backed Admin API
+reads after a player performs any Gateway command:
+
+```bash
+curl -fsS "http://127.0.0.1:7420/admin/gameplay-events?limit=10"
+curl -fsS "http://127.0.0.1:7420/admin/gameplay-events/summary?windowSeconds=300&limit=10&maxLagSeconds=180&minEvents=1"
+```
+
+The summary response reports total command volume, per-command counts, last
+event time, max snapshot tick, `lagMs`, `ready`, and structured readiness
+alerts for quick local checks.
 
 Apply the first Postgres schema indirectly by starting Admin API with
 `ADMIN_DATABASE_URL`; the API runs `infra/postgres/migrations/0001_core.sql` at
@@ -145,7 +190,10 @@ ClickHouse subscribes to the Redpanda `admin.command.succeeded`,
 `admin.approval.approved`, `admin.approval.rejected`, `admin.outbox.retry`, and
 `admin.outbox.dead_letter` topics through a Kafka engine table and writes rows to
 `mir2_events.admin_events` plus the compatibility projection
-`mir2_events.admin_command_events`.
+`mir2_events.admin_command_events`. When `MIR2_GAMEPLAY_EVENT_REDPANDA_URL` is
+set, Gateway also publishes non-authoritative gameplay command outcome events
+to `gameplay.command.executed`; ClickHouse projects them into
+`mir2_events.gameplay_events` through `infra/clickhouse/initdb/002_gameplay_events.sql`.
 
 Create the topic explicitly for local smoke runs:
 
@@ -158,7 +206,8 @@ docker exec mir2-redpanda rpk topic create \
   admin.approval.approved \
   admin.approval.rejected \
   admin.outbox.retry \
-  admin.outbox.dead_letter
+  admin.outbox.dead_letter \
+  gameplay.command.executed
 ```
 
 Produce one admin command event:
@@ -178,6 +227,16 @@ docker exec mir2-clickhouse clickhouse-client \
   --query "SELECT event_id, event_type, command_id, operator_id, status FROM admin_events WHERE command_id='smoke-redpanda' ORDER BY ingested_at DESC LIMIT 1"
 ```
 
+Query recent gameplay command outcome events:
+
+```bash
+docker exec mir2-clickhouse clickhouse-client \
+  --user mir2 \
+  --password mir2_dev_password \
+  --database mir2_events \
+  --query "SELECT event_id, zone_id, command_kind, character_name, packet_count FROM gameplay_events ORDER BY ingested_at DESC LIMIT 10"
+```
+
 Read the same projection through Admin API with filters:
 
 ```bash
@@ -194,6 +253,9 @@ message when ClickHouse is unavailable, so command/audit pages can keep working
 while the analytics read side is down.
 `/admin/timeline` merges command, audit, approval, and ClickHouse event records
 into one operational read model. It uses the same degraded event-read behavior.
+`/admin/gameplay-events` reads the non-authoritative gameplay command outcome
+projection and supports `zoneId`, `commandKind`, `accountId`, `characterName`,
+and `limit` filters.
 
 Mirror runtime JSON account-store saves into Postgres while keeping JSON as the
 runtime source of truth:
@@ -219,13 +281,23 @@ session cache:
 ```bash
 MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
 MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS=30 \
+MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS=30 \
+MIR2_GAMEPLAY_EVENT_REDPANDA_URL=http://127.0.0.1:8082 \
 cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
 ```
 
 If `MIR2_GATEWAY_REDIS_CACHE_URL` is unset, the gateway uses the in-memory cache.
 Both cache implementations support lookup/removal by account/character index and
 by character-name routing index for Admin `KickPlayer`; Redis stores the routing
-index with the same TTL as the session record.
+index with the same TTL as the session record. Gateway session records include
+`updatedAtMs`, and the routing helpers can reject or remove stale online routes.
+Gateway Web sessions also acquire a route lease keyed by account/character. A
+stale disconnect only removes the route when it still owns that lease, so a
+newer connection is not erased by an older socket closing late.
+
+If `MIR2_GAMEPLAY_EVENT_REDPANDA_URL` is unset, gameplay event publishing is
+disabled. Set `MIR2_GAMEPLAY_EVENT_LOG=true` for local stderr-only event
+inspection without Redpanda.
 
 Admin API can require Postgres-backed operator bearer tokens for local control
 plane testing:

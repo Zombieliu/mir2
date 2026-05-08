@@ -6,7 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{
-    client_packet_name, decode_frame, decode_server_packet, encode_client_packet, ClientPacket,
+    client_packet_name, decode_frame, decode_server_packet, encode_client_packet,
+    packet_payload_hex, server_packet_display_name, server_packet_raw_display_name, ClientPacket,
     MirClass, MirDirection, MirGender, MirGridType, PacketTraceDirection, Point, ServerPacket,
     ServerPacketId, Spell,
 };
@@ -380,10 +381,11 @@ fn matrix_capture_priority(trace_flow: &str) -> usize {
     match trace_flow {
         "core_bootstrap" => 0,
         "combat_basic" => 1,
-        "inventory_storage" => 2,
-        "storage_password" => 3,
-        "movement_chat_keepalive" => 4,
-        "account_lifecycle" => 5,
+        "magic_basic" => 2,
+        "inventory_storage" => 3,
+        "storage_password" => 4,
+        "movement_chat_keepalive" => 5,
+        "account_lifecycle" => 6,
         _ => 10,
     }
 }
@@ -769,7 +771,7 @@ fn trace_server_entry(sequence: usize, elapsed_ms: u128, frame: &[u8]) -> TraceE
             elapsed_ms,
             direction: PacketTraceDirection::Server,
             packet_id,
-            packet: mir2_protocol::server_packet_name(&packet).to_string(),
+            packet: server_packet_display_name(&packet),
             payload_len: frame.len().saturating_sub(4),
             payload_hash: payload_hash(frame),
             payload_hex: trace_payload_hex(frame),
@@ -822,14 +824,228 @@ fn client_packet_detail(packet: &ClientPacket) -> Option<Value> {
         | ClientPacket::StartGame { character_index } => Some(json!({
             "characterIndex": character_index
         })),
+        ClientPacket::DepositTradeItem { from, to }
+        | ClientPacket::RetrieveTradeItem { from, to }
+        | ClientPacket::TakeBackHeroItem { from, to }
+        | ClientPacket::TransferHeroItem { from, to } => Some(json!({
+            "from": from,
+            "to": to
+        })),
+        ClientPacket::NewHero {
+            name,
+            gender,
+            class,
+        } => Some(json!({
+            "name": name,
+            "gender": format!("{gender:?}"),
+            "class": format!("{class:?}")
+        })),
+        ClientPacket::SetHeroBehaviour { behaviour } => Some(json!({
+            "behaviour": behaviour
+        })),
+        ClientPacket::ChangeHero { list_index } => Some(json!({
+            "listIndex": list_index
+        })),
+        ClientPacket::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        } => Some(json!({
+            "uniqueId": unique_id,
+            "price": price,
+            "marketType": market_type
+        })),
+        ClientPacket::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        } => Some(json!({
+            "matchText": match_text,
+            "itemType": item_type,
+            "userMode": user_mode,
+            "minShape": min_shape,
+            "maxShape": max_shape,
+            "marketType": market_type
+        })),
+        ClientPacket::MarketPage { page } => Some(json!({
+            "page": page
+        })),
+        ClientPacket::MarketBuy {
+            auction_id,
+            bid_price,
+        } => Some(json!({
+            "auctionId": auction_id,
+            "bidPrice": bid_price
+        })),
+        ClientPacket::MarketGetBack { mode, auction_id } => Some(json!({
+            "mode": mode,
+            "auctionId": auction_id
+        })),
+        ClientPacket::MarketSellNow { auction_id } => Some(json!({
+            "auctionId": auction_id
+        })),
+        ClientPacket::MarriageReply { accept_invite }
+        | ClientPacket::DivorceReply { accept_invite }
+        | ClientPacket::MentorReply { accept_invite } => Some(json!({
+            "acceptInvite": accept_invite
+        })),
+        ClientPacket::AddMentor { name } => Some(json!({
+            "name": name
+        })),
+        ClientPacket::TradeReply { accept_invite } => Some(json!({
+            "acceptInvite": accept_invite
+        })),
+        ClientPacket::TradeGold { amount } => Some(json!({
+            "amount": amount
+        })),
+        ClientPacket::TradeConfirm { locked } => Some(json!({
+            "locked": locked
+        })),
+        ClientPacket::FishingCast { cast_out } => Some(json!({
+            "castOut": cast_out
+        })),
+        ClientPacket::FishingChangeAutocast { auto_cast } => Some(json!({
+            "autoCast": auto_cast
+        })),
+        ClientPacket::SendMail {
+            name,
+            gold,
+            items_idx,
+            stamped,
+            ..
+        } => Some(json!({
+            "name": name,
+            "gold": gold,
+            "itemsIdx": items_idx,
+            "stamped": stamped
+        })),
+        ClientPacket::ReadMail { mail_id }
+        | ClientPacket::CollectParcel { mail_id }
+        | ClientPacket::DeleteMail { mail_id } => Some(json!({
+            "mailId": mail_id
+        })),
+        ClientPacket::LockMail { mail_id, lock } => Some(json!({
+            "mailId": mail_id,
+            "lock": lock
+        })),
+        ClientPacket::MailLockedItem { unique_id, locked } => Some(json!({
+            "uniqueId": unique_id,
+            "locked": locked
+        })),
+        ClientPacket::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        } => Some(json!({
+            "gold": gold,
+            "itemsIdx": items_idx,
+            "stamped": stamped
+        })),
+        ClientPacket::UpdateIntelligentCreature {
+            creature,
+            summon_me,
+            unsummon_me,
+            release_me,
+        } => Some(json!({
+            "customName": creature.custom_name,
+            "slotIndex": creature.slot_index,
+            "summonMe": summon_me,
+            "unsummonMe": unsummon_me,
+            "releaseMe": release_me
+        })),
+        ClientPacket::IntelligentCreaturePickup {
+            mouse_mode,
+            location,
+        } => Some(json!({
+            "mouseMode": mouse_mode,
+            "location": {
+                "x": location.x,
+                "y": location.y
+            }
+        })),
+        ClientPacket::RequestIntelligentCreatureUpdates { update } => Some(json!({
+            "update": update
+        })),
+        ClientPacket::AddFriend { name, blocked } => Some(json!({
+            "name": name,
+            "blocked": blocked
+        })),
+        ClientPacket::RemoveFriend { character_index } => Some(json!({
+            "characterIndex": character_index
+        })),
+        ClientPacket::AddMemo {
+            character_index,
+            memo,
+        } => Some(json!({
+            "characterIndex": character_index,
+            "memo": memo
+        })),
         _ => None,
     }
 }
 
 fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
     match packet {
-        ServerPacket::Raw { payload, .. } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::Raw { packet_id, payload } => Some(raw_payload_detail(
+            &server_packet_raw_display_name(*packet_id),
+            *packet_id as i16,
+            payload,
+        )),
+        ServerPacket::BaseStatsInfo { stats } | ServerPacket::HeroBaseStatsInfo { stats } => {
+            Some(json!({
+                "job": format!("{:?}", stats.job),
+                "statCount": stats.stats.len(),
+                "capCount": stats.caps.len()
+            }))
+        }
+        ServerPacket::HeroInformation { info } => Some(json!({
+            "objectId": info.object_id,
+            "name": info.name,
+            "class": format!("{:?}", info.class),
+            "gender": format!("{:?}", info.gender),
+            "level": info.level,
+            "hp": info.hp,
+            "mp": info.mp,
+            "inventorySlots": info.inventory.as_ref().map_or(0, Vec::len),
+            "equipmentSlots": info.equipment.as_ref().map_or(0, Vec::len),
+            "magicCount": info.magics.len(),
+            "autoPot": info.auto_pot,
+            "autoHpPercent": info.auto_hp_percent,
+            "autoMpPercent": info.auto_mp_percent
+        })),
+        ServerPacket::NPCMarket {
+            listings,
+            pages,
+            user_mode,
+        } => Some(json!({
+            "listingCount": listings.len(),
+            "pages": pages,
+            "userMode": user_mode
+        })),
+        ServerPacket::NPCMarketPage { listings } => Some(json!({
+            "listingCount": listings.len()
+        })),
+        ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        } => Some(json!({
+            "remove": remove,
+            "activeBuffCount": active_buffs.len(),
+            "guildBuffCount": guild_buffs.len()
+        })),
+        ServerPacket::GameShopInfo { item, stock_level } => Some(json!({
+            "itemIndex": item.item_index,
+            "gameShopIndex": item.g_index,
+            "name": item.info.name,
+            "goldPrice": item.gold_price,
+            "creditPrice": item.credit_price,
+            "count": item.count,
+            "category": item.category,
+            "stockLevel": stock_level
         })),
         ServerPacket::ClientVersion { result }
         | ServerPacket::NewAccount { result }
@@ -1002,14 +1218,207 @@ fn server_packet_detail(packet: &ServerPacket) -> Option<Value> {
             "direction": format!("{:?}", info.direction),
             "param": info.param
         })),
-        ServerPacket::NewQuestInfo { payload } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::TradeRequest { name } | ServerPacket::TradeAccept { name } => Some(json!({
+            "name": name
         })),
-        ServerPacket::NewRecipeInfo { payload } => Some(json!({
-            "rawPayloadLength": payload.len()
+        ServerPacket::TradeGold { amount } => Some(json!({
+            "amount": amount
+        })),
+        ServerPacket::TradeItem { trade_items } => Some(json!({
+            "tradeItemCount": trade_items.len(),
+            "tradeItems": trade_items
+        })),
+        ServerPacket::TradeCancel { unlock } => Some(json!({
+            "unlock": unlock
+        })),
+        ServerPacket::NewHeroInfo {
+            info,
+            storage_index,
+        } => Some(json!({
+            "index": info.index,
+            "name": info.name,
+            "level": info.level,
+            "class": format!("{:?}", info.class),
+            "gender": format!("{:?}", info.gender),
+            "storageIndex": storage_index
+        })),
+        ServerPacket::TakeBackHeroItem { from, to, success }
+        | ServerPacket::TransferHeroItem { from, to, success } => Some(json!({
+            "from": from,
+            "to": to,
+            "success": success
+        })),
+        ServerPacket::HeroHealthChanged { hp, mp } => Some(json!({
+            "hp": hp,
+            "mp": mp
+        })),
+        ServerPacket::GainHeroExperience { amount } => Some(json!({
+            "amount": amount
+        })),
+        ServerPacket::HeroLevelChanged {
+            level,
+            experience,
+            max_experience,
+        } => Some(json!({
+            "level": level,
+            "experience": experience,
+            "maxExperience": max_experience
+        })),
+        ServerPacket::HeroCreateRequest { can_create_class } => Some(json!({
+            "canCreateClass": can_create_class
+        })),
+        ServerPacket::NewHero { result } => Some(json!({
+            "result": result
+        })),
+        ServerPacket::UpdateHeroSpawnState { state } => Some(json!({
+            "state": state
+        })),
+        ServerPacket::SetHeroBehaviour { behaviour } => Some(json!({
+            "behaviour": behaviour
+        })),
+        ServerPacket::ManageHeroes {
+            maximum_count,
+            current_hero,
+            heroes,
+        } => Some(json!({
+            "maximumCount": maximum_count,
+            "currentHero": current_hero,
+            "heroSlots": heroes.as_ref().map(|heroes| heroes.len()).unwrap_or_default()
+        })),
+        ServerPacket::ChangeHero { from_index } => Some(json!({
+            "fromIndex": from_index
+        })),
+        ServerPacket::ConsignItem { unique_id, success } => Some(json!({
+            "uniqueId": unique_id,
+            "success": success
+        })),
+        ServerPacket::MarketFail { reason } => Some(json!({
+            "reason": reason
+        })),
+        ServerPacket::MarketSuccess { message } => Some(json!({
+            "message": message
+        })),
+        ServerPacket::MarriageRequest { name } | ServerPacket::DivorceRequest { name } => {
+            Some(json!({
+                "name": name
+            }))
+        }
+        ServerPacket::MentorRequest { name, level } => Some(json!({
+            "name": name,
+            "level": level
+        })),
+        ServerPacket::MountUpdate {
+            object_id,
+            mount_type,
+            riding_mount,
+        } => Some(json!({
+            "objectId": object_id,
+            "mountType": mount_type,
+            "ridingMount": riding_mount
+        })),
+        ServerPacket::FishingUpdate {
+            object_id,
+            fishing,
+            progress_percent,
+            chance_percent,
+            fishing_point,
+            found_fish,
+        } => Some(json!({
+            "objectId": object_id,
+            "fishing": fishing,
+            "progressPercent": progress_percent,
+            "chancePercent": chance_percent,
+            "fishingPoint": {
+                "x": fishing_point.x,
+                "y": fishing_point.y
+            },
+            "foundFish": found_fish
+        })),
+        ServerPacket::ReceiveMail { mail } => Some(json!({
+            "mailCount": mail.len()
+        })),
+        ServerPacket::MailLockedItem { unique_id, locked } => Some(json!({
+            "uniqueId": unique_id,
+            "locked": locked
+        })),
+        ServerPacket::MailSent { result } | ServerPacket::ParcelCollected { result } => {
+            Some(json!({
+                "result": result
+            }))
+        }
+        ServerPacket::MailCost { cost } => Some(json!({
+            "cost": cost
+        })),
+        ServerPacket::FriendUpdate { friends } => Some(json!({
+            "friendCount": friends.len()
+        })),
+        ServerPacket::NewIntelligentCreature { creature } => Some(json!({
+            "customName": creature.custom_name,
+            "slotIndex": creature.slot_index
+        })),
+        ServerPacket::UpdateIntelligentCreatureList {
+            creature_list,
+            creature_summoned,
+            summoned_creature_type,
+            pearl_count,
+        } => Some(json!({
+            "creatureCount": creature_list.len(),
+            "creatureSummoned": creature_summoned,
+            "summonedCreatureType": summoned_creature_type,
+            "pearlCount": pearl_count
+        })),
+        ServerPacket::IntelligentCreaturePickup { object_id } => Some(json!({
+            "objectId": object_id
+        })),
+        ServerPacket::ObjectMana { info } => Some(json!({
+            "objectId": info.object_id,
+            "percent": info.percent
+        })),
+        ServerPacket::AddBuff { buff } => Some(json!({
+            "buffType": buff.buff_type,
+            "visible": buff.visible,
+            "objectId": buff.object_id,
+            "expireTime": buff.expire_time,
+            "infinite": buff.infinite,
+            "paused": buff.paused,
+            "stats": buff.stats,
+            "values": buff.values
+        })),
+        ServerPacket::RemoveBuff {
+            buff_type,
+            object_id,
+        } => Some(json!({
+            "buffType": buff_type,
+            "objectId": object_id
+        })),
+        ServerPacket::NewQuestInfo { info } => Some(json!({
+            "index": info.index,
+            "name": info.name,
+            "group": info.group,
+            "npcIndex": info.npc_index,
+            "finishNpcIndex": info.finish_npc_index,
+            "fixedRewardCount": info.rewards_fixed_item.len(),
+            "selectRewardCount": info.rewards_select_item.len()
+        })),
+        ServerPacket::NewRecipeInfo { info } => Some(json!({
+            "gold": info.gold,
+            "chance": info.chance,
+            "itemIndex": info.item.item_index,
+            "toolCount": info.tools.len(),
+            "ingredientCount": info.ingredients.len()
         })),
         _ => None,
     }
+}
+
+fn raw_payload_detail(packet_name: &str, packet_id: i16, payload: &[u8]) -> Value {
+    json!({
+        "packetName": packet_name,
+        "packetId": packet_id,
+        "payloadLength": payload.len(),
+        "payloadHex": packet_payload_hex(payload),
+        "rawPayloadLength": payload.len()
+    })
 }
 
 fn user_item_slots_detail(items: Option<&[Option<mir2_protocol::UserItem>]>) -> Value {
@@ -1059,17 +1468,7 @@ fn trace_payload_hex(frame: &[u8]) -> Option<String> {
     if !env_flag("MIR2_PACKET_TRACE_CAPTURE_PAYLOAD_HEX") {
         return None;
     }
-    Some(hex_lower(frame.get(4..).unwrap_or_default()))
-}
-
-fn hex_lower(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let mut output = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        output.push(HEX[(byte >> 4) as usize] as char);
-        output.push(HEX[(byte & 0x0f) as usize] as char);
-    }
-    output
+    Some(packet_payload_hex(frame.get(4..).unwrap_or_default()))
 }
 
 fn diff_traces(local: &EndpointTrace, crystal: &EndpointTrace) -> TraceDiff {
@@ -1193,6 +1592,9 @@ fn stable_ordered_packet(entry: &TraceEntry) -> bool {
             | "ObjectSpell"
             | "ObjectStruck"
             | "ObjectHealth"
+            | "ObjectMana"
+            | "AddBuff"
+            | "RemoveBuff"
             | "Struck"
             | "ObjectDied"
             | "NPCUpdate"
@@ -1344,6 +1746,11 @@ fn trace_flows() -> Vec<TraceFlow> {
             packets: combat_basic_packets,
         },
         TraceFlow {
+            name: "magic_basic",
+            description: "Login, StartGame, MagicKey, Magic, SpellToggle",
+            packets: magic_basic_packets,
+        },
+        TraceFlow {
             name: "storage_password",
             description:
                 "Login, StartGame, SetStoragePassword, UnlockStorage, RemoveStoragePassword",
@@ -1455,6 +1862,30 @@ fn combat_basic_packets(fixture: &Fixture) -> Vec<ClientPacket> {
         },
         ClientPacket::Harvest {
             direction: MirDirection::Right,
+        },
+    ]);
+    packets
+}
+
+fn magic_basic_packets(fixture: &Fixture) -> Vec<ClientPacket> {
+    let mut packets = logged_in_packets(fixture);
+    packets.extend([
+        ClientPacket::MagicKey {
+            spell: Spell::Fury,
+            key: 7,
+            old_key: 0,
+        },
+        ClientPacket::Magic {
+            object_id: 0,
+            spell: Spell::Fury,
+            direction: MirDirection::Right,
+            target_id: 0,
+            location: Point { x: 334, y: 267 },
+            spell_target_lock: false,
+        },
+        ClientPacket::SpellToggle {
+            spell: Spell::Slaying,
+            toggle_state: 1,
         },
     ]);
     packets
@@ -1649,6 +2080,7 @@ mod tests {
             "movement_chat_keepalive",
             "inventory_storage",
             "combat_basic",
+            "magic_basic",
             "storage_password",
         ] {
             assert!(names.contains(expected), "missing flow {expected}");
@@ -1887,6 +2319,20 @@ mod tests {
             payload_hash(&[5, 0, 1, 0, 0xaa]),
             "fnv1a64:af64274c86026bfd"
         );
+    }
+
+    #[test]
+    fn raw_server_packet_detail_includes_copyable_payload_fields() {
+        let detail = super::server_packet_detail(&ServerPacket::Raw {
+            packet_id: ServerPacketId::MailSent,
+            payload: vec![0x00, 0x01, 0x02, 0x03],
+        })
+        .expect("detail exists for raw packets");
+        assert_eq!(detail["packetId"], json!(ServerPacketId::MailSent as i16));
+        assert_eq!(detail["packetName"], "MailSent");
+        assert_eq!(detail["payloadLength"], 4);
+        assert_eq!(detail["payloadHex"], "00010203");
+        assert_eq!(detail["rawPayloadLength"], 4);
     }
 
     #[test]

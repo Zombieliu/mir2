@@ -1120,6 +1120,7 @@ name = "mir2-admin-api"
 version = "0.1.0"
 dependencies = [
  "axum 0.7.9",
+ "mir2-game-data",
  "mir2-simulation",
  "postgres",
  "serde",

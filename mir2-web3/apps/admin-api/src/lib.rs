@@ -16,7 +16,7 @@ use axum::{Json, Router};
 use mir2_simulation::{
     ban_account_in_store, deliver_stage5_system_mail, AccountRecord, AccountStore, CharacterRecord,
     CharacterSaveRecord, SimulationConfig, Stage5MailDelivery, Stage5MailDeliveryReceipt,
-    Stage5MailTargetKind, Stage5SystemsState,
+    Stage5MailMessage, Stage5MailTargetKind, Stage5SystemsState,
 };
 use postgres::error::SqlState;
 use postgres::{Client, NoTls, Row};
@@ -27,13 +27,22 @@ use serde_json::Value;
 #[serde(rename_all = "snake_case")]
 pub enum Permission {
     AccountRead,
+    AccountWrite,
     AccountBan,
     CharacterRead,
+    CharacterWrite,
     CharacterKick,
+    CharacterMessage,
     InventoryRead,
     InventoryGrantItem,
     CurrencyGrant,
     MailSendSystem,
+    WorldBroadcast,
+    ServerControl,
+    MarketModerate,
+    GuildModerate,
+    NameListManage,
+    ContentRead,
     ContentPublish,
     ContentRollback,
     AuditRead,
@@ -78,6 +87,10 @@ pub enum TargetType {
     Account,
     Character,
     ContentBundle,
+    Guild,
+    Market,
+    NameList,
+    Server,
     World,
 }
 
@@ -132,6 +145,108 @@ pub enum AdminCommand {
         account_id: String,
         duration_seconds: Option<u64>,
     },
+    CreateAccount {
+        account_id: String,
+        password: Option<String>,
+    },
+    UpdateAccount {
+        account_id: String,
+        password: Option<String>,
+        storage_size: Option<u16>,
+        clear_storage_password: bool,
+        unban: bool,
+    },
+    DeleteAccount {
+        account_id: String,
+    },
+    UpdateCharacter {
+        character_id: String,
+        name: Option<String>,
+        level: Option<u16>,
+        gold: Option<u32>,
+        credit: Option<u32>,
+        map_file_name: Option<String>,
+        map_title: Option<String>,
+        position_x: Option<i32>,
+        position_y: Option<i32>,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+        pk_points: Option<i32>,
+    },
+    ReturnSafeZone {
+        character_id: String,
+    },
+    KillPlayer {
+        character_id: String,
+    },
+    KillPets {
+        character_id: String,
+    },
+    SetCharacterFlag {
+        character_id: String,
+        flag_index: u32,
+        active: bool,
+    },
+    SetChatBan {
+        character_id: String,
+        banned: bool,
+        until_ms: Option<u64>,
+    },
+    MessagePlayer {
+        character_id: String,
+        message: String,
+    },
+    Broadcast {
+        message: String,
+    },
+    MarketCancelListing {
+        character_id: String,
+        listing_id: u32,
+        notify_seller: bool,
+    },
+    MarketExpireListing {
+        character_id: String,
+        listing_id: u32,
+        notify_seller: bool,
+    },
+    MarketDeleteListing {
+        character_id: String,
+        listing_id: u32,
+        reason_message: Option<String>,
+    },
+    GuildRemoveMember {
+        guild_name: String,
+        member_name: String,
+    },
+    GuildSendMessage {
+        guild_name: String,
+        message: String,
+    },
+    NameListAdd {
+        list_name: String,
+        player_name: String,
+    },
+    NameListRemove {
+        list_name: String,
+        player_name: String,
+    },
+    NameListCreate {
+        list_name: String,
+    },
+    NameListDelete {
+        list_name: String,
+    },
+    PublishContentBundle {
+        bundle_id: String,
+        category: String,
+        record_key: String,
+        payload_json: Value,
+    },
+    ServerControl {
+        action: String,
+        target: Option<String>,
+    },
 }
 
 impl AdminCommand {
@@ -142,6 +257,29 @@ impl AdminCommand {
             AdminCommand::GrantCurrency { .. } => Permission::CurrencyGrant,
             AdminCommand::KickPlayer { .. } => Permission::CharacterKick,
             AdminCommand::BanAccount { .. } => Permission::AccountBan,
+            AdminCommand::CreateAccount { .. }
+            | AdminCommand::UpdateAccount { .. }
+            | AdminCommand::DeleteAccount { .. } => Permission::AccountWrite,
+            AdminCommand::UpdateCharacter { .. }
+            | AdminCommand::ReturnSafeZone { .. }
+            | AdminCommand::KillPlayer { .. }
+            | AdminCommand::KillPets { .. }
+            | AdminCommand::SetCharacterFlag { .. }
+            | AdminCommand::SetChatBan { .. } => Permission::CharacterWrite,
+            AdminCommand::MessagePlayer { .. } => Permission::CharacterMessage,
+            AdminCommand::Broadcast { .. } => Permission::WorldBroadcast,
+            AdminCommand::MarketCancelListing { .. }
+            | AdminCommand::MarketExpireListing { .. }
+            | AdminCommand::MarketDeleteListing { .. } => Permission::MarketModerate,
+            AdminCommand::GuildRemoveMember { .. } | AdminCommand::GuildSendMessage { .. } => {
+                Permission::GuildModerate
+            }
+            AdminCommand::NameListAdd { .. }
+            | AdminCommand::NameListRemove { .. }
+            | AdminCommand::NameListCreate { .. }
+            | AdminCommand::NameListDelete { .. } => Permission::NameListManage,
+            AdminCommand::PublishContentBundle { .. } => Permission::ContentPublish,
+            AdminCommand::ServerControl { .. } => Permission::ServerControl,
         }
     }
 }
@@ -2298,6 +2436,18 @@ pub trait SystemMailDomain {
             "ban_account is not supported for {account_id}"
         )))
     }
+
+    fn execute_console_command(
+        &mut self,
+        command: &AdminCommand,
+        _operator_id: &str,
+        _reason: &str,
+        _accepted_at_ms: u64,
+    ) -> Result<String, AdminError> {
+        Err(AdminError::UnsupportedCommand(format!(
+            "console command is not supported: {command:?}"
+        )))
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -2350,13 +2500,28 @@ impl SystemMailDomain for InMemorySystemMailOutbox {
             "memory ban accepted for {account_id} duration={duration_seconds:?} reason={reason}"
         ))
     }
+
+    fn execute_console_command(
+        &mut self,
+        command: &AdminCommand,
+        operator_id: &str,
+        reason: &str,
+        _accepted_at_ms: u64,
+    ) -> Result<String, AdminError> {
+        Ok(format!(
+            "memory console command accepted by {operator_id}: {command:?} ({reason})"
+        ))
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct AccountStoreSystemMailDomain {
     gateway_mail_url: String,
     gateway_kick_url: String,
+    gateway_control_url: String,
     fallback_config: SimulationConfig,
+    name_list_root: PathBuf,
+    content_bundle_dir: PathBuf,
     receipts: Vec<SystemMailReceipt>,
 }
 
@@ -2366,6 +2531,10 @@ impl AccountStoreSystemMailDomain {
             .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/system-mail".to_string());
         let gateway_kick_url = env::var("ADMIN_GATEWAY_KICK_URL")
             .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/kick-player".to_string());
+        let gateway_control_url = env::var("ADMIN_GATEWAY_CONTROL_URL")
+            .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/control".to_string());
+        let name_list_root = name_list_root_from_env();
+        let content_bundle_dir = content_bundle_dir_from_env();
         let database_backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
         let fallback_config = if database_backend.eq_ignore_ascii_case("postgres") {
             let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
@@ -2385,7 +2554,10 @@ impl AccountStoreSystemMailDomain {
         Self {
             gateway_mail_url,
             gateway_kick_url,
+            gateway_control_url,
             fallback_config,
+            name_list_root,
+            content_bundle_dir,
             receipts: Vec::new(),
         }
     }
@@ -2397,7 +2569,10 @@ impl AccountStoreSystemMailDomain {
         Self {
             gateway_mail_url,
             gateway_kick_url: "http://127.0.0.1:7110/admin/kick-player".to_string(),
+            gateway_control_url: "http://127.0.0.1:7110/admin/control".to_string(),
             fallback_config,
+            name_list_root: name_list_root_from_env(),
+            content_bundle_dir: content_bundle_dir_from_env(),
             receipts: Vec::new(),
         }
     }
@@ -2408,6 +2583,76 @@ impl AccountStoreSystemMailDomain {
 
     pub fn fallback_config(&self) -> &SimulationConfig {
         &self.fallback_config
+    }
+
+    fn mutate_account_store(
+        &self,
+        mutate: impl FnOnce(&mut AccountStore, &CharacterRecord) -> Result<String, AdminError>,
+    ) -> Result<String, AdminError> {
+        let message = {
+            let mut store = self
+                .fallback_config
+                .account_store
+                .lock()
+                .map_err(|_| AdminError::Repository("account store lock poisoned".into()))?;
+            mutate(&mut store, &self.fallback_config.default_character)?
+        };
+        self.fallback_config
+            .save_account_store()
+            .map_err(AdminError::ExecutionFailed)?;
+        Ok(message)
+    }
+
+    fn deliver_admin_message(
+        &self,
+        target_kind: Stage5MailTargetKind,
+        target_id: String,
+        subject: String,
+        body: String,
+        from: String,
+    ) -> Result<String, AdminError> {
+        let receipt = deliver_stage5_system_mail(
+            &self.fallback_config,
+            Stage5MailDelivery {
+                target_kind,
+                target_id,
+                from,
+                subject,
+                body,
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .map_err(AdminError::ExecutionFailed)?;
+        Ok(format!(
+            "admin message delivered to {} mailbox target(s); mail ids={:?}",
+            receipt.delivered_count, receipt.mail_ids
+        ))
+    }
+
+    fn execute_server_control(
+        &self,
+        action: &str,
+        target: Option<&str>,
+        operator_id: &str,
+        reason: &str,
+    ) -> Result<String, AdminError> {
+        let action = canonical_control_action(action)?;
+        let payload = serde_json::json!({
+            "action": action,
+            "target": target,
+            "operatorId": operator_id,
+            "reason": reason,
+        });
+        match post_json_to_gateway(&self.gateway_control_url, &payload) {
+            Ok(receipt) => Ok(format!("gateway control accepted: {receipt}")),
+            Err(error) if control_action_can_fallback(&action) => Ok(format!(
+                "local control receipt accepted for {action}; gateway unavailable: {error}"
+            )),
+            Err(error) => Err(AdminError::ExecutionFailed(format!(
+                "gateway control endpoint is required for {action}: {error}"
+            ))),
+        }
     }
 }
 
@@ -2477,6 +2722,520 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
             "account {} banned until {:?}",
             receipt.account_id, receipt.ban_until_ms
         ))
+    }
+
+    fn execute_console_command(
+        &mut self,
+        command: &AdminCommand,
+        operator_id: &str,
+        reason: &str,
+        accepted_at_ms: u64,
+    ) -> Result<String, AdminError> {
+        match command {
+            AdminCommand::CreateAccount {
+                account_id,
+                password,
+            } => self.mutate_account_store(|store, _| {
+                let account_id = required_string("account_id", account_id)?;
+                if store.accounts.contains_key(&account_id) {
+                    return Err(AdminError::InvalidCommand(format!(
+                        "account already exists: {account_id}"
+                    )));
+                }
+                let mut account = AccountRecord::empty();
+                if let Some(password) = optional_string(password.clone()) {
+                    account.password = password;
+                }
+                store.accounts.insert(account_id.clone(), account);
+                Ok(format!("account {account_id} created"))
+            }),
+            AdminCommand::UpdateAccount {
+                account_id,
+                password,
+                storage_size,
+                clear_storage_password,
+                unban,
+            } => self.mutate_account_store(|store, _| {
+                let account_id = required_string("account_id", account_id)?;
+                let account = store.accounts.get_mut(&account_id).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("account not found: {account_id}"))
+                })?;
+                let mut changes = Vec::new();
+                if let Some(password) = optional_string(password.clone()) {
+                    account.password = password;
+                    changes.push("password");
+                }
+                if let Some(storage_size) = storage_size {
+                    account.storage_size = *storage_size;
+                    changes.push("storage_size");
+                }
+                if *clear_storage_password {
+                    account.storage_password.clear();
+                    account.storage_password_last_set_binary_datetime = 0;
+                    changes.push("storage_password");
+                }
+                if *unban {
+                    account.is_banned = false;
+                    account.ban_reason.clear();
+                    account.ban_until_ms = None;
+                    account.banned_at_ms = None;
+                    changes.push("ban_state");
+                }
+                if changes.is_empty() {
+                    return Err(AdminError::InvalidCommand(
+                        "no account changes were requested".into(),
+                    ));
+                }
+                Ok(format!(
+                    "account {account_id} updated: {}",
+                    changes.join(", ")
+                ))
+            }),
+            AdminCommand::DeleteAccount { account_id } => self.mutate_account_store(|store, _| {
+                let account_id = required_string("account_id", account_id)?;
+                if store.accounts.remove(&account_id).is_none() {
+                    return Err(AdminError::InvalidCommand(format!(
+                        "account not found: {account_id}"
+                    )));
+                }
+                Ok(format!("account {account_id} deleted"))
+            }),
+            AdminCommand::UpdateCharacter {
+                character_id,
+                name,
+                level,
+                gold,
+                credit,
+                map_file_name,
+                map_title,
+                position_x,
+                position_y,
+                hp,
+                max_hp,
+                mp,
+                pk_points,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let requested_name = optional_string(name.clone());
+                if let Some(name) = requested_name.as_ref() {
+                    if store.accounts.iter().any(|(existing_account_id, account)| {
+                        account.characters.iter().any(|existing| {
+                            (existing_account_id != &account_id
+                                || existing.index != character_index)
+                                && existing.name.eq_ignore_ascii_case(name)
+                        })
+                    }) {
+                        return Err(AdminError::InvalidCommand(format!(
+                            "character name already exists: {name}"
+                        )));
+                    }
+                }
+                let account = store.accounts.get_mut(&account_id).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("account not found: {account_id}"))
+                })?;
+                let character = account
+                    .characters
+                    .iter_mut()
+                    .find(|character| character.index == character_index)
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!("character not found: {character_id}"))
+                    })?;
+                let save = account.saves.get_mut(&character_index).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("character save not found: {character_id}"))
+                })?;
+                let mut changes = Vec::new();
+                if let Some(name) = requested_name {
+                    character.name = name.clone();
+                    save.character.name = name;
+                    changes.push("name");
+                }
+                if let Some(level) = level {
+                    character.level = *level;
+                    save.character.level = *level;
+                    changes.push("level");
+                }
+                if let Some(gold) = gold {
+                    save.gold = *gold;
+                    changes.push("gold");
+                }
+                if let Some(credit) = credit {
+                    save.credit = *credit;
+                    changes.push("credit");
+                }
+                if let Some(map_file_name) = optional_string(map_file_name.clone()) {
+                    save.map_file_name = map_file_name;
+                    changes.push("map_file_name");
+                }
+                if let Some(map_title) = optional_string(map_title.clone()) {
+                    save.map_title = map_title;
+                    changes.push("map_title");
+                }
+                if let Some(position_x) = position_x {
+                    save.position.x = *position_x;
+                    changes.push("position_x");
+                }
+                if let Some(position_y) = position_y {
+                    save.position.y = *position_y;
+                    changes.push("position_y");
+                }
+                if let Some(max_hp) = max_hp {
+                    save.max_hp = (*max_hp).max(1);
+                    changes.push("max_hp");
+                }
+                if let Some(hp) = hp {
+                    save.hp = *hp;
+                    changes.push("hp");
+                }
+                if let Some(mp) = mp {
+                    save.mp = (*mp).max(0);
+                    changes.push("mp");
+                }
+                if let Some(pk_points) = pk_points {
+                    save.pk_points = *pk_points;
+                    changes.push("pk_points");
+                }
+                save.hp = save.hp.min(save.max_hp);
+                if changes.is_empty() {
+                    return Err(AdminError::InvalidCommand(
+                        "no character changes were requested".into(),
+                    ));
+                }
+                Ok(format!(
+                    "character {} updated: {}",
+                    character_player_id(&account_id, character_index),
+                    changes.join(", ")
+                ))
+            }),
+            AdminCommand::ReturnSafeZone { character_id } => {
+                self.mutate_account_store(|store, _| {
+                    let (account_id, character_index) =
+                        resolve_character_target(store, character_id)?;
+                    let save = store
+                        .accounts
+                        .get_mut(&account_id)
+                        .and_then(|account| account.saves.get_mut(&character_index))
+                        .ok_or_else(|| {
+                            AdminError::InvalidCommand(format!(
+                                "character save not found: {character_id}"
+                            ))
+                        })?;
+                    save.map_file_name = "0".to_string();
+                    save.map_title = "BichonProvince".to_string();
+                    save.position.x = 284;
+                    save.position.y = 607;
+                    save.hp = save.hp.max(1);
+                    Ok(format!(
+                        "character {} returned to BichonProvince safe zone",
+                        character_player_id(&account_id, character_index)
+                    ))
+                })
+            }
+            AdminCommand::KillPlayer { character_id } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let save = store
+                    .accounts
+                    .get_mut(&account_id)
+                    .and_then(|account| account.saves.get_mut(&character_index))
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "character save not found: {character_id}"
+                        ))
+                    })?;
+                save.hp = 0;
+                Ok(format!(
+                    "character {} hp set to 0",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::KillPets { character_id } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let save = store
+                    .accounts
+                    .get_mut(&account_id)
+                    .and_then(|account| account.saves.get_mut(&character_index))
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "character save not found: {character_id}"
+                        ))
+                    })?;
+                let mut systems = stage5_systems_from_save(save);
+                let removed = systems.hero.take().is_some();
+                write_stage5_systems_to_save(save, systems)?;
+                Ok(format!(
+                    "character {} companion state cleared={removed}",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::SetCharacterFlag {
+                character_id,
+                flag_index,
+                active,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let save = store
+                    .accounts
+                    .get_mut(&account_id)
+                    .and_then(|account| account.saves.get_mut(&character_index))
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "character save not found: {character_id}"
+                        ))
+                    })?;
+                set_npc_flag(save, *flag_index, *active)?;
+                Ok(format!(
+                    "character {} flag {flag_index} set to {active}",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::SetChatBan {
+                character_id,
+                banned,
+                until_ms,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let save = store
+                    .accounts
+                    .get_mut(&account_id)
+                    .and_then(|account| account.saves.get_mut(&character_index))
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "character save not found: {character_id}"
+                        ))
+                    })?;
+                save.chat_banned = *banned;
+                save.chat_ban_until_ms = if *banned { *until_ms } else { None };
+                Ok(format!(
+                    "character {} chat_banned={} until={:?}",
+                    character_player_id(&account_id, character_index),
+                    save.chat_banned,
+                    save.chat_ban_until_ms
+                ))
+            }),
+            AdminCommand::MessagePlayer {
+                character_id,
+                message,
+            } => self.deliver_admin_message(
+                Stage5MailTargetKind::Character,
+                character_id.clone(),
+                "GM Message".to_string(),
+                required_string("message", message)?,
+                format!("GM {operator_id}"),
+            ),
+            AdminCommand::Broadcast { message } => self.deliver_admin_message(
+                Stage5MailTargetKind::Global,
+                "global".to_string(),
+                "GM Broadcast".to_string(),
+                required_string("message", message)?,
+                format!("GM {operator_id}"),
+            ),
+            AdminCommand::MarketCancelListing {
+                character_id,
+                listing_id,
+                notify_seller,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let account = store.accounts.get_mut(&account_id).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("account not found: {account_id}"))
+                })?;
+                let save = account.saves.get_mut(&character_index).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("character save not found: {character_id}"))
+                })?;
+                let character_name = save.character.name.clone();
+                let mut systems = stage5_systems_from_save(save);
+                let listing = systems
+                    .auction
+                    .iter_mut()
+                    .find(|listing| listing.id == *listing_id)
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "auction listing not found: {listing_id}"
+                        ))
+                    })?;
+                listing.cancelled = true;
+                if *notify_seller {
+                    push_stage5_mail(
+                        &mut systems,
+                        character_name,
+                        "GM Market Notice",
+                        &format!("Listing {listing_id} was cancelled by GM moderation."),
+                        0,
+                        Vec::new(),
+                    );
+                }
+                write_stage5_systems_to_save(save, systems)?;
+                Ok(format!(
+                    "auction listing {listing_id} cancelled for {}",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::MarketExpireListing {
+                character_id,
+                listing_id,
+                notify_seller,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let account = store.accounts.get_mut(&account_id).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("account not found: {account_id}"))
+                })?;
+                let save = account.saves.get_mut(&character_index).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("character save not found: {character_id}"))
+                })?;
+                let character_name = save.character.name.clone();
+                let mut systems = stage5_systems_from_save(save);
+                let listing = systems
+                    .auction
+                    .iter_mut()
+                    .find(|listing| listing.id == *listing_id)
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "auction listing not found: {listing_id}"
+                        ))
+                    })?;
+                listing.expired = true;
+                if *notify_seller {
+                    push_stage5_mail(
+                        &mut systems,
+                        character_name,
+                        "GM Market Notice",
+                        &format!("Listing {listing_id} was expired by GM moderation."),
+                        0,
+                        Vec::new(),
+                    );
+                }
+                write_stage5_systems_to_save(save, systems)?;
+                Ok(format!(
+                    "auction listing {listing_id} expired for {}",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::MarketDeleteListing {
+                character_id,
+                listing_id,
+                reason_message,
+            } => self.mutate_account_store(|store, _| {
+                let (account_id, character_index) = resolve_character_target(store, character_id)?;
+                let account = store.accounts.get_mut(&account_id).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("account not found: {account_id}"))
+                })?;
+                let save = account.saves.get_mut(&character_index).ok_or_else(|| {
+                    AdminError::InvalidCommand(format!("character save not found: {character_id}"))
+                })?;
+                let character_name = save.character.name.clone();
+                let mut systems = stage5_systems_from_save(save);
+                let index = systems
+                    .auction
+                    .iter()
+                    .position(|listing| listing.id == *listing_id)
+                    .ok_or_else(|| {
+                        AdminError::InvalidCommand(format!(
+                            "auction listing not found: {listing_id}"
+                        ))
+                    })?;
+                systems.auction.remove(index);
+                if let Some(reason_message) = optional_string(reason_message.clone()) {
+                    push_stage5_mail(
+                        &mut systems,
+                        character_name,
+                        "GM Market Notice",
+                        &reason_message,
+                        0,
+                        Vec::new(),
+                    );
+                }
+                write_stage5_systems_to_save(save, systems)?;
+                Ok(format!(
+                    "auction listing {listing_id} deleted for {}",
+                    character_player_id(&account_id, character_index)
+                ))
+            }),
+            AdminCommand::GuildRemoveMember {
+                guild_name,
+                member_name,
+            } => self.mutate_account_store(|store, _| {
+                let guild_name = required_string("guild_name", guild_name)?;
+                let member_name = required_string("member_name", member_name)?;
+                let mut updated = 0usize;
+                for account in store.accounts.values_mut() {
+                    for save in account.saves.values_mut() {
+                        let mut systems = stage5_systems_from_save(save);
+                        if systems.guild.name.eq_ignore_ascii_case(&guild_name) {
+                            let before = systems.guild.members.len();
+                            systems
+                                .guild
+                                .members
+                                .retain(|member| !member.eq_ignore_ascii_case(&member_name));
+                            if save.character.name.eq_ignore_ascii_case(&member_name) {
+                                systems.guild = Default::default();
+                            }
+                            if systems.guild.members.len() != before
+                                || save.character.name.eq_ignore_ascii_case(&member_name)
+                            {
+                                write_stage5_systems_to_save(save, systems)?;
+                                updated = updated.saturating_add(1);
+                            }
+                        }
+                    }
+                }
+                Ok(format!(
+                    "guild {guild_name} removed member {member_name}; updated saves={updated}"
+                ))
+            }),
+            AdminCommand::GuildSendMessage {
+                guild_name,
+                message,
+            } => self.mutate_account_store(|store, _| {
+                let guild_name = required_string("guild_name", guild_name)?;
+                let message = required_string("message", message)?;
+                let entry = format!("[GM {operator_id}] {message}");
+                let mut updated = 0usize;
+                for account in store.accounts.values_mut() {
+                    for save in account.saves.values_mut() {
+                        let mut systems = stage5_systems_from_save(save);
+                        if systems.guild.name.eq_ignore_ascii_case(&guild_name) {
+                            systems.guild.chat_log.push(entry.clone());
+                            write_stage5_systems_to_save(save, systems)?;
+                            updated = updated.saturating_add(1);
+                        }
+                    }
+                }
+                Ok(format!(
+                    "guild {guild_name} message appended to {updated} character save(s)"
+                ))
+            }),
+            AdminCommand::NameListAdd {
+                list_name,
+                player_name,
+            } => update_name_list(&self.name_list_root, list_name, player_name, true),
+            AdminCommand::NameListRemove {
+                list_name,
+                player_name,
+            } => update_name_list(&self.name_list_root, list_name, player_name, false),
+            AdminCommand::NameListCreate { list_name } => {
+                create_name_list(&self.name_list_root, list_name)
+            }
+            AdminCommand::NameListDelete { list_name } => {
+                delete_name_list(&self.name_list_root, list_name)
+            }
+            AdminCommand::PublishContentBundle {
+                bundle_id,
+                category,
+                record_key,
+                payload_json,
+            } => publish_content_bundle(
+                &self.content_bundle_dir,
+                bundle_id,
+                category,
+                record_key,
+                payload_json,
+                operator_id,
+                reason,
+                accepted_at_ms,
+            ),
+            AdminCommand::ServerControl { action, target } => {
+                self.execute_server_control(action, target.as_deref(), operator_id, reason)
+            }
+            _ => Err(AdminError::UnsupportedCommand(format!("{command:?}"))),
+        }
     }
 }
 
@@ -2600,6 +3359,364 @@ fn parse_http_url(url: &str) -> Result<(String, String), String> {
         return Err("gateway mail url host is required".to_string());
     }
     Ok((host.to_string(), path))
+}
+
+fn resolve_character_target(
+    store: &AccountStore,
+    character_id: &str,
+) -> Result<(String, i32), AdminError> {
+    let character_id = required_string("character_id", character_id)?;
+    if let Some((account_id, raw_index)) = character_id.split_once(':') {
+        let account_id = required_string("account_id", account_id)?;
+        let character_index = raw_index.trim().parse::<i32>().map_err(|_| {
+            AdminError::InvalidCommand(format!("invalid character index: {raw_index}"))
+        })?;
+        let account = store.accounts.get(&account_id).ok_or_else(|| {
+            AdminError::InvalidCommand(format!("account not found: {account_id}"))
+        })?;
+        if account
+            .characters
+            .iter()
+            .any(|character| character.index == character_index)
+            || account.saves.contains_key(&character_index)
+        {
+            return Ok((account_id, character_index));
+        }
+        return Err(AdminError::InvalidCommand(format!(
+            "character not found: {character_id}"
+        )));
+    }
+    for (account_id, account) in &store.accounts {
+        for character in &account.characters {
+            if character.name.eq_ignore_ascii_case(&character_id)
+                || character.index.to_string() == character_id
+            {
+                return Ok((account_id.clone(), character.index));
+            }
+        }
+    }
+    Err(AdminError::InvalidCommand(format!(
+        "character not found: {character_id}"
+    )))
+}
+
+fn character_player_id(account_id: &str, character_index: i32) -> String {
+    format!("{account_id}:{character_index}")
+}
+
+fn stage5_systems_from_save(save: &CharacterSaveRecord) -> Stage5SystemsState {
+    save.stage5_systems_json
+        .as_deref()
+        .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+        .unwrap_or_default()
+}
+
+fn write_stage5_systems_to_save(
+    save: &mut CharacterSaveRecord,
+    systems: Stage5SystemsState,
+) -> Result<(), AdminError> {
+    save.stage5_systems_json = Some(serde_json::to_string(&systems).map_err(|error| {
+        AdminError::Repository(format!("encode stage5 systems failed: {error}"))
+    })?);
+    Ok(())
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+struct AdminNpcFlagState {
+    index: u32,
+    value: bool,
+}
+
+fn npc_flags_from_save(save: &CharacterSaveRecord) -> Vec<AdminNpcFlagState> {
+    save.npc_flag_states_json
+        .iter()
+        .filter_map(|entry| serde_json::from_str::<AdminNpcFlagState>(entry).ok())
+        .collect()
+}
+
+fn write_npc_flags_to_save(
+    save: &mut CharacterSaveRecord,
+    mut flags: Vec<AdminNpcFlagState>,
+) -> Result<(), AdminError> {
+    flags.sort_by_key(|flag| flag.index);
+    save.npc_flag_states_json = flags
+        .iter()
+        .map(|flag| {
+            serde_json::to_string(flag)
+                .map_err(|error| AdminError::Repository(format!("encode npc flag failed: {error}")))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(())
+}
+
+fn set_npc_flag(
+    save: &mut CharacterSaveRecord,
+    flag_index: u32,
+    active: bool,
+) -> Result<(), AdminError> {
+    if !(1..=1999).contains(&flag_index) {
+        return Err(AdminError::InvalidCommand(
+            "flag_index must be between 1 and 1999".into(),
+        ));
+    }
+    let mut flags = npc_flags_from_save(save);
+    if let Some(flag) = flags.iter_mut().find(|flag| flag.index == flag_index) {
+        flag.value = active;
+    } else {
+        flags.push(AdminNpcFlagState {
+            index: flag_index,
+            value: active,
+        });
+    }
+    flags.retain(|flag| flag.value);
+    write_npc_flags_to_save(save, flags)
+}
+
+fn push_stage5_mail(
+    systems: &mut Stage5SystemsState,
+    to: String,
+    subject: &str,
+    body: &str,
+    gold: u32,
+    items: Vec<String>,
+) {
+    let id = systems
+        .mail
+        .iter()
+        .map(|mail| mail.id)
+        .max()
+        .unwrap_or(0)
+        .saturating_add(1);
+    systems.mail.push(Stage5MailMessage {
+        id,
+        from: "GM System".to_string(),
+        to,
+        subject: subject.to_string(),
+        body: body.to_string(),
+        gold,
+        items,
+        claimed: false,
+        deleted: false,
+    });
+}
+
+fn name_list_root_from_env() -> PathBuf {
+    env::var("ADMIN_NAMELIST_ROOT")
+        .or_else(|_| env::var("MIR2_NAMELIST_ROOT"))
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from(".mir2-data/NameLists"))
+}
+
+fn content_bundle_dir_from_env() -> PathBuf {
+    env::var("ADMIN_CONTENT_BUNDLE_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| PathBuf::from(".mir2-data/admin-content-bundles"))
+}
+
+fn sanitized_file_stem(field: &str, value: &str) -> Result<String, AdminError> {
+    let value = required_string(field, value)?;
+    let mut stem = String::new();
+    for ch in value.chars() {
+        if ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_' | '.') {
+            stem.push(ch);
+        } else if ch.is_whitespace() {
+            stem.push('-');
+        } else {
+            return Err(AdminError::InvalidCommand(format!(
+                "{field} contains unsupported path character: {ch}"
+            )));
+        }
+    }
+    let stem = stem.trim_matches('.').trim_matches('-').to_string();
+    if stem.is_empty() || stem.contains("..") {
+        return Err(AdminError::InvalidCommand(format!("{field} is not safe")));
+    }
+    Ok(stem)
+}
+
+fn name_list_path(root: &PathBuf, list_name: &str) -> Result<PathBuf, AdminError> {
+    let mut stem = sanitized_file_stem("list_name", list_name)?;
+    if !stem.ends_with(".txt") {
+        stem.push_str(".txt");
+    }
+    Ok(root.join(stem))
+}
+
+fn update_name_list(
+    root: &PathBuf,
+    list_name: &str,
+    player_name: &str,
+    add: bool,
+) -> Result<String, AdminError> {
+    let player_name = required_string("player_name", player_name)?;
+    let path = name_list_path(root, list_name)?;
+    fs::create_dir_all(root).map_err(|error| {
+        AdminError::Repository(format!(
+            "create namelist root {} failed: {error}",
+            root.display()
+        ))
+    })?;
+    let mut players = fs::read_to_string(&path)
+        .unwrap_or_default()
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    if add {
+        if !players
+            .iter()
+            .any(|existing| existing.eq_ignore_ascii_case(&player_name))
+        {
+            players.push(player_name.clone());
+        }
+    } else {
+        players.retain(|existing| !existing.eq_ignore_ascii_case(&player_name));
+    }
+    players.sort_by_key(|value| value.to_ascii_lowercase());
+    let mut body = players.join("\n");
+    if !body.is_empty() {
+        body.push('\n');
+    }
+    fs::write(&path, body).map_err(|error| {
+        AdminError::Repository(format!("write namelist {} failed: {error}", path.display()))
+    })?;
+    Ok(format!(
+        "namelist {} {} {}; players={}",
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("unknown"),
+        if add { "added" } else { "removed" },
+        player_name,
+        players.len()
+    ))
+}
+
+fn create_name_list(root: &PathBuf, list_name: &str) -> Result<String, AdminError> {
+    let path = name_list_path(root, list_name)?;
+    fs::create_dir_all(root).map_err(|error| {
+        AdminError::Repository(format!(
+            "create namelist root {} failed: {error}",
+            root.display()
+        ))
+    })?;
+    if path.exists() {
+        return Err(AdminError::InvalidCommand(format!(
+            "namelist already exists: {}",
+            path.display()
+        )));
+    }
+    fs::write(&path, "").map_err(|error| {
+        AdminError::Repository(format!(
+            "create namelist {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    Ok(format!(
+        "namelist {} created",
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("unknown")
+    ))
+}
+
+fn delete_name_list(root: &PathBuf, list_name: &str) -> Result<String, AdminError> {
+    let path = name_list_path(root, list_name)?;
+    if !path.exists() {
+        return Err(AdminError::InvalidCommand(format!(
+            "namelist not found: {}",
+            path.display()
+        )));
+    }
+    fs::remove_file(&path).map_err(|error| {
+        AdminError::Repository(format!(
+            "delete namelist {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    Ok(format!(
+        "namelist {} deleted",
+        path.file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("unknown")
+    ))
+}
+
+fn publish_content_bundle(
+    root: &PathBuf,
+    bundle_id: &str,
+    category: &str,
+    record_key: &str,
+    payload_json: &Value,
+    operator_id: &str,
+    reason: &str,
+    updated_at_ms: u64,
+) -> Result<String, AdminError> {
+    let bundle_id = sanitized_file_stem("bundle_id", bundle_id)?;
+    let category = required_string("category", category)?;
+    let record_key = required_string("record_key", record_key)?;
+    fs::create_dir_all(root).map_err(|error| {
+        AdminError::Repository(format!(
+            "create content bundle dir {} failed: {error}",
+            root.display()
+        ))
+    })?;
+    let payload = serde_json::json!({
+        "bundleId": bundle_id,
+        "category": category,
+        "recordKey": record_key,
+        "payload": payload_json,
+        "operatorId": operator_id,
+        "reason": reason,
+        "updatedAtMs": updated_at_ms,
+    });
+    let body = serde_json::to_vec_pretty(&payload).map_err(|error| {
+        AdminError::Repository(format!("encode content bundle failed: {error}"))
+    })?;
+    let path = root.join(format!("{bundle_id}.json"));
+    fs::write(&path, body).map_err(|error| {
+        AdminError::Repository(format!(
+            "write content bundle {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    Ok(format!(
+        "content bundle {bundle_id} published to {}",
+        path.display()
+    ))
+}
+
+fn canonical_control_action(action: &str) -> Result<String, AdminError> {
+    let action = required_string("action", action)?
+        .replace('-', "_")
+        .replace(' ', "_")
+        .to_ascii_lowercase();
+    let canonical = match action.as_str() {
+        "status" | "health" => "status",
+        "reload_npcs" | "reload_npc" | "reloadnpc" => "reload_npcs",
+        "reload_drops" | "reload_drop" | "reloaddrops" => "reload_drops",
+        "reload_line_message" | "reload_line_messages" | "reloadlinemessage" => {
+            "reload_line_message"
+        }
+        "clear_blocked_ips" | "clear_blocked_ip" | "clearblockedips" => "clear_blocked_ips",
+        "start" | "start_server" => "start",
+        "stop" | "stop_server" => "stop",
+        "reboot" | "restart" => "reboot",
+        "close" | "shutdown" => "close",
+        other => {
+            return Err(AdminError::InvalidCommand(format!(
+                "unsupported server control action: {other}"
+            )))
+        }
+    };
+    Ok(canonical.to_string())
+}
+
+fn control_action_can_fallback(action: &str) -> bool {
+    matches!(
+        action,
+        "status" | "reload_npcs" | "reload_drops" | "reload_line_message" | "clear_blocked_ips"
+    )
 }
 
 pub struct SystemMailExecutor<D> {
@@ -2726,7 +3843,18 @@ where
                     message,
                 })
             }
-            other => Err(AdminError::UnsupportedCommand(format!("{other:?}"))),
+            other => {
+                let message = self.domain.execute_console_command(
+                    other,
+                    &envelope.operator.id,
+                    &envelope.reason,
+                    envelope.created_at_ms,
+                )?;
+                Ok(CommandExecutionResult {
+                    status: CommandStatus::Succeeded,
+                    message,
+                })
+            }
         }
     }
 }
@@ -2809,12 +3937,24 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
             post(reject_approval),
         )
         .route("/admin/events", get(list_admin_events))
+        .route(
+            "/admin/gameplay-events/summary",
+            get(get_gameplay_event_summary),
+        )
+        .route("/admin/gameplay-events", get(list_gameplay_events))
         .route("/admin/timeline", get(list_admin_timeline))
         .route("/admin/system-mail/outbox", get(list_system_mail_outbox))
         .route("/admin/read/dashboard", get(read_dashboard))
+        .route("/admin/read/accounts", get(read_accounts))
+        .route("/admin/read/accounts/:account_id", get(read_account_detail))
         .route("/admin/read/players", get(read_players))
         .route("/admin/read/players/:player_id", get(read_player_detail))
         .route("/admin/read/economy", get(read_economy))
+        .route("/admin/read/market", get(read_market))
+        .route("/admin/read/guilds", get(read_guilds))
+        .route("/admin/read/namelists", get(read_namelists))
+        .route("/admin/read/content", get(read_content))
+        .route("/admin/read/control", get(read_control))
         .route("/admin/read/activities", get(read_activities))
         .route("/admin/read/servers", get(read_servers))
         .route("/admin/read/risk", get(read_risk))
@@ -2832,6 +3972,7 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         )
         .route("/admin/commands/kick-player", post(submit_kick_player))
         .route("/admin/commands/ban-account", post(submit_ban_account))
+        .route("/admin/commands/console", post(submit_console_command))
         .with_state(state)
 }
 
@@ -2899,6 +4040,17 @@ pub struct SubmitBanAccountRequest {
     pub approval_id: Option<String>,
     pub account_id: String,
     pub duration_seconds: Option<u64>,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitConsoleCommandRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub target: AdminTarget,
+    pub command: AdminCommand,
     pub reason: String,
 }
 
@@ -3015,6 +4167,92 @@ pub struct AdminEventsResponse {
     pub records: Vec<AdminEventRecord>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventRecord {
+    pub event_id: String,
+    pub event_type: String,
+    pub zone_id: String,
+    pub command_kind: String,
+    pub account_id: Option<String>,
+    pub character_index: Option<i32>,
+    pub character_name: Option<String>,
+    pub packet_count: u64,
+    pub snapshot_tick: u64,
+    pub occurred_at_ms: u64,
+    pub payload_json: String,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventQuery {
+    pub limit: Option<usize>,
+    pub zone_id: Option<String>,
+    pub command_kind: Option<String>,
+    pub account_id: Option<String>,
+    pub character_name: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventsResponse {
+    pub degraded: bool,
+    pub error: Option<String>,
+    pub records: Vec<GameplayEventRecord>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventSummaryQuery {
+    pub window_seconds: Option<u64>,
+    pub limit: Option<usize>,
+    pub zone_id: Option<String>,
+    pub command_kind: Option<String>,
+    pub max_lag_seconds: Option<u64>,
+    pub min_events: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventCommandSummary {
+    pub command_kind: String,
+    pub event_count: u64,
+    pub last_occurred_at_ms: u64,
+    pub max_snapshot_tick: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventReadinessAlert {
+    pub level: String,
+    pub code: String,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameplayEventSummaryResponse {
+    pub degraded: bool,
+    pub ready: bool,
+    pub error: Option<String>,
+    pub generated_at_ms: u64,
+    pub window_seconds: u64,
+    pub max_lag_ms: u64,
+    pub min_event_count: u64,
+    pub total_count: u64,
+    pub last_occurred_at_ms: Option<u64>,
+    pub lag_ms: Option<u64>,
+    pub alerts: Vec<GameplayEventReadinessAlert>,
+    pub commands: Vec<GameplayEventCommandSummary>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct GameplayEventSummary {
+    total_count: u64,
+    last_occurred_at_ms: Option<u64>,
+    commands: Vec<GameplayEventCommandSummary>,
+}
+
 #[derive(Debug, Clone, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AdminTimelineQuery {
@@ -3084,6 +4322,39 @@ pub struct AdminServiceStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminAccountsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub accounts: Vec<AdminAccountSummary>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAccountSummary {
+    pub account_id: String,
+    pub password_configured: bool,
+    pub character_count: usize,
+    pub storage_size: u16,
+    pub has_storage_password: bool,
+    pub is_banned: bool,
+    pub ban_reason: Option<String>,
+    pub ban_until_ms: Option<u64>,
+    pub banned_at_ms: Option<u64>,
+    pub store_version: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAccountDetail {
+    pub summary: AdminAccountSummary,
+    pub characters: Vec<AdminPlayerSummary>,
+    pub has_expanded_storage: bool,
+    pub expanded_storage_expiry_time_binary_datetime: i64,
+    pub storage_password_last_set_binary_datetime: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AdminPlayersReadModel {
     pub source: String,
     pub generated_at_ms: u64,
@@ -3109,6 +4380,9 @@ pub struct AdminPlayerSummary {
     pub mp: i32,
     pub gold: u64,
     pub credit: u64,
+    pub pk_points: i32,
+    pub chat_banned: bool,
+    pub chat_ban_until_ms: Option<u64>,
     pub status: String,
     pub online: bool,
     pub online_source: Option<String>,
@@ -3128,6 +4402,8 @@ pub struct AdminPlayerDetail {
     pub equipment_count: usize,
     pub quest_state_count: usize,
     pub skill_state_count: usize,
+    pub npc_flag_count: usize,
+    pub active_npc_flags: Vec<AdminNpcFlagRecord>,
     pub mail_count: usize,
     pub unclaimed_mail_count: usize,
     pub auction_listing_count: usize,
@@ -3140,6 +4416,13 @@ pub struct AdminPlayerDetail {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct AdminNpcFlagRecord {
+    pub index: u32,
+    pub active: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AdminEconomyReadModel {
     pub source: String,
     pub generated_at_ms: u64,
@@ -3147,6 +4430,113 @@ pub struct AdminEconomyReadModel {
     pub gold_distribution: Vec<AdminDistributionBucket>,
     pub price_feeds: Vec<AdminPriceFeedRecord>,
     pub price_feed_configured: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMarketReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub listings: Vec<AdminMarketListingRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMarketListingRecord {
+    pub owner_player_id: String,
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub listing_id: u32,
+    pub seller: String,
+    pub item_key: String,
+    pub price: u32,
+    pub sold: bool,
+    pub cancelled: bool,
+    pub expired: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminGuildsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub guilds: Vec<AdminGuildRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminGuildRecord {
+    pub guild_name: String,
+    pub member_count: usize,
+    pub members: Vec<String>,
+    pub ranks: Vec<String>,
+    pub chat_log: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminNameListsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub root: String,
+    pub lists: Vec<AdminNameListRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminNameListRecord {
+    pub list_name: String,
+    pub path: String,
+    pub player_count: usize,
+    pub players: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminContentReadModel {
+    pub generated_at_ms: u64,
+    pub categories: Vec<AdminContentCategoryRecord>,
+    pub bundles: Vec<AdminContentBundleRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminContentCategoryRecord {
+    pub category: String,
+    pub source: String,
+    pub total_records: usize,
+    pub status: String,
+    pub editable: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminContentBundleRecord {
+    pub bundle_id: String,
+    pub category: String,
+    pub record_key: String,
+    pub path: String,
+    pub updated_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminControlReadModel {
+    pub generated_at_ms: u64,
+    pub gateway_control_configured: bool,
+    pub control_actions: Vec<String>,
+    pub logs: Vec<AdminLogTailRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminLogTailRecord {
+    pub name: String,
+    pub path: String,
+    pub configured: bool,
+    pub lines: Vec<String>,
+    pub error: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3609,6 +4999,82 @@ async fn list_admin_events(
     }
 }
 
+async fn list_gameplay_events(
+    Query(query): Query<GameplayEventQuery>,
+) -> Result<Json<GameplayEventsResponse>, ApiError> {
+    let records = tokio::task::spawn_blocking(move || fetch_clickhouse_gameplay_events(&query))
+        .await
+        .map_err(join_error)?;
+    match records {
+        Ok(records) => Ok(Json(GameplayEventsResponse {
+            degraded: false,
+            error: None,
+            records,
+        })),
+        Err(error) => Ok(Json(GameplayEventsResponse {
+            degraded: true,
+            error: Some(error.message),
+            records: Vec::new(),
+        })),
+    }
+}
+
+async fn get_gameplay_event_summary(
+    Query(query): Query<GameplayEventSummaryQuery>,
+) -> Result<Json<GameplayEventSummaryResponse>, ApiError> {
+    let generated_at_ms = now_ms();
+    let window_seconds = normalized_gameplay_event_summary_window_seconds(query.window_seconds);
+    let max_lag_ms =
+        normalized_gameplay_event_summary_max_lag_ms(query.max_lag_seconds, window_seconds);
+    let min_event_count = normalized_gameplay_event_summary_min_events(query.min_events);
+    let summary = tokio::task::spawn_blocking(move || {
+        fetch_clickhouse_gameplay_event_summary(&query, generated_at_ms, window_seconds)
+    })
+    .await
+    .map_err(join_error)?;
+    match summary {
+        Ok(summary) => {
+            let lag_ms = summary
+                .last_occurred_at_ms
+                .map(|last_occurred_at_ms| generated_at_ms.saturating_sub(last_occurred_at_ms));
+            let alerts =
+                gameplay_event_readiness_alerts(&summary, lag_ms, max_lag_ms, min_event_count);
+            Ok(Json(GameplayEventSummaryResponse {
+                degraded: false,
+                ready: alerts.is_empty(),
+                error: None,
+                generated_at_ms,
+                window_seconds,
+                max_lag_ms,
+                min_event_count,
+                total_count: summary.total_count,
+                last_occurred_at_ms: summary.last_occurred_at_ms,
+                lag_ms,
+                alerts,
+                commands: summary.commands,
+            }))
+        }
+        Err(error) => Ok(Json(GameplayEventSummaryResponse {
+            degraded: true,
+            ready: false,
+            error: Some(error.message.clone()),
+            generated_at_ms,
+            window_seconds,
+            max_lag_ms,
+            min_event_count,
+            total_count: 0,
+            last_occurred_at_ms: None,
+            lag_ms: None,
+            alerts: vec![GameplayEventReadinessAlert {
+                level: "critical".into(),
+                code: "clickhouse_unavailable".into(),
+                message: error.message,
+            }],
+            commands: Vec::new(),
+        })),
+    }
+}
+
 async fn list_admin_timeline(
     State(state): State<AdminApiState>,
     Query(query): Query<AdminTimelineQuery>,
@@ -3688,6 +5154,35 @@ async fn read_dashboard(
     Ok(Json(response))
 }
 
+async fn read_accounts(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminAccountsReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        Ok::<_, ApiError>(build_accounts_read_model(&snapshot))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_account_detail(
+    State(state): State<AdminApiState>,
+    Path(account_id): Path<String>,
+) -> Result<Json<AdminAccountDetail>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        let presence = load_gateway_presence();
+        build_account_detail(&snapshot, &account_id, Some(&presence)).ok_or_else(|| ApiError {
+            status: StatusCode::NOT_FOUND,
+            message: format!("account not found: {account_id}"),
+        })
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
 async fn read_players(
     State(state): State<AdminApiState>,
 ) -> Result<Json<AdminPlayersReadModel>, ApiError> {
@@ -3739,6 +5234,51 @@ async fn read_economy(
     })
     .await
     .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_market(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminMarketReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        Ok::<_, ApiError>(build_market_read_model(&snapshot))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_guilds(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminGuildsReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(move || {
+        let snapshot = state.read_models.load_snapshot().map_err(ApiError::from)?;
+        Ok::<_, ApiError>(build_guilds_read_model(&snapshot))
+    })
+    .await
+    .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_namelists() -> Result<Json<AdminNameListsReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(build_namelists_read_model)
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_content() -> Result<Json<AdminContentReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(build_content_read_model)
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_control() -> Result<Json<AdminControlReadModel>, ApiError> {
+    let response = tokio::task::spawn_blocking(build_control_read_model)
+        .await
+        .map_err(join_error)??;
     Ok(Json(response))
 }
 
@@ -4089,6 +5629,33 @@ async fn submit_ban_account(
     .await
 }
 
+async fn submit_console_command(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitConsoleCommandRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_type = command_type(&request.command);
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-{command_type}-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        request.target,
+        request.reason,
+        request.command,
+        now,
+    )
+    .await
+}
+
 async fn submit_admin_http_command(
     state: AdminApiState,
     headers: HeaderMap,
@@ -4324,6 +5891,76 @@ fn build_dashboard_read_model(state: AdminApiState) -> Result<AdminDashboardRead
     })
 }
 
+fn build_accounts_read_model(snapshot: &AccountReadSnapshot) -> AdminAccountsReadModel {
+    let now = now_ms();
+    AdminAccountsReadModel {
+        source: snapshot.source.clone(),
+        generated_at_ms: now,
+        accounts: snapshot
+            .accounts
+            .iter()
+            .map(|account| account_summary(account, now))
+            .collect(),
+    }
+}
+
+fn build_account_detail(
+    snapshot: &AccountReadSnapshot,
+    account_id: &str,
+    presence: Option<&GatewayPresenceSnapshot>,
+) -> Option<AdminAccountDetail> {
+    let now = now_ms();
+    let account = snapshot
+        .accounts
+        .iter()
+        .find(|account| account.account_id.eq_ignore_ascii_case(account_id))?;
+    let presence_by_key = presence_records_by_key(presence);
+    let characters = account
+        .saves
+        .values()
+        .map(|save| {
+            let presence_record = presence_by_key.get(&GatewaySessionKey {
+                account_id: account.account_id.clone(),
+                character_index: save.save.character.index,
+            });
+            player_summary_from_save(
+                account,
+                save,
+                now,
+                presence.map(|presence| presence.source.as_str()),
+                presence_record.copied(),
+            )
+        })
+        .collect();
+    Some(AdminAccountDetail {
+        summary: account_summary(account, now),
+        characters,
+        has_expanded_storage: account.account.has_expanded_storage,
+        expanded_storage_expiry_time_binary_datetime: account
+            .account
+            .expanded_storage_expiry_time_binary_datetime,
+        storage_password_last_set_binary_datetime: account
+            .account
+            .storage_password_last_set_binary_datetime,
+    })
+}
+
+fn account_summary(account: &AccountReadRecord, now: u64) -> AdminAccountSummary {
+    let active_ban = account.account.active_ban(now);
+    AdminAccountSummary {
+        account_id: account.account_id.clone(),
+        password_configured: !account.account.password.trim().is_empty(),
+        character_count: account.account.characters.len().max(account.saves.len()),
+        storage_size: account.account.storage_size,
+        has_storage_password: !account.account.storage_password.trim().is_empty(),
+        is_banned: active_ban.is_some(),
+        ban_reason: active_ban.as_ref().map(|ban| ban.reason.clone()),
+        ban_until_ms: active_ban.as_ref().and_then(|ban| ban.ban_until_ms),
+        banned_at_ms: active_ban.as_ref().and_then(|ban| ban.banned_at_ms),
+        store_version: account.store_version,
+    }
+}
+
 fn build_player_summaries(
     snapshot: &AccountReadSnapshot,
     presence: Option<&GatewayPresenceSnapshot>,
@@ -4385,6 +6022,14 @@ fn build_player_detail(
                 .as_ref()
                 .map(|systems| systems.guild.name.trim().to_string())
                 .filter(|name| !name.is_empty());
+            let active_npc_flags = npc_flags_from_save(&save.save)
+                .into_iter()
+                .filter(|flag| flag.value)
+                .map(|flag| AdminNpcFlagRecord {
+                    index: flag.index,
+                    active: true,
+                })
+                .collect::<Vec<_>>();
             return Some(AdminPlayerDetail {
                 summary,
                 inventory_count: save.save.inventory_items_json.len(),
@@ -4393,6 +6038,8 @@ fn build_player_detail(
                 equipment_count: save.save.equipment_items_json.len(),
                 quest_state_count: save.save.quest_states_json.len(),
                 skill_state_count: save.save.skill_states_json.len(),
+                npc_flag_count: active_npc_flags.len(),
+                active_npc_flags,
                 mail_count: systems
                     .as_ref()
                     .map(|systems| systems.mail.len())
@@ -4463,8 +6110,13 @@ fn player_summary_from_save(
             .map(|presence| u64::from(presence.gold))
             .unwrap_or_else(|| u64::from(save.save.gold)),
         credit: u64::from(save.save.credit),
+        pk_points: save.save.pk_points,
+        chat_banned: save.save.chat_banned,
+        chat_ban_until_ms: save.save.chat_ban_until_ms,
         status: if active_ban {
             "Banned".into()
+        } else if save.save.chat_banned {
+            "ChatBanned".into()
         } else if presence.is_some() {
             "Online".into()
         } else {
@@ -4493,6 +6145,378 @@ fn decode_stage5_systems(save: &CharacterSaveRecord) -> Option<Stage5SystemsStat
     save.stage5_systems_json
         .as_deref()
         .and_then(|value| serde_json::from_str::<Stage5SystemsState>(value).ok())
+}
+
+fn build_market_read_model(snapshot: &AccountReadSnapshot) -> AdminMarketReadModel {
+    let mut listings = Vec::new();
+    for account in &snapshot.accounts {
+        for save in account.saves.values() {
+            let systems = stage5_systems_from_save(&save.save);
+            for listing in systems.auction {
+                listings.push(AdminMarketListingRecord {
+                    owner_player_id: player_id(&account.account_id, save.save.character.index),
+                    account_id: account.account_id.clone(),
+                    character_index: save.save.character.index,
+                    character_name: save.save.character.name.clone(),
+                    listing_id: listing.id,
+                    seller: listing.seller,
+                    item_key: listing.item_key,
+                    price: listing.price,
+                    sold: listing.sold,
+                    cancelled: listing.cancelled,
+                    expired: listing.expired,
+                });
+            }
+        }
+    }
+    listings.sort_by(|left, right| {
+        left.cancelled
+            .cmp(&right.cancelled)
+            .then(left.expired.cmp(&right.expired))
+            .then(left.sold.cmp(&right.sold))
+            .then(left.listing_id.cmp(&right.listing_id))
+    });
+    AdminMarketReadModel {
+        source: snapshot.source.clone(),
+        generated_at_ms: now_ms(),
+        listings,
+    }
+}
+
+fn build_guilds_read_model(snapshot: &AccountReadSnapshot) -> AdminGuildsReadModel {
+    #[derive(Default)]
+    struct GuildAccumulator {
+        members: BTreeSet<String>,
+        ranks: BTreeSet<String>,
+        chat_log: Vec<String>,
+    }
+
+    let mut guilds: BTreeMap<String, GuildAccumulator> = BTreeMap::new();
+    for account in &snapshot.accounts {
+        for save in account.saves.values() {
+            let systems = stage5_systems_from_save(&save.save);
+            let guild_name = systems.guild.name.trim();
+            if guild_name.is_empty() {
+                continue;
+            }
+            let accumulator = guilds.entry(guild_name.to_string()).or_default();
+            for member in systems.guild.members {
+                if !member.trim().is_empty() {
+                    accumulator.members.insert(member);
+                }
+            }
+            if !save.save.character.name.trim().is_empty() {
+                accumulator.members.insert(save.save.character.name.clone());
+            }
+            if !systems.guild.rank.trim().is_empty() {
+                accumulator.ranks.insert(systems.guild.rank);
+            }
+            for entry in systems.guild.chat_log {
+                if !entry.trim().is_empty() && accumulator.chat_log.len() < 50 {
+                    accumulator.chat_log.push(entry);
+                }
+            }
+        }
+    }
+
+    AdminGuildsReadModel {
+        source: snapshot.source.clone(),
+        generated_at_ms: now_ms(),
+        guilds: guilds
+            .into_iter()
+            .map(|(guild_name, accumulator)| AdminGuildRecord {
+                guild_name,
+                member_count: accumulator.members.len(),
+                members: accumulator.members.into_iter().collect(),
+                ranks: accumulator.ranks.into_iter().collect(),
+                chat_log: accumulator.chat_log,
+            })
+            .collect(),
+    }
+}
+
+fn build_namelists_read_model() -> Result<AdminNameListsReadModel, ApiError> {
+    let root = name_list_root_from_env();
+    let mut lists = Vec::new();
+    match fs::read_dir(&root) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.extension().and_then(|ext| ext.to_str()) != Some("txt") {
+                    continue;
+                }
+                let players = fs::read_to_string(&path)
+                    .unwrap_or_default()
+                    .lines()
+                    .map(str::trim)
+                    .filter(|line| !line.is_empty())
+                    .map(str::to_string)
+                    .collect::<Vec<_>>();
+                lists.push(AdminNameListRecord {
+                    list_name: path
+                        .file_stem()
+                        .and_then(|name| name.to_str())
+                        .unwrap_or("unknown")
+                        .to_string(),
+                    path: path.display().to_string(),
+                    player_count: players.len(),
+                    players,
+                });
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(ApiError {
+                status: StatusCode::INTERNAL_SERVER_ERROR,
+                message: format!("read namelist root {} failed: {error}", root.display()),
+            });
+        }
+    }
+    lists.sort_by(|left, right| left.list_name.cmp(&right.list_name));
+    Ok(AdminNameListsReadModel {
+        source: "file_namelists".to_string(),
+        generated_at_ms: now_ms(),
+        root: root.display().to_string(),
+        lists,
+    })
+}
+
+fn build_content_read_model() -> Result<AdminContentReadModel, ApiError> {
+    let categories = vec![
+        AdminContentCategoryRecord {
+            category: "maps".to_string(),
+            source: mir2_game_data::crystal_respawn_manifest().source_file,
+            total_records: mir2_game_data::crystal_respawn_manifest().total_maps,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "respawns".to_string(),
+            source: mir2_game_data::crystal_respawn_manifest().source_file,
+            total_records: mir2_game_data::crystal_respawn_manifest().total_respawns,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "items".to_string(),
+            source: mir2_game_data::crystal_item_manifest().source_file,
+            total_records: mir2_game_data::crystal_item_manifest().total_items,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "monsters".to_string(),
+            source: mir2_game_data::crystal_monster_manifest().source_file,
+            total_records: mir2_game_data::crystal_monster_manifest().total_monsters,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "npcs".to_string(),
+            source: mir2_game_data::crystal_npc_info_manifest().source_file,
+            total_records: mir2_game_data::crystal_npc_info_manifest().total_npcs,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "npc_scripts".to_string(),
+            source: mir2_game_data::crystal_npc_manifest().source_dir,
+            total_records: mir2_game_data::crystal_npc_manifest().total_scripts,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "quests".to_string(),
+            source: mir2_game_data::crystal_quest_packet_manifest().source_file,
+            total_records: mir2_game_data::crystal_quest_packet_manifest().total_quests,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "magic".to_string(),
+            source: mir2_game_data::crystal_magic_manifest().source_file,
+            total_records: mir2_game_data::crystal_magic_manifest().total_magics,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "game_shop".to_string(),
+            source: mir2_game_data::crystal_game_shop_packet_manifest().source_file,
+            total_records: mir2_game_data::crystal_game_shop_packet_manifest().total_items,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "recipes".to_string(),
+            source: mir2_game_data::crystal_recipe_packet_manifest().source_file,
+            total_records: mir2_game_data::crystal_recipe_packet_manifest().total_recipes,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "base_stats".to_string(),
+            source: mir2_game_data::crystal_base_stats_packet_manifest().source_configs_dir,
+            total_records: mir2_game_data::crystal_base_stats_packet_manifest().total_classes,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "buffs".to_string(),
+            source: mir2_game_data::crystal_buff_manifest().source_file,
+            total_records: mir2_game_data::crystal_buff_manifest().total_buffs,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+        AdminContentCategoryRecord {
+            category: "drops".to_string(),
+            source: mir2_game_data::crystal_drop_manifest().source_dir,
+            total_records: mir2_game_data::crystal_drop_manifest().total_tables,
+            status: "Generated".to_string(),
+            editable: true,
+        },
+    ];
+
+    Ok(AdminContentReadModel {
+        generated_at_ms: now_ms(),
+        categories,
+        bundles: list_content_bundles(&content_bundle_dir_from_env())?,
+    })
+}
+
+fn list_content_bundles(root: &PathBuf) -> Result<Vec<AdminContentBundleRecord>, ApiError> {
+    let mut records = Vec::new();
+    match fs::read_dir(root) {
+        Ok(entries) => {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.extension().and_then(|ext| ext.to_str()) != Some("json") {
+                    continue;
+                }
+                let data = fs::read_to_string(&path).unwrap_or_default();
+                let value = serde_json::from_str::<Value>(&data).unwrap_or(Value::Null);
+                let updated_at_ms = entry
+                    .metadata()
+                    .ok()
+                    .and_then(|metadata| metadata.modified().ok())
+                    .and_then(|modified| modified.duration_since(UNIX_EPOCH).ok())
+                    .map(|duration| duration.as_millis() as u64)
+                    .unwrap_or_default();
+                records.push(AdminContentBundleRecord {
+                    bundle_id: value
+                        .get("bundleId")
+                        .and_then(Value::as_str)
+                        .map(str::to_string)
+                        .unwrap_or_else(|| {
+                            path.file_stem()
+                                .and_then(|name| name.to_str())
+                                .unwrap_or("unknown")
+                                .to_string()
+                        }),
+                    category: value
+                        .get("category")
+                        .and_then(Value::as_str)
+                        .unwrap_or("unknown")
+                        .to_string(),
+                    record_key: value
+                        .get("recordKey")
+                        .and_then(Value::as_str)
+                        .unwrap_or("unknown")
+                        .to_string(),
+                    path: path.display().to_string(),
+                    updated_at_ms,
+                });
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => {
+            return Err(ApiError {
+                status: StatusCode::INTERNAL_SERVER_ERROR,
+                message: format!("read content bundle dir {} failed: {error}", root.display()),
+            });
+        }
+    }
+    records.sort_by(|left, right| right.updated_at_ms.cmp(&left.updated_at_ms));
+    Ok(records)
+}
+
+fn build_control_read_model() -> Result<AdminControlReadModel, ApiError> {
+    Ok(AdminControlReadModel {
+        generated_at_ms: now_ms(),
+        gateway_control_configured: env::var("ADMIN_GATEWAY_CONTROL_URL")
+            .map(|value| !value.trim().is_empty())
+            .unwrap_or(false),
+        control_actions: vec![
+            "status".to_string(),
+            "reload_npcs".to_string(),
+            "reload_drops".to_string(),
+            "reload_line_message".to_string(),
+            "clear_blocked_ips".to_string(),
+            "start".to_string(),
+            "stop".to_string(),
+            "reboot".to_string(),
+            "close".to_string(),
+        ],
+        logs: read_admin_log_tails(),
+    })
+}
+
+fn read_admin_log_tails() -> Vec<AdminLogTailRecord> {
+    let configured = env::var("ADMIN_LOG_PATHS")
+        .ok()
+        .map(|value| {
+            value
+                .split(',')
+                .filter_map(|entry| {
+                    let entry = entry.trim();
+                    if entry.is_empty() {
+                        return None;
+                    }
+                    let (name, path) = entry
+                        .split_once('=')
+                        .map(|(name, path)| (name.trim(), path.trim()))
+                        .unwrap_or(("server", entry));
+                    Some((name.to_string(), PathBuf::from(path)))
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    if configured.is_empty() {
+        return vec![AdminLogTailRecord {
+            name: "server".to_string(),
+            path: "ADMIN_LOG_PATHS".to_string(),
+            configured: false,
+            lines: Vec::new(),
+            error: Some("ADMIN_LOG_PATHS is not configured".to_string()),
+        }];
+    }
+    configured
+        .into_iter()
+        .map(|(name, path)| match fs::read_to_string(&path) {
+            Ok(data) => {
+                let mut lines = data
+                    .lines()
+                    .rev()
+                    .take(80)
+                    .map(str::to_string)
+                    .collect::<Vec<_>>();
+                lines.reverse();
+                AdminLogTailRecord {
+                    name,
+                    path: path.display().to_string(),
+                    configured: true,
+                    lines,
+                    error: None,
+                }
+            }
+            Err(error) => AdminLogTailRecord {
+                name,
+                path: path.display().to_string(),
+                configured: true,
+                lines: Vec::new(),
+                error: Some(error.to_string()),
+            },
+        })
+        .collect()
 }
 
 fn load_gateway_presence() -> GatewayPresenceSnapshot {
@@ -5339,13 +7363,22 @@ fn required_header(headers: &HeaderMap, name: &str) -> Result<String, ApiError> 
 fn parse_permission(value: &str) -> Result<Permission, ApiError> {
     match value {
         "account_read" => Ok(Permission::AccountRead),
+        "account_write" => Ok(Permission::AccountWrite),
         "account_ban" => Ok(Permission::AccountBan),
         "character_read" => Ok(Permission::CharacterRead),
+        "character_write" => Ok(Permission::CharacterWrite),
         "character_kick" => Ok(Permission::CharacterKick),
+        "character_message" => Ok(Permission::CharacterMessage),
         "inventory_read" => Ok(Permission::InventoryRead),
         "inventory_grant_item" => Ok(Permission::InventoryGrantItem),
         "currency_grant" => Ok(Permission::CurrencyGrant),
         "mail_send_system" => Ok(Permission::MailSendSystem),
+        "world_broadcast" => Ok(Permission::WorldBroadcast),
+        "server_control" => Ok(Permission::ServerControl),
+        "market_moderate" => Ok(Permission::MarketModerate),
+        "guild_moderate" => Ok(Permission::GuildModerate),
+        "namelist_manage" => Ok(Permission::NameListManage),
+        "content_read" => Ok(Permission::ContentRead),
         "content_publish" => Ok(Permission::ContentPublish),
         "content_rollback" => Ok(Permission::ContentRollback),
         "audit_read" => Ok(Permission::AuditRead),
@@ -5389,6 +7422,81 @@ fn fetch_clickhouse_admin_events(
         .collect()
 }
 
+fn fetch_clickhouse_gameplay_events(
+    query: &GameplayEventQuery,
+) -> Result<Vec<GameplayEventRecord>, ApiError> {
+    let base_url =
+        env::var("ADMIN_CLICKHOUSE_URL").unwrap_or_else(|_| "http://127.0.0.1:8123".into());
+    let user = env::var("ADMIN_CLICKHOUSE_USER").unwrap_or_else(|_| "mir2".into());
+    let password =
+        env::var("ADMIN_CLICKHOUSE_PASSWORD").unwrap_or_else(|_| "mir2_dev_password".into());
+    let database = env::var("ADMIN_CLICKHOUSE_DATABASE").unwrap_or_else(|_| "mir2_events".into());
+    let url = ParsedClickHouseUrl::parse(base_url.trim()).map_err(|message| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message,
+    })?;
+    let query_text = build_clickhouse_gameplay_events_query(query);
+    let path = format!(
+        "/?user={}&password={}&database={}",
+        url_component(&user),
+        url_component(&password),
+        url_component(&database)
+    );
+    let response = post_clickhouse_query(&url, &path, &query_text).map_err(|message| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message,
+    })?;
+    response
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(parse_clickhouse_gameplay_event)
+        .collect()
+}
+
+fn fetch_clickhouse_gameplay_event_summary(
+    query: &GameplayEventSummaryQuery,
+    generated_at_ms: u64,
+    window_seconds: u64,
+) -> Result<GameplayEventSummary, ApiError> {
+    let base_url =
+        env::var("ADMIN_CLICKHOUSE_URL").unwrap_or_else(|_| "http://127.0.0.1:8123".into());
+    let user = env::var("ADMIN_CLICKHOUSE_USER").unwrap_or_else(|_| "mir2".into());
+    let password =
+        env::var("ADMIN_CLICKHOUSE_PASSWORD").unwrap_or_else(|_| "mir2_dev_password".into());
+    let database = env::var("ADMIN_CLICKHOUSE_DATABASE").unwrap_or_else(|_| "mir2_events".into());
+    let url = ParsedClickHouseUrl::parse(base_url.trim()).map_err(|message| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message,
+    })?;
+    let query_text =
+        build_clickhouse_gameplay_event_summary_query(query, generated_at_ms, window_seconds);
+    let path = format!(
+        "/?user={}&password={}&database={}",
+        url_component(&user),
+        url_component(&password),
+        url_component(&database)
+    );
+    let response = post_clickhouse_query(&url, &path, &query_text).map_err(|message| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message,
+    })?;
+    let commands = response
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(parse_clickhouse_gameplay_event_summary)
+        .collect::<Result<Vec<_>, _>>()?;
+    let total_count = commands.iter().map(|command| command.event_count).sum();
+    let last_occurred_at_ms = commands
+        .iter()
+        .map(|command| command.last_occurred_at_ms)
+        .max();
+    Ok(GameplayEventSummary {
+        total_count,
+        last_occurred_at_ms,
+        commands,
+    })
+}
+
 fn build_clickhouse_admin_events_query(query: &AdminEventQuery) -> String {
     let mut filters = Vec::new();
     if let Some(command_id) = non_empty_query_value(query.command_id.as_deref()) {
@@ -5429,6 +7537,152 @@ fn build_clickhouse_admin_events_query(query: &AdminEventQuery) -> String {
          LIMIT {limit} \
          FORMAT JSONEachRow"
     )
+}
+
+fn build_clickhouse_gameplay_events_query(query: &GameplayEventQuery) -> String {
+    let mut filters = Vec::new();
+    if let Some(zone_id) = non_empty_query_value(query.zone_id.as_deref()) {
+        filters.push(format!(
+            "zone_id = '{}'",
+            clickhouse_string_literal(zone_id)
+        ));
+    }
+    if let Some(command_kind) = non_empty_query_value(query.command_kind.as_deref()) {
+        filters.push(format!(
+            "command_kind = '{}'",
+            clickhouse_string_literal(command_kind)
+        ));
+    }
+    if let Some(account_id) = non_empty_query_value(query.account_id.as_deref()) {
+        filters.push(format!(
+            "account_id = '{}'",
+            clickhouse_string_literal(account_id)
+        ));
+    }
+    if let Some(character_name) = non_empty_query_value(query.character_name.as_deref()) {
+        filters.push(format!(
+            "character_name = '{}'",
+            clickhouse_string_literal(character_name)
+        ));
+    }
+    let where_clause = if filters.is_empty() {
+        String::new()
+    } else {
+        format!(" WHERE {}", filters.join(" AND "))
+    };
+    let limit = query.limit.unwrap_or(100).clamp(1, 500);
+    format!(
+        "SELECT event_id, event_type, zone_id, command_kind, account_id, character_index, character_name, packet_count, snapshot_tick, occurred_at_ms, payload_json \
+         FROM (\
+            SELECT event_id,\
+                argMax(event_type, ingested_at) AS event_type,\
+                argMax(zone_id, ingested_at) AS zone_id,\
+                argMax(command_kind, ingested_at) AS command_kind,\
+                argMax(account_id, ingested_at) AS account_id,\
+                argMax(character_index, ingested_at) AS character_index,\
+                argMax(character_name, ingested_at) AS character_name,\
+                argMax(packet_count, ingested_at) AS packet_count,\
+                argMax(snapshot_tick, ingested_at) AS snapshot_tick,\
+                argMax(occurred_at_ms, ingested_at) AS occurred_at_ms,\
+                argMax(payload_json, ingested_at) AS payload_json \
+            FROM gameplay_events \
+            GROUP BY event_id\
+         ){where_clause} \
+         ORDER BY occurred_at_ms DESC, event_id DESC \
+         LIMIT {limit} \
+         FORMAT JSONEachRow"
+    )
+}
+
+fn build_clickhouse_gameplay_event_summary_query(
+    query: &GameplayEventSummaryQuery,
+    generated_at_ms: u64,
+    window_seconds: u64,
+) -> String {
+    let mut filters = vec![format!(
+        "occurred_at_ms >= {}",
+        generated_at_ms.saturating_sub(window_seconds.saturating_mul(1_000))
+    )];
+    if let Some(zone_id) = non_empty_query_value(query.zone_id.as_deref()) {
+        filters.push(format!(
+            "zone_id = '{}'",
+            clickhouse_string_literal(zone_id)
+        ));
+    }
+    if let Some(command_kind) = non_empty_query_value(query.command_kind.as_deref()) {
+        filters.push(format!(
+            "command_kind = '{}'",
+            clickhouse_string_literal(command_kind)
+        ));
+    }
+    let limit = query.limit.unwrap_or(20).clamp(1, 100);
+    format!(
+        "SELECT command_kind, count() AS event_count, max(occurred_at_ms) AS last_occurred_at_ms, max(snapshot_tick) AS max_snapshot_tick \
+         FROM (\
+            SELECT event_id,\
+                argMax(zone_id, ingested_at) AS zone_id,\
+                argMax(command_kind, ingested_at) AS command_kind,\
+                argMax(snapshot_tick, ingested_at) AS snapshot_tick,\
+                argMax(occurred_at_ms, ingested_at) AS occurred_at_ms \
+            FROM gameplay_events \
+            GROUP BY event_id\
+         ) \
+         WHERE {} \
+         GROUP BY command_kind \
+         ORDER BY event_count DESC, last_occurred_at_ms DESC, command_kind ASC \
+         LIMIT {limit} \
+         FORMAT JSONEachRow",
+        filters.join(" AND ")
+    )
+}
+
+fn normalized_gameplay_event_summary_window_seconds(window_seconds: Option<u64>) -> u64 {
+    window_seconds.unwrap_or(300).clamp(1, 86_400)
+}
+
+fn normalized_gameplay_event_summary_max_lag_ms(
+    max_lag_seconds: Option<u64>,
+    window_seconds: u64,
+) -> u64 {
+    max_lag_seconds
+        .unwrap_or(window_seconds)
+        .clamp(1, 86_400)
+        .saturating_mul(1_000)
+}
+
+fn normalized_gameplay_event_summary_min_events(min_events: Option<u64>) -> u64 {
+    min_events.unwrap_or(1).min(1_000_000)
+}
+
+fn gameplay_event_readiness_alerts(
+    summary: &GameplayEventSummary,
+    lag_ms: Option<u64>,
+    max_lag_ms: u64,
+    min_event_count: u64,
+) -> Vec<GameplayEventReadinessAlert> {
+    let mut alerts = Vec::new();
+    if summary.total_count < min_event_count {
+        alerts.push(GameplayEventReadinessAlert {
+            level: "warning".into(),
+            code: "event_volume_below_minimum".into(),
+            message: format!(
+                "Expected at least {min_event_count} gameplay event(s) in the current window; observed {}.",
+                summary.total_count
+            ),
+        });
+    }
+    if let Some(lag_ms) = lag_ms {
+        if lag_ms > max_lag_ms {
+            alerts.push(GameplayEventReadinessAlert {
+                level: "critical".into(),
+                code: "event_lag_above_threshold".into(),
+                message: format!(
+                    "Latest gameplay event lag is {lag_ms} ms, above the configured {max_lag_ms} ms threshold."
+                ),
+            });
+        }
+    }
+    alerts
 }
 
 fn non_empty_query_value(value: Option<&str>) -> Option<&str> {
@@ -5572,6 +7826,41 @@ fn parse_clickhouse_admin_event(line: &str) -> Result<AdminEventRecord, ApiError
     })
 }
 
+fn parse_clickhouse_gameplay_event(line: &str) -> Result<GameplayEventRecord, ApiError> {
+    let row: Value = serde_json::from_str(line).map_err(|error| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message: format!("decode ClickHouse gameplay event failed: {error}"),
+    })?;
+    Ok(GameplayEventRecord {
+        event_id: string_field(&row, "event_id")?,
+        event_type: string_field(&row, "event_type")?,
+        zone_id: string_field(&row, "zone_id")?,
+        command_kind: string_field(&row, "command_kind")?,
+        account_id: optional_string_field(&row, "account_id")?,
+        character_index: optional_i32_field(&row, "character_index")?,
+        character_name: optional_string_field(&row, "character_name")?,
+        packet_count: u64_field(&row, "packet_count")?,
+        snapshot_tick: u64_field(&row, "snapshot_tick")?,
+        occurred_at_ms: u64_field(&row, "occurred_at_ms")?,
+        payload_json: string_field(&row, "payload_json")?,
+    })
+}
+
+fn parse_clickhouse_gameplay_event_summary(
+    line: &str,
+) -> Result<GameplayEventCommandSummary, ApiError> {
+    let row: Value = serde_json::from_str(line).map_err(|error| ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message: format!("decode ClickHouse gameplay event summary failed: {error}"),
+    })?;
+    Ok(GameplayEventCommandSummary {
+        command_kind: string_field(&row, "command_kind")?,
+        event_count: u64_field(&row, "event_count")?,
+        last_occurred_at_ms: u64_field(&row, "last_occurred_at_ms")?,
+        max_snapshot_tick: u64_field(&row, "max_snapshot_tick")?,
+    })
+}
+
 fn string_field(row: &Value, field: &str) -> Result<String, ApiError> {
     row.get(field)
         .and_then(Value::as_str)
@@ -5580,6 +7869,36 @@ fn string_field(row: &Value, field: &str) -> Result<String, ApiError> {
             status: StatusCode::BAD_GATEWAY,
             message: format!("ClickHouse event row missing string field {field}"),
         })
+}
+
+fn optional_string_field(row: &Value, field: &str) -> Result<Option<String>, ApiError> {
+    match row.get(field) {
+        Some(Value::Null) | None => Ok(None),
+        Some(Value::String(value)) => Ok(Some(value.clone())),
+        Some(other) => Err(ApiError {
+            status: StatusCode::BAD_GATEWAY,
+            message: format!("ClickHouse event row field {field} is not nullable string: {other}"),
+        }),
+    }
+}
+
+fn optional_i32_field(row: &Value, field: &str) -> Result<Option<i32>, ApiError> {
+    let Some(value) = row.get(field) else {
+        return Ok(None);
+    };
+    if value.is_null() {
+        return Ok(None);
+    }
+    if let Some(value) = value.as_i64().and_then(|value| i32::try_from(value).ok()) {
+        return Ok(Some(value));
+    }
+    if let Some(value) = value.as_str().and_then(|value| value.parse::<i32>().ok()) {
+        return Ok(Some(value));
+    }
+    Err(ApiError {
+        status: StatusCode::BAD_GATEWAY,
+        message: format!("ClickHouse event row missing integer field {field}"),
+    })
 }
 
 fn u64_field(row: &Value, field: &str) -> Result<u64, ApiError> {
@@ -5672,6 +7991,114 @@ fn validate_command_payload(command: &AdminCommand) -> Result<(), AdminError> {
         AdminCommand::BanAccount { account_id, .. } => {
             require_non_empty("account_id", account_id)?;
         }
+        AdminCommand::CreateAccount { account_id, .. }
+        | AdminCommand::UpdateAccount { account_id, .. }
+        | AdminCommand::DeleteAccount { account_id } => {
+            require_non_empty("account_id", account_id)?;
+        }
+        AdminCommand::UpdateCharacter { character_id, .. }
+        | AdminCommand::ReturnSafeZone { character_id }
+        | AdminCommand::KillPlayer { character_id }
+        | AdminCommand::KillPets { character_id } => {
+            require_non_empty("character_id", character_id)?;
+        }
+        AdminCommand::SetCharacterFlag {
+            character_id,
+            flag_index,
+            ..
+        } => {
+            require_non_empty("character_id", character_id)?;
+            if !(1..=1999).contains(flag_index) {
+                return Err(AdminError::InvalidCommand(
+                    "flag_index must be between 1 and 1999".into(),
+                ));
+            }
+        }
+        AdminCommand::SetChatBan {
+            character_id,
+            banned,
+            until_ms,
+        } => {
+            require_non_empty("character_id", character_id)?;
+            if *banned && until_ms == &Some(0) {
+                return Err(AdminError::InvalidCommand(
+                    "until_ms must be greater than zero when provided".into(),
+                ));
+            }
+        }
+        AdminCommand::MessagePlayer {
+            character_id,
+            message,
+        } => {
+            require_non_empty("character_id", character_id)?;
+            require_non_empty("message", message)?;
+        }
+        AdminCommand::Broadcast { message } => {
+            require_non_empty("message", message)?;
+        }
+        AdminCommand::MarketCancelListing {
+            character_id,
+            listing_id,
+            ..
+        }
+        | AdminCommand::MarketExpireListing {
+            character_id,
+            listing_id,
+            ..
+        }
+        | AdminCommand::MarketDeleteListing {
+            character_id,
+            listing_id,
+            ..
+        } => {
+            require_non_empty("character_id", character_id)?;
+            if *listing_id == 0 {
+                return Err(AdminError::InvalidCommand(
+                    "listing_id must be greater than zero".into(),
+                ));
+            }
+        }
+        AdminCommand::GuildRemoveMember {
+            guild_name,
+            member_name,
+        } => {
+            require_non_empty("guild_name", guild_name)?;
+            require_non_empty("member_name", member_name)?;
+        }
+        AdminCommand::GuildSendMessage {
+            guild_name,
+            message,
+        } => {
+            require_non_empty("guild_name", guild_name)?;
+            require_non_empty("message", message)?;
+        }
+        AdminCommand::NameListAdd {
+            list_name,
+            player_name,
+        }
+        | AdminCommand::NameListRemove {
+            list_name,
+            player_name,
+        } => {
+            require_non_empty("list_name", list_name)?;
+            require_non_empty("player_name", player_name)?;
+        }
+        AdminCommand::NameListCreate { list_name } | AdminCommand::NameListDelete { list_name } => {
+            require_non_empty("list_name", list_name)?;
+        }
+        AdminCommand::PublishContentBundle {
+            bundle_id,
+            category,
+            record_key,
+            ..
+        } => {
+            require_non_empty("bundle_id", bundle_id)?;
+            require_non_empty("category", category)?;
+            require_non_empty("record_key", record_key)?;
+        }
+        AdminCommand::ServerControl { action, .. } => {
+            require_non_empty("action", action)?;
+        }
     }
     Ok(())
 }
@@ -5681,8 +8108,33 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
         AdminCommand::SendSystemMail { target_kind, .. } => *target_kind == MailTargetKind::Global,
         AdminCommand::GrantItem { .. }
         | AdminCommand::GrantCurrency { .. }
-        | AdminCommand::BanAccount { .. } => true,
+        | AdminCommand::BanAccount { .. }
+        | AdminCommand::DeleteAccount { .. }
+        | AdminCommand::UpdateCharacter { .. }
+        | AdminCommand::SetCharacterFlag { .. }
+        | AdminCommand::KillPlayer { .. }
+        | AdminCommand::MarketDeleteListing { .. }
+        | AdminCommand::NameListDelete { .. }
+        | AdminCommand::PublishContentBundle { .. } => true,
+        AdminCommand::ServerControl { action, .. } => matches!(
+            canonical_control_action(action).as_deref(),
+            Ok("stop" | "reboot" | "close")
+        ),
         AdminCommand::KickPlayer { .. } => false,
+        AdminCommand::CreateAccount { .. }
+        | AdminCommand::UpdateAccount { .. }
+        | AdminCommand::ReturnSafeZone { .. }
+        | AdminCommand::KillPets { .. }
+        | AdminCommand::SetChatBan { .. }
+        | AdminCommand::MessagePlayer { .. }
+        | AdminCommand::Broadcast { .. }
+        | AdminCommand::MarketCancelListing { .. }
+        | AdminCommand::MarketExpireListing { .. }
+        | AdminCommand::GuildRemoveMember { .. }
+        | AdminCommand::GuildSendMessage { .. }
+        | AdminCommand::NameListAdd { .. }
+        | AdminCommand::NameListRemove { .. }
+        | AdminCommand::NameListCreate { .. } => false,
     }
 }
 
@@ -6133,6 +8585,28 @@ fn command_type(command: &AdminCommand) -> String {
         AdminCommand::GrantCurrency { .. } => "grant_currency",
         AdminCommand::KickPlayer { .. } => "kick_player",
         AdminCommand::BanAccount { .. } => "ban_account",
+        AdminCommand::CreateAccount { .. } => "create_account",
+        AdminCommand::UpdateAccount { .. } => "update_account",
+        AdminCommand::DeleteAccount { .. } => "delete_account",
+        AdminCommand::UpdateCharacter { .. } => "update_character",
+        AdminCommand::ReturnSafeZone { .. } => "return_safe_zone",
+        AdminCommand::KillPlayer { .. } => "kill_player",
+        AdminCommand::KillPets { .. } => "kill_pets",
+        AdminCommand::SetCharacterFlag { .. } => "set_character_flag",
+        AdminCommand::SetChatBan { .. } => "set_chat_ban",
+        AdminCommand::MessagePlayer { .. } => "message_player",
+        AdminCommand::Broadcast { .. } => "broadcast",
+        AdminCommand::MarketCancelListing { .. } => "market_cancel_listing",
+        AdminCommand::MarketExpireListing { .. } => "market_expire_listing",
+        AdminCommand::MarketDeleteListing { .. } => "market_delete_listing",
+        AdminCommand::GuildRemoveMember { .. } => "guild_remove_member",
+        AdminCommand::GuildSendMessage { .. } => "guild_send_message",
+        AdminCommand::NameListAdd { .. } => "namelist_add",
+        AdminCommand::NameListRemove { .. } => "namelist_remove",
+        AdminCommand::NameListCreate { .. } => "namelist_create",
+        AdminCommand::NameListDelete { .. } => "namelist_delete",
+        AdminCommand::PublishContentBundle { .. } => "publish_content_bundle",
+        AdminCommand::ServerControl { .. } => "server_control",
     }
     .to_string()
 }
@@ -7095,6 +9569,128 @@ mod tests {
     }
 
     #[test]
+    fn clickhouse_gameplay_event_row_parses_json_each_row_output() {
+        let record = parse_clickhouse_gameplay_event(
+            r#"{"event_id":"primary:0:1","event_type":"gameplay.command.executed","zone_id":"primary","command_kind":"client.StartGame","account_id":"demo","character_index":"0","character_name":"Scout","packet_count":"7","snapshot_tick":"3","occurred_at_ms":"123","payload_json":"{}"}"#,
+        )
+        .expect("gameplay event row should parse");
+
+        assert_eq!(record.event_id, "primary:0:1");
+        assert_eq!(record.zone_id, "primary");
+        assert_eq!(record.command_kind, "client.StartGame");
+        assert_eq!(record.account_id.as_deref(), Some("demo"));
+        assert_eq!(record.character_index, Some(0));
+        assert_eq!(record.character_name.as_deref(), Some("Scout"));
+        assert_eq!(record.packet_count, 7);
+        assert_eq!(record.snapshot_tick, 3);
+        assert_eq!(record.occurred_at_ms, 123);
+    }
+
+    #[test]
+    fn clickhouse_gameplay_events_query_applies_filters_and_limit() {
+        let query = build_clickhouse_gameplay_events_query(&GameplayEventQuery {
+            limit: Some(1_000),
+            zone_id: Some("primary".into()),
+            command_kind: Some("client.StartGame".into()),
+            account_id: Some("demo'1".into()),
+            character_name: Some("Scout".into()),
+        });
+
+        assert!(query.contains("zone_id = 'primary'"));
+        assert!(query.contains("command_kind = 'client.StartGame'"));
+        assert!(query.contains("account_id = 'demo\\'1'"));
+        assert!(query.contains("character_name = 'Scout'"));
+        assert!(query.contains("FROM gameplay_events"));
+        assert!(query.contains("GROUP BY event_id"));
+        assert!(query.contains("LIMIT 500"));
+    }
+
+    #[test]
+    fn clickhouse_gameplay_event_summary_row_parses_json_each_row_output() {
+        let summary = parse_clickhouse_gameplay_event_summary(
+            r#"{"command_kind":"client.PickUp","event_count":"12","last_occurred_at_ms":"456","max_snapshot_tick":"99"}"#,
+        )
+        .expect("gameplay summary row should parse");
+
+        assert_eq!(summary.command_kind, "client.PickUp");
+        assert_eq!(summary.event_count, 12);
+        assert_eq!(summary.last_occurred_at_ms, 456);
+        assert_eq!(summary.max_snapshot_tick, 99);
+    }
+
+    #[test]
+    fn clickhouse_gameplay_event_summary_query_applies_window_filters_and_limit() {
+        let query = build_clickhouse_gameplay_event_summary_query(
+            &GameplayEventSummaryQuery {
+                window_seconds: Some(3_600),
+                limit: Some(1_000),
+                zone_id: Some("primary".into()),
+                command_kind: Some("client.PickUp".into()),
+                max_lag_seconds: Some(120),
+                min_events: Some(2),
+            },
+            10_000_000,
+            normalized_gameplay_event_summary_window_seconds(Some(3_600)),
+        );
+
+        assert!(query.contains("occurred_at_ms >= 6400000"));
+        assert!(query.contains("zone_id = 'primary'"));
+        assert!(query.contains("command_kind = 'client.PickUp'"));
+        assert!(query.contains("FROM gameplay_events"));
+        assert!(query.contains("GROUP BY event_id"));
+        assert!(query.contains("GROUP BY command_kind"));
+        assert!(query.contains("ORDER BY event_count DESC"));
+        assert!(query.contains("LIMIT 100"));
+    }
+
+    #[test]
+    fn gameplay_event_summary_readiness_alerts_detect_missing_volume_and_lag() {
+        let summary = GameplayEventSummary {
+            total_count: 0,
+            last_occurred_at_ms: None,
+            commands: Vec::new(),
+        };
+        let alerts = gameplay_event_readiness_alerts(&summary, None, 1_000, 1);
+
+        assert_eq!(alerts.len(), 1);
+        assert_eq!(alerts[0].level, "warning");
+        assert_eq!(alerts[0].code, "event_volume_below_minimum");
+
+        let summary = GameplayEventSummary {
+            total_count: 3,
+            last_occurred_at_ms: Some(100),
+            commands: Vec::new(),
+        };
+        let alerts = gameplay_event_readiness_alerts(&summary, Some(5_001), 5_000, 1);
+
+        assert_eq!(alerts.len(), 1);
+        assert_eq!(alerts[0].level, "critical");
+        assert_eq!(alerts[0].code, "event_lag_above_threshold");
+    }
+
+    #[test]
+    fn gameplay_event_summary_thresholds_are_normalized() {
+        assert_eq!(
+            normalized_gameplay_event_summary_max_lag_ms(None, 300),
+            300_000
+        );
+        assert_eq!(
+            normalized_gameplay_event_summary_max_lag_ms(Some(0), 300),
+            1_000
+        );
+        assert_eq!(
+            normalized_gameplay_event_summary_max_lag_ms(Some(100_000), 300),
+            86_400_000
+        );
+        assert_eq!(normalized_gameplay_event_summary_min_events(None), 1);
+        assert_eq!(normalized_gameplay_event_summary_min_events(Some(0)), 0);
+        assert_eq!(
+            normalized_gameplay_event_summary_min_events(Some(2_000_000)),
+            1_000_000
+        );
+    }
+
+    #[test]
     fn command_event_type_covers_terminal_admin_statuses() {
         assert_eq!(
             command_event_type(&CommandStatus::Succeeded),
@@ -7218,6 +9814,487 @@ mod tests {
         assert_eq!(systems.mail[0].items, vec!["red-potion"]);
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[test]
+    fn crystal_console_commands_mutate_accounts_market_guild_lists_and_content() {
+        let unique = format!("{}-{}", std::process::id(), now_ms());
+        let root = std::env::temp_dir().join(format!("mir2-admin-console-{unique}"));
+        let account_path = root.join("accounts.json");
+        let namelist_root = root.join("NameLists");
+        let content_root = root.join("content");
+        std::fs::create_dir_all(&root).expect("temp root");
+        let config = SimulationConfig::default().with_account_store_path(account_path.clone());
+        {
+            let mut store = config.account_store.lock().expect("store lock");
+            let account = store.accounts.get_mut("demo").expect("demo account");
+            account.storage_password = "1234".into();
+            account.storage_password_last_set_binary_datetime = 42;
+            let save = account.saves.get_mut(&0).expect("demo save");
+            let mut systems = Stage5SystemsState::default();
+            systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                id: 1,
+                seller: "Scout".into(),
+                item_key: "auction-sword".into(),
+                price: 50,
+                sold: false,
+                cancelled: false,
+                expired: false,
+            });
+            systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                id: 2,
+                seller: "Scout".into(),
+                item_key: "auction-shield".into(),
+                price: 75,
+                sold: false,
+                cancelled: false,
+                expired: false,
+            });
+            systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                id: 3,
+                seller: "Scout".into(),
+                item_key: "auction-ring".into(),
+                price: 90,
+                sold: false,
+                cancelled: false,
+                expired: false,
+            });
+            systems.guild.name = "BichonGuard".into();
+            systems.guild.members = vec!["Scout".into(), "Peer".into()];
+            systems.guild.rank = "Guild Chief".into();
+            save.stage5_systems_json = Some(serde_json::to_string(&systems).expect("systems"));
+        }
+        config.save_account_store().expect("seed store");
+        std::fs::create_dir_all(&namelist_root).expect("namelist root");
+        std::fs::write(namelist_root.join("OldList.txt"), "Retired\n").expect("old namelist");
+
+        let executor = SystemMailExecutor::new(AccountStoreSystemMailDomain {
+            gateway_mail_url: "http://127.0.0.1:1/admin/system-mail".into(),
+            gateway_kick_url: "http://127.0.0.1:1/admin/kick-player".into(),
+            gateway_control_url: "http://127.0.0.1:1/admin/control".into(),
+            fallback_config: config,
+            name_list_root: namelist_root.clone(),
+            content_bundle_dir: content_root.clone(),
+            receipts: Vec::new(),
+        });
+        let mut control = AdminControlPlane::new(executor);
+
+        submit_console_for_test(
+            &mut control,
+            Permission::AccountWrite,
+            AdminCommand::CreateAccount {
+                account_id: "ops".into(),
+                password: Some("secret".into()),
+            },
+        )
+        .expect("create account");
+        submit_console_for_test(
+            &mut control,
+            Permission::AccountWrite,
+            AdminCommand::UpdateAccount {
+                account_id: "demo".into(),
+                password: None,
+                storage_size: Some(120),
+                clear_storage_password: true,
+                unban: false,
+            },
+        )
+        .expect("update account");
+        let mut character_envelope = test_console_envelope(
+            operator_with([Permission::CharacterWrite]),
+            AdminCommand::UpdateCharacter {
+                character_id: "demo:0".into(),
+                name: Some("ScoutGM".into()),
+                level: Some(11),
+                gold: Some(333),
+                credit: Some(7),
+                map_file_name: None,
+                map_title: None,
+                position_x: None,
+                position_y: None,
+                hp: None,
+                max_hp: None,
+                mp: None,
+                pk_points: Some(22),
+            },
+        );
+        character_envelope.command_id = "cmd-character".into();
+        character_envelope.approval_id = Some("approval-character".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-character".into(),
+                "cmd-character".into(),
+                "update_character".into(),
+                "op-1".into(),
+                "character update review".into(),
+                1_000,
+            ))
+            .expect("character approval");
+        control
+            .decide_approval(
+                "approval-character",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved".into()),
+                1_500,
+            )
+            .expect("approve character");
+        control
+            .submit(character_envelope, 2_000)
+            .expect("update character");
+        let mut flag_envelope = test_console_envelope(
+            operator_with([Permission::CharacterWrite]),
+            AdminCommand::SetCharacterFlag {
+                character_id: "demo:0".into(),
+                flag_index: 7,
+                active: true,
+            },
+        );
+        flag_envelope.command_id = "cmd-flag".into();
+        flag_envelope.approval_id = Some("approval-flag".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-flag".into(),
+                "cmd-flag".into(),
+                "set_character_flag".into(),
+                "op-1".into(),
+                "flag update review".into(),
+                1_000,
+            ))
+            .expect("flag approval");
+        control
+            .decide_approval(
+                "approval-flag",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved".into()),
+                1_500,
+            )
+            .expect("approve flag");
+        control.submit(flag_envelope, 2_000).expect("set flag");
+        submit_console_for_test(
+            &mut control,
+            Permission::CharacterWrite,
+            AdminCommand::SetChatBan {
+                character_id: "demo:0".into(),
+                banned: true,
+                until_ms: Some(now_ms() + 120_000),
+            },
+        )
+        .expect("set chat ban");
+        submit_console_for_test(
+            &mut control,
+            Permission::CharacterWrite,
+            AdminCommand::ReturnSafeZone {
+                character_id: "demo:0".into(),
+            },
+        )
+        .expect("return safe zone");
+        submit_console_for_test(
+            &mut control,
+            Permission::MarketModerate,
+            AdminCommand::MarketCancelListing {
+                character_id: "demo:0".into(),
+                listing_id: 1,
+                notify_seller: true,
+            },
+        )
+        .expect("cancel listing");
+        submit_console_for_test(
+            &mut control,
+            Permission::MarketModerate,
+            AdminCommand::MarketExpireListing {
+                character_id: "demo:0".into(),
+                listing_id: 2,
+                notify_seller: true,
+            },
+        )
+        .expect("expire listing");
+        submit_approved_console_for_test(
+            &mut control,
+            Permission::MarketModerate,
+            AdminCommand::MarketDeleteListing {
+                character_id: "demo:0".into(),
+                listing_id: 3,
+                reason_message: Some("Listing removed by GM review.".into()),
+            },
+            "cmd-market-delete",
+            "approval-market-delete",
+        )
+        .expect("delete listing");
+        submit_console_for_test(
+            &mut control,
+            Permission::GuildModerate,
+            AdminCommand::GuildSendMessage {
+                guild_name: "BichonGuard".into(),
+                message: "Ready".into(),
+            },
+        )
+        .expect("guild message");
+        submit_console_for_test(
+            &mut control,
+            Permission::GuildModerate,
+            AdminCommand::GuildRemoveMember {
+                guild_name: "BichonGuard".into(),
+                member_name: "Peer".into(),
+            },
+        )
+        .expect("guild remove");
+        submit_console_for_test(
+            &mut control,
+            Permission::NameListManage,
+            AdminCommand::NameListAdd {
+                list_name: "Rebirth1".into(),
+                player_name: "Scout".into(),
+            },
+        )
+        .expect("namelist add");
+        submit_console_for_test(
+            &mut control,
+            Permission::NameListManage,
+            AdminCommand::NameListCreate {
+                list_name: "NewList".into(),
+            },
+        )
+        .expect("namelist create");
+        submit_approved_console_for_test(
+            &mut control,
+            Permission::NameListManage,
+            AdminCommand::NameListDelete {
+                list_name: "OldList".into(),
+            },
+            "cmd-namelist-delete",
+            "approval-namelist-delete",
+        )
+        .expect("namelist delete");
+        submit_console_for_test(
+            &mut control,
+            Permission::ServerControl,
+            AdminCommand::ServerControl {
+                action: "reload_npcs".into(),
+                target: None,
+            },
+        )
+        .expect("server control fallback");
+
+        let mut content_envelope = test_console_envelope(
+            operator_with([Permission::ContentPublish]),
+            AdminCommand::PublishContentBundle {
+                bundle_id: "bundle-one".into(),
+                category: "items".into(),
+                record_key: "WoodenSword".into(),
+                payload_json: serde_json::json!({"price": 1}),
+            },
+        );
+        content_envelope.command_id = "cmd-content".into();
+        content_envelope.approval_id = Some("approval-content".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-content".into(),
+                "cmd-content".into(),
+                "publish_content_bundle".into(),
+                "op-1".into(),
+                "content publish review".into(),
+                1_000,
+            ))
+            .expect("approval");
+        control
+            .decide_approval(
+                "approval-content",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved".into()),
+                1_500,
+            )
+            .expect("approve");
+        control
+            .submit(content_envelope, 2_000)
+            .expect("content publish");
+
+        let store =
+            AccountStore::load_or_new(&account_path, SimulationConfig::default().default_character);
+        assert!(store.accounts.contains_key("ops"));
+        let demo = store.accounts.get("demo").expect("demo");
+        assert_eq!(demo.storage_size, 120);
+        assert!(demo.storage_password.is_empty());
+        let save = demo.saves.get(&0).expect("demo save");
+        assert_eq!(demo.characters[0].name, "ScoutGM");
+        assert_eq!(save.character.name, "ScoutGM");
+        assert_eq!(save.character.level, 11);
+        assert_eq!(save.gold, 333);
+        assert_eq!(save.credit, 7);
+        assert_eq!(save.pk_points, 22);
+        assert!(save.chat_banned);
+        assert!(save.chat_ban_until_ms.is_some());
+        assert_eq!(save.map_file_name, "0");
+        assert_eq!((save.position.x, save.position.y), (284, 607));
+        assert!(save
+            .npc_flag_states_json
+            .iter()
+            .any(|entry| entry.contains("\"index\":7") && entry.contains("\"value\":true")));
+        let systems: Stage5SystemsState =
+            serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == 1 && listing.cancelled));
+        assert!(systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == 2 && listing.expired));
+        assert!(!systems.auction.iter().any(|listing| listing.id == 3));
+        assert!(systems
+            .mail
+            .iter()
+            .any(|mail| mail.subject == "GM Market Notice"));
+        assert!(systems
+            .guild
+            .chat_log
+            .iter()
+            .any(|entry| entry.contains("Ready")));
+        assert!(!systems.guild.members.iter().any(|member| member == "Peer"));
+        let namelist = std::fs::read_to_string(namelist_root.join("Rebirth1.txt"))
+            .expect("namelist should exist");
+        assert!(namelist.lines().any(|line| line == "Scout"));
+        assert!(namelist_root.join("NewList.txt").exists());
+        assert!(!namelist_root.join("OldList.txt").exists());
+        let bundle =
+            std::fs::read_to_string(content_root.join("bundle-one.json")).expect("bundle exists");
+        assert!(bundle.contains("\"recordKey\": \"WoodenSword\""));
+
+        let snapshot = snapshot_from_store("test", store);
+        assert_eq!(build_accounts_read_model(&snapshot).accounts.len(), 2);
+        let market = build_market_read_model(&snapshot);
+        assert!(market
+            .listings
+            .iter()
+            .any(|listing| listing.listing_id == 2 && listing.expired));
+        assert_eq!(
+            build_guilds_read_model(&snapshot).guilds[0].guild_name,
+            "BichonGuard"
+        );
+        let detail = build_player_detail(&snapshot, "demo:0", None).expect("detail");
+        assert_eq!(detail.npc_flag_count, 1);
+        assert_eq!(detail.active_npc_flags[0].index, 7);
+        assert_eq!(detail.summary.pk_points, 22);
+        assert!(detail.summary.chat_banned);
+
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn console_command_request_accepts_frontend_payload_shape() {
+        let request = serde_json::from_value::<SubmitConsoleCommandRequest>(serde_json::json!({
+            "commandId": "cmd-console",
+            "traceId": "trace-console",
+            "target": {
+                "targetType": "name_list",
+                "targetId": "Rebirth1",
+                "accountId": null,
+                "characterId": null
+            },
+            "reason": "frontend generic console command",
+            "command": {
+                "type": "name_list_add",
+                "list_name": "Rebirth1",
+                "player_name": "Scout"
+            }
+        }))
+        .expect("frontend command should deserialize");
+
+        assert_eq!(request.command_id.as_deref(), Some("cmd-console"));
+        assert!(matches!(request.target.target_type, TargetType::NameList));
+        assert!(matches!(request.command, AdminCommand::NameListAdd { .. }));
+    }
+
+    fn submit_approved_console_for_test(
+        control: &mut AdminControlPlane<SystemMailExecutor<AccountStoreSystemMailDomain>>,
+        permission: Permission,
+        command: AdminCommand,
+        command_id: &str,
+        approval_id: &str,
+    ) -> Result<CommandExecutionResult, AdminError> {
+        let command_type = command_type(&command);
+        let mut envelope = test_console_envelope(operator_with([permission]), command);
+        envelope.command_id = command_id.to_string();
+        envelope.approval_id = Some(approval_id.to_string());
+        control.create_approval(ApprovalRecord::pending(
+            approval_id.to_string(),
+            command_id.to_string(),
+            command_type,
+            "op-1".into(),
+            "approved console command test".into(),
+            1_000,
+        ))?;
+        control.decide_approval(
+            approval_id,
+            ApprovalStatus::Approved,
+            "lead-gm".into(),
+            Some("approved".into()),
+            1_500,
+        )?;
+        control.submit(envelope, 2_000)
+    }
+
+    fn submit_console_for_test(
+        control: &mut AdminControlPlane<SystemMailExecutor<AccountStoreSystemMailDomain>>,
+        permission: Permission,
+        command: AdminCommand,
+    ) -> Result<CommandExecutionResult, AdminError> {
+        let mut envelope = test_console_envelope(operator_with([permission]), command);
+        envelope.command_id = format!(
+            "cmd-test-{}-{}",
+            command_type(&envelope.command),
+            control.command_records(usize::MAX).len()
+        );
+        control.submit(envelope, 2_000)
+    }
+
+    fn test_console_envelope(operator: Operator, command: AdminCommand) -> AdminCommandEnvelope {
+        let target_id = match &command {
+            AdminCommand::CreateAccount { account_id, .. }
+            | AdminCommand::UpdateAccount { account_id, .. }
+            | AdminCommand::DeleteAccount { account_id }
+            | AdminCommand::BanAccount { account_id, .. } => account_id.clone(),
+            AdminCommand::UpdateCharacter { character_id, .. }
+            | AdminCommand::ReturnSafeZone { character_id }
+            | AdminCommand::KillPlayer { character_id }
+            | AdminCommand::KillPets { character_id }
+            | AdminCommand::SetCharacterFlag { character_id, .. }
+            | AdminCommand::SetChatBan { character_id, .. }
+            | AdminCommand::MessagePlayer { character_id, .. }
+            | AdminCommand::MarketCancelListing { character_id, .. }
+            | AdminCommand::MarketExpireListing { character_id, .. }
+            | AdminCommand::MarketDeleteListing { character_id, .. } => character_id.clone(),
+            AdminCommand::GuildRemoveMember { guild_name, .. }
+            | AdminCommand::GuildSendMessage { guild_name, .. } => guild_name.clone(),
+            AdminCommand::NameListAdd { list_name, .. }
+            | AdminCommand::NameListRemove { list_name, .. }
+            | AdminCommand::NameListCreate { list_name }
+            | AdminCommand::NameListDelete { list_name } => list_name.clone(),
+            AdminCommand::PublishContentBundle { bundle_id, .. } => bundle_id.clone(),
+            AdminCommand::ServerControl { action, .. } => action.clone(),
+            AdminCommand::Broadcast { .. } => "global".into(),
+            AdminCommand::SendSystemMail { target_id, .. } => target_id.clone(),
+            AdminCommand::GrantItem { character_id, .. }
+            | AdminCommand::GrantCurrency { character_id, .. }
+            | AdminCommand::KickPlayer { character_id } => character_id.clone(),
+        };
+        AdminCommandEnvelope {
+            command_id: format!("cmd-test-{}", now_ms()),
+            operator,
+            target: AdminTarget {
+                target_type: TargetType::World,
+                target_id,
+                account_id: None,
+                character_id: None,
+            },
+            reason: "console command test reason".into(),
+            approval_id: None,
+            command,
+            trace_id: format!("trace-test-{}", now_ms()),
+            created_at_ms: 1_000,
+        }
     }
 
     fn sample_envelope(operator: Operator) -> AdminCommandEnvelope {

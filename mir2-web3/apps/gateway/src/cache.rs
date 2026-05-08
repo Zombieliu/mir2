@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
-use crate::GatewaySession;
+use crate::{routing::SessionRouteRequest, GatewaySession};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -20,12 +20,73 @@ pub struct GatewaySessionCacheKey {
 pub struct GatewaySessionCacheRecord {
     pub key: GatewaySessionCacheKey,
     pub character_name: String,
+    #[serde(default, rename = "zoneId")]
+    pub zone_id: Option<String>,
     pub map_file_name: Option<String>,
     pub player_object_id: Option<u32>,
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub gold: u32,
     pub tick: u64,
+    #[serde(default, rename = "updatedAtMs")]
+    pub updated_at_ms: u64,
+    #[serde(default, rename = "routeLeaseOwner")]
+    pub route_lease_owner: Option<String>,
+    #[serde(default, rename = "routeLeaseExpiresAtMs")]
+    pub route_lease_expires_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewaySessionRoute {
+    pub key: GatewaySessionCacheKey,
+    pub character_name: String,
+    #[serde(default, rename = "zoneId")]
+    pub zone_id: Option<String>,
+    pub map_file_name: Option<String>,
+    pub tick: u64,
+    #[serde(default, rename = "updatedAtMs")]
+    pub updated_at_ms: u64,
+    #[serde(default, rename = "routeLeaseOwner")]
+    pub route_lease_owner: Option<String>,
+    #[serde(default, rename = "routeLeaseExpiresAtMs")]
+    pub route_lease_expires_at_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewayRouteLease {
+    pub key: GatewaySessionCacheKey,
+    pub owner: String,
+    pub expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewaySessionCacheStatus {
+    pub configured: bool,
+    pub backend: String,
+    pub ttl_seconds: Option<u64>,
+    pub record_count: usize,
+    pub stale_record_count: usize,
+    pub route_lease_count: usize,
+    pub healthy: bool,
+    pub last_error: Option<String>,
+}
+
+impl From<GatewaySessionCacheRecord> for GatewaySessionRoute {
+    fn from(record: GatewaySessionCacheRecord) -> Self {
+        Self {
+            key: record.key,
+            character_name: record.character_name,
+            zone_id: record.zone_id,
+            map_file_name: record.map_file_name,
+            tick: record.tick,
+            updated_at_ms: record.updated_at_ms,
+            route_lease_owner: record.route_lease_owner,
+            route_lease_expires_at_ms: record.route_lease_expires_at_ms,
+        }
+    }
 }
 
 pub trait GatewaySessionCache: Send + Sync {
@@ -33,7 +94,55 @@ pub trait GatewaySessionCache: Send + Sync {
     fn list(&self) -> Vec<GatewaySessionCacheRecord>;
     fn put(&self, record: GatewaySessionCacheRecord);
     fn remove(&self, key: &GatewaySessionCacheKey);
+    fn remove_owned(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+    ) -> Option<GatewaySessionCacheRecord> {
+        let record = self.get(key)?;
+        match record.route_lease_owner.as_deref() {
+            Some(record_owner) if record_owner != owner => return None,
+            _ => {}
+        }
+        self.remove(key);
+        Some(record)
+    }
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord>;
+    fn acquire_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String>;
+    fn renew_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String>;
+    fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String>;
+    fn route_lease_count(&self) -> usize {
+        0
+    }
+    fn status(&self) -> GatewaySessionCacheStatus {
+        let records = self.list();
+        GatewaySessionCacheStatus {
+            configured: true,
+            backend: "custom".to_string(),
+            ttl_seconds: None,
+            record_count: records.len(),
+            stale_record_count: stale_record_count(&records, 30_000),
+            route_lease_count: self.route_lease_count(),
+            healthy: true,
+            last_error: None,
+        }
+    }
+    fn route_character(&self, character_name: &str) -> Option<GatewaySessionRoute> {
+        self.list()
+            .into_iter()
+            .find(|record| record.character_name.eq_ignore_ascii_case(character_name))
+            .map(GatewaySessionRoute::from)
+    }
 }
 
 pub type SharedGatewaySessionCache = Arc<dyn GatewaySessionCache>;
@@ -41,6 +150,7 @@ pub type SharedGatewaySessionCache = Arc<dyn GatewaySessionCache>;
 #[derive(Debug, Default)]
 pub struct InMemoryGatewaySessionCache {
     records: Mutex<BTreeMap<GatewaySessionCacheKey, GatewaySessionCacheRecord>>,
+    route_leases: Mutex<BTreeMap<GatewaySessionCacheKey, GatewayRouteLease>>,
 }
 
 impl GatewaySessionCache for InMemoryGatewaySessionCache {
@@ -73,6 +183,32 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .lock()
             .expect("gateway session cache mutex should not be poisoned")
             .remove(key);
+        self.route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned")
+            .remove(key);
+    }
+
+    fn remove_owned(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+    ) -> Option<GatewaySessionCacheRecord> {
+        let mut records = self
+            .records
+            .lock()
+            .expect("gateway session cache mutex should not be poisoned");
+        let record = records.get(key)?;
+        match record.route_lease_owner.as_deref() {
+            Some(record_owner) if record_owner != owner => return None,
+            _ => {}
+        }
+        let record = records.remove(key);
+        self.route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned")
+            .remove(key);
+        record
     }
 
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord> {
@@ -84,7 +220,93 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
             .iter()
             .find(|(_, record)| record.character_name.eq_ignore_ascii_case(character_name))
             .map(|(key, _)| key.clone())?;
-        records.remove(&key)
+        let record = records.remove(&key);
+        self.route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned")
+            .remove(&key);
+        record
+    }
+
+    fn acquire_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String> {
+        let mut leases = self
+            .route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned");
+        let now_ms = current_unix_ms();
+        if let Some(existing) = leases.get(key) {
+            if existing.expires_at_ms > now_ms && existing.owner != owner {
+                return Err(format!(
+                    "route lease for {}/{} is held by {} until {}",
+                    key.account_id, key.character_index, existing.owner, existing.expires_at_ms
+                ));
+            }
+        }
+        let lease = GatewayRouteLease {
+            key: key.clone(),
+            owner: owner.to_string(),
+            expires_at_ms: now_ms.saturating_add(ttl_seconds.max(1).saturating_mul(1_000)),
+        };
+        leases.insert(key.clone(), lease.clone());
+        Ok(lease)
+    }
+
+    fn renew_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String> {
+        self.acquire_route_lease(key, owner, ttl_seconds)
+    }
+
+    fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String> {
+        let mut leases = self
+            .route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned");
+        if leases.get(key).is_some_and(|lease| lease.owner == owner) {
+            leases.remove(key);
+        }
+        Ok(())
+    }
+
+    fn route_lease_count(&self) -> usize {
+        self.route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned")
+            .values()
+            .filter(|lease| lease.expires_at_ms > current_unix_ms())
+            .count()
+    }
+
+    fn status(&self) -> GatewaySessionCacheStatus {
+        let records = self.list();
+        GatewaySessionCacheStatus {
+            configured: true,
+            backend: "in_memory".to_string(),
+            ttl_seconds: None,
+            record_count: records.len(),
+            stale_record_count: stale_record_count(&records, 30_000),
+            route_lease_count: self.route_lease_count(),
+            healthy: true,
+            last_error: None,
+        }
+    }
+
+    fn route_character(&self, character_name: &str) -> Option<GatewaySessionRoute> {
+        self.records
+            .lock()
+            .expect("gateway session cache mutex should not be poisoned")
+            .values()
+            .find(|record| record.character_name.eq_ignore_ascii_case(character_name))
+            .cloned()
+            .map(GatewaySessionRoute::from)
     }
 }
 
@@ -120,6 +342,15 @@ impl RedisGatewaySessionCache {
             "{}:character:{}",
             self.namespace,
             sanitize_cache_key_part(&character_name.to_ascii_lowercase())
+        )
+    }
+
+    fn route_lease_key(&self, key: &GatewaySessionCacheKey) -> String {
+        format!(
+            "{}:lease:{}:{}",
+            self.namespace,
+            sanitize_cache_key_part(&key.account_id),
+            key.character_index
         )
     }
 
@@ -263,8 +494,9 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
 
     fn remove(&self, key: &GatewaySessionCacheKey) {
         let redis_key = self.redis_key(key);
+        let lease_key = self.route_lease_key(key);
         let record = self.get(key);
-        if let Err(error) = self.execute(&["DEL".to_string(), redis_key]) {
+        if let Err(error) = self.execute(&["DEL".to_string(), redis_key, lease_key]) {
             eprintln!("redis session-cache remove failed: {error}");
         }
         if let Some(record) = record {
@@ -273,6 +505,20 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
                 eprintln!("redis session-cache character index remove failed: {error}");
             }
         }
+    }
+
+    fn remove_owned(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+    ) -> Option<GatewaySessionCacheRecord> {
+        let record = self.get(key)?;
+        match record.route_lease_owner.as_deref() {
+            Some(record_owner) if record_owner != owner => return None,
+            _ => {}
+        }
+        self.remove(key);
+        Some(record)
     }
 
     fn remove_character(&self, character_name: &str) -> Option<GatewaySessionCacheRecord> {
@@ -289,22 +535,184 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
                 return None;
             }
         };
-        let record = match self.execute(&["GET".to_string(), redis_key.clone()]) {
-            Ok(RedisValue::Bulk(Some(value))) => serde_json::from_str(&value).ok(),
-            Ok(RedisValue::Bulk(None)) => None,
-            Ok(other) => {
-                eprintln!("unexpected redis session-cache character get response: {other:?}");
-                None
-            }
-            Err(error) => {
-                eprintln!("redis session-cache character get failed: {error}");
-                None
-            }
-        };
+        let record: Option<GatewaySessionCacheRecord> =
+            match self.execute(&["GET".to_string(), redis_key.clone()]) {
+                Ok(RedisValue::Bulk(Some(value))) => serde_json::from_str(&value).ok(),
+                Ok(RedisValue::Bulk(None)) => None,
+                Ok(other) => {
+                    eprintln!("unexpected redis session-cache character get response: {other:?}");
+                    None
+                }
+                Err(error) => {
+                    eprintln!("redis session-cache character get failed: {error}");
+                    None
+                }
+            };
         if let Err(error) = self.execute(&["DEL".to_string(), redis_key, character_index_key]) {
             eprintln!("redis session-cache character remove failed: {error}");
         }
+        if let Some(record) = record.as_ref() {
+            if let Err(error) =
+                self.execute(&["DEL".to_string(), self.route_lease_key(&record.key)])
+            {
+                eprintln!("redis session-cache character lease remove failed: {error}");
+            }
+        }
         record
+    }
+
+    fn acquire_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String> {
+        let ttl_seconds = ttl_seconds.max(1);
+        let lease_key = self.route_lease_key(key);
+        let response = self.execute(&[
+            "SET".to_string(),
+            lease_key.clone(),
+            owner.to_string(),
+            "EX".to_string(),
+            ttl_seconds.to_string(),
+            "NX".to_string(),
+        ])?;
+        match response {
+            RedisValue::Simple(value) if value == "OK" => Ok(GatewayRouteLease {
+                key: key.clone(),
+                owner: owner.to_string(),
+                expires_at_ms: current_unix_ms().saturating_add(ttl_seconds.saturating_mul(1_000)),
+            }),
+            RedisValue::Bulk(None) => {
+                let current_owner = match self.execute(&["GET".to_string(), lease_key.clone()]) {
+                    Ok(RedisValue::Bulk(Some(value))) | Ok(RedisValue::Simple(value)) => value,
+                    Ok(other) => {
+                        return Err(format!("unexpected redis route lease get: {other:?}"))
+                    }
+                    Err(error) => return Err(error),
+                };
+                if current_owner == owner {
+                    return self.renew_route_lease(key, owner, ttl_seconds);
+                }
+                Err(format!(
+                    "route lease for {}/{} is held by {current_owner}",
+                    key.account_id, key.character_index
+                ))
+            }
+            other => Err(format!(
+                "unexpected redis route lease set response: {other:?}"
+            )),
+        }
+    }
+
+    fn renew_route_lease(
+        &self,
+        key: &GatewaySessionCacheKey,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<GatewayRouteLease, String> {
+        let ttl_seconds = ttl_seconds.max(1);
+        let lease_key = self.route_lease_key(key);
+        let current_owner = match self.execute(&["GET".to_string(), lease_key.clone()]) {
+            Ok(RedisValue::Bulk(Some(value))) | Ok(RedisValue::Simple(value)) => value,
+            Ok(RedisValue::Bulk(None)) => return self.acquire_route_lease(key, owner, ttl_seconds),
+            Ok(other) => return Err(format!("unexpected redis route lease get: {other:?}")),
+            Err(error) => return Err(error),
+        };
+        if current_owner != owner {
+            return Err(format!(
+                "route lease for {}/{} is held by {current_owner}",
+                key.account_id, key.character_index
+            ));
+        }
+        match self.execute(&["EXPIRE".to_string(), lease_key, ttl_seconds.to_string()])? {
+            RedisValue::Integer(1) => Ok(GatewayRouteLease {
+                key: key.clone(),
+                owner: owner.to_string(),
+                expires_at_ms: current_unix_ms().saturating_add(ttl_seconds.saturating_mul(1_000)),
+            }),
+            other => Err(format!(
+                "unexpected redis route lease expire response: {other:?}"
+            )),
+        }
+    }
+
+    fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String> {
+        let lease_key = self.route_lease_key(key);
+        let current_owner = match self.execute(&["GET".to_string(), lease_key.clone()]) {
+            Ok(RedisValue::Bulk(Some(value))) | Ok(RedisValue::Simple(value)) => value,
+            Ok(RedisValue::Bulk(None)) => return Ok(()),
+            Ok(other) => return Err(format!("unexpected redis route lease get: {other:?}")),
+            Err(error) => return Err(error),
+        };
+        if current_owner == owner {
+            let _ = self.execute(&["DEL".to_string(), lease_key])?;
+        }
+        Ok(())
+    }
+
+    fn status(&self) -> GatewaySessionCacheStatus {
+        match self.ping() {
+            Ok(()) => {
+                let records = self.list();
+                GatewaySessionCacheStatus {
+                    configured: true,
+                    backend: "redis".to_string(),
+                    ttl_seconds: Some(self.ttl_seconds),
+                    record_count: records.len(),
+                    stale_record_count: stale_record_count(
+                        &records,
+                        self.ttl_seconds.saturating_mul(1_000),
+                    ),
+                    route_lease_count: records
+                        .iter()
+                        .filter(|record| record.route_lease_owner.is_some())
+                        .count(),
+                    healthy: true,
+                    last_error: None,
+                }
+            }
+            Err(error) => GatewaySessionCacheStatus {
+                configured: true,
+                backend: "redis".to_string(),
+                ttl_seconds: Some(self.ttl_seconds),
+                record_count: 0,
+                stale_record_count: 0,
+                route_lease_count: 0,
+                healthy: false,
+                last_error: Some(error),
+            },
+        }
+    }
+
+    fn route_character(&self, character_name: &str) -> Option<GatewaySessionRoute> {
+        let character_index_key = self.character_index_key(character_name);
+        let redis_key = match self.execute(&["GET".to_string(), character_index_key]) {
+            Ok(RedisValue::Bulk(Some(value))) => value,
+            Ok(RedisValue::Bulk(None)) => return None,
+            Ok(other) => {
+                eprintln!("unexpected redis session-cache route index response: {other:?}");
+                return None;
+            }
+            Err(error) => {
+                eprintln!("redis session-cache route index get failed: {error}");
+                return None;
+            }
+        };
+        let record: GatewaySessionCacheRecord = match self.execute(&["GET".to_string(), redis_key])
+        {
+            Ok(RedisValue::Bulk(Some(value))) => serde_json::from_str(&value).ok(),
+            Ok(RedisValue::Bulk(None)) => None,
+            Ok(other) => {
+                eprintln!("unexpected redis session-cache route record response: {other:?}");
+                None
+            }
+            Err(error) => {
+                eprintln!("redis session-cache route record get failed: {error}");
+                None
+            }
+        }?;
+        Some(GatewaySessionRoute::from(record))
     }
 }
 
@@ -469,12 +877,16 @@ pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCa
             character_index: identity.character_index,
         },
         character_name: identity.character_name,
+        zone_id: Some(session.zone_id().as_str().to_string()),
         map_file_name: snapshot.map_file_name,
         player_object_id: snapshot.player_object_id,
         player_hp: snapshot.player_hp,
         player_max_hp: snapshot.player_max_hp,
         gold: snapshot.gold,
         tick: snapshot.tick,
+        updated_at_ms: current_unix_ms(),
+        route_lease_owner: None,
+        route_lease_expires_at_ms: None,
     })
 }
 
@@ -485,6 +897,22 @@ pub fn refresh_session_cache(
     let record = session_cache_record(session)?;
     cache.put(record.clone());
     Some(record)
+}
+
+pub fn refresh_session_cache_with_route_lease(
+    cache: &dyn GatewaySessionCache,
+    session: &GatewaySession,
+    ttl_seconds: u64,
+) -> Result<Option<GatewaySessionCacheRecord>, String> {
+    let mut record = match session_cache_record(session) {
+        Some(record) => record,
+        None => return Ok(None),
+    };
+    let lease = cache.renew_route_lease(&record.key, session.session_id(), ttl_seconds)?;
+    record.route_lease_owner = Some(lease.owner);
+    record.route_lease_expires_at_ms = Some(lease.expires_at_ms);
+    cache.put(record.clone());
+    Ok(Some(record))
 }
 
 pub fn cached_session_record(
@@ -504,15 +932,97 @@ pub fn remove_session_cache(
     Some(key)
 }
 
+pub fn remove_owned_session_cache(
+    cache: &dyn GatewaySessionCache,
+    session: &GatewaySession,
+) -> Option<GatewaySessionCacheKey> {
+    let key = session_cache_key(session)?;
+    let _ = cache.release_route_lease(&key, session.session_id());
+    cache.remove_owned(&key, session.session_id())?;
+    Some(key)
+}
+
+pub fn route_request_for_character(
+    cache: &dyn GatewaySessionCache,
+    character_name: &str,
+) -> Option<SessionRouteRequest> {
+    let route = cache.route_character(character_name)?;
+    Some(route_request_from_route(route))
+}
+
+pub fn fresh_route_request_for_character(
+    cache: &dyn GatewaySessionCache,
+    character_name: &str,
+    max_age_ms: u64,
+) -> Option<SessionRouteRequest> {
+    let route = cache.route_character(character_name)?;
+    route_is_fresh(&route, current_unix_ms(), max_age_ms).then(|| route_request_from_route(route))
+}
+
+pub fn remove_stale_session_routes(cache: &dyn GatewaySessionCache, max_age_ms: u64) -> usize {
+    let now_ms = current_unix_ms();
+    cache
+        .list()
+        .into_iter()
+        .filter(|record| record.updated_at_ms != 0)
+        .filter(|record| now_ms.saturating_sub(record.updated_at_ms) > max_age_ms)
+        .map(|record| {
+            cache.remove(&record.key);
+            1_usize
+        })
+        .sum()
+}
+
+pub fn gateway_session_cache_status(cache: &dyn GatewaySessionCache) -> GatewaySessionCacheStatus {
+    cache.status()
+}
+
+fn route_request_from_route(route: GatewaySessionRoute) -> SessionRouteRequest {
+    SessionRouteRequest {
+        account_id: Some(route.key.account_id),
+        character_index: Some(route.key.character_index),
+        map_file_name: route.map_file_name,
+    }
+}
+
+fn route_is_fresh(route: &GatewaySessionRoute, now_ms: u64, max_age_ms: u64) -> bool {
+    let record_fresh =
+        route.updated_at_ms == 0 || now_ms.saturating_sub(route.updated_at_ms) <= max_age_ms;
+    let lease_fresh = route
+        .route_lease_expires_at_ms
+        .is_none_or(|expires_at_ms| expires_at_ms >= now_ms);
+    record_fresh && lease_fresh
+}
+
+fn stale_record_count(records: &[GatewaySessionCacheRecord], max_age_ms: u64) -> usize {
+    let now_ms = current_unix_ms();
+    records
+        .iter()
+        .filter(|record| record.updated_at_ms != 0)
+        .filter(|record| now_ms.saturating_sub(record.updated_at_ms) > max_age_ms)
+        .count()
+}
+
+fn current_unix_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or(0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        cached_session_record, refresh_session_cache, remove_session_cache, GatewaySessionCache,
-        GatewaySessionCacheKey, InMemoryGatewaySessionCache, RedisGatewaySessionCache,
+        cached_session_record, refresh_session_cache, remove_session_cache,
+        route_request_for_character, GatewaySessionCache, GatewaySessionCacheKey,
+        InMemoryGatewaySessionCache, RedisGatewaySessionCache,
     };
-    use crate::{GatewayConfig, GatewaySession};
+    use crate::{
+        GatewayConfig, GatewaySession, MapZoneSessionRouter, SharedSessionRouter,
+        SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
+    };
     use mir2_protocol::{ClientPacket, MirDirection};
-    use std::time::Duration;
+    use std::{sync::Arc, time::Duration};
 
     fn login_and_start(session: &mut GatewaySession) {
         let _ = session.handle_packet(ClientPacket::Login {
@@ -548,6 +1058,7 @@ mod tests {
         assert_eq!(cached.key.account_id, "demo");
         assert_eq!(cached.key.character_index, 0);
         assert_eq!(cached.character_name, "Scout");
+        assert_eq!(cached.zone_id.as_deref(), Some("primary"));
         assert_eq!(cached.map_file_name.as_deref(), Some("0"));
         assert_eq!(cached.gold, session.world_snapshot().gold);
     }
@@ -600,6 +1111,140 @@ mod tests {
     }
 
     #[test]
+    fn session_cache_routes_online_character_to_zone() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let refreshed =
+            refresh_session_cache(&cache, &session).expect("active session should cache");
+
+        let route = cache
+            .route_character("sCoUt")
+            .expect("online character should have a route");
+
+        assert_eq!(route.key, refreshed.key);
+        assert_eq!(route.character_name, "Scout");
+        assert_eq!(route.zone_id.as_deref(), Some("primary"));
+        assert_eq!(route.map_file_name.as_deref(), Some("0"));
+        assert_eq!(route.tick, refreshed.tick);
+        assert!(cached_session_record(&cache, &session).is_some());
+    }
+
+    #[test]
+    fn session_cache_route_request_can_drive_zone_registry() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        refresh_session_cache(&cache, &session).expect("active session should cache");
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(crate::SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(MapZoneSessionRouter::new().with_route("0", ZoneId::new("bichon-0")))
+                as SharedSessionRouter,
+        );
+
+        let route_request = route_request_for_character(&cache, "Scout")
+            .expect("online character should produce route request");
+        let routed = registry.open_session_for(GatewayConfig::default(), route_request);
+
+        assert_eq!(routed.zone_id, ZoneId::new("bichon-0"));
+    }
+
+    #[test]
+    fn session_cache_fresh_route_rejects_stale_presence_records() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let mut stale =
+            refresh_session_cache(&cache, &session).expect("active session should cache");
+        stale.updated_at_ms = super::current_unix_ms().saturating_sub(60_000);
+        cache.put(stale);
+
+        assert!(route_request_for_character(&cache, "Scout").is_some());
+        assert!(super::fresh_route_request_for_character(&cache, "Scout", 1_000).is_none());
+    }
+
+    #[test]
+    fn session_cache_stale_route_cleanup_keeps_fresh_records() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let fresh = refresh_session_cache(&cache, &session).expect("active session should cache");
+        let mut stale = fresh.clone();
+        stale.key = GatewaySessionCacheKey {
+            account_id: "stale".to_string(),
+            character_index: 7,
+        };
+        stale.character_name = "StaleScout".to_string();
+        stale.updated_at_ms = super::current_unix_ms().saturating_sub(60_000);
+        cache.put(stale.clone());
+
+        let removed = super::remove_stale_session_routes(&cache, 1_000);
+
+        assert_eq!(removed, 1);
+        assert!(cache.get(&fresh.key).is_some());
+        assert!(cache.get(&stale.key).is_none());
+    }
+
+    #[test]
+    fn session_cache_status_reports_backend_and_stale_records() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let fresh = refresh_session_cache(&cache, &session).expect("active session should cache");
+        let mut stale = fresh.clone();
+        stale.key = GatewaySessionCacheKey {
+            account_id: "stale-status".to_string(),
+            character_index: 8,
+        };
+        stale.character_name = "StaleStatusScout".to_string();
+        stale.updated_at_ms = super::current_unix_ms().saturating_sub(60_000);
+        cache.put(stale);
+
+        let status = super::gateway_session_cache_status(&cache);
+
+        assert!(status.configured);
+        assert_eq!(status.backend, "in_memory");
+        assert_eq!(status.ttl_seconds, None);
+        assert_eq!(status.record_count, 2);
+        assert_eq!(status.stale_record_count, 1);
+        assert!(status.healthy);
+        assert_eq!(status.last_error, None);
+    }
+
+    #[test]
+    fn session_cache_route_lease_blocks_stale_owner_overwrite_and_owned_remove() {
+        let mut first = GatewaySession::new(GatewayConfig::default());
+        let mut second = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut first);
+        login_and_start(&mut second);
+
+        let first_record = super::refresh_session_cache_with_route_lease(&cache, &first, 30)
+            .expect("first lease should succeed")
+            .expect("first session should cache");
+        let second_error = super::refresh_session_cache_with_route_lease(&cache, &second, 30)
+            .expect_err("second owner should be blocked while first lease is fresh");
+        let route = cache
+            .route_character("Scout")
+            .expect("first route should remain visible");
+
+        assert!(second_error.contains("route lease"));
+        assert_eq!(
+            first_record.route_lease_owner.as_deref(),
+            Some(first.session_id())
+        );
+        assert_eq!(route.route_lease_owner.as_deref(), Some(first.session_id()));
+        assert_eq!(super::remove_owned_session_cache(&cache, &second), None);
+        assert!(cache.route_character("Scout").is_some());
+        assert_eq!(
+            super::remove_owned_session_cache(&cache, &first),
+            Some(first_record.key)
+        );
+        assert!(cache.route_character("Scout").is_none());
+    }
+
+    #[test]
     fn redis_session_cache_roundtrips_removes_and_expires_records() {
         let redis_url = std::env::var("MIR2_TEST_REDIS_URL")
             .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
@@ -624,6 +1269,13 @@ mod tests {
         assert_eq!(cached, refreshed);
         assert_eq!(listed, vec![refreshed]);
         assert_eq!(cached.gold, session.world_snapshot().gold);
+        let route = cache
+            .route_character("Scout")
+            .expect("redis cache should route online character");
+        assert_eq!(route.zone_id.as_deref(), Some("primary"));
+        assert_eq!(route.map_file_name.as_deref(), Some("0"));
+        assert!(route.updated_at_ms > 0);
+        assert!(super::fresh_route_request_for_character(&cache, "Scout", 5_000).is_some());
 
         let removed = remove_session_cache(&cache, &session).expect("active session key");
         assert_eq!(removed.account_id, "demo");
@@ -639,6 +1291,43 @@ mod tests {
             account_id: "demo".to_string(),
             character_index: 0,
         });
+    }
+
+    #[test]
+    fn redis_session_cache_route_lease_blocks_competing_owner() {
+        let redis_url = std::env::var("MIR2_TEST_REDIS_URL")
+            .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
+        let cache = RedisGatewaySessionCache::new(
+            &redis_url,
+            format!("mir2:test:session:lease:{}", std::process::id()),
+            30,
+        );
+        if cache.ping().is_err() {
+            eprintln!("skipping redis session cache lease test because Redis is unavailable");
+            return;
+        }
+
+        let mut first = GatewaySession::new(GatewayConfig::default());
+        let mut second = GatewaySession::new(GatewayConfig::default());
+        login_and_start(&mut first);
+        login_and_start(&mut second);
+
+        let first_record = super::refresh_session_cache_with_route_lease(&cache, &first, 30)
+            .expect("first redis lease should succeed")
+            .expect("first redis session should cache");
+        let second_error = super::refresh_session_cache_with_route_lease(&cache, &second, 30)
+            .expect_err("second redis owner should be blocked while first lease is fresh");
+        let route = cache
+            .route_character("Scout")
+            .expect("redis route should remain visible");
+
+        assert!(second_error.contains("route lease"));
+        assert_eq!(route.route_lease_owner.as_deref(), Some(first.session_id()));
+        assert_eq!(
+            super::remove_owned_session_cache(&cache, &first),
+            Some(first_record.key)
+        );
+        assert!(cache.route_character("Scout").is_none());
     }
 
     #[test]

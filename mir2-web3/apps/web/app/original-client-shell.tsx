@@ -13,6 +13,7 @@ import {
   frameMetaForIndex,
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
+  originalSceneSpriteLibraryExists,
   type OriginalSceneSpriteFrameMeta,
   type OriginalSceneSpriteLibraryMeta,
 } from "../lib/original-scene-sprite-meta";
@@ -32,7 +33,7 @@ import {
   SUPPORTED_LANGUAGES,
   type Mir2Language,
 } from "../lib/localization";
-import type { OriginalMapRegion } from "../lib/scene-types";
+import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../lib/scene-types";
 import {
   CRYSTAL_GAME_SHOP_ITEM_INFO_BY_INDEX,
   CRYSTAL_GAME_SHOP_ITEMS,
@@ -132,6 +133,9 @@ type DisplayEntity = {
   bigMapIcon?: number;
   showOnBigMap?: boolean;
   canTeleportTo?: boolean;
+  movementAnimation?: "walking" | "running";
+  movementStartedAt?: number;
+  movementUntil?: number;
   attackAnimation?: "melee1" | "melee2" | "melee3" | "melee4" | "range";
   attackStartedAt?: number;
   attackUntil?: number;
@@ -159,6 +163,7 @@ type DisplayItem = {
   key: string;
   name: string;
   icon: number;
+  uniqueId: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -167,10 +172,10 @@ type DisplayItem = {
   durabilityMax?: number;
 };
 
-type ItemActionRef = Pick<DisplayItem, "key" | "slot" | "container">;
+type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;
 type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
-type MoveItemRef = Pick<DisplayItem, "slot" | "container">;
-type MergeItemRef = Pick<DisplayItem, "slot" | "container">;
+type MoveItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
+type MergeItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
 
 type DisplayEquipmentItem = {
   slot: EquipmentSlot;
@@ -234,6 +239,7 @@ type DisplayLogLine = {
   channel:
     | "normal"
     | "shout"
+    | "trade"
     | "whisper"
     | "group"
     | "guild"
@@ -309,7 +315,22 @@ type DisplayWorld = {
   knownSkills: DisplayKnownSkill[];
   activeBuffs: DisplayActiveBuff[];
   stage5Systems?: {
+    group?: { members?: string[]; lootMode?: string };
+    guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
+    social?: { friends?: string[]; blocked?: string[] };
+    relationship?: Record<string, unknown>;
+    mentor?: Record<string, unknown>;
     mail?: DisplayMailMessage[];
+    trade?: Record<string, unknown> | null;
+    auction?: Array<Record<string, unknown>>;
+    conquest?: { castleOwner?: string; activeWars?: string[]; eventLog?: string[]; taxRatePercent?: number; gold?: number };
+    guildTerritory?: { owned?: boolean; mapFileName?: string; rentalDaysLeft?: number; recallLog?: string[] };
+    hero?: Record<string, unknown> | null;
+    itemRental?: Record<string, unknown>;
+    profession?: { miningLevel?: number; ore?: number; craftedItems?: string[] };
+    appearance?: { hair?: number };
+    nameLists?: string[];
+    intelligentCreatures?: Array<Record<string, unknown>>;
   };
   interactionHints: string[];
   projectiles: DisplayProjectile[];
@@ -361,6 +382,7 @@ type OriginalClientShellProps = {
   showCharacter: boolean;
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
+  storageServiceOpenVersion: number;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -396,6 +418,8 @@ type OriginalClientShellProps = {
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
+  onRunStage5Command: (action: string, args?: string[]) => void;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
   transferOptions: SystemMenuTransferOption[];
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
@@ -434,6 +458,8 @@ const VIEWPORT_TILE_CENTER_Y = VIEWPORT_TILE_TOP_ORIGIN + VIEWPORT_CELL_HEIGHT /
 const VIEWPORT_ENTITY_LEFT_ORIGIN = VIEWPORT_OFFSET_X * VIEWPORT_CELL_WIDTH;
 const VIEWPORT_ENTITY_TOP_ORIGIN = VIEWPORT_OFFSET_Y * VIEWPORT_CELL_HEIGHT;
 const CRYSTAL_MOVE_INPUT_INTERVAL_MS = 100;
+const CRYSTAL_MOVE_FRAME_COUNT = 6;
+const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
 const MAX_PREDICTED_PLAYER_LEAD_TILES = 10;
 const LOGIN_STATIC_BACKGROUND_FRAME = 0;
 const LOGIN_TRANSITION_FRAME_MS = 180;
@@ -485,7 +511,7 @@ type GameShopPaymentType = "gold" | "credit";
 
 const GAME_SHOP_ITEMS_PER_PAGE = 8;
 const GAME_SHOP_CLASS_FILTERS: GameShopClassFilter[] = ["all", "warrior", "assassin", "taoist", "wizard", "archer"];
-const GAME_SHOP_PREVIEW_ITEM_TYPES = new Set([1, 2, 13, 37]);
+const GAME_SHOP_PREVIEW_ITEM_TYPES = new Set([1, 2, 19, 37]);
 const BIG_MAP_NPC_INDEX = new Map(
   CRYSTAL_BIG_MAP_NPCS.map((npc) => [bigMapNpcKey(npc.map, npc.name, npc.x, npc.y), npc]),
 );
@@ -576,6 +602,7 @@ export function OriginalClientShell({
   showCharacter,
   activeInventoryTab,
   activeCharacterTab,
+  storageServiceOpenVersion,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -611,6 +638,8 @@ export function OriginalClientShell({
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
+  onRunStage5Command,
+  onSendClientCommand,
   transferOptions,
   onToggleCharacter,
   onToggleInventory,
@@ -876,6 +905,7 @@ export function OriginalClientShell({
       event.preventDefault();
       onUseItem({
         key: item.key,
+        uniqueId: item.uniqueId,
         slot: item.slot,
         container: item.container,
       });
@@ -957,8 +987,15 @@ export function OriginalClientShell({
     }
 
     const missingLibraries = [...libraries].filter((libraryKey) => !(libraryKey in sceneSpriteLibraries));
+    for (const libraryKey of missingLibraries) {
+      if (!originalSceneSpriteLibraryExists(libraryKey)) {
+        missingSceneSpriteLibrariesRef.current.add(libraryKey);
+      }
+    }
     const pendingLibraries = missingLibraries.filter(
-      (libraryKey) => !missingSceneSpriteLibrariesRef.current.has(libraryKey),
+      (libraryKey) =>
+        originalSceneSpriteLibraryExists(libraryKey) &&
+        !missingSceneSpriteLibrariesRef.current.has(libraryKey),
     );
     if (!pendingLibraries.length) {
       return;
@@ -1017,16 +1054,21 @@ export function OriginalClientShell({
     playerCameraMotionOffset,
   };
   const viewportEntitySprites = player
-    ? viewportEntities.map((entity) => ({
-        entity,
-        sprite: buildViewportEntitySprite(
+    ? viewportEntities.map((entity) => {
+        const motionSnapshot = entityMotionSnapshotsRef.current[entity.objectId];
+        const animationState = entityAnimationStateForEntity(entity, entityMotionSnapshotsRef.current, sceneNow);
+        return {
           entity,
-          sceneSpriteLibraries,
-          sceneSpriteFrameIndex,
-          sceneNow,
-          entityAnimationStateForEntity(entity, entityMotionSnapshotsRef.current, sceneNow),
-        ),
-      }))
+          sprite: buildViewportEntitySprite(
+            entity,
+            sceneSpriteLibraries,
+            sceneSpriteFrameIndex,
+            sceneNow,
+            animationState,
+            motionSnapshot,
+          ),
+        };
+      })
     : [];
   const viewportGroundDrops = player
     ? world.groundDrops
@@ -1332,9 +1374,13 @@ export function OriginalClientShell({
               <img
                 key={sprite.key}
                 className="scene-map-object-sprite"
-                src={sprite.path}
+                src={mapSpriteRenderPath(sprite.path)}
                 alt=""
                 draggable={false}
+                data-map-sprite-path={sprite.path}
+                data-map-render-path={mapSpriteRenderPath(sprite.path)}
+                data-map-cell-x={sprite.cellX}
+                data-map-cell-y={sprite.cellY}
                 style={{
                   left: sprite.left + playerCameraMotionOffset.x,
                   top: sprite.top + playerCameraMotionOffset.y,
@@ -1594,6 +1640,7 @@ export function OriginalClientShell({
               showCharacter={showCharacter}
               activeInventoryTab={activeInventoryTab}
               activeCharacterTab={activeCharacterTab}
+              storageServiceOpenVersion={storageServiceOpenVersion}
               onChatMessageChange={onChatMessageChange}
               onSendChat={onSendChat}
               onRentExpandedStorage={onRentExpandedStorage}
@@ -1627,6 +1674,8 @@ export function OriginalClientShell({
               onClaimMail={onClaimMail}
               onDeleteMail={onDeleteMail}
               onBuyGameShopItem={onBuyGameShopItem}
+              onRunStage5Command={onRunStage5Command}
+              onSendClientCommand={onSendClientCommand}
               transferOptions={transferOptions}
             />
           ) : null}
@@ -1706,6 +1755,7 @@ type GameUiSceneProps = {
   showCharacter: boolean;
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
+  storageServiceOpenVersion: number;
   onChatMessageChange: (value: string) => void;
   onSendChat: () => void;
   onRentExpandedStorage: () => void;
@@ -1739,6 +1789,8 @@ type GameUiSceneProps = {
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
+  onRunStage5Command: (action: string, args?: string[]) => void;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
   transferOptions: SystemMenuTransferOption[];
 };
 
@@ -1754,6 +1806,7 @@ function GameUiScene({
   showCharacter,
   activeInventoryTab,
   activeCharacterTab,
+  storageServiceOpenVersion,
   onChatMessageChange,
   onSendChat,
   onRentExpandedStorage,
@@ -1787,6 +1840,8 @@ function GameUiScene({
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
+  onRunStage5Command,
+  onSendClientCommand,
   transferOptions,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
@@ -1800,6 +1855,7 @@ function GameUiScene({
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showGameShop, setShowGameShop] = useState(false);
+  const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<SystemMenuSurfacePanel | null>(null);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
   const dialogKey = world.activeNpcDialog
@@ -1849,7 +1905,7 @@ function GameUiScene({
         chatExpanded={chatExpanded}
         showSettings={showChatSettings}
         onSelectFilter={setActiveChatFilter}
-        onSelectTrade={() => setActiveChatFilter("shout")}
+        onSelectTrade={() => setActiveChatFilter("trade")}
         onToggleExpanded={() => setChatExpanded((current) => !current)}
         onToggleSettings={() => setShowChatSettings((current) => !current)}
         onToggleReport={() => setShowReportPanel((current) => !current)}
@@ -1915,11 +1971,29 @@ function GameUiScene({
           mapFileName={world.mapFileName}
           inSafeZone={world.inSafeZone}
           transferOptions={transferOptions}
+          onOpenPanel={(panel) => {
+            setShowSystemMenuFeaturePanel(panel);
+            setShowSystemMenu(false);
+          }}
           onClose={() => setShowSystemMenu(false)}
           onLogout={onLogout}
           onTransferMap={(transferKey) => {
             onTransferMap(transferKey);
             setShowSystemMenu(false);
+          }}
+        />
+      ) : null}
+      {showSystemMenuFeaturePanel ? (
+        <SystemMenuFeaturePanel
+          t={t}
+          feature={showSystemMenuFeaturePanel}
+          playerName={player?.name ?? null}
+          world={world}
+          onRunStage5Command={onRunStage5Command}
+          onSendClientCommand={onSendClientCommand}
+          onClose={() => {
+            setShowSystemMenuFeaturePanel(null);
+            setShowSystemMenu(true);
           }}
         />
       ) : null}
@@ -1948,6 +2022,7 @@ function GameUiScene({
           locale={locale}
           activeTab={activeInventoryTab}
           world={world}
+          storageServiceOpenVersion={storageServiceOpenVersion}
           onClose={onCloseInventory}
           onTabChange={onOpenInventoryTab}
           onUseItem={onUseItem}
@@ -1984,7 +2059,7 @@ function GameUiScene({
   );
 }
 
-type ChatFilterKey = "all" | "shout" | "whisper" | "lover" | "mentor" | "group" | "guild";
+type ChatFilterKey = "all" | "shout" | "trade" | "whisper" | "lover" | "mentor" | "group" | "guild";
 
 type SceneBackdropTile = {
   key: string;
@@ -1997,6 +2072,8 @@ type SceneBackdropTile = {
 type ViewportMapSprite = {
   key: string;
   path: string;
+  cellX: number;
+  cellY: number;
   left: number;
   top: number;
   width: number;
@@ -2018,6 +2095,762 @@ type SystemMenuTransferOption = {
   key: string;
   label: string;
 };
+
+type SystemMenuButtonDefinition = {
+  key: keyof typeof ORIGINAL_UI.menu.buttons;
+  label: string;
+  panel?: SystemMenuSurfacePanel;
+  onClick?: () => void;
+};
+
+type SystemMenuFeaturePanel = "creature" | "mount" | "fishing";
+type SystemMenuSocialPanel =
+  | "ranking"
+  | "friend"
+  | "mentor"
+  | "relationship"
+  | "group"
+  | "guild"
+  | "trade"
+  | "market"
+  | "marriage"
+  | "hero"
+  | "itemRental";
+type SystemMenuSurfacePanel = SystemMenuFeaturePanel | SystemMenuSocialPanel;
+
+type SystemMenuSocialPanelMetric = {
+  label: string;
+  value: string;
+};
+
+type SystemMenuSocialPanelRow = {
+  name: string;
+  meta: string;
+  note: string;
+  metrics: SystemMenuSocialPanelMetric[];
+};
+
+type SystemMenuSocialPanelTab = {
+  key: string;
+  label: string;
+  rows: SystemMenuSocialPanelRow[];
+  actions: string[];
+};
+
+type SystemMenuSocialPanelDefinition = {
+  subtitle: string;
+  footer: string;
+  tabs: SystemMenuSocialPanelTab[];
+};
+
+const SYSTEM_MENU_SOCIAL_PANEL_DEFINITIONS: Partial<Record<SystemMenuSocialPanel, SystemMenuSocialPanelDefinition>> = {
+  ranking: {
+    subtitle: "Crystal leaderboard for {player}",
+    footer: "Compare, inspect, and whisper without leaving the menu.",
+    tabs: [
+      {
+        key: "overall",
+        label: "Overall",
+        rows: [
+          {
+            name: "{player}",
+            meta: "Current slot",
+            note: "Safe-zone progress and route status are shown here.",
+            metrics: [
+              { label: "Rank", value: "01" },
+              { label: "Score", value: "1,820" },
+              { label: "Map", value: "Bichon" },
+            ],
+          },
+          {
+            name: "CrystalKnight",
+            meta: "Front line",
+            note: "Stable damage pressure and route clarity.",
+            metrics: [
+              { label: "Rank", value: "02" },
+              { label: "Score", value: "1,774" },
+              { label: "Map", value: "Border" },
+            ],
+          },
+          {
+            name: "MapScout",
+            meta: "Traversal",
+            note: "Fast map switching and arrival route status.",
+            metrics: [
+              { label: "Rank", value: "03" },
+              { label: "Score", value: "1,709" },
+              { label: "Map", value: "Arena" },
+            ],
+          },
+        ],
+        actions: ["Compare", "Inspect", "Whisper"],
+      },
+      {
+        key: "class",
+        label: "Class",
+        rows: [
+          {
+            name: "Warrior",
+            meta: "Melee ladder",
+            note: "Heavy armor and steady damage still anchor the list.",
+            metrics: [
+              { label: "Best", value: "2,008" },
+              { label: "Wins", value: "84" },
+              { label: "Trend", value: "+12" },
+            ],
+          },
+          {
+            name: "Wizard",
+            meta: "Burst ladder",
+            note: "Magic burst remains the fastest route to the top.",
+            metrics: [
+              { label: "Best", value: "1,962" },
+              { label: "Wins", value: "79" },
+              { label: "Trend", value: "+8" },
+            ],
+          },
+          {
+            name: "Archer",
+            meta: "Ranged ladder",
+            note: "Long-range control is shown in the panel preview.",
+            metrics: [
+              { label: "Best", value: "1,955" },
+              { label: "Wins", value: "88" },
+              { label: "Trend", value: "+15" },
+            ],
+          },
+        ],
+        actions: ["Sort", "Filter", "Whisper"],
+      },
+      {
+        key: "guild",
+        label: "Guild",
+        rows: [
+          {
+            name: "Obelisk",
+            meta: "Prime guild",
+            note: "Guild coordination, roster review, and notice checks.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Donation", value: "96%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+          {
+            name: "Crystal",
+            meta: "Support guild",
+            note: "Guild searching and comparison details.",
+            metrics: [
+              { label: "Members", value: "31" },
+              { label: "Donation", value: "88%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+          {
+            name: "Mir2",
+            meta: "Training guild",
+            note: "Useful for quick roster and memo verification.",
+            metrics: [
+              { label: "Members", value: "27" },
+              { label: "Donation", value: "74%" },
+              { label: "Status", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+    ],
+  },
+  friend: {
+    subtitle: "Friends, block list, and memos for {player}",
+    footer: "Whisper, memo, or inspect the current social list.",
+    tabs: [
+      {
+        key: "friends",
+        label: "Friends",
+        rows: [
+          {
+            name: "Assistant_Jane",
+            meta: "Online",
+            note: "Helpful route checks and map labels are shared here.",
+            metrics: [
+              { label: "Map", value: "Bichon" },
+              { label: "Mood", value: "Ready" },
+              { label: "Note", value: "Escort" },
+            ],
+          },
+          {
+            name: "Merchant_Ruben",
+            meta: "Away",
+            note: "Inventory and trade context stay visible in the panel.",
+            metrics: [
+              { label: "Map", value: "Market" },
+              { label: "Mood", value: "Away" },
+              { label: "Note", value: "Mail" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Local hero",
+            note: "Your own row stays visible for quick status review.",
+            metrics: [
+              { label: "Map", value: "Bichon" },
+              { label: "Mood", value: "Open" },
+              { label: "Note", value: "Self" },
+            ],
+          },
+        ],
+        actions: ["Whisper", "Memo", "Inspect"],
+      },
+      {
+        key: "blocks",
+        label: "Block List",
+        rows: [
+          {
+            name: "Spam_Filter",
+            meta: "Muted",
+            note: "Noise filtering is represented as a real row selection.",
+            metrics: [
+              { label: "Reason", value: "Spam" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "12d" },
+            ],
+          },
+          {
+            name: "Trade_Auto",
+            meta: "Muted",
+            note: "Trade moderation list entries are kept here for visibility.",
+            metrics: [
+              { label: "Reason", value: "Spoof" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "4d" },
+            ],
+          },
+          {
+            name: "Channel_Noise",
+            meta: "Muted",
+            note: "Channel list entry showing active moderation state.",
+            metrics: [
+              { label: "Reason", value: "Noise" },
+              { label: "Flag", value: "Muted" },
+              { label: "Age", value: "1d" },
+            ],
+          },
+        ],
+        actions: ["Unblock", "Memo", "Inspect"],
+      },
+      {
+        key: "memo",
+        label: "Memo",
+        rows: [
+          {
+            name: "Bichon Route",
+            meta: "Pinned memo",
+            note: "The menu keeps saved route notes clickable.",
+            metrics: [
+              { label: "Tag", value: "Route" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+          {
+            name: "Guild Invite",
+            meta: "Pinned memo",
+            note: "Stored invite memo with quick follow-up actions.",
+            metrics: [
+              { label: "Tag", value: "Invite" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+          {
+            name: "Drop Check",
+            meta: "Pinned memo",
+            note: "Use this memo to keep route updates quick and visible.",
+            metrics: [
+              { label: "Tag", value: "Loot" },
+              { label: "State", value: "Pinned" },
+              { label: "Age", value: "Today" },
+            ],
+          },
+        ],
+        actions: ["Write", "Pin", "Inspect"],
+      },
+    ],
+  },
+  mentor: {
+    subtitle: "Mentor and apprentice rollup for {player}",
+    footer: "Review training rows or track a mentor request.",
+    tabs: [
+      {
+        key: "mentor",
+        label: "Mentor",
+        rows: [
+          {
+            name: "Crystal_Sage",
+            meta: "Mentor",
+            note: "Guidance, tracks, and training notes stay visible.",
+            metrics: [
+              { label: "Rank", value: "S" },
+              { label: "Focus", value: "Balance" },
+              { label: "State", value: "Active" },
+            ],
+          },
+          {
+            name: "Field_Guide",
+            meta: "Mentor",
+            note: "Mentor contact state and availability.",
+            metrics: [
+              { label: "Rank", value: "A" },
+              { label: "Focus", value: "Route" },
+              { label: "State", value: "Active" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Current trainee",
+            note: "Your slot can still be clicked like a real mentor row.",
+            metrics: [
+              { label: "Rank", value: "B" },
+              { label: "Focus", value: "Route" },
+              { label: "State", value: "Active" },
+            ],
+          },
+        ],
+        actions: ["Track", "Teach", "Review"],
+      },
+      {
+        key: "apprentices",
+        label: "Apprentices",
+        rows: [
+          {
+            name: "Rising_Hero",
+            meta: "Level 24",
+            note: "Apprentice roster rows can be selected and compared.",
+            metrics: [
+              { label: "Progress", value: "63%" },
+              { label: "Focus", value: "Combat" },
+              { label: "State", value: "Training" },
+            ],
+          },
+          {
+            name: "Map_Walker",
+            meta: "Level 31",
+            note: "Route familiarity and map travel are represented here.",
+            metrics: [
+              { label: "Progress", value: "71%" },
+              { label: "Focus", value: "Travel" },
+              { label: "State", value: "Training" },
+            ],
+          },
+          {
+            name: "Crystal_Reader",
+            meta: "Level 19",
+            note: "Level progression row with clear state updates.",
+            metrics: [
+              { label: "Progress", value: "42%" },
+              { label: "Focus", value: "Info" },
+              { label: "State", value: "Training" },
+            ],
+          },
+        ],
+        actions: ["Track", "Assign", "Review"],
+      },
+      {
+        key: "requests",
+        label: "Requests",
+        rows: [
+          {
+            name: "Pending_Bond",
+            meta: "Awaiting response",
+            note: "Request rows mirror the kind of yes/no state Crystal uses.",
+            metrics: [
+              { label: "Age", value: "2h" },
+              { label: "Type", value: "Mentor" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+          {
+            name: "Manual_Review",
+            meta: "Awaiting response",
+            note: "Alternate request row for mentor queue status checks.",
+            metrics: [
+              { label: "Age", value: "5h" },
+              { label: "Type", value: "Train" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+          {
+            name: "Fallback_Pass",
+            meta: "Awaiting response",
+            note: "A pending request row for mentor actions.",
+            metrics: [
+              { label: "Age", value: "1d" },
+              { label: "Type", value: "Trace" },
+              { label: "State", value: "Pending" },
+            ],
+          },
+        ],
+        actions: ["Accept", "Track", "Review"],
+      },
+    ],
+  },
+  relationship: {
+    subtitle: "Relationship, ring, and affinity for {player}",
+    footer: "Review bond rows and inspect relationship status.",
+    tabs: [
+      {
+        key: "lover",
+        label: "Lover",
+        rows: [
+          {
+            name: "Promise_Ring",
+            meta: "Bonded",
+            note: "Love-state rows turn into a real clickable selection.",
+            metrics: [
+              { label: "Affinity", value: "87%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+          {
+            name: "Shared_Route",
+            meta: "Bonded",
+            note: "Shared relationship status and route history.",
+            metrics: [
+              { label: "Affinity", value: "81%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+          {
+            name: "{player}",
+            meta: "Bonded",
+            note: "The player row can still be selected like a normal entry.",
+            metrics: [
+              { label: "Affinity", value: "90%" },
+              { label: "Gift", value: "Ready" },
+              { label: "State", value: "Bonded" },
+            ],
+          },
+        ],
+        actions: ["Gift", "Bond", "Inspect"],
+      },
+      {
+        key: "affinity",
+        label: "Affinity",
+        rows: [
+          {
+            name: "Affinity_87",
+            meta: "Gauge",
+            note: "A progress-style row for the affinity tab.",
+            metrics: [
+              { label: "Level", value: "87" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+          {
+            name: "Gift_Cooldown",
+            meta: "Gauge",
+            note: "Gift cooldown meter with instant status updates.",
+            metrics: [
+              { label: "Level", value: "12" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+          {
+            name: "Ring_Bond",
+            meta: "Gauge",
+            note: "Another row to make the tab feel like a true management panel.",
+            metrics: [
+              { label: "Level", value: "44" },
+              { label: "Timer", value: "Ready" },
+              { label: "State", value: "Warm" },
+            ],
+          },
+        ],
+        actions: ["Trace", "Gift", "Inspect"],
+      },
+      {
+        key: "history",
+        label: "History",
+        rows: [
+          {
+            name: "First_Meeting",
+            meta: "Log",
+            note: "History rows give the panel enough weight to feel present.",
+            metrics: [
+              { label: "Date", value: "Day 1" },
+              { label: "Map", value: "Bichon" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+          {
+            name: "Last_Gift",
+            meta: "Log",
+            note: "Another static row makes selection changes easy to spot.",
+            metrics: [
+              { label: "Date", value: "Today" },
+              { label: "Map", value: "Market" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+          {
+            name: "Travel_Log",
+            meta: "Log",
+            note: "Good for screenshoting a different selected row state.",
+            metrics: [
+              { label: "Date", value: "This week" },
+              { label: "Map", value: "Arena" },
+              { label: "State", value: "Saved" },
+            ],
+          },
+        ],
+        actions: ["Record", "Bond", "Inspect"],
+      },
+    ],
+  },
+  group: {
+    subtitle: "Party roster and recruitment for {player}",
+    footer: "Invite, assist, or inspect the group state.",
+    tabs: [
+      {
+        key: "party",
+        label: "Party",
+        rows: [
+          {
+            name: "{player}",
+            meta: "Leader",
+            note: "The local player stays visible as a normal selected row.",
+            metrics: [
+              { label: "Role", value: "Leader" },
+              { label: "Range", value: "Near" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Field_Cleric",
+            meta: "Support",
+            note: "Support row with clear role visibility and status.",
+            metrics: [
+              { label: "Role", value: "Heal" },
+              { label: "Range", value: "Mid" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Frontline",
+            meta: "Tank",
+            note: "Front-line rows help the panel read like a real party list.",
+            metrics: [
+              { label: "Role", value: "Tank" },
+              { label: "Range", value: "Front" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+        ],
+        actions: ["Invite", "Assist", "Share"],
+      },
+      {
+        key: "recruit",
+        label: "Recruit",
+        rows: [
+          {
+            name: "Need_Tank",
+            meta: "Recruit",
+            note: "Recruit rows show available party slots.",
+            metrics: [
+              { label: "Role", value: "Tank" },
+              { label: "Slots", value: "1" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Need_DPS",
+            meta: "Recruit",
+            note: "Another row keeps click selection obvious.",
+            metrics: [
+              { label: "Role", value: "DPS" },
+              { label: "Slots", value: "2" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Need_Support",
+            meta: "Recruit",
+            note: "Recruiting state for the party list.",
+            metrics: [
+              { label: "Role", value: "Support" },
+              { label: "Slots", value: "1" },
+              { label: "State", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Invite", "Inspect", "Chat"],
+      },
+      {
+        key: "loot",
+        label: "Loot",
+        rows: [
+          {
+            name: "Shard_Split",
+            meta: "Share",
+            note: "Group loot is ready to share.",
+            metrics: [
+              { label: "Split", value: "Equal" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Gold_Share",
+            meta: "Share",
+            note: "A different row makes the click target unmistakable.",
+            metrics: [
+              { label: "Split", value: "Gold" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+          {
+            name: "Quest_Drop",
+            meta: "Share",
+            note: "Quest split row for quick loot visibility and handoff.",
+            metrics: [
+              { label: "Split", value: "Quest" },
+              { label: "Need", value: "Open" },
+              { label: "State", value: "Ready" },
+            ],
+          },
+        ],
+        actions: ["Share", "Inspect", "Chat"],
+      },
+    ],
+  },
+  guild: {
+    subtitle: "Guild hall and member queue for {player}",
+    footer: "Notice, roster, and member management are available.",
+    tabs: [
+      {
+        key: "overview",
+        label: "Overview",
+        rows: [
+          {
+            name: "Obelisk",
+            meta: "Guild hall",
+            note: "Main guild summary with a real selectable row.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Banner_Room",
+            meta: "Guild hall",
+            note: "A second overview row for clearer panel screenshots.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+          {
+            name: "Crystal_Notice",
+            meta: "Guild hall",
+            note: "Guild notice row for current hall updates.",
+            metrics: [
+              { label: "Members", value: "42" },
+              { label: "Rank", value: "A" },
+              { label: "State", value: "Open" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+      {
+        key: "members",
+        label: "Members",
+        rows: [
+          {
+            name: "Guild_Master",
+            meta: "Leader",
+            note: "Leader entries show current roster visibility and state.",
+            metrics: [
+              { label: "Role", value: "Leader" },
+              { label: "Duty", value: "Manage" },
+              { label: "State", value: "Online" },
+            ],
+          },
+          {
+            name: "Deputy",
+            meta: "Officer",
+            note: "Officer row for member management.",
+            metrics: [
+              { label: "Role", value: "Officer" },
+              { label: "Duty", value: "Manage" },
+              { label: "State", value: "Online" },
+            ],
+          },
+          {
+            name: "Recruit",
+            meta: "Member",
+            note: "Member row for roster review.",
+            metrics: [
+              { label: "Role", value: "Member" },
+              { label: "Duty", value: "Train" },
+              { label: "State", value: "Online" },
+            ],
+          },
+        ],
+        actions: ["Promote", "Inspect", "Chat"],
+      },
+      {
+        key: "notice",
+        label: "Notice",
+        rows: [
+          {
+            name: "Raid_Night",
+            meta: "Pinned",
+            note: "Guild notice row for current hall updates.",
+            metrics: [
+              { label: "Time", value: "20:00" },
+              { label: "Type", value: "Raid" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+          {
+            name: "Bank_Lock",
+            meta: "Pinned",
+            note: "Lock rows are static but still clickable and selectable.",
+            metrics: [
+              { label: "Time", value: "Now" },
+              { label: "Type", value: "Bank" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+          {
+            name: "Contribution",
+            meta: "Pinned",
+            note: "Useful for demonstrating row state and action updates.",
+            metrics: [
+              { label: "Time", value: "Today" },
+              { label: "Type", value: "Donate" },
+              { label: "State", value: "Pinned" },
+            ],
+          },
+        ],
+        actions: ["Notice", "Inspect", "Chat"],
+      },
+    ],
+  },
+};
+
+function resolveSystemMenuShellText(value: string, playerName: string | null) {
+  return value.replace(/\{player\}/g, playerName ?? "-");
+}
 
 const EMPTY_VIEWPORT_MAP_SPRITES: ViewportMapSprites = {
   floor: [],
@@ -2234,11 +3067,18 @@ function MailListRow({
   const message = (entry.body || entry.subject || "").replace(/\s+/g, " ");
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className="overlay-panel-row mail-row"
       style={{ top: 55 + index * 33 }}
       onDoubleClick={() => entry.id !== undefined && !entry.claimed && onClaim(entry.id)}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && entry.id !== undefined && !entry.claimed) {
+          event.preventDefault();
+          onClaim(entry.id);
+        }
+      }}
     >
       {selected ? <img className="mail-row-selected" src={ORIGINAL_UI.mail.icons.selected} alt="" draggable={false} /> : null}
       <span className="mail-row-icon-area">
@@ -2270,7 +3110,7 @@ function MailListRow({
           Delete
         </button>
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -2404,6 +3244,7 @@ function SystemMenuPanel({
   mapFileName,
   inSafeZone,
   transferOptions,
+  onOpenPanel,
   onClose,
   onLogout,
   onTransferMap,
@@ -2415,6 +3256,7 @@ function SystemMenuPanel({
   mapFileName: string | null;
   inSafeZone: boolean;
   transferOptions: SystemMenuTransferOption[];
+  onOpenPanel: (panel: SystemMenuSurfacePanel) => void;
   onClose: () => void;
   onLogout: () => void;
   onTransferMap: (transferKey: string) => void;
@@ -2423,21 +3265,28 @@ function SystemMenuPanel({
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
   const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
   const noop = () => undefined;
-  const menuButtons = [
+  const menuButtons: SystemMenuButtonDefinition[] = [
     { key: "exit", label: t("ui.exit"), onClick: onLogout },
     { key: "logout", label: t("ui.logout", [], "Log Out"), onClick: onLogout },
     { key: "help", label: t("ui.help", [], "Help"), onClick: noop },
     { key: "keyboard", label: t("ui.keyboard", [], "Keyboard"), onClick: noop },
-    { key: "ranking", label: t("ui.ranking", [], "Ranking"), onClick: noop },
-    { key: "creature", label: t("ui.creature", [], "Creature"), onClick: noop },
-    { key: "ride", label: t("ui.mount", [], "Mount"), onClick: noop },
-    { key: "fishing", label: t("ui.fishing", [], "Fishing"), onClick: noop },
-    { key: "friend", label: t("ui.friends", [], "Friends"), onClick: noop },
-    { key: "mentor", label: t("ui.mentor", [], "Mentor"), onClick: noop },
-    { key: "relationship", label: t("ui.relationship", [], "Relationship"), onClick: noop },
-    { key: "group", label: t("ui.group", [], "Group"), onClick: noop },
-    { key: "guild", label: t("ui.guild", [], "Guild"), onClick: noop },
-  ] as const;
+    { key: "ranking", label: t("ui.ranking", [], "Ranking"), panel: "ranking" as const },
+    { key: "creature", label: t("ui.creature", [], "Creature"), panel: "creature" as const },
+    { key: "ride", label: t("ui.mount", [], "Mount"), panel: "mount" as const },
+    { key: "fishing", label: t("ui.fishing", [], "Fishing"), panel: "fishing" as const },
+    { key: "friend", label: t("ui.friends", [], "Friends"), panel: "friend" as const },
+    { key: "mentor", label: t("ui.mentor", [], "Mentor"), panel: "mentor" as const },
+    { key: "relationship", label: t("ui.relationship", [], "Relationship"), panel: "relationship" as const },
+    { key: "group", label: t("ui.group", [], "Group"), panel: "group" as const },
+    { key: "guild", label: t("ui.guild", [], "Guild"), panel: "guild" as const },
+  ];
+  const lateSystemButtons: Array<{ panel: SystemMenuSocialPanel; label: string }> = [
+    { panel: "hero", label: t("ui.hero", [], "Hero") },
+    { panel: "trade", label: t("ui.trade", [], "Trade") },
+    { panel: "market", label: t("ui.market", [], "Market") },
+    { panel: "marriage", label: t("ui.marriage", [], "Marriage") },
+    { panel: "itemRental", label: t("ui.itemRental", [], "Item Rental") },
+  ];
 
   function submitQaTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -2456,22 +3305,27 @@ function SystemMenuPanel({
     <>
       <section className="system-menu-panel" aria-label={t("ui.menu")}>
         <img className="system-menu-frame" src={ORIGINAL_UI.menu.frame} alt="" draggable={false} />
-        {menuButtons.map((button) => {
-          const definition = ORIGINAL_UI.menu.buttons[button.key];
+        <section className="system-menu-actions" aria-label={t("ui.menu") + " actions"}>
+          {menuButtons.map((button) => {
+            const definition = ORIGINAL_UI.menu.buttons[button.key];
+            const panel = button.panel;
+            const handleClick = panel ? () => onOpenPanel(panel) : button.onClick ?? noop;
 
-          return (
-            <div
-              key={button.key}
-              className="system-menu-icon"
-              style={{ left: `${definition.x}px`, top: `${definition.y}px` }}
-            >
-              <SpriteButton sprite={definition.sprite} label={button.label} onClick={button.onClick} />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={button.key}
+                className="system-menu-icon"
+                data-system-menu-action={button.key}
+                style={{ left: `${definition.x}px`, top: `${definition.y}px` }}
+              >
+                <SpriteButton sprite={definition.sprite} label={button.label} onClick={handleClick} />
+              </div>
+            );
+          })}
+        </section>
         <button type="button" className="system-menu-close-hit" onClick={onClose} aria-label={t("ui.close")} />
       </section>
-      <section className="system-menu-qa-panel" aria-label="QA transfer">
+      <section className="system-menu-qa-panel" aria-label={t("ui.transfer", [], "Transfer controls")}>
         <div className="system-menu-meta">
           <span>{playerName ?? "-"}</span>
           <span>{mapTitle ?? t("ui.map")}{mapFileName ? ` [${mapFileName}]` : ""}</span>
@@ -2486,7 +3340,7 @@ function SystemMenuPanel({
           ))}
         </div>
         <form className="system-menu-qa-transfer" onSubmit={submitQaTransfer}>
-          <div className="system-menu-transfer-title">{t("ui.qaJump", [], "QA Jump")}</div>
+          <div className="system-menu-transfer-title">{t("ui.quickJump", [], "Quick Jump")}</div>
           <label>
             <span>{t("ui.map")}</span>
             <input
@@ -2518,7 +3372,893 @@ function SystemMenuPanel({
             <button type="submit">{t("ui.go", [], "Go")}</button>
           </div>
         </form>
+        <div className="system-menu-late-actions" aria-label="Late systems">
+          <div className="system-menu-transfer-title">{t("ui.lateSystems", [], "Systems")}</div>
+          {lateSystemButtons.map((button) => (
+            <button
+              key={button.panel}
+              type="button"
+              data-system-menu-action={button.panel}
+              onClick={() => onOpenPanel(button.panel)}
+            >
+              {button.label}
+            </button>
+          ))}
+        </div>
       </section>
+    </>
+  );
+}
+
+function SystemMenuFeaturePanel({
+  t,
+  feature,
+  playerName,
+  world,
+  onRunStage5Command,
+  onSendClientCommand,
+  onClose,
+}: {
+  t: TranslateFn;
+  feature: SystemMenuSurfacePanel;
+  playerName: string | null;
+  world: DisplayWorld;
+  onRunStage5Command: (action: string, args?: string[]) => void;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
+  onClose: () => void;
+}) {
+  const featureTitle =
+    feature === "creature"
+      ? t("ui.creature", [], "Creature")
+      : feature === "mount"
+        ? t("ui.mount", [], "Mount")
+        : feature === "fishing"
+          ? t("ui.fishing", [], "Fishing")
+          : feature === "ranking"
+            ? t("ui.ranking", [], "Ranking")
+            : feature === "friend"
+              ? t("ui.friends", [], "Friends")
+              : feature === "mentor"
+                ? t("ui.mentor", [], "Mentor")
+                : feature === "relationship"
+                  ? t("ui.relationship", [], "Relationship")
+                  : feature === "group"
+                    ? t("ui.group", [], "Group")
+                    : feature === "guild"
+                      ? t("ui.guild", [], "Guild")
+                      : feature === "trade"
+                        ? t("ui.trade", [], "Trade")
+                        : feature === "market"
+                          ? t("ui.market", [], "Market")
+                          : t("ui.marriage", [], "Marriage");
+  const isSocialPanel = feature !== "creature" && feature !== "mount" && feature !== "fishing";
+
+  return (
+    <section
+      className={`system-feature-panel system-feature-panel-${feature} ${isSocialPanel ? "system-feature-panel-social" : ""}`}
+      aria-label={featureTitle}
+      data-system-feature-panel={feature}
+    >
+      <button type="button" className="system-feature-close" onClick={onClose} aria-label={t("ui.close")} />
+      {feature === "creature" ? (
+        <CreatureSystemPanel t={t} world={world} onSendClientCommand={onSendClientCommand} />
+      ) : feature === "mount" ? (
+        <MountSystemPanel t={t} world={world} onSendClientCommand={onSendClientCommand} />
+      ) : feature === "fishing" ? (
+        <FishingSystemPanel t={t} onSendClientCommand={onSendClientCommand} />
+      ) : (
+        <SocialSystemPanel
+          t={t}
+          panel={feature}
+          playerName={playerName}
+          world={world}
+          onRunStage5Command={onRunStage5Command}
+          onSendClientCommand={onSendClientCommand}
+        />
+      )}
+    </section>
+  );
+}
+
+function SocialSystemPanel({
+  t,
+  panel,
+  playerName,
+  world,
+  onRunStage5Command,
+  onSendClientCommand,
+}: {
+  t: TranslateFn;
+  panel: SystemMenuSocialPanel;
+  playerName: string | null;
+  world: DisplayWorld;
+  onRunStage5Command: (action: string, args?: string[]) => void;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
+}) {
+  const definition = systemMenuSocialPanelDefinition(panel, playerName, world);
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [selectedRowIndex, setSelectedRowIndex] = useState(0);
+  const [statusLine, setStatusLine] = useState(() => definition.footer);
+
+  const activeTab = definition.tabs[activeTabIndex] ?? definition.tabs[0];
+  const selectedRow = activeTab.rows[selectedRowIndex] ?? activeTab.rows[0];
+
+  useEffect(() => {
+    setActiveTabIndex(0);
+    setSelectedRowIndex(0);
+    setStatusLine(definition.footer);
+  }, [definition.footer, panel]);
+
+  if (!activeTab || !selectedRow) {
+    return null;
+  }
+
+  const resolvedSubtitle = resolveSystemMenuShellText(definition.subtitle, playerName);
+  const resolvedTabLabel = resolveSystemMenuShellText(activeTab.label, playerName);
+  const resolvedSelectedRowName = resolveSystemMenuShellText(selectedRow.name, playerName);
+  const resolvedSelectedRowMeta = resolveSystemMenuShellText(selectedRow.meta, playerName);
+  const resolvedSelectedRowNote = resolveSystemMenuShellText(selectedRow.note, playerName);
+
+  return (
+    <div
+      className="system-social-panel"
+      data-system-social-panel={panel}
+      data-system-social-tab={activeTab.key}
+      data-system-social-selected-row={resolvedSelectedRowName}
+      data-system-social-status={statusLine}
+    >
+      <div className="system-social-subtitle">{resolvedSubtitle}</div>
+      <div className="system-social-tabs" role="tablist" aria-label={featureTitleForSocialPanel(t, panel)}>
+        {definition.tabs.map((tab, index) => {
+          const resolvedLabel = resolveSystemMenuShellText(tab.label, playerName);
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              className={index === activeTabIndex ? "active" : ""}
+              data-social-tab-key={tab.key}
+              role="tab"
+              aria-selected={index === activeTabIndex}
+              onClick={() => {
+                setActiveTabIndex(index);
+                setSelectedRowIndex(0);
+                setStatusLine(`${resolvedLabel} opened`);
+              }}
+            >
+              {resolvedLabel}
+            </button>
+          );
+        })}
+      </div>
+      <div className="system-social-body">
+        <div className="system-social-list" aria-label={`${resolvedTabLabel} rows`}>
+          {activeTab.rows.map((row, index) => {
+            const resolvedRowName = resolveSystemMenuShellText(row.name, playerName);
+            const resolvedRowMeta = resolveSystemMenuShellText(row.meta, playerName);
+            return (
+              <button
+                key={`${panel}-${activeTab.key}-${row.name}`}
+                type="button"
+                className={`system-social-entry ${index === selectedRowIndex ? "selected" : ""}`}
+                data-social-entry-name={resolvedRowName}
+                aria-pressed={index === selectedRowIndex}
+                onClick={() => {
+                  setSelectedRowIndex(index);
+                  setStatusLine(`${resolvedRowName} selected`);
+                }}
+              >
+                <strong>{resolvedRowName}</strong>
+                <span>{resolvedRowMeta}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="system-social-detail">
+          <div className="system-social-detail-name">{resolvedSelectedRowName}</div>
+          <div className="system-social-detail-meta">{resolvedSelectedRowMeta}</div>
+          <div className="system-social-detail-note">{resolvedSelectedRowNote}</div>
+          <div className="system-social-detail-metrics">
+            {selectedRow.metrics.map((metric) => (
+              <div key={`${panel}-${activeTab.key}-${selectedRow.name}-${metric.label}`} className="system-social-metric">
+                <span className="label">{metric.label}</span>
+                <span className="value">{resolveSystemMenuShellText(metric.value, playerName)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="system-social-actions">
+        {activeTab.actions.map((action) => {
+          const resolvedAction = resolveSystemMenuShellText(action, playerName);
+          return (
+            <button
+              key={`${panel}-${activeTab.key}-${action}`}
+              type="button"
+              data-social-action-label={resolvedAction}
+              onClick={() => {
+                const clientCommand = clientCommandForSocialAction(panel, activeTab.key, resolvedAction, resolvedSelectedRowName);
+                if (clientCommand) {
+                  onSendClientCommand(clientCommand);
+                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
+                  return;
+                }
+                const command = stage5CommandForSocialAction(panel, activeTab.key, resolvedAction, resolvedSelectedRowName);
+                if (command) {
+                  onRunStage5Command(command.action, command.args);
+                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
+                } else {
+                  setStatusLine(`${resolvedAction} -> ${resolvedSelectedRowName}`);
+                }
+              }}
+            >
+              {resolvedAction}
+            </button>
+          );
+        })}
+      </div>
+      <div className="system-social-footer">
+        <span>{definition.footer}</span>
+        <span>{statusLine}</span>
+      </div>
+      <div className="system-social-shell-tick" aria-hidden="true">
+        {`${resolvedSelectedRowName} • ${resolvedSelectedRowMeta}`}
+      </div>
+    </div>
+  );
+}
+
+function featureTitleForSocialPanel(t: TranslateFn, panel: SystemMenuSocialPanel) {
+  switch (panel) {
+    case "ranking":
+      return t("ui.ranking", [], "Ranking");
+    case "friend":
+      return t("ui.friends", [], "Friends");
+    case "mentor":
+      return t("ui.mentor", [], "Mentor");
+    case "relationship":
+      return t("ui.relationship", [], "Relationship");
+    case "group":
+      return t("ui.group", [], "Group");
+    case "guild":
+      return t("ui.guild", [], "Guild");
+    case "trade":
+      return t("ui.trade", [], "Trade");
+    case "market":
+      return t("ui.market", [], "Market");
+    case "marriage":
+      return t("ui.marriage", [], "Marriage");
+    case "hero":
+      return t("ui.hero", [], "Hero");
+    case "itemRental":
+      return t("ui.itemRental", [], "Item Rental");
+  }
+}
+
+function systemMenuSocialPanelDefinition(
+  panel: SystemMenuSocialPanel,
+  playerName: string | null,
+  world: DisplayWorld,
+): SystemMenuSocialPanelDefinition {
+  const systems = world.stage5Systems ?? {};
+  const player = playerName ?? "{player}";
+  const selfEntity = world.entities.find((entity) => entity.kind === "selfPlayer");
+  const emptyRow = (name: string, meta = "Empty") =>
+    systemMenuRow(name, meta, "No live data is currently available for this slot.", [
+      { label: "State", value: "None" },
+      { label: "Player", value: player },
+      { label: "Map", value: world.mapTitle ?? "-" },
+    ]);
+
+  switch (panel) {
+    case "ranking":
+      return {
+        subtitle: "Current leaderboard context for {player}",
+        footer: "Rows are derived from the current session instead of fixed sample names.",
+        tabs: [
+          {
+            key: "overall",
+            label: "Overall",
+            rows: [
+              systemMenuRow(player, "Current character", "Live character state from the active world snapshot.", [
+                { label: "Level", value: String(selfEntity?.level ?? 1) },
+                { label: "Gold", value: String(world.gold) },
+                { label: "Map", value: world.mapTitle ?? "-" },
+              ]),
+              systemMenuRow("Visible monsters", "Current map", "Local combat density around the player.", [
+                { label: "Count", value: String(world.entities.filter((entity) => entity.kind === "monster").length) },
+                { label: "Safe", value: world.inSafeZone ? "Yes" : "No" },
+                { label: "Buffs", value: String(world.activeBuffs.length) },
+              ]),
+            ],
+            actions: ["Inspect", "Refresh"],
+          },
+        ],
+      };
+    case "friend": {
+      const friends = systems.social?.friends ?? [];
+      const blocked = systems.social?.blocked ?? [];
+      return {
+        subtitle: "Friends, block list, and memos for {player}",
+        footer: "Friend list is loaded from the active runtime snapshot.",
+        tabs: [
+          {
+            key: "friends",
+            label: "Friends",
+            rows: friends.length
+              ? friends.map((name) =>
+                  systemMenuRow(name, "Friend", "Friend entry synced from runtime social state.", socialMetrics("Online", "Friend")),
+                )
+              : [emptyRow("No friends")],
+            actions: ["Add", "Memo", "Refresh"],
+          },
+          {
+            key: "blocks",
+            label: "Block List",
+            rows: blocked.length
+              ? blocked.map((name) =>
+                  systemMenuRow(name, "Blocked", "Blocked entry synced from runtime social state.", socialMetrics("Muted", "Blocked")),
+                )
+              : [emptyRow("No blocked entries")],
+            actions: ["Block", "Unblock", "Refresh"],
+          },
+        ],
+      };
+    }
+    case "group": {
+      const members = systems.group?.members ?? [];
+      return {
+        subtitle: "Group state for {player}",
+        footer: `Loot mode: ${systems.group?.lootMode ?? "none"}`,
+        tabs: [
+          {
+            key: "party",
+            label: "Party",
+            rows: members.length
+              ? members.map((name) =>
+                  systemMenuRow(name, "Member", "Active group member from the current session.", [
+                    { label: "Loot", value: systems.group?.lootMode ?? "-" },
+                    { label: "Count", value: String(members.length) },
+                    { label: "Map", value: world.mapTitle ?? "-" },
+                  ]),
+                )
+              : [emptyRow("No party")],
+            actions: ["Create", "Loot", "Refresh"],
+          },
+        ],
+      };
+    }
+    case "guild": {
+      const members = systems.guild?.members ?? [];
+      const chatLog = systems.guild?.chatLog ?? [];
+      return {
+        subtitle: `${systems.guild?.name ?? "No guild"} roster for {player}`,
+        footer: `Rank: ${systems.guild?.rank ?? "-"}`,
+        tabs: [
+          {
+            key: "members",
+            label: "Members",
+            rows: members.length
+              ? members.map((name) =>
+                  systemMenuRow(name, systems.guild?.rank ?? "Member", "Guild roster entry from live session data.", [
+                    { label: "Guild", value: systems.guild?.name ?? "-" },
+                    { label: "Rank", value: systems.guild?.rank ?? "-" },
+                    { label: "Perms", value: String(systems.guild?.permissions?.length ?? 0) },
+                  ]),
+                )
+              : [emptyRow("No guild members")],
+            actions: ["Create", "Notice", "Chat"],
+          },
+          {
+            key: "notice",
+            label: "Notice",
+            rows: chatLog.length
+              ? chatLog.slice(-3).map((line) => systemMenuRow(line, "Guild chat", "Latest guild chat line from live traffic.", socialMetrics("Log", "Chat")))
+              : [emptyRow("No guild notice")],
+            actions: ["Chat", "Refresh"],
+          },
+        ],
+      };
+    }
+    case "trade": {
+      const trade = systems.trade ?? null;
+      const partner = stringRecordValue(trade, ["partner", "partnerName", "name"]) ?? "No active trade";
+      return {
+        subtitle: "Trade exchange state for {player}",
+        footer: trade ? "Trade session is open." : "No active trade session.",
+        tabs: [
+          {
+            key: "session",
+            label: "Session",
+            rows: [
+              systemMenuRow(partner, trade ? "Active" : "Idle", "Trade session state for this character.", [
+                { label: "Gold", value: stringRecordValue(trade, ["gold", "offeredGold"]) ?? "0" },
+                { label: "Accepted", value: stringRecordValue(trade, ["accepted", "confirmed"]) ?? "false" },
+                { label: "Partner", value: partner },
+              ]),
+            ],
+            actions: ["Start", "Offer 1g", "Accept", "Cancel"],
+          },
+        ],
+      };
+    }
+    case "hero": {
+      const hero = systems.hero ?? null;
+      const heroName = stringRecordValue(hero, ["name"]) ?? "Aide";
+      const heroClass = stringRecordValue(hero, ["class"]) ?? "warrior";
+      const heroGender = stringRecordValue(hero, ["gender"]) ?? "female";
+      const behaviour = stringRecordValue(hero, ["behaviour"]) ?? "0";
+      const spawned = stringRecordValue(hero, ["spawned"]) ?? "false";
+      return {
+        subtitle: "Hero management for {player}",
+        footer: hero ? "Hero state is loaded from the current runtime snapshot." : "No active hero is attached.",
+        tabs: [
+          {
+            key: "status",
+            label: "Status",
+            rows: [
+              systemMenuRow(heroName, hero ? "Active hero" : "Create hero", "Current hero slot and behaviour state.", [
+                { label: "Class", value: heroClass },
+                { label: "Gender", value: heroGender },
+                { label: "Behaviour", value: behaviour },
+              ]),
+              systemMenuRow("Spawn", spawned === "true" ? "Spawned" : "Idle", "Hero spawn state reported by runtime.", [
+                { label: "Level", value: stringRecordValue(hero, ["level"]) ?? "1" },
+                { label: "Experience", value: stringRecordValue(hero, ["experience"]) ?? "0" },
+                { label: "Player", value: player },
+              ]),
+            ],
+            actions: ["Create", "Behaviour Guard", "Change"],
+          },
+        ],
+      };
+    }
+    case "market": {
+      const auctions = systems.auction ?? [];
+      return {
+        subtitle: "Market listings for {player}",
+        footer: `${auctions.length} active listing${auctions.length === 1 ? "" : "s"}`,
+        tabs: [
+          {
+            key: "listings",
+            label: "Listings",
+            rows: auctions.length
+              ? auctions.map((listing, index) =>
+                  systemMenuRow(
+                    stringRecordValue(listing, ["item", "itemName", "name"]) ?? `Listing ${index + 1}`,
+                    stringRecordValue(listing, ["seller", "owner"]) ?? "Market",
+                    "Active market listing from live session data.",
+                    [
+                      { label: "Id", value: stringRecordValue(listing, ["id", "listingId"]) ?? String(index + 1) },
+                      { label: "Price", value: stringRecordValue(listing, ["price", "gold"]) ?? "0" },
+                      { label: "State", value: stringRecordValue(listing, ["state", "status"]) ?? "Open" },
+                    ],
+                  ),
+                )
+              : [emptyRow("No market listings")],
+            actions: ["List", "Buy", "Cancel"],
+          },
+        ],
+      };
+    }
+    case "itemRental": {
+      const rental = systems.itemRental ?? {};
+      const partner = stringRecordValue(rental, ["partnerName", "partner"]) ?? "Crystal Partner";
+      const fee = stringRecordValue(rental, ["fee"]) ?? "100";
+      const days = stringRecordValue(rental, ["days"]) ?? "7";
+      const goldLocked = stringRecordValue(rental, ["goldLocked"]) ?? "false";
+      const itemLocked = stringRecordValue(rental, ["itemLocked"]) ?? "false";
+      return {
+        subtitle: "Item rental session for {player}",
+        footer: `Partner: ${partner}`,
+        tabs: [
+          {
+            key: "session",
+            label: "Session",
+            rows: [
+              systemMenuRow(partner, "Rental partner", "Current rental handshake and lock state.", [
+                { label: "Fee", value: fee },
+                { label: "Days", value: days },
+                { label: "Gold lock", value: goldLocked },
+              ]),
+              systemMenuRow("Loan item", itemLocked === "true" ? "Locked" : "Open", "Loan item slot state.", [
+                { label: "Item lock", value: itemLocked },
+                { label: "Records", value: stringRecordValue(rental, ["recordCount"]) ?? "0" },
+                { label: "Player", value: player },
+              ]),
+            ],
+            actions: ["Request", "Fee 100", "Period 7", "Cancel", "List"],
+          },
+        ],
+      };
+    }
+    case "marriage":
+    case "relationship": {
+      const relationship = systems.relationship ?? {};
+      const partnerName = stringRecordValue(relationship, ["partnerName"]) ?? "";
+      const allowMarriage = boolRecordValue(relationship, ["allowMarriage"], true);
+      const requestFrom = stringRecordValue(relationship, ["pendingRequestFrom", "pendingDivorceFrom"]) ?? "None";
+      return {
+        subtitle: `${panel === "marriage" ? "Marriage" : "Relationship"} state for {player}`,
+        footer: allowMarriage ? "Marriage requests are allowed." : "Marriage requests are blocked.",
+        tabs: [
+          {
+            key: "status",
+            label: "Status",
+            rows: [
+              systemMenuRow(partnerName || player, partnerName ? "Married" : "Single", "Current relationship state.", [
+                { label: "Partner", value: partnerName || "-" },
+                { label: "Ring", value: "-" },
+                { label: "Request", value: requestFrom },
+              ]),
+            ],
+            actions: ["Allow", "Request", "Divorce", "Refresh"],
+          },
+        ],
+      };
+    }
+    case "mentor": {
+      const mentor = systems.mentor ?? {};
+      const mentorName = stringRecordValue(mentor, ["name"]) ?? "";
+      const allowMentor = boolRecordValue(mentor, ["allowMentor"], true);
+      const pending = stringRecordValue(mentor, ["pendingRequestFrom"]) ?? "";
+      return {
+        subtitle: "Mentor state for {player}",
+        footer: allowMentor ? "Mentor requests are allowed." : "Mentor requests are blocked.",
+        tabs: [
+          {
+            key: "requests",
+            label: "Requests",
+            rows: [
+              systemMenuRow(mentorName || pending || "No mentor request", mentorName ? "Mentor" : "Open", "Current mentor state.", [
+                { label: "Level", value: stringRecordValue(mentor, ["level"]) ?? "0" },
+                { label: "Online", value: stringRecordValue(mentor, ["online"]) ?? "false" },
+                { label: "Mentee EXP", value: stringRecordValue(mentor, ["menteeExp"]) ?? "0" },
+              ]),
+            ],
+            actions: ["Allow", "Add", "Cancel", "Refresh"],
+          },
+        ],
+      };
+    }
+  }
+
+  return SYSTEM_MENU_SOCIAL_PANEL_DEFINITIONS[panel] ?? {
+    subtitle: "System state for {player}",
+    footer: "No state available.",
+    tabs: [{ key: "state", label: "State", rows: [emptyRow("No rows")], actions: ["Refresh"] }],
+  };
+}
+
+function systemMenuRow(
+  name: string,
+  meta: string,
+  note: string,
+  metrics: SystemMenuSocialPanelMetric[],
+): SystemMenuSocialPanelRow {
+  return { name, meta, note, metrics };
+}
+
+function socialMetrics(state: string, note: string): SystemMenuSocialPanelMetric[] {
+  return [
+    { label: "State", value: state },
+    { label: "Note", value: note },
+    { label: "Source", value: "Live" },
+  ];
+}
+
+function stringRecordValue(record: Record<string, unknown> | null | undefined, keys: string[]) {
+  if (!record) return null;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      return String(value);
+    }
+  }
+  return null;
+}
+
+function numberRecordValue(record: Record<string, unknown> | null | undefined, keys: string[], fallback = 0) {
+  const value = stringRecordValue(record, keys);
+  if (value === null) return fallback;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function boolRecordValue(record: Record<string, unknown> | null | undefined, keys: string[], fallback = false) {
+  if (!record) return fallback;
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "boolean") return value;
+  }
+  return fallback;
+}
+
+function recordObjectValue(record: Record<string, unknown> | null | undefined, key: string) {
+  const value = record?.[key];
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function clientCommandForSocialAction(
+  panel: SystemMenuSocialPanel,
+  tab: string,
+  action: string,
+  rowName: string,
+): Record<string, unknown> | null {
+  const normalized = action.toLowerCase();
+  if (panel === "friend" && normalized === "refresh") {
+    return { type: "refreshFriends" };
+  }
+  if (panel === "friend" && normalized === "add" && rowName !== "No friends") {
+    return { type: "addFriend", name: rowName, blocked: false };
+  }
+  if (panel === "friend" && normalized === "block" && rowName !== "No blocked entries") {
+    return { type: "addFriend", name: rowName, blocked: true };
+  }
+  if (panel === "trade" && normalized === "start") {
+    return { type: "tradeRequest" };
+  }
+  if (panel === "trade" && normalized === "offer 1g") {
+    return { type: "tradeGold", amount: 1 };
+  }
+  if (panel === "trade" && normalized === "accept") {
+    return { type: "tradeConfirm", locked: true };
+  }
+  if (panel === "trade" && normalized === "cancel") {
+    return { type: "tradeCancel" };
+  }
+  if (panel === "hero" && normalized === "create") {
+    return { type: "newHero", name: "Aide", gender: "female", class: "taoist" };
+  }
+  if (panel === "hero" && normalized === "behaviour guard") {
+    return { type: "setHeroBehaviour", behaviour: 2 };
+  }
+  if (panel === "hero" && normalized === "change") {
+    return { type: "changeHero", listIndex: 0 };
+  }
+  if (panel === "itemRental" && normalized === "request") {
+    return { type: "itemRentalRequest" };
+  }
+  if (panel === "itemRental" && normalized === "fee 100") {
+    return { type: "itemRentalFee", amount: 100 };
+  }
+  if (panel === "itemRental" && normalized === "period 7") {
+    return { type: "itemRentalPeriod", days: 7 };
+  }
+  if (panel === "itemRental" && normalized === "cancel") {
+    return { type: "cancelItemRental" };
+  }
+  if (panel === "itemRental" && normalized === "list") {
+    return { type: "getRentedItems" };
+  }
+  if (panel === "mentor" && normalized === "allow") {
+    return { type: "allowMentor" };
+  }
+  if (panel === "mentor" && normalized === "add") {
+    return { type: "addMentor", name: rowName === "No mentor request" ? "Master" : rowName };
+  }
+  if (panel === "mentor" && normalized === "cancel") {
+    return { type: "cancelMentor" };
+  }
+  if ((panel === "relationship" || panel === "marriage") && normalized === "allow") {
+    return { type: "changeMarriage" };
+  }
+  if ((panel === "relationship" || panel === "marriage") && normalized === "request") {
+    return { type: "marriageRequest" };
+  }
+  if ((panel === "relationship" || panel === "marriage") && normalized === "divorce") {
+    return { type: "divorceRequest" };
+  }
+  if (panel === "market" && normalized === "refresh") {
+    return { type: "marketRefresh" };
+  }
+  void tab;
+  return null;
+}
+
+function stage5CommandForSocialAction(
+  panel: SystemMenuSocialPanel,
+  tab: string,
+  action: string,
+  rowName: string,
+): { action: string; args: string[] } | null {
+  const normalized = action.toLowerCase();
+  if (panel === "friend" && normalized === "add" && rowName !== "No friends") {
+    return { action: "social.friend", args: [rowName] };
+  }
+  if (panel === "friend" && normalized === "block" && rowName !== "No blocked entries") {
+    return { action: "social.block", args: [rowName] };
+  }
+  if (panel === "group" && normalized === "create") {
+    return { action: "group.create", args: ["Panel"] };
+  }
+  if (panel === "group" && normalized === "loot") {
+    return { action: "group.loot", args: ["roundRobin"] };
+  }
+  if (panel === "guild" && normalized === "create") {
+    return { action: "guild.create", args: ["PanelGuild"] };
+  }
+  if (panel === "guild" && normalized === "chat") {
+    return { action: "guild.chat", args: ["Guild", "panel"] };
+  }
+  if (panel === "trade" && normalized === "start") {
+    return { action: "trade.start", args: ["Trader"] };
+  }
+  if (panel === "trade" && normalized === "offer 1g") {
+    return { action: "trade.offerGold", args: ["1"] };
+  }
+  if (panel === "trade" && normalized === "accept") {
+    return { action: "trade.accept", args: [] };
+  }
+  if (panel === "trade" && normalized === "cancel") {
+    return { action: "trade.cancel", args: [] };
+  }
+  if (panel === "market" && normalized === "list") {
+    return { action: "auction.list", args: ["panel-listing", "35"] };
+  }
+  if (panel === "market" && normalized === "buy") {
+    return { action: "auction.buy", args: ["1"] };
+  }
+  if (panel === "market" && normalized === "cancel") {
+    return { action: "auction.cancel", args: ["1"] };
+  }
+  void tab;
+  return null;
+}
+
+function defaultIntelligentCreaturePayload(source: Record<string, unknown> | null, summoned: boolean) {
+  const rules = recordObjectValue(source, "creatureRules") ?? {};
+  const filter = recordObjectValue(source, "filter") ?? {};
+  return {
+    petType: numberRecordValue(source, ["petType"], 1),
+    icon: numberRecordValue(source, ["icon"], 44),
+    customName: stringRecordValue(source, ["customName", "name"]) ?? "Buddy",
+    fullness: numberRecordValue(source, ["fullness"], 50),
+    slotIndex: numberRecordValue(source, ["slotIndex"], 0),
+    expireBinaryDatetime: numberRecordValue(source, ["expireBinaryDatetime"], 638000000000000000),
+    blackstoneTime: numberRecordValue(source, ["blackstoneTime"], 12000),
+    petMode: summoned ? 1 : 0,
+    creatureRules: {
+      minimalFullness: numberRecordValue(rules, ["minimalFullness"], 1),
+      mousePickupEnabled: boolRecordValue(rules, ["mousePickupEnabled"], true),
+      mousePickupRange: numberRecordValue(rules, ["mousePickupRange"], 6),
+      autoPickupEnabled: boolRecordValue(rules, ["autoPickupEnabled"], false),
+      autoPickupRange: numberRecordValue(rules, ["autoPickupRange"], 0),
+      semiAutoPickupEnabled: boolRecordValue(rules, ["semiAutoPickupEnabled"], true),
+      semiAutoPickupRange: numberRecordValue(rules, ["semiAutoPickupRange"], 4),
+      canProduceBlackstone: boolRecordValue(rules, ["canProduceBlackstone"], true),
+    },
+    filter: {
+      petPickupAll: boolRecordValue(filter, ["petPickupAll"], false),
+      petPickupGold: boolRecordValue(filter, ["petPickupGold"], true),
+      petPickupWeapons: boolRecordValue(filter, ["petPickupWeapons"], false),
+      petPickupArmours: boolRecordValue(filter, ["petPickupArmours"], false),
+      petPickupHelmets: boolRecordValue(filter, ["petPickupHelmets"], false),
+      petPickupBoots: boolRecordValue(filter, ["petPickupBoots"], false),
+      petPickupBelts: boolRecordValue(filter, ["petPickupBelts"], false),
+      petPickupAccessories: boolRecordValue(filter, ["petPickupAccessories"], false),
+      petPickupOthers: boolRecordValue(filter, ["petPickupOthers"], true),
+    },
+    pickupGrade: numberRecordValue(source, ["pickupGrade"], 2),
+    maintainFoodTime: numberRecordValue(source, ["maintainFoodTime"], 24000),
+  };
+}
+
+function CreatureSystemPanel({
+  t,
+  world,
+  onSendClientCommand,
+}: {
+  t: TranslateFn;
+  world: DisplayWorld;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
+}) {
+  const creature = world.stage5Systems?.intelligentCreatures?.[0] ?? null;
+  const fullness = clampNumber(numberRecordValue(creature, ["fullness"], 0), 0, 100);
+  const blackstone = clampNumber(Math.round(numberRecordValue(creature, ["blackstoneTime"], 0) / 240), 0, 100);
+  const creatureName = stringRecordValue(creature, ["customName", "name"]) ?? "-";
+  const updateCreature = (summoned: boolean, releaseMe = false) => {
+    onSendClientCommand({
+      type: "updateIntelligentCreature",
+      creature: defaultIntelligentCreaturePayload(creature, summoned),
+      summonMe: summoned && !releaseMe,
+      unsummonMe: !summoned && !releaseMe,
+      releaseMe,
+    });
+  };
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.creature", [], "Creature")}</div>
+      <div className="creature-feature-name">{creatureName}</div>
+      <div className="creature-feature-gauge creature-feature-fullness">
+        <span className="creature-feature-fill" style={{ width: `${fullness}%` }} />
+      </div>
+      <div className="creature-feature-gauge creature-feature-minimum">
+        <span className="creature-feature-marker" style={{ left: "10%" }} />
+      </div>
+      <div className="creature-feature-blackstone">
+        <span className="creature-feature-fill" style={{ width: `${blackstone}%` }} />
+      </div>
+      <div className="creature-feature-actions">
+        <button type="button" onClick={() => updateCreature(true)}>{t("ui.summon", [], "Summon")}</button>
+        <button type="button" onClick={() => updateCreature(false)}>{t("ui.dismiss", [], "Dismiss")}</button>
+        <button type="button" onClick={() => updateCreature(false, true)}>{t("ui.release", [], "Release")}</button>
+      </div>
+      <div className="creature-feature-slots">
+        {Array.from({ length: 10 }, (_, index) => (
+          <span key={`creature-slot-${index}`} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function MountSystemPanel({
+  t,
+  world,
+  onSendClientCommand,
+}: {
+  t: TranslateFn;
+  world: DisplayWorld;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
+}) {
+  const slots = ["Reins", "Bells", "Saddle", "Ribbon", "Mask"];
+  const mountItem = world.equipmentItems.find((item) => item.slot === "mount");
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.mount", [], "Mount")}</div>
+      <div className="mount-feature-name">{mountItem?.name ?? "-"}</div>
+      <div className="mount-feature-loyalty">
+        {mountItem ? `${mountItem.durabilityCurrent} / ${mountItem.durabilityMax}` : "0 / 0"}
+      </div>
+      <div className="mount-feature-preview" />
+      <button
+        type="button"
+        className="mount-feature-ride"
+        onClick={() => onSendClientCommand({ type: "useItem", slot: 13, grid: "equipment" })}
+      >
+        {t("ui.mount", [], "Mount")}
+      </button>
+      <div className="mount-feature-slots">
+        {slots.map((slot) => (
+          <span key={slot} aria-label={slot} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function FishingSystemPanel({
+  t,
+  onSendClientCommand,
+}: {
+  t: TranslateFn;
+  onSendClientCommand: (command: Record<string, unknown>) => void;
+}) {
+  const slots = ["Hook", "Float", "Bait", "Finder", "Reel"];
+  return (
+    <>
+      <div className="system-feature-title">{t("ui.fishing", [], "Fishing")}</div>
+      <div className="fishing-feature-water" />
+      <div className="fishing-feature-slots">
+        {slots.map((slot) => (
+          <span key={slot} aria-label={slot} />
+        ))}
+      </div>
+      <div className="fishing-feature-status">
+        <button type="button" onClick={() => onSendClientCommand({ type: "fishingCast", castOut: true })}>
+          {t("ui.cast", [], "Cast")}
+        </button>
+        <button type="button" onClick={() => onSendClientCommand({ type: "fishingChangeAutocast", autoCast: true })}>
+          {t("ui.auto", [], "Auto")}
+        </button>
+        <label>
+          <input
+            type="checkbox"
+            readOnly
+            onClick={() => onSendClientCommand({ type: "fishingChangeAutocast", autoCast: true })}
+          />
+        </label>
+      </div>
     </>
   );
 }
@@ -2554,6 +4294,7 @@ function GameShopWindow({
   const [page, setPage] = useState(0);
   const [paymentType, setPaymentType] = useState<GameShopPaymentType>("gold");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [preview, setPreview] = useState<{ item: CrystalGameShopEntry; cellLeft: number } | null>(null);
 
   const sectionItems = useMemo(
     () => applyGameShopSectionFilter(CRYSTAL_GAME_SHOP_ITEMS, sectionFilter),
@@ -2617,6 +4358,10 @@ function GameShopWindow({
       ...current,
       [gameShopIndex]: Math.max(1, Math.min(99, nextQuantity)),
     }));
+  };
+
+  const showPreview = (item: CrystalGameShopEntry, cellLeft: number) => {
+    setPreview({ item, cellLeft });
   };
 
   return (
@@ -2688,10 +4433,20 @@ function GameShopWindow({
             quantity={quantities[item.game_shop_index] ?? 1}
             onQuantityChange={(nextQuantity) => setQuantity(item.game_shop_index, nextQuantity)}
             onBuy={() => onBuy(item.game_shop_index, quantities[item.game_shop_index] ?? 1, paymentType)}
+            onPreview={(cellLeft) => showPreview(item, cellLeft)}
             t={t}
           />
         ))}
       </div>
+      {preview ? (
+        <GameShopViewer
+          item={preview.item}
+          left={preview.cellLeft < 350 ? 416 : 151}
+          top={115}
+          t={t}
+          onClose={() => setPreview(null)}
+        />
+      ) : null}
       <div className="game-shop-total credits">{credits}</div>
       <div className="game-shop-total gold">{gold}</div>
       <button type="button" className="game-shop-payment gold" onClick={() => setPaymentType("gold")}>
@@ -2719,6 +4474,7 @@ function GameShopCell({
   quantity,
   onQuantityChange,
   onBuy,
+  onPreview,
   t,
 }: {
   item: CrystalGameShopEntry;
@@ -2726,6 +4482,7 @@ function GameShopCell({
   quantity: number;
   onQuantityChange: (quantity: number) => void;
   onBuy: () => void;
+  onPreview: (cellLeft: number) => void;
   t: TranslateFn;
 }) {
   const info = gameShopItemInfo(item.item_index);
@@ -2760,11 +4517,74 @@ function GameShopCell({
       <div className="game-shop-cell-gold-price">{item.gold_price * quantity}</div>
       {hasPreview ? (
         <div className="game-shop-cell-preview">
-          <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => undefined} />
+          <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => onPreview(left)} />
         </div>
       ) : null}
       <div className={hasPreview ? "game-shop-cell-buy with-preview" : "game-shop-cell-buy"}>
         <SpriteButton sprite={ORIGINAL_UI.gameShop.buyButton} label={t("ui.buy", [], "Buy")} onClick={onBuy} />
+      </div>
+    </div>
+  );
+}
+
+function GameShopViewer({
+  item,
+  left,
+  top,
+  t,
+  onClose,
+}: {
+  item: CrystalGameShopEntry;
+  left: number;
+  top: number;
+  t: TranslateFn;
+  onClose: () => void;
+}) {
+  const [direction, setDirection] = useState(6);
+  const info = gameShopItemInfo(item.item_index);
+
+  return (
+    <div
+      className="game-shop-viewer"
+      style={{ left, top }}
+      data-item-name={item.item_name}
+      data-game-shop-index={item.game_shop_index}
+      data-direction={direction}
+    >
+      <button type="button" className="game-shop-viewer-close" onClick={onClose} aria-label={t("ui.close")}>
+        x
+      </button>
+      <div className="game-shop-viewer-stage">
+        {info ? (
+          <img
+            className="game-shop-viewer-item-icon"
+            src={originalItemIconPath(info.image)}
+            alt=""
+            draggable={false}
+          />
+        ) : null}
+        <div className="game-shop-viewer-figure" data-direction={direction}>
+          <div className="game-shop-viewer-head" />
+          <div className="game-shop-viewer-body" />
+          <div className="game-shop-viewer-item-glow" />
+        </div>
+      </div>
+      <div className="game-shop-viewer-name">{truncateGameShopName(item.item_name)}</div>
+      <div className="game-shop-viewer-controls">
+        <div className="game-shop-viewer-left">
+          <SpriteButton
+            sprite={ORIGINAL_UI.gameShop.previousButton}
+            label={t("ui.previous", [], "Previous")}
+            onClick={() => setDirection((current) => (current === 1 ? 8 : current - 1))}
+          />
+        </div>
+        <div className="game-shop-viewer-right">
+          <SpriteButton
+            sprite={ORIGINAL_UI.gameShop.nextButton}
+            label={t("ui.next", [], "Next")}
+            onClick={() => setDirection((current) => (current === 8 ? 1 : current + 1))}
+          />
+        </div>
       </div>
     </div>
   );
@@ -2820,12 +4640,14 @@ function NpcDialogPanel({
   onSubmitInput: (value: string) => void;
 }) {
   const [inputValue, setInputValue] = useState("");
-  const bodyLines = dialog.body.filter((line) => line.trim().length > 0);
+  const bodyLines = dialog.body.map(stripCrystalDialogMarkup).filter((line) => line.trim().length > 0);
+  const title = stripCrystalDialogMarkup(dialog.title || dialog.npcName);
+  const footer = stripCrystalDialogMarkup(dialog.footer);
 
   return (
     <section className="npc-dialog-panel">
       <div className="npc-dialog-head">
-        <strong>{dialog.title || dialog.npcName}</strong>
+        <strong>{title}</strong>
         <div className="npc-dialog-actions">
           <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
           <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close")} onClick={onClose} />
@@ -2844,7 +4666,7 @@ function NpcDialogPanel({
                 data-target={link.target}
                 onClick={() => onSelectTarget(link.target)}
               >
-                {link.text}
+                {stripCrystalDialogMarkup(link.text)}
               </button>
             ))}
           </div>
@@ -2860,7 +4682,7 @@ function NpcDialogPanel({
           }}
         >
           <label>
-            <span>{dialog.input.prompt}</span>
+            <span>{stripCrystalDialogMarkup(dialog.input.prompt)}</span>
             <input
               value={inputValue}
               onChange={(event) => setInputValue(event.target.value)}
@@ -2871,9 +4693,18 @@ function NpcDialogPanel({
           <button type="submit">{t("ui.confirm", [], "Confirm")}</button>
         </form>
       ) : null}
-      {dialog.footer ? <div className="npc-dialog-footer">{dialog.footer}</div> : null}
+      {footer ? <div className="npc-dialog-footer">{footer}</div> : null}
     </section>
   );
+}
+
+function stripCrystalDialogMarkup(text: string) {
+  return text
+    .replace(/\{\/?[A-Z]+\}/gi, "")
+    .replace(/<\$[^>]+>/g, "")
+    .replace(/%[A-Z0-9_()]+/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 type ChatFrameProps = {
@@ -3005,7 +4836,13 @@ function ChatFilterBar({
     <section className="chat-filter-bar">
       <img className="chat-filter-bg" src={ORIGINAL_UI.game.chatControlBar} alt="" draggable={false} />
       {CHAT_FILTER_BUTTONS.map(({ key, left, labelKey }) => (
-        <div key={key} className="chat-filter-button" style={{ left }}>
+        <div
+          key={key}
+          className="chat-filter-button"
+          data-chat-filter-key={key}
+          data-chat-filter-active={activeFilter === key}
+          style={{ left }}
+        >
           <SpriteButton
             sprite={ORIGINAL_UI.game.chatFilterButtons[key]}
             label={t(labelKey, [], labelKey)}
@@ -3014,12 +4851,12 @@ function ChatFilterBar({
           />
         </div>
       ))}
-      <div className="chat-filter-button trade">
+      <div className="chat-filter-button trade" data-chat-filter-key="trade" data-chat-filter-active={activeFilter === "trade"}>
         <SpriteButton
           sprite={ORIGINAL_UI.game.chatFilterButtons.trade}
           label={t("ui.trade")}
           onClick={onSelectTrade}
-          active={activeFilter === "shout"}
+          active={activeFilter === "trade"}
         />
       </div>
       <div className="chat-filter-button size">
@@ -3060,6 +4897,22 @@ type BeltDialogProps = {
 
 function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }: BeltDialogProps) {
   const itemBySlot = new Map(items.map((item) => [item.slot, item]));
+  const useBeltItem = (item: DisplayItem) => {
+    (window as typeof window & { __mir2LastBeltActivation?: Record<string, unknown> }).__mir2LastBeltActivation = {
+      key: item.key,
+      name: item.name,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      at: Date.now(),
+    };
+    onUseItem({
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+    });
+  };
 
   return (
     <section className={`belt-dialog ${vertical ? "vertical" : "horizontal"}`}>
@@ -3101,13 +4954,15 @@ function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }: BeltDi
                 type="button"
                 className={`belt-item ${vertical ? "vertical" : "horizontal"}`}
                 title={item.name}
-                onClick={() =>
-                  onUseItem({
-                    key: item.key,
-                    slot: item.slot,
-                    container: item.container,
-                  })
-                }
+                onMouseDown={(event) => {
+                  if (event.button !== 0) return;
+                  event.preventDefault();
+                  useBeltItem(item);
+                }}
+                onClick={(event) => {
+                  if (event.detail !== 0) return;
+                  useBeltItem(item);
+                }}
               >
                 <img
                   className="original-item-icon belt-item-icon"
@@ -3709,6 +5564,7 @@ type InventoryWindowProps = {
   locale: string;
   activeTab: InventoryTabKey;
   world: DisplayWorld;
+  storageServiceOpenVersion: number;
   onClose: () => void;
   onTabChange: (tab: InventoryTabKey) => void;
   onUseItem: (item: ItemActionRef) => void;
@@ -3732,6 +5588,7 @@ export function InventoryWindow({
   locale,
   activeTab,
   world,
+  storageServiceOpenVersion,
   onClose,
   onTabChange,
   onUseItem,
@@ -3778,6 +5635,36 @@ export function InventoryWindow({
   const [splitCount, setSplitCount] = useState("1");
   const [pendingGoldDrop, setPendingGoldDrop] = useState(false);
   const [goldDropAmount, setGoldDropAmount] = useState("100");
+
+  useEffect(() => {
+    if (storageServiceOpenVersion <= 0) {
+      return;
+    }
+
+    setStorageMode("takeBack");
+    setDeleteMode(false);
+    setSellMode(false);
+    setPendingDeleteItem(null);
+    setPendingSellItem(null);
+    setPendingMoveItem(null);
+    setPendingSplitItem(null);
+    setPendingGoldDrop(false);
+    setDeleteFeedback(null);
+
+    if (storageLocked) {
+      setShowStoragePasswordPanel(true);
+      setStoragePasswordPanelMode("unlock");
+      setStoragePassword("");
+      setNewStoragePassword("");
+      setConfirmStoragePassword("");
+    } else if (world.requireStoragePassword && !world.hasStoragePassword) {
+      setShowStoragePasswordPanel(true);
+      setStoragePasswordPanelMode("set");
+      setStoragePassword("");
+      setNewStoragePassword("");
+      setConfirmStoragePassword("");
+    }
+  }, [storageServiceOpenVersion, storageLocked, world.hasStoragePassword, world.requireStoragePassword]);
 
   useEffect(() => {
     if (!deleteFeedback) {
@@ -3857,25 +5744,27 @@ export function InventoryWindow({
       : null;
   const storageStatusLabelText =
     storageMode !== null || pendingMoveItem?.container === "storage" || storageLocked ? storageModeText : null;
+  const effectiveStoragePasswordPanelMode = storageLocked ? "unlock" : storagePasswordPanelMode;
+  const effectiveShowStoragePasswordPanel = showStoragePasswordPanel || (showStorageWindow && storageLocked);
   const storagePasswordPanelTitle =
-    storagePasswordPanelMode === "unlock"
+    effectiveStoragePasswordPanelMode === "unlock"
       ? t("ui.unlockStorage", [], "Unlock Storage")
-      : storagePasswordPanelMode === "set"
+      : effectiveStoragePasswordPanelMode === "set"
         ? t("ui.setStoragePassword", [], "Set Storage Password")
-        : storagePasswordPanelMode === "change"
+        : effectiveStoragePasswordPanelMode === "change"
           ? t("ui.changeStoragePassword", [], "Change Storage Password")
           : t("ui.removeStoragePassword", [], "Remove Storage Password");
   const storagePasswordPanelPrompt =
-    storagePasswordPanelMode === "unlock"
+    effectiveStoragePasswordPanelMode === "unlock"
       ? t("client.StoragePasswordPrompt", [], "Enter your storage password.")
-      : storagePasswordPanelMode === "set"
+      : effectiveStoragePasswordPanelMode === "set"
         ? t("client.StoragePasswordNewPrompt", [], "Enter a new storage password.")
-        : storagePasswordPanelMode === "change"
+        : effectiveStoragePasswordPanelMode === "change"
           ? t("client.StoragePasswordChangePrompt", [], "Change your storage password.")
           : t("ui.storagePasswordRemovePrompt", [], "Enter your current password to remove storage protection.");
   const storagePasswordRules = t("client.StoragePasswordRules", [4, 20], "Password must be between {0} and {1} characters.");
   const passwordConfirmationMismatch =
-    (storagePasswordPanelMode === "set" || storagePasswordPanelMode === "change") &&
+    (effectiveStoragePasswordPanelMode === "set" || effectiveStoragePasswordPanelMode === "change") &&
     confirmStoragePassword.length > 0 &&
     newStoragePassword !== confirmStoragePassword;
 
@@ -3911,12 +5800,12 @@ export function InventoryWindow({
   }
 
   function submitStoragePasswordPanel() {
-    if (storagePasswordPanelMode === "unlock") {
+    if (effectiveStoragePasswordPanelMode === "unlock") {
       onUnlockStorage(storagePassword);
       return;
     }
 
-    if (storagePasswordPanelMode === "remove") {
+    if (effectiveStoragePasswordPanelMode === "remove") {
       onRemoveStoragePassword(storagePassword);
       return;
     }
@@ -3926,11 +5815,11 @@ export function InventoryWindow({
       return;
     }
 
-    onSetStoragePassword(storagePasswordPanelMode === "set" ? "" : storagePassword, newStoragePassword);
+    onSetStoragePassword(effectiveStoragePasswordPanelMode === "set" ? "" : storagePassword, newStoragePassword);
   }
 
   function storagePasswordPanelCanSubmit() {
-    switch (storagePasswordPanelMode) {
+    switch (effectiveStoragePasswordPanelMode) {
       case "unlock":
       case "remove":
         return storagePassword.trim().length > 0;
@@ -3943,6 +5832,193 @@ export function InventoryWindow({
           newStoragePassword === confirmStoragePassword
         );
     }
+  }
+
+  function activateInventoryItem(item: DisplayItem) {
+    (window as typeof window & { __mir2LastInventoryActivation?: Record<string, unknown> }).__mir2LastInventoryActivation = {
+      key: item.key,
+      name: item.name,
+      slot: item.slot,
+      container: item.container,
+      storageMode,
+      deleteMode,
+      sellMode,
+      hasPendingMoveItem: Boolean(pendingMoveItem),
+      at: Date.now(),
+    };
+    if (storageMode === "store") {
+      if (item.container === "storage") {
+        return;
+      }
+      setPendingMoveItem(item);
+      setPendingSplitItem(null);
+      setDeleteFeedback(`${t("ui.storeItem", [], "Store Item")}: ${item.name}`);
+      return;
+    }
+    if (storageMode === "takeBack") {
+      if (item.container !== "storage") {
+        return;
+      }
+      setPendingMoveItem(item);
+      setPendingSplitItem(null);
+      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+      return;
+    }
+    if (deleteMode) {
+      setPendingDeleteItem(item);
+      return;
+    }
+    if (sellMode) {
+      setPendingSellItem(item);
+      return;
+    }
+    if (pendingMoveItem) {
+      if (pendingMoveItem.slot === item.slot && pendingMoveItem.container === item.container) {
+        setPendingMoveItem(null);
+        return;
+      }
+
+      if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container) {
+        onMergeItem(
+          {
+            uniqueId: pendingMoveItem.uniqueId,
+            slot: pendingMoveItem.slot,
+            container: pendingMoveItem.container,
+          },
+          {
+            uniqueId: item.uniqueId,
+            slot: item.slot,
+            container: item.container,
+          },
+        );
+      } else {
+        onMoveItem(
+          {
+            uniqueId: pendingMoveItem.uniqueId,
+            slot: pendingMoveItem.slot,
+            container: pendingMoveItem.container,
+          },
+          item.slot,
+        );
+      }
+      setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${item.name}`);
+      setPendingMoveItem(null);
+      return;
+    }
+
+    const equipSlot = equipmentSlotForItemKey(item.key);
+    if (equipSlot) {
+      onEquipItem(
+        {
+          key: item.key,
+          uniqueId: item.uniqueId,
+          slot: item.slot,
+          container: item.container,
+        },
+        equipSlot,
+      );
+    } else {
+      onUseItem({
+        key: item.key,
+        uniqueId: item.uniqueId,
+        slot: item.slot,
+        container: item.container,
+      });
+    }
+  }
+
+  function confirmSellItem(item: DisplayItem) {
+    (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
+      action: "sell",
+      key: item.key,
+      name: item.name,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      at: Date.now(),
+    };
+    onSellItem(
+      {
+        key: item.key,
+        uniqueId: item.uniqueId,
+        slot: item.slot,
+        container: item.container,
+      },
+      1,
+    );
+    setDeleteFeedback(`${t("ui.sellItem", [], "Sell Item")}: ${item.name}`);
+    setPendingSellItem(null);
+    setSellMode(false);
+  }
+
+  function confirmDeleteItem(item: DisplayItem) {
+    (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
+      action: "drop",
+      key: item.key,
+      name: item.name,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      at: Date.now(),
+    };
+    onDropItem({
+      key: item.key,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+    });
+    setDeleteFeedback(`${t("ui.deleteItem")}: ${item.name}`);
+    setPendingDeleteItem(null);
+    setDeleteMode(false);
+  }
+
+  function confirmSplitItem(item: DisplayItem) {
+    const count = Number.parseInt(splitCount, 10);
+    if (!Number.isFinite(count) || count <= 0) {
+      return;
+    }
+    (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
+      action: "split",
+      key: item.key,
+      name: item.name,
+      uniqueId: item.uniqueId,
+      slot: item.slot,
+      container: item.container,
+      count,
+      at: Date.now(),
+    };
+    onSplitItem(
+      {
+        key: item.key,
+        uniqueId: item.uniqueId,
+        slot: item.slot,
+        container: item.container,
+      },
+      count,
+    );
+    setDeleteFeedback(`${t("ui.splitItem", [], "Split Item")}: ${item.name} x${count}`);
+    setPendingSplitItem(null);
+  }
+
+  function confirmGoldDrop() {
+    const amount = Number.parseInt(goldDropAmount, 10);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return;
+    }
+    (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
+      action: "dropGold",
+      amount,
+      at: Date.now(),
+    };
+    onDropGold(amount);
+    setDeleteFeedback(`${t("ui.dropGold", [], "Drop Gold")}: ${amount}`);
+    setPendingGoldDrop(false);
+  }
+
+  function primaryMouseAction(event: MouseEvent, action: () => void) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    action();
   }
 
   return (
@@ -3960,7 +6036,22 @@ export function InventoryWindow({
         </button>
       </div>
       <div className="inventory-tab tab-three">
-        <button type="button" className="window-tab-button" onClick={() => onTabChange("quest")}>
+        <button
+          type="button"
+          className="window-tab-button"
+          onClick={() => {
+            onTabChange("quest");
+            setStorageMode("takeBack");
+            setPendingMoveItem(null);
+            setPendingSplitItem(null);
+            if (storageLocked) {
+              setShowStoragePasswordPanel(true);
+              setStoragePasswordPanelMode("unlock");
+            } else {
+              setShowStoragePasswordPanel(false);
+            }
+          }}
+        >
           <img src={activeTab === "quest" ? ORIGINAL_UI.inventory.tabs.quest.active : ORIGINAL_UI.inventory.tabs.quest.idle} alt={t("ui.quest")} draggable={false} />
         </button>
       </div>
@@ -3986,26 +6077,54 @@ export function InventoryWindow({
           active={deleteMode}
         />
       </div>
+      <div className="inventory-sell">
+        <button
+          type="button"
+          aria-label={t("ui.sellItem", [], "Sell Item")}
+          title={t("ui.sellItem", [], "Sell Item")}
+          className={sellMode ? "active" : ""}
+          onClick={() => {
+            setSellMode((current) => !current);
+            setDeleteMode(false);
+            setPendingDeleteItem(null);
+            setPendingSellItem(null);
+            setPendingMoveItem(null);
+            setPendingSplitItem(null);
+            setPendingGoldDrop(false);
+            setStorageMode(null);
+            setDeleteFeedback(null);
+          }}
+        >
+          {t("ui.sell", [], "Sell")}
+        </button>
+      </div>
       <div className="inventory-grid">
         {ORIGINAL_UI.inventory.slots.map((slot, slotIndex) => (
           <div
             key={slot.key}
             className={`inventory-slot ${activeTab === "quest" ? "quest" : ""}`}
             style={{ left: slot.x, top: slot.y }}
-            title={slot.key}
-            onClick={() => {
-              if (storageMode === "takeBack" && pendingMoveItem && pendingMoveItem.container === "storage") {
-                onTakeBackItem(
-                  {
-                    slot: pendingMoveItem.slot,
-                    container: pendingMoveItem.container,
-                  },
-                  slotIndex,
-                );
-                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${pendingMoveItem.name} -> ${slot.key}`);
-                setPendingMoveItem(null);
-                return;
-              }
+	            title={slot.key}
+	            onClick={() => {
+	              const takeBackItem =
+	                pendingMoveItem?.container === "storage"
+	                  ? pendingMoveItem
+	                  : storageMode === "takeBack"
+	                    ? (visibleStorageItems[0] ?? null)
+	                    : null;
+	              if (storageMode === "takeBack" && takeBackItem) {
+	                onTakeBackItem(
+	                  {
+	                    uniqueId: takeBackItem.uniqueId,
+	                    slot: takeBackItem.slot,
+	                    container: takeBackItem.container,
+	                  },
+	                  slotIndex,
+	                );
+	                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${takeBackItem.name} -> ${slot.key}`);
+	                setPendingMoveItem(null);
+	                return;
+	              }
               if (!pendingMoveItem) return;
               if (pendingMoveItem.slot === slotIndex && pendingMoveItem.container === activeTab) {
                 setPendingMoveItem(null);
@@ -4013,6 +6132,7 @@ export function InventoryWindow({
               }
               onMoveItem(
                 {
+                  uniqueId: pendingMoveItem.uniqueId,
                   slot: pendingMoveItem.slot,
                   container: pendingMoveItem.container,
                 },
@@ -4029,92 +6149,37 @@ export function InventoryWindow({
 
           return (
             <button
-              key={item.key}
+              key={`${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
               type="button"
               className="inventory-item-card"
               style={{ left: slot.x, top: slot.y }}
               title={item.name}
-              onClick={() => {
-                if (deleteMode) {
-                  setPendingDeleteItem(item);
-                  return;
-                }
-                if (sellMode) {
-                  setPendingSellItem(item);
-                  return;
-                }
-                if (storageMode === "store") {
-                  if (item.container === "storage") {
-                    return;
-                  }
-                  setPendingMoveItem(item);
-                  setPendingSplitItem(null);
-                  setDeleteFeedback(`${t("ui.storeItem", [], "Store Item")}: ${item.name}`);
-                  return;
-                }
-                if (storageMode === "takeBack") {
-                  if (item.container !== "storage") {
-                    return;
-                  }
-                  setPendingMoveItem(item);
-                  setPendingSplitItem(null);
-                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
-                  return;
-                }
-                if (pendingMoveItem) {
-                  if (pendingMoveItem.slot === item.slot && pendingMoveItem.container === item.container) {
-                    setPendingMoveItem(null);
-                    return;
-                  }
-
-                  if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container) {
-                    onMergeItem(
-                      {
-                        slot: pendingMoveItem.slot,
-                        container: pendingMoveItem.container,
-                      },
-                      {
-                        slot: item.slot,
-                        container: item.container,
-                      },
-                    );
-                  } else {
-                    onMoveItem(
-                      {
-                        slot: pendingMoveItem.slot,
-                        container: pendingMoveItem.container,
-                      },
-                      item.slot,
-                    );
-                  }
-                  setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${item.name}`);
-                  setPendingMoveItem(null);
-                  return;
-                }
-
-                const equipSlot = equipmentSlotForItemKey(item.key);
-                if (equipSlot) {
-                  onEquipItem(
-                    {
-                      key: item.key,
-                      slot: item.slot,
-                      container: item.container,
-                    },
-                    equipSlot,
-                  );
-                } else {
-                  onUseItem({
-                    key: item.key,
-                    slot: item.slot,
-                    container: item.container,
-                  });
-                }
-              }}
-              onContextMenu={(event) => {
+              onMouseDown={(event) => {
+                if (event.button !== 0) return;
                 event.preventDefault();
-                if (item.quantity > 1) {
-                  setPendingSplitItem(item);
-                  setSplitCount("1");
+                activateInventoryItem(item);
+              }}
+              onClick={(event) => {
+                if (event.detail !== 0) return;
+                activateInventoryItem(item);
+              }}
+	              onContextMenu={(event) => {
+	                event.preventDefault();
+	                if (storageMode === "store" && item.container !== "storage") {
+	                  setPendingMoveItem(item);
+	                  setPendingSplitItem(null);
+	                  setDeleteFeedback(`${t("ui.storeItem", [], "Store Item")}: ${item.name}`);
+	                  return;
+	                }
+	                if (storageMode === "takeBack" && item.container === "storage") {
+	                  setPendingMoveItem(item);
+	                  setPendingSplitItem(null);
+	                  setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+	                  return;
+	                }
+	                if (item.quantity > 1) {
+	                  setPendingSplitItem(item);
+	                  setSplitCount("1");
                   setPendingMoveItem(null);
                   return;
                 }
@@ -4149,9 +6214,26 @@ export function InventoryWindow({
             </div>
           ) : (
             world.questLog.map((quest) => (
-              <div key={quest.questId} className={`inventory-quest-entry ${quest.stage}`}>
-                <strong>{quest.title}</strong>
-                <span>{quest.progressLabel}</span>
+              <div
+                key={quest.questId}
+                className={`inventory-quest-entry ${quest.stage}`}
+                data-quest-id={quest.questId}
+                data-quest-stage={quest.stage}
+              >
+                <div className="inventory-quest-entry-head">
+                  <strong>{quest.title}</strong>
+                  <span>{quest.stage}</span>
+                </div>
+                <span className="inventory-quest-summary">{quest.summary}</span>
+                <span className="inventory-quest-objective">{quest.objective}</span>
+                <div className="inventory-quest-progress-row">
+                  <span>{quest.progressLabel}</span>
+                  <span>{quest.rewardPreview}</span>
+                </div>
+                <span
+                  className="inventory-quest-progress-fill"
+                  style={{ width: `${Math.min(100, Math.max(0, (quest.current / Math.max(quest.required, 1)) * 100))}%` }}
+                />
               </div>
             ))
           )}
@@ -4159,7 +6241,24 @@ export function InventoryWindow({
       ) : null}
 
       <img className="inventory-weight-bar" src={ORIGINAL_UI.inventory.weightBar} alt="" draggable={false} />
-      <div className="inventory-gold">{world.gold}</div>
+      <button
+        type="button"
+        className="inventory-gold"
+        aria-label={t("ui.dropGold", [], "Drop Gold")}
+        title={t("ui.dropGold", [], "Drop Gold")}
+        onClick={() => {
+          setPendingGoldDrop(true);
+          setDeleteMode(false);
+          setSellMode(false);
+          setStorageMode(null);
+          setPendingDeleteItem(null);
+          setPendingSellItem(null);
+          setPendingSplitItem(null);
+          setDeleteFeedback(null);
+        }}
+      >
+        {world.gold}
+      </button>
       <div className="inventory-weight">{world.freeBagSlots}</div>
       {deleteMode ? <div className="inventory-delete-hint">{`${t("ui.deleteItem")}...`}</div> : null}
       {showStorageWindow ? (
@@ -4188,11 +6287,55 @@ export function InventoryWindow({
               {t("ui.storagePageTwoShort", [], "2")}
             </button>
           </div>
-          <button
-            type="button"
-            className="storage-action-button rent"
-            onClick={() => {
-              setStoragePageIndex(1);
+	          <button
+	            type="button"
+	            className={`storage-action-button take-back ${storageMode === "takeBack" ? "active" : ""}`}
+	            aria-label={t("ui.takeBackItem", [], "Take Back")}
+	            title={t("ui.takeBackItem", [], "Take Back")}
+	            onClick={() => {
+	              const firstStorageItem = visibleStorageItems[0] ?? null;
+	              setStorageMode("takeBack");
+	              setSellMode(false);
+	              setDeleteMode(false);
+	              setPendingMoveItem(firstStorageItem);
+	              setPendingSplitItem(null);
+	              setPendingDeleteItem(null);
+	              setPendingSellItem(null);
+	              setPendingGoldDrop(false);
+	              setShowStoragePasswordPanel(false);
+	              setDeleteFeedback(
+	                firstStorageItem ? `${t("ui.takeBackItem", [], "Take Back")}: ${firstStorageItem.name}` : null,
+	              );
+	              onTabChange("quest");
+	            }}
+	          >
+	            {t("ui.takeBack", [], "Take Back")}
+	          </button>
+	          <button
+	            type="button"
+	            className={`storage-action-button store ${storageMode === "store" ? "active" : ""}`}
+	            aria-label={t("ui.storeItem", [], "Store Item")}
+	            title={t("ui.storeItem", [], "Store Item")}
+	            onClick={() => {
+	              setStorageMode("store");
+	              setSellMode(false);
+	              setDeleteMode(false);
+	              setPendingMoveItem(null);
+	              setPendingSplitItem(null);
+	              setPendingDeleteItem(null);
+	              setPendingSellItem(null);
+	              setPendingGoldDrop(false);
+	              setShowStoragePasswordPanel(false);
+	              onTabChange("bag1");
+	            }}
+	          >
+	            {t("ui.store", [], "Store")}
+	          </button>
+	          <button
+	            type="button"
+	            className="storage-action-button rent"
+	            onClick={() => {
+	              setStoragePageIndex(1);
               onRentExpandedStorage();
               setDeleteFeedback(
                 world.hasExpandedStorage
@@ -4205,7 +6348,7 @@ export function InventoryWindow({
           </button>
           <button
             type="button"
-            className={`storage-action-button protect ${showStoragePasswordPanel ? "active" : ""}`}
+            className={`storage-action-button protect ${effectiveShowStoragePasswordPanel ? "active" : ""}`}
             onClick={() => {
               if (showStoragePasswordPanel) {
                 closeStoragePasswordPanel();
@@ -4224,13 +6367,33 @@ export function InventoryWindow({
             {ORIGINAL_UI.storage.slots.map((slot, slotIndex) => {
               const absoluteSlot = storagePageStart + slotIndex;
               return (
-                <div
-                  key={slot.key}
-                  className="storage-slot"
-                  style={{ left: slot.x, top: slot.y }}
-                  onClick={() => {
-                    if (
-                      storageMode === "store" &&
+	                <button
+	                  key={slot.key}
+	                  type="button"
+	                  className="storage-slot"
+	                  style={{ left: slot.x, top: slot.y }}
+	                  onClick={() => {
+	                    const slotItem = visibleStorageItems.find((entry) => entry.slot === absoluteSlot);
+	                    if (slotItem && storageMode === "takeBack" && !storageLocked && !storagePageLocked) {
+	                      setPendingMoveItem(slotItem);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${slotItem.name}`);
+	                      return;
+	                    }
+	                    if (
+	                      slotItem &&
+	                      storageMode === null &&
+	                      !pendingMoveItem &&
+	                      !storageLocked &&
+	                      !storagePageLocked
+	                    ) {
+	                      setPendingMoveItem(slotItem);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.storageMode", [], "Storage items")}: ${slotItem.name}`);
+	                      return;
+	                    }
+	                    if (
+	                      storageMode === "store" &&
                       pendingMoveItem &&
                       pendingMoveItem.container !== "storage" &&
                       !storageLocked &&
@@ -4238,6 +6401,7 @@ export function InventoryWindow({
                     ) {
                       onStoreItem(
                         {
+                          uniqueId: pendingMoveItem.uniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
@@ -4263,6 +6427,7 @@ export function InventoryWindow({
                       }
                       onMoveItem(
                         {
+                          uniqueId: pendingMoveItem.uniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
@@ -4274,7 +6439,7 @@ export function InventoryWindow({
                       setPendingMoveItem(null);
                     }
                   }}
-                />
+	                />
               );
             })}
             {visibleStorageItems.map((item) => {
@@ -4282,8 +6447,8 @@ export function InventoryWindow({
               if (!slot) return null;
 
               return (
-                <button
-                  key={`storage-${item.key}-${item.slot}`}
+	                      <button
+	                        key={`storage-${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
                   type="button"
                   className={`storage-item-card ${
                     pendingMoveItem?.container === "storage" && pendingMoveItem.slot === item.slot
@@ -4292,57 +6457,37 @@ export function InventoryWindow({
                   }`}
                   style={{ left: slot.x, top: slot.y }}
                   title={item.name}
-                  onClick={() => {
-                    if (storageLocked || storagePageLocked) {
-                      return;
-                    }
+	                  onClick={() => {
+	                    if (storageLocked || storagePageLocked) {
+	                      return;
+	                    }
 
-                    if (storageMode === "takeBack") {
-                      setPendingMoveItem(item);
-                      setPendingSplitItem(null);
-                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
-                      return;
-                    }
-
-                    if (pendingMoveItem && pendingMoveItem.container === "storage") {
-                      if (pendingMoveItem.slot === item.slot) {
-                        setPendingMoveItem(null);
-                        return;
-                      }
-
-                      if (pendingMoveItem.key === item.key) {
-                        onMergeItem(
-                          {
-                            slot: pendingMoveItem.slot,
-                            container: pendingMoveItem.container,
-                          },
-                          {
-                            slot: item.slot,
-                            container: item.container,
-                          },
-                        );
-                      } else {
-                        onMoveItem(
-                          {
-                            slot: pendingMoveItem.slot,
-                            container: pendingMoveItem.container,
-                          },
-                          item.slot,
-                        );
-                      }
-                      setDeleteFeedback(
-                        `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${item.name}`,
-                      );
-                      setPendingMoveItem(null);
-                    }
-                  }}
-                  onContextMenu={(event) => {
-                    event.preventDefault();
-                    if (storageLocked || storagePageLocked || storageMode !== null) {
-                      return;
-                    }
-                    if (item.quantity > 1) {
-                      setPendingSplitItem(item);
+	                    setPendingMoveItem(item);
+	                    setPendingSplitItem(null);
+	                    setDeleteFeedback(
+	                      `${
+	                        storageMode === "takeBack"
+	                          ? t("ui.takeBackItem", [], "Take Back")
+	                          : t("ui.storageMode", [], "Storage items")
+	                      }: ${item.name}`,
+	                    );
+	                  }}
+	                  onContextMenu={(event) => {
+	                    event.preventDefault();
+	                    if (storageLocked || storagePageLocked) {
+	                      return;
+	                    }
+	                    if (storageMode === "takeBack") {
+	                      setPendingMoveItem(item);
+	                      setPendingSplitItem(null);
+	                      setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${item.name}`);
+	                      return;
+	                    }
+	                    if (storageMode !== null) {
+	                      return;
+	                    }
+	                    if (item.quantity > 1) {
+	                      setPendingSplitItem(item);
                       setSplitCount("1");
                       setPendingMoveItem(null);
                       return;
@@ -4371,13 +6516,13 @@ export function InventoryWindow({
               </div>
             ) : null}
           </div>
-          {showStoragePasswordPanel ? (
+          {effectiveShowStoragePasswordPanel ? (
             <div className="inventory-storage-panel storage-password-panel">
               <strong>{storagePasswordPanelTitle}</strong>
               <span>{storagePasswordPanelPrompt}</span>
               <span>{storageStatusText}</span>
               {storagePasswordLastSetText ? <span>{storagePasswordLastSetText}</span> : null}
-              {storagePasswordPanelMode !== "set" ? (
+              {effectiveStoragePasswordPanelMode !== "set" ? (
                 <input
                   type="password"
                   value={storagePassword}
@@ -4385,7 +6530,7 @@ export function InventoryWindow({
                   onChange={(event) => setStoragePassword(event.target.value)}
                 />
               ) : null}
-              {storagePasswordPanelMode === "set" || storagePasswordPanelMode === "change" ? (
+              {effectiveStoragePasswordPanelMode === "set" || effectiveStoragePasswordPanelMode === "change" ? (
                 <>
                   <input
                     type="password"
@@ -4438,9 +6583,9 @@ export function InventoryWindow({
                   onClick={submitStoragePasswordPanel}
                   disabled={!storagePasswordPanelCanSubmit()}
                 >
-                  {storagePasswordPanelMode === "unlock"
+                  {effectiveStoragePasswordPanelMode === "unlock"
                     ? t("ui.unlock", [], "Unlock")
-                    : storagePasswordPanelMode === "remove"
+                    : effectiveStoragePasswordPanelMode === "remove"
                       ? t("ui.removePassword", [], "Remove")
                       : t("ui.ok", [], "OK")}
                 </button>
@@ -4473,15 +6618,10 @@ export function InventoryWindow({
           <div className="inventory-delete-actions">
             <button
               type="button"
-              onClick={() => {
-                onDropItem({
-                  key: pendingDeleteItem.key,
-                  slot: pendingDeleteItem.slot,
-                  container: pendingDeleteItem.container,
-                });
-                setDeleteFeedback(`${t("ui.deleteItem")}: ${pendingDeleteItem.name}`);
-                setPendingDeleteItem(null);
-                setDeleteMode(false);
+              onMouseDown={(event) => primaryMouseAction(event, () => confirmDeleteItem(pendingDeleteItem))}
+              onClick={(event) => {
+                if (event.detail !== 0) return;
+                confirmDeleteItem(pendingDeleteItem);
               }}
             >
               {t("ui.confirm", [], "Confirm")}
@@ -4507,18 +6647,10 @@ export function InventoryWindow({
           <div className="inventory-delete-actions">
             <button
               type="button"
-              onClick={() => {
-                onSellItem(
-                  {
-                    key: pendingSellItem.key,
-                    slot: pendingSellItem.slot,
-                    container: pendingSellItem.container,
-                  },
-                  1,
-                );
-                setDeleteFeedback(`${t("ui.sellItem", [], "Sell Item")}: ${pendingSellItem.name}`);
-                setPendingSellItem(null);
-                setSellMode(false);
+              onMouseDown={(event) => primaryMouseAction(event, () => confirmSellItem(pendingSellItem))}
+              onClick={(event) => {
+                if (event.detail !== 0) return;
+                confirmSellItem(pendingSellItem);
               }}
             >
               {t("ui.confirm", [], "Confirm")}
@@ -4551,21 +6683,10 @@ export function InventoryWindow({
           <div className="inventory-delete-actions">
             <button
               type="button"
-              onClick={() => {
-                const count = Number.parseInt(splitCount, 10);
-                if (!Number.isFinite(count) || count <= 0) {
-                  return;
-                }
-                onSplitItem(
-                  {
-                    key: pendingSplitItem.key,
-                    slot: pendingSplitItem.slot,
-                    container: pendingSplitItem.container,
-                  },
-                  count,
-                );
-                setDeleteFeedback(`${t("ui.splitItem", [], "Split Item")}: ${pendingSplitItem.name} x${count}`);
-                setPendingSplitItem(null);
+              onMouseDown={(event) => primaryMouseAction(event, () => confirmSplitItem(pendingSplitItem))}
+              onClick={(event) => {
+                if (event.detail !== 0) return;
+                confirmSplitItem(pendingSplitItem);
               }}
             >
               {t("ui.confirm", [], "Confirm")}
@@ -4588,14 +6709,10 @@ export function InventoryWindow({
           <div className="inventory-delete-actions">
             <button
               type="button"
-              onClick={() => {
-                const amount = Number.parseInt(goldDropAmount, 10);
-                if (!Number.isFinite(amount) || amount <= 0) {
-                  return;
-                }
-                onDropGold(amount);
-                setDeleteFeedback(`${t("ui.dropGold", [], "Drop Gold")}: ${amount}`);
-                setPendingGoldDrop(false);
+              onMouseDown={(event) => primaryMouseAction(event, confirmGoldDrop)}
+              onClick={(event) => {
+                if (event.detail !== 0) return;
+                confirmGoldDrop();
               }}
             >
               {t("ui.confirm", [], "Confirm")}
@@ -4640,6 +6757,13 @@ export function CharacterWindow({
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
+  const [repairMode, setRepairMode] = useState<"normal" | "special" | null>(null);
+  const repairModeLabel =
+    repairMode === "normal"
+      ? t("ui.repairItem", [], "Repair Item")
+      : repairMode === "special"
+        ? t("ui.specialRepairItem", [], "Special Repair")
+        : "";
   const stats1Values = [
     displayFieldValue(world.playerHp, world.playerMaxHp),
     displayFieldValue(world.playerMp, 100),
@@ -4705,15 +6829,25 @@ export function CharacterWindow({
                 style={{ left: slot.x + 8, top: slot.y + 90 }}
                 title={slot.label}
               >
-                {item ? (
-                  <button
-                    type="button"
-                    className="character-slot-card"
-                    title={item.name}
-                    onClick={() => {
-                      onRemoveItem({ slot: item.slot });
-                    }}
-                  >
+	                {item ? (
+	                  <button
+	                    type="button"
+	                    className="character-slot-card"
+	                    title={item.name}
+	                    onClick={() => {
+	                      if (repairMode === "normal") {
+	                        onRepairItem({ slot: item.slot });
+	                        setRepairMode(null);
+	                        return;
+	                      }
+	                      if (repairMode === "special") {
+	                        onSpecialRepairItem({ slot: item.slot });
+	                        setRepairMode(null);
+	                        return;
+	                      }
+	                      onRemoveItem({ slot: item.slot });
+	                    }}
+	                  >
                     <img
                       className="original-item-icon character-item-icon"
                       src={originalItemIconPath(item.icon)}
@@ -4725,8 +6859,30 @@ export function CharacterWindow({
               </div>
             );
           })}
-        </>
-      ) : null}
+	        </>
+	      ) : null}
+
+	      {activeTab === "char" ? (
+	        <>
+	          {repairModeLabel ? <div className="inventory-delete-hint">{repairModeLabel}</div> : null}
+	          <div className="character-repair-actions">
+	            <button
+	              type="button"
+	              className={repairMode === "normal" ? "active" : ""}
+	              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
+	            >
+	              {t("ui.repairItem", [], "Repair Item")}
+	            </button>
+	            <button
+	              type="button"
+	              className={repairMode === "special" ? "active" : ""}
+	              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
+	            >
+	              {t("ui.specialRepairItem", [], "Special Repair")}
+	            </button>
+	          </div>
+	        </>
+	      ) : null}
 
       {activeTab === "stats1" ? (
         <div className="character-field-values stats1">
@@ -4853,6 +7009,7 @@ function buildViewportEntitySprite(
   sceneFrameIndex: number,
   now: number,
   animationState: EntitySpriteAnimationState,
+  motionSnapshot?: EntityMotionSnapshot,
 ): ViewportEntitySprite | null {
   const sprite = resolvedEntitySprite(entity, libraries, animationState);
   if (!sprite) {
@@ -4864,7 +7021,14 @@ function buildViewportEntitySprite(
     return null;
   }
 
-  const frameCycle = spriteFrameCycleForEntity(entity, sceneFrameIndex, now, animationState, animation);
+  const frameCycle = spriteFrameCycleForEntity(
+    entity,
+    sceneFrameIndex,
+    now,
+    animationState,
+    animation,
+    motionSnapshot,
+  );
   const frameIndex =
     animation.frameBaseOffset +
     directionIndex(entity.direction) * animation.directionStride +
@@ -5085,6 +7249,7 @@ function spriteFrameCycleForEntity(
   now: number,
   animationState: EntitySpriteAnimationState,
   animation: ViewportSpriteAnimationMeta,
+  motionSnapshot?: EntityMotionSnapshot,
 ) {
   const frameCount = Math.max(animation.frameCount, 1);
   if (frameCount <= 1) {
@@ -5095,9 +7260,34 @@ function spriteFrameCycleForEntity(
   let cycle = sceneFrameIndex % frameCount;
 
   switch (animationState) {
-    case "standing":
+    case "standing": {
+      const standingStartedAt =
+        motionSnapshot && motionSnapshot.expiresAt > 0 && motionSnapshot.expiresAt <= now
+          ? motionSnapshot.expiresAt
+          : 0;
+      const phaseMs =
+        standingStartedAt === 0 && entity.kind === "monster"
+          ? stableEntityAnimationPhaseMs(entity, frameIntervalMs, frameCount)
+          : 0;
+      cycle = loopingFrameCycle(
+        now + phaseMs,
+        standingStartedAt,
+        frameIntervalMs,
+        frameCount,
+      );
+      break;
+    }
     case "dead":
       cycle = 0;
+      break;
+    case "walking":
+    case "running":
+      cycle = transientFrameCycle(
+        now,
+        motionSnapshot?.startedAt ?? entity.movementStartedAt,
+        frameIntervalMs,
+        frameCount,
+      );
       break;
     case "attackMelee":
     case "attackRange":
@@ -5119,6 +7309,23 @@ function spriteFrameCycleForEntity(
   return animation.reverse ? frameCount - 1 - cycle : cycle;
 }
 
+function loopingFrameCycle(now: number, startedAt: number, frameIntervalMs: number, frameCount: number) {
+  if (frameCount <= 1) {
+    return 0;
+  }
+
+  const elapsed = Math.max(now - startedAt, 0);
+  return Math.floor(elapsed / Math.max(frameIntervalMs, 1)) % frameCount;
+}
+
+function stableEntityAnimationPhaseMs(entity: DisplayEntity, frameIntervalMs: number, frameCount: number) {
+  const numericId = Number(entity.objectId);
+  const seed = Number.isFinite(numericId)
+    ? numericId
+    : Array.from(entity.objectId).reduce((total, char) => total + char.charCodeAt(0), 0);
+  return (Math.abs(seed) % Math.max(frameCount, 1)) * Math.max(frameIntervalMs, 1);
+}
+
 function spriteAnimationMetaForEntity(
   entity: DisplayEntity,
   sprite: EntitySprite,
@@ -5133,6 +7340,7 @@ function spriteAnimationMetaForEntity(
           : sprite.weaponFrameOffset,
       frameCount: Math.max(sprite.frameCount, 1),
       directionStride: Math.max(sprite.directionStride, 1),
+      frameIntervalMs: 450,
     };
   }
 
@@ -5193,6 +7401,7 @@ function spriteAnimationMetaForEntity(
           weaponFrameOffset: null,
           frameCount: Math.max(sprite.frameCount, 1),
           directionStride: Math.max(sprite.directionStride, 1),
+          frameIntervalMs: 500,
         };
     }
   }
@@ -5312,13 +7521,22 @@ function spriteAnimationMetaForEntity(
             : sprite.weaponFrameOffset,
         frameCount: Math.max(sprite.frameCount, 1),
         directionStride: Math.max(sprite.directionStride, 1),
+        frameIntervalMs: 500,
       };
   }
 }
 
-function animationStateForMovement(entity: DisplayEntity, tileDistance: number): EntitySpriteAnimationState {
+function animationStateForMovement(
+  entity: DisplayEntity,
+  tileDistance: number,
+  now: number,
+): EntitySpriteAnimationState {
   if (entity.dead || entity.kind === "npc") {
     return "standing";
+  }
+
+  if (isEntityMovementAnimationActive(entity, now)) {
+    return entity.movementAnimation ?? "walking";
   }
 
   if (entity.kind === "monster") {
@@ -5328,12 +7546,11 @@ function animationStateForMovement(entity: DisplayEntity, tileDistance: number):
   return tileDistance > 1 ? "running" : "walking";
 }
 
-function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, tileDistance: number) {
+function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, _tileDistance: number) {
   switch (animationState) {
     case "running":
-      return Math.max(600, tileDistance * 300);
     case "walking":
-      return Math.max(600, tileDistance * 600);
+      return 600;
     default:
       return 0;
   }
@@ -5368,6 +7585,10 @@ function entityAnimationStateForEntity(
     return entity.attackAnimation === "range" ? "attackRange" : "attackMelee";
   }
 
+  if (isEntityMovementAnimationActive(entity, now)) {
+    return entity.movementAnimation ?? "walking";
+  }
+
   const snapshot = snapshots[entity.objectId];
   if (!snapshot || snapshot.expiresAt <= now) {
     return "standing";
@@ -5392,8 +7613,8 @@ function entityMotionOffsetForEntity(
   }
 
   return {
-    x: (snapshot.fromX - snapshot.toX) * VIEWPORT_CELL_WIDTH * remaining,
-    y: (snapshot.fromY - snapshot.toY) * VIEWPORT_CELL_HEIGHT * remaining,
+    x: crystalMovementPixelOffset((snapshot.fromX - snapshot.toX) * VIEWPORT_CELL_WIDTH * remaining),
+    y: crystalMovementPixelOffset((snapshot.fromY - snapshot.toY) * VIEWPORT_CELL_HEIGHT * remaining),
   };
 }
 
@@ -5440,15 +7661,26 @@ function refreshEntityMotionSnapshots(
     }
 
     if (tileDistance > 0.001) {
-      const animationState = animationStateForMovement(entity, tileDistance);
+      const animationState = animationStateForMovement(entity, tileDistance, now);
+      const packetStartedAt =
+        entity.movementStartedAt !== undefined &&
+        entity.movementStartedAt <= now &&
+        entity.movementUntil !== undefined &&
+        entity.movementUntil > now
+          ? entity.movementStartedAt
+          : now;
+      const packetExpiresAt =
+        entity.movementUntil !== undefined && entity.movementUntil > now
+          ? entity.movementUntil
+          : now + animationStateLifetimeMs(animationState, tileDistance);
       nextSnapshots[entity.objectId] = {
         fromX: previousX,
         fromY: previousY,
         toX: entity.x,
         toY: entity.y,
         animationState,
-        startedAt: now,
-        expiresAt: now + animationStateLifetimeMs(animationState, tileDistance),
+        startedAt: packetStartedAt,
+        expiresAt: packetExpiresAt,
       };
       continue;
     }
@@ -5489,8 +7721,8 @@ function cameraMotionOffsetForEntity(
   }
 
   return {
-    x: (snapshot.toX - snapshot.fromX) * VIEWPORT_CELL_WIDTH * remaining,
-    y: (snapshot.toY - snapshot.fromY) * VIEWPORT_CELL_HEIGHT * remaining,
+    x: crystalMovementPixelOffset((snapshot.toX - snapshot.fromX) * VIEWPORT_CELL_WIDTH * remaining),
+    y: crystalMovementPixelOffset((snapshot.toY - snapshot.fromY) * VIEWPORT_CELL_HEIGHT * remaining),
   };
 }
 
@@ -5499,9 +7731,37 @@ function remainingMotionRatio(snapshot: EntityMotionSnapshot, now: number) {
     return 0;
   }
 
+  return 1 - movementProgressRatio(snapshot, now);
+}
+
+function movementProgressRatio(snapshot: EntityMotionSnapshot, now: number) {
   const duration = snapshot.expiresAt - snapshot.startedAt;
   const elapsed = Math.min(Math.max(now - snapshot.startedAt, 0), duration);
-  return 1 - elapsed / duration;
+
+  if (elapsed >= duration) {
+    return 1;
+  }
+
+  if (snapshot.animationState !== "walking" && snapshot.animationState !== "running") {
+    return elapsed / duration;
+  }
+
+  // Crystal ties walk/run displacement to the same six 100ms frames used by the body sprite.
+  const frameIndex = Math.min(
+    Math.floor(elapsed / CRYSTAL_MOVE_FRAME_INTERVAL_MS),
+    CRYSTAL_MOVE_FRAME_COUNT - 1,
+  );
+  return Math.min((frameIndex + 1) / CRYSTAL_MOVE_FRAME_COUNT, 1);
+}
+
+function crystalMovementPixelOffset(value: number) {
+  if (!Number.isFinite(value) || Math.abs(value) < 0.001) {
+    return 0;
+  }
+
+  const integer = value < 0 ? Math.ceil(value) : Math.floor(value);
+  const even = integer + (integer % 2);
+  return Object.is(even, -0) ? 0 : even;
 }
 
 function currentMotionCoordinate(from: number, to: number, snapshot: EntityMotionSnapshot, now: number) {
@@ -5535,6 +7795,14 @@ function transientFrameCycle(
 
   const raw = Math.floor(Math.max(now - startedAt, 0) / frameIntervalMs);
   return Math.min(raw, frameCount - 1);
+}
+
+function isEntityMovementAnimationActive(entity: DisplayEntity, now: number) {
+  return (
+    (entity.movementAnimation === "walking" || entity.movementAnimation === "running") &&
+    typeof entity.movementUntil === "number" &&
+    entity.movementUntil > now
+  );
 }
 
 function isEntityAttacking(entity: DisplayEntity, now: number) {
@@ -5958,19 +8226,53 @@ function appendViewportMapSprite(
 
   const cellLeft = VIEWPORT_TILE_LEFT_ORIGIN + (cell.x - player.x) * VIEWPORT_CELL_WIDTH;
   const cellTop = VIEWPORT_TILE_TOP_ORIGIN + (cell.y - player.y) * VIEWPORT_CELL_HEIGHT;
+  const crystalOffset = crystalMapFrameOffset(frame);
+  const useCrystalOffset = sprite.drawMode === "object" && crystalMapFrameUsesOffset(frame);
 
   target.push({
     key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
-    left: cellLeft,
+    cellX: cell.x,
+    cellY: cell.y,
+    left: cellLeft + (useCrystalOffset ? crystalOffset.x : 0),
     top:
       sprite.drawMode === "object"
-        ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height
+        ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height + (useCrystalOffset ? crystalOffset.y : 0)
         : cellTop,
     width: frame.width,
     height: frame.height,
     zIndex: viewportDepthForCell(cell.x, cell.y, player, sprite.drawMode === "object" ? 1 : 0),
   });
+}
+
+function crystalMapFrameUsesOffset(frame: OriginalMapSpriteFrame) {
+  return crystalMapFrameHasCrystalOffsetMode(frame.path);
+}
+
+function crystalMapFrameOffset(frame: OriginalMapSpriteFrame): ViewportOffset {
+  if (!crystalMapFrameHasCrystalOffsetMode(frame.path)) {
+    return EMPTY_VIEWPORT_OFFSET;
+  }
+
+  if (typeof frame.offsetX === "number" || typeof frame.offsetY === "number") {
+    return {
+      x: frame.offsetX ?? 0,
+      y: frame.offsetY ?? 0,
+    };
+  }
+
+  // Crystal draws the Bichon torch/fire blend frames with the Lib frame offset enabled.
+  // Older packaged starter-map JSON predates offset export; these 100x100 light frames
+  // are anchored around the red torch head, not the tile floor or lamp base.
+  if (/\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(frame.path)) {
+    return { x: -50, y: -100 };
+  }
+
+  return EMPTY_VIEWPORT_OFFSET;
+}
+
+function crystalMapFrameHasCrystalOffsetMode(path: string) {
+  return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path);
 }
 
 function viewportDepthForCell(
@@ -6066,6 +8368,16 @@ function mapSpriteBlendMode(path: string) {
   return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path) ? "screen" : undefined;
 }
 
+function mapSpriteRenderPath(path: string) {
+  const frame = bichonTorchLightFrame(path);
+  return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
+}
+
+function bichonTorchLightFrame(path: string) {
+  const match = path.match(/\/original-map\/WemadeMir2\/Objects\/(27(?:2[3-9]|3[0-2]))\.png$/i);
+  return match?.[1] ?? null;
+}
+
 function playerFacingChatLines(logs: DisplayLogLine[], activeFilter: ChatFilterKey) {
   const lines = logs
     .filter((line) => line.tone !== "network")
@@ -6097,6 +8409,8 @@ function matchesChatFilter(line: DisplayLogLine, activeFilter: ChatFilterKey) {
       return true;
     case "shout":
       return line.channel === "shout" || line.channel === "announcement";
+    case "trade":
+      return line.channel === "trade";
     case "whisper":
       return line.channel === "whisper";
     case "group":

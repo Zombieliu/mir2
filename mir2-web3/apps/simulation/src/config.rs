@@ -13,7 +13,10 @@ use mir2_game_data::{
     starter_map_collision, starter_scene, DecorObjectTemplate, MapBounds, SceneBootstrap,
     SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
-use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point, SelectInfo};
+use mir2_protocol::{
+    ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
+    SelectInfo, UserItemStat,
+};
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -184,8 +187,123 @@ struct AccountStoreSourceVersions {
     saves: BTreeMap<String, BTreeMap<i32, i64>>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountStoreRepositoryStatus {
+    pub backend: String,
+    pub mode: AccountStoreDatabaseMode,
+    pub configured: bool,
+    pub location: String,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct AccountStoreRepositorySave {
+    pub account_versions: BTreeMap<String, i64>,
+    pub save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
+}
+
+impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
+    fn from(value: AccountStoreSourceVersions) -> Self {
+        Self {
+            account_versions: value.accounts,
+            save_versions: value.saves,
+        }
+    }
+}
+
+impl AccountStoreRepositorySave {
+    fn into_source_versions(self) -> AccountStoreSourceVersions {
+        AccountStoreSourceVersions {
+            accounts: self.account_versions,
+            saves: self.save_versions,
+        }
+    }
+}
+
+pub trait AccountStoreRepository: Send + Sync {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String>;
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String>;
+    fn status(&self) -> AccountStoreRepositoryStatus;
+}
+
+#[derive(Debug, Clone)]
+pub struct FileAccountStoreRepository {
+    path: PathBuf,
+}
+
+impl FileAccountStoreRepository {
+    pub fn new(path: impl Into<PathBuf>) -> Self {
+        Self { path: path.into() }
+    }
+}
+
+impl AccountStoreRepository for FileAccountStoreRepository {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String> {
+        Ok(AccountStore::load_or_new(&self.path, default_character))
+    }
+
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
+        save_account_store_snapshot_to_path(store, &self.path)?;
+        Ok(AccountStoreRepositorySave::default())
+    }
+
+    fn status(&self) -> AccountStoreRepositoryStatus {
+        AccountStoreRepositoryStatus {
+            backend: "file".to_string(),
+            mode: AccountStoreDatabaseMode::Mirror,
+            configured: true,
+            location: self.path.display().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PostgresAccountStoreRepository {
+    database_url: String,
+    mode: AccountStoreDatabaseMode,
+}
+
+impl PostgresAccountStoreRepository {
+    pub fn new(database_url: impl Into<String>, mode: AccountStoreDatabaseMode) -> Self {
+        Self {
+            database_url: database_url.into(),
+            mode,
+        }
+    }
+}
+
+impl AccountStoreRepository for PostgresAccountStoreRepository {
+    fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String> {
+        load_account_store_from_postgres(self.database_url.clone(), default_character)
+    }
+
+    fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
+        save_account_store_to_postgres(self.database_url.clone(), store.clone(), self.mode)
+            .map(AccountStoreRepositorySave::from)
+    }
+
+    fn status(&self) -> AccountStoreRepositoryStatus {
+        AccountStoreRepositoryStatus {
+            backend: "postgres".to_string(),
+            mode: self.mode,
+            configured: !self.database_url.trim().is_empty(),
+            location: redact_database_url(&self.database_url),
+        }
+    }
+}
+
 const fn legacy_account_store_schema_version() -> u16 {
     1
+}
+
+fn redact_database_url(database_url: &str) -> String {
+    let Some((scheme, rest)) = database_url.split_once("://") else {
+        return "<configured>".to_string();
+    };
+    let Some(at_index) = rest.rfind('@') else {
+        return format!("{scheme}://<configured>");
+    };
+    format!("{scheme}://<redacted>@{}", &rest[at_index + 1..])
 }
 
 fn write_file_atomically(path: &Path, data: &[u8]) -> io::Result<()> {
@@ -398,6 +516,12 @@ pub struct CharacterSaveRecord {
     pub gold: u32,
     #[serde(default)]
     pub credit: u32,
+    #[serde(default)]
+    pub pk_points: i32,
+    #[serde(default)]
+    pub chat_banned: bool,
+    #[serde(default)]
+    pub chat_ban_until_ms: Option<u64>,
     pub inventory_items_json: Vec<String>,
     pub belt_items_json: Vec<String>,
     #[serde(default)]
@@ -415,6 +539,10 @@ pub struct CharacterSaveRecord {
     pub npc_buy_back_items_json: Vec<String>,
     #[serde(default)]
     pub npc_used_goods_items_json: Vec<String>,
+    #[serde(default)]
+    pub item_rental_records_json: Vec<String>,
+    #[serde(default)]
+    pub has_rented_item: bool,
     #[serde(default)]
     pub stage5_systems_json: Option<String>,
 }
@@ -453,6 +581,9 @@ impl CharacterSaveRecord {
             max_experience: default_max_experience(),
             gold: 1280,
             credit: 0,
+            pk_points: 0,
+            chat_banned: false,
+            chat_ban_until_ms: None,
             inventory_items_json: Vec::new(),
             belt_items_json: Vec::new(),
             storage_items_json: Vec::new(),
@@ -464,6 +595,8 @@ impl CharacterSaveRecord {
             npc_saved_values_json: Vec::new(),
             npc_buy_back_items_json: Vec::new(),
             npc_used_goods_items_json: Vec::new(),
+            item_rental_records_json: Vec::new(),
+            has_rented_item: false,
             stage5_systems_json: None,
         }
     }
@@ -697,6 +830,51 @@ mod tests {
             })
             .count();
         assert_eq!(temp_files, 0);
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn file_account_store_repository_loads_saves_and_reports_status() {
+        let dir = unique_temp_dir("repository-file");
+        let path = dir.join("accounts.json");
+        let repository = FileAccountStoreRepository::new(path.clone());
+        let mut store = repository
+            .load(default_character())
+            .expect("file repository should load default store");
+        store
+            .accounts
+            .insert("repo".to_string(), AccountRecord::empty());
+
+        repository
+            .save(&store)
+            .expect("file repository should save store");
+        let reloaded = repository
+            .load(default_character())
+            .expect("file repository should reload store");
+        let status = repository.status();
+
+        assert!(reloaded.accounts.contains_key("repo"));
+        assert_eq!(status.backend, "file");
+        assert_eq!(status.mode, AccountStoreDatabaseMode::Mirror);
+        assert_eq!(status.location, path.display().to_string());
+        let _ = fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn simulation_config_reports_configured_account_store_repositories() {
+        let dir = unique_temp_dir("repository-status");
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default()
+            .with_account_store_path(path)
+            .with_account_store_database_url("postgres://user:secret@db:5432/mir2");
+
+        let statuses = config.account_store_repository_statuses();
+
+        assert_eq!(statuses.len(), 2);
+        assert_eq!(statuses[0].backend, "file");
+        assert_eq!(statuses[1].backend, "postgres");
+        assert_eq!(statuses[1].mode, AccountStoreDatabaseMode::Mirror);
+        assert_eq!(statuses[1].location, "postgres://<redacted>@db:5432/mir2");
         let _ = fs::remove_dir_all(dir);
     }
 
@@ -1061,6 +1239,8 @@ pub struct MapDropRuleRecord {
     pub no_throw_item: bool,
     pub no_drop_player: bool,
     pub no_drop_monster: bool,
+    pub no_mount: bool,
+    pub need_bridle: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1069,7 +1249,8 @@ pub enum MonsterSpawnSource {
     CrystalStarterRegion,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum AccountStoreDatabaseMode {
     Mirror,
     SourceOfTruth,
@@ -1191,10 +1372,15 @@ impl SimulationConfig {
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {
         let path = path.into();
-        self.account_store = Arc::new(Mutex::new(AccountStore::load_or_new(
-            &path,
-            self.default_character.clone(),
-        )));
+        let repository = FileAccountStoreRepository::new(path.clone());
+        self.account_store = Arc::new(Mutex::new(
+            repository
+                .load(self.default_character.clone())
+                .unwrap_or_else(|error| {
+                    eprintln!("failed to load file account store, using default: {error}");
+                    AccountStore::new(self.default_character.clone())
+                }),
+        ));
         self.account_store_path = Some(path);
         self
     }
@@ -1211,14 +1397,16 @@ impl SimulationConfig {
     pub fn with_postgres_account_store(mut self, database_url: impl Into<String>) -> Self {
         let database_url = database_url.into();
         if !database_url.trim().is_empty() {
-            let store = load_account_store_from_postgres(
+            let repository = PostgresAccountStoreRepository::new(
                 database_url.clone(),
-                self.default_character.clone(),
-            )
-            .unwrap_or_else(|error| {
-                eprintln!("failed to load postgres account store, using default: {error}");
-                AccountStore::new(self.default_character.clone())
-            });
+                AccountStoreDatabaseMode::SourceOfTruth,
+            );
+            let store = repository
+                .load(self.default_character.clone())
+                .unwrap_or_else(|error| {
+                    eprintln!("failed to load postgres account store, using default: {error}");
+                    AccountStore::new(self.default_character.clone())
+                });
             self.account_store = Arc::new(Mutex::new(store));
             self.account_store_path = None;
             self.account_store_database_url = Some(database_url);
@@ -1236,14 +1424,13 @@ impl SimulationConfig {
             store.clone()
         };
         if let Some(path) = self.account_store_path.as_deref() {
-            save_account_store_snapshot_to_path(&store, path)?;
+            FileAccountStoreRepository::new(path).save(&store)?;
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
-            let source_versions = save_account_store_to_postgres(
-                database_url.to_string(),
-                store,
-                self.account_store_database_mode,
-            )?;
+            let source_versions =
+                PostgresAccountStoreRepository::new(database_url, self.account_store_database_mode)
+                    .save(&store)?
+                    .into_source_versions();
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
                 let mut store = self
                     .account_store
@@ -1254,6 +1441,31 @@ impl SimulationConfig {
             }
         }
         Ok(())
+    }
+
+    pub fn account_store_repository_statuses(&self) -> Vec<AccountStoreRepositoryStatus> {
+        let mut statuses = Vec::new();
+        if let Some(path) = self.account_store_path.as_ref() {
+            statuses.push(FileAccountStoreRepository::new(path.clone()).status());
+        }
+        if let Some(database_url) = self.account_store_database_url.as_ref() {
+            statuses.push(
+                PostgresAccountStoreRepository::new(
+                    database_url.clone(),
+                    self.account_store_database_mode,
+                )
+                .status(),
+            );
+        }
+        if statuses.is_empty() {
+            statuses.push(AccountStoreRepositoryStatus {
+                backend: "memory".to_string(),
+                mode: AccountStoreDatabaseMode::Mirror,
+                configured: true,
+                location: "process".to_string(),
+            });
+        }
+        statuses
     }
 
     pub fn backup_account_store(&self, backup_path: impl AsRef<Path>) -> Result<(), String> {
@@ -1819,6 +2031,7 @@ pub struct WorldItemSnapshot {
     pub key: String,
     pub name: String,
     pub icon: u16,
+    pub unique_id: u64,
     pub slot: u8,
     pub container: ItemContainer,
     pub quantity: u32,
@@ -1861,6 +2074,29 @@ pub struct GroundDropSnapshot {
     pub y: i32,
     pub quantity: u32,
     pub source_monster: String,
+    pub loot: GroundDropLootSnapshot,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum GroundDropLootSnapshot {
+    Gold {
+        amount: u32,
+    },
+    InventoryItem {
+        key: String,
+        name: String,
+        description: String,
+        weight: u16,
+        durability_current: Option<u16>,
+        durability_max: Option<u16>,
+        added_attack: i32,
+        added_defence: i32,
+        added_stats: Vec<UserItemStat>,
+        cursed: bool,
+        socket_slots: u8,
+        show_group_pickup: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -1910,6 +2146,11 @@ pub struct SkillSnapshot {
     pub key: String,
     pub name: String,
     pub description: String,
+    pub level: u8,
+    pub experience: u16,
+    pub hotkey: u8,
+    pub delay_ms: i64,
+    pub cast_time_ms: i64,
     pub cooldown_remaining_ticks: u32,
 }
 
@@ -1930,9 +2171,15 @@ pub struct Stage5SystemsState {
     pub group: Stage5GroupState,
     pub guild: Stage5GuildState,
     pub social: Stage5SocialState,
+    #[serde(default)]
+    pub relationship: Stage5RelationshipState,
+    #[serde(default)]
+    pub mentor: Stage5MentorState,
     pub mail: Vec<Stage5MailMessage>,
     pub trade: Option<Stage5TradeState>,
     pub auction: Vec<Stage5AuctionListing>,
+    #[serde(default)]
+    pub refine: Stage5RefineState,
     pub conquest: Stage5ConquestState,
     #[serde(default)]
     pub guild_territory: Stage5GuildTerritoryState,
@@ -1942,6 +2189,10 @@ pub struct Stage5SystemsState {
     pub appearance: Stage5AppearanceState,
     #[serde(default)]
     pub name_lists: Vec<String>,
+    #[serde(default)]
+    pub intelligent_creatures: Vec<ClientIntelligentCreature>,
+    #[serde(default)]
+    pub item_rental: Stage5ItemRentalSnapshot,
 }
 
 impl Default for Stage5SystemsState {
@@ -1950,29 +2201,64 @@ impl Default for Stage5SystemsState {
             group: Stage5GroupState::default(),
             guild: Stage5GuildState::default(),
             social: Stage5SocialState::default(),
+            relationship: Stage5RelationshipState::default(),
+            mentor: Stage5MentorState::default(),
             mail: Vec::new(),
             trade: None,
             auction: Vec::new(),
+            refine: Stage5RefineState::default(),
             conquest: Stage5ConquestState::default(),
             guild_territory: Stage5GuildTerritoryState::default(),
             hero: None,
             profession: Stage5ProfessionState::default(),
             appearance: Stage5AppearanceState::default(),
             name_lists: Vec::new(),
+            intelligent_creatures: Vec::new(),
+            item_rental: Stage5ItemRentalSnapshot::default(),
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5ItemRentalSnapshot {
+    pub partner_name: Option<String>,
+    pub fee: u32,
+    pub days: u32,
+    pub has_deposited_item: bool,
+    pub deposited_item_name: Option<String>,
+    pub gold_locked: bool,
+    pub item_locked: bool,
+    pub record_count: usize,
+    pub rented_items: Vec<Stage5ItemRentalRecordSnapshot>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5ItemRentalRecordSnapshot {
+    pub item_id: u64,
+    pub item_name: String,
+    pub renting_player_name: String,
+    pub item_return_date_binary_datetime: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5GroupState {
+    #[serde(default = "default_stage5_allow_group")]
+    pub allow_group: bool,
     pub members: Vec<String>,
     pub loot_mode: String,
+}
+
+const fn default_stage5_allow_group() -> bool {
+    true
 }
 
 impl Default for Stage5GroupState {
     fn default() -> Self {
         Self {
+            allow_group: true,
             members: Vec::new(),
             loot_mode: "free".to_string(),
         }
@@ -1994,6 +2280,82 @@ pub struct Stage5GuildState {
 pub struct Stage5SocialState {
     pub friends: Vec<String>,
     pub blocked: Vec<String>,
+    #[serde(default)]
+    pub memos: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5RelationshipState {
+    #[serde(default = "default_stage5_allow_marriage")]
+    pub allow_marriage: bool,
+    #[serde(default)]
+    pub partner_name: String,
+    #[serde(default)]
+    pub married_date_binary_datetime: i64,
+    #[serde(default)]
+    pub map_name: String,
+    #[serde(default)]
+    pub married_days: i16,
+    #[serde(default)]
+    pub pending_request_from: Option<String>,
+    #[serde(default)]
+    pub pending_divorce_from: Option<String>,
+}
+
+const fn default_stage5_allow_marriage() -> bool {
+    true
+}
+
+impl Default for Stage5RelationshipState {
+    fn default() -> Self {
+        Self {
+            allow_marriage: true,
+            partner_name: String::new(),
+            married_date_binary_datetime: 0,
+            map_name: String::new(),
+            married_days: 0,
+            pending_request_from: None,
+            pending_divorce_from: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5MentorState {
+    #[serde(default = "default_stage5_allow_mentor")]
+    pub allow_mentor: bool,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub level: u16,
+    #[serde(default)]
+    pub online: bool,
+    #[serde(default)]
+    pub mentee_exp: i64,
+    #[serde(default)]
+    pub pending_request_from: Option<String>,
+    #[serde(default)]
+    pub pending_request_level: u16,
+}
+
+const fn default_stage5_allow_mentor() -> bool {
+    true
+}
+
+impl Default for Stage5MentorState {
+    fn default() -> Self {
+        Self {
+            allow_mentor: true,
+            name: String::new(),
+            level: 0,
+            online: false,
+            mentee_exp: 0,
+            pending_request_from: None,
+            pending_request_level: 0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2241,8 +2603,12 @@ fn stage5_mail_character_matches(
 pub struct Stage5TradeState {
     pub partner: String,
     pub offered_items: Vec<String>,
+    #[serde(default)]
+    pub offered_slots: BTreeMap<u8, u8>,
     pub offered_gold: u32,
     pub accepted: bool,
+    #[serde(default)]
+    pub locked: bool,
     pub completed: bool,
 }
 
@@ -2255,6 +2621,17 @@ pub struct Stage5AuctionListing {
     pub price: u32,
     pub sold: bool,
     pub cancelled: bool,
+    #[serde(default)]
+    pub expired: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Stage5RefineState {
+    pub slots: BTreeMap<u8, String>,
+    pub current_item: Option<String>,
+    pub refining: bool,
+    pub ready: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -2302,7 +2679,23 @@ pub struct Stage5AppearanceState {
 pub struct Stage5HeroState {
     pub name: String,
     pub level: u16,
+    #[serde(default = "default_stage5_hero_class")]
+    pub class: MirClass,
+    #[serde(default = "default_stage5_hero_gender")]
+    pub gender: MirGender,
     pub behaviour: u8,
+    #[serde(default)]
+    pub experience: u32,
+    #[serde(default)]
+    pub spawned: bool,
+}
+
+fn default_stage5_hero_class() -> MirClass {
+    MirClass::Warrior
+}
+
+fn default_stage5_hero_gender() -> MirGender {
+    MirGender::Male
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]

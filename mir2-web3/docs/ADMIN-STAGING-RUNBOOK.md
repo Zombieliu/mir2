@@ -1,6 +1,6 @@
 # Admin Staging Runbook
 
-Last updated: 2026-04-29
+Last updated: 2026-05-06
 
 Status: staging-ready runbook. This is not a production-readiness sign-off.
 
@@ -39,6 +39,7 @@ Player Web
   -> Gateway WebSocket
       -> Rust simulation/account store
       -> Redis session/routing cache
+      -> Redpanda gameplay events
       -> Admin API zone heartbeat
 ```
 
@@ -58,8 +59,8 @@ Provision these first:
 | Postgres | Admin commands, audit, approvals, operators, account store | Persistent volume, automated backup, private network only |
 | Redis | Non-authoritative online session and kick routing cache | Private network only, TTL eviction acceptable |
 | NATS JetStream | Admin outbox notification bus | Persistent JetStream storage |
-| Redpanda | Append-only admin analytics event stream | Internal Kafka/Pandaproxy endpoint |
-| ClickHouse | Admin Audit/Timeline event projection | Private endpoint, initialized from `infra/clickhouse/initdb` |
+| Redpanda | Append-only admin and gameplay analytics event stream | Internal Kafka/Pandaproxy endpoint |
+| ClickHouse | Admin Audit/Timeline and gameplay event projection | Private endpoint, initialized from `infra/clickhouse/initdb` |
 | Gateway | Gameplay WebSocket plus admin mail/kick/session endpoints | Public player WS/HTTP, private admin path if possible |
 | Admin API | Rust control plane | Private to Admin Web/Gateway where possible |
 | Admin Web | Operator UI | TLS, operator-only access |
@@ -107,6 +108,9 @@ Required:
 - `MIR2_ACCOUNT_STORE_DATABASE_URL`
 - `MIR2_GATEWAY_REDIS_CACHE_URL`
 - `MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS`
+- `MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS`
+- `MIR2_GAMEPLAY_EVENT_REDPANDA_URL`
+- `MIR2_GAMEPLAY_EVENT_TOPIC`
 - `ADMIN_API_BASE_URL`
 - `MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN`
 - `MIR2_GATEWAY_ZONE_ID`
@@ -165,7 +169,8 @@ WebSocket before broad player acceptance.
      admin.approval.approved \
      admin.approval.rejected \
      admin.outbox.retry \
-     admin.outbox.dead_letter
+     admin.outbox.dead_letter \
+     gameplay.command.executed
    ```
 
 5. Seed the first operators.
@@ -247,6 +252,8 @@ curl -fsS "$PLAYER_WEB_URL/"
 Pass criteria:
 
 - Gateway and Admin API return healthy responses.
+- Gateway `/health` includes `gameplayEvents.configured=true` and topic
+  `gameplay.command.executed`.
 - Admin Web `/login` returns 200.
 - Player Web first page returns 200.
 
@@ -319,12 +326,23 @@ curl -fsS "$ADMIN_API_INTERNAL_URL/admin/events?commandId=$COMMAND_ID&limit=10" 
 
 curl -fsS "$ADMIN_API_INTERNAL_URL/admin/timeline?commandId=$COMMAND_ID&limit=20" \
   -H "authorization: Bearer $LEAD_OPERATOR_TOKEN"
+
+curl -fsS "$ADMIN_API_INTERNAL_URL/admin/gameplay-events?characterName=Scout&limit=10" \
+  -H "authorization: Bearer $LEAD_OPERATOR_TOKEN"
+
+curl -fsS "$ADMIN_API_INTERNAL_URL/admin/gameplay-events/summary?windowSeconds=300&limit=10" \
+  -H "authorization: Bearer $LEAD_OPERATOR_TOKEN"
 ```
 
 Pass criteria:
 
 - `/admin/events` returns `degraded: false`.
 - `/admin/timeline` returns `degraded: false`.
+- `/admin/gameplay-events` returns `degraded: false` after a player performs at
+  least one Gateway command with gameplay event publishing enabled.
+- `/admin/gameplay-events/summary` returns `degraded: false`, a non-zero
+  `totalCount`, a `lastOccurredAtMs`, and a bounded `lagMs` after the same
+  smoke command.
 - Records include approval requested, approval approved, command succeeded,
   audit, and command status entries.
 

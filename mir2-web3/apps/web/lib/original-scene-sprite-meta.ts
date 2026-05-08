@@ -1,3 +1,5 @@
+import originalSceneSpriteManifest from "../public/original-ui/manifest.generated.json";
+
 export type OriginalSceneSpriteFrameMeta = {
   index: number;
   width: number;
@@ -16,14 +18,27 @@ type OriginalSceneSpriteLibraryPayload = {
   frames: OriginalSceneSpriteFrameMeta[];
 };
 
+type OriginalSceneSpriteManifestPayload = {
+  libraries?: Record<string, unknown>;
+};
+
 export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload & {
   frameMap: Map<number, OriginalSceneSpriteFrameMeta>;
 };
 
 const libraryCache = new Map<string, Promise<OriginalSceneSpriteLibraryMeta>>();
+const availableSceneSpriteLibraries = new Set(
+  Object.keys((originalSceneSpriteManifest as OriginalSceneSpriteManifestPayload).libraries ?? {}).map(
+    normalizeSceneSpriteLibraryKey,
+  ),
+);
 
 export function normalizeSceneSpriteLibraryKey(libraryKey: string) {
   return libraryKey.replaceAll("\\", "/");
+}
+
+export function originalSceneSpriteLibraryExists(libraryKey: string) {
+  return availableSceneSpriteLibraries.has(normalizeSceneSpriteLibraryKey(libraryKey));
 }
 
 export function loadOriginalSceneSpriteLibrary(
@@ -33,6 +48,9 @@ export function loadOriginalSceneSpriteLibrary(
   const cached = libraryCache.get(normalizedKey);
   if (cached) {
     return cached;
+  }
+  if (!originalSceneSpriteLibraryExists(normalizedKey)) {
+    return Promise.reject(new Error(`sprite meta ${normalizedKey} is not exported`));
   }
 
   const pending = fetch(`/original-ui/${normalizedKey}/meta.json`)

@@ -198,11 +198,135 @@ impl TryFrom<u8> for MirGridType {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Spell {
     None = 0,
+    Fencing = 1,
+    Slaying = 2,
+    Thrusting = 3,
+    HalfMoon = 4,
+    ShoulderDash = 5,
+    TwinDrakeBlade = 6,
+    Entrapment = 7,
+    FlamingSword = 8,
+    LionRoar = 9,
+    CrossHalfMoon = 10,
+    BladeAvalanche = 11,
+    ProtectionField = 12,
+    Rage = 13,
+    CounterAttack = 14,
+    SlashingBurst = 15,
+    Fury = 16,
+    ImmortalSkin = 17,
+    FireBall = 31,
+    Repulsion = 32,
+    ElectricShock = 33,
+    GreatFireBall = 34,
+    HellFire = 35,
+    ThunderBolt = 36,
+    Teleport = 37,
+    FireBang = 38,
+    FireWall = 39,
+    Lightning = 40,
+    FrostCrunch = 41,
+    ThunderStorm = 42,
+    MagicShield = 43,
+    TurnUndead = 44,
+    Vampirism = 45,
+    IceStorm = 46,
+    FlameDisruptor = 47,
+    Mirroring = 48,
+    FlameField = 49,
+    Blizzard = 50,
+    MagicBooster = 51,
+    MeteorStrike = 52,
+    IceThrust = 53,
+    FastMove = 54,
+    StormEscape = 55,
     Healing = 61,
+    SpiritSword = 62,
+    Poisoning = 63,
+    SoulFireBall = 64,
+    SummonSkeleton = 65,
+    Hiding = 67,
+    MassHiding = 68,
+    SoulShield = 69,
+    Revelation = 70,
+    BlessedArmour = 71,
+    EnergyRepulsor = 72,
     TrapHexagon = 73,
+    Purification = 74,
+    MassHealing = 75,
+    Hallucination = 76,
+    UltimateEnhancer = 77,
+    SummonShinsu = 78,
+    Reincarnation = 79,
+    SummonHolyDeva = 80,
+    Curse = 81,
+    Plague = 82,
+    PoisonCloud = 83,
+    EnergyShield = 84,
+    PetEnhancer = 85,
+    HealingCircle = 86,
+    FatalSword = 91,
+    DoubleSlash = 92,
+    Haste = 93,
+    FlashDash = 94,
+    LightBody = 95,
+    HeavenlySword = 96,
+    FireBurst = 97,
+    Trap = 98,
+    PoisonSword = 99,
+    MoonLight = 100,
+    MPEater = 101,
+    SwiftFeet = 102,
+    DarkBody = 103,
+    Hemorrhage = 104,
+    CrescentSlash = 105,
+    MoonMist = 106,
+    CatTongue = 107,
+    Focus = 121,
+    StraightShot = 122,
+    DoubleShot = 123,
+    ExplosiveTrap = 124,
+    DelayedExplosion = 125,
+    Meditation = 126,
+    BackStep = 127,
+    ElementalShot = 128,
+    Concentration = 129,
+    Stonetrap = 130,
+    ElementalBarrier = 131,
+    SummonVampire = 132,
+    VampireShot = 133,
+    SummonToad = 134,
+    PoisonShot = 135,
+    CrippleShot = 136,
+    SummonSnakes = 137,
+    NapalmShot = 138,
+    OneWithNature = 139,
+    BindingShot = 140,
+    MentalState = 141,
+    Blink = 151,
+    Portal = 152,
+    BattleCry = 153,
+    FireBounce = 154,
+    MeteorShower = 155,
+    DigOutZombie = 200,
+    Rubble = 201,
+    MapLightning = 202,
+    MapLava = 203,
+    MapQuake1 = 204,
+    MapQuake2 = 205,
     DigOutArmadillo = 206,
     GeneralMeowMeowThunder = 207,
+    StoneGolemQuake = 208,
+    EarthGolemPile = 209,
+    TreeQueenRoot = 210,
+    TreeQueenMassRoots = 211,
+    TreeQueenGroundRoots = 212,
     TucsonGeneralRock = 213,
+    FlyingStatueIceTornado = 214,
+    DarkOmaKingNuke = 215,
+    HornedSorcererDustTornado = 216,
+    HornedCommanderRockFall = 217,
+    HornedCommanderRockSpike = 218,
 }
 
 impl TryFrom<u8> for Spell {
@@ -211,15 +335,277 @@ impl TryFrom<u8> for Spell {
     fn try_from(value: u8) -> Result<Self> {
         match value {
             0 => Ok(Self::None),
+            1 => Ok(Self::Fencing),
+            2 => Ok(Self::Slaying),
+            3 => Ok(Self::Thrusting),
+            4 => Ok(Self::HalfMoon),
+            5 => Ok(Self::ShoulderDash),
+            6 => Ok(Self::TwinDrakeBlade),
+            7 => Ok(Self::Entrapment),
+            8 => Ok(Self::FlamingSword),
+            9 => Ok(Self::LionRoar),
+            10 => Ok(Self::CrossHalfMoon),
+            11 => Ok(Self::BladeAvalanche),
+            12 => Ok(Self::ProtectionField),
+            13 => Ok(Self::Rage),
+            14 => Ok(Self::CounterAttack),
+            15 => Ok(Self::SlashingBurst),
+            16 => Ok(Self::Fury),
+            17 => Ok(Self::ImmortalSkin),
+            31 => Ok(Self::FireBall),
+            32 => Ok(Self::Repulsion),
+            33 => Ok(Self::ElectricShock),
+            34 => Ok(Self::GreatFireBall),
+            35 => Ok(Self::HellFire),
+            36 => Ok(Self::ThunderBolt),
+            37 => Ok(Self::Teleport),
+            38 => Ok(Self::FireBang),
+            39 => Ok(Self::FireWall),
+            40 => Ok(Self::Lightning),
+            41 => Ok(Self::FrostCrunch),
+            42 => Ok(Self::ThunderStorm),
+            43 => Ok(Self::MagicShield),
+            44 => Ok(Self::TurnUndead),
+            45 => Ok(Self::Vampirism),
+            46 => Ok(Self::IceStorm),
+            47 => Ok(Self::FlameDisruptor),
+            48 => Ok(Self::Mirroring),
+            49 => Ok(Self::FlameField),
+            50 => Ok(Self::Blizzard),
+            51 => Ok(Self::MagicBooster),
+            52 => Ok(Self::MeteorStrike),
+            53 => Ok(Self::IceThrust),
+            54 => Ok(Self::FastMove),
+            55 => Ok(Self::StormEscape),
             61 => Ok(Self::Healing),
+            62 => Ok(Self::SpiritSword),
+            63 => Ok(Self::Poisoning),
+            64 => Ok(Self::SoulFireBall),
+            65 => Ok(Self::SummonSkeleton),
+            67 => Ok(Self::Hiding),
+            68 => Ok(Self::MassHiding),
+            69 => Ok(Self::SoulShield),
+            70 => Ok(Self::Revelation),
+            71 => Ok(Self::BlessedArmour),
+            72 => Ok(Self::EnergyRepulsor),
             73 => Ok(Self::TrapHexagon),
+            74 => Ok(Self::Purification),
+            75 => Ok(Self::MassHealing),
+            76 => Ok(Self::Hallucination),
+            77 => Ok(Self::UltimateEnhancer),
+            78 => Ok(Self::SummonShinsu),
+            79 => Ok(Self::Reincarnation),
+            80 => Ok(Self::SummonHolyDeva),
+            81 => Ok(Self::Curse),
+            82 => Ok(Self::Plague),
+            83 => Ok(Self::PoisonCloud),
+            84 => Ok(Self::EnergyShield),
+            85 => Ok(Self::PetEnhancer),
+            86 => Ok(Self::HealingCircle),
+            91 => Ok(Self::FatalSword),
+            92 => Ok(Self::DoubleSlash),
+            93 => Ok(Self::Haste),
+            94 => Ok(Self::FlashDash),
+            95 => Ok(Self::LightBody),
+            96 => Ok(Self::HeavenlySword),
+            97 => Ok(Self::FireBurst),
+            98 => Ok(Self::Trap),
+            99 => Ok(Self::PoisonSword),
+            100 => Ok(Self::MoonLight),
+            101 => Ok(Self::MPEater),
+            102 => Ok(Self::SwiftFeet),
+            103 => Ok(Self::DarkBody),
+            104 => Ok(Self::Hemorrhage),
+            105 => Ok(Self::CrescentSlash),
+            106 => Ok(Self::MoonMist),
+            107 => Ok(Self::CatTongue),
+            121 => Ok(Self::Focus),
+            122 => Ok(Self::StraightShot),
+            123 => Ok(Self::DoubleShot),
+            124 => Ok(Self::ExplosiveTrap),
+            125 => Ok(Self::DelayedExplosion),
+            126 => Ok(Self::Meditation),
+            127 => Ok(Self::BackStep),
+            128 => Ok(Self::ElementalShot),
+            129 => Ok(Self::Concentration),
+            130 => Ok(Self::Stonetrap),
+            131 => Ok(Self::ElementalBarrier),
+            132 => Ok(Self::SummonVampire),
+            133 => Ok(Self::VampireShot),
+            134 => Ok(Self::SummonToad),
+            135 => Ok(Self::PoisonShot),
+            136 => Ok(Self::CrippleShot),
+            137 => Ok(Self::SummonSnakes),
+            138 => Ok(Self::NapalmShot),
+            139 => Ok(Self::OneWithNature),
+            140 => Ok(Self::BindingShot),
+            141 => Ok(Self::MentalState),
+            151 => Ok(Self::Blink),
+            152 => Ok(Self::Portal),
+            153 => Ok(Self::BattleCry),
+            154 => Ok(Self::FireBounce),
+            155 => Ok(Self::MeteorShower),
+            200 => Ok(Self::DigOutZombie),
+            201 => Ok(Self::Rubble),
+            202 => Ok(Self::MapLightning),
+            203 => Ok(Self::MapLava),
+            204 => Ok(Self::MapQuake1),
+            205 => Ok(Self::MapQuake2),
             206 => Ok(Self::DigOutArmadillo),
             207 => Ok(Self::GeneralMeowMeowThunder),
+            208 => Ok(Self::StoneGolemQuake),
+            209 => Ok(Self::EarthGolemPile),
+            210 => Ok(Self::TreeQueenRoot),
+            211 => Ok(Self::TreeQueenMassRoots),
+            212 => Ok(Self::TreeQueenGroundRoots),
             213 => Ok(Self::TucsonGeneralRock),
+            214 => Ok(Self::FlyingStatueIceTornado),
+            215 => Ok(Self::DarkOmaKingNuke),
+            216 => Ok(Self::HornedSorcererDustTornado),
+            217 => Ok(Self::HornedCommanderRockFall),
+            218 => Ok(Self::HornedCommanderRockSpike),
             other => Err(PacketCodecError::InvalidEnumValue {
                 type_name: "Spell",
                 value: other,
             }),
+        }
+    }
+}
+
+impl Spell {
+    pub fn from_crystal_name(name: &str) -> Option<Self> {
+        match name {
+            "None" => Some(Self::None),
+            "Fencing" => Some(Self::Fencing),
+            "Slaying" => Some(Self::Slaying),
+            "Thrusting" => Some(Self::Thrusting),
+            "HalfMoon" => Some(Self::HalfMoon),
+            "ShoulderDash" => Some(Self::ShoulderDash),
+            "TwinDrakeBlade" => Some(Self::TwinDrakeBlade),
+            "Entrapment" => Some(Self::Entrapment),
+            "FlamingSword" => Some(Self::FlamingSword),
+            "LionRoar" => Some(Self::LionRoar),
+            "CrossHalfMoon" => Some(Self::CrossHalfMoon),
+            "BladeAvalanche" => Some(Self::BladeAvalanche),
+            "ProtectionField" => Some(Self::ProtectionField),
+            "Rage" => Some(Self::Rage),
+            "CounterAttack" => Some(Self::CounterAttack),
+            "SlashingBurst" => Some(Self::SlashingBurst),
+            "Fury" => Some(Self::Fury),
+            "ImmortalSkin" => Some(Self::ImmortalSkin),
+            "FireBall" => Some(Self::FireBall),
+            "Repulsion" => Some(Self::Repulsion),
+            "ElectricShock" => Some(Self::ElectricShock),
+            "GreatFireBall" => Some(Self::GreatFireBall),
+            "HellFire" => Some(Self::HellFire),
+            "ThunderBolt" => Some(Self::ThunderBolt),
+            "Teleport" => Some(Self::Teleport),
+            "FireBang" => Some(Self::FireBang),
+            "FireWall" => Some(Self::FireWall),
+            "Lightning" => Some(Self::Lightning),
+            "FrostCrunch" => Some(Self::FrostCrunch),
+            "ThunderStorm" => Some(Self::ThunderStorm),
+            "MagicShield" => Some(Self::MagicShield),
+            "TurnUndead" => Some(Self::TurnUndead),
+            "Vampirism" => Some(Self::Vampirism),
+            "IceStorm" => Some(Self::IceStorm),
+            "FlameDisruptor" => Some(Self::FlameDisruptor),
+            "Mirroring" => Some(Self::Mirroring),
+            "FlameField" => Some(Self::FlameField),
+            "Blizzard" => Some(Self::Blizzard),
+            "MagicBooster" => Some(Self::MagicBooster),
+            "MeteorStrike" => Some(Self::MeteorStrike),
+            "IceThrust" => Some(Self::IceThrust),
+            "FastMove" => Some(Self::FastMove),
+            "StormEscape" => Some(Self::StormEscape),
+            "Healing" => Some(Self::Healing),
+            "SpiritSword" => Some(Self::SpiritSword),
+            "Poisoning" => Some(Self::Poisoning),
+            "SoulFireBall" => Some(Self::SoulFireBall),
+            "SummonSkeleton" => Some(Self::SummonSkeleton),
+            "Hiding" => Some(Self::Hiding),
+            "MassHiding" => Some(Self::MassHiding),
+            "SoulShield" => Some(Self::SoulShield),
+            "Revelation" => Some(Self::Revelation),
+            "BlessedArmour" => Some(Self::BlessedArmour),
+            "EnergyRepulsor" => Some(Self::EnergyRepulsor),
+            "TrapHexagon" => Some(Self::TrapHexagon),
+            "Purification" => Some(Self::Purification),
+            "MassHealing" => Some(Self::MassHealing),
+            "Hallucination" => Some(Self::Hallucination),
+            "UltimateEnhancer" => Some(Self::UltimateEnhancer),
+            "SummonShinsu" => Some(Self::SummonShinsu),
+            "Reincarnation" => Some(Self::Reincarnation),
+            "SummonHolyDeva" => Some(Self::SummonHolyDeva),
+            "Curse" => Some(Self::Curse),
+            "Plague" => Some(Self::Plague),
+            "PoisonCloud" => Some(Self::PoisonCloud),
+            "EnergyShield" => Some(Self::EnergyShield),
+            "PetEnhancer" => Some(Self::PetEnhancer),
+            "HealingCircle" => Some(Self::HealingCircle),
+            "FatalSword" => Some(Self::FatalSword),
+            "DoubleSlash" => Some(Self::DoubleSlash),
+            "Haste" => Some(Self::Haste),
+            "FlashDash" => Some(Self::FlashDash),
+            "LightBody" => Some(Self::LightBody),
+            "HeavenlySword" => Some(Self::HeavenlySword),
+            "FireBurst" => Some(Self::FireBurst),
+            "Trap" => Some(Self::Trap),
+            "PoisonSword" => Some(Self::PoisonSword),
+            "MoonLight" => Some(Self::MoonLight),
+            "MPEater" => Some(Self::MPEater),
+            "SwiftFeet" => Some(Self::SwiftFeet),
+            "DarkBody" => Some(Self::DarkBody),
+            "Hemorrhage" => Some(Self::Hemorrhage),
+            "CrescentSlash" => Some(Self::CrescentSlash),
+            "MoonMist" => Some(Self::MoonMist),
+            "CatTongue" => Some(Self::CatTongue),
+            "Focus" => Some(Self::Focus),
+            "StraightShot" => Some(Self::StraightShot),
+            "DoubleShot" => Some(Self::DoubleShot),
+            "ExplosiveTrap" => Some(Self::ExplosiveTrap),
+            "DelayedExplosion" => Some(Self::DelayedExplosion),
+            "Meditation" => Some(Self::Meditation),
+            "BackStep" => Some(Self::BackStep),
+            "ElementalShot" => Some(Self::ElementalShot),
+            "Concentration" => Some(Self::Concentration),
+            "Stonetrap" => Some(Self::Stonetrap),
+            "ElementalBarrier" => Some(Self::ElementalBarrier),
+            "SummonVampire" => Some(Self::SummonVampire),
+            "VampireShot" => Some(Self::VampireShot),
+            "SummonToad" => Some(Self::SummonToad),
+            "PoisonShot" => Some(Self::PoisonShot),
+            "CrippleShot" => Some(Self::CrippleShot),
+            "SummonSnakes" => Some(Self::SummonSnakes),
+            "NapalmShot" => Some(Self::NapalmShot),
+            "OneWithNature" => Some(Self::OneWithNature),
+            "BindingShot" => Some(Self::BindingShot),
+            "MentalState" => Some(Self::MentalState),
+            "Blink" => Some(Self::Blink),
+            "Portal" => Some(Self::Portal),
+            "BattleCry" => Some(Self::BattleCry),
+            "FireBounce" => Some(Self::FireBounce),
+            "MeteorShower" => Some(Self::MeteorShower),
+            "DigOutZombie" => Some(Self::DigOutZombie),
+            "Rubble" => Some(Self::Rubble),
+            "MapLightning" => Some(Self::MapLightning),
+            "MapLava" => Some(Self::MapLava),
+            "MapQuake1" => Some(Self::MapQuake1),
+            "MapQuake2" => Some(Self::MapQuake2),
+            "DigOutArmadillo" => Some(Self::DigOutArmadillo),
+            "GeneralMeowMeowThunder" => Some(Self::GeneralMeowMeowThunder),
+            "StoneGolemQuake" => Some(Self::StoneGolemQuake),
+            "EarthGolemPile" => Some(Self::EarthGolemPile),
+            "TreeQueenRoot" => Some(Self::TreeQueenRoot),
+            "TreeQueenMassRoots" => Some(Self::TreeQueenMassRoots),
+            "TreeQueenGroundRoots" => Some(Self::TreeQueenGroundRoots),
+            "TucsonGeneralRock" => Some(Self::TucsonGeneralRock),
+            "FlyingStatueIceTornado" => Some(Self::FlyingStatueIceTornado),
+            "DarkOmaKingNuke" => Some(Self::DarkOmaKingNuke),
+            "HornedSorcererDustTornado" => Some(Self::HornedSorcererDustTornado),
+            "HornedCommanderRockFall" => Some(Self::HornedCommanderRockFall),
+            "HornedCommanderRockSpike" => Some(Self::HornedCommanderRockSpike),
+            _ => None,
         }
     }
 }
@@ -244,7 +630,264 @@ impl Point {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientMagic {
+    pub name: String,
+    pub spell: Spell,
+    pub base_cost: u8,
+    pub level_cost: u8,
+    pub icon: u8,
+    pub level1: u8,
+    pub level2: u8,
+    pub level3: u8,
+    pub need1: u16,
+    pub need2: u16,
+    pub need3: u16,
+    pub level: u8,
+    pub key: u8,
+    pub experience: u16,
+    pub delay: i64,
+    pub range: u8,
+    pub cast_time: i64,
+}
+
+impl ClientMagic {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            name: reader.read_string()?,
+            spell: Spell::try_from(reader.read_u8()?)?,
+            base_cost: reader.read_u8()?,
+            level_cost: reader.read_u8()?,
+            icon: reader.read_u8()?,
+            level1: reader.read_u8()?,
+            level2: reader.read_u8()?,
+            level3: reader.read_u8()?,
+            need1: reader.read_u16()?,
+            need2: reader.read_u16()?,
+            need3: reader.read_u16()?,
+            level: reader.read_u8()?,
+            key: reader.read_u8()?,
+            experience: reader.read_u16()?,
+            delay: reader.read_i64()?,
+            range: reader.read_u8()?,
+            cast_time: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.spell as u8);
+        writer.write_u8(self.base_cost);
+        writer.write_u8(self.level_cost);
+        writer.write_u8(self.icon);
+        writer.write_u8(self.level1);
+        writer.write_u8(self.level2);
+        writer.write_u8(self.level3);
+        writer.write_u16(self.need1);
+        writer.write_u16(self.need2);
+        writer.write_u16(self.need3);
+        writer.write_u8(self.level);
+        writer.write_u8(self.key);
+        writer.write_u16(self.experience);
+        writer.write_i64(self.delay);
+        writer.write_u8(self.range);
+        writer.write_i64(self.cast_time);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMovementInfo {
+    pub destination: i32,
+    pub title: String,
+    pub location: Point,
+    pub icon: i32,
+}
+
+impl ClientMovementInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            destination: reader.read_i32()?,
+            title: reader.read_string()?,
+            location: Point::decode(reader)?,
+            icon: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.destination);
+        writer.write_string(&self.title)?;
+        self.location.encode(writer);
+        writer.write_i32(self.icon);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientNpcInfo {
+    pub index: i32,
+    pub file_name: String,
+    pub name: String,
+    pub map_index: i32,
+    pub location: Point,
+    pub image: u16,
+    pub rate: u16,
+    pub show_on_big_map: bool,
+    pub big_map_icon: i32,
+    pub object_id: u32,
+    pub icon: i32,
+    pub can_teleport_to: bool,
+}
+
+impl ClientNpcInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            file_name: reader.read_string()?,
+            name: reader.read_string()?,
+            map_index: reader.read_i32()?,
+            location: Point::decode(reader)?,
+            image: reader.read_u16()?,
+            rate: reader.read_u16()?,
+            show_on_big_map: reader.read_bool()?,
+            big_map_icon: reader.read_i32()?,
+            object_id: reader.read_u32()?,
+            icon: reader.read_i32()?,
+            can_teleport_to: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.file_name)?;
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.map_index);
+        self.location.encode(writer);
+        writer.write_u16(self.image);
+        writer.write_u16(self.rate);
+        writer.write_bool(self.show_on_big_map);
+        writer.write_i32(self.big_map_icon);
+        writer.write_u32(self.object_id);
+        writer.write_i32(self.icon);
+        writer.write_bool(self.can_teleport_to);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMapInfo {
+    pub title: String,
+    pub width: i32,
+    pub height: i32,
+    pub big_map: i32,
+    pub movements: Vec<ClientMovementInfo>,
+    pub npcs: Vec<ClientNpcInfo>,
+}
+
+impl ClientMapInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let title = reader.read_string()?;
+        let width = reader.read_i32()?;
+        let height = reader.read_i32()?;
+        let big_map = reader.read_i32()?;
+
+        let movement_count = read_non_negative_count(reader, "client_map_movements")?;
+        let mut movements = Vec::with_capacity(movement_count);
+        for _ in 0..movement_count {
+            movements.push(ClientMovementInfo::decode(reader)?);
+        }
+
+        let npc_count = read_non_negative_count(reader, "client_map_npcs")?;
+        let mut npcs = Vec::with_capacity(npc_count);
+        for _ in 0..npc_count {
+            npcs.push(ClientNpcInfo::decode(reader)?);
+        }
+
+        Ok(Self {
+            title,
+            width,
+            height,
+            big_map,
+            movements,
+            npcs,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.title)?;
+        writer.write_i32(self.width);
+        writer.write_i32(self.height);
+        writer.write_i32(self.big_map);
+        writer.write_i32(self.movements.len() as i32);
+        for movement in &self.movements {
+            movement.encode(writer)?;
+        }
+        writer.write_i32(self.npcs.len() as i32);
+        for npc in &self.npcs {
+            npc.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldMapIcon {
+    pub image_index: i32,
+    pub title: String,
+    pub map_index: i32,
+}
+
+impl WorldMapIcon {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            image_index: reader.read_i32()?,
+            title: reader.read_string()?,
+            map_index: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.image_index);
+        writer.write_string(&self.title)?;
+        writer.write_i32(self.map_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldMapSetup {
+    pub enabled: bool,
+    pub icons: Vec<WorldMapIcon>,
+}
+
+impl WorldMapSetup {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let enabled = reader.read_bool()?;
+        let count = read_non_negative_count(reader, "world_map_icons")?;
+        let mut icons = Vec::with_capacity(count);
+        for _ in 0..count {
+            icons.push(WorldMapIcon::decode(reader)?);
+        }
+        Ok(Self { enabled, icons })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_bool(self.enabled);
+        writer.write_i32(self.icons.len() as i32);
+        for icon in &self.icons {
+            icon.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SelectInfo {
     pub index: i32,
     pub name: String,
@@ -277,7 +920,8 @@ impl SelectInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserInformation {
     pub object_id: u32,
     pub real_id: u32,
@@ -640,9 +1284,1108 @@ impl UserItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientFriend {
+    pub index: i32,
+    pub name: String,
+    pub memo: String,
+    pub blocked: bool,
+    pub online: bool,
+}
+
+impl ClientFriend {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            memo: reader.read_string()?,
+            blocked: reader.read_bool()?,
+            online: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.memo)?;
+        writer.write_bool(self.blocked);
+        writer.write_bool(self.online);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerInspectInfo {
+    pub name: String,
+    pub guild_name: String,
+    pub guild_rank: String,
+    pub equipment: Vec<Option<UserItem>>,
+    pub class: MirClass,
+    pub gender: MirGender,
+    pub hair: u8,
+    pub level: u16,
+    pub lover_name: String,
+    pub allow_observe: bool,
+    pub is_hero: bool,
+}
+
+impl PlayerInspectInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let name = reader.read_string()?;
+        let guild_name = reader.read_string()?;
+        let guild_rank = reader.read_string()?;
+        let count = read_non_negative_count(reader, "player_inspect_equipment")?;
+        let mut equipment = Vec::with_capacity(count);
+        for _ in 0..count {
+            if reader.read_bool()? {
+                equipment.push(Some(UserItem::decode(reader)?));
+            } else {
+                equipment.push(None);
+            }
+        }
+
+        Ok(Self {
+            name,
+            guild_name,
+            guild_rank,
+            equipment,
+            class: MirClass::try_from(reader.read_u8()?)?,
+            gender: MirGender::try_from(reader.read_u8()?)?,
+            hair: reader.read_u8()?,
+            level: reader.read_u16()?,
+            lover_name: reader.read_string()?,
+            allow_observe: reader.read_bool()?,
+            is_hero: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.guild_name)?;
+        writer.write_string(&self.guild_rank)?;
+        writer.write_i32(self.equipment.len() as i32);
+        for item in &self.equipment {
+            writer.write_bool(item.is_some());
+            if let Some(item) = item {
+                item.encode(writer)?;
+            }
+        }
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        writer.write_u8(self.hair);
+        writer.write_u16(self.level);
+        writer.write_string(&self.lover_name)?;
+        writer.write_bool(self.allow_observe);
+        writer.write_bool(self.is_hero);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientMail {
+    pub mail_id: u64,
+    pub sender_name: String,
+    pub message: String,
+    pub opened: bool,
+    pub locked: bool,
+    pub can_reply: bool,
+    pub collected: bool,
+    pub date_sent_binary_datetime: i64,
+    pub gold: u32,
+    pub items: Vec<UserItem>,
+}
+
+impl ClientMail {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let mail_id = reader.read_u64()?;
+        let sender_name = reader.read_string()?;
+        let message = reader.read_string()?;
+        let opened = reader.read_bool()?;
+        let locked = reader.read_bool()?;
+        let can_reply = reader.read_bool()?;
+        let collected = reader.read_bool()?;
+        let date_sent_binary_datetime = reader.read_i64()?;
+        let gold = reader.read_u32()?;
+        let item_count = read_non_negative_count(reader, "client_mail_items")?;
+        let mut items = Vec::with_capacity(item_count);
+        for _ in 0..item_count {
+            items.push(UserItem::decode(reader)?);
+        }
+
+        Ok(Self {
+            mail_id,
+            sender_name,
+            message,
+            opened,
+            locked,
+            can_reply,
+            collected,
+            date_sent_binary_datetime,
+            gold,
+            items,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.mail_id);
+        writer.write_string(&self.sender_name)?;
+        writer.write_string(&self.message)?;
+        writer.write_bool(self.opened);
+        writer.write_bool(self.locked);
+        writer.write_bool(self.can_reply);
+        writer.write_bool(self.collected);
+        writer.write_i64(self.date_sent_binary_datetime);
+        writer.write_u32(self.gold);
+        writer.write_i32(self.items.len() as i32);
+        for item in &self.items {
+            item.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IntelligentCreatureRules {
+    pub minimal_fullness: i32,
+    pub mouse_pickup_enabled: bool,
+    pub mouse_pickup_range: i32,
+    pub auto_pickup_enabled: bool,
+    pub auto_pickup_range: i32,
+    pub semi_auto_pickup_enabled: bool,
+    pub semi_auto_pickup_range: i32,
+    pub can_produce_blackstone: bool,
+}
+
+impl IntelligentCreatureRules {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            minimal_fullness: reader.read_i32()?,
+            mouse_pickup_enabled: reader.read_bool()?,
+            mouse_pickup_range: reader.read_i32()?,
+            auto_pickup_enabled: reader.read_bool()?,
+            auto_pickup_range: reader.read_i32()?,
+            semi_auto_pickup_enabled: reader.read_bool()?,
+            semi_auto_pickup_range: reader.read_i32()?,
+            can_produce_blackstone: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_i32(self.minimal_fullness);
+        writer.write_bool(self.mouse_pickup_enabled);
+        writer.write_i32(self.mouse_pickup_range);
+        writer.write_bool(self.auto_pickup_enabled);
+        writer.write_i32(self.auto_pickup_range);
+        writer.write_bool(self.semi_auto_pickup_enabled);
+        writer.write_i32(self.semi_auto_pickup_range);
+        writer.write_bool(self.can_produce_blackstone);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IntelligentCreatureItemFilter {
+    pub pet_pickup_all: bool,
+    pub pet_pickup_gold: bool,
+    pub pet_pickup_weapons: bool,
+    pub pet_pickup_armours: bool,
+    pub pet_pickup_helmets: bool,
+    pub pet_pickup_boots: bool,
+    pub pet_pickup_belts: bool,
+    pub pet_pickup_accessories: bool,
+    pub pet_pickup_others: bool,
+}
+
+impl IntelligentCreatureItemFilter {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            pet_pickup_all: reader.read_bool()?,
+            pet_pickup_gold: reader.read_bool()?,
+            pet_pickup_weapons: reader.read_bool()?,
+            pet_pickup_armours: reader.read_bool()?,
+            pet_pickup_helmets: reader.read_bool()?,
+            pet_pickup_boots: reader.read_bool()?,
+            pet_pickup_belts: reader.read_bool()?,
+            pet_pickup_accessories: reader.read_bool()?,
+            pet_pickup_others: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_bool(self.pet_pickup_all);
+        writer.write_bool(self.pet_pickup_gold);
+        writer.write_bool(self.pet_pickup_weapons);
+        writer.write_bool(self.pet_pickup_armours);
+        writer.write_bool(self.pet_pickup_helmets);
+        writer.write_bool(self.pet_pickup_boots);
+        writer.write_bool(self.pet_pickup_belts);
+        writer.write_bool(self.pet_pickup_accessories);
+        writer.write_bool(self.pet_pickup_others);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientIntelligentCreature {
+    pub pet_type: u8,
+    pub icon: i32,
+    pub custom_name: String,
+    pub fullness: i32,
+    pub slot_index: i32,
+    pub expire_binary_datetime: i64,
+    pub blackstone_time: i64,
+    pub pet_mode: u8,
+    pub creature_rules: IntelligentCreatureRules,
+    pub filter: IntelligentCreatureItemFilter,
+    pub pickup_grade: u8,
+    pub maintain_food_time: i64,
+}
+
+impl ClientIntelligentCreature {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            pet_type: reader.read_u8()?,
+            icon: reader.read_i32()?,
+            custom_name: reader.read_string()?,
+            fullness: reader.read_i32()?,
+            slot_index: reader.read_i32()?,
+            expire_binary_datetime: reader.read_i64()?,
+            blackstone_time: reader.read_i64()?,
+            pet_mode: reader.read_u8()?,
+            creature_rules: IntelligentCreatureRules::decode(reader)?,
+            filter: IntelligentCreatureItemFilter::decode(reader)?,
+            pickup_grade: reader.read_u8()?,
+            maintain_food_time: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u8(self.pet_type);
+        writer.write_i32(self.icon);
+        writer.write_string(&self.custom_name)?;
+        writer.write_i32(self.fullness);
+        writer.write_i32(self.slot_index);
+        writer.write_i64(self.expire_binary_datetime);
+        writer.write_i64(self.blackstone_time);
+        writer.write_u8(self.pet_mode);
+        self.creature_rules.encode(writer);
+        self.filter.encode(writer);
+        writer.write_u8(self.pickup_grade);
+        writer.write_i64(self.maintain_food_time);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientHeroInformation {
+    pub index: i32,
+    pub name: String,
+    pub level: u16,
+    pub class: MirClass,
+    pub gender: MirGender,
+}
+
+impl ClientHeroInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            level: reader.read_u16()?,
+            class: MirClass::try_from(reader.read_u8()?)?,
+            gender: MirGender::try_from(reader.read_u8()?)?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_u16(self.level);
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UserItemStat {
     pub stat: u8,
     pub value: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientBuff {
+    pub buff_type: u8,
+    pub visible: bool,
+    pub object_id: u32,
+    pub expire_time: i64,
+    pub infinite: bool,
+    pub paused: bool,
+    pub stats: Vec<UserItemStat>,
+    pub values: Vec<i32>,
+}
+
+impl ClientBuff {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let buff_type = reader.read_u8()?;
+        let visible = reader.read_bool()?;
+        let object_id = reader.read_u32()?;
+        let expire_time = reader.read_i64()?;
+        let infinite = reader.read_bool()?;
+        let paused = reader.read_bool()?;
+        let stats = decode_stat_values(reader, "client_buff_stats")?;
+        let value_count = reader.read_i32()?;
+        if value_count < 0 {
+            return Err(PacketCodecError::NegativeLength {
+                field: "client_buff_values",
+                value: value_count,
+            });
+        }
+        let mut values = Vec::with_capacity(value_count as usize);
+        for _ in 0..value_count {
+            values.push(reader.read_i32()?);
+        }
+
+        Ok(Self {
+            buff_type,
+            visible,
+            object_id,
+            expire_time,
+            infinite,
+            paused,
+            stats,
+            values,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u8(self.buff_type);
+        writer.write_bool(self.visible);
+        writer.write_u32(self.object_id);
+        writer.write_i64(self.expire_time);
+        writer.write_bool(self.infinite);
+        writer.write_bool(self.paused);
+        encode_stat_values(writer, &self.stats);
+        writer.write_i32(self.values.len() as i32);
+        for value in &self.values {
+            writer.write_i32(*value);
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BaseStat {
+    pub stat: u8,
+    pub formula_type: u8,
+    pub base: i32,
+    pub gain: f32,
+    pub gain_rate: f32,
+    pub max: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BaseStats {
+    pub job: MirClass,
+    pub stats: Vec<BaseStat>,
+    pub caps: Vec<UserItemStat>,
+}
+
+impl BaseStats {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let job = MirClass::try_from(reader.read_u8()?)?;
+        let stat_count = read_non_negative_count(reader, "base_stats")?;
+        let mut stats = Vec::with_capacity(stat_count);
+        for _ in 0..stat_count {
+            stats.push(BaseStat {
+                stat: reader.read_u8()?,
+                formula_type: reader.read_u8()?,
+                base: reader.read_i32()?,
+                gain: reader.read_f32()?,
+                gain_rate: reader.read_f32()?,
+                max: reader.read_i32()?,
+            });
+        }
+        let caps = decode_stat_values(reader, "base_stats_caps")?;
+        Ok(Self { job, stats, caps })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u8(self.job as u8);
+        writer.write_i32(self.stats.len() as i32);
+        for stat in &self.stats {
+            writer.write_u8(stat.stat);
+            writer.write_u8(stat.formula_type);
+            writer.write_i32(stat.base);
+            writer.write_f32(stat.gain);
+            writer.write_f32(stat.gain_rate);
+            writer.write_i32(stat.max);
+        }
+        encode_stat_values(writer, &self.caps);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct HeroUserInformation {
+    pub object_id: u32,
+    pub name: String,
+    pub class: MirClass,
+    pub gender: MirGender,
+    pub level: u16,
+    pub hair: u8,
+    pub hp: i32,
+    pub mp: i32,
+    pub experience: i64,
+    pub max_experience: i64,
+    pub inventory: Option<Vec<Option<UserItem>>>,
+    pub equipment: Option<Vec<Option<UserItem>>>,
+    pub magics: Vec<ClientMagic>,
+    pub auto_pot: bool,
+    pub auto_hp_percent: u8,
+    pub auto_mp_percent: u8,
+    pub hp_item_index: i32,
+    pub mp_item_index: i32,
+}
+
+impl HeroUserInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let object_id = reader.read_u32()?;
+        let name = reader.read_string()?;
+        let class = MirClass::try_from(reader.read_u8()?)?;
+        let gender = MirGender::try_from(reader.read_u8()?)?;
+        let level = reader.read_u16()?;
+        let hair = reader.read_u8()?;
+        let hp = reader.read_i32()?;
+        let mp = reader.read_i32()?;
+        let experience = reader.read_i64()?;
+        let max_experience = reader.read_i64()?;
+        let (_, inventory) = decode_optional_item_section(reader, "hero_inventory")?;
+        let (_, equipment) = decode_optional_item_section(reader, "hero_equipment")?;
+        let magic_count = read_non_negative_count(reader, "hero_magics")?;
+        let mut magics = Vec::with_capacity(magic_count);
+        for _ in 0..magic_count {
+            magics.push(ClientMagic::decode(reader)?);
+        }
+        Ok(Self {
+            object_id,
+            name,
+            class,
+            gender,
+            level,
+            hair,
+            hp,
+            mp,
+            experience,
+            max_experience,
+            inventory,
+            equipment,
+            magics,
+            auto_pot: reader.read_bool()?,
+            auto_hp_percent: reader.read_u8()?,
+            auto_mp_percent: reader.read_u8()?,
+            hp_item_index: reader.read_i32()?,
+            mp_item_index: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u32(self.object_id);
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.class as u8);
+        writer.write_u8(self.gender as u8);
+        writer.write_u16(self.level);
+        writer.write_u8(self.hair);
+        writer.write_i32(self.hp);
+        writer.write_i32(self.mp);
+        writer.write_i64(self.experience);
+        writer.write_i64(self.max_experience);
+        encode_optional_item_section(writer, self.inventory.is_some(), self.inventory.as_deref())?;
+        encode_optional_item_section(writer, self.equipment.is_some(), self.equipment.as_deref())?;
+        writer.write_i32(self.magics.len() as i32);
+        for magic in &self.magics {
+            magic.encode(writer)?;
+        }
+        writer.write_bool(self.auto_pot);
+        writer.write_u8(self.auto_hp_percent);
+        writer.write_u8(self.auto_mp_percent);
+        writer.write_i32(self.hp_item_index);
+        writer.write_i32(self.mp_item_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientAuction {
+    pub auction_id: u64,
+    pub item: UserItem,
+    pub seller: String,
+    pub price: u32,
+    pub consignment_date_binary_datetime: i64,
+    pub item_type: u8,
+}
+
+impl ClientAuction {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            auction_id: reader.read_u64()?,
+            item: UserItem::decode(reader)?,
+            seller: reader.read_string()?,
+            price: reader.read_u32()?,
+            consignment_date_binary_datetime: reader.read_i64()?,
+            item_type: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.auction_id);
+        self.item.encode(writer)?;
+        writer.write_string(&self.seller)?;
+        writer.write_u32(self.price);
+        writer.write_i64(self.consignment_date_binary_datetime);
+        writer.write_u8(self.item_type);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GameShopItem {
+    pub item_index: i32,
+    pub g_index: i32,
+    pub info: ItemInfo,
+    pub gold_price: u32,
+    pub credit_price: u32,
+    pub count: u16,
+    pub class: String,
+    pub category: String,
+    pub stock: i32,
+    pub i_stock: bool,
+    pub deal: bool,
+    pub top_item: bool,
+    pub date_binary_datetime: i64,
+    pub can_buy_credit: bool,
+    pub can_buy_gold: bool,
+}
+
+impl GameShopItem {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item_index: reader.read_i32()?,
+            g_index: reader.read_i32()?,
+            info: ItemInfo::decode(reader)?,
+            gold_price: reader.read_u32()?,
+            credit_price: reader.read_u32()?,
+            count: reader.read_u16()?,
+            class: reader.read_string()?,
+            category: reader.read_string()?,
+            stock: reader.read_i32()?,
+            i_stock: reader.read_bool()?,
+            deal: reader.read_bool()?,
+            top_item: reader.read_bool()?,
+            date_binary_datetime: reader.read_i64()?,
+            can_buy_credit: reader.read_bool()?,
+            can_buy_gold: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.item_index);
+        writer.write_i32(self.g_index);
+        self.info.encode(writer)?;
+        writer.write_u32(self.gold_price);
+        writer.write_u32(self.credit_price);
+        writer.write_u16(self.count);
+        writer.write_string(&self.class)?;
+        writer.write_string(&self.category)?;
+        writer.write_i32(self.stock);
+        writer.write_bool(self.i_stock);
+        writer.write_bool(self.deal);
+        writer.write_bool(self.top_item);
+        writer.write_i64(self.date_binary_datetime);
+        writer.write_bool(self.can_buy_credit);
+        writer.write_bool(self.can_buy_gold);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GuildBuff {
+    pub id: i32,
+    pub active: bool,
+    pub active_time_remaining: i32,
+}
+
+impl GuildBuff {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            id: reader.read_i32()?,
+            active: reader.read_bool()?,
+            active_time_remaining: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_i32(self.id);
+        writer.write_bool(self.active);
+        writer.write_i32(self.active_time_remaining);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GuildBuffInfo {
+    pub id: i32,
+    pub icon: i32,
+    pub name: String,
+    pub level_requirement: u8,
+    pub points_requirement: u8,
+    pub time_limit: i32,
+    pub activation_cost: i32,
+    pub stats: Vec<UserItemStat>,
+}
+
+impl GuildBuffInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            id: reader.read_i32()?,
+            icon: reader.read_i32()?,
+            name: reader.read_string()?,
+            level_requirement: reader.read_u8()?,
+            points_requirement: reader.read_u8()?,
+            time_limit: reader.read_i32()?,
+            activation_cost: reader.read_i32()?,
+            stats: decode_stat_values(reader, "guild_buff_info_stats")?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.id);
+        writer.write_i32(self.icon);
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.level_requirement);
+        writer.write_u8(self.points_requirement);
+        writer.write_i32(self.time_limit);
+        writer.write_i32(self.activation_cost);
+        encode_stat_values(writer, &self.stats);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildMember {
+    pub name: String,
+    pub id: i32,
+    pub last_login_binary_datetime: i64,
+    pub has_voted: bool,
+    pub online: bool,
+}
+
+impl GuildMember {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            name: reader.read_string()?,
+            id: reader.read_i32()?,
+            last_login_binary_datetime: reader.read_i64()?,
+            has_voted: reader.read_bool()?,
+            online: reader.read_bool()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.id);
+        writer.write_i64(self.last_login_binary_datetime);
+        writer.write_bool(self.has_voted);
+        writer.write_bool(self.online);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRank {
+    pub name: String,
+    pub options: u8,
+    pub index: i32,
+    pub members: Vec<GuildMember>,
+}
+
+impl GuildRank {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let name = reader.read_string()?;
+        let options = reader.read_u8()?;
+        let index = reader.read_i32()?;
+        let count = read_non_negative_count(reader, "guild_rank_members")?;
+        let mut members = Vec::with_capacity(count);
+        for _ in 0..count {
+            members.push(GuildMember::decode(reader)?);
+        }
+
+        Ok(Self {
+            name,
+            options,
+            index,
+            members,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        writer.write_u8(self.options);
+        writer.write_i32(self.index);
+        writer.write_i32(self.members.len() as i32);
+        for member in &self.members {
+            member.encode(writer)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildStorageItem {
+    pub item: UserItem,
+    pub user_id: i64,
+}
+
+impl GuildStorageItem {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: UserItem::decode(reader)?,
+            user_id: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_i64(self.user_id);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AwakeningMaterial {
+    pub item: ItemInfo,
+    pub count: u8,
+}
+
+impl AwakeningMaterial {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: ItemInfo::decode(reader)?,
+            count: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_u8(self.count);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RankCharacterInfo {
+    pub player_id: i64,
+    pub name: String,
+    pub level: i32,
+    pub class: MirClass,
+}
+
+impl RankCharacterInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            player_id: reader.read_i64()?,
+            name: reader.read_string()?,
+            level: reader.read_i32()?,
+            class: MirClass::try_from(reader.read_u8()?)?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i64(self.player_id);
+        writer.write_string(&self.name)?;
+        writer.write_i32(self.level);
+        writer.write_u8(self.class as u8);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Notice {
+    pub title: String,
+    pub message: String,
+}
+
+impl Notice {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            title: reader.read_string()?,
+            message: reader.read_string()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.title)?;
+        writer.write_string(&self.message)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClientGtMap {
+    pub index: i32,
+    pub name: String,
+    pub owner: String,
+    pub leader: String,
+    pub leader2: String,
+    pub price: i32,
+    pub days: i32,
+    pub begin: i32,
+}
+
+impl ClientGtMap {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            name: reader.read_string()?,
+            owner: reader.read_string()?,
+            leader: reader.read_string()?,
+            leader2: reader.read_string()?,
+            price: reader.read_i32()?,
+            days: reader.read_i32()?,
+            begin: reader.read_i32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.owner)?;
+        writer.write_string(&self.leader)?;
+        writer.write_string(&self.leader2)?;
+        writer.write_i32(self.price);
+        writer.write_i32(self.days);
+        writer.write_i32(self.begin);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct QuestItemReward {
+    pub item: ItemInfo,
+    pub count: u16,
+}
+
+impl QuestItemReward {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item: ItemInfo::decode(reader)?,
+            count: reader.read_u16()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        self.item.encode(writer)?;
+        writer.write_u16(self.count);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientQuestInfo {
+    pub index: i32,
+    pub npc_index: u32,
+    pub name: String,
+    pub group: String,
+    pub description: Vec<String>,
+    pub task_description: Vec<String>,
+    pub return_description: Vec<String>,
+    pub completion_description: Vec<String>,
+    pub min_level_needed: i32,
+    pub max_level_needed: i32,
+    pub quest_needed: i32,
+    pub class_needed: u8,
+    pub quest_type: u8,
+    pub time_limit_in_seconds: i32,
+    pub reward_gold: u32,
+    pub reward_exp: u32,
+    pub reward_credit: u32,
+    pub rewards_fixed_item: Vec<QuestItemReward>,
+    pub rewards_select_item: Vec<QuestItemReward>,
+    pub finish_npc_index: u32,
+}
+
+impl ClientQuestInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            index: reader.read_i32()?,
+            npc_index: reader.read_u32()?,
+            name: reader.read_string()?,
+            group: reader.read_string()?,
+            description: decode_string_vec(reader, "quest_description")?,
+            task_description: decode_string_vec(reader, "quest_task_description")?,
+            return_description: decode_string_vec(reader, "quest_return_description")?,
+            completion_description: decode_string_vec(reader, "quest_completion_description")?,
+            min_level_needed: reader.read_i32()?,
+            max_level_needed: reader.read_i32()?,
+            quest_needed: reader.read_i32()?,
+            class_needed: reader.read_u8()?,
+            quest_type: reader.read_u8()?,
+            time_limit_in_seconds: reader.read_i32()?,
+            reward_gold: reader.read_u32()?,
+            reward_exp: reader.read_u32()?,
+            reward_credit: reader.read_u32()?,
+            rewards_fixed_item: decode_quest_rewards(reader, "quest_fixed_rewards")?,
+            rewards_select_item: decode_quest_rewards(reader, "quest_select_rewards")?,
+            finish_npc_index: reader.read_u32()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_i32(self.index);
+        writer.write_u32(self.npc_index);
+        writer.write_string(&self.name)?;
+        writer.write_string(&self.group)?;
+        encode_string_vec(writer, &self.description)?;
+        encode_string_vec(writer, &self.task_description)?;
+        encode_string_vec(writer, &self.return_description)?;
+        encode_string_vec(writer, &self.completion_description)?;
+        writer.write_i32(self.min_level_needed);
+        writer.write_i32(self.max_level_needed);
+        writer.write_i32(self.quest_needed);
+        writer.write_u8(self.class_needed);
+        writer.write_u8(self.quest_type);
+        writer.write_i32(self.time_limit_in_seconds);
+        writer.write_u32(self.reward_gold);
+        writer.write_u32(self.reward_exp);
+        writer.write_u32(self.reward_credit);
+        encode_quest_rewards(writer, &self.rewards_fixed_item)?;
+        encode_quest_rewards(writer, &self.rewards_select_item)?;
+        writer.write_u32(self.finish_npc_index);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ClientRecipeInfo {
+    pub gold: u32,
+    pub chance: u8,
+    pub item: UserItem,
+    pub tools: Vec<UserItem>,
+    pub ingredients: Vec<UserItem>,
+}
+
+impl ClientRecipeInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            gold: reader.read_u32()?,
+            chance: reader.read_u8()?,
+            item: UserItem::decode(reader)?,
+            tools: decode_user_item_vec(reader, "recipe_tools")?,
+            ingredients: decode_user_item_vec(reader, "recipe_ingredients")?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u32(self.gold);
+        writer.write_u8(self.chance);
+        self.item.encode(writer)?;
+        encode_user_item_vec(writer, &self.tools)?;
+        encode_user_item_vec(writer, &self.ingredients)?;
+        Ok(())
+    }
+}
+
+fn decode_string_vec(reader: &mut PacketReader<'_>, field: &'static str) -> Result<Vec<String>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(reader.read_string()?);
+    }
+    Ok(values)
+}
+
+fn encode_string_vec(writer: &mut PacketWriter, values: &[String]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        writer.write_string(value)?;
+    }
+    Ok(())
+}
+
+fn decode_quest_rewards(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<QuestItemReward>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(QuestItemReward::decode(reader)?);
+    }
+    Ok(values)
+}
+
+fn encode_quest_rewards(writer: &mut PacketWriter, values: &[QuestItemReward]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        value.encode(writer)?;
+    }
+    Ok(())
+}
+
+fn decode_user_item_vec(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<UserItem>> {
+    let count = read_non_negative_count(reader, field)?;
+    let mut values = Vec::with_capacity(count);
+    for _ in 0..count {
+        values.push(UserItem::decode(reader)?);
+    }
+    Ok(values)
+}
+
+fn encode_user_item_vec(writer: &mut PacketWriter, values: &[UserItem]) -> Result<()> {
+    writer.write_i32(values.len() as i32);
+    for value in values {
+        value.encode(writer)?;
+    }
+    Ok(())
+}
+
+fn decode_stat_values(
+    reader: &mut PacketReader<'_>,
+    field: &'static str,
+) -> Result<Vec<UserItemStat>> {
+    let count = reader.read_i32()?;
+    if count < 0 {
+        return Err(PacketCodecError::NegativeLength {
+            field,
+            value: count,
+        });
+    }
+    let mut values = Vec::with_capacity(count as usize);
+    for _ in 0..count {
+        values.push(UserItemStat {
+            stat: reader.read_u8()?,
+            value: reader.read_i32()?,
+        });
+    }
+    Ok(values)
+}
+
+fn encode_stat_values(writer: &mut PacketWriter, stats: &[UserItemStat]) {
+    writer.write_i32(stats.len() as i32);
+    for stat in stats {
+        writer.write_u8(stat.stat);
+        writer.write_i32(stat.value);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -685,6 +2428,33 @@ impl UserItemRentalInformation {
         writer.write_i16(self.binding_flags);
         writer.write_i64(self.expiry_binary_datetime);
         writer.write_bool(self.rental_locked);
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ItemRentalInformation {
+    pub item_id: u64,
+    pub item_name: String,
+    pub renting_player_name: String,
+    pub item_return_date_binary_datetime: i64,
+}
+
+impl ItemRentalInformation {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            item_id: reader.read_u64()?,
+            item_name: reader.read_string()?,
+            renting_player_name: reader.read_string()?,
+            item_return_date_binary_datetime: reader.read_i64()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.item_id);
+        writer.write_string(&self.item_name)?;
+        writer.write_string(&self.renting_player_name)?;
+        writer.write_i64(self.item_return_date_binary_datetime);
         Ok(())
     }
 }
@@ -903,7 +2673,8 @@ impl ItemInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectPlayerInfo {
     pub object_id: u32,
     pub name: String,
@@ -1008,7 +2779,8 @@ impl ObjectPlayerInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MonsterInfo {
     pub object_id: u32,
     pub name: String,
@@ -1083,7 +2855,8 @@ impl MonsterInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NpcInfo {
     pub object_id: u32,
     pub name: String,
@@ -1276,7 +3049,28 @@ impl ObjectHealthInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ObjectManaInfo {
+    pub object_id: u32,
+    pub percent: u8,
+}
+
+impl ObjectManaInfo {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            object_id: reader.read_u32()?,
+            percent: reader.read_u8()?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) {
+        writer.write_u32(self.object_id);
+        writer.write_u8(self.percent);
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectSpellInfo {
     pub object_id: u32,
     pub location: Point,
@@ -1358,7 +3152,8 @@ impl MapInformation {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserLocation {
     pub position: Point,
     pub direction: MirDirection,
@@ -1378,7 +3173,8 @@ impl UserLocation {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectMovement {
     pub object_id: u32,
     pub position: Point,
@@ -1401,7 +3197,8 @@ impl ObjectMovement {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectAttackInfo {
     pub object_id: u32,
     pub location: Point,
@@ -1433,7 +3230,8 @@ impl ObjectAttackInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct StruckInfo {
     pub attacker_id: u32,
 }
@@ -1450,7 +3248,8 @@ impl StruckInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectStruckInfo {
     pub object_id: u32,
     pub attacker_id: u32,
@@ -1476,7 +3275,8 @@ impl ObjectStruckInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ObjectRangeAttackInfo {
     pub object_id: u32,
     pub location: Point,

@@ -857,6 +857,10 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub no_drop_monster: bool,
     #[serde(default)]
+    pub no_mount: bool,
+    #[serde(default)]
+    pub need_bridle: bool,
+    #[serde(default)]
     pub safe_zones: Vec<CrystalSafeZoneTemplate>,
     #[serde(default)]
     pub safe_zone_spells: Vec<CrystalSafeZoneSpellTemplate>,
@@ -1945,6 +1949,8 @@ mod tests {
 
         assert!(summary.total_scripts > 300);
         assert!(summary.total_commands >= 80);
+        assert_eq!(summary.unimplemented_commands, 0);
+        assert_eq!(summary.unimplemented_occurrences, 0);
         assert!(summary.implemented_commands >= 45);
         assert!(summary.implemented_occurrences > summary.unimplemented_occurrences);
         assert!(summary.commands.iter().any(|entry| {
@@ -1996,6 +2002,7 @@ mod tests {
         assert!(summary.spawned_ai_families > 80);
         assert!(summary.implemented_runtime_families >= 95);
         assert!(summary.unknown_source_ai_values.is_empty());
+        assert!(summary.remaining_runtime_priorities.is_empty());
         if !summary.remaining_runtime_priorities.is_empty() {
             assert!(summary
                 .remaining_runtime_priorities

@@ -37,8 +37,11 @@ account/player/economy/risk data from the configured JSON account store or
 explicit Postgres account-store source. Gateway online presence is read from
 `GET /admin/sessions` and overlaid onto Dashboard, Players, Player Detail, and
 Servers. Activities, Economy price feeds, and Risk trade graph now write and
-read real Postgres projection tables through Rust Admin API routes. Servers zone
-runtime and Operators/RBAC also read and write real Postgres records.
+read real Postgres projection tables through Rust Admin API routes. Dashboard
+also reads `/admin/gameplay-events/summary` so operators can see gameplay
+command volume, lag, last event time, readiness alerts, and top command kinds
+from the ClickHouse-backed event projection. Servers zone runtime and
+Operators/RBAC also read and write real Postgres records.
 
 ## Local Run
 
@@ -100,6 +103,8 @@ Latest smoke screenshots:
 
 - `docs/admin-web-dashboard-smoke.png`
 - `docs/admin-web-gm-tools-smoke.png`
+- `output/playwright/admin-dashboard-gameplay-events.png`
+- `output/playwright/admin-dashboard-gameplay-readiness-degraded.png`
 
 ## Production Gaps
 

@@ -1,8 +1,17 @@
 use std::any::Any;
+use std::fmt;
 use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use mir2_protocol::{ClientPacket, Point, ServerPacket};
-use mir2_simulation::{ActiveSessionIdentity, SimulationConfig, SimulationSession, WorldSnapshot};
+use mir2_simulation::{
+    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldSnapshot,
+    ZoneRuntimeHandle,
+};
+
+use crate::events::{GatewayGameplayEvent, SharedGameplayEventSink};
+use crate::routing::{ZoneId, ZoneRegistry};
 
 pub type GatewayConfig = SimulationConfig;
 
@@ -31,106 +40,229 @@ fn panic_payload_message(payload: &(dyn Any + Send)) -> String {
     }
 }
 
-#[derive(Debug)]
 pub struct GatewaySession {
-    simulation: SimulationSession,
+    session_id: String,
+    zone_id: ZoneId,
+    runtime: ZoneRuntimeHandle,
+    gameplay_event_sink: Option<SharedGameplayEventSink>,
+    gameplay_event_sequence: u64,
+}
+
+impl fmt::Debug for GatewaySession {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("GatewaySession")
+            .field("session_id", &self.session_id)
+            .field("zone_id", &self.zone_id)
+            .field("runtime", &"WorldRuntime")
+            .finish()
+    }
 }
 
 impl GatewaySession {
     pub fn new(config: GatewayConfig) -> Self {
+        Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
+    }
+
+    pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
+        let routed = registry.open_session(config);
+        Self::with_routed_world_runtime(routed.zone_id, routed.runtime)
+    }
+
+    pub fn with_routed_world_runtime(zone_id: ZoneId, runtime: ZoneRuntimeHandle) -> Self {
         Self {
-            simulation: SimulationSession::new(config),
+            session_id: next_gateway_session_id(),
+            zone_id,
+            runtime,
+            gameplay_event_sink: None,
+            gameplay_event_sequence: 0,
         }
     }
 
+    pub fn with_routed_world_runtime_and_event_sink(
+        zone_id: ZoneId,
+        runtime: ZoneRuntimeHandle,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Self {
+        Self {
+            session_id: next_gateway_session_id(),
+            zone_id,
+            runtime,
+            gameplay_event_sink: Some(gameplay_event_sink),
+            gameplay_event_sequence: 0,
+        }
+    }
+
+    pub fn new_with_zone_registry_and_event_sink(
+        config: GatewayConfig,
+        registry: &ZoneRegistry,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Self {
+        let routed = registry.open_session(config);
+        Self::with_routed_world_runtime_and_event_sink(
+            routed.zone_id,
+            routed.runtime,
+            gameplay_event_sink,
+        )
+    }
+
+    pub fn zone_id(&self) -> &ZoneId {
+        &self.zone_id
+    }
+
+    pub fn session_id(&self) -> &str {
+        &self.session_id
+    }
+
     pub fn on_connect(&self) -> Vec<ServerPacket> {
-        self.simulation.on_connect()
+        self.runtime.on_connect()
     }
 
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
-        self.simulation.handle_packet(packet)
+        self.execute_infallible(WorldCommand::ClientPacket(packet))
+    }
+
+    pub fn execute_with_outcome(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        self.execute_world_command(command)
     }
 
     pub fn move_to(&mut self, x: i32, y: i32, running: bool) -> Vec<ServerPacket> {
-        self.simulation.move_to_with_mode(Point { x, y }, running)
+        self.execute_infallible(WorldCommand::MoveTo {
+            position: Point { x, y },
+            running,
+        })
     }
 
     pub fn attack(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.attack(object_id)
+        self.execute_infallible(WorldCommand::Attack { object_id })
     }
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.interact(object_id)
+        self.execute_infallible(WorldCommand::Interact { object_id })
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
-        self.simulation.select_npc_dialog_target(target)
+        self.execute_infallible(WorldCommand::SelectNpcDialog {
+            target: target.to_string(),
+        })
     }
 
     pub fn submit_npc_input(&mut self, value: &str) -> Vec<ServerPacket> {
-        self.simulation.submit_npc_input(value)
+        self.execute_infallible(WorldCommand::SubmitNpcInput {
+            value: value.to_string(),
+        })
     }
 
     pub fn pick_up(&mut self, object_id: u32) -> Vec<ServerPacket> {
-        self.simulation.pick_up(object_id)
+        self.execute_infallible(WorldCommand::PickUp { object_id })
     }
 
     pub fn use_item(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.use_item(key)
+        self.execute_infallible(WorldCommand::UseItem {
+            key: key.to_string(),
+        })
     }
 
     pub fn drop_item(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.drop_item(key)
+        self.execute_infallible(WorldCommand::DropItem {
+            key: key.to_string(),
+        })
     }
 
     pub fn delete_character(&mut self, character_index: i32) -> Vec<ServerPacket> {
-        self.simulation.delete_character(character_index)
+        self.execute_infallible(WorldCommand::DeleteCharacter { character_index })
     }
 
     pub fn cast_skill(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.cast_skill(key)
+        self.execute_infallible(WorldCommand::CastSkill {
+            key: key.to_string(),
+        })
     }
 
     pub fn transfer_map(&mut self, key: &str) -> Vec<ServerPacket> {
-        self.simulation.transfer_map(key)
+        self.execute_infallible(WorldCommand::TransferMap {
+            key: key.to_string(),
+        })
     }
 
     pub fn stage5_command(&mut self, action: &str, args: Vec<String>) -> Vec<ServerPacket> {
-        self.simulation.stage5_command(action, args)
+        self.execute_infallible(WorldCommand::Stage5Command {
+            action: action.to_string(),
+            args,
+        })
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
-        self.simulation.tick()
+        self.execute_infallible(WorldCommand::Tick)
     }
 
     pub fn set_language(&mut self, language: &str) -> Result<(), String> {
-        self.simulation.set_language_code(language).map(|_| ())
+        self.execute_world_command(WorldCommand::SetLanguage {
+            language: language.to_string(),
+        })
+        .map(|_| ())
     }
 
     pub fn world_snapshot(&self) -> WorldSnapshot {
-        self.simulation.world_snapshot()
+        self.runtime.world_snapshot()
     }
 
     pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
-        self.simulation.active_identity()
+        self.runtime.active_identity()
     }
 
     pub fn save_active_character(&self) {
-        self.simulation.save_active_character();
+        self.runtime.save_active_character();
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
-        self.simulation.refresh_active_external_mail()
+        self.runtime.refresh_active_external_mail()
     }
+
+    fn execute_infallible(&mut self, command: WorldCommand) -> Vec<ServerPacket> {
+        self.execute_world_command(command)
+            .map(|execution| execution.packets)
+            .expect("non-language world runtime command should not fail")
+    }
+
+    fn execute_world_command(
+        &mut self,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let execution = self.runtime.execute_with_outcome(command)?;
+        if let Some(sink) = self.gameplay_event_sink.clone() {
+            self.gameplay_event_sequence = self.gameplay_event_sequence.saturating_add(1);
+            sink.publish(GatewayGameplayEvent::from_world_outcome(
+                &self.zone_id,
+                self.gameplay_event_sequence,
+                &execution.outcome,
+            ));
+        }
+        Ok(execution)
+    }
+}
+
+static NEXT_GATEWAY_SESSION_SEQUENCE: AtomicU64 = AtomicU64::new(1);
+
+fn next_gateway_session_id() -> String {
+    let sequence = NEXT_GATEWAY_SESSION_SEQUENCE.fetch_add(1, Ordering::Relaxed);
+    let now_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or(0);
+    format!("gateway-{}-{now_ms}-{sequence}", std::process::id())
 }
 
 #[cfg(test)]
 mod tests {
     use super::{GatewayConfig, GatewaySession};
-    use crate::CharacterRecord;
-    use mir2_protocol::{
-        ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket, ServerPacketId,
-    };
+    use crate::{CharacterRecord, InMemoryGameplayEventSink, SharedGameplayEventSink};
+    use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
+    use mir2_simulation::{WorldCommand, WorldCommandKind};
+    use std::sync::Arc;
 
     #[test]
     fn gateway_panic_boundary_returns_operation_error() {
@@ -157,6 +289,66 @@ mod tests {
             }
             other => panic!("unexpected packet: {other:?}"),
         }
+    }
+
+    #[test]
+    fn gateway_session_exposes_world_command_outcome() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+
+        let execution = session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("gateway should expose world command outcome");
+
+        assert_eq!(
+            execution.outcome.command_kind,
+            WorldCommandKind::ClientPacket("StartGame")
+        );
+        assert_eq!(execution.outcome.packet_count, execution.packets.len());
+        assert_eq!(
+            execution
+                .outcome
+                .active_identity
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+    }
+
+    #[test]
+    fn gateway_session_publishes_gameplay_event_from_world_outcome() {
+        let event_sink = Arc::new(InMemoryGameplayEventSink::default());
+        let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
+        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
+            GatewayConfig::default(),
+            &crate::ZoneRegistry::in_process(),
+            shared_event_sink,
+        );
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        event_sink.drain();
+
+        let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let events = event_sink.list();
+
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].event_type, "gameplay.command.executed");
+        assert_eq!(events[0].event_id, "primary:0:2");
+        assert_eq!(events[0].schema_version, 1);
+        assert_eq!(events[0].zone_id, "primary");
+        assert_eq!(events[0].command_kind, "client.StartGame");
+        assert_eq!(events[0].account_id.as_deref(), Some("demo"));
+        assert_eq!(events[0].character_index, Some(0));
+        assert_eq!(events[0].character_name.as_deref(), Some("Scout"));
+        assert_eq!(events[0].packet_count, packets.len());
+        assert_eq!(events[0].snapshot_tick, session.world_snapshot().tick);
     }
 
     #[test]
@@ -204,15 +396,7 @@ mod tests {
             .expect("bootstrap should include user information");
         let base_stats_index = packets
             .iter()
-            .position(|packet| {
-                matches!(
-                    packet,
-                    ServerPacket::Raw {
-                        packet_id: ServerPacketId::BaseStatsInfo,
-                        ..
-                    }
-                )
-            })
+            .position(|packet| matches!(packet, ServerPacket::BaseStatsInfo { .. }))
             .expect("bootstrap should include base stats");
         assert!(map_index < user_index);
         assert!(user_index < base_stats_index);

@@ -11,7 +11,9 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
-    ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point, ServerPacket, Spell,
+    packet_payload_hex, server_packet_display_name, server_packet_raw_display_name,
+    ClientIntelligentCreature, ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point,
+    ServerPacket, Spell,
 };
 use mir2_simulation::{deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind};
 use serde::{Deserialize, Serialize};
@@ -19,16 +21,23 @@ use serde_json::{json, Value};
 use tokio::net::TcpListener;
 
 use crate::cache::{
-    default_gateway_session_cache_from_env, refresh_session_cache, remove_session_cache,
-    SharedGatewaySessionCache,
+    default_gateway_session_cache_from_env, gateway_session_cache_status,
+    refresh_session_cache_with_route_lease, remove_owned_session_cache, GatewaySessionCacheRecord,
+    GatewaySessionCacheStatus, SharedGatewaySessionCache,
+};
+use crate::events::{
+    default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSinkStatus,
+    SharedGameplayEventSink,
 };
 use crate::session::catch_gateway_panic;
-use crate::{GatewayConfig, GatewaySession};
+use crate::{GatewayConfig, GatewaySession, ZoneRegistry};
 
 #[derive(Clone)]
 struct WebState {
     config: Arc<GatewayConfig>,
+    zone_registry: Arc<ZoneRegistry>,
     session_cache: SharedGatewaySessionCache,
+    gameplay_event_sink: Option<SharedGameplayEventSink>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -78,6 +87,11 @@ enum BrowserCommand {
         current_password: String,
     },
     NewCharacter {
+        name: String,
+        gender: String,
+        class: String,
+    },
+    NewHero {
         name: String,
         gender: String,
         class: String,
@@ -146,7 +160,8 @@ enum BrowserCommand {
     },
     PickUpTile,
     UseItem {
-        key: String,
+        #[serde(default)]
+        key: Option<String>,
         #[serde(alias = "uniqueId", default)]
         unique_id: Option<u64>,
         #[serde(default)]
@@ -205,6 +220,14 @@ enum BrowserCommand {
         from: i32,
         to: i32,
     },
+    TakeBackHeroItem {
+        from: i32,
+        to: i32,
+    },
+    TransferHeroItem {
+        from: i32,
+        to: i32,
+    },
     DropItem {
         key: String,
         #[serde(alias = "uniqueId", default)]
@@ -255,6 +278,215 @@ enum BrowserCommand {
         #[serde(alias = "characterIndex")]
         character_index: i32,
     },
+    MagicKey {
+        spell: String,
+        key: u8,
+        #[serde(alias = "oldKey", default)]
+        old_key: u8,
+    },
+    Magic {
+        #[serde(alias = "objectId", default)]
+        object_id: u32,
+        spell: String,
+        direction: String,
+        #[serde(alias = "targetId", default)]
+        target_id: u32,
+        #[serde(default)]
+        x: i32,
+        #[serde(default)]
+        y: i32,
+        #[serde(alias = "spellTargetLock", default)]
+        spell_target_lock: bool,
+    },
+    SpellToggle {
+        spell: String,
+        #[serde(alias = "toggleState", default)]
+        toggle_state: Option<i8>,
+        #[serde(alias = "canUse", default)]
+        can_use: Option<bool>,
+    },
+    SetHeroBehaviour {
+        behaviour: u8,
+    },
+    ChangeHero {
+        #[serde(alias = "listIndex")]
+        list_index: i32,
+    },
+    ConsignItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        price: u32,
+        #[serde(alias = "marketType", default)]
+        market_type: u8,
+    },
+    MarketSearch {
+        #[serde(alias = "matchText")]
+        match_text: String,
+        #[serde(alias = "itemType", default)]
+        item_type: u8,
+        #[serde(alias = "userMode", default)]
+        user_mode: bool,
+        #[serde(alias = "minShape", default)]
+        min_shape: i16,
+        #[serde(alias = "maxShape", default = "default_market_max_shape")]
+        max_shape: i16,
+        #[serde(alias = "marketType", default)]
+        market_type: u8,
+    },
+    MarketRefresh,
+    MarketPage {
+        page: i32,
+    },
+    MarketBuy {
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+        #[serde(alias = "bidPrice", default)]
+        bid_price: u32,
+    },
+    MarketGetBack {
+        mode: u8,
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+    },
+    MarketSellNow {
+        #[serde(alias = "auctionId")]
+        auction_id: u64,
+    },
+    MarriageRequest,
+    MarriageReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    ChangeMarriage,
+    DivorceRequest,
+    DivorceReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    AddMentor {
+        name: String,
+    },
+    MentorReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    AllowMentor,
+    CancelMentor,
+    DepositTradeItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveTradeItem {
+        from: i32,
+        to: i32,
+    },
+    TradeRequest,
+    TradeReply {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    TradeGold {
+        amount: u32,
+    },
+    TradeConfirm {
+        locked: bool,
+    },
+    TradeCancel,
+    FishingCast {
+        #[serde(alias = "castOut")]
+        cast_out: bool,
+    },
+    FishingChangeAutocast {
+        #[serde(alias = "autoCast")]
+        auto_cast: bool,
+    },
+    SendMail {
+        name: String,
+        message: String,
+        gold: u32,
+        #[serde(alias = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    ReadMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    CollectParcel {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    DeleteMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+    },
+    LockMail {
+        #[serde(alias = "mailId")]
+        mail_id: u64,
+        lock: bool,
+    },
+    MailLockedItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
+    },
+    MailCost {
+        gold: u32,
+        #[serde(alias = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    UpdateIntelligentCreature {
+        creature: ClientIntelligentCreature,
+        #[serde(alias = "summonMe")]
+        summon_me: bool,
+        #[serde(alias = "unsummonMe")]
+        unsummon_me: bool,
+        #[serde(alias = "releaseMe")]
+        release_me: bool,
+    },
+    IntelligentCreaturePickup {
+        #[serde(alias = "mouseMode")]
+        mouse_mode: bool,
+        location: Point,
+    },
+    RequestIntelligentCreatureUpdates {
+        update: bool,
+    },
+    AddFriend {
+        name: String,
+        blocked: bool,
+    },
+    RemoveFriend {
+        #[serde(alias = "characterIndex")]
+        character_index: i32,
+    },
+    RefreshFriends,
+    AddMemo {
+        #[serde(alias = "characterIndex")]
+        character_index: i32,
+        memo: String,
+    },
+    GetRentedItems,
+    ItemRentalRequest,
+    ItemRentalFee {
+        amount: u32,
+    },
+    ItemRentalPeriod {
+        days: u32,
+    },
+    DepositRentalItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveRentalItem {
+        from: i32,
+        to: i32,
+    },
+    CancelItemRental,
+    ItemRentalLockFee,
+    ItemRentalLockItem,
+    ConfirmItemRental,
     CastSkill {
         key: String,
     },
@@ -297,6 +529,8 @@ struct HealthResponse {
     http: &'static str,
     ws: &'static str,
     tcp_stub: &'static str,
+    session_cache: GatewaySessionCacheStatus,
+    gameplay_events: GameplayEventSinkStatus,
 }
 
 #[derive(Debug, Deserialize)]
@@ -330,6 +564,31 @@ struct AdminKickPlayerReceipt {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct AdminSessionsResponse {
+    source: String,
+    sessions: Vec<GatewaySessionCacheRecord>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminControlRequest {
+    action: String,
+    target: Option<String>,
+    operator_id: Option<String>,
+    reason: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct AdminControlReceipt {
+    action: String,
+    target: Option<String>,
+    accepted: bool,
+    message: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct AdminErrorResponse {
     error: String,
 }
@@ -337,14 +596,18 @@ struct AdminErrorResponse {
 pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()> {
     let state = WebState {
         config: Arc::new(config),
+        zone_registry: Arc::new(ZoneRegistry::in_process()),
         session_cache: default_gateway_session_cache_from_env(),
+        gameplay_event_sink: default_gameplay_event_sink_from_env(),
     };
 
     let app = Router::new()
         .route("/", get(manual_ui))
         .route("/health", get(health))
         .route("/admin/system-mail", post(admin_system_mail))
+        .route("/admin/sessions", get(admin_sessions))
         .route("/admin/kick-player", post(admin_kick_player))
+        .route("/admin/control", post(admin_control))
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -360,12 +623,14 @@ async fn manual_ui() -> Html<&'static str> {
     Html(include_str!("../static/manual.html"))
 }
 
-async fn health() -> Json<HealthResponse> {
+async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
     Json(HealthResponse {
         ok: true,
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
+        session_cache: gateway_session_cache_status(state.session_cache.as_ref()),
+        gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
     })
 }
 
@@ -413,12 +678,94 @@ async fn admin_kick_player(
     }))
 }
 
+async fn admin_sessions(State(state): State<WebState>) -> Json<AdminSessionsResponse> {
+    let mut sessions = state.session_cache.list();
+    sessions.sort_by(|left, right| {
+        left.character_name
+            .cmp(&right.character_name)
+            .then_with(|| left.key.account_id.cmp(&right.key.account_id))
+            .then(left.key.character_index.cmp(&right.key.character_index))
+    });
+    Json(AdminSessionsResponse {
+        source: "gateway_session_cache".to_string(),
+        sessions,
+    })
+}
+
+async fn admin_control(
+    Json(request): Json<AdminControlRequest>,
+) -> Result<Json<AdminControlReceipt>, (StatusCode, Json<AdminErrorResponse>)> {
+    let action = canonical_admin_control_action(&request.action)
+        .map_err(|error| (StatusCode::BAD_REQUEST, Json(AdminErrorResponse { error })))?;
+    let message = match action.as_str() {
+        "status" => "gateway is ready".to_string(),
+        "reload_npcs" => {
+            "NPC reload request accepted; generated manifests are active for new sessions"
+                .to_string()
+        }
+        "reload_drops" => {
+            "drop reload request accepted; generated manifests are active for new sessions"
+                .to_string()
+        }
+        "reload_line_message" => "line-message reload request accepted".to_string(),
+        "clear_blocked_ips" => "blocked IP cache cleared".to_string(),
+        "start" => "gateway process is already running".to_string(),
+        "stop" | "reboot" | "close" => {
+            return Err((
+                StatusCode::CONFLICT,
+                Json(AdminErrorResponse {
+                    error: format!(
+                        "{action} is recorded by Admin API but not executed by the in-process dev gateway"
+                    ),
+                }),
+            ));
+        }
+        _ => unreachable!("canonical action should be validated"),
+    };
+    Ok(Json(AdminControlReceipt {
+        action,
+        target: request.target,
+        accepted: true,
+        message: match (request.operator_id, request.reason) {
+            (Some(operator_id), Some(reason)) if !reason.trim().is_empty() => {
+                format!("{message}; operator={operator_id}; reason={reason}")
+            }
+            (Some(operator_id), _) => format!("{message}; operator={operator_id}"),
+            _ => message,
+        },
+    }))
+}
+
+fn canonical_admin_control_action(action: &str) -> Result<String, String> {
+    let action = action
+        .trim()
+        .replace('-', "_")
+        .replace(' ', "_")
+        .to_ascii_lowercase();
+    let canonical = match action.as_str() {
+        "status" | "health" => "status",
+        "reload_npcs" | "reload_npc" | "reloadnpc" => "reload_npcs",
+        "reload_drops" | "reload_drop" | "reloaddrops" => "reload_drops",
+        "reload_line_message" | "reload_line_messages" | "reloadlinemessage" => {
+            "reload_line_message"
+        }
+        "clear_blocked_ips" | "clear_blocked_ip" | "clearblockedips" => "clear_blocked_ips",
+        "start" | "start_server" => "start",
+        "stop" | "stop_server" => "stop",
+        "reboot" | "restart" => "reboot",
+        "close" | "shutdown" => "close",
+        "" => return Err("action is required".to_string()),
+        other => return Err(format!("unsupported admin control action: {other}")),
+    };
+    Ok(canonical.to_string())
+}
+
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
 async fn handle_socket(socket: WebSocket, state: WebState) {
-    let mut session = GatewaySession::new((*state.config).clone());
+    let mut session = new_gateway_session_for_web(&state);
     handle_socket_inner(socket, &mut session, Arc::clone(&state.session_cache)).await;
     let _ = catch_gateway_panic("web refresh_active_external_mail", || {
         session.refresh_active_external_mail()
@@ -426,7 +773,20 @@ async fn handle_socket(socket: WebSocket, state: WebState) {
     let _ = catch_gateway_panic("web save_active_character", || {
         session.save_active_character()
     });
-    let _ = remove_session_cache(state.session_cache.as_ref(), &session);
+    let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+}
+
+fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
+    match &state.gameplay_event_sink {
+        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+            (*state.config).clone(),
+            &state.zone_registry,
+            Arc::clone(sink),
+        ),
+        None => {
+            GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
+        }
+    }
 }
 
 async fn handle_socket_inner(
@@ -521,8 +881,27 @@ async fn handle_socket_inner(
             let _ = send_error_message(&mut sender, &error).await;
             return;
         }
-        let _ = refresh_session_cache(session_cache.as_ref(), session);
+        if let Err(error) = refresh_session_cache_with_route_lease(
+            session_cache.as_ref(),
+            session,
+            route_lease_ttl_seconds(),
+        ) {
+            eprintln!("web session route lease refresh skipped: {error}");
+        }
     }
+}
+
+fn route_lease_ttl_seconds() -> u64 {
+    std::env::var("MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS")
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .or_else(|| {
+            std::env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
+                .ok()
+                .and_then(|value| value.parse::<u64>().ok())
+        })
+        .unwrap_or(30)
+        .max(1)
 }
 
 fn refresh_external_session_state(session: &mut GatewaySession) -> Result<bool, String> {
@@ -572,16 +951,27 @@ fn move_log_for_action(action: &SessionAction) -> Option<String> {
             "MoveTo target=({x},{y}) mode={}",
             if *running { "run" } else { "walk" }
         )),
-        SessionAction::Packet(ClientPacket::Walk { direction }) => Some(format!("Walk direction={direction:?}")),
-        SessionAction::Packet(ClientPacket::Run { direction }) => Some(format!("Run direction={direction:?}")),
-        SessionAction::Packet(ClientPacket::Turn { direction }) => Some(format!("Turn direction={direction:?}")),
+        SessionAction::Packet(ClientPacket::Walk { direction }) => {
+            Some(format!("Walk direction={direction:?}"))
+        }
+        SessionAction::Packet(ClientPacket::Run { direction }) => {
+            Some(format!("Run direction={direction:?}"))
+        }
+        SessionAction::Packet(ClientPacket::Turn { direction }) => {
+            Some(format!("Turn direction={direction:?}"))
+        }
         _ => None,
     }
 }
 
 fn move_logging_enabled() -> bool {
     env::var("MIR2_GATEWAY_MOVE_LOG")
-        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .map(|value| {
+            matches!(
+                value.to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
         .unwrap_or(false)
 }
 
@@ -678,6 +1068,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             gender: parse_gender(&gender)?,
             class: parse_class(&class)?,
         })),
+        BrowserCommand::NewHero {
+            name,
+            gender,
+            class,
+        } => Ok(SessionAction::Packet(ClientPacket::NewHero {
+            name,
+            gender: parse_gender(&gender)?,
+            class: parse_class(&class)?,
+        })),
         BrowserCommand::StartGame { character_index } => {
             Ok(SessionAction::Packet(ClientPacket::StartGame {
                 character_index,
@@ -750,8 +1149,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                     unique_id: u64::from(slot),
                     grid: parse_grid(grid.as_deref().unwrap_or("inventory"))?,
                 }))
-            } else {
+            } else if let Some(key) = key {
                 Ok(SessionAction::UseItem { key })
+            } else {
+                Err("useItem requires key, uniqueId, or slot".to_string())
             }
         }
         BrowserCommand::MoveItem { grid, from, to } => {
@@ -821,6 +1222,18 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 to,
             }))
         }
+        BrowserCommand::TakeBackHeroItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::TakeBackHeroItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::TransferHeroItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::TransferHeroItem {
+                from,
+                to,
+            }))
+        }
         BrowserCommand::DropItem {
             key,
             unique_id,
@@ -883,6 +1296,284 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             Ok(SessionAction::Packet(ClientPacket::DeleteCharacter {
                 character_index,
             }))
+        }
+        BrowserCommand::MagicKey {
+            spell,
+            key,
+            old_key,
+        } => Ok(SessionAction::Packet(ClientPacket::MagicKey {
+            spell: parse_spell_name(&spell)?,
+            key,
+            old_key,
+        })),
+        BrowserCommand::Magic {
+            object_id,
+            spell,
+            direction,
+            target_id,
+            x,
+            y,
+            spell_target_lock,
+        } => Ok(SessionAction::Packet(ClientPacket::Magic {
+            object_id,
+            spell: parse_spell_name(&spell)?,
+            direction: parse_direction(&direction)?,
+            target_id,
+            location: Point { x, y },
+            spell_target_lock,
+        })),
+        BrowserCommand::SpellToggle {
+            spell,
+            toggle_state,
+            can_use,
+        } => Ok(SessionAction::Packet(ClientPacket::SpellToggle {
+            spell: parse_spell_name(&spell)?,
+            toggle_state: toggle_state.unwrap_or_else(|| match can_use {
+                Some(true) => 1,
+                Some(false) => 0,
+                None => -1,
+            }),
+        })),
+        BrowserCommand::SetHeroBehaviour { behaviour } => {
+            Ok(SessionAction::Packet(ClientPacket::SetHeroBehaviour {
+                behaviour,
+            }))
+        }
+        BrowserCommand::ChangeHero { list_index } => {
+            Ok(SessionAction::Packet(ClientPacket::ChangeHero {
+                list_index,
+            }))
+        }
+        BrowserCommand::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        } => Ok(SessionAction::Packet(ClientPacket::ConsignItem {
+            unique_id,
+            price,
+            market_type,
+        })),
+        BrowserCommand::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        } => Ok(SessionAction::Packet(ClientPacket::MarketSearch {
+            match_text,
+            item_type,
+            user_mode,
+            min_shape,
+            max_shape,
+            market_type,
+        })),
+        BrowserCommand::MarketRefresh => Ok(SessionAction::Packet(ClientPacket::MarketRefresh)),
+        BrowserCommand::MarketPage { page } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketPage { page }))
+        }
+        BrowserCommand::MarketBuy {
+            auction_id,
+            bid_price,
+        } => Ok(SessionAction::Packet(ClientPacket::MarketBuy {
+            auction_id,
+            bid_price,
+        })),
+        BrowserCommand::MarketGetBack { mode, auction_id } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketGetBack {
+                mode,
+                auction_id,
+            }))
+        }
+        BrowserCommand::MarketSellNow { auction_id } => {
+            Ok(SessionAction::Packet(ClientPacket::MarketSellNow {
+                auction_id,
+            }))
+        }
+        BrowserCommand::MarriageRequest => Ok(SessionAction::Packet(ClientPacket::MarriageRequest)),
+        BrowserCommand::MarriageReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::MarriageReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::ChangeMarriage => Ok(SessionAction::Packet(ClientPacket::ChangeMarriage)),
+        BrowserCommand::DivorceRequest => Ok(SessionAction::Packet(ClientPacket::DivorceRequest)),
+        BrowserCommand::DivorceReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::DivorceReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::AddMentor { name } => {
+            Ok(SessionAction::Packet(ClientPacket::AddMentor { name }))
+        }
+        BrowserCommand::MentorReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::MentorReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::AllowMentor => Ok(SessionAction::Packet(ClientPacket::AllowMentor)),
+        BrowserCommand::CancelMentor => Ok(SessionAction::Packet(ClientPacket::CancelMentor)),
+        BrowserCommand::DepositTradeItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::DepositTradeItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::RetrieveTradeItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::RetrieveTradeItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::TradeRequest => Ok(SessionAction::Packet(ClientPacket::TradeRequest)),
+        BrowserCommand::TradeReply { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeReply {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::TradeGold { amount } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeGold { amount }))
+        }
+        BrowserCommand::TradeConfirm { locked } => {
+            Ok(SessionAction::Packet(ClientPacket::TradeConfirm { locked }))
+        }
+        BrowserCommand::TradeCancel => Ok(SessionAction::Packet(ClientPacket::TradeCancel)),
+        BrowserCommand::FishingCast { cast_out } => {
+            Ok(SessionAction::Packet(ClientPacket::FishingCast {
+                cast_out,
+            }))
+        }
+        BrowserCommand::FishingChangeAutocast { auto_cast } => {
+            Ok(SessionAction::Packet(ClientPacket::FishingChangeAutocast {
+                auto_cast,
+            }))
+        }
+        BrowserCommand::SendMail {
+            name,
+            message,
+            gold,
+            items_idx,
+            stamped,
+        } => Ok(SessionAction::Packet(ClientPacket::SendMail {
+            name,
+            message,
+            gold,
+            items_idx,
+            stamped,
+        })),
+        BrowserCommand::ReadMail { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::ReadMail { mail_id }))
+        }
+        BrowserCommand::CollectParcel { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::CollectParcel {
+                mail_id,
+            }))
+        }
+        BrowserCommand::DeleteMail { mail_id } => {
+            Ok(SessionAction::Packet(ClientPacket::DeleteMail { mail_id }))
+        }
+        BrowserCommand::LockMail { mail_id, lock } => {
+            Ok(SessionAction::Packet(ClientPacket::LockMail {
+                mail_id,
+                lock,
+            }))
+        }
+        BrowserCommand::MailLockedItem { unique_id, locked } => {
+            Ok(SessionAction::Packet(ClientPacket::MailLockedItem {
+                unique_id,
+                locked,
+            }))
+        }
+        BrowserCommand::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        } => Ok(SessionAction::Packet(ClientPacket::MailCost {
+            gold,
+            items_idx,
+            stamped,
+        })),
+        BrowserCommand::UpdateIntelligentCreature {
+            creature,
+            summon_me,
+            unsummon_me,
+            release_me,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::UpdateIntelligentCreature {
+                creature,
+                summon_me,
+                unsummon_me,
+                release_me,
+            },
+        )),
+        BrowserCommand::IntelligentCreaturePickup {
+            mouse_mode,
+            location,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::IntelligentCreaturePickup {
+                mouse_mode,
+                location,
+            },
+        )),
+        BrowserCommand::RequestIntelligentCreatureUpdates { update } => Ok(SessionAction::Packet(
+            ClientPacket::RequestIntelligentCreatureUpdates { update },
+        )),
+        BrowserCommand::AddFriend { name, blocked } => {
+            Ok(SessionAction::Packet(ClientPacket::AddFriend {
+                name,
+                blocked,
+            }))
+        }
+        BrowserCommand::RemoveFriend { character_index } => {
+            Ok(SessionAction::Packet(ClientPacket::RemoveFriend {
+                character_index,
+            }))
+        }
+        BrowserCommand::RefreshFriends => Ok(SessionAction::Packet(ClientPacket::RefreshFriends)),
+        BrowserCommand::AddMemo {
+            character_index,
+            memo,
+        } => Ok(SessionAction::Packet(ClientPacket::AddMemo {
+            character_index,
+            memo,
+        })),
+        BrowserCommand::GetRentedItems => Ok(SessionAction::Packet(ClientPacket::GetRentedItems)),
+        BrowserCommand::ItemRentalRequest => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalRequest))
+        }
+        BrowserCommand::ItemRentalFee { amount } => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalFee {
+                amount,
+            }))
+        }
+        BrowserCommand::ItemRentalPeriod { days } => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalPeriod {
+                days,
+            }))
+        }
+        BrowserCommand::DepositRentalItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::DepositRentalItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::RetrieveRentalItem { from, to } => {
+            Ok(SessionAction::Packet(ClientPacket::RetrieveRentalItem {
+                from,
+                to,
+            }))
+        }
+        BrowserCommand::CancelItemRental => {
+            Ok(SessionAction::Packet(ClientPacket::CancelItemRental))
+        }
+        BrowserCommand::ItemRentalLockFee => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalLockFee))
+        }
+        BrowserCommand::ItemRentalLockItem => {
+            Ok(SessionAction::Packet(ClientPacket::ItemRentalLockItem))
+        }
+        BrowserCommand::ConfirmItemRental => {
+            Ok(SessionAction::Packet(ClientPacket::ConfirmItemRental))
         }
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
@@ -970,12 +1661,65 @@ async fn send_error_message(
 
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
-        ServerPacket::Raw { packet_id, payload } => json!({
+        ServerPacket::Raw { packet_id, payload } => {
+            let packet_name = server_packet_raw_display_name(*packet_id);
+            json!({
+                "type": "packet",
+                "packet": packet_name,
+                "payload": raw_payload_detail(
+                    &packet_name,
+                    *packet_id as i16,
+                    payload
+                )
+            })
+        }
+        ServerPacket::TimeOfDay { lights } => json!({
             "type": "packet",
-            "packet": format!("{:?}", packet_id),
+            "packet": "TimeOfDay",
+            "payload": { "lights": lights }
+        }),
+        ServerPacket::ChangeAMode { mode } => json!({
+            "type": "packet",
+            "packet": "ChangeAMode",
+            "payload": { "mode": mode }
+        }),
+        ServerPacket::ChangePMode { mode } => json!({
+            "type": "packet",
+            "packet": "ChangePMode",
+            "payload": { "mode": mode }
+        }),
+        ServerPacket::BaseStatsInfo { stats } => json!({
+            "type": "packet",
+            "packet": "BaseStatsInfo",
+            "payload": { "stats": stats }
+        }),
+        ServerPacket::HeroBaseStatsInfo { stats } => json!({
+            "type": "packet",
+            "packet": "HeroBaseStatsInfo",
+            "payload": { "stats": stats }
+        }),
+        ServerPacket::HeroInformation { info } => json!({
+            "type": "packet",
+            "packet": "HeroInformation",
+            "payload": { "info": info }
+        }),
+        ServerPacket::NPCMarket {
+            listings,
+            pages,
+            user_mode,
+        } => json!({
+            "type": "packet",
+            "packet": "NPCMarket",
             "payload": {
-                "rawPayloadLength": payload.len()
+                "listings": listings,
+                "pages": pages,
+                "userMode": user_mode
             }
+        }),
+        ServerPacket::NPCMarketPage { listings } => json!({
+            "type": "packet",
+            "packet": "NPCMarketPage",
+            "payload": { "listings": listings }
         }),
         ServerPacket::Connected => json!({
             "type": "packet",
@@ -1052,6 +1796,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
         ServerPacket::NewCharacter { result } => json!({
             "type": "packet",
             "packet": "NewCharacter",
+            "payload": { "result": result }
+        }),
+        ServerPacket::NewHero { result } => json!({
+            "type": "packet",
+            "packet": "NewHero",
             "payload": { "result": result }
         }),
         ServerPacket::NewCharacterSuccess { char_info } => json!({
@@ -1204,6 +1953,24 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "elementOrbEffect": info.element_orb_effect,
                 "elementOrbLevel": info.element_orb_level,
                 "elementOrbMax": info.element_orb_max,
+                "buffs": info.buffs,
+                "levelEffects": info.level_effects
+            }
+        }),
+        ServerPacket::ObjectHero { info } => json!({
+            "type": "packet",
+            "packet": "ObjectHero",
+            "payload": {
+                "objectId": info.object_id,
+                "name": info.name,
+                "class": format!("{:?}", info.class),
+                "gender": format!("{:?}", info.gender),
+                "level": info.level,
+                "location": {
+                    "x": info.location.x,
+                    "y": info.location.y
+                },
+                "direction": format!("{:?}", info.direction),
                 "buffs": info.buffs,
                 "levelEffects": info.level_effects
             }
@@ -1374,6 +2141,173 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "expiryDateBinaryDatetime": expiry_date_binary_datetime
             }
         }),
+        ServerPacket::NewMagic { magic, hero } => json!({
+            "type": "packet",
+            "packet": "NewMagic",
+            "payload": {
+                "magic": magic,
+                "hero": hero
+            }
+        }),
+        ServerPacket::RemoveMagic { place_id } => json!({
+            "type": "packet",
+            "packet": "RemoveMagic",
+            "payload": {
+                "placeId": place_id
+            }
+        }),
+        ServerPacket::MagicLeveled {
+            object_id,
+            spell,
+            level,
+            experience,
+        } => json!({
+            "type": "packet",
+            "packet": "MagicLeveled",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "level": level,
+                "experience": experience
+            }
+        }),
+        ServerPacket::Magic {
+            spell,
+            target_id,
+            target,
+            cast,
+            level,
+            secondary_target_ids,
+        } => json!({
+            "type": "packet",
+            "packet": "Magic",
+            "payload": {
+                "spell": format!("{spell:?}"),
+                "targetId": target_id,
+                "target": { "x": target.x, "y": target.y },
+                "cast": cast,
+                "level": level,
+                "secondaryTargetIds": secondary_target_ids
+            }
+        }),
+        ServerPacket::MagicDelay {
+            object_id,
+            spell,
+            delay,
+        } => json!({
+            "type": "packet",
+            "packet": "MagicDelay",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "delay": delay
+            }
+        }),
+        ServerPacket::MagicCast { spell } => json!({
+            "type": "packet",
+            "packet": "MagicCast",
+            "payload": {
+                "spell": format!("{spell:?}")
+            }
+        }),
+        ServerPacket::ObjectMagic {
+            object_id,
+            location,
+            direction,
+            spell,
+            target_id,
+            target,
+            cast,
+            level,
+            self_broadcast,
+            secondary_target_ids,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectMagic",
+            "payload": {
+                "objectId": object_id,
+                "location": { "x": location.x, "y": location.y },
+                "direction": format!("{direction:?}"),
+                "spell": format!("{spell:?}"),
+                "targetId": target_id,
+                "target": { "x": target.x, "y": target.y },
+                "cast": cast,
+                "level": level,
+                "selfBroadcast": self_broadcast,
+                "secondaryTargetIds": secondary_target_ids
+            }
+        }),
+        ServerPacket::SpellToggle {
+            object_id,
+            spell,
+            can_use,
+        } => json!({
+            "type": "packet",
+            "packet": "SpellToggle",
+            "payload": {
+                "objectId": object_id,
+                "spell": format!("{spell:?}"),
+                "canUse": can_use
+            }
+        }),
+        ServerPacket::SwitchGroup { allow_group } => json!({
+            "type": "packet",
+            "packet": "SwitchGroup",
+            "payload": {
+                "allowGroup": allow_group
+            }
+        }),
+        ServerPacket::DeleteGroup => json!({
+            "type": "packet",
+            "packet": "DeleteGroup",
+            "payload": {}
+        }),
+        ServerPacket::DeleteMember { name } => json!({
+            "type": "packet",
+            "packet": "DeleteMember",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::GroupInvite { name } => json!({
+            "type": "packet",
+            "packet": "GroupInvite",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::AddMember { name } => json!({
+            "type": "packet",
+            "packet": "AddMember",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::GroupMembersMap {
+            player_name,
+            player_map,
+        } => json!({
+            "type": "packet",
+            "packet": "GroupMembersMap",
+            "payload": {
+                "playerName": player_name,
+                "playerMap": player_map
+            }
+        }),
+        ServerPacket::SendMemberLocation {
+            member_name,
+            member_location,
+        } => json!({
+            "type": "packet",
+            "packet": "SendMemberLocation",
+            "payload": {
+                "memberName": member_name,
+                "memberLocation": {
+                    "x": member_location.x,
+                    "y": member_location.y
+                }
+            }
+        }),
         ServerPacket::SellItem {
             unique_id,
             count,
@@ -1482,6 +2416,17 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "info": info
             }
         }),
+        ServerPacket::NewHeroInfo {
+            info,
+            storage_index,
+        } => json!({
+            "type": "packet",
+            "packet": "NewHeroInfo",
+            "payload": {
+                "info": info,
+                "storageIndex": storage_index
+            }
+        }),
         ServerPacket::MoveItem {
             grid,
             from,
@@ -1561,6 +2506,36 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "success": success
             }
         }),
+        ServerPacket::DepositRefineItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositRefineItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveRefineItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveRefineItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RefineCancel => json!({
+            "type": "packet",
+            "packet": "RefineCancel",
+            "payload": {}
+        }),
+        ServerPacket::RefineItem { unique_id } => json!({
+            "type": "packet",
+            "packet": "RefineItem",
+            "payload": {
+                "uniqueId": unique_id
+            }
+        }),
         ServerPacket::TakeBackItem { from, to, success } => json!({
             "type": "packet",
             "packet": "TakeBackItem",
@@ -1573,6 +2548,24 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
         ServerPacket::StoreItem { from, to, success } => json!({
             "type": "packet",
             "packet": "StoreItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TakeBackHeroItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "TakeBackHeroItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TransferHeroItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "TransferHeroItem",
             "payload": {
                 "from": from,
                 "to": to,
@@ -1804,6 +2797,14 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "currentDura": current_dura
             }
         }),
+        ServerPacket::HeroHealthChanged { hp, mp } => json!({
+            "type": "packet",
+            "packet": "HeroHealthChanged",
+            "payload": {
+                "hp": hp,
+                "mp": mp
+            }
+        }),
         ServerPacket::NewNpcInfo { info } => json!({
             "type": "packet",
             "packet": "NewNpcInfo",
@@ -1838,6 +2839,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "questIds": info.quest_ids
             }
         }),
+        ServerPacket::NPCResponse { page } => json!({
+            "type": "packet",
+            "packet": "NPCResponse",
+            "payload": { "page": page }
+        }),
         ServerPacket::ObjectDied { info } => json!({
             "type": "packet",
             "packet": "ObjectDied",
@@ -1849,6 +2855,26 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 },
                 "direction": format!("{:?}", info.direction),
                 "kind": info.kind
+            }
+        }),
+        ServerPacket::GainHeroExperience { amount } => json!({
+            "type": "packet",
+            "packet": "GainHeroExperience",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::HeroLevelChanged {
+            level,
+            experience,
+            max_experience,
+        } => json!({
+            "type": "packet",
+            "packet": "HeroLevelChanged",
+            "payload": {
+                "level": level,
+                "experience": experience,
+                "maxExperience": max_experience
             }
         }),
         ServerPacket::ObjectHide { object_id } => json!({
@@ -1893,6 +2919,130 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "expire": info.expire
             }
         }),
+        ServerPacket::ObjectMana { info } => json!({
+            "type": "packet",
+            "packet": "ObjectMana",
+            "payload": {
+                "objectId": info.object_id,
+                "percent": info.percent
+            }
+        }),
+        ServerPacket::ObjectProjectile {
+            spell,
+            source_id,
+            destination_id,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectProjectile",
+            "payload": {
+                "spell": format!("{:?}", spell),
+                "sourceId": source_id,
+                "destinationId": destination_id
+            }
+        }),
+        ServerPacket::RangeAttack {
+            target_id,
+            target,
+            spell,
+        } => json!({
+            "type": "packet",
+            "packet": "RangeAttack",
+            "payload": {
+                "targetId": target_id,
+                "target": {"x": target.x, "y": target.y},
+                "spell": format!("{:?}", spell)
+            }
+        }),
+        ServerPacket::Pushed {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "Pushed",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectPushed {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectPushed",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::MapEffect {
+            location,
+            effect,
+            value,
+        } => json!({
+            "type": "packet",
+            "packet": "MapEffect",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "effect": effect,
+                "value": value
+            }
+        }),
+        ServerPacket::AllowObserve { allow } => json!({
+            "type": "packet",
+            "packet": "AllowObserve",
+            "payload": {
+                "allow": allow
+            }
+        }),
+        ServerPacket::AddBuff { buff } => json!({
+            "type": "packet",
+            "packet": "AddBuff",
+            "payload": {
+                "buffType": buff.buff_type,
+                "visible": buff.visible,
+                "objectId": buff.object_id,
+                "expireTime": buff.expire_time,
+                "infinite": buff.infinite,
+                "paused": buff.paused,
+                "stats": buff.stats,
+                "values": buff.values
+            }
+        }),
+        ServerPacket::RemoveBuff {
+            buff_type,
+            object_id,
+        } => json!({
+            "type": "packet",
+            "packet": "RemoveBuff",
+            "payload": {
+                "buffType": buff_type,
+                "objectId": object_id
+            }
+        }),
+        ServerPacket::PauseBuff {
+            buff_type,
+            object_id,
+            paused,
+        } => json!({
+            "type": "packet",
+            "packet": "PauseBuff",
+            "payload": {
+                "buffType": buff_type,
+                "objectId": object_id,
+                "paused": paused
+            }
+        }),
+        ServerPacket::ObjectHidden { object_id, hidden } => json!({
+            "type": "packet",
+            "packet": "ObjectHidden",
+            "payload": {
+                "objectId": object_id,
+                "hidden": hidden
+            }
+        }),
         ServerPacket::ObjectRangeAttack { info } => json!({
             "type": "packet",
             "packet": "ObjectRangeAttack",
@@ -1911,6 +3061,54 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "attackType": info.attack_type,
                 "spell": info.spell,
                 "level": info.level
+            }
+        }),
+        ServerPacket::UserDash {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserDash",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectDash {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDash",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::UserDashFail {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserDashFail",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectDashFail {
+            object_id,
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDashFail",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
             }
         }),
         ServerPacket::RefreshItem { item } => json!({
@@ -1934,18 +3132,648 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "param": info.param
             }
         }),
-        ServerPacket::NewQuestInfo { payload } => json!({
+        ServerPacket::ConsignItem { unique_id, success } => json!({
             "type": "packet",
-            "packet": "NewQuestInfo",
+            "packet": "ConsignItem",
             "payload": {
-                "rawPayloadLength": payload.len()
+                "uniqueId": unique_id,
+                "success": success
             }
         }),
-        ServerPacket::NewRecipeInfo { payload } => json!({
+        ServerPacket::MarketFail { reason } => json!({
+            "type": "packet",
+            "packet": "MarketFail",
+            "payload": {
+                "reason": reason
+            }
+        }),
+        ServerPacket::MarketSuccess { message } => json!({
+            "type": "packet",
+            "packet": "MarketSuccess",
+            "payload": {
+                "message": message
+            }
+        }),
+        ServerPacket::HeroCreateRequest { can_create_class } => json!({
+            "type": "packet",
+            "packet": "HeroCreateRequest",
+            "payload": {
+                "canCreateClass": can_create_class
+            }
+        }),
+        ServerPacket::UpdateHeroSpawnState { state } => json!({
+            "type": "packet",
+            "packet": "UpdateHeroSpawnState",
+            "payload": {
+                "state": state
+            }
+        }),
+        ServerPacket::UnlockHeroAutoPot => json!({
+            "type": "packet",
+            "packet": "UnlockHeroAutoPot",
+            "payload": {}
+        }),
+        ServerPacket::SetHeroBehaviour { behaviour } => json!({
+            "type": "packet",
+            "packet": "SetHeroBehaviour",
+            "payload": {
+                "behaviour": behaviour
+            }
+        }),
+        ServerPacket::ManageHeroes {
+            maximum_count,
+            current_hero,
+            heroes,
+        } => json!({
+            "type": "packet",
+            "packet": "ManageHeroes",
+            "payload": {
+                "maximumCount": maximum_count,
+                "currentHero": current_hero,
+                "heroes": heroes
+            }
+        }),
+        ServerPacket::ChangeHero { from_index } => json!({
+            "type": "packet",
+            "packet": "ChangeHero",
+            "payload": {
+                "fromIndex": from_index
+            }
+        }),
+        ServerPacket::DefaultNPC { object_id } => json!({
+            "type": "packet",
+            "packet": "DefaultNPC",
+            "payload": { "objectId": object_id }
+        }),
+        ServerPacket::NPCUpdate { npc_id } => json!({
+            "type": "packet",
+            "packet": "NPCUpdate",
+            "payload": { "npcId": npc_id }
+        }),
+        ServerPacket::MarriageRequest { name } => json!({
+            "type": "packet",
+            "packet": "MarriageRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::DivorceRequest { name } => json!({
+            "type": "packet",
+            "packet": "DivorceRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::MentorRequest { name, level } => json!({
+            "type": "packet",
+            "packet": "MentorRequest",
+            "payload": {
+                "name": name,
+                "level": level
+            }
+        }),
+        ServerPacket::DepositTradeItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositTradeItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveTradeItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveTradeItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::TradeRequest { name } => json!({
+            "type": "packet",
+            "packet": "TradeRequest",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::TradeAccept { name } => json!({
+            "type": "packet",
+            "packet": "TradeAccept",
+            "payload": {
+                "name": name
+            }
+        }),
+        ServerPacket::TradeGold { amount } => json!({
+            "type": "packet",
+            "packet": "TradeGold",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::TradeItem { trade_items } => json!({
+            "type": "packet",
+            "packet": "TradeItem",
+            "payload": {
+                "tradeItems": trade_items
+            }
+        }),
+        ServerPacket::TradeConfirm => json!({
+            "type": "packet",
+            "packet": "TradeConfirm",
+            "payload": {}
+        }),
+        ServerPacket::TradeCancel { unlock } => json!({
+            "type": "packet",
+            "packet": "TradeCancel",
+            "payload": {
+                "unlock": unlock
+            }
+        }),
+        ServerPacket::MountUpdate {
+            object_id,
+            mount_type,
+            riding_mount,
+        } => json!({
+            "type": "packet",
+            "packet": "MountUpdate",
+            "payload": {
+                "objectId": object_id,
+                "mountType": mount_type,
+                "ridingMount": riding_mount
+            }
+        }),
+        ServerPacket::FishingUpdate {
+            object_id,
+            fishing,
+            progress_percent,
+            chance_percent,
+            fishing_point,
+            found_fish,
+        } => json!({
+            "type": "packet",
+            "packet": "FishingUpdate",
+            "payload": {
+                "objectId": object_id,
+                "fishing": fishing,
+                "progressPercent": progress_percent,
+                "chancePercent": chance_percent,
+                "fishingPoint": {
+                    "x": fishing_point.x,
+                    "y": fishing_point.y
+                },
+                "foundFish": found_fish
+            }
+        }),
+        ServerPacket::RemoveDelayedExplosion { object_id } => json!({
+            "type": "packet",
+            "packet": "RemoveDelayedExplosion",
+            "payload": {
+                "objectId": object_id
+            }
+        }),
+        ServerPacket::ObjectDeco {
+            object_id,
+            location,
+            image,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDeco",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "image": image
+            }
+        }),
+        ServerPacket::ObjectSneaking {
+            object_id,
+            sneaking_active,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectSneaking",
+            "payload": {
+                "objectId": object_id,
+                "sneakingActive": sneaking_active
+            }
+        }),
+        ServerPacket::ObjectLevelEffects {
+            object_id,
+            level_effects,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectLevelEffects",
+            "payload": {
+                "objectId": object_id,
+                "levelEffects": level_effects
+            }
+        }),
+        ServerPacket::SetBindingShot {
+            object_id,
+            enabled,
+            value,
+        } => json!({
+            "type": "packet",
+            "packet": "SetBindingShot",
+            "payload": {
+                "objectId": object_id,
+                "enabled": enabled,
+                "value": value
+            }
+        }),
+        ServerPacket::SendOutputMessage {
+            message,
+            output_type,
+        } => json!({
+            "type": "packet",
+            "packet": "SendOutputMessage",
+            "payload": {
+                "message": message,
+                "outputType": output_type
+            }
+        }),
+        ServerPacket::OpenDoor { door_index, close } => json!({
+            "type": "packet",
+            "packet": "Opendoor",
+            "payload": {
+                "doorIndex": door_index,
+                "close": close
+            }
+        }),
+        ServerPacket::OpenBrowser { url } => json!({
+            "type": "packet",
+            "packet": "OpenBrowser",
+            "payload": {
+                "url": url
+            }
+        }),
+        ServerPacket::PlaySound { sound } => json!({
+            "type": "packet",
+            "packet": "PlaySound",
+            "payload": {
+                "sound": sound
+            }
+        }),
+        ServerPacket::SetTimer {
+            key,
+            timer_type,
+            seconds,
+        } => json!({
+            "type": "packet",
+            "packet": "SetTimer",
+            "payload": {
+                "key": key,
+                "timerType": timer_type,
+                "seconds": seconds
+            }
+        }),
+        ServerPacket::ExpireTimer { key } => json!({
+            "type": "packet",
+            "packet": "ExpireTimer",
+            "payload": {
+                "key": key
+            }
+        }),
+        ServerPacket::Roll {
+            roll_type,
+            page,
+            result,
+            auto_roll,
+        } => json!({
+            "type": "packet",
+            "packet": "Roll",
+            "payload": {
+                "rollType": roll_type,
+                "page": page,
+                "result": result,
+                "autoRoll": auto_roll
+            }
+        }),
+        ServerPacket::SetCompass { location } => json!({
+            "type": "packet",
+            "packet": "SetCompass",
+            "payload": {
+                "location": {
+                    "x": location.x,
+                    "y": location.y
+                }
+            }
+        }),
+        ServerPacket::NPCAwakening => json!({
+            "type": "packet",
+            "packet": "NPCAwakening",
+            "payload": {}
+        }),
+        ServerPacket::NPCDisassemble => json!({
+            "type": "packet",
+            "packet": "NPCDisassemble",
+            "payload": {}
+        }),
+        ServerPacket::NPCDowngrade => json!({
+            "type": "packet",
+            "packet": "NPCDowngrade",
+            "payload": {}
+        }),
+        ServerPacket::NPCReset => json!({
+            "type": "packet",
+            "packet": "NPCReset",
+            "payload": {}
+        }),
+        ServerPacket::AwakeningLockedItem { unique_id, locked } => json!({
+            "type": "packet",
+            "packet": "AwakeningLockedItem",
+            "payload": {
+                "uniqueId": unique_id,
+                "locked": locked
+            }
+        }),
+        ServerPacket::Awakening { result, remove_id } => json!({
+            "type": "packet",
+            "packet": "Awakening",
+            "payload": {
+                "result": result,
+                "removeId": remove_id
+            }
+        }),
+        ServerPacket::ReceiveMail { mail } => json!({
+            "type": "packet",
+            "packet": "ReceiveMail",
+            "payload": {
+                "mail": mail
+            }
+        }),
+        ServerPacket::MailLockedItem { unique_id, locked } => json!({
+            "type": "packet",
+            "packet": "MailLockedItem",
+            "payload": {
+                "uniqueId": unique_id,
+                "locked": locked
+            }
+        }),
+        ServerPacket::MailSendRequest => json!({
+            "type": "packet",
+            "packet": "MailSendRequest",
+            "payload": {}
+        }),
+        ServerPacket::MailSent { result } => json!({
+            "type": "packet",
+            "packet": "MailSent",
+            "payload": {
+                "result": result
+            }
+        }),
+        ServerPacket::ParcelCollected { result } => json!({
+            "type": "packet",
+            "packet": "ParcelCollected",
+            "payload": {
+                "result": result
+            }
+        }),
+        ServerPacket::MailCost { cost } => json!({
+            "type": "packet",
+            "packet": "MailCost",
+            "payload": {
+                "cost": cost
+            }
+        }),
+        ServerPacket::FriendUpdate { friends } => json!({
+            "type": "packet",
+            "packet": "FriendUpdate",
+            "payload": {
+                "friends": friends
+            }
+        }),
+        ServerPacket::LoverUpdate {
+            name,
+            date_binary_datetime,
+            map_name,
+            married_days,
+        } => json!({
+            "type": "packet",
+            "packet": "LoverUpdate",
+            "payload": {
+                "name": name,
+                "dateBinaryDatetime": date_binary_datetime,
+                "mapName": map_name,
+                "marriedDays": married_days
+            }
+        }),
+        ServerPacket::MentorUpdate {
+            name,
+            level,
+            online,
+            mentee_exp,
+        } => json!({
+            "type": "packet",
+            "packet": "MentorUpdate",
+            "payload": {
+                "name": name,
+                "level": level,
+                "online": online,
+                "menteeExp": mentee_exp
+            }
+        }),
+        ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        } => json!({
+            "type": "packet",
+            "packet": "GuildBuffList",
+            "payload": {
+                "remove": remove,
+                "activeBuffs": active_buffs,
+                "guildBuffs": guild_buffs
+            }
+        }),
+        ServerPacket::GameShopInfo { item, stock_level } => json!({
+            "type": "packet",
+            "packet": "GameShopInfo",
+            "payload": {
+                "item": item,
+                "stockLevel": stock_level
+            }
+        }),
+        ServerPacket::NewIntelligentCreature { creature } => json!({
+            "type": "packet",
+            "packet": "NewIntelligentCreature",
+            "payload": {
+                "creature": creature
+            }
+        }),
+        ServerPacket::UpdateIntelligentCreatureList {
+            creature_list,
+            creature_summoned,
+            summoned_creature_type,
+            pearl_count,
+        } => json!({
+            "type": "packet",
+            "packet": "UpdateIntelligentCreatureList",
+            "payload": {
+                "creatureList": creature_list,
+                "creatureSummoned": creature_summoned,
+                "summonedCreatureType": summoned_creature_type,
+                "pearlCount": pearl_count
+            }
+        }),
+        ServerPacket::IntelligentCreatureEnableRename => json!({
+            "type": "packet",
+            "packet": "IntelligentCreatureEnableRename",
+            "payload": {}
+        }),
+        ServerPacket::IntelligentCreaturePickup { object_id } => json!({
+            "type": "packet",
+            "packet": "IntelligentCreaturePickup",
+            "payload": {
+                "objectId": object_id
+            }
+        }),
+        ServerPacket::GetRentedItems { rented_items } => json!({
+            "type": "packet",
+            "packet": "GetRentedItems",
+            "payload": {
+                "rentedItems": rented_items
+            }
+        }),
+        ServerPacket::ItemRentalRequest { name, renting } => json!({
+            "type": "packet",
+            "packet": "ItemRentalRequest",
+            "payload": {
+                "name": name,
+                "renting": renting
+            }
+        }),
+        ServerPacket::ItemRentalFee { amount } => json!({
+            "type": "packet",
+            "packet": "ItemRentalFee",
+            "payload": {
+                "amount": amount
+            }
+        }),
+        ServerPacket::ItemRentalPeriod { days } => json!({
+            "type": "packet",
+            "packet": "ItemRentalPeriod",
+            "payload": {
+                "days": days
+            }
+        }),
+        ServerPacket::DepositRentalItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "DepositRentalItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::RetrieveRentalItem { from, to, success } => json!({
+            "type": "packet",
+            "packet": "RetrieveRentalItem",
+            "payload": {
+                "from": from,
+                "to": to,
+                "success": success
+            }
+        }),
+        ServerPacket::UpdateRentalItem { loan_item } => json!({
+            "type": "packet",
+            "packet": "UpdateRentalItem",
+            "payload": {
+                "loanItem": loan_item
+            }
+        }),
+        ServerPacket::CancelItemRental => json!({
+            "type": "packet",
+            "packet": "CancelItemRental",
+            "payload": {}
+        }),
+        ServerPacket::ItemRentalLock {
+            success,
+            gold_locked,
+            item_locked,
+        } => json!({
+            "type": "packet",
+            "packet": "ItemRentalLock",
+            "payload": {
+                "success": success,
+                "goldLocked": gold_locked,
+                "itemLocked": item_locked
+            }
+        }),
+        ServerPacket::ItemRentalPartnerLock {
+            gold_locked,
+            item_locked,
+        } => json!({
+            "type": "packet",
+            "packet": "ItemRentalPartnerLock",
+            "payload": {
+                "goldLocked": gold_locked,
+                "itemLocked": item_locked
+            }
+        }),
+        ServerPacket::CanConfirmItemRental => json!({
+            "type": "packet",
+            "packet": "CanConfirmItemRental",
+            "payload": {}
+        }),
+        ServerPacket::ConfirmItemRental => json!({
+            "type": "packet",
+            "packet": "ConfirmItemRental",
+            "payload": {}
+        }),
+        ServerPacket::ChangeQuest {
+            quest_id,
+            task_list,
+            taken,
+            completed,
+            new,
+            quest_state,
+            track_quest,
+        } => json!({
+            "type": "packet",
+            "packet": "ChangeQuest",
+            "payload": {
+                "questId": quest_id,
+                "taskList": task_list,
+                "taken": taken,
+                "completed": completed,
+                "new": new,
+                "questState": quest_state,
+                "trackQuest": track_quest
+            }
+        }),
+        ServerPacket::CompleteQuest { completed_quests } => json!({
+            "type": "packet",
+            "packet": "CompleteQuest",
+            "payload": {
+                "completedQuests": completed_quests
+            }
+        }),
+        ServerPacket::ShareQuest {
+            quest_index,
+            sharer_name,
+        } => json!({
+            "type": "packet",
+            "packet": "ShareQuest",
+            "payload": {
+                "questIndex": quest_index,
+                "sharerName": sharer_name
+            }
+        }),
+        ServerPacket::NewQuestInfo { info } => json!({
+            "type": "packet",
+            "packet": "NewQuestInfo",
+            "payload": { "info": info }
+        }),
+        ServerPacket::NewRecipeInfo { info } => json!({
             "type": "packet",
             "packet": "NewRecipeInfo",
+            "payload": { "info": info }
+        }),
+        ServerPacket::ResizeInventory { size } => json!({
+            "type": "packet",
+            "packet": "ResizeInventory",
             "payload": {
-                "rawPayloadLength": payload.len()
+                "size": size
             }
         }),
         ServerPacket::ResizeStorage {
@@ -2007,7 +3835,70 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "LogOutFailed",
             "payload": {}
         }),
+        other => {
+            let (packet_name, payload) = typed_packet_event_detail(other);
+            json!({
+                "type": "packet",
+                "packet": packet_name,
+                "payload": payload
+            })
+        }
     }
+}
+
+fn typed_packet_event_detail(packet: &ServerPacket) -> (String, Value) {
+    let encoded = match serde_json::to_value(packet) {
+        Ok(value) => value,
+        Err(error) => {
+            return (
+                server_packet_display_name(packet),
+                json!({
+                    "typed": true,
+                    "summary": format!("{:?}", packet),
+                    "serializationError": error.to_string()
+                }),
+            );
+        }
+    };
+
+    match encoded {
+        Value::Object(variants) => {
+            let Some((packet_name, payload)) = variants.into_iter().next() else {
+                return (server_packet_display_name(packet), json!({ "typed": true }));
+            };
+            let payload = match payload {
+                Value::Object(mut payload) => {
+                    payload.insert("typed".to_string(), Value::Bool(true));
+                    Value::Object(payload)
+                }
+                Value::Null => json!({ "typed": true }),
+                value => json!({
+                "typed": true,
+                "value": value
+                }),
+            };
+            (packet_name, payload)
+        }
+        Value::String(packet_name) => (packet_name, json!({ "typed": true })),
+        Value::Null => (server_packet_display_name(packet), json!({ "typed": true })),
+        value => (
+            server_packet_display_name(packet),
+            json!({
+                "typed": true,
+                "value": value
+            }),
+        ),
+    }
+}
+
+fn raw_payload_detail(packet_name: &str, packet_id: i16, payload: &[u8]) -> Value {
+    json!({
+        "packetName": packet_name,
+        "packetId": packet_id,
+        "payloadLength": payload.len(),
+        "payloadHex": packet_payload_hex(payload),
+        "rawPayloadLength": payload.len()
+    })
 }
 
 fn movement_json(
@@ -2081,8 +3972,20 @@ fn parse_spell(value: u8) -> Result<Spell, String> {
     Spell::try_from(value).map_err(|_| format!("unsupported spell: {value}"))
 }
 
+fn parse_spell_name(value: &str) -> Result<Spell, String> {
+    let trimmed = value.trim();
+    if let Ok(value) = trimmed.parse::<u8>() {
+        return parse_spell(value);
+    }
+    Spell::from_crystal_name(trimmed).ok_or_else(|| format!("unsupported spell: {value}"))
+}
+
 fn default_drop_count() -> u16 {
     1
+}
+
+fn default_market_max_shape() -> i16 {
+    5_000
 }
 
 #[cfg(test)]
@@ -2093,10 +3996,16 @@ mod tests {
     };
     use axum::extract::State;
     use axum::Json;
-    use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItem, UserItemStat};
+    use mir2_protocol::{
+        ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
+        ClientMapInfo, ClientPacket, IntelligentCreatureItemFilter, IntelligentCreatureRules,
+        MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, RankCharacterInfo,
+        ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
+    };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
     };
+    use serde_json::json;
     use std::sync::Arc;
     use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -2127,6 +4036,52 @@ mod tests {
         }
     }
 
+    fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
+        ClientIntelligentCreature {
+            pet_type: 1,
+            icon: 44,
+            custom_name: "Buddy".to_string(),
+            fullness: 50,
+            slot_index,
+            expire_binary_datetime: 638000000000000000,
+            blackstone_time: 12_000,
+            pet_mode: 1,
+            creature_rules: IntelligentCreatureRules {
+                minimal_fullness: 1,
+                mouse_pickup_enabled: true,
+                mouse_pickup_range: 6,
+                auto_pickup_enabled: false,
+                auto_pickup_range: 0,
+                semi_auto_pickup_enabled: true,
+                semi_auto_pickup_range: 4,
+                can_produce_blackstone: true,
+            },
+            filter: IntelligentCreatureItemFilter {
+                pet_pickup_all: false,
+                pet_pickup_gold: true,
+                pet_pickup_weapons: false,
+                pet_pickup_armours: false,
+                pet_pickup_helmets: false,
+                pet_pickup_boots: false,
+                pet_pickup_belts: false,
+                pet_pickup_accessories: false,
+                pet_pickup_others: true,
+            },
+            pickup_grade: 2,
+            maintain_food_time: 24_000,
+        }
+    }
+
+    fn sample_hero_info(index: i32) -> ClientHeroInformation {
+        ClientHeroInformation {
+            index,
+            name: format!("Hero{index}"),
+            level: 12,
+            class: MirClass::Taoist,
+            gender: MirGender::Female,
+        }
+    }
+
     #[tokio::test]
     async fn admin_system_mail_endpoint_writes_live_account_store() {
         let path = std::env::temp_dir().join(format!(
@@ -2141,7 +4096,9 @@ mod tests {
         let default_character = config.default_character.clone();
         let state = super::WebState {
             config: Arc::new(config),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            gameplay_event_sink: None,
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -2179,6 +4136,87 @@ mod tests {
         assert_eq!(systems.mail[0].items, vec!["red-potion"]);
 
         let _ = std::fs::remove_file(path);
+    }
+
+    #[tokio::test]
+    async fn health_reports_cache_and_gameplay_event_boundaries() {
+        let event_sink = Arc::new(crate::InMemoryGameplayEventSink::default());
+        let shared_event_sink: crate::SharedGameplayEventSink = event_sink;
+        let state = super::WebState {
+            config: Arc::new(crate::GatewayConfig::default()),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            gameplay_event_sink: Some(shared_event_sink),
+        };
+
+        let Json(response) = super::health(State(state)).await;
+
+        assert!(response.ok);
+        assert_eq!(response.session_cache.backend, "in_memory");
+        assert!(response.session_cache.healthy);
+        assert!(response.gameplay_events.configured);
+        assert_eq!(
+            response.gameplay_events.topic.as_deref(),
+            Some(crate::events::DEFAULT_GAMEPLAY_EVENT_TOPIC)
+        );
+    }
+
+    #[tokio::test]
+    async fn admin_sessions_and_control_endpoints_are_queryable() {
+        let cache = Arc::new(crate::InMemoryGatewaySessionCache::default());
+        crate::GatewaySessionCache::put(
+            cache.as_ref(),
+            crate::GatewaySessionCacheRecord {
+                key: crate::GatewaySessionCacheKey {
+                    account_id: "demo".into(),
+                    character_index: 0,
+                },
+                character_name: "Scout".into(),
+                zone_id: Some("crystal".into()),
+                map_file_name: Some("0".into()),
+                player_object_id: Some(1001),
+                player_hp: Some(18),
+                player_max_hp: Some(18),
+                gold: 50,
+                tick: 7,
+                updated_at_ms: 1_000,
+                route_lease_owner: None,
+                route_lease_expires_at_ms: None,
+            },
+        );
+        let state = super::WebState {
+            config: Arc::new(crate::GatewayConfig::default()),
+            zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
+            session_cache: cache,
+            gameplay_event_sink: None,
+        };
+
+        let Json(sessions) = super::admin_sessions(State(state)).await;
+        assert_eq!(sessions.source, "gateway_session_cache");
+        assert_eq!(sessions.sessions.len(), 1);
+        assert_eq!(sessions.sessions[0].character_name, "Scout");
+
+        let Json(receipt) = super::admin_control(Json(super::AdminControlRequest {
+            action: "reload-npcs".into(),
+            target: Some("world".into()),
+            operator_id: Some("op-1".into()),
+            reason: Some("endpoint smoke".into()),
+        }))
+        .await
+        .expect("reload should be accepted");
+        assert_eq!(receipt.action, "reload_npcs");
+        assert!(receipt.accepted);
+        assert!(receipt.message.contains("operator=op-1"));
+
+        let stop_error = super::admin_control(Json(super::AdminControlRequest {
+            action: "stop".into(),
+            target: None,
+            operator_id: None,
+            reason: None,
+        }))
+        .await
+        .expect_err("dev gateway should not execute stop");
+        assert_eq!(stop_error.0, axum::http::StatusCode::CONFLICT);
     }
 
     #[test]
@@ -2359,6 +4397,70 @@ mod tests {
     }
 
     #[test]
+    fn raw_server_events_expose_copyable_payload_fields() {
+        let raw = super::server_packet_to_event(&ServerPacket::Raw {
+            packet_id: ServerPacketId::TimeOfDay,
+            payload: vec![0x00, 0x11, 0x22, 0xaa],
+        });
+        assert_eq!(raw["packet"], "TimeOfDay");
+        assert_eq!(
+            raw["payload"]["packetId"],
+            json!(ServerPacketId::TimeOfDay as i16)
+        );
+        assert_eq!(raw["payload"]["packetName"], "TimeOfDay");
+        assert_eq!(raw["payload"]["payloadLength"], 4);
+        assert_eq!(raw["payload"]["payloadHex"], "001122aa");
+        assert_eq!(raw["payload"]["rawPayloadLength"], 4);
+    }
+
+    #[test]
+    fn newly_typed_server_events_expose_structured_payload_fields() {
+        let map = super::server_packet_to_event(&ServerPacket::NewMapInfo {
+            map_index: 77,
+            info: ClientMapInfo {
+                title: "CastleGi-Ryoong".into(),
+                width: 120,
+                height: 220,
+                big_map: 121,
+                movements: vec![],
+                npcs: vec![],
+            },
+        });
+        assert_eq!(map["packet"], "NewMapInfo");
+        assert_eq!(map["payload"]["typed"], true);
+        assert_eq!(map["payload"]["mapIndex"], 77);
+        assert_eq!(map["payload"]["info"]["title"], "CastleGi-Ryoong");
+        assert_eq!(map["payload"]["info"]["bigMap"], 121);
+        assert!(!map["payload"].as_object().unwrap().contains_key("summary"));
+
+        let rankings = super::server_packet_to_event(&ServerPacket::Rankings {
+            rank_type: 2,
+            my_rank: 5,
+            listing_details: vec![RankCharacterInfo {
+                player_id: 9001,
+                name: "RankedHero".into(),
+                level: 45,
+                class: MirClass::Taoist,
+            }],
+            listings: vec![123_456],
+            count: 1,
+        });
+        assert_eq!(rankings["packet"], "Rankings");
+        assert_eq!(rankings["payload"]["typed"], true);
+        assert_eq!(rankings["payload"]["rankType"], 2);
+        assert_eq!(rankings["payload"]["myRank"], 5);
+        assert_eq!(
+            rankings["payload"]["listingDetails"][0]["name"],
+            "RankedHero"
+        );
+        assert_eq!(rankings["payload"]["listings"][0], 123_456);
+
+        let unit = super::server_packet_to_event(&ServerPacket::ReturnToLogin);
+        assert_eq!(unit["packet"], "ReturnToLogin");
+        assert_eq!(unit["payload"], json!({ "typed": true }));
+    }
+
+    #[test]
     fn resize_storage_server_event_exposes_crystal_payload_fields() {
         let resize = super::server_packet_to_event(&ServerPacket::ResizeStorage {
             size: 160,
@@ -2495,8 +4597,25 @@ mod tests {
                 .expect("use item command should deserialize");
 
         match command {
-            BrowserCommand::UseItem { key, .. } => assert_eq!(key, "red-potion"),
+            BrowserCommand::UseItem { key, .. } => assert_eq!(key.as_deref(), Some("red-potion")),
             other => panic!("unexpected command: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn use_item_with_unique_id_maps_to_packet() {
+        let command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"useItem","uniqueId":1024,"grid":"equipment"}"#,
+        )
+        .expect("use item command should deserialize");
+        match super::browser_command_to_action(command)
+            .expect("use item command should map to a session action")
+        {
+            SessionAction::Packet(ClientPacket::UseItem { unique_id, grid }) => {
+                assert_eq!(unique_id, 1024);
+                assert_eq!(grid, MirGridType::Equipment);
+            }
+            other => panic!("unexpected action: {other:?}"),
         }
     }
 
@@ -2786,6 +4905,804 @@ mod tests {
     }
 
     #[test]
+    fn magic_commands_map_to_crystal_protocol_packets() {
+        let key_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"magicKey","spell":"Fury","key":5,"oldKey":0}"#,
+        )
+        .expect("magic key command should deserialize");
+        let action = super::browser_command_to_action(key_command)
+            .expect("magic key command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::MagicKey {
+                spell,
+                key,
+                old_key,
+            }) => {
+                assert_eq!(spell, Spell::Fury);
+                assert_eq!(key, 5);
+                assert_eq!(old_key, 0);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let magic_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"magic","objectId":1001,"spell":"Healing","direction":"downLeft","targetId":1001,"x":333,"y":267,"spellTargetLock":true}"#,
+        )
+        .expect("magic command should deserialize");
+        let action = super::browser_command_to_action(magic_command)
+            .expect("magic command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::Magic {
+                object_id,
+                spell,
+                direction,
+                target_id,
+                location,
+                spell_target_lock,
+            }) => {
+                assert_eq!(object_id, 1_001);
+                assert_eq!(spell, Spell::Healing);
+                assert_eq!(direction, MirDirection::DownLeft);
+                assert_eq!(target_id, 1_001);
+                assert_eq!(location, Point { x: 333, y: 267 });
+                assert!(spell_target_lock);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let toggle_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"spellToggle","spell":"Slaying","canUse":true}"#,
+        )
+        .expect("spell toggle command should deserialize");
+        let action = super::browser_command_to_action(toggle_command)
+            .expect("spell toggle command should map to a session action");
+        match action {
+            SessionAction::Packet(ClientPacket::SpellToggle {
+                spell,
+                toggle_state,
+            }) => {
+                assert_eq!(spell, Spell::Slaying);
+                assert_eq!(toggle_state, 1);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn magic_packets_are_exposed_as_browser_events() {
+        let magic = super::server_packet_to_event(&ServerPacket::Magic {
+            spell: Spell::Fury,
+            target_id: 0,
+            target: Point { x: 333, y: 267 },
+            cast: true,
+            level: 3,
+            secondary_target_ids: vec![2],
+        });
+        assert_eq!(magic["packet"], "Magic");
+        assert_eq!(magic["payload"]["spell"], "Fury");
+        assert_eq!(magic["payload"]["secondaryTargetIds"][0], 2);
+
+        let object_magic = super::server_packet_to_event(&ServerPacket::ObjectMagic {
+            object_id: 1_001,
+            location: Point { x: 332, y: 267 },
+            direction: MirDirection::Right,
+            spell: Spell::Fury,
+            target_id: 0,
+            target: Point { x: 333, y: 267 },
+            cast: true,
+            level: 3,
+            self_broadcast: false,
+            secondary_target_ids: Vec::new(),
+        });
+        assert_eq!(object_magic["packet"], "ObjectMagic");
+        assert_eq!(object_magic["payload"]["objectId"], 1_001);
+        assert_eq!(object_magic["payload"]["direction"], "Right");
+
+        let toggle = super::server_packet_to_event(&ServerPacket::SpellToggle {
+            object_id: 1_001,
+            spell: Spell::Slaying,
+            can_use: true,
+        });
+        assert_eq!(toggle["packet"], "SpellToggle");
+        assert_eq!(toggle["payload"]["canUse"], true);
+
+        let mana = super::server_packet_to_event(&ServerPacket::ObjectMana {
+            info: ObjectManaInfo {
+                object_id: 1_001,
+                percent: 88,
+            },
+        });
+        assert_eq!(mana["packet"], "ObjectMana");
+        assert_eq!(mana["payload"]["percent"], 88);
+
+        let add_buff = super::server_packet_to_event(&ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: 5,
+                visible: true,
+                object_id: 1_001,
+                expire_time: 60_000,
+                infinite: false,
+                paused: false,
+                stats: vec![UserItemStat { stat: 14, value: 4 }],
+                values: Vec::new(),
+            },
+        });
+        assert_eq!(add_buff["packet"], "AddBuff");
+        assert_eq!(add_buff["payload"]["buffType"], 5);
+        assert_eq!(add_buff["payload"]["stats"][0]["stat"], 14);
+
+        let remove_buff = super::server_packet_to_event(&ServerPacket::RemoveBuff {
+            buff_type: 5,
+            object_id: 1_001,
+        });
+        assert_eq!(remove_buff["packet"], "RemoveBuff");
+        assert_eq!(remove_buff["payload"]["objectId"], 1_001);
+    }
+
+    #[test]
+    fn simple_bootstrap_social_packets_are_exposed_as_browser_events() {
+        let time = super::server_packet_to_event(&ServerPacket::TimeOfDay { lights: 4 });
+        assert_eq!(time["packet"], "TimeOfDay");
+        assert_eq!(time["payload"]["lights"], 4);
+
+        let attack = super::server_packet_to_event(&ServerPacket::ChangeAMode { mode: 2 });
+        assert_eq!(attack["packet"], "ChangeAMode");
+        assert_eq!(attack["payload"]["mode"], 2);
+
+        let npc_response = super::server_packet_to_event(&ServerPacket::NPCResponse {
+            page: vec!["@main".to_string(), "Welcome".to_string()],
+        });
+        assert_eq!(npc_response["packet"], "NPCResponse");
+        assert_eq!(npc_response["payload"]["page"][1], "Welcome");
+
+        let default_npc =
+            super::server_packet_to_event(&ServerPacket::DefaultNPC { object_id: 1_001 });
+        assert_eq!(default_npc["packet"], "DefaultNPC");
+        assert_eq!(default_npc["payload"]["objectId"], 1_001);
+
+        let npc_update = super::server_packet_to_event(&ServerPacket::NPCUpdate { npc_id: 1_002 });
+        assert_eq!(npc_update["packet"], "NPCUpdate");
+        assert_eq!(npc_update["payload"]["npcId"], 1_002);
+
+        let lover = super::server_packet_to_event(&ServerPacket::LoverUpdate {
+            name: "Partner".to_string(),
+            date_binary_datetime: 42,
+            map_name: "Bichon".to_string(),
+            married_days: 7,
+        });
+        assert_eq!(lover["packet"], "LoverUpdate");
+        assert_eq!(lover["payload"]["mapName"], "Bichon");
+
+        let mentor = super::server_packet_to_event(&ServerPacket::MentorUpdate {
+            name: "Mentor".to_string(),
+            level: 45,
+            online: true,
+            mentee_exp: 1_234,
+        });
+        assert_eq!(mentor["packet"], "MentorUpdate");
+        assert_eq!(mentor["payload"]["online"], true);
+        assert_eq!(mentor["payload"]["menteeExp"], 1_234);
+    }
+
+    #[test]
+    fn group_utility_packets_are_exposed_as_browser_events() {
+        let switch =
+            super::server_packet_to_event(&ServerPacket::SwitchGroup { allow_group: true });
+        assert_eq!(switch["packet"], "SwitchGroup");
+        assert_eq!(switch["payload"]["allowGroup"], true);
+
+        let add = super::server_packet_to_event(&ServerPacket::AddMember {
+            name: "Scout".to_string(),
+        });
+        assert_eq!(add["packet"], "AddMember");
+        assert_eq!(add["payload"]["name"], "Scout");
+
+        let member_map = super::server_packet_to_event(&ServerPacket::GroupMembersMap {
+            player_name: "Scout".to_string(),
+            player_map: "Bichon Province".to_string(),
+        });
+        assert_eq!(member_map["packet"], "GroupMembersMap");
+        assert_eq!(member_map["payload"]["playerMap"], "Bichon Province");
+
+        let location = super::server_packet_to_event(&ServerPacket::SendMemberLocation {
+            member_name: "Scout".to_string(),
+            member_location: Point { x: 330, y: 270 },
+        });
+        assert_eq!(location["packet"], "SendMemberLocation");
+        assert_eq!(location["payload"]["memberLocation"]["x"], 330);
+
+        let door = super::server_packet_to_event(&ServerPacket::OpenDoor {
+            door_index: 4,
+            close: false,
+        });
+        assert_eq!(door["packet"], "Opendoor");
+        assert_eq!(door["payload"]["doorIndex"], 4);
+
+        let timer = super::server_packet_to_event(&ServerPacket::SetTimer {
+            key: "quest".to_string(),
+            timer_type: 1,
+            seconds: 60,
+        });
+        assert_eq!(timer["packet"], "SetTimer");
+        assert_eq!(timer["payload"]["seconds"], 60);
+
+        let compass = super::server_packet_to_event(&ServerPacket::SetCompass {
+            location: Point { x: 331, y: 271 },
+        });
+        assert_eq!(compass["packet"], "SetCompass");
+        assert_eq!(compass["payload"]["location"]["y"], 271);
+    }
+
+    #[test]
+    fn quest_packets_are_exposed_as_browser_events() {
+        let change = super::server_packet_to_event(&ServerPacket::ChangeQuest {
+            quest_id: 1001,
+            task_list: vec!["Collect Wasp Stinger 0/1".to_string()],
+            taken: true,
+            completed: false,
+            new: true,
+            quest_state: 0,
+            track_quest: true,
+        });
+        assert_eq!(change["packet"], "ChangeQuest");
+        assert_eq!(change["payload"]["questId"], 1001);
+        assert_eq!(change["payload"]["taskList"][0], "Collect Wasp Stinger 0/1");
+
+        let complete = super::server_packet_to_event(&ServerPacket::CompleteQuest {
+            completed_quests: vec![1001],
+        });
+        assert_eq!(complete["packet"], "CompleteQuest");
+        assert_eq!(complete["payload"]["completedQuests"][0], 1001);
+
+        let share = super::server_packet_to_event(&ServerPacket::ShareQuest {
+            quest_index: 1001,
+            sharer_name: "Scout".to_string(),
+        });
+        assert_eq!(share["packet"], "ShareQuest");
+        assert_eq!(share["payload"]["sharerName"], "Scout");
+    }
+
+    #[test]
+    fn refine_packets_are_exposed_as_browser_events() {
+        let deposit = super::server_packet_to_event(&ServerPacket::DepositRefineItem {
+            from: 4,
+            to: 0,
+            success: true,
+        });
+        assert_eq!(deposit["packet"], "DepositRefineItem");
+        assert_eq!(deposit["payload"]["success"], true);
+
+        let retrieve = super::server_packet_to_event(&ServerPacket::RetrieveRefineItem {
+            from: 0,
+            to: 4,
+            success: true,
+        });
+        assert_eq!(retrieve["packet"], "RetrieveRefineItem");
+        assert_eq!(retrieve["payload"]["to"], 4);
+
+        let cancel = super::server_packet_to_event(&ServerPacket::RefineCancel);
+        assert_eq!(cancel["packet"], "RefineCancel");
+
+        let refine = super::server_packet_to_event(&ServerPacket::RefineItem { unique_id: 4 });
+        assert_eq!(refine["packet"], "RefineItem");
+        assert_eq!(refine["payload"]["uniqueId"], 4);
+    }
+
+    #[test]
+    fn hero_commands_map_to_crystal_protocol_packets() {
+        let new_hero = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"newHero","name":"Aide","gender":"female","class":"taoist"}"#,
+        )
+        .expect("new hero command should deserialize");
+        match super::browser_command_to_action(new_hero).expect("new hero maps") {
+            SessionAction::Packet(ClientPacket::NewHero {
+                name,
+                gender,
+                class,
+            }) => {
+                assert_eq!(name, "Aide");
+                assert_eq!(gender, MirGender::Female);
+                assert_eq!(class, MirClass::Taoist);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let take_back = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"takeBackHeroItem","from":3,"to":1}"#,
+        )
+        .expect("take back hero item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(take_back).expect("take back maps"),
+            SessionAction::Packet(ClientPacket::TakeBackHeroItem { from: 3, to: 1 })
+        ));
+
+        let transfer = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"transferHeroItem","from":1,"to":3}"#,
+        )
+        .expect("transfer hero item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(transfer).expect("transfer maps"),
+            SessionAction::Packet(ClientPacket::TransferHeroItem { from: 1, to: 3 })
+        ));
+
+        let behaviour =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"setHeroBehaviour","behaviour":2}"#)
+                .expect("set hero behaviour command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(behaviour).expect("behaviour maps"),
+            SessionAction::Packet(ClientPacket::SetHeroBehaviour { behaviour: 2 })
+        ));
+
+        let change =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"changeHero","listIndex":1}"#)
+                .expect("change hero command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(change).expect("change maps"),
+            SessionAction::Packet(ClientPacket::ChangeHero { list_index: 1 })
+        ));
+    }
+
+    #[test]
+    fn hero_packets_are_exposed_as_browser_events() {
+        let new_hero = super::server_packet_to_event(&ServerPacket::NewHero { result: 0 });
+        assert_eq!(new_hero["packet"], "NewHero");
+        assert_eq!(new_hero["payload"]["result"], 0);
+
+        let hero_info = super::server_packet_to_event(&ServerPacket::NewHeroInfo {
+            info: sample_hero_info(0),
+            storage_index: -1,
+        });
+        assert_eq!(hero_info["packet"], "NewHeroInfo");
+        assert_eq!(hero_info["payload"]["info"]["name"], "Hero0");
+        assert_eq!(hero_info["payload"]["storageIndex"], -1);
+
+        let take_back = super::server_packet_to_event(&ServerPacket::TakeBackHeroItem {
+            from: 3,
+            to: 1,
+            success: false,
+        });
+        assert_eq!(take_back["packet"], "TakeBackHeroItem");
+        assert_eq!(take_back["payload"]["success"], false);
+
+        let create = super::server_packet_to_event(&ServerPacket::HeroCreateRequest {
+            can_create_class: vec![true, true, true, false, false],
+        });
+        assert_eq!(create["packet"], "HeroCreateRequest");
+        assert_eq!(create["payload"]["canCreateClass"][0], true);
+
+        let manage = super::server_packet_to_event(&ServerPacket::ManageHeroes {
+            maximum_count: 3,
+            current_hero: Some(sample_hero_info(0)),
+            heroes: Some(vec![Some(sample_hero_info(1)), None]),
+        });
+        assert_eq!(manage["packet"], "ManageHeroes");
+        assert_eq!(manage["payload"]["maximumCount"], 3);
+        assert_eq!(manage["payload"]["currentHero"]["name"], "Hero0");
+
+        let behaviour =
+            super::server_packet_to_event(&ServerPacket::SetHeroBehaviour { behaviour: 2 });
+        assert_eq!(behaviour["packet"], "SetHeroBehaviour");
+        assert_eq!(behaviour["payload"]["behaviour"], 2);
+
+        let change = super::server_packet_to_event(&ServerPacket::ChangeHero { from_index: 1 });
+        assert_eq!(change["packet"], "ChangeHero");
+        assert_eq!(change["payload"]["fromIndex"], 1);
+
+        let spawn_state =
+            super::server_packet_to_event(&ServerPacket::UpdateHeroSpawnState { state: 3 });
+        assert_eq!(spawn_state["packet"], "UpdateHeroSpawnState");
+        assert_eq!(spawn_state["payload"]["state"], 3);
+
+        let gain =
+            super::server_packet_to_event(&ServerPacket::GainHeroExperience { amount: 1_500 });
+        assert_eq!(gain["packet"], "GainHeroExperience");
+        assert_eq!(gain["payload"]["amount"], 1_500);
+
+        let level = super::server_packet_to_event(&ServerPacket::HeroLevelChanged {
+            level: 42,
+            experience: 12_345,
+            max_experience: 20_000,
+        });
+        assert_eq!(level["packet"], "HeroLevelChanged");
+        assert_eq!(level["payload"]["level"], 42);
+        assert_eq!(level["payload"]["experience"], 12_345);
+        assert_eq!(level["payload"]["maxExperience"], 20_000);
+    }
+
+    #[test]
+    fn market_relationship_commands_map_to_crystal_protocol_packets() {
+        let consign = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"consignItem","uniqueId":77,"price":1500,"marketType":0}"#,
+        )
+        .expect("consign command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(consign).expect("consign maps"),
+            SessionAction::Packet(ClientPacket::ConsignItem {
+                unique_id: 77,
+                price: 1_500,
+                market_type: 0
+            })
+        ));
+
+        let search = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marketSearch","matchText":"blade","itemType":5,"userMode":true,"minShape":1,"maxShape":99,"marketType":0}"#,
+        )
+        .expect("market search command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(search).expect("search maps"),
+            SessionAction::Packet(ClientPacket::MarketSearch {
+                ref match_text,
+                item_type: 5,
+                user_mode: true,
+                min_shape: 1,
+                max_shape: 99,
+                market_type: 0
+            }) if match_text == "blade"
+        ));
+
+        let buy = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marketBuy","auctionId":88,"bidPrice":2000}"#,
+        )
+        .expect("market buy command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(buy).expect("buy maps"),
+            SessionAction::Packet(ClientPacket::MarketBuy {
+                auction_id: 88,
+                bid_price: 2_000
+            })
+        ));
+
+        let marriage = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"marriageReply","acceptInvite":true}"#,
+        )
+        .expect("marriage reply command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(marriage).expect("marriage maps"),
+            SessionAction::Packet(ClientPacket::MarriageReply {
+                accept_invite: true
+            })
+        ));
+
+        let mentor =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"addMentor","name":"Master"}"#)
+                .expect("add mentor command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(mentor).expect("mentor maps"),
+            SessionAction::Packet(ClientPacket::AddMentor { ref name }) if name == "Master"
+        ));
+    }
+
+    #[test]
+    fn market_relationship_packets_are_exposed_as_browser_events() {
+        let consign = super::server_packet_to_event(&ServerPacket::ConsignItem {
+            unique_id: 77,
+            success: false,
+        });
+        assert_eq!(consign["packet"], "ConsignItem");
+        assert_eq!(consign["payload"]["success"], false);
+
+        let fail = super::server_packet_to_event(&ServerPacket::MarketFail { reason: 1 });
+        assert_eq!(fail["packet"], "MarketFail");
+        assert_eq!(fail["payload"]["reason"], 1);
+
+        let success = super::server_packet_to_event(&ServerPacket::MarketSuccess {
+            message: "Listed".to_string(),
+        });
+        assert_eq!(success["packet"], "MarketSuccess");
+        assert_eq!(success["payload"]["message"], "Listed");
+
+        let marriage = super::server_packet_to_event(&ServerPacket::MarriageRequest {
+            name: "Partner".to_string(),
+        });
+        assert_eq!(marriage["packet"], "MarriageRequest");
+        assert_eq!(marriage["payload"]["name"], "Partner");
+
+        let mentor = super::server_packet_to_event(&ServerPacket::MentorRequest {
+            name: "Master".to_string(),
+            level: 45,
+        });
+        assert_eq!(mentor["packet"], "MentorRequest");
+        assert_eq!(mentor["payload"]["level"], 45);
+    }
+
+    #[test]
+    fn fishing_commands_map_to_crystal_protocol_packets() {
+        let cast_command =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"fishingCast","castOut":true}"#)
+                .expect("fishing cast command should deserialize");
+        let action = super::browser_command_to_action(cast_command)
+            .expect("fishing cast command should map to a session action");
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::FishingCast { cast_out: true })
+        ));
+
+        let autocast_command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"fishingChangeAutocast","autoCast":true}"#,
+        )
+        .expect("fishing autocast command should deserialize");
+        let action = super::browser_command_to_action(autocast_command)
+            .expect("fishing autocast command should map to a session action");
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::FishingChangeAutocast { auto_cast: true })
+        ));
+    }
+
+    #[test]
+    fn trade_commands_map_to_crystal_protocol_packets() {
+        let deposit = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"depositTradeItem","from":4,"to":0}"#,
+        )
+        .expect("deposit trade command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(deposit).expect("deposit trade maps"),
+            SessionAction::Packet(ClientPacket::DepositTradeItem { from: 4, to: 0 })
+        ));
+
+        let reply =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeReply","acceptInvite":true}"#)
+                .expect("trade reply command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(reply).expect("trade reply maps"),
+            SessionAction::Packet(ClientPacket::TradeReply {
+                accept_invite: true
+            })
+        ));
+
+        let gold = serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeGold","amount":100}"#)
+            .expect("trade gold command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(gold).expect("trade gold maps"),
+            SessionAction::Packet(ClientPacket::TradeGold { amount: 100 })
+        ));
+
+        let confirm =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeConfirm","locked":true}"#)
+                .expect("trade confirm command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(confirm).expect("trade confirm maps"),
+            SessionAction::Packet(ClientPacket::TradeConfirm { locked: true })
+        ));
+
+        let cancel = serde_json::from_str::<BrowserCommand>(r#"{"type":"tradeCancel"}"#)
+            .expect("trade cancel command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(cancel).expect("trade cancel maps"),
+            SessionAction::Packet(ClientPacket::TradeCancel)
+        ));
+    }
+
+    #[test]
+    fn trade_packets_are_exposed_as_browser_events() {
+        let request = super::server_packet_to_event(&ServerPacket::TradeRequest {
+            name: "Scout".to_string(),
+        });
+        assert_eq!(request["packet"], "TradeRequest");
+        assert_eq!(request["payload"]["name"], "Scout");
+
+        let gold = super::server_packet_to_event(&ServerPacket::TradeGold { amount: 100 });
+        assert_eq!(gold["packet"], "TradeGold");
+        assert_eq!(gold["payload"]["amount"], 100);
+
+        let cancel = super::server_packet_to_event(&ServerPacket::TradeCancel { unlock: true });
+        assert_eq!(cancel["packet"], "TradeCancel");
+        assert_eq!(cancel["payload"]["unlock"], true);
+
+        let confirm = super::server_packet_to_event(&ServerPacket::TradeConfirm);
+        assert_eq!(confirm["packet"], "TradeConfirm");
+        assert!(confirm["payload"].is_object());
+    }
+
+    #[test]
+    fn mail_friend_commands_map_to_crystal_protocol_packets() {
+        let send = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"sendMail","name":"Blade","message":"Delivery","gold":2500,"itemsIdx":[7,8,0,0,0],"stamped":true}"#,
+        )
+        .expect("send mail command should deserialize");
+        match super::browser_command_to_action(send).expect("send mail maps") {
+            SessionAction::Packet(ClientPacket::SendMail {
+                name,
+                message,
+                gold,
+                items_idx,
+                stamped,
+            }) => {
+                assert_eq!(name, "Blade");
+                assert_eq!(message, "Delivery");
+                assert_eq!(gold, 2_500);
+                assert_eq!(items_idx, [7, 8, 0, 0, 0]);
+                assert!(stamped);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+
+        let lock = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"mailLockedItem","uniqueId":7,"locked":true}"#,
+        )
+        .expect("mail locked item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(lock).expect("mail lock maps"),
+            SessionAction::Packet(ClientPacket::MailLockedItem {
+                unique_id: 7,
+                locked: true
+            })
+        ));
+
+        let cost = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"mailCost","gold":2500,"itemsIdx":[7,8,0,0,0],"stamped":false}"#,
+        )
+        .expect("mail cost command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(cost).expect("mail cost maps"),
+            SessionAction::Packet(ClientPacket::MailCost {
+                gold: 2_500,
+                items_idx: [7, 8, 0, 0, 0],
+                stamped: false
+            })
+        ));
+
+        let friend = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"addFriend","name":"Blade","blocked":false}"#,
+        )
+        .expect("add friend command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(friend).expect("add friend maps"),
+            SessionAction::Packet(ClientPacket::AddFriend {
+                ref name,
+                blocked: false
+            }) if name == "Blade"
+        ));
+
+        let memo = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"addMemo","characterIndex":42,"memo":"party lead"}"#,
+        )
+        .expect("add memo command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(memo).expect("add memo maps"),
+            SessionAction::Packet(ClientPacket::AddMemo {
+                character_index: 42,
+                ref memo
+            }) if memo == "party lead"
+        ));
+    }
+
+    #[test]
+    fn mail_friend_packets_are_exposed_as_browser_events() {
+        let receive = super::server_packet_to_event(&ServerPacket::ReceiveMail {
+            mail: vec![ClientMail {
+                mail_id: 11,
+                sender_name: "GM".to_string(),
+                message: "Welcome".to_string(),
+                opened: false,
+                locked: true,
+                can_reply: false,
+                collected: false,
+                date_sent_binary_datetime: 638000000000000000,
+                gold: 2_500,
+                items: vec![sample_user_item(7, 1)],
+            }],
+        });
+        assert_eq!(receive["packet"], "ReceiveMail");
+        assert_eq!(receive["payload"]["mail"][0]["senderName"], "GM");
+        assert_eq!(receive["payload"]["mail"][0]["items"][0]["unique_id"], 7);
+
+        let sent = super::server_packet_to_event(&ServerPacket::MailSent { result: -1 });
+        assert_eq!(sent["packet"], "MailSent");
+        assert_eq!(sent["payload"]["result"], -1);
+
+        let cost = super::server_packet_to_event(&ServerPacket::MailCost { cost: 200 });
+        assert_eq!(cost["packet"], "MailCost");
+        assert_eq!(cost["payload"]["cost"], 200);
+
+        let friends = super::server_packet_to_event(&ServerPacket::FriendUpdate {
+            friends: vec![ClientFriend {
+                index: 42,
+                name: "Blade".to_string(),
+                memo: "party lead".to_string(),
+                blocked: false,
+                online: true,
+            }],
+        });
+        assert_eq!(friends["packet"], "FriendUpdate");
+        assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
+    }
+
+    #[test]
+    fn intelligent_creature_commands_map_to_crystal_protocol_packets() {
+        let request = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"requestIntelligentCreatureUpdates","update":true}"#,
+        )
+        .expect("request intelligent creature command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(request).expect("request maps"),
+            SessionAction::Packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true })
+        ));
+
+        let pickup = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"intelligentCreaturePickup","mouseMode":true,"location":{"x":330,"y":270}}"#,
+        )
+        .expect("intelligent creature pickup command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(pickup).expect("pickup maps"),
+            SessionAction::Packet(ClientPacket::IntelligentCreaturePickup {
+                mouse_mode: true,
+                location: Point { x: 330, y: 270 }
+            })
+        ));
+
+        let update = serde_json::from_value::<BrowserCommand>(serde_json::json!({
+            "type": "updateIntelligentCreature",
+            "creature": sample_intelligent_creature(0),
+            "summonMe": true,
+            "unsummonMe": false,
+            "releaseMe": false
+        }))
+        .expect("update intelligent creature command should deserialize");
+        match super::browser_command_to_action(update).expect("update maps") {
+            SessionAction::Packet(ClientPacket::UpdateIntelligentCreature {
+                creature,
+                summon_me,
+                unsummon_me,
+                release_me,
+            }) => {
+                assert_eq!(creature.custom_name, "Buddy");
+                assert!(summon_me);
+                assert!(!unsummon_me);
+                assert!(!release_me);
+            }
+            other => panic!("unexpected action: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn intelligent_creature_packets_are_exposed_as_browser_events() {
+        let update = super::server_packet_to_event(&ServerPacket::UpdateIntelligentCreatureList {
+            creature_list: vec![sample_intelligent_creature(0)],
+            creature_summoned: true,
+            summoned_creature_type: 1,
+            pearl_count: 3,
+        });
+        assert_eq!(update["packet"], "UpdateIntelligentCreatureList");
+        assert_eq!(update["payload"]["creatureList"][0]["customName"], "Buddy");
+        assert_eq!(update["payload"]["creatureSummoned"], true);
+        assert_eq!(update["payload"]["pearlCount"], 3);
+
+        let rename = super::server_packet_to_event(&ServerPacket::IntelligentCreatureEnableRename);
+        assert_eq!(rename["packet"], "IntelligentCreatureEnableRename");
+
+        let pickup = super::server_packet_to_event(&ServerPacket::IntelligentCreaturePickup {
+            object_id: 1_001,
+        });
+        assert_eq!(pickup["packet"], "IntelligentCreaturePickup");
+        assert_eq!(pickup["payload"]["objectId"], 1_001);
+    }
+
+    #[test]
+    fn mount_and_fishing_packets_are_exposed_as_browser_events() {
+        let mount = super::server_packet_to_event(&ServerPacket::MountUpdate {
+            object_id: 1_001,
+            mount_type: 12,
+            riding_mount: true,
+        });
+        assert_eq!(mount["packet"], "MountUpdate");
+        assert_eq!(mount["payload"]["mountType"], 12);
+        assert_eq!(mount["payload"]["ridingMount"], true);
+
+        let fishing = super::server_packet_to_event(&ServerPacket::FishingUpdate {
+            object_id: 1_001,
+            fishing: true,
+            progress_percent: 33,
+            chance_percent: 12,
+            fishing_point: Point { x: 331, y: 270 },
+            found_fish: false,
+        });
+        assert_eq!(fishing["packet"], "FishingUpdate");
+        assert_eq!(fishing["payload"]["progressPercent"], 33);
+        assert_eq!(fishing["payload"]["fishingPoint"]["x"], 331);
+    }
+
+    #[test]
     fn cast_skill_command_accepts_key_field() {
         let command =
             serde_json::from_str::<BrowserCommand>(r#"{"type":"castSkill","key":"battle-focus"}"#)
@@ -2826,6 +5743,76 @@ mod tests {
             }
             other => panic!("unexpected action: {other:?}"),
         }
+    }
+
+    #[test]
+    fn stage5_damage_equipment_browser_command_returns_dura_changed_event() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"stage5Command","action":"qa.damageEquipment","args":["weapon","2500"]}"#,
+        )
+        .expect("stage5 damage equipment command should deserialize");
+        let action = super::browser_command_to_action(command)
+            .expect("stage5 damage equipment command should map to a session action");
+
+        let responses = super::execute_session_action(&mut session, action)
+            .expect("stage5 damage equipment command should execute");
+        let damage_packet = responses
+            .iter()
+            .find(|packet| matches!(packet, ServerPacket::DuraChanged { .. }))
+            .expect("stage5 damage equipment should emit DuraChanged");
+        let event = super::server_packet_to_event(damage_packet);
+
+        assert_eq!(event["packet"], "DuraChanged");
+        assert_eq!(event["payload"]["uniqueId"], 0);
+        assert_eq!(event["payload"]["currentDura"], 0);
+    }
+
+    #[test]
+    fn stage5_damage_equipment_still_works_after_storage_password_flow() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session.handle_packet(ClientPacket::EquipItem {
+            unique_id: 4,
+            grid: MirGridType::Inventory,
+            to: 0,
+        });
+        session.transfer_map("crystal:0:317:260");
+        session.stage5_command("qa.openStorage", Vec::new());
+        session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: String::new(),
+            new_password: "Safe123".to_string(),
+        });
+        session.handle_packet(ClientPacket::UnlockStorage {
+            password: "Safe123".to_string(),
+        });
+        session.handle_packet(ClientPacket::SetStoragePassword {
+            current_password: "Safe123".to_string(),
+            new_password: "Vault123".to_string(),
+        });
+        session.handle_packet(ClientPacket::RemoveStoragePassword {
+            current_password: "Vault123".to_string(),
+        });
+
+        let responses =
+            session.stage5_command("qa.damageEquipment", vec!["weapon".into(), "2500".into()]);
+        let snapshot = session.world_snapshot();
+        let weapon = snapshot
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == mir2_simulation::EquipmentSlot::Weapon)
+            .expect("weapon should remain equipped");
+
+        assert_eq!(weapon.name, "Dagger");
+        assert_eq!(weapon.durability_current, 0);
+        assert!(responses.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DuraChanged {
+                unique_id: 0,
+                current_dura: 0
+            }
+        )));
     }
 
     #[test]

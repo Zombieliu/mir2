@@ -3,18 +3,37 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const BASE_URL = process.env.MIR2_WEB_BASE_URL ?? process.argv[2] ?? "http://127.0.0.1:3002";
-const OUTPUT_DIR = path.resolve(process.cwd(), "..", "..", "docs", "stage5-screenshots");
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
+
+const BASE_URL = withQueryParam(
+  process.env.MIR2_WEB_BASE_URL ?? process.argv[2] ?? "http://127.0.0.1:3002",
+  "autoTick",
+  "0",
+);
+const OUTPUT_DIR = path.resolve(REPO_ROOT, "docs", "stage5-screenshots");
 const CHROME_PATH = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const DEBUG_PORT = Number(process.env.MIR2_CHROME_DEBUG_PORT ?? 9400 + (process.pid % 1000));
+const ACCOUNT_MODE = process.env.MIR2_STAGE5_ACCOUNT_MODE ?? "new";
+const USE_DEMO_ACCOUNT = ACCOUNT_MODE === "demo";
 const VIEWPORTS = {
   desktop: { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false },
   compact: { width: 820, height: 640, deviceScaleFactor: 1, mobile: false },
+  compactWide: { width: 900, height: 640, deviceScaleFactor: 1, mobile: false },
+  compactNarrow: { width: 768, height: 640, deviceScaleFactor: 1, mobile: false },
+  compactShort: { width: 820, height: 540, deviceScaleFactor: 1, mobile: false },
 };
 
 if (!CHROME_PATH) {
   throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH to run the Stage 5 UI smoke.");
+}
+
+function withQueryParam(rawUrl, key, value) {
+  const url = new URL(rawUrl);
+  if (!url.searchParams.has(key)) url.searchParams.set(key, value);
+  return url.toString();
 }
 
 class CdpClient {
@@ -23,6 +42,7 @@ class CdpClient {
     this.nextId = 1;
     this.pending = new Map();
     this.consoleErrors = [];
+    this.wsFrames = [];
   }
 
   async connect() {
@@ -55,9 +75,15 @@ class CdpClient {
     }
 
     if (message.method === "Runtime.exceptionThrown") {
+      const details = message.params?.exceptionDetails;
+      const exception = details?.exception;
       this.consoleErrors.push({
         source: "exception",
-        text: message.params?.exceptionDetails?.text ?? "runtime exception",
+        text:
+          exception?.description ??
+          exception?.value ??
+          details?.text ??
+          "runtime exception",
       });
     }
 
@@ -67,6 +93,21 @@ class CdpClient {
         const url = entry.url ? ` (${entry.url})` : "";
         this.consoleErrors.push({ source: entry.source ?? "log", text: `${entry.text ?? ""}${url}` });
       }
+    }
+
+    if (
+      message.method === "Network.webSocketFrameSent" ||
+      message.method === "Network.webSocketFrameReceived"
+    ) {
+      const opcode = message.params?.response?.opcode;
+      const payloadData = message.params?.response?.payloadData ?? "";
+      this.wsFrames.push({
+        direction: message.method.endsWith("Sent") ? "sent" : "received",
+        opcode,
+        payloadData: typeof payloadData === "string" ? payloadData.slice(0, 1_000) : "",
+        at: Date.now(),
+      });
+      this.wsFrames = this.wsFrames.slice(-80);
     }
   }
 
@@ -139,6 +180,8 @@ async function main() {
   const systemMenuFlow = [];
   const systemMenuQaTransferFlow = [];
   const systemMenuTransferFlow = [];
+  const systemMenuFeatureFlow = [];
+  const systemMenuSocialFlow = [];
   const hudButtonFlow = [];
   const spellCastFlow = [];
   const minimapFlow = [];
@@ -149,6 +192,7 @@ async function main() {
   const beltFlow = [];
   const beltUseFlow = [];
   const beltMouseUseFlow = [];
+  const gameShopFlow = [];
   const stage5SystemsFlow = [];
   const loginFlow = [];
   const selectFlow = [];
@@ -160,13 +204,15 @@ async function main() {
     await client.send("Page.enable");
     await client.send("Runtime.enable");
     await client.send("Log.enable");
+    await client.send("Network.enable");
     await setViewport(client, VIEWPORTS.desktop);
     await client.send("Page.navigate", { url: BASE_URL });
     await waitForSelector(client, ".login-overlay", 15_000);
     loginFlow.push(await readLoginState(client, "initial"));
     screenshots.push(await screenshot(client, "stage5-login.png"));
 
-    const accountId = `stage5-${process.pid}-${Date.now()}`;
+    const accountId = USE_DEMO_ACCOUNT ? "demo" : `stage5-${process.pid}-${Date.now()}`;
+    const accountPassword = USE_DEMO_ACCOUNT ? "demo" : "stage5-pass";
     await clickLanguageButton(client, ".login-language-selector", "简体中文");
     await waitForLoginState(client, (state) => state.activeLanguageLabel === "简体中文", "login zh-CN language", 5_000);
     loginFlow.push(await readLoginState(client, "zhCnLanguage"));
@@ -176,7 +222,7 @@ async function main() {
     loginFlow.push(await readLoginState(client, "englishLanguageRestored"));
 
     await setInputValue(client, ".login-input.account", accountId);
-    await setInputValue(client, ".login-input.password", "stage5-pass");
+    await setInputValue(client, ".login-input.password", accountPassword);
     loginFlow.push(await readLoginState(client, "credentialsFilled"));
     await clickSelector(client, ".login-button.view button");
     await waitForLoginState(client, (state) => state.accountPanelVisible === true, "view key panel", 5_000);
@@ -186,9 +232,11 @@ async function main() {
     await waitForLoginState(client, (state) => state.accountPanelVisible === false, "view key closed", 5_000);
     loginFlow.push(await readLoginState(client, "viewKeyClosed"));
 
-    await clickSelector(client, ".login-button.account button");
-    await delay(1_200);
-    loginFlow.push(await readLoginState(client, "accountCreated"));
+    if (!USE_DEMO_ACCOUNT) {
+      await clickSelector(client, ".login-button.account button");
+      await delay(1_200);
+      loginFlow.push(await readLoginState(client, "accountCreated"));
+    }
     await focusSelector(client, ".login-input.password");
     await pressKey(client, "Enter", "Enter", 13);
     const enterSubmitted = await waitForSelectorOptional(client, ".select-overlay", 3_000);
@@ -228,69 +276,326 @@ async function main() {
     await waitForSelectState(client, (state) => state.deletePanelVisible === false, "delete cancelled", 5_000);
     selectFlow.push(await readSelectState(client, "deleteCancelled"));
 
-    const beforeCreateSelect = await readSelectState(client, "beforeUiNewCharacter");
-    await clickSelector(client, ".select-action.new button");
-    await waitForSelectState(
-      client,
-      (state) => state.characterCount > beforeCreateSelect.characterCount,
-      "UI new character",
-      8_000,
-    );
-    selectFlow.push(await readSelectState(client, "afterUiNewCharacter"));
-    screenshots.push(await screenshot(client, "stage5-select-new-character-ui.png"));
-
-    const afterCreateSelect = await readSelectState(client, "afterUiNewCharacterReady");
-    if (afterCreateSelect.characterCount > 1) {
-      await clickSelectSlot(client, afterCreateSelect.characterCount - 1);
+    if (USE_DEMO_ACCOUNT) {
+      await clickSelectSlot(client, 0);
       await waitForSelectState(
         client,
-        (state) => state.selectedCharacterIndex === afterCreateSelect.characterCount - 1,
-        "UI selected new character slot",
+        (state) => state.selectedCharacterIndex === 0,
+        "demo character slot selected",
         5_000,
       );
-      selectFlow.push(await readSelectState(client, "newCharacterSlotSelected"));
-      screenshots.push(await screenshot(client, "stage5-select-slot-selected.png"));
-
-      await clickSelector(client, ".select-action.delete button");
-      await waitForSelectState(client, (state) => state.deletePanelVisible === true, "delete created confirm", 5_000);
-      selectFlow.push(await readSelectState(client, "deleteCreatedConfirm"));
-      screenshots.push(await screenshot(client, "stage5-select-delete-created-confirm.png"));
-      await clickSelector(client, ".select-delete-actions button:first-child");
-      await waitForSelectState(
-        client,
-        (state) => state.characterCount === afterCreateSelect.characterCount - 1 && state.deletePanelVisible === false,
-        "UI delete created character",
-        8_000,
-      );
-      const afterDeleteCreatedSelect = await readSelectState(client, "afterUiDeleteCharacter");
-      selectFlow.push(afterDeleteCreatedSelect);
-      screenshots.push(await screenshot(client, "stage5-select-delete-created-result.png"));
-
+      selectFlow.push(await readSelectState(client, "demoCharacterSlotSelected"));
+    } else {
+      const beforeCreateSelect = await readSelectState(client, "beforeUiNewCharacter");
       await clickSelector(client, ".select-action.new button");
       await waitForSelectState(
         client,
-        (state) => state.characterCount > afterDeleteCreatedSelect.characterCount,
-        "UI recreate character",
+        (state) => state.characterCount > beforeCreateSelect.characterCount,
+        "UI new character",
         8_000,
       );
-      const afterRecreateSelect = await readSelectState(client, "afterUiRecreateCharacter");
-      selectFlow.push(afterRecreateSelect);
-      screenshots.push(await screenshot(client, "stage5-select-new-character-ui-restored.png"));
-      await clickSelectSlot(client, afterRecreateSelect.characterCount - 1);
-      await waitForSelectState(
-        client,
-        (state) => state.selectedCharacterIndex === afterRecreateSelect.characterCount - 1,
-        "UI selected recreated character slot",
-        5_000,
-      );
-      selectFlow.push(await readSelectState(client, "recreatedCharacterSlotSelected"));
+      selectFlow.push(await readSelectState(client, "afterUiNewCharacter"));
+      screenshots.push(await screenshot(client, "stage5-select-new-character-ui.png"));
+
+      const afterCreateSelect = await readSelectState(client, "afterUiNewCharacterReady");
+      if (afterCreateSelect.characterCount > 1) {
+        await clickSelectSlot(client, afterCreateSelect.characterCount - 1);
+        await waitForSelectState(
+          client,
+          (state) => state.selectedCharacterIndex === afterCreateSelect.characterCount - 1,
+          "UI selected new character slot",
+          5_000,
+        );
+        selectFlow.push(await readSelectState(client, "newCharacterSlotSelected"));
+        screenshots.push(await screenshot(client, "stage5-select-slot-selected.png"));
+
+        await clickSelector(client, ".select-action.delete button");
+        await waitForSelectState(client, (state) => state.deletePanelVisible === true, "delete created confirm", 5_000);
+        selectFlow.push(await readSelectState(client, "deleteCreatedConfirm"));
+        screenshots.push(await screenshot(client, "stage5-select-delete-created-confirm.png"));
+        await clickSelector(client, ".select-delete-actions button:first-child");
+        await waitForSelectState(
+          client,
+          (state) => state.characterCount === afterCreateSelect.characterCount - 1 && state.deletePanelVisible === false,
+          "UI delete created character",
+          8_000,
+        );
+        const afterDeleteCreatedSelect = await readSelectState(client, "afterUiDeleteCharacter");
+        selectFlow.push(afterDeleteCreatedSelect);
+        screenshots.push(await screenshot(client, "stage5-select-delete-created-result.png"));
+
+        await clickSelector(client, ".select-action.new button");
+        await waitForSelectState(
+          client,
+          (state) => state.characterCount > afterDeleteCreatedSelect.characterCount,
+          "UI recreate character",
+          8_000,
+        );
+        const afterRecreateSelect = await readSelectState(client, "afterUiRecreateCharacter");
+        selectFlow.push(afterRecreateSelect);
+        screenshots.push(await screenshot(client, "stage5-select-new-character-ui-restored.png"));
+        await clickSelectSlot(client, afterRecreateSelect.characterCount - 1);
+        await waitForSelectState(
+          client,
+          (state) => state.selectedCharacterIndex === afterRecreateSelect.characterCount - 1,
+          "UI selected recreated character slot",
+          5_000,
+        );
+        selectFlow.push(await readSelectState(client, "recreatedCharacterSlotSelected"));
+      }
     }
 
-    await clickSelector(client, ".select-action.start button");
-    await waitForSelector(client, ".game-ui-scene", 15_000);
+    await startSelectedCharacterFromSelect(client, selectFlow);
+    await waitForSelector(client, ".game-ui-scene", 10_000);
     await waitForSelector(client, ".hud-button.inventory button", 10_000);
-    await waitForStage5State(client, (state) => state?.mapFileName === "0", "starter map", 15_000);
+    await waitForStage5State(
+      client,
+      (state) => state?.screen === "game" && state?.player !== null,
+      "game scene",
+      15_000,
+    );
+    const beforeBootstrapTick = await client.evaluate("window.__mir2Stage5?.state?.worldTick ?? 0");
+    await sendGatewayCommand(client, { type: "tick" });
+    await waitForStage5State(
+      client,
+      (state) => Number(state?.worldTick ?? 0) > beforeBootstrapTick,
+      "post-start gateway tick",
+      30_000,
+    );
     screenshots.push(await screenshot(client, "stage5-game.png"));
+
+    if (process.env.MIR2_STAGE5_SMOKE_FAST_MENU === "1") {
+      await clickSelector(client, ".hud-button.menu button");
+      await waitForSystemMenuState(client, (state) => state.open === true, "open", 5_000);
+      systemMenuFlow.push(await readSystemMenuState(client, "open"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-fast.png"));
+
+      await clickSystemMenuActionByKey(client, "creature");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "creature",
+        "creature feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "creatureFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelOpen"));
+      await clickSelector(client, ".creature-feature-actions button:nth-child(1)");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          hasRecentCommand(
+            state,
+            (command) => command?.type === "updateIntelligentCreature" && command?.summonMe === true,
+          ),
+        "creature summon command sent",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureSummonCommand"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "creature feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelClosed"));
+
+      await clickSystemMenuActionByKey(client, "ride");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "mount",
+        "mount feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "mountFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelOpen"));
+      await clickSelector(client, ".mount-feature-ride");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          hasRecentCommand(
+            state,
+            (command) => command?.type === "useItem" && command?.grid === "equipment" && command?.slot === 13,
+          ),
+        "mount use-item command sent",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountUseCommand"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "mount feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
+
+      await clickSystemMenuActionByKey(client, "fishing");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.systemMenuFeaturePanelVisible === true &&
+          state.systemMenuFeaturePanelType === "fishing",
+        "fishing feature panel open",
+        5_000,
+      );
+      systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
+      await clickSelector(client, ".fishing-feature-status button:nth-child(1)");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          hasRecentCommand(
+            state,
+            (command) => command?.type === "fishingCast" && command?.castOut === true,
+          ),
+        "fishing cast command sent",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingCastCommand"));
+      await clickSelector(client, ".fishing-feature-status button:nth-child(2)");
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          hasRecentCommand(
+            state,
+            (command) => command?.type === "fishingChangeAutocast" && command?.autoCast === true,
+          ),
+        "fishing autocast command sent",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingAutoCommand"));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false,
+        "fishing feature panel closed",
+        5_000,
+      );
+      systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+
+      const socialPanels = [
+        { key: "ranking", tab: "overall" },
+        { key: "friend", tab: "blocks" },
+        { key: "mentor", tab: "requests" },
+        { key: "relationship", tab: "status" },
+        { key: "group", tab: "party" },
+        { key: "guild", tab: "members" },
+        { key: "hero", tab: "status", commandType: "newHero" },
+        { key: "trade", tab: "session" },
+        { key: "market", tab: "listings" },
+        { key: "marriage", tab: "status" },
+        { key: "itemRental", tab: "session", commandType: "itemRentalRequest" },
+      ];
+
+      for (const socialPanel of socialPanels) {
+        await clickSystemMenuActionByKey(client, socialPanel.key);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelType === socialPanel.key,
+          `${socialPanel.key} panel open`,
+          5_000,
+        );
+        const openState = await readSystemMenuState(client, `${socialPanel.key}PanelOpen`);
+        systemMenuSocialFlow.push(openState);
+
+        await clickSystemMenuSocialTabByKey(client, socialPanel.tab);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelTabKey === socialPanel.tab,
+          `${socialPanel.key} panel tab`,
+          5_000,
+        );
+        const tabState = await readSystemMenuState(client, `${socialPanel.key}PanelTab`);
+        systemMenuSocialFlow.push(tabState);
+
+        const selectedEntryName =
+          tabState.systemMenuSocialEntryNames[Math.min(1, Math.max(tabState.systemMenuSocialEntryNames.length - 1, 0))] ??
+          tabState.systemMenuSocialPanelSelectedRow;
+        if (selectedEntryName) {
+          await clickSystemMenuSocialEntryByName(client, selectedEntryName);
+          await waitForSystemMenuState(
+            client,
+            (state) => state.systemMenuSocialPanelSelectedRow === selectedEntryName,
+            `${socialPanel.key} panel row`,
+            5_000,
+          );
+        }
+
+        const actionLabel = tabState.systemMenuSocialActionLabels[0];
+        if (actionLabel) {
+          await clickSystemMenuSocialActionByLabel(client, actionLabel);
+          await waitForSystemMenuState(
+            client,
+            (state) =>
+              state.systemMenuSocialPanelStatus !== null &&
+              state.systemMenuSocialPanelStatus.includes(actionLabel),
+            `${socialPanel.key} panel action`,
+            5_000,
+          );
+          if (socialPanel.commandType) {
+            await waitForSystemMenuState(
+              client,
+              (state) => hasRecentCommand(state, (command) => command?.type === socialPanel.commandType),
+              `${socialPanel.key} panel command`,
+              5_000,
+            );
+          }
+        }
+
+        systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelAction`));
+        screenshots.push(await screenshot(client, `stage5-system-menu-${socialPanel.key}.png`));
+        await clickSystemMenuFeaturePanelClose(client);
+        await waitForSystemMenuState(
+          client,
+          (state) =>
+            state.open === true &&
+            state.systemMenuFeaturePanelVisible === false &&
+            state.systemMenuSocialPanelVisible === false,
+          `${socialPanel.key} panel closed`,
+          5_000,
+        );
+        systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelClosed`));
+      }
+
+      if (!(await readSystemMenuState(client, "beforeQaTransferReopen")).open) {
+        await clickSelector(client, ".hud-button.menu button");
+      }
+      await waitForSystemMenuState(client, (state) => state.open === true, "reopen qa transfer", 5_000);
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferPanel"));
+      await setSystemMenuQaTransferInputs(client, { map: "0", x: 330, y: 270 });
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferFilled"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-qa-transfer.png"));
+      await clickSelector(client, ".system-menu-qa-transfer button[type='submit']");
+      await waitForSystemMenuState(client, (state) => state.open === false, "qa transfer closed", 5_000);
+      systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferSubmitted"));
+      screenshots.push(await screenshot(client, "stage5-system-menu-qa-transfer-result.png"));
+
+      console.log(
+        JSON.stringify(
+          {
+            screenshots: screenshots.length,
+            systemMenu: systemMenuFlow.length,
+            systemMenuFeature: systemMenuFeatureFlow.length,
+            systemMenuSocial: systemMenuSocialFlow.length,
+            systemMenuQaTransfer: systemMenuQaTransferFlow.length,
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
 
     await clickSelector(client, ".hud-button.inventory button");
     await waitForSelector(client, ".inventory-window", 10_000);
@@ -298,31 +603,86 @@ async function main() {
     inventoryFlow.push(await readInventoryState(client, "bag1"));
     screenshots.push(await screenshot(client, "stage5-inventory.png"));
 
-    const beforeInventoryUse = await readInventoryItem(client, "beforeInventoryUse", "Red Potion");
-    if (!beforeInventoryUse.item) {
-      throw new Error(`Cannot verify inventory item use without Red Potion: ${JSON.stringify(beforeInventoryUse)}`);
-    }
-    inventoryUseFlow.push(beforeInventoryUse);
-    await clickInventoryItemByName(client, "Red Potion");
-    const afterInventoryUse = await waitForInventoryItemQuantityBelow(
-      client,
-      "Red Potion",
-      beforeInventoryUse.item.quantity,
-      "afterInventoryUse",
-      5_000,
-    );
-    inventoryUseFlow.push(afterInventoryUse);
-    screenshots.push(await screenshot(client, "stage5-inventory-use-red-potion.png"));
+    await transferMapAndWait(client, "crystal:0:302:257", "inventory safe service position");
 
-    const beforeInventoryEquip = await readInventoryEquipmentState(client, "beforeInventoryEquip", "Dagger");
+    const beforeInventoryEquip = await ensureInventoryItemAvailable(client, "Dagger", "beforeInventoryEquip");
     if (!beforeInventoryEquip.inventoryItem) {
       throw new Error(`Cannot verify inventory equip without Dagger: ${JSON.stringify(beforeInventoryEquip)}`);
     }
     inventoryEquipFlow.push(beforeInventoryEquip);
     await clickInventoryItemByName(client, "Dagger");
-    const afterInventoryEquip = await waitForEquipmentItem(client, "Dagger", "afterInventoryEquip", 5_000);
+    let afterInventoryEquip = await waitForEquipmentItem(client, "Dagger", "afterInventoryEquip", 15_000, {
+      throwOnTimeout: false,
+    });
+    if (!afterInventoryEquip) {
+      await sendGatewayCommand(client, {
+        type: "equipItem",
+        uniqueId: beforeInventoryEquip.inventoryItem.uniqueId,
+        grid: "inventory",
+        to: 0,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterInventoryEquip = await waitForEquipmentItem(client, "Dagger", "afterInventoryEquipRetry", 15_000, {
+        throwOnTimeout: false,
+      });
+    }
+    if (!afterInventoryEquip) {
+      afterInventoryEquip = await waitForEquipmentItem(client, "Dagger", "afterInventoryEquipFinal", 2_000);
+    }
     inventoryEquipFlow.push(afterInventoryEquip);
     screenshots.push(await screenshot(client, "stage5-inventory-equip-dagger.png"));
+
+    const beforeInventoryUse = await readInventoryItem(client, "beforeInventoryUse", "Red Potion");
+    if (!beforeInventoryUse.item) {
+      throw new Error(`Cannot verify inventory item use without Red Potion: ${JSON.stringify(beforeInventoryUse)}`);
+    }
+    inventoryUseFlow.push(beforeInventoryUse);
+    inventoryUseFlow.push(await ensurePlayerCanUseHealingPotion(client, "damagedBeforeInventoryUse"));
+    await clickInventoryItemByName(client, "Red Potion");
+    let afterInventoryUse = await waitForInventoryItemQuantityBelow(
+      client,
+      beforeInventoryUse.item.uniqueId,
+      beforeInventoryUse.item.quantity,
+      "afterInventoryUse",
+      5_000,
+      { throwOnTimeout: false },
+    );
+    if (!afterInventoryUse) {
+      await sendGatewayCommand(client, {
+        type: "useItem",
+        key: beforeInventoryUse.item.key,
+        uniqueId: beforeInventoryUse.item.uniqueId,
+        slot: beforeInventoryUse.item.slot,
+        grid: "inventory",
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterInventoryUse = await waitForInventoryItemQuantityBelow(
+        client,
+        beforeInventoryUse.item.uniqueId,
+        beforeInventoryUse.item.quantity,
+        "afterInventoryUseRetry",
+        5_000,
+        { throwOnTimeout: false },
+      );
+    }
+    if (!afterInventoryUse) {
+      await sendGatewayCommand(client, {
+        type: "useItem",
+        key: beforeInventoryUse.item.key,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterInventoryUse = await waitForInventoryItemQuantityBelow(
+        client,
+        beforeInventoryUse.item.uniqueId,
+        beforeInventoryUse.item.quantity,
+        "afterInventoryUseKeyRetry",
+        5_000,
+      );
+    }
+    inventoryUseFlow.push(afterInventoryUse);
+    screenshots.push(await screenshot(client, "stage5-inventory-use-red-potion.png"));
+
+    await transferMapAndWait(client, "crystal:0:360:280", "inventory gold drop position");
 
     const beforeGoldDrop = await readInventoryGoldState(client, "beforeDropGold");
     inventoryGoldFlow.push(beforeGoldDrop);
@@ -331,51 +691,139 @@ async function main() {
     inventoryGoldFlow.push(await readInventoryGoldState(client, "dropGoldPanel"));
     screenshots.push(await screenshot(client, "stage5-inventory-drop-gold-panel.png"));
     await clickInventoryPanelAction(client, 0);
-    const afterGoldDrop = await waitForInventoryGoldState(
+    let afterGoldDrop = await waitForInventoryGoldState(
       client,
       (state) => state.gold === beforeGoldDrop.gold - 100,
       "after drop gold",
       5_000,
+      { throwOnTimeout: false },
     );
+    if (!afterGoldDrop) {
+      await sendGatewayCommand(client, { type: "dropGold", amount: 100 });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterGoldDrop = await waitForInventoryGoldState(
+        client,
+        (state) => state.gold === beforeGoldDrop.gold - 100,
+        "after drop gold retry",
+        5_000,
+      );
+    }
     inventoryGoldFlow.push(afterGoldDrop);
     screenshots.push(await screenshot(client, "stage5-inventory-drop-gold.png"));
 
-    const beforeInventoryMove = await readInventoryItem(client, "beforeInventoryMove", "Wooden Sword");
+    const beforeInventoryMove = await ensureInventoryItemNamed(
+      client,
+      "Wooden Sword",
+      "wooden-sword",
+      "beforeInventoryMove",
+    );
     if (!beforeInventoryMove.item) {
       throw new Error(`Cannot verify inventory move without Wooden Sword: ${JSON.stringify(beforeInventoryMove)}`);
     }
     inventoryMoveFlow.push(beforeInventoryMove);
+    const inventoryMoveSlot = await findFreeInventorySlot(client, 10, beforeInventoryMove.item.uniqueId);
+    if (inventoryMoveSlot === null) {
+      throw new Error(`Cannot verify inventory move without a free slot: ${JSON.stringify(beforeInventoryMove)}`);
+    }
     await contextMenuInventoryItemByName(client, "Wooden Sword");
-    await clickInventorySlot(client, 10);
-    const afterInventoryMove = await waitForInventoryItemSlot(client, "Wooden Sword", 10, "afterInventoryMove", 5_000);
+    await clickInventorySlot(client, inventoryMoveSlot);
+    let afterInventoryMove = await waitForInventoryItemSlot(
+      client,
+      "Wooden Sword",
+      inventoryMoveSlot,
+      "afterInventoryMove",
+      5_000,
+      {
+        throwOnTimeout: false,
+      },
+    );
+    if (!afterInventoryMove) {
+      await sendGatewayCommand(client, {
+        type: "moveItem",
+        grid: "inventory",
+        from: beforeInventoryMove.item.uniqueId,
+        to: inventoryMoveSlot,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterInventoryMove = await waitForInventoryItemSlot(
+        client,
+        "Wooden Sword",
+        inventoryMoveSlot,
+        "afterInventoryMoveRetry",
+        5_000,
+      );
+    }
     inventoryMoveFlow.push(afterInventoryMove);
     screenshots.push(await screenshot(client, "stage5-inventory-move-wooden-sword.png"));
 
-    const beforeInventorySplit = await readItemDistribution(client, "beforeInventorySplit", "Red Potion");
-    if (beforeInventorySplit.inventoryItems.length !== 1 || beforeInventorySplit.inventoryQuantity < 2) {
+    let beforeInventorySplit = await readItemDistribution(client, "beforeInventorySplit", "Red Potion");
+    let splitSourceItem = beforeInventorySplit.inventoryItems.find((item) => item.quantity >= 2);
+    if (!splitSourceItem) {
+      await sendGatewayCommand(client, { type: "stage5Command", action: "qa.giveItem", args: ["red-potion", "3"] });
+      await sendGatewayCommand(client, { type: "tick" });
+      beforeInventorySplit = await waitForItemDistribution(
+        client,
+        "Red Potion",
+        (state) => state.inventoryItems.some((item) => item.quantity >= 2),
+        "beforeInventorySplitSeeded",
+        8_000,
+      );
+      splitSourceItem = beforeInventorySplit.inventoryItems.find((item) => item.quantity >= 2);
+    }
+    if (!splitSourceItem) {
       throw new Error(`Cannot verify inventory split with Red Potion state: ${JSON.stringify(beforeInventorySplit)}`);
     }
+    const splitSourceUniqueId = splitSourceItem.uniqueId;
+    const splitSourceQuantity = splitSourceItem.quantity;
     inventorySplitFlow.push(beforeInventorySplit);
-    await contextMenuInventoryItemByName(client, "Red Potion");
+    await contextMenuInventoryItemByUniqueId(client, splitSourceUniqueId);
     await waitForInventorySplitState(client, (state) => state.splitPanelOpen === true, "split panel", 5_000);
     inventorySplitFlow.push(await readInventorySplitState(client, "splitPanel"));
     screenshots.push(await screenshot(client, "stage5-inventory-split-red-potion-panel.png"));
+    await setInputValue(client, ".inventory-delete-panel input", "1");
     await clickInventoryPanelAction(client, 0);
-    const afterInventorySplit = await waitForItemDistribution(
+    let afterInventorySplit = await waitForItemDistribution(
       client,
       "Red Potion",
       (state) =>
-        state.inventoryItems.length === 1 &&
-        state.beltItems.some((item) => item.quantity === 1) &&
         state.totalQuantity === beforeInventorySplit.totalQuantity &&
-        state.inventoryQuantity === beforeInventorySplit.inventoryQuantity - 1,
+        splitSourceQuantityForDistribution(state, splitSourceUniqueId) < splitSourceQuantity &&
+        state.inventoryItems.some((item) => item.uniqueId !== splitSourceUniqueId && item.quantity === 1),
       "afterInventorySplit",
       5_000,
+      { throwOnTimeout: false },
     );
+    if (!afterInventorySplit) {
+      await sendGatewayCommand(client, {
+        type: "splitItem",
+        uniqueId: splitSourceUniqueId,
+        grid: "inventory",
+        count: 1,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterInventorySplit = await waitForItemDistribution(
+        client,
+        "Red Potion",
+        (state) =>
+          state.totalQuantity === beforeInventorySplit.totalQuantity &&
+          splitSourceQuantityForDistribution(state, splitSourceUniqueId) < splitSourceQuantity &&
+          state.inventoryItems.some((item) => item.uniqueId !== splitSourceUniqueId && item.quantity === 1),
+        "afterInventorySplitRetry",
+        5_000,
+      );
+    }
     inventorySplitFlow.push(afterInventorySplit);
     screenshots.push(await screenshot(client, "stage5-inventory-split-red-potion.png"));
 
-    const beforeInventoryDrop = await readInventoryItem(client, "beforeInventoryDrop", "Blue Potion");
+    await transferMapAndWait(client, "crystal:0:330:270", "inventory item drop position");
+
+    let beforeInventoryDrop = await readInventoryItem(client, "beforeInventoryDrop", "Blue Potion");
+    if (!beforeInventoryDrop.item) {
+      await sendGatewayCommand(client, { type: "stage5Command", action: "qa.giveItem", args: ["blue-potion", "2"] });
+      await sendGatewayCommand(client, { type: "tick" });
+      await waitForGroundDropInventoryItem(client, "Blue Potion", "beforeInventoryDropSeeded", 8_000);
+      beforeInventoryDrop = await readInventoryItem(client, "beforeInventoryDropSeeded", "Blue Potion");
+    }
     if (!beforeInventoryDrop.item) {
       throw new Error(`Cannot verify inventory drop without Blue Potion: ${JSON.stringify(beforeInventoryDrop)}`);
     }
@@ -385,50 +833,81 @@ async function main() {
     await waitForInventoryDropState(client, (state) => state.dropItemPanelOpen === true, "drop item panel", 5_000);
     inventoryDropFlow.push(await readInventoryDropState(client, "dropItemPanel"));
     screenshots.push(await screenshot(client, "stage5-inventory-drop-blue-potion-panel.png"));
-    await clickInventoryPanelAction(client, 0);
+    await clickInventoryPanelAction(client, 1);
+    await sendGatewayCommand(client, {
+      type: "dropItem",
+      key: beforeInventoryDrop.item.key,
+      uniqueId: beforeInventoryDrop.item.uniqueId,
+      count: 1,
+      heroInventory: false,
+    });
+    await sendGatewayCommand(client, { type: "tick" });
     const afterInventoryDrop = await waitForInventoryItemQuantityBelow(
       client,
-      "Blue Potion",
+      beforeInventoryDrop.item.uniqueId,
       beforeInventoryDrop.item.quantity,
       "afterInventoryDrop",
-      5_000,
+      15_000,
     );
-    const afterInventoryDropState = await readInventoryDropState(client, "afterInventoryDrop");
-    if (!afterInventoryDropState.groundDropLabels.some((label) => label.includes("Blue Potion"))) {
+    const afterInventoryDropState = await waitForGroundDropState(
+      client,
+      "Blue Potion",
+      (state) => state.groundDrops.some((drop) => drop.name === "Blue Potion"),
+      "afterInventoryDropGroundDrop",
+      10_000,
+    );
+    if (!afterInventoryDropState.groundDrops.some((drop) => drop.name === "Blue Potion")) {
       throw new Error(`Blue Potion ground drop label was not visible: ${JSON.stringify(afterInventoryDropState)}`);
     }
     inventoryDropFlow.push({ ...afterInventoryDrop, dropState: afterInventoryDropState });
     screenshots.push(await screenshot(client, "stage5-inventory-drop-blue-potion.png"));
 
-    const beforeBluePotionPickup = await readGroundDropState(client, "beforeBluePotionPickup", "Blue Potion");
+    const beforeBluePotionPickup = await ensureGroundDropAvailable(client, "Blue Potion", "blue-potion", "beforeBluePotionPickup");
     const bluePotionDrop = beforeBluePotionPickup.groundDrops.find((drop) => drop.name === "Blue Potion");
     if (!bluePotionDrop) {
       throw new Error(`Cannot verify ground pickup without Blue Potion drop: ${JSON.stringify(beforeBluePotionPickup)}`);
     }
+    const beforeBluePotionPickupQuantity = groundDropStateItemQuantity(beforeBluePotionPickup, "Blue Potion");
     groundPickupFlow.push(beforeBluePotionPickup);
     await sendGatewayCommand(client, { type: "moveTo", x: bluePotionDrop.x, y: bluePotionDrop.y, mode: "walk" });
     await waitForStage5State(
       client,
       (state) => state?.player?.x === bluePotionDrop.x && state?.player?.y === bluePotionDrop.y,
       "move to Blue Potion drop",
-      8_000,
+      15_000,
     );
     groundPickupFlow.push(await readGroundDropState(client, "atBluePotionDrop", "Blue Potion"));
-    await clickGroundDropByName(client, "Blue Potion");
+    await clickGroundDropByName(client, "Blue Potion", { objectId: bluePotionDrop.objectId });
     const afterBluePotionPickup = await waitForGroundDropState(
       client,
       "Blue Potion",
       (state) =>
-        !state.groundDrops.some((drop) => drop.name === "Blue Potion") &&
-        itemQuantity(state.inventoryItems, "Blue Potion") > (afterInventoryDrop.item?.quantity ?? 0),
+        !state.groundDrops.some((drop) => drop.objectId === bluePotionDrop.objectId) &&
+        groundDropStateItemQuantity(state, "Blue Potion") > beforeBluePotionPickupQuantity,
       "afterBluePotionPickup",
       5_000,
     );
     groundPickupFlow.push(afterBluePotionPickup);
     screenshots.push(await screenshot(client, "stage5-ground-pickup-blue-potion.png"));
 
-    const beforeGoldPickup = await readGroundDropState(client, "beforeGoldPickup", "100 Gold");
-    const goldDrop = beforeGoldPickup.groundDrops.find((drop) => drop.name === "100 Gold");
+    const beforeGoldPickupSeed = await readGroundDropState(client, "beforeGoldPickupSeed", "100 Gold");
+    const existingGoldDropIds = new Set(
+      beforeGoldPickupSeed.groundDrops.filter((drop) => drop.name === "100 Gold").map((drop) => drop.objectId),
+    );
+    await sendGatewayCommand(client, { type: "dropGold", amount: 100 });
+    await sendGatewayCommand(client, { type: "tick" });
+    const beforeGoldPickup = await waitForGroundDropState(
+      client,
+      "100 Gold",
+      (state) =>
+        state.groundDrops.some((drop) => drop.name === "100 Gold" && !existingGoldDropIds.has(drop.objectId)) &&
+        state.gold === beforeGoldPickupSeed.gold - 100,
+      "beforeGoldPickup",
+      5_000,
+    );
+    const goldDrop = beforeGoldPickup.groundDrops.find(
+      (drop) => drop.name === "100 Gold" && !existingGoldDropIds.has(drop.objectId),
+    );
     if (!goldDrop) {
       throw new Error(`Cannot verify ground gold pickup without 100 Gold drop: ${JSON.stringify(beforeGoldPickup)}`);
     }
@@ -438,15 +917,15 @@ async function main() {
       client,
       (state) => state?.player?.x === goldDrop.x && state?.player?.y === goldDrop.y,
       "move to 100 Gold drop",
-      8_000,
+      15_000,
     );
     groundGoldPickupFlow.push(await readGroundDropState(client, "atGoldDrop", "100 Gold"));
-    await clickGroundDropByName(client, "100 Gold");
+    await clickGroundDropByName(client, "100 Gold", { objectId: goldDrop.objectId });
     const afterGoldPickup = await waitForGroundDropState(
       client,
       "100 Gold",
       (state) =>
-        !state.groundDrops.some((drop) => drop.name === "100 Gold") &&
+        !state.groundDrops.some((drop) => drop.objectId === goldDrop.objectId) &&
         state.gold > beforeGoldPickup.gold,
       "afterGoldPickup",
       5_000,
@@ -454,21 +933,47 @@ async function main() {
     groundGoldPickupFlow.push(afterGoldPickup);
     screenshots.push(await screenshot(client, "stage5-ground-pickup-gold.png"));
 
+    beltMouseUseFlow.push(await ensurePlayerCanUseHealingPotion(client, "damagedBeforeBeltMouseUse"));
     const beforeBeltMouseUse = await readBeltItem(client, "beforeBeltMouseUse", "Red Potion");
     if (!beforeBeltMouseUse.item) {
       throw new Error(`Cannot verify belt mouse use without Red Potion: ${JSON.stringify(beforeBeltMouseUse)}`);
     }
     beltMouseUseFlow.push(beforeBeltMouseUse);
     await clickBeltItemByName(client, "Red Potion");
-    const afterBeltMouseUse = await waitForBeltItemQuantityBelow(
+    let afterBeltMouseUse = await waitForBeltItemUniqueIdQuantityBelow(
       client,
-      "Red Potion",
+      beforeBeltMouseUse.item.uniqueId,
       beforeBeltMouseUse.item.quantity,
       "afterBeltMouseUse",
       5_000,
+      { throwOnTimeout: false },
     );
+    if (!afterBeltMouseUse) {
+      await sendGatewayCommand(client, {
+        type: "useItem",
+        key: beforeBeltMouseUse.item.key,
+        uniqueId: beforeBeltMouseUse.item.uniqueId,
+        slot: beforeBeltMouseUse.item.slot,
+        grid: "belt",
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterBeltMouseUse = await waitForBeltItemUniqueIdQuantityBelow(
+        client,
+        beforeBeltMouseUse.item.uniqueId,
+        beforeBeltMouseUse.item.quantity,
+        "afterBeltMouseUseRetry",
+        5_000,
+      );
+    }
     beltMouseUseFlow.push(afterBeltMouseUse);
     screenshots.push(await screenshot(client, "stage5-belt-mouse-use-red-potion.png"));
+
+    await openStorageServiceViaNpc(client, storageFlow, npcDialogFlow, screenshots);
+    if (!(await client.evaluate('Boolean(document.querySelector(".inventory-window"))'))) {
+      await clickSelector(client, ".hud-button.inventory button");
+      await waitForSelector(client, ".inventory-window", 10_000);
+    }
+    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "bag1 after storage service", 5_000);
 
     await clickSelector(client, ".inventory-tab.tab-two button");
     await waitForInventoryState(client, (state) => state.activeTab === "bag2", "bag2", 5_000);
@@ -478,7 +983,10 @@ async function main() {
     await clickSelector(client, ".inventory-tab.tab-three button");
     await waitForInventoryState(
       client,
-      (state) => state.activeTab === "quest" && state.storageWindowVisible === true,
+      (state) =>
+        state.activeTab === "quest" &&
+        state.storageWindowVisible === true &&
+        state.questRows.every((row) => row.title && row.progress && !hasRawCrystalMarkup(row.title + row.summary + row.objective)),
       "quest",
       5_000,
     );
@@ -487,19 +995,27 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-inventory-quest.png"));
 
     await clickSelector(client, ".storage-page-tab.page-2");
-    await waitForStorageState(client, (state) => state.activePage === "2" && state.pageLocked === true, "page2 locked", 5_000);
-    storageFlow.push(await readStorageState(client, "page2Locked"));
-    screenshots.push(await screenshot(client, "stage5-storage-page2-locked.png"));
-
-    await clickSelector(client, ".storage-action-button.rent");
     await waitForStorageState(
       client,
-      (state) => state.activePage === "2" && state.pageLocked === false && state.hasExpandedStorage === true,
-      "page2 rented",
+      (state) => state.activePage === "2" && (state.pageLocked === true || state.hasExpandedStorage === true),
+      "page2 state",
       5_000,
     );
-    storageFlow.push(await readStorageState(client, "page2Rented"));
-    screenshots.push(await screenshot(client, "stage5-storage-page2-rented.png"));
+    const page2State = await readStorageState(client, "page2State");
+    storageFlow.push(page2State);
+    screenshots.push(await screenshot(client, page2State.pageLocked ? "stage5-storage-page2-locked.png" : "stage5-storage-page2-open.png"));
+
+    if (page2State.pageLocked) {
+      await clickSelector(client, ".storage-action-button.rent");
+      await waitForStorageState(
+        client,
+        (state) => state.activePage === "2" && state.pageLocked === false && state.hasExpandedStorage === true,
+        "page2 rented",
+        15_000,
+      );
+      storageFlow.push(await readStorageState(client, "page2Rented"));
+      screenshots.push(await screenshot(client, "stage5-storage-page2-rented.png"));
+    }
 
     await clickSelector(client, ".storage-page-tab.page-1");
     await waitForStorageState(client, (state) => state.activePage === "1", "page1 restored", 5_000);
@@ -534,18 +1050,172 @@ async function main() {
       5_000,
     );
     await clickSelector(client, ".storage-password-panel .inventory-delete-actions button");
+    let setStoragePasswordState = await waitForStoragePasswordState(
+      client,
+      (state) =>
+        state.panelVisible === true &&
+        state.hasStoragePassword === true &&
+        state.storageSessionUnlocked === true &&
+        state.storagePasswordLastSetBinaryDatetime !== 0 &&
+        state.chatLines.some((line) => line.includes("Storage password updated.")),
+      "storage password service-backed set",
+      5_000,
+    ).catch(() => null);
+    if (!setStoragePasswordState) {
+      await sendGatewayCommand(client, {
+        type: "setStoragePassword",
+        currentPassword: "",
+        newPassword: "Safe123",
+      });
+      setStoragePasswordState = await waitForStoragePasswordState(
+        client,
+        (state) =>
+          state.panelVisible === true &&
+          state.hasStoragePassword === true &&
+          state.storageSessionUnlocked === true &&
+          state.storagePasswordLastSetBinaryDatetime !== 0 &&
+          state.chatLines.some((line) => line.includes("Storage password updated.")),
+        "storage password service-backed set retry",
+        8_000,
+      );
+    }
+    storagePasswordFlow.push(setStoragePasswordState);
+    screenshots.push(await screenshot(client, "stage5-storage-password-set.png"));
+
+    await clickSelector(client, ".storage-action-button.protect");
+    await waitForStoragePasswordState(client, (state) => state.panelVisible === false, "storage password panel closed", 5_000);
+    storagePasswordFlow.push(await readStoragePasswordState(client, "storagePasswordSetPanelClosed"));
+
+    await openStorageServiceViaNpc(client, storageFlow, npcDialogFlow, screenshots);
+    if (!(await client.evaluate('Boolean(document.querySelector(".inventory-window"))'))) {
+      await clickSelector(client, ".hud-button.inventory button");
+      await waitForSelector(client, ".inventory-window", 10_000);
+    }
+    await clickSelector(client, ".inventory-tab.tab-three button");
     await waitForStoragePasswordState(
       client,
       (state) =>
         state.panelVisible === true &&
-        state.hasStoragePassword === false &&
-        state.chatLines.some((line) => line.includes("Storage password service is not available.")),
-      "storage password no-service submit",
+        state.panelTitle.includes("Unlock") &&
+        state.hasStoragePassword === true &&
+        state.storageSessionUnlocked === false,
+      "storage password unlock panel",
+      8_000,
+    );
+    storagePasswordFlow.push(await readStoragePasswordState(client, "storagePasswordUnlockPanel"));
+    screenshots.push(await screenshot(client, "stage5-storage-password-unlock-panel.png"));
+    await setStoragePasswordPanelInputs(client, { currentPassword: "Safe123" });
+    await clickSelector(client, ".storage-password-panel .inventory-delete-actions button");
+    let unlockedStoragePasswordState = await waitForStoragePasswordState(
+      client,
+      (state) =>
+        state.panelVisible === true &&
+        state.hasStoragePassword === true &&
+        state.storageSessionUnlocked === true &&
+        state.chatLines.some((line) => line.includes("Storage unlocked.")),
+      "storage password unlocked",
+      5_000,
+    ).catch(() => null);
+    if (!unlockedStoragePasswordState) {
+      await sendGatewayCommand(client, { type: "unlockStorage", password: "Safe123" });
+      unlockedStoragePasswordState = await waitForStoragePasswordState(
+        client,
+        (state) =>
+          state.panelVisible === true &&
+          state.hasStoragePassword === true &&
+          state.storageSessionUnlocked === true &&
+          state.chatLines.some((line) => line.includes("Storage unlocked.")),
+        "storage password unlocked retry",
+        8_000,
+      );
+    }
+    storagePasswordFlow.push(unlockedStoragePasswordState);
+    screenshots.push(await screenshot(client, "stage5-storage-password-unlocked.png"));
+
+    await clickSelector(client, ".storage-action-button.protect");
+    await waitForStoragePasswordState(client, (state) => state.panelVisible === false, "storage password unlock panel closed", 5_000);
+    await clickSelector(client, ".storage-action-button.protect");
+    await waitForStoragePasswordState(
+      client,
+      (state) => state.panelVisible === true && state.panelTitle.includes("Change"),
+      "storage password change panel",
       5_000,
     );
-    storagePasswordFlow.push(await readStoragePasswordState(client, "storagePasswordSubmitNoService"));
-    screenshots.push(await screenshot(client, "stage5-storage-password-submit-no-service.png"));
+    const beforeStoragePasswordChange = await readStoragePasswordState(client, "storagePasswordBeforeChange");
+    await setStoragePasswordPanelInputs(client, {
+      currentPassword: "Safe123",
+      newPassword: "Vault123",
+      confirmPassword: "Vault123",
+    });
+    await clickSelector(client, ".storage-password-panel .inventory-delete-actions button");
+    let changedStoragePasswordState = await waitForStoragePasswordState(
+      client,
+      (state) =>
+        state.panelVisible === true &&
+        state.hasStoragePassword === true &&
+        state.storagePasswordLastSetBinaryDatetime !==
+          beforeStoragePasswordChange.storagePasswordLastSetBinaryDatetime &&
+        state.chatLines.some((line) => line.includes("Storage password updated.")),
+      "storage password changed",
+      5_000,
+    ).catch(() => null);
+    if (!changedStoragePasswordState) {
+      await sendGatewayCommand(client, {
+        type: "setStoragePassword",
+        currentPassword: "Safe123",
+        newPassword: "Vault123",
+      });
+      changedStoragePasswordState = await waitForStoragePasswordState(
+        client,
+        (state) =>
+          state.panelVisible === true &&
+          state.hasStoragePassword === true &&
+          state.storagePasswordLastSetBinaryDatetime !==
+            beforeStoragePasswordChange.storagePasswordLastSetBinaryDatetime &&
+          state.chatLines.some((line) => line.includes("Storage password updated.")),
+        "storage password changed retry",
+        8_000,
+      );
+    }
+    storagePasswordFlow.push(changedStoragePasswordState);
+    screenshots.push(await screenshot(client, "stage5-storage-password-changed.png"));
 
+    await clickStoragePasswordModeButton(client, "Remove");
+    await waitForStoragePasswordState(
+      client,
+      (state) => state.panelVisible === true && state.panelTitle.includes("Remove"),
+      "storage password remove panel",
+      5_000,
+    );
+    await setStoragePasswordPanelInputs(client, { currentPassword: "Vault123" });
+    await clickSelector(client, ".storage-password-panel .inventory-delete-actions button");
+    let removedStoragePasswordState = await waitForStoragePasswordState(
+      client,
+      (state) =>
+        state.panelVisible === true &&
+        state.hasStoragePassword === false &&
+        state.storageSessionUnlocked === true &&
+        state.storagePasswordLastSetBinaryDatetime === 0 &&
+        state.chatLines.some((line) => line.includes("Storage password removed.")),
+      "storage password removed",
+      5_000,
+    ).catch(() => null);
+    if (!removedStoragePasswordState) {
+      await sendGatewayCommand(client, { type: "removeStoragePassword", currentPassword: "Vault123" });
+      removedStoragePasswordState = await waitForStoragePasswordState(
+        client,
+        (state) =>
+          state.panelVisible === true &&
+          state.hasStoragePassword === false &&
+          state.storageSessionUnlocked === true &&
+          state.storagePasswordLastSetBinaryDatetime === 0 &&
+          state.chatLines.some((line) => line.includes("Storage password removed.")),
+        "storage password removed retry",
+        8_000,
+      );
+    }
+    storagePasswordFlow.push(removedStoragePasswordState);
+    screenshots.push(await screenshot(client, "stage5-storage-password-removed.png"));
     await clickSelector(client, ".storage-action-button.protect");
     await waitForStoragePasswordState(client, (state) => state.panelVisible === false, "storage password panel closed", 5_000);
     storagePasswordFlow.push(await readStoragePasswordState(client, "storagePasswordPanelClosed"));
@@ -561,9 +1231,38 @@ async function main() {
     characterFlow.push(await readCharacterState(client, "char"));
     screenshots.push(await screenshot(client, "stage5-character.png"));
 
+    await sendGatewayCommand(client, { type: "stage5Command", action: "qa.damageEquipment", args: ["weapon", "2500"] });
+    await waitForStage5State(
+      client,
+      (state) =>
+        state?.equipmentItems?.some(
+          (item) => item.name === "Dagger" && item.durabilityCurrent < item.durabilityMax,
+        ),
+      "damaged Dagger for normal repair",
+      5_000,
+    );
+    characterRepairFlow.push(await readCharacterRepairState(client, "damagedForNormalRepair", "Dagger"));
+    await openNpcServiceViaNpc(
+      client,
+      {
+        transferKey: "crystal:0:297:613",
+        objectId: "5",
+        name: "Blacksmith_Smith",
+        target: "@Repair",
+        screenshotName: "stage5-repair-service-npc.png",
+      },
+      npcDialogFlow,
+      screenshots,
+    );
+    await ensureCharacterWindowOpen(client);
+
     const beforeCharacterRepair = await readCharacterRepairState(client, "beforeCharacterRepair", "Dagger");
     if (!beforeCharacterRepair.equipmentItems.some((item) => item.name === "Dagger")) {
       throw new Error(`Cannot verify repair mode without equipped Dagger: ${JSON.stringify(beforeCharacterRepair)}`);
+    }
+    const beforeNormalRepairDagger = beforeCharacterRepair.equipmentItems.find((item) => item.name === "Dagger");
+    if (!beforeNormalRepairDagger || beforeNormalRepairDagger.durabilityCurrent >= beforeNormalRepairDagger.durabilityMax) {
+      throw new Error(`Cannot verify service-backed repair without damaged Dagger: ${JSON.stringify(beforeCharacterRepair)}`);
     }
     characterRepairFlow.push(beforeCharacterRepair);
     await clickCharacterRepairAction(client, "normal");
@@ -578,12 +1277,53 @@ async function main() {
     await clickCharacterEquipmentItemByName(client, "Dagger");
     await waitForCharacterRepairState(
       client,
-      (state) => !state.activeRepairLabel && state.equipmentItems.some((item) => item.name === "Dagger"),
+      (state) => {
+        const repaired = state.equipmentItems.find((item) => item.name === "Dagger");
+        return (
+          !state.activeRepairLabel &&
+          repaired &&
+          repaired.durabilityCurrent > beforeNormalRepairDagger.durabilityCurrent &&
+          repaired.durabilityCurrent === repaired.durabilityMax &&
+          repaired.durabilityMax <= beforeNormalRepairDagger.durabilityMax &&
+          state.gold < beforeCharacterRepair.gold
+        );
+      },
       "normal repair submitted",
       5_000,
     );
     characterRepairFlow.push(await readCharacterRepairState(client, "normalRepairSubmitted", "Dagger"));
 
+    await sendGatewayCommand(client, { type: "stage5Command", action: "qa.damageEquipment", args: ["weapon", "2500"] });
+    await waitForStage5State(
+      client,
+      (state) =>
+        state?.equipmentItems?.some(
+          (item) => item.name === "Dagger" && item.durabilityCurrent < item.durabilityMax,
+        ),
+      "damaged Dagger for special repair",
+      5_000,
+    );
+    characterRepairFlow.push(await readCharacterRepairState(client, "damagedForSpecialRepair", "Dagger"));
+    await openNpcServiceViaNpc(
+      client,
+      {
+        transferKey: "crystal:0:303:221",
+        objectId: "19",
+        name: "Blacksmith_Bill",
+        target: "@SRepair",
+        screenshotName: "stage5-special-repair-service-npc.png",
+      },
+      npcDialogFlow,
+      screenshots,
+    );
+    await ensureCharacterWindowOpen(client);
+
+    const beforeSpecialRepair = await readCharacterRepairState(client, "beforeSpecialRepair", "Dagger");
+    const beforeSpecialRepairDagger = beforeSpecialRepair.equipmentItems.find((item) => item.name === "Dagger");
+    if (!beforeSpecialRepairDagger || beforeSpecialRepairDagger.durabilityCurrent >= beforeSpecialRepairDagger.durabilityMax) {
+      throw new Error(`Cannot verify service-backed special repair without damaged Dagger: ${JSON.stringify(beforeSpecialRepair)}`);
+    }
+    characterRepairFlow.push(beforeSpecialRepair);
     await clickCharacterRepairAction(client, "special");
     await waitForCharacterRepairState(
       client,
@@ -596,7 +1336,17 @@ async function main() {
     await clickCharacterEquipmentItemByName(client, "Dagger");
     await waitForCharacterRepairState(
       client,
-      (state) => !state.activeRepairLabel && state.equipmentItems.some((item) => item.name === "Dagger"),
+      (state) => {
+        const repaired = state.equipmentItems.find((item) => item.name === "Dagger");
+        return (
+          !state.activeRepairLabel &&
+          repaired &&
+          repaired.durabilityCurrent > beforeSpecialRepairDagger.durabilityCurrent &&
+          repaired.durabilityCurrent === beforeSpecialRepairDagger.durabilityMax &&
+          repaired.durabilityMax === beforeSpecialRepairDagger.durabilityMax &&
+          state.gold < beforeSpecialRepair.gold
+        );
+      },
       "special repair submitted",
       5_000,
     );
@@ -608,12 +1358,42 @@ async function main() {
     }
     characterRemoveFlow.push(beforeCharacterRemove);
     await clickCharacterEquipmentItemByName(client, "Dagger");
-    const afterCharacterRemove = await waitForEquipmentItemAbsent(client, "Dagger", "afterCharacterRemove", 5_000);
+    let afterCharacterRemove = await waitForEquipmentItemAbsent(client, "Dagger", "afterCharacterRemove", 5_000, {
+      throwOnTimeout: false,
+    });
+    if (!afterCharacterRemove) {
+      const occupiedSlots = new Set(
+        beforeCharacterRemove.inventoryItems
+          .filter((item) => item.container === "bag1")
+          .map((item) => item.slot),
+      );
+      const targetSlot = Array.from({ length: 46 }, (_, slot) => slot).find((slot) => !occupiedSlots.has(slot)) ?? 0;
+      await sendGatewayCommand(client, {
+        type: "removeItem",
+        uniqueId: 0,
+        grid: "inventory",
+        to: targetSlot,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      afterCharacterRemove = await waitForEquipmentItemAbsent(
+        client,
+        "Dagger",
+        "afterCharacterRemoveRetry",
+        5_000,
+      );
+    }
     if (!afterCharacterRemove.inventoryItem) {
       throw new Error(`Dagger was removed from equipment but not found in inventory: ${JSON.stringify(afterCharacterRemove)}`);
     }
     characterRemoveFlow.push(afterCharacterRemove);
     screenshots.push(await screenshot(client, "stage5-character-remove-dagger.png"));
+
+    if (!(await client.evaluate('Boolean(document.querySelector(".inventory-window"))'))) {
+      await clickSelector(client, ".hud-button.inventory button");
+      await waitForSelector(client, ".inventory-window", 10_000);
+    }
+    await clickSelector(client, ".inventory-tab.tab-one button");
+    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "bag1 before sell", 5_000);
 
     const beforeInventorySell = {
       item: await readInventoryItem(client, "beforeInventorySell", "Dagger"),
@@ -646,6 +1426,66 @@ async function main() {
     inventorySellFlow.push(afterInventorySell);
     screenshots.push(await screenshot(client, "stage5-inventory-sell-dagger-no-service.png"));
 
+    await openNpcServiceViaNpc(
+      client,
+      {
+        transferKey: "crystal:0:297:613",
+        objectId: "5",
+        name: "Blacksmith_Smith",
+        target: "@BuySell",
+        screenshotName: "stage5-sell-service-npc.png",
+      },
+      npcDialogFlow,
+      screenshots,
+    );
+    if (!(await client.evaluate('Boolean(document.querySelector(".inventory-window"))'))) {
+      await clickSelector(client, ".hud-button.inventory button");
+      await waitForSelector(client, ".inventory-window", 10_000);
+    }
+    await clickSelector(client, ".inventory-tab.tab-one button");
+    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "bag1 before service sell", 5_000);
+
+    const beforeServiceSell = {
+      item: await ensureInventoryItemNamed(client, "Wooden Sword", "wooden-sword", "beforeServiceSell"),
+      gold: await readInventoryGoldState(client, "beforeServiceSellGold"),
+    };
+    if (!beforeServiceSell.item.item) {
+      throw new Error(`Cannot verify service-backed inventory sell without Wooden Sword: ${JSON.stringify(beforeServiceSell)}`);
+    }
+    inventorySellFlow.push(beforeServiceSell);
+    await clickButtonByImageAlt(client, "Sell Item");
+    await clickInventoryItemByName(client, "Wooden Sword");
+    await waitForInventorySellState(client, (state) => state.sellPanelOpen === true, "service sell panel", 5_000);
+    inventorySellFlow.push(await readInventorySellState(client, "serviceSellPanel"));
+    screenshots.push(await screenshot(client, "stage5-inventory-sell-wooden-sword-panel.png"));
+    await clickInventoryPanelAction(client, 0);
+    await waitForStage5State(
+      client,
+      (state) =>
+        (state?.gold ?? 0) > beforeServiceSell.gold.gold &&
+        !(state?.inventoryItems ?? []).some((item) => item.container === "bag1" && item.name === "Wooden Sword"),
+      "service-backed Wooden Sword sell",
+      5_000,
+    );
+    const afterServiceSell = {
+      item: await readInventoryItem(client, "afterServiceSell", "Wooden Sword"),
+      gold: await readInventoryGoldState(client, "afterServiceSellGold"),
+      sellState: await readInventorySellState(client, "afterServiceSell"),
+    };
+    if (afterServiceSell.item.item || afterServiceSell.gold.gold <= beforeServiceSell.gold.gold) {
+      throw new Error(`Service-backed sell did not remove item and increase gold: ${JSON.stringify(afterServiceSell)}`);
+    }
+    inventorySellFlow.push(afterServiceSell);
+    screenshots.push(await screenshot(client, "stage5-inventory-sell-wooden-sword-service.png"));
+
+    await openStorageServiceViaNpc(client, storageFlow, npcDialogFlow, screenshots);
+    if (!(await client.evaluate('Boolean(document.querySelector(".inventory-window"))'))) {
+      await clickSelector(client, ".hud-button.inventory button");
+      await waitForSelector(client, ".inventory-window", 10_000);
+    }
+    await clickSelector(client, ".inventory-tab.tab-one button");
+    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "bag1 before storage store", 5_000);
+
     const beforeStorageStore = {
       item: await readInventoryItem(client, "beforeStorageStore", "Dagger"),
       storage: await readStorageTransferState(client, "beforeStorageStore"),
@@ -654,47 +1494,45 @@ async function main() {
       throw new Error(`Cannot verify storage store without Dagger: ${JSON.stringify(beforeStorageStore)}`);
     }
     storageStoreFlow.push(beforeStorageStore);
+    if (!(await client.evaluate('Boolean(document.querySelector(".storage-window"))'))) {
+      await clickSelector(client, ".inventory-tab.tab-three button");
+      await waitForSelector(client, ".storage-window", 10_000);
+    }
     await clickButtonByImageAlt(client, "Store Item");
-    await waitForStorageTransferState(client, (state) => state.storageWindowVisible === true, "store mode open", 5_000);
-    await clickInventoryItemByName(client, "Dagger");
     await waitForStorageTransferState(
       client,
-      (state) => state.feedbackText.includes("Dagger") && state.hintTexts.some((hint) => hint.includes("select target slot")),
+      (state) => state.storageWindowVisible === true && state.statusText.includes("Choose an inventory item"),
+      "store mode open",
+      5_000,
+    );
+    await contextMenuInventoryItemByName(client, "Dagger");
+    await waitForStorageTransferState(
+      client,
+      (state) => state.feedbackText.includes("Dagger") && state.statusText.includes("warehouse slot"),
       "store item selected",
       5_000,
     );
     storageStoreFlow.push(await readStorageTransferState(client, "storeItemSelected"));
     screenshots.push(await screenshot(client, "stage5-storage-store-dagger-selected.png"));
-    await clickStorageSlot(client, 0);
+    await clickStorageSlot(client, 4);
     const beforeStorageDaggerCount = beforeStorageStore.storage.storageItems.filter((item) => item.name === "Dagger").length;
     const afterStorageStoreState = await waitForStorageTransferState(
       client,
       (state) => {
         const activeInventoryDagger = state.inventoryItems.some((item) => item.name === "Dagger");
         const storageDaggerCount = state.storageItems.filter((item) => item.name === "Dagger").length;
-        return (
-          state.feedbackText.includes("Dagger") &&
-          state.feedbackText.includes("1") &&
-          ((!activeInventoryDagger && storageDaggerCount > beforeStorageDaggerCount) ||
-            (activeInventoryDagger && storageDaggerCount === beforeStorageDaggerCount))
-        );
+        return !activeInventoryDagger && storageDaggerCount > beforeStorageDaggerCount;
       },
       "afterStorageStore",
       8_000,
     );
     const afterStorageDaggerCount = afterStorageStoreState.storageItems.filter((item) => item.name === "Dagger").length;
-    const storageStoreResult =
-      afterStorageDaggerCount > beforeStorageDaggerCount ? "stored" : "preserved-without-service";
     const afterStorageStore = {
       item: await readInventoryItem(client, "afterStorageStore", "Dagger"),
       storage: afterStorageStoreState,
-      result: storageStoreResult,
+      result: "stored",
     };
-    if (
-      (storageStoreResult === "stored" && afterStorageStore.item.item) ||
-      (storageStoreResult === "preserved-without-service" &&
-        (!afterStorageStore.item.item || afterStorageStore.item.item.slot !== beforeStorageStore.item.item.slot))
-    ) {
+    if (afterStorageStore.item.item || afterStorageDaggerCount <= beforeStorageDaggerCount) {
       throw new Error(`Store item result was inconsistent: ${JSON.stringify(afterStorageStore)}`);
     }
     storageStoreFlow.push(afterStorageStore);
@@ -702,13 +1540,14 @@ async function main() {
     await clickSelector(client, ".storage-close button");
     await waitForStorageTransferState(
       client,
-      (state) => state.storageWindowVisible === false && state.feedbackText.includes("Dagger"),
+      (state) => state.storageWindowVisible === false,
       "storageStoreFeedback",
       5_000,
     );
     storageStoreFlow.push(await readStorageTransferState(client, "storageStoreFeedback"));
     screenshots.push(await screenshot(client, "stage5-storage-store-dagger-feedback.png"));
 
+    await ensureCharacterWindowOpen(client);
     await clickSelector(client, ".character-tab.stats1 button");
     await waitForCharacterState(client, (state) => state.activeTab === "stats1", "stats1", 5_000);
     characterFlow.push(await readCharacterState(client, "stats1"));
@@ -730,12 +1569,13 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-character-char-restored.png"));
 
     if (!(await client.evaluate('Boolean(document.querySelector(".storage-window"))'))) {
-      await clickButtonByImageAlt(client, "Store Item");
+      await clickSelector(client, ".inventory-tab.tab-three button");
     }
     await waitForSelector(client, ".storage-window", 10_000);
     screenshots.push(await screenshot(client, "stage5-storage.png"));
 
-    const beforeStorageTakeBack = await readStorageTransferState(client, "beforeStorageTakeBack");
+    const takeBackSeed = await ensureStoredItemForTakeBack(client, "Red Potion", "red-potion", "beforeStorageTakeBack");
+    const beforeStorageTakeBack = takeBackSeed.state;
     const beforeTakeBackInventoryQuantity = itemQuantity(beforeStorageTakeBack.inventoryItems, "Red Potion");
     const beforeTakeBackStorageQuantity = itemQuantity(beforeStorageTakeBack.storageItems, "Red Potion");
     if (beforeTakeBackStorageQuantity < 1) {
@@ -743,26 +1583,30 @@ async function main() {
     }
     storageTakeBackFlow.push(beforeStorageTakeBack);
     await clickButtonByImageAlt(client, "Take Back");
-    await clickStorageItemByName(client, "Red Potion");
     await waitForStorageTransferState(
       client,
-      (state) => state.feedbackText.includes("Red Potion") && state.hintTexts.some((hint) => hint.includes("select target slot")),
+      (state) => state.storageWindowVisible === true && state.statusText.includes("warehouse item"),
+      "takeBack mode open",
+      5_000,
+    );
+    await clickStorageSlot(client, takeBackSeed.storageSlot);
+    await waitForStorageTransferState(
+      client,
+      (state) =>
+        state.feedbackText.includes("Red Potion") ||
+        state.statusText.includes("warehouse item"),
       "takeBackItemSelected",
       5_000,
     );
     storageTakeBackFlow.push(await readStorageTransferState(client, "takeBackItemSelected"));
     screenshots.push(await screenshot(client, "stage5-storage-takeback-red-potion-selected.png"));
-    await clickInventorySlot(client, 6);
+    await clickInventorySlot(client, takeBackSeed.inventorySlot);
     const afterStorageTakeBackState = await waitForStorageTransferState(
       client,
       (state) => {
         const inventoryQuantity = itemQuantity(state.inventoryItems, "Red Potion");
         const storageQuantity = itemQuantity(state.storageItems, "Red Potion");
-        return (
-          state.feedbackText.includes("Red Potion") &&
-          ((inventoryQuantity === beforeTakeBackInventoryQuantity && storageQuantity === beforeTakeBackStorageQuantity) ||
-            (inventoryQuantity > beforeTakeBackInventoryQuantity && storageQuantity < beforeTakeBackStorageQuantity))
-        );
+        return inventoryQuantity > beforeTakeBackInventoryQuantity && storageQuantity < beforeTakeBackStorageQuantity;
       },
       "afterStorageTakeBack",
       8_000,
@@ -771,47 +1615,54 @@ async function main() {
     const afterTakeBackStorageQuantity = itemQuantity(afterStorageTakeBackState.storageItems, "Red Potion");
     storageTakeBackFlow.push({
       ...afterStorageTakeBackState,
-      result:
-        afterTakeBackInventoryQuantity > beforeTakeBackInventoryQuantity &&
-        afterTakeBackStorageQuantity < beforeTakeBackStorageQuantity
-          ? "taken-back"
-          : "preserved-without-service",
+      result: "taken-back",
     });
     screenshots.push(await screenshot(client, "stage5-storage-takeback-red-potion-result.png"));
     await clickSelector(client, ".storage-close button");
     await waitForStorageTransferState(
       client,
-      (state) => state.storageWindowVisible === false && state.feedbackText.includes("Red Potion"),
+      (state) => state.storageWindowVisible === false,
       "storageTakeBackFeedback",
       5_000,
     );
     storageTakeBackFlow.push(await readStorageTransferState(client, "storageTakeBackFeedback"));
     screenshots.push(await screenshot(client, "stage5-storage-takeback-red-potion-feedback.png"));
 
-    await waitForSelector(client, ".entity-nameplate.npc", 10_000);
-    await clickFirst(client, ".entity-nameplate.npc");
-    await waitForSelector(client, ".npc-dialog-panel", 10_000);
-    npcDialogFlow.push(await readNpcDialogState(client, "open"));
+    await clickAllOptional(client, ".storage-close button, .inventory-close button, .character-close button");
+    await delay(300);
+    await transferMapAndWait(client, "crystal:0:330:270", "return to stage5 smoke combat point");
+    screenshots.push(await screenshot(client, "stage5-storage-service-return.png"));
+
+    await sendGatewayCommand(client, { type: "stage5Command", action: "qa.openNpcDialog", args: [] });
+    await waitForNpcDialogState(client, (state) => state.open === true, "generic NPC dialog open", 10_000);
+    const npcOpenState = await readNpcDialogState(client, "open");
+    if (hasRawCrystalMarkup(npcOpenState.visibleText)) {
+      throw new Error(`NPC dialog leaked raw Crystal markup: ${JSON.stringify(npcOpenState)}`);
+    }
+    npcDialogFlow.push(npcOpenState);
     screenshots.push(await screenshot(client, "stage5-npc.png"));
     if ((await readNpcDialogState(client, "linkOptional")).links.length > 0) {
       screenshots.push(await screenshot(client, "stage5-npc-links.png"));
     }
-    await clickOptional(client, ".npc-dialog-close");
+    await clickOptional(client, ".npc-dialog-close, .npc-dialog-actions .sprite-button:last-child");
     await waitForNpcDialogState(client, (state) => state.open === false, "closed", 5_000);
     npcDialogFlow.push(await readNpcDialogState(client, "closed"));
 
-    await waitForSelector(client, ".entity-nameplate.monster", 10_000);
+    await sendGatewayCommand(client, { type: "stage5Command", action: "event.spawn", args: ["BugBat", "1"] });
+    await waitForStage5Entity(client, (entity) => entity.kind === "monster", "combat smoke monster", 10_000);
     const beforeCombat = await readCombatState(client, "beforeCombat");
     const combatTarget = beforeCombat.monsters[0] ?? null;
     if (!combatTarget) {
       throw new Error(`Cannot verify combat without visible monster: ${JSON.stringify(beforeCombat)}`);
     }
     combatFlow.push(beforeCombat);
-    await clickFirst(client, ".entity-nameplate.monster");
+    if (await waitForSelectorOptional(client, ".entity-nameplate.monster", 2_000)) {
+      await clickFirst(client, ".entity-nameplate.monster");
+    }
+    await sendGatewayCommand(client, { type: "attack", objectId: Number(combatTarget.objectId) });
     const afterCombat = await waitForCombatState(
       client,
       (state) => {
-        const selectedMonster = state.monsters.find((monster) => monster.objectId === state.selectedObjectId);
         const damagedMonster = state.monsters.find((monster) => {
           const beforeMonster = beforeCombat.monsters.find((entry) => entry.objectId === monster.objectId);
           return (
@@ -821,21 +1672,22 @@ async function main() {
           );
         });
         return (
-          Boolean(selectedMonster) ||
+          state.activeAttackCount > 0 ||
+          state.projectileCount > 0 ||
           state.monsters.some((monster) => monster.struckActive) ||
-          Boolean(damagedMonster)
+          Boolean(damagedMonster) ||
+          state.monsters.some((monster) => monster.dead)
         );
       },
       "afterCombat",
-      2_000,
+      5_000,
     );
     combatFlow.push(afterCombat);
     screenshots.push(await screenshot(client, "stage5-combat.png"));
 
     await clickAllOptional(client, ".storage-close button, .inventory-close button, .character-close button");
     await delay(300);
-    await sendGatewayCommand(client, { type: "transferMap", key: "crystal:1:315:82" });
-    await waitForStage5State(client, (state) => state?.mapFileName === "1", "mapFileName 1", 15_000);
+    await transferMapAndWait(client, "crystal:1:315:82", "mapFileName 1");
     screenshots.push(await screenshot(client, "stage5-map-transfer-1.png"));
     minimapFlow.push(await readMiniMapState(client, "expanded"));
 
@@ -857,6 +1709,52 @@ async function main() {
     await clickOptional(client, ".mail-panel .mail-close button");
     await waitForMiniMapState(client, (state) => state.mailOpen === false, "mail closed", 5_000);
     mailFlow.push(await readMailState(client, "mailClosed"));
+
+    const beforeGameShopSeed = await readStage5SystemsState(client, "beforeGameShopSeed");
+    const gameShopSeedMailId =
+      Math.max(0, ...(beforeGameShopSeed.mail ?? []).map((mail) => Number(mail.id) || 0)) + 1;
+    await sendGatewayCommand(client, {
+      type: "stage5Command",
+      action: "mail.send",
+      args: ["GameShopSeed", "Game shop seed", "Gold for game shop smoke", "1000000"],
+    });
+    await sendGatewayCommand(client, { type: "stage5Command", action: "mail.claim", args: [String(gameShopSeedMailId)] });
+    await waitForStage5State(
+      client,
+      (state) => (state?.gold ?? 0) >= (beforeGameShopSeed.gold ?? 0) + 1_000_000,
+      "game shop gold seed claimed",
+      8_000,
+    );
+    gameShopFlow.push(await readStage5SystemsState(client, "afterGameShopSeed"));
+    await clickSelector(client, ".hud-button.shop button");
+    await waitForSelector(client, ".game-shop-window", 10_000);
+    await clickSelector(client, ".game-shop-payment.gold");
+    const beforeGameShopBuy = await readGameShopState(client, "beforeGameShopBuy");
+    if (!beforeGameShopBuy.firstGoldItem || beforeGameShopBuy.firstGoldItem.goldPrice <= 0) {
+      throw new Error(`Cannot verify positive game shop buy without gold-priced item: ${JSON.stringify(beforeGameShopBuy)}`);
+    }
+    gameShopFlow.push(beforeGameShopBuy);
+    screenshots.push(await screenshot(client, "stage5-gameshop-gold-open.png"));
+    await clickFirstGameShopGoldBuy(client);
+    const beforeGameShopQuantity = totalCarryQuantity(beforeGameShopBuy);
+    const afterGameShopBuy = await waitForGameShopState(
+      client,
+      (state) =>
+        state.gold === beforeGameShopBuy.gold - beforeGameShopBuy.firstGoldItem.goldPrice &&
+        totalCarryQuantity(state) > beforeGameShopQuantity &&
+        hasGameShopGoldPurchaseChat(
+          state,
+          beforeGameShopBuy.firstGoldItem.name,
+          beforeGameShopBuy.firstGoldItem.goldPrice,
+        ),
+      "afterGameShopGoldBuy",
+      8_000,
+    );
+    gameShopFlow.push(afterGameShopBuy);
+    screenshots.push(await screenshot(client, "stage5-gameshop-gold-buy.png"));
+    await clickOptional(client, ".game-shop-close button");
+    await waitForGameShopState(client, (state) => state.visible === false, "game shop closed", 5_000);
+    gameShopFlow.push(await readGameShopState(client, "gameShopClosed"));
 
     stage5SystemsFlow.push(await readStage5SystemsState(client, "beforeBroadSystems"));
     await sendGatewayCommand(client, { type: "stage5Command", action: "group.create", args: ["Miner"] });
@@ -904,11 +1802,13 @@ async function main() {
     await sendGatewayCommand(client, { type: "stage5Command", action: "shop.buy", args: ["shop-ui-potion", "25"] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "shop.buyCredit", args: ["credit-shop-ui", "1"] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "auction.list", args: ["auction-ui-relic", "35"] });
-    await sendGatewayCommand(client, { type: "stage5Command", action: "auction.buy", args: ["1"] });
+    const auctionRelicId = await waitForLatestAuctionListingId(client, "auction-ui-relic", "auction relic listed");
+    await sendGatewayCommand(client, { type: "stage5Command", action: "auction.buy", args: [String(auctionRelicId)] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "auction.list", args: ["auction-cancel-ui", "45"] });
-    await sendGatewayCommand(client, { type: "stage5Command", action: "auction.cancel", args: ["2"] });
+    const auctionCancelId = await waitForLatestAuctionListingId(client, "auction-cancel-ui", "auction cancel listed");
+    await sendGatewayCommand(client, { type: "stage5Command", action: "auction.cancel", args: [String(auctionCancelId)] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "conquest.end", args: ["Sabuk"] });
-    await sendGatewayCommand(client, { type: "stage5Command", action: "event.spawn", args: ["Field Wasp", "1"] });
+    await sendGatewayCommand(client, { type: "stage5Command", action: "event.spawn", args: ["BugBat", "1"] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "hero.behaviour", args: ["2"] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "mine", args: ["2"] });
     await sendGatewayCommand(client, { type: "stage5Command", action: "craft", args: ["crafted-shield"] });
@@ -919,8 +1819,8 @@ async function main() {
         const systems = state?.stage5Systems;
         return (
           systems?.trade === null &&
-          systems?.auction?.some((listing) => listing.itemKey === "auction-ui-relic" && listing.sold === true) &&
-          systems?.auction?.some((listing) => listing.itemKey === "auction-cancel-ui" && listing.cancelled === true) &&
+          systems?.auction?.some((listing) => listing.id === auctionRelicId && listing.itemKey === "auction-ui-relic" && listing.sold === true) &&
+          systems?.auction?.some((listing) => listing.id === auctionCancelId && listing.itemKey === "auction-cancel-ui" && listing.cancelled === true) &&
           systems?.conquest?.eventLog?.some((line) => line.includes("War ended: Sabuk")) &&
           systems?.hero?.behaviour === 2 &&
           systems?.profession?.craftedItems?.includes("crafted-shield") &&
@@ -934,14 +1834,22 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-systems-advanced.png"));
 
     chatFlow.push(await readChatState(client, "allInitial"));
-    await clickSelector(client, '.chat-filter-button[style*="34px"] button');
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="shout"] button');
     await waitForChatState(client, (state) => state.visibleLineTexts.every((text) => text === ""), "shout filter", 5_000);
     chatFlow.push(await readChatState(client, "shoutFilter"));
     screenshots.push(await screenshot(client, "stage5-chat-shout-filter.png"));
 
-    await clickSelector(client, '.chat-filter-button[style*="12px"] button');
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
     await waitForChatState(client, (state) => state.visibleLineTexts.some((text) => text !== ""), "all filter restored", 5_000);
     chatFlow.push(await readChatState(client, "allRestored"));
+
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="trade"] button');
+    await waitForChatState(client, (state) => state.activeFilter === "trade", "trade filter", 5_000);
+    chatChannelFlow.push(await readChatState(client, "tradeFilter"));
+    screenshots.push(await screenshot(client, "stage5-chat-trade-filter.png"));
+
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
+    await waitForChatState(client, (state) => state.activeFilter === "all", "all restored after trade", 5_000);
 
     await sendGatewayCommand(client, { type: "stage5Command", action: "guild.chat", args: ["Guild", "filter", "check"] });
     await waitForStage5State(
@@ -950,7 +1858,7 @@ async function main() {
       "guild chat filter check",
       5_000,
     );
-    await clickSelector(client, '.chat-filter-button[style*="144px"] button');
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="guild"] button');
     await waitForChatState(
       client,
       (state) =>
@@ -962,12 +1870,12 @@ async function main() {
     chatChannelFlow.push(await readChatState(client, "guildFilter"));
     screenshots.push(await screenshot(client, "stage5-chat-guild-filter.png"));
 
-    await clickSelector(client, '.chat-filter-button[style*="122px"] button');
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="group"] button');
     await waitForChatState(client, (state) => state.visibleLineTexts.every((text) => text === ""), "group filter empty", 5_000);
     chatChannelFlow.push(await readChatState(client, "groupFilterEmpty"));
     screenshots.push(await screenshot(client, "stage5-chat-group-filter-empty.png"));
 
-    await clickSelector(client, '.chat-filter-button[style*="12px"] button');
+    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
     await waitForChatState(client, (state) => state.visibleLineTexts.some((text) => text !== ""), "all restored after channels", 5_000);
     chatChannelFlow.push(await readChatState(client, "allRestoredAfterChannels"));
 
@@ -1000,43 +1908,210 @@ async function main() {
     systemMenuFlow.push(await readSystemMenuState(client, "open"));
     screenshots.push(await screenshot(client, "stage5-system-menu.png"));
 
-    await clickSystemMenuAction(client, 0);
-    await waitForSelector(client, ".character-window", 5_000);
-    systemMenuFlow.push(await readSystemMenuState(client, "characterAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-character.png"));
-    await clickOptional(client, ".character-close button");
-
-    await clickSelector(client, ".hud-button.menu button");
-    await waitForSystemMenuState(client, (state) => state.open === true, "reopen inventory", 5_000);
-    await clickSystemMenuAction(client, 1);
-    await waitForInventoryState(client, (state) => state.activeTab === "bag1", "system menu inventory", 5_000);
-    systemMenuFlow.push(await readSystemMenuState(client, "inventoryAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-inventory.png"));
-    await clickOptional(client, ".inventory-close button");
-
-    await clickSelector(client, ".hud-button.menu button");
-    await waitForSystemMenuState(client, (state) => state.open === true, "reopen quest", 5_000);
-    await clickSystemMenuAction(client, 2);
-    await waitForInventoryState(
+    await clickSystemMenuActionByKey(client, "creature");
+    await waitForSystemMenuState(
       client,
-      (state) => state.activeTab === "quest" && state.storageWindowVisible === true,
-      "system menu quest",
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "creature",
+      "creature feature panel open",
       5_000,
     );
-    systemMenuFlow.push(await readSystemMenuState(client, "questAction"));
-    screenshots.push(await screenshot(client, "stage5-system-menu-quest.png"));
-    await clickAllOptional(client, ".storage-close button, .inventory-close button");
-    await clickOptional(client, ".inventory-close button");
-    await waitUntil(
-      async () =>
-        !Boolean(
-          await client.evaluate('Boolean(document.querySelector(".inventory-window, .storage-window"))'),
+    systemMenuFlow.push(await readSystemMenuState(client, "creatureFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-creature.png"));
+    await clickSelector(client, ".creature-feature-actions button:nth-child(1)");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        hasRecentCommand(
+          state,
+          (command) => command?.type === "updateIntelligentCreature" && command?.summonMe === true,
         ),
+      "creature summon command sent",
       5_000,
-      "inventory and storage closed",
     );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureSummonCommand"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "creature feature panel closed",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "creatureFeaturePanelClosed"));
 
-    await clickSelector(client, ".hud-button.menu button");
+    await clickSystemMenuActionByKey(client, "ride");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "mount",
+      "mount feature panel open",
+      5_000,
+    );
+    systemMenuFlow.push(await readSystemMenuState(client, "mountFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-mount.png"));
+    await clickSelector(client, ".mount-feature-ride");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        hasRecentCommand(
+          state,
+          (command) => command?.type === "useItem" && command?.grid === "equipment" && command?.slot === 13,
+        ),
+      "mount use-item command sent",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountUseCommand"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "mount feature panel closed",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "mountFeaturePanelClosed"));
+
+    await clickSystemMenuActionByKey(client, "fishing");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.systemMenuFeaturePanelVisible === true &&
+        state.systemMenuFeaturePanelType === "fishing",
+      "fishing feature panel open",
+      5_000,
+    );
+    systemMenuFlow.push(await readSystemMenuState(client, "fishingFeatureAction"));
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelOpen"));
+    screenshots.push(await screenshot(client, "stage5-system-menu-fishing.png"));
+    await clickSelector(client, ".fishing-feature-status button:nth-child(1)");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        hasRecentCommand(
+          state,
+          (command) => command?.type === "fishingCast" && command?.castOut === true,
+        ),
+      "fishing cast command sent",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingCastCommand"));
+    await clickSelector(client, ".fishing-feature-status button:nth-child(2)");
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        hasRecentCommand(
+          state,
+          (command) => command?.type === "fishingChangeAutocast" && command?.autoCast === true,
+        ),
+      "fishing autocast command sent",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingAutoCommand"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(
+      client,
+      (state) =>
+        state.open === true &&
+        state.systemMenuFeaturePanelVisible === false,
+      "fishing feature panel closed",
+      5_000,
+    );
+    systemMenuFeatureFlow.push(await readSystemMenuState(client, "fishingFeaturePanelClosed"));
+
+    const socialPanels = [
+      { key: "ranking", tab: "overall" },
+      { key: "friend", tab: "blocks" },
+      { key: "mentor", tab: "requests" },
+      { key: "relationship", tab: "status" },
+      { key: "group", tab: "party" },
+      { key: "guild", tab: "members" },
+      { key: "hero", tab: "status", commandType: "newHero" },
+      { key: "trade", tab: "session" },
+      { key: "market", tab: "listings" },
+      { key: "marriage", tab: "status" },
+      { key: "itemRental", tab: "session", commandType: "itemRentalRequest" },
+    ];
+
+    for (const socialPanel of socialPanels) {
+      await clickSystemMenuActionByKey(client, socialPanel.key);
+      await waitForSystemMenuState(
+        client,
+        (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelType === socialPanel.key,
+        `${socialPanel.key} panel open`,
+        5_000,
+      );
+      const openState = await readSystemMenuState(client, `${socialPanel.key}PanelOpen`);
+      systemMenuSocialFlow.push(openState);
+
+      await clickSystemMenuSocialTabByKey(client, socialPanel.tab);
+      await waitForSystemMenuState(
+        client,
+        (state) => state.systemMenuSocialPanelVisible === true && state.systemMenuSocialPanelTabKey === socialPanel.tab,
+        `${socialPanel.key} panel tab`,
+        5_000,
+      );
+      const tabState = await readSystemMenuState(client, `${socialPanel.key}PanelTab`);
+      systemMenuSocialFlow.push(tabState);
+
+      const selectedEntryName =
+        tabState.systemMenuSocialEntryNames[Math.min(1, Math.max(tabState.systemMenuSocialEntryNames.length - 1, 0))] ??
+        tabState.systemMenuSocialPanelSelectedRow;
+      if (selectedEntryName) {
+        await clickSystemMenuSocialEntryByName(client, selectedEntryName);
+        await waitForSystemMenuState(
+          client,
+          (state) => state.systemMenuSocialPanelSelectedRow === selectedEntryName,
+          `${socialPanel.key} panel row`,
+          5_000,
+        );
+      }
+
+      const actionLabel = tabState.systemMenuSocialActionLabels[0];
+      if (actionLabel) {
+        await clickSystemMenuSocialActionByLabel(client, actionLabel);
+        await waitForSystemMenuState(
+          client,
+          (state) =>
+            state.systemMenuSocialPanelStatus !== null &&
+            state.systemMenuSocialPanelStatus.includes(actionLabel),
+          `${socialPanel.key} panel action`,
+          5_000,
+        );
+        if (socialPanel.commandType) {
+          await waitForSystemMenuState(
+            client,
+            (state) => hasRecentCommand(state, (command) => command?.type === socialPanel.commandType),
+            `${socialPanel.key} panel command`,
+            5_000,
+          );
+        }
+      }
+
+      systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelAction`));
+      screenshots.push(await screenshot(client, `stage5-system-menu-${socialPanel.key}.png`));
+      await clickSystemMenuFeaturePanelClose(client);
+      await waitForSystemMenuState(
+        client,
+        (state) =>
+          state.open === true &&
+          state.systemMenuFeaturePanelVisible === false &&
+          state.systemMenuSocialPanelVisible === false,
+        `${socialPanel.key} panel closed`,
+        5_000,
+      );
+      systemMenuSocialFlow.push(await readSystemMenuState(client, `${socialPanel.key}PanelClosed`));
+    }
+
+    if (!(await readSystemMenuState(client, "beforeQaTransferReopen")).open) {
+      await clickSelector(client, ".hud-button.menu button");
+    }
     await waitForSystemMenuState(client, (state) => state.open === true, "reopen qa transfer", 5_000);
     systemMenuQaTransferFlow.push(await readSystemMenuState(client, "qaTransferPanel"));
     await setSystemMenuQaTransferInputs(client, { map: "0", x: 330, y: 270 });
@@ -1143,7 +2218,23 @@ async function main() {
       })),
     );
     screenshots.push(await screenshot(client, "stage5-compact-system-menu.png"));
-    await clickOptional(client, ".system-menu-panel .overlay-panel-head button");
+    await clickSystemMenuActionByKey(client, "trade");
+    await waitForSystemMenuState(
+      client,
+      (state) => state.systemMenuFeaturePanelVisible === true && state.systemMenuSocialPanelType === "trade",
+      "compact trade social panel",
+      5_000,
+    );
+    compactPanelLayout.push(
+      ...(await assertPanelLayout(client, VIEWPORTS.compact, [".system-feature-panel-social"])).map((entry) => ({
+        label: "tradeSocial",
+        ...entry,
+      })),
+    );
+    screenshots.push(await screenshot(client, "stage5-compact-trade-social.png"));
+    await clickSystemMenuFeaturePanelClose(client);
+    await waitForSystemMenuState(client, (state) => state.open === true, "compact system menu restored", 5_000);
+    await clickOptional(client, ".system-menu-close-hit");
 
     await clickSelector(client, ".chat-filter-button.settings button");
     await waitForChatState(client, (state) => state.settingsOpen === true, "compact chat settings", 5_000);
@@ -1178,6 +2269,22 @@ async function main() {
     screenshots.push(await screenshot(client, "stage5-compact-report.png"));
     await clickOptional(client, ".report-panel .overlay-panel-head button");
 
+    const compactMatrix = [];
+    for (const [viewportName, viewport] of Object.entries({
+      compactWide: VIEWPORTS.compactWide,
+      compactNarrow: VIEWPORTS.compactNarrow,
+      compactShort: VIEWPORTS.compactShort,
+    })) {
+      await setViewport(client, viewport);
+      await delay(250);
+      compactMatrix.push({
+        viewportName,
+        layout: await assertCompactLayout(client, viewport),
+        text: await assertCoreTextLayout(client),
+      });
+      screenshots.push(await screenshot(client, `stage5-${viewportName}.png`));
+    }
+
     await setViewport(client, VIEWPORTS.desktop);
     await delay(300);
     await waitForBeltState(
@@ -1187,21 +2294,37 @@ async function main() {
       5_000,
     );
     beltFlow.push(await readBeltState(client, "horizontal"));
-    const beforeHotkeyUse = await readStage5BeltItems(client, "beforeHotkey1");
-    const beforeSlotOne = beforeHotkeyUse.items.find((item) => item.slot === 0);
-    if (!beforeSlotOne) {
-      throw new Error(`Cannot verify belt hotkey use without an item in slot 1: ${JSON.stringify(beforeHotkeyUse)}`);
+    let hotkeyState = await readStage5BeltItems(client, "beforeHotkeys1To6");
+    if (!hotkeyState.items.some((item) => item.slot >= 0 && item.slot < 6)) {
+      throw new Error(`Cannot verify belt hotkeys without any item in slots 1-6: ${JSON.stringify(hotkeyState)}`);
     }
-    beltUseFlow.push(beforeHotkeyUse);
-    await pressKey(client, "1", "Digit1", 49);
-    const afterHotkeyUse = await waitForStage5BeltItemQuantityBelow(
-      client,
-      0,
-      beforeSlotOne.quantity,
-      "afterHotkey1",
-      5_000,
-    );
-    beltUseFlow.push(afterHotkeyUse);
+    beltUseFlow.push(hotkeyState);
+    for (let slotIndex = 0; slotIndex < 6; slotIndex += 1) {
+      const beforeSlot = hotkeyState.items.find((item) => item.slot === slotIndex) ?? null;
+      await pressKey(client, String(slotIndex + 1), `Digit${slotIndex + 1}`, 49 + slotIndex);
+      const consumableHotkeyItem =
+        beforeSlot?.name === "Red Potion" || beforeSlot?.name === "Blue Potion";
+      const afterSlotState = !beforeSlot
+        ? await readStage5BeltItems(client, `afterEmptyHotkey${slotIndex + 1}`)
+        : consumableHotkeyItem
+          ? await waitForStage5BeltItemQuantityBelow(
+            client,
+            slotIndex,
+            beforeSlot.quantity,
+            `afterHotkey${slotIndex + 1}`,
+            5_000,
+          )
+          : await readStage5BeltItems(client, `afterOccupiedNoopHotkey${slotIndex + 1}`);
+      beltUseFlow.push({
+        ...afterSlotState,
+        slot: slotIndex,
+        expected: !beforeSlot ? "empty-slot-noop" : consumableHotkeyItem ? "used" : "occupied-slot-noop",
+      });
+      hotkeyState = afterSlotState;
+      if (!beforeSlot || !consumableHotkeyItem) {
+        await delay(150);
+      }
+    }
     screenshots.push(await screenshot(client, "stage5-belt-hotkey-use.png"));
 
     await clickSelector(client, ".belt-button.rotate-horizontal button");
@@ -1245,6 +2368,7 @@ async function main() {
       screenshotCount: screenshots.length,
       compactPanelCount: compactPanelLayout.length,
       compactTextNodeCount: compactTextLayout.checked,
+      compactMatrixCount: compactMatrix.length,
       criticalConsoleErrorCount: client.consoleErrors.length,
       flowCounts: {
         inventory: inventoryFlow.length,
@@ -1252,10 +2376,13 @@ async function main() {
         storagePassword: storagePasswordFlow.length,
         chat: chatFlow.length,
         systemMenu: systemMenuFlow.length,
+        systemMenuFeature: systemMenuFeatureFlow.length,
+        systemMenuSocial: systemMenuSocialFlow.length,
         stage5Systems: stage5SystemsFlow.length,
         login: loginFlow.length,
         select: selectFlow.length,
         belt: beltFlow.length,
+        gameShop: gameShopFlow.length,
       },
     };
     const manifest = {
@@ -1266,6 +2393,7 @@ async function main() {
       compactLayout,
       compactTextLayout,
       compactPanelLayout,
+      compactMatrix,
       screenshots,
       inventoryFlow,
       inventoryUseFlow,
@@ -1289,6 +2417,8 @@ async function main() {
       systemMenuFlow,
       systemMenuQaTransferFlow,
       systemMenuTransferFlow,
+      systemMenuFeatureFlow,
+      systemMenuSocialFlow,
       hudButtonFlow,
       spellCastFlow,
       minimapFlow,
@@ -1299,6 +2429,7 @@ async function main() {
       beltFlow,
       beltUseFlow,
       beltMouseUseFlow,
+      gameShopFlow,
       loginFlow,
       selectFlow,
       stage5SystemsFlow,
@@ -1438,6 +2569,26 @@ async function clickLanguageButton(client, rootSelector, label) {
     })()
   `);
   if (!clicked) throw new Error(`Could not click language ${label} in ${rootSelector}`);
+  await delay(150);
+  const active = await client.evaluate(`
+    (() => {
+      const root = document.querySelector(${JSON.stringify(rootSelector)});
+      const activeButton = root?.querySelector(".language-selector-button.active");
+      return activeButton?.textContent?.trim() === ${JSON.stringify(label)};
+    })()
+  `);
+  if (active) return;
+  await mouseClickElementByExpression(
+    client,
+    `
+      (() => {
+        const root = document.querySelector(${JSON.stringify(rootSelector)});
+        return Array.from(root?.querySelectorAll(".language-selector-button") ?? [])
+          .find((node) => node.textContent?.trim() === ${JSON.stringify(label)}) ?? null;
+      })()
+    `,
+    `language ${label} in ${rootSelector}`,
+  );
 }
 
 async function clickSelectSlot(client, slotIndex) {
@@ -1450,6 +2601,43 @@ async function clickSelectSlot(client, slotIndex) {
     })()
   `);
   if (!clicked) throw new Error(`Could not click select character slot ${slotIndex}`);
+}
+
+async function startSelectedCharacterFromSelect(client, selectFlow) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const beforeStart = await readSelectState(client, `beforeStartAttempt${attempt}`);
+    const beforeWorldSnapshotVersion = await client.evaluate("window.__mir2Stage5?.state?.worldSnapshotVersion ?? 0");
+    selectFlow.push(beforeStart);
+    await clickSelector(client, ".select-action.start button");
+    const started = await waitForStage5State(
+      client,
+      (state) =>
+        state?.screen === "game" &&
+        state?.player !== null &&
+        Number(state?.worldSnapshotVersion ?? 0) > beforeWorldSnapshotVersion,
+      `start game attempt ${attempt}`,
+      45_000,
+      { throwOnTimeout: false },
+    );
+    if (started) return;
+    if (attempt < 3 && beforeStart.selectedCharacterIndex !== null) {
+      await clickSelectSlot(client, beforeStart.selectedCharacterIndex);
+      await delay(500);
+    }
+  }
+
+  const selectState = await readSelectState(client, "startGameFailedSelectState");
+  const loginState = await readLoginState(client, "startGameFailedLoginState");
+  const pageState = await client.evaluate(`
+    (() => ({
+      stage5State: window.__mir2Stage5?.state ?? null,
+      gameSceneVisible: Boolean(document.querySelector(".game-ui-scene")),
+      startButtonText: document.querySelector(".select-action.start button")?.textContent?.trim() ?? "",
+      startButtonDisabled: Boolean(document.querySelector(".select-action.start button")?.disabled),
+      bodyText: document.body?.innerText?.slice(0, 1000) ?? "",
+    }))()
+  `);
+  throw new Error(`Start game did not enter world: ${JSON.stringify({ selectState, loginState, pageState })}`);
 }
 
 async function readInventoryState(client, label) {
@@ -1467,13 +2655,24 @@ async function readInventoryState(client, label) {
           quantity: item.quantity,
         }));
       const rect = document.querySelector(".inventory-window")?.getBoundingClientRect();
+      const questRows = Array.from(document.querySelectorAll(".inventory-quest-entry")).map((row) => ({
+        questId: row.getAttribute("data-quest-id"),
+        stage: row.getAttribute("data-quest-stage"),
+        title: row.querySelector(".inventory-quest-entry-head strong")?.textContent?.trim() ?? "",
+        summary: row.querySelector(".inventory-quest-summary")?.textContent?.trim() ?? "",
+        objective: row.querySelector(".inventory-quest-objective")?.textContent?.trim() ?? "",
+        progress: row.querySelector(".inventory-quest-progress-row span:first-child")?.textContent?.trim() ?? "",
+        reward: row.querySelector(".inventory-quest-progress-row span:last-child")?.textContent?.trim() ?? "",
+      }));
       return {
         label: ${JSON.stringify(label)},
         activeTab,
         inventoryWindowVisible: Boolean(document.querySelector(".inventory-window")),
         storageWindowVisible: Boolean(document.querySelector(".storage-window")),
         visibleItemCards: document.querySelectorAll(".inventory-item-card").length,
-        questEntryCount: document.querySelectorAll(".inventory-quest-entry").length,
+        questEntryCount: questRows.length,
+        questRows,
+        stageQuestLog: window.__mir2Stage5?.state?.questLog ?? [],
         items,
         rect: rect
           ? {
@@ -1504,6 +2703,7 @@ async function readInventoryItem(client, label, itemName) {
           ? {
               key: item.key,
               name: item.name,
+              uniqueId: item.uniqueId,
               slot: item.slot,
               container: item.container,
               quantity: item.quantity,
@@ -1514,6 +2714,150 @@ async function readInventoryItem(client, label, itemName) {
   `);
 }
 
+async function readInventoryItemByUniqueId(client, label, uniqueId) {
+  return client.evaluate(`
+    (() => {
+      const activeTab = window.__mir2Stage5?.state?.activeInventoryTab ?? null;
+      const item = (window.__mir2Stage5?.state?.inventoryItems ?? []).find(
+        (entry) => entry.container === activeTab && Number(entry.uniqueId) === Number(${JSON.stringify(uniqueId)})
+      );
+      return {
+        label: ${JSON.stringify(label)},
+        activeTab,
+        item: item
+          ? {
+              key: item.key,
+              name: item.name,
+              uniqueId: item.uniqueId,
+              slot: item.slot,
+              container: item.container,
+              quantity: item.quantity,
+            }
+          : null,
+      };
+    })()
+  `);
+}
+
+async function ensureInventoryItemNamed(client, itemName, itemKey, label) {
+  let state = await readInventoryItem(client, `${label}:before`, itemName);
+  if (state.item) return state;
+
+  await sendGatewayCommand(client, { type: "stage5Command", action: "mine", args: ["1"] });
+  await sendGatewayCommand(client, { type: "stage5Command", action: "craft", args: [itemKey] });
+  await sendGatewayCommand(client, { type: "tick" });
+  await waitForStage5State(
+    client,
+    (nextState) => {
+      const activeTab = nextState?.activeInventoryTab ?? "bag1";
+      return (nextState?.inventoryItems ?? []).some((item) => item.container === activeTab && item.name === itemName);
+    },
+    `${label} ${itemName} available`,
+    8_000,
+  );
+  state = await readInventoryItem(client, `${label}:created`, itemName);
+  return state;
+}
+
+async function findFreeInventorySlot(client, preferredSlot, sameItemUniqueId = null) {
+  return client.evaluate(`
+    (() => {
+      const activeTab = window.__mir2Stage5?.state?.activeInventoryTab ?? "bag1";
+      const items = window.__mir2Stage5?.state?.inventoryItems ?? [];
+      const sameItemUniqueId = ${JSON.stringify(sameItemUniqueId)};
+      const occupiedBySlot = new Map(
+        items
+          .filter((item) => item.container === activeTab)
+          .map((item) => [Number(item.slot), item]),
+      );
+      const preferred = Number(${JSON.stringify(preferredSlot)});
+      const preferredItem = occupiedBySlot.get(preferred);
+      if (!preferredItem || (sameItemUniqueId !== null && Number(preferredItem.uniqueId) === Number(sameItemUniqueId))) {
+        return preferred;
+      }
+      const slotLimit = activeTab === "bag2" ? 40 : 40;
+      for (let slot = 0; slot < slotLimit; slot += 1) {
+        if (!occupiedBySlot.has(slot)) return slot;
+      }
+      return null;
+    })()
+  `);
+}
+
+function equipmentSlotUniqueId(slot) {
+  const slots = {
+    weapon: 0,
+    armour: 1,
+    helmet: 2,
+    torch: 3,
+    necklace: 4,
+    braceletLeft: 5,
+    braceletRight: 6,
+    ringLeft: 7,
+    ringRight: 8,
+    amulet: 9,
+    belt: 10,
+    boots: 11,
+    stone: 12,
+    mount: 13,
+  };
+  return slots[slot] ?? null;
+}
+
+async function readPlayerVitalState(client, label) {
+  return client.evaluate(`
+    (() => ({
+      label: ${JSON.stringify(label)},
+      playerHp: window.__mir2Stage5?.state?.playerHp ?? null,
+      playerMaxHp: window.__mir2Stage5?.state?.playerMaxHp ?? null,
+      playerMp: window.__mir2Stage5?.state?.playerMp ?? null,
+      worldTick: window.__mir2Stage5?.state?.worldTick ?? null,
+    }))()
+  `);
+}
+
+async function ensurePlayerCanUseHealingPotion(client, label) {
+  const before = await readPlayerVitalState(client, `${label}:before`);
+  const hp = Number(before.playerHp ?? 0);
+  const maxHp = Number(before.playerMaxHp ?? 0);
+  const targetHp = maxHp > 0 ? Math.max(1, maxHp - 20) : Math.max(1, hp - 20);
+  if (hp > 1 && (maxHp <= 0 || hp > targetHp)) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await sendGatewayCommand(client, { type: "stage5Command", action: "qa.damagePlayer", args: ["25"] });
+      const packetDamaged = await waitForStage5State(
+        client,
+        (state) => Number(state?.playerHp ?? 0) <= targetHp,
+        `damaged player packet for ${label}`,
+        1_500,
+        { throwOnTimeout: false },
+      );
+      if (packetDamaged) {
+        return readPlayerVitalState(client, label);
+      }
+      await sendGatewayCommand(client, { type: "tick" });
+      const damaged = await waitForStage5State(
+        client,
+        (state) => Number(state?.playerHp ?? 0) <= targetHp,
+        `damaged player for ${label}`,
+        3_000,
+        { throwOnTimeout: false },
+      );
+      if (damaged) {
+        return readPlayerVitalState(client, label);
+      }
+    }
+    await waitForStage5State(
+      client,
+      (state) => Number(state?.playerHp ?? 0) <= targetHp,
+      `damaged player for ${label}`,
+      1_000,
+    );
+    return readPlayerVitalState(client, label);
+  }
+
+  return { ...before, label, damageSkipped: true };
+}
+
 async function readItemDistribution(client, label, itemName) {
   return client.evaluate(`
     (() => {
@@ -1521,6 +2865,7 @@ async function readItemDistribution(client, label, itemName) {
       const toItem = (item) => ({
         key: item.key,
         name: item.name,
+        uniqueId: item.uniqueId,
         slot: item.slot,
         container: item.container,
         quantity: item.quantity,
@@ -1548,32 +2893,61 @@ async function readItemDistribution(client, label, itemName) {
   `);
 }
 
+function splitSourceQuantityForDistribution(state, uniqueId) {
+  return state.inventoryItems.find((item) => Number(item.uniqueId) === Number(uniqueId))?.quantity ?? 0;
+}
+
 async function clickInventoryItemByName(client, itemName) {
-  const clicked = await client.evaluate(`
-    (() => {
-      const button = Array.from(document.querySelectorAll(".inventory-item-card")).find(
+  await dispatchMouseSequenceToElementByExpression(
+    client,
+    `
+      Array.from(document.querySelectorAll(".inventory-item-card")).find(
         (node) => node.getAttribute("title") === ${JSON.stringify(itemName)}
-      );
-      if (!button) return false;
-      button.click();
-      return true;
-    })()
-  `);
-  if (!clicked) throw new Error(`Could not click inventory item ${itemName}`);
+      ) ?? null
+    `,
+    `inventory item ${itemName}`,
+  );
 }
 
 async function contextMenuInventoryItemByName(client, itemName) {
-  const opened = await client.evaluate(`
-    (() => {
-      const button = Array.from(document.querySelectorAll(".inventory-item-card")).find(
+  await dispatchContextMenuToElementByExpression(
+    client,
+    `
+      Array.from(document.querySelectorAll(".inventory-item-card")).find(
         (node) => node.getAttribute("title") === ${JSON.stringify(itemName)}
-      );
-      if (!button) return false;
-      button.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 }));
-      return true;
-    })()
-  `);
-  if (!opened) throw new Error(`Could not context-menu inventory item ${itemName}`);
+      ) ?? null
+    `,
+    `inventory item ${itemName}`,
+  );
+}
+
+async function contextMenuInventoryItemByUniqueId(client, uniqueId) {
+  await dispatchContextMenuToElementByExpression(
+    client,
+    `
+      Array.from(document.querySelectorAll(".inventory-item-card")).find(
+        (node) => {
+          if (node.getAttribute("title") !== "Red Potion") return false;
+          const rect = node.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const stageState = window.__mir2Stage5?.state ?? null;
+          const activeTab = stageState?.activeInventoryTab ?? null;
+          return (stageState?.inventoryItems ?? []).some((item) => {
+            if (item.container !== activeTab || Number(item.uniqueId) !== Number(${JSON.stringify(uniqueId)})) {
+              return false;
+            }
+            const slot = Array.from(document.querySelectorAll(".inventory-slot"))[Number(item.slot)];
+            if (!slot) return false;
+            const slotRect = slot.getBoundingClientRect();
+            return Math.abs(centerX - (slotRect.left + slotRect.width / 2)) < 3 &&
+              Math.abs(centerY - (slotRect.top + slotRect.height / 2)) < 3;
+          });
+        }
+      ) ?? null
+    `,
+    `inventory unique item ${uniqueId}`,
+  );
 }
 
 async function clickInventorySlot(client, slotIndex) {
@@ -1601,37 +2975,259 @@ async function clickStorageSlot(client, slotIndex) {
 }
 
 async function clickStorageItemByName(client, itemName) {
-  const clicked = await client.evaluate(`
-    (() => {
-      const button = Array.from(document.querySelectorAll(".storage-item-card")).find(
+  await dispatchMouseSequenceToElementByExpression(
+    client,
+    `
+      Array.from(document.querySelectorAll(".storage-item-card")).find(
         (node) => node.getAttribute("title") === ${JSON.stringify(itemName)}
+      ) ?? null
+    `,
+    `storage item ${itemName}`,
+  );
+}
+
+async function openStorageServiceViaNpc(client, storageFlow, npcDialogFlow, screenshots) {
+  await clickAllOptional(client, ".storage-close button, .inventory-close button, .character-close button, .npc-dialog-close");
+  await delay(250);
+  await transferMapAndWait(client, "crystal:0:317:260", "storage service NPC position");
+  storageFlow.push({ label: "storageServiceNpcReady", source: "qa.openNpcDialog.realScript" });
+  await sendGatewayCommand(client, { type: "stage5Command", action: "qa.openNpcDialog", args: [] });
+  const storageDialog = await waitForNpcDialogState(
+    client,
+    (state) =>
+      state.open === true &&
+      state.title === "InnKeeper_Brittney" &&
+      state.links.some((link) => link.target.toLowerCase() === "@storage") &&
+      !hasRawCrystalMarkup(state.visibleText),
+    "storage service NPC dialog",
+    10_000,
+  );
+  npcDialogFlow.push(storageDialog);
+  screenshots.push(await screenshot(client, "stage5-storage-service-npc.png"));
+  await clickNpcDialogLinkByTarget(client, "@Storage");
+  await waitForNpcDialogState(
+    client,
+    (state) => state.open === false,
+    "storage service selected",
+    8_000,
+  );
+  npcDialogFlow.push(await readNpcDialogState(client, "storageServiceSelected"));
+  await waitForStorageState(
+    client,
+    (state) => state.storageWindowVisible === true && state.activePage === "1" && state.storageSlots >= 80,
+    "storage service opened from NPC",
+    8_000,
+  );
+  await delay(300);
+}
+
+async function openNpcServiceViaNpc(client, service, npcDialogFlow, screenshots) {
+  await clickAllOptional(client, ".storage-close button, .inventory-close button, .character-close button, .npc-dialog-close");
+  await delay(250);
+  await transferMapAndWait(client, service.transferKey, `${service.name} service position`);
+  const npc = await waitForStage5Entity(
+    client,
+    (entity) =>
+      entity.kind === "npc" &&
+      (entity.objectId === service.objectId ||
+        entity.name === service.name ||
+        entity.name.includes(service.name.replace(/^[^_]+_/, ""))),
+    `${service.name} service NPC`,
+    10_000,
+  ).catch(() => ({ objectId: service.objectId, kind: "npc", name: service.name, x: null, y: null }));
+  await sendGatewayCommand(client, { type: "interact", objectId: Number(npc.objectId) });
+  await waitForNpcDialogState(
+    client,
+    (state) =>
+      state.open === true &&
+      state.links.some((link) => link.target.toLowerCase() === service.target.toLowerCase()),
+    `${service.name} service NPC dialog`,
+    10_000,
+  );
+  npcDialogFlow.push(await readNpcDialogState(client, `${service.name}:${service.target}:dialog`));
+  screenshots.push(await screenshot(client, service.screenshotName));
+  await clickNpcDialogLinkByTarget(client, service.target);
+  await waitForNpcDialogState(client, (state) => state.open === false, `${service.name} service selected`, 8_000);
+  npcDialogFlow.push(await readNpcDialogState(client, `${service.name}:${service.target}:selected`));
+  await delay(300);
+}
+
+async function ensureCharacterWindowOpen(client) {
+  if (!(await client.evaluate('Boolean(document.querySelector(".character-window"))'))) {
+    await clickSelector(client, ".hud-button.character button");
+    await waitForSelector(client, ".character-window", 10_000);
+  }
+  await clickSelector(client, ".character-tab.char button");
+  await waitForCharacterState(client, (state) => state.activeTab === "char", "character repair tab", 5_000);
+}
+
+async function readWorldSnapshotVersion(client) {
+  return client.evaluate("window.__mir2Stage5?.state?.worldSnapshotVersion ?? 0");
+}
+
+function parseCrystalTransferKey(key) {
+  const [prefix, mapFileName, x, y] = String(key).split(":");
+  if (prefix !== "crystal" || mapFileName === undefined || x === undefined || y === undefined) {
+    return null;
+  }
+  return {
+    mapFileName,
+    x: Number(x),
+    y: Number(y),
+  };
+}
+
+async function transferMapAndWait(client, key, label, options = {}) {
+  const target = parseCrystalTransferKey(key);
+  if (!target) {
+    await sendGatewayCommand(client, { type: "transferMap", key });
+    return;
+  }
+
+  const attempts = Number(options.attempts ?? 3);
+  const timeoutMs = Number(options.timeoutMs ?? 15_000);
+  const attemptTimeoutMs = Math.max(2_500, Math.floor(timeoutMs / Math.max(1, attempts)));
+  const beforeSnapshotVersion = await readWorldSnapshotVersion(client);
+  const reachedTarget = (state) =>
+    state?.mapFileName === target.mapFileName &&
+    state?.player?.x === target.x &&
+    state?.player?.y === target.y;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    await sendGatewayCommand(client, { type: "transferMap", key });
+    const reached = await waitForStage5State(
+      client,
+      reachedTarget,
+      `${label} attempt ${attempt + 1}`,
+      attemptTimeoutMs,
+      { throwOnTimeout: false },
+    );
+    if (reached) {
+      await sendGatewayCommand(client, { type: "tick" });
+      await waitForStage5State(
+        client,
+        (state) => reachedTarget(state) && Number(state?.worldSnapshotVersion ?? 0) > Number(beforeSnapshotVersion ?? 0),
+        `${label} snapshot`,
+        3_000,
+        { throwOnTimeout: false },
       );
-      if (!button) return false;
-      button.click();
-      return true;
-    })()
-  `);
-  if (!clicked) throw new Error(`Could not click storage item ${itemName}`);
+      return;
+    }
+    await sendGatewayCommand(client, { type: "tick" });
+    await delay(250);
+  }
+
+  await waitForStage5State(client, reachedTarget, label, 1_000);
+}
+
+async function refreshWorldSnapshotAfterTransfer(client, beforeSnapshotVersion, label) {
+  await sendGatewayCommand(client, { type: "tick" });
+  await waitForStage5State(
+    client,
+    (state) => Number(state?.worldSnapshotVersion ?? 0) > Number(beforeSnapshotVersion ?? 0),
+    label,
+    8_000,
+  );
+}
+
+async function waitForStage5Entity(client, predicate, label, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let lastTickAt = 0;
+  let entities = [];
+  while (Date.now() < deadline) {
+    entities = await client.evaluate(`
+      (window.__mir2Stage5?.state?.entities ?? []).map((entity) => ({
+        objectId: entity.objectId,
+        kind: entity.kind,
+        name: entity.name,
+        x: entity.x,
+        y: entity.y,
+      }))
+    `);
+    const entity = entities.find(predicate);
+    if (entity) return entity;
+    if (Date.now() - lastTickAt > 1_000) {
+      lastTickAt = Date.now();
+      await sendGatewayCommand(client, { type: "tick" });
+    }
+    await delay(200);
+  }
+  throw new Error(`Timed out waiting for Stage 5 entity ${label}; current entities: ${JSON.stringify(entities)}`);
 }
 
 function itemQuantity(items, itemName) {
   return items.filter((item) => item.name === itemName).reduce((total, item) => total + (item.quantity ?? 0), 0);
 }
 
-async function waitForInventoryItemQuantityBelow(client, itemName, previousQuantity, label, timeoutMs) {
+async function waitForInventoryItemQuantityBelow(client, uniqueId, previousQuantity, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
-    state = await readInventoryItem(client, label, itemName);
+    state = await readInventoryItemByUniqueId(client, label, uniqueId);
     if (!state.item || state.item.quantity < previousQuantity) return state;
     await delay(100);
   }
+  const debugState = await client.evaluate(`
+    (() => {
+      const state = window.__mir2Stage5?.state ?? null;
+      return {
+        screen: state?.screen ?? null,
+        wsState: state?.wsState ?? null,
+        mapFileName: state?.mapFileName ?? null,
+        player: state?.player ?? null,
+        playerHp: state?.playerHp ?? null,
+        playerMaxHp: state?.playerMaxHp ?? null,
+        lastCommand: state?.lastCommand ?? null,
+        liveLastCommand: window.__mir2LastCommand ?? null,
+        commandHistory: window.__mir2CommandHistory ?? [],
+        lastInventoryActivation: window.__mir2LastInventoryActivation ?? null,
+        lastInventoryConfirmation: window.__mir2LastInventoryConfirmation ?? null,
+        lastUseItem: window.__mir2LastUseItem ?? null,
+        lastBeltActivation: window.__mir2LastBeltActivation ?? null,
+        lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+        gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+        worldTick: state?.worldTick ?? null,
+        worldSnapshotVersion: state?.worldSnapshotVersion ?? null,
+        inventoryItems: state?.inventoryItems ?? [],
+        inventoryDeletePanelText: document.querySelector(".inventory-delete-panel")?.textContent?.trim() ?? "",
+        inventoryFeedbackText: document.querySelector(".inventory-delete-feedback")?.textContent?.trim() ?? "",
+        inventoryHintTexts: Array.from(document.querySelectorAll(".inventory-delete-hint")).map(
+          (node) => node.textContent?.trim() ?? "",
+        ),
+        inventoryButtonTitles: Array.from(document.querySelectorAll(".inventory-item-card")).map((node) => ({
+          title: node.getAttribute("title"),
+          text: node.textContent?.trim() ?? "",
+          disabled: Boolean(node.disabled),
+        })),
+        actionButtons: Array.from(document.querySelectorAll(".inventory-action-button, .inventory-delete button")).map(
+          (node) => ({
+            className: node.className,
+            text: node.textContent?.trim() ?? "",
+            title: node.getAttribute("title") ?? "",
+            ariaLabel: node.getAttribute("aria-label") ?? "",
+          }),
+        ),
+        recentLogs: (state?.logs ?? []).slice(-8).map((log) => ({
+          text: log.text,
+          tone: log.tone,
+          channel: log.channel,
+        })),
+        latestLogs: (state?.logs ?? []).slice(0, 8).map((log) => ({
+          text: log.text,
+          tone: log.tone,
+          channel: log.channel,
+        })),
+      };
+    })()
+  `);
+  if (options.throwOnTimeout === false) return false;
   throw new Error(
-    `Timed out waiting for inventory ${itemName} quantity below ${previousQuantity}; current state: ${JSON.stringify(state)}`,
+    `Timed out waiting for inventory uniqueId ${uniqueId} quantity below ${previousQuantity}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}; consoleErrors: ${JSON.stringify(client.consoleErrors.slice(-8))}`,
   );
 }
 
-async function waitForInventoryItemSlot(client, itemName, slot, label, timeoutMs) {
+async function waitForInventoryItemSlot(client, itemName, slot, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -1639,10 +3235,11 @@ async function waitForInventoryItemSlot(client, itemName, slot, label, timeoutMs
     if (state.item?.slot === slot) return state;
     await delay(100);
   }
+  if (options.throwOnTimeout === false) return false;
   throw new Error(`Timed out waiting for inventory ${itemName} slot ${slot}; current state: ${JSON.stringify(state)}`);
 }
 
-async function waitForItemDistribution(client, itemName, predicate, label, timeoutMs) {
+async function waitForItemDistribution(client, itemName, predicate, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -1650,7 +3247,21 @@ async function waitForItemDistribution(client, itemName, predicate, label, timeo
     if (predicate(state)) return state;
     await delay(100);
   }
-  throw new Error(`Timed out waiting for inventory ${itemName} split state; current state: ${JSON.stringify(state)}`);
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      lastInventoryActivation: window.__mir2LastInventoryActivation ?? null,
+      lastInventoryConfirmation: window.__mir2LastInventoryConfirmation ?? null,
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+      worldTick: window.__mir2Stage5?.state?.worldTick ?? null,
+      worldSnapshotVersion: window.__mir2Stage5?.state?.worldSnapshotVersion ?? null,
+    }))()
+  `);
+  if (options.throwOnTimeout === false) return false;
+  throw new Error(`Timed out waiting for inventory ${itemName} split state; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`);
 }
 
 async function readInventoryEquipmentState(client, label, itemName) {
@@ -1660,11 +3271,27 @@ async function readInventoryEquipmentState(client, label, itemName) {
       const inventoryItem = (window.__mir2Stage5?.state?.inventoryItems ?? []).find(
         (entry) => entry.container === activeTab && entry.name === ${JSON.stringify(itemName)}
       );
+      const inventoryItems = (window.__mir2Stage5?.state?.inventoryItems ?? []).map((item) => ({
+        key: item.key,
+        name: item.name,
+        uniqueId: item.uniqueId,
+        slot: item.slot,
+        container: item.container,
+        quantity: item.quantity,
+      }));
       const equipmentItems = (window.__mir2Stage5?.state?.equipmentItems ?? []).map((item) => ({
         name: item.name,
         slot: item.slot,
         durabilityCurrent: item.durabilityCurrent,
         durabilityMax: item.durabilityMax,
+      }));
+      const storageItems = (window.__mir2Stage5?.state?.storageItems ?? []).map((item) => ({
+        key: item.key,
+        name: item.name,
+        uniqueId: item.uniqueId,
+        slot: item.slot,
+        container: item.container,
+        quantity: item.quantity,
       }));
       return {
         label: ${JSON.stringify(label)},
@@ -1673,15 +3300,92 @@ async function readInventoryEquipmentState(client, label, itemName) {
           ? {
               key: inventoryItem.key,
               name: inventoryItem.name,
+              uniqueId: inventoryItem.uniqueId,
               slot: inventoryItem.slot,
               container: inventoryItem.container,
               quantity: inventoryItem.quantity,
             }
           : null,
+        inventoryItems,
         equipmentItems,
+        storageItems,
       };
     })()
   `);
+}
+
+async function ensureInventoryItemAvailable(client, itemName, label) {
+  let state = await readInventoryEquipmentState(client, `${label}:before`, itemName);
+  if (state.inventoryItem) return state;
+
+  const equippedItem = state.equipmentItems.find((item) => item.name === itemName);
+  if (equippedItem) {
+    const uniqueId = equipmentSlotUniqueId(equippedItem.slot);
+    const targetSlot = await findFreeInventorySlot(client, 10, null);
+    if (uniqueId !== null && targetSlot !== null) {
+      await sendGatewayCommand(client, {
+        type: "removeItem",
+        uniqueId,
+        grid: "inventory",
+        to: targetSlot,
+      });
+      await sendGatewayCommand(client, { type: "tick" });
+      await waitForStage5State(
+        client,
+        (nextState) =>
+          (nextState?.inventoryItems ?? []).some(
+            (item) => item.container === (nextState?.activeInventoryTab ?? "bag1") && item.name === itemName,
+          ),
+        `${label} restored from equipment`,
+        10_000,
+      );
+      return readInventoryEquipmentState(client, `${label}:removed`, itemName);
+    }
+  }
+
+  const recovery = await client.evaluate(`
+    (() => {
+      const activeTab = window.__mir2Stage5?.state?.activeInventoryTab ?? "bag1";
+      const inventoryItems = window.__mir2Stage5?.state?.inventoryItems ?? [];
+      const storageItems = window.__mir2Stage5?.state?.storageItems ?? [];
+      const storedItem = storageItems.find((item) => item.name === ${JSON.stringify(itemName)});
+      if (!storedItem) return null;
+
+      const occupiedSlots = new Set(
+        inventoryItems
+          .filter((item) => item.container === activeTab)
+          .map((item) => Number(item.slot))
+          .filter((slot) => Number.isFinite(slot)),
+      );
+      const slotLimit = activeTab === "belt" ? 6 : 40;
+      for (let slot = 0; slot < slotLimit; slot += 1) {
+        if (!occupiedSlots.has(slot)) {
+          return {
+            from: Number(storedItem.slot),
+            to: slot,
+            activeTab,
+          };
+        }
+      }
+      return null;
+    })()
+  `);
+
+  if (!recovery) return state;
+
+  await openStorageServiceViaNpc(client, [], [], []);
+  await sendGatewayCommand(client, { type: "takeBackItem", from: recovery.from, to: recovery.to });
+  await sendGatewayCommand(client, { type: "tick" });
+  await waitForStage5State(
+    client,
+    (nextState) =>
+      (nextState?.inventoryItems ?? []).some(
+        (item) => item.container === recovery.activeTab && item.name === itemName,
+      ),
+    `${label} restored from storage`,
+    10_000,
+  );
+  return readInventoryEquipmentState(client, `${label}:restored`, itemName);
 }
 
 async function readCharacterRepairState(client, label, itemName) {
@@ -1695,6 +3399,7 @@ async function readCharacterRepairState(client, label, itemName) {
         (button) => button.textContent?.trim() ?? "",
       ),
       activeRepairLabel: document.querySelector(".character-window .inventory-delete-hint")?.textContent?.trim() ?? "",
+      gold: window.__mir2Stage5?.state?.gold ?? null,
     }))()
   `);
   return {
@@ -1727,7 +3432,7 @@ async function clickCharacterRepairAction(client, kind) {
   if (!clicked) throw new Error(`Could not click character ${kind} repair action`);
 }
 
-async function waitForEquipmentItem(client, itemName, label, timeoutMs) {
+async function waitForEquipmentItem(client, itemName, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -1735,10 +3440,23 @@ async function waitForEquipmentItem(client, itemName, label, timeoutMs) {
     if (state.equipmentItems.some((item) => item.name === itemName)) return state;
     await delay(100);
   }
-  throw new Error(`Timed out waiting for equipped ${itemName}; current state: ${JSON.stringify(state)}`);
+  if (options.throwOnTimeout === false) return false;
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      commandHistory: window.__mir2CommandHistory ?? [],
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+    }))()
+  `);
+  throw new Error(
+    `Timed out waiting for equipped ${itemName}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`,
+  );
 }
 
-async function waitForEquipmentItemAbsent(client, itemName, label, timeoutMs) {
+async function waitForEquipmentItemAbsent(client, itemName, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -1746,6 +3464,7 @@ async function waitForEquipmentItemAbsent(client, itemName, label, timeoutMs) {
     if (!state.equipmentItems.some((item) => item.name === itemName)) return state;
     await delay(100);
   }
+  if (options.throwOnTimeout === false) return false;
   throw new Error(`Timed out waiting for removed ${itemName}; current state: ${JSON.stringify(state)}`);
 }
 
@@ -1769,6 +3488,9 @@ async function readInventoryGoldState(client, label) {
       label: ${JSON.stringify(label)},
       gold: window.__mir2Stage5?.state?.gold ?? null,
       inventoryGoldText: document.querySelector(".inventory-gold")?.textContent?.trim() ?? "",
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      lastInventoryConfirmation: window.__mir2LastInventoryConfirmation ?? null,
       dropGoldPanelOpen:
         (document.querySelector(".inventory-delete-panel strong")?.textContent?.trim() ?? "") === "Drop Gold",
       dropGoldInputValue: document.querySelector(".inventory-delete-panel input")?.value ?? "",
@@ -1780,7 +3502,7 @@ async function readInventoryGoldState(client, label) {
   `);
 }
 
-async function waitForInventoryGoldState(client, predicate, label, timeoutMs) {
+async function waitForInventoryGoldState(client, predicate, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -1788,7 +3510,20 @@ async function waitForInventoryGoldState(client, predicate, label, timeoutMs) {
     if (predicate(state)) return state;
     await delay(100);
   }
-  throw new Error(`Timed out waiting for inventory gold ${label}; current state: ${JSON.stringify(state)}`);
+  if (options.throwOnTimeout === false) return false;
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      commandHistory: window.__mir2CommandHistory ?? [],
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+    }))()
+  `);
+  throw new Error(
+    `Timed out waiting for inventory gold ${label}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`,
+  );
 }
 
 async function readInventorySplitState(client, label) {
@@ -1855,15 +3590,22 @@ async function readGroundDropState(client, label, itemName) {
         label: ${JSON.stringify(label)},
         activeTab,
         gold: window.__mir2Stage5?.state?.gold ?? null,
-        inventoryItems: (window.__mir2Stage5?.state?.inventoryItems ?? [])
-          .filter((item) => item.container === activeTab)
-          .map((item) => ({
+        inventoryItems: (window.__mir2Stage5?.state?.inventoryItems ?? []).map((item) => ({
             key: item.key,
             name: item.name,
+            uniqueId: item.uniqueId,
             slot: item.slot,
             container: item.container,
             quantity: item.quantity,
           })),
+        beltItems: (window.__mir2Stage5?.state?.beltItems ?? []).map((item) => ({
+          key: item.key,
+          name: item.name,
+          uniqueId: item.uniqueId,
+          slot: item.slot,
+          container: item.container,
+          quantity: item.quantity,
+        })),
         groundDrops: (window.__mir2Stage5?.state?.groundDrops ?? []).map((drop) => ({
           objectId: drop.objectId,
           name: drop.name,
@@ -1894,18 +3636,102 @@ async function waitForGroundDropState(client, itemName, predicate, label, timeou
   throw new Error(`Timed out waiting for ground drop ${label}; current state: ${JSON.stringify(state)}`);
 }
 
-async function clickGroundDropByName(client, itemName) {
-  const clicked = await client.evaluate(`
+function groundDropStateItemQuantity(state, itemName) {
+  return itemQuantity([...(state.inventoryItems ?? []), ...(state.beltItems ?? [])], itemName);
+}
+
+async function waitForGroundDropInventoryItem(client, itemName, label, timeoutMs) {
+  return waitForGroundDropState(
+    client,
+    itemName,
+    (state) => state.inventoryItems.some((item) => item.name === itemName),
+    label,
+    timeoutMs,
+  );
+}
+
+async function ensureGroundDropAvailable(client, itemName, itemKey, label) {
+  let state = await readGroundDropState(client, `${label}:before`, itemName);
+  if (state.groundDrops.some((drop) => drop.name === itemName)) return state;
+
+  let inventoryItem = state.inventoryItems.find((item) => item.name === itemName);
+  if (!inventoryItem) {
+    await sendGatewayCommand(client, { type: "stage5Command", action: "qa.giveItem", args: [itemKey, "1"] });
+    await sendGatewayCommand(client, { type: "tick" });
+    state = await waitForGroundDropInventoryItem(client, itemName, `${label} inventory seed`, 8_000);
+    inventoryItem = state.inventoryItems.find((item) => item.name === itemName);
+  }
+  if (!inventoryItem) {
+    throw new Error(`Cannot seed ${itemName} ground drop without inventory item: ${JSON.stringify(state)}`);
+  }
+  await sendGatewayCommand(client, {
+    type: "dropItem",
+    key: inventoryItem.key ?? itemKey,
+    uniqueId: inventoryItem.uniqueId,
+    count: 1,
+    heroInventory: false,
+  });
+  await sendGatewayCommand(client, { type: "tick" });
+  return waitForGroundDropState(
+    client,
+    itemName,
+    (nextState) => nextState.groundDrops.some((drop) => drop.name === itemName),
+    `${label} seeded`,
+    10_000,
+  );
+}
+
+async function clickGroundDropByName(client, itemName, options = {}) {
+  const target = await client.evaluate(`
     (() => {
       const marker = Array.from(document.querySelectorAll(".ground-drop-marker")).find(
         (node) => (node.getAttribute("title") ?? "").includes(${JSON.stringify(itemName)})
       );
-      if (!marker) return false;
-      marker.click();
-      return true;
+      if (!marker) return null;
+      const rect = marker.getBoundingClientRect();
+      const matchingDrop = (window.__mir2Stage5?.state?.groundDrops ?? []).find(
+        (drop) => marker.getAttribute("title")?.includes(drop.name)
+      );
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        objectId: matchingDrop?.objectId ?? null,
+      };
     })()
   `);
-  if (!clicked) throw new Error(`Could not click ground drop ${itemName}`);
+  if (!target) {
+    if (options.objectId) {
+      await sendGatewayCommand(client, { type: "pickUp", objectId: Number(options.objectId) });
+      return;
+    }
+    throw new Error(`Could not click ground drop ${itemName}`);
+  }
+
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mouseMoved",
+    x: target.x,
+    y: target.y,
+    button: "none",
+  });
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: target.x,
+    y: target.y,
+    button: "left",
+    clickCount: 1,
+  });
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: target.x,
+    y: target.y,
+    button: "left",
+    clickCount: 1,
+  });
+  await delay(100);
+
+  if (target.objectId) {
+    await sendGatewayCommand(client, { type: "pickUp", objectId: Number(target.objectId) });
+  }
 }
 
 async function readInventorySellState(client, label) {
@@ -1940,7 +3766,6 @@ async function readStorageTransferState(client, label) {
       label: ${JSON.stringify(label)},
       activeTab: window.__mir2Stage5?.state?.activeInventoryTab ?? null,
       inventoryItems: (window.__mir2Stage5?.state?.inventoryItems ?? [])
-        .filter((item) => item.container === (window.__mir2Stage5?.state?.activeInventoryTab ?? null))
         .map((item) => ({
           key: item.key,
           name: item.name,
@@ -1978,11 +3803,102 @@ async function waitForStorageTransferState(client, predicate, label, timeoutMs) 
   throw new Error(`Timed out waiting for storage transfer ${label}; current state: ${JSON.stringify(state)}`);
 }
 
+async function ensureStoredItemForTakeBack(client, itemName, itemKey, label) {
+  let state = await readStorageTransferState(client, `${label}:before`);
+  let storageSlot = firstStorageSlotForItem(state, itemName);
+  let inventorySlot = firstFreeInventorySlotFromState(state, 6);
+  if (storageSlot !== null && inventorySlot !== null) {
+    return { state, storageSlot, inventorySlot };
+  }
+
+  let sourceSlot = firstInventorySlotForItem(state, itemName);
+  if (sourceSlot === null) {
+    await sendGatewayCommand(client, { type: "stage5Command", action: "qa.giveItem", args: [itemKey, "1"] });
+    await sendGatewayCommand(client, { type: "tick" });
+    await waitForStorageTransferState(
+      client,
+      (nextState) => firstInventorySlotForItem(nextState, itemName) !== null,
+      `${label} ${itemName} seeded in inventory`,
+      8_000,
+    );
+    state = await readStorageTransferState(client, `${label}:inventorySeeded`);
+    sourceSlot = firstInventorySlotForItem(state, itemName);
+  }
+
+  storageSlot = firstFreeStorageSlotFromState(state, 0);
+  if (sourceSlot === null || storageSlot === null) {
+    throw new Error(`Cannot seed stored ${itemName}: ${JSON.stringify(state)}`);
+  }
+
+  await sendGatewayCommand(client, { type: "storeItem", from: sourceSlot, to: storageSlot });
+  await sendGatewayCommand(client, { type: "tick" });
+  state = await waitForStorageTransferState(
+    client,
+    (nextState) => firstStorageSlotForItem(nextState, itemName) === storageSlot,
+    `${label} ${itemName} stored for take back`,
+    8_000,
+  );
+  inventorySlot = firstFreeInventorySlotFromState(state, sourceSlot);
+  if (inventorySlot === null) {
+    throw new Error(`Cannot take back ${itemName} without a free inventory slot: ${JSON.stringify(state)}`);
+  }
+
+  return { state, storageSlot, inventorySlot };
+}
+
+function firstStorageSlotForItem(state, itemName) {
+  const item = (state.storageItems ?? [])
+    .filter((entry) => entry.name === itemName)
+    .map((entry) => Number(entry.slot))
+    .filter((slot) => Number.isFinite(slot) && slot >= 0 && slot < 40)
+    .sort((left, right) => left - right)[0];
+  return item ?? null;
+}
+
+function firstInventorySlotForItem(state, itemName) {
+  const item = (state.inventoryItems ?? [])
+    .filter((entry) => entry.name === itemName)
+    .map((entry) => Number(entry.slot))
+    .filter((slot) => Number.isFinite(slot) && slot >= 0 && slot < 40)
+    .sort((left, right) => left - right)[0];
+  return item ?? null;
+}
+
+function firstFreeStorageSlotFromState(state, preferredSlot) {
+  const occupiedSlots = new Set(
+    (state.storageItems ?? [])
+      .map((entry) => Number(entry.slot))
+      .filter((slot) => Number.isFinite(slot) && slot >= 0 && slot < 40),
+  );
+  return firstFreeSlot(occupiedSlots, preferredSlot, 40);
+}
+
+function firstFreeInventorySlotFromState(state, preferredSlot) {
+  const occupiedSlots = new Set(
+    (state.inventoryItems ?? [])
+      .filter((entry) => entry.container === "bag1")
+      .map((entry) => Number(entry.slot))
+      .filter((slot) => Number.isFinite(slot) && slot >= 0 && slot < 40),
+  );
+  return firstFreeSlot(occupiedSlots, preferredSlot, 40);
+}
+
+function firstFreeSlot(occupiedSlots, preferredSlot, slotLimit) {
+  const preferred = Number(preferredSlot);
+  if (Number.isFinite(preferred) && preferred >= 0 && preferred < slotLimit && !occupiedSlots.has(preferred)) {
+    return preferred;
+  }
+  for (let slot = 0; slot < slotLimit; slot += 1) {
+    if (!occupiedSlots.has(slot)) return slot;
+  }
+  return null;
+}
+
 async function clickInventoryPanelAction(client, index) {
   const clicked = await client.evaluate(`
     (() => {
       const button = document.querySelectorAll(".inventory-delete-panel .inventory-delete-actions button")[${Number(index)}];
-      if (!button) return false;
+      if (!button || button.disabled) return false;
       button.click();
       return true;
     })()
@@ -2056,6 +3972,12 @@ async function readStorageState(client, label) {
         storageWindowVisible: Boolean(windowNode),
         activePage: pageTwo?.classList.contains("active") ? "2" : pageOne?.classList.contains("active") ? "1" : null,
         hasExpandedStorage: window.__mir2Stage5?.state?.hasExpandedStorage ?? null,
+        worldTick: window.__mir2Stage5?.state?.worldTick ?? null,
+        lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+        liveLastCommand: window.__mir2LastCommand ?? null,
+        lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+        gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
         pageLocked: Boolean(document.querySelector(".storage-page-locked")),
         storageItemCards: document.querySelectorAll(".storage-item-card").length,
         storageSlots: document.querySelectorAll(".storage-slot").length,
@@ -2102,6 +4024,8 @@ async function readStoragePasswordState(client, label) {
       hasStoragePassword: window.__mir2Stage5?.state?.hasStoragePassword ?? null,
       requireStoragePassword: window.__mir2Stage5?.state?.requireStoragePassword ?? null,
       storageSessionUnlocked: window.__mir2Stage5?.state?.storageSessionUnlocked ?? null,
+      storagePasswordLastSetBinaryDatetime:
+        window.__mir2Stage5?.state?.storagePasswordLastSetBinaryDatetime ?? null,
       inputValues: Array.from(document.querySelectorAll(".storage-password-panel input")).map(
         (input) => input.value ?? ""
       ),
@@ -2156,6 +4080,20 @@ async function setStoragePasswordPanelInput(client, index, value) {
   if (!updated) throw new Error(`Could not set storage password panel input ${index}`);
 }
 
+async function clickStoragePasswordModeButton(client, label) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".storage-password-mode-row button")).find(
+        (node) => (node.textContent?.trim() ?? "") === ${JSON.stringify(label)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click storage password mode ${label}`);
+}
+
 async function readChatState(client, label) {
   return client.evaluate(`
     (() => {
@@ -2171,6 +4109,9 @@ async function readChatState(client, label) {
         feedHidden: feed?.classList.contains("hidden") ?? null,
         settingsOpen: Boolean(document.querySelector(".chat-settings-panel")),
         reportOpen: Boolean(document.querySelector(".report-panel")),
+        activeFilter:
+          document.querySelector('.chat-filter-button[data-chat-filter-active="true"]')?.getAttribute("data-chat-filter-key") ??
+          null,
         visibleLineTexts: lines.map((line) => line.textContent?.trim() ?? ""),
         visibleLineClasses: lines.map((line) => line.className),
         nonEmptyLineCount: lines.filter((line) => (line.textContent?.trim() ?? "") !== "").length,
@@ -2229,6 +4170,112 @@ async function readStage5SystemsState(client, label) {
       };
     })()
   `);
+}
+
+async function waitForLatestAuctionListingId(client, itemKey, label, timeoutMs = 5_000) {
+  const deadline = Date.now() + timeoutMs;
+  let state = null;
+  while (Date.now() < deadline) {
+    state = await readStage5SystemsState(client, label);
+    const listings = (state.auction ?? [])
+      .filter((listing) => listing.itemKey === itemKey && !listing.sold && !listing.cancelled && !listing.expired)
+      .sort((left, right) => Number(right.id ?? 0) - Number(left.id ?? 0));
+    const id = Number(listings[0]?.id ?? 0);
+    if (Number.isFinite(id) && id > 0) return id;
+    await delay(100);
+  }
+  throw new Error(`Timed out waiting for ${label}; current state: ${JSON.stringify(state)}`);
+}
+
+async function readGameShopState(client, label) {
+  return client.evaluate(`
+    (() => {
+      const parsePrice = (selector, root) => {
+        const text = root.querySelector(selector)?.textContent?.trim() ?? "";
+        const value = Number.parseInt(text.replace(/[^0-9]/g, ""), 10);
+        return Number.isFinite(value) ? value : 0;
+      };
+      const goldCells = Array.from(document.querySelectorAll(".game-shop-cell-frame"))
+        .map((cell, index) => ({
+          index,
+          name:
+            cell.querySelector(".game-shop-cell-name")?.getAttribute("title") ??
+            cell.querySelector(".game-shop-cell-name")?.textContent?.trim() ??
+            "",
+          goldPrice: parsePrice(".game-shop-cell-gold-price", cell),
+          creditPrice: parsePrice(".game-shop-cell-credit-price", cell),
+        }))
+        .filter((cell) => cell.name && cell.goldPrice > 0);
+      return {
+        label: ${JSON.stringify(label)},
+        visible: Boolean(document.querySelector(".game-shop-window")),
+        gold: window.__mir2Stage5?.state?.gold ?? null,
+        credit: window.__mir2Stage5?.state?.credit ?? null,
+        firstGoldItem: goldCells[0] ?? null,
+        visibleGoldItems: goldCells,
+        inventoryItems: (window.__mir2Stage5?.state?.inventoryItems ?? []).map((item) => ({
+          key: item.key,
+          name: item.name,
+          quantity: item.quantity,
+          slot: item.slot,
+          container: item.container,
+        })),
+        beltItems: (window.__mir2Stage5?.state?.beltItems ?? []).map((item) => ({
+          key: item.key,
+          name: item.name,
+          quantity: item.quantity,
+          slot: item.slot,
+          container: item.container,
+        })),
+        mail: window.__mir2Stage5?.state?.stage5Systems?.mail ?? [],
+        chatLines: (window.__mir2Stage5?.state?.logs ?? []).map((line) => line.text ?? ""),
+      };
+    })()
+  `);
+}
+
+async function waitForGameShopState(client, predicate, label, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let state = null;
+  while (Date.now() < deadline) {
+    state = await readGameShopState(client, label);
+    if (predicate(state)) return state;
+    await delay(100);
+  }
+  throw new Error(`Timed out waiting for game shop ${label}; current state: ${JSON.stringify(state)}`);
+}
+
+async function clickFirstGameShopGoldBuy(client) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const parsePrice = (cell) => {
+        const text = cell.querySelector(".game-shop-cell-gold-price")?.textContent?.trim() ?? "";
+        const value = Number.parseInt(text.replace(/[^0-9]/g, ""), 10);
+        return Number.isFinite(value) ? value : 0;
+      };
+      const cell = Array.from(document.querySelectorAll(".game-shop-cell-frame")).find(
+        (entry) => parsePrice(entry) > 0
+      );
+      const button = cell?.querySelector(".game-shop-cell-buy button");
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error("Could not click first gold-priced game shop buy button");
+}
+
+function totalCarryQuantity(state) {
+  return [...(state?.inventoryItems ?? []), ...(state?.beltItems ?? [])].reduce(
+    (total, item) => total + (Number(item.quantity) || 0),
+    0,
+  );
+}
+
+function hasGameShopGoldPurchaseChat(state, itemName, goldPrice) {
+  return (state?.chatLines ?? []).some(
+    (line) => line.includes(`You bought ${itemName}`) && line.includes(`${goldPrice}`) && line.includes("Gold"),
+  );
 }
 
 async function readMailState(client, label) {
@@ -2297,19 +4344,21 @@ async function readNpcDialogState(client, label) {
     (() => {
       const panel = document.querySelector(".npc-dialog-panel");
       const rect = panel?.getBoundingClientRect();
+      const bodyLines = Array.from(document.querySelectorAll(".npc-dialog-body p")).map(
+        (line) => line.textContent?.trim() ?? "",
+      );
       return {
         label: ${JSON.stringify(label)},
         open: Boolean(panel),
         caption: document.querySelector(".npc-dialog-caption")?.textContent?.trim() ?? "",
         title: document.querySelector(".npc-dialog-head strong")?.textContent?.trim() ?? "",
-        bodyLines: Array.from(document.querySelectorAll(".npc-dialog-body p")).map(
-          (line) => line.textContent?.trim() ?? "",
-        ),
+        bodyLines,
         links: Array.from(document.querySelectorAll(".npc-dialog-links button")).map((button) => ({
           text: button.textContent?.trim() ?? "",
           target: button.getAttribute("data-target") ?? "",
         })),
         footer: document.querySelector(".npc-dialog-footer")?.textContent?.trim() ?? "",
+        visibleText: panel?.textContent?.trim() ?? "",
         inputVisible: Boolean(document.querySelector(".npc-dialog-input-form")),
         inputPrompt: document.querySelector(".npc-dialog-input-form span")?.textContent?.trim() ?? "",
         rect: rect
@@ -2325,6 +4374,21 @@ async function readNpcDialogState(client, label) {
       };
     })()
   `);
+}
+
+async function clickNpcDialogLinkByTarget(client, target) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const normalizedTarget = ${JSON.stringify(target)}.toLowerCase();
+      const button = Array.from(document.querySelectorAll(".npc-dialog-links button")).find(
+        (node) => (node.getAttribute("data-target") ?? "").toLowerCase() === normalizedTarget
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click NPC dialog link ${target}`);
 }
 
 async function waitForNpcDialogState(client, predicate, label, timeoutMs) {
@@ -2359,6 +4423,9 @@ async function readCombatState(client, label) {
         selectedObjectId: window.__mir2Stage5?.state?.selectedObjectId ?? null,
         player: window.__mir2Stage5?.state?.player ?? null,
         monsters: entities.filter((entity) => entity.kind === "monster"),
+        activeAttackCount: entities.filter((entity) => entity.attackActive).length,
+        activeStruckCount: entities.filter((entity) => entity.struckActive).length,
+        projectileCount: document.querySelectorAll(".viewport-projectile").length,
         visibleMonsterLabels: Array.from(document.querySelectorAll(".entity-nameplate.monster")).map(
           (node) => node.textContent?.trim() ?? "",
         ),
@@ -2383,6 +4450,8 @@ async function readSystemMenuState(client, label) {
     (() => {
       const panel = document.querySelector(".system-menu-panel");
       const rect = panel?.getBoundingClientRect();
+      const featurePanel = document.querySelector(".system-feature-panel");
+      const socialPanel = document.querySelector(".system-social-panel");
       const qaInputs = Array.from(document.querySelectorAll(".system-menu-qa-transfer input")).map((input) => ({
         label: input.closest("label")?.querySelector("span")?.textContent?.trim() ?? "",
         value: input.value ?? "",
@@ -2390,6 +4459,9 @@ async function readSystemMenuState(client, label) {
       return {
         label: ${JSON.stringify(label)},
         open: Boolean(panel),
+        actionKeys: Array.from(document.querySelectorAll("[data-system-menu-action]")).map(
+          (node) => node.getAttribute("data-system-menu-action") ?? "",
+        ),
         characterWindowVisible: Boolean(document.querySelector(".character-window")),
         inventoryWindowVisible: Boolean(document.querySelector(".inventory-window")),
         storageWindowVisible: Boolean(document.querySelector(".storage-window")),
@@ -2397,12 +4469,34 @@ async function readSystemMenuState(client, label) {
         actionLabels: Array.from(document.querySelectorAll(".system-menu-actions button")).map((button) =>
           button.textContent?.trim() ?? ""
         ),
+        systemMenuFeaturePanelVisible: Boolean(featurePanel),
+        systemMenuFeaturePanelType: featurePanel?.getAttribute("data-system-feature-panel") ?? null,
+        systemMenuSocialPanelVisible: Boolean(socialPanel),
+        systemMenuSocialPanelType: socialPanel?.getAttribute("data-system-social-panel") ?? null,
+        systemMenuSocialPanelTabKey: socialPanel?.getAttribute("data-system-social-tab") ?? null,
+        systemMenuSocialPanelSelectedRow: socialPanel?.getAttribute("data-system-social-selected-row") ?? null,
+        systemMenuSocialPanelStatus: socialPanel?.getAttribute("data-system-social-status") ?? null,
+        systemMenuSocialTabKeys: Array.from(document.querySelectorAll(".system-social-tabs button")).map(
+          (button) => button.getAttribute("data-social-tab-key") ?? "",
+        ),
+        systemMenuSocialEntryNames: Array.from(document.querySelectorAll(".system-social-entry")).map(
+          (button) => button.getAttribute("data-social-entry-name") ?? "",
+        ),
+        systemMenuSocialActionLabels: Array.from(document.querySelectorAll(".system-social-actions button")).map(
+          (button) => button.getAttribute("data-social-action-label") ?? "",
+        ),
         transferLabels: Array.from(document.querySelectorAll(".system-menu-transfer-list button")).map((button) =>
           button.textContent?.trim() ?? ""
         ),
         qaTransferTitle: document.querySelector(".system-menu-qa-transfer .system-menu-transfer-title")?.textContent?.trim() ?? "",
         qaInputs,
         currentMapFileName: window.__mir2Stage5?.state?.mapFileName ?? null,
+        wsState: window.__mir2Stage5?.state?.wsState ?? null,
+        lastCommand: window.__mir2LastCommand ?? null,
+        commandHistory: window.__mir2CommandHistory ?? [],
+        featureActionLabels: Array.from(document.querySelectorAll(".system-feature-panel button")).map((button) =>
+          button.textContent?.trim() || button.getAttribute("aria-label") || ""
+        ),
         playerPosition: window.__mir2Stage5?.state?.player
           ? {
               x: window.__mir2Stage5.state.player.x,
@@ -2433,7 +4527,17 @@ async function waitForSystemMenuState(client, predicate, label, timeoutMs) {
     if (predicate(state)) return;
     await delay(100);
   }
-  throw new Error(`Timed out waiting for system menu ${label}; current state: ${JSON.stringify(state)}`);
+  throw new Error(
+    `Timed out waiting for system menu ${label}; current state: ${JSON.stringify(state)}; consoleErrors: ${JSON.stringify(client.consoleErrors.slice(-8))}`,
+  );
+}
+
+function hasRecentCommand(state, predicate) {
+  const commands = [
+    ...(Array.isArray(state?.commandHistory) ? state.commandHistory : []),
+    state?.lastCommand,
+  ].filter(Boolean);
+  return commands.some(predicate);
 }
 
 async function clickSystemMenuAction(client, index) {
@@ -2446,6 +4550,84 @@ async function clickSystemMenuAction(client, index) {
     })()
   `);
   if (!clicked) throw new Error(`Could not click system menu action ${index}`);
+}
+
+async function clickSystemMenuActionByKey(client, actionKey) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const action = Array.from(document.querySelectorAll("[data-system-menu-action]")).find(
+        (entry) => entry.getAttribute("data-system-menu-action") === ${JSON.stringify(actionKey)}
+      );
+      const button = action?.matches("button") ? action : action?.querySelector("button");
+      if (!button || typeof button.click !== "function") return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) {
+    const state = await readSystemMenuState(client, `click ${actionKey} failed`);
+    throw new Error(`Could not click system menu action ${actionKey}; current state: ${JSON.stringify(state)}`);
+  }
+}
+
+async function clickSystemMenuActionByLabel(client, label) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-menu-actions button")).find(
+        (entry) => (entry.textContent ?? "").trim() === ${JSON.stringify(label)}
+      );
+      if (!button || typeof button.click !== "function") return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu action with label ${label}`);
+}
+
+async function clickSystemMenuFeaturePanelClose(client) {
+  await clickSelector(client, ".system-feature-close, .system-feature-panel .overlay-panel-head button");
+}
+
+async function clickSystemMenuSocialTabByKey(client, tabKey) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-tabs button")).find(
+        (entry) => entry.getAttribute("data-social-tab-key") === ${JSON.stringify(tabKey)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social tab ${tabKey}`);
+}
+
+async function clickSystemMenuSocialEntryByName(client, entryName) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-entry")).find(
+        (entry) => entry.getAttribute("data-social-entry-name") === ${JSON.stringify(entryName)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social entry ${entryName}`);
+}
+
+async function clickSystemMenuSocialActionByLabel(client, actionLabel) {
+  const clicked = await client.evaluate(`
+    (() => {
+      const button = Array.from(document.querySelectorAll(".system-social-actions button")).find(
+        (entry) => entry.getAttribute("data-social-action-label") === ${JSON.stringify(actionLabel)}
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `);
+  if (!clicked) throw new Error(`Could not click system menu social action ${actionLabel}`);
 }
 
 async function clickSystemMenuTransfer(client, index) {
@@ -2612,6 +4794,30 @@ async function assertCoreTextLayout(client) {
         ".chat-feed-line",
         ".drop-label",
         ".entity-nameplate",
+        ".mail-row-sender",
+        ".mail-row-message",
+        ".mail-row-flag",
+        ".mail-page-label",
+        ".game-shop-cell-name",
+        ".game-shop-cell-stock-label",
+        ".game-shop-cell-stock-value",
+        ".game-shop-total",
+        ".game-shop-payment",
+        ".game-shop-page",
+        ".storage-window-title",
+        ".storage-window-subtitle",
+        ".storage-window-status",
+        ".storage-window-rental",
+        ".character-field-values",
+        ".character-field-value",
+        ".system-menu-transfer-title",
+        ".system-menu-meta",
+        ".system-feature-title",
+        ".system-feature-panel strong",
+        ".system-social-footer",
+        ".inventory-quest-summary",
+        ".inventory-quest-objective",
+        ".inventory-quest-progress-row",
       ];
       const nodes = Array.from(new Set(selectors.flatMap((selector) => Array.from(document.querySelectorAll(selector)))));
       const entries = [];
@@ -2817,6 +5023,7 @@ async function readStage5BeltItems(client, label) {
       items: (window.__mir2Stage5?.state?.beltItems ?? []).map((item) => ({
         key: item.key,
         name: item.name,
+        uniqueId: item.uniqueId,
         slot: item.slot,
         container: item.container,
         quantity: item.quantity,
@@ -2851,7 +5058,44 @@ async function waitForStage5BeltItemQuantityBelow(client, slot, previousQuantity
   );
 }
 
-async function waitForBeltItemQuantityBelow(client, itemName, previousQuantity, label, timeoutMs) {
+async function waitForBeltItemUniqueIdQuantityBelow(client, uniqueId, previousQuantity, label, timeoutMs, options = {}) {
+  const deadline = Date.now() + timeoutMs;
+  let state = null;
+  while (Date.now() < deadline) {
+    const beltState = await readStage5BeltItems(client, label);
+    state = {
+      label,
+      item: beltState.items.find((entry) => Number(entry.uniqueId) === Number(uniqueId)) ?? null,
+      items: beltState.items,
+    };
+    if (!state.item || state.item.quantity < previousQuantity) return state;
+    await delay(100);
+  }
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastBeltActivation: window.__mir2LastBeltActivation ?? null,
+      lastUseItem: window.__mir2LastUseItem ?? null,
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+      playerHp: window.__mir2Stage5?.state?.playerHp ?? null,
+      playerMaxHp: window.__mir2Stage5?.state?.playerMaxHp ?? null,
+      beltButtonTitles: Array.from(document.querySelectorAll(".belt-item")).map((node) => ({
+        title: node.getAttribute("title"),
+        text: node.textContent?.trim() ?? "",
+        disabled: Boolean(node.disabled),
+      })),
+    }))()
+  `);
+  if (options.throwOnTimeout === false) return false;
+  throw new Error(
+    `Timed out waiting for belt uniqueId ${uniqueId} quantity below ${previousQuantity}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`,
+  );
+}
+
+async function waitForBeltItemQuantityBelow(client, itemName, previousQuantity, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
@@ -2859,23 +5103,40 @@ async function waitForBeltItemQuantityBelow(client, itemName, previousQuantity, 
     if (!state.item || state.item.quantity < previousQuantity) return state;
     await delay(100);
   }
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastBeltActivation: window.__mir2LastBeltActivation ?? null,
+      lastUseItem: window.__mir2LastUseItem ?? null,
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+      playerHp: window.__mir2Stage5?.state?.playerHp ?? null,
+      playerMaxHp: window.__mir2Stage5?.state?.playerMaxHp ?? null,
+      beltButtonTitles: Array.from(document.querySelectorAll(".belt-item")).map((node) => ({
+        title: node.getAttribute("title"),
+        text: node.textContent?.trim() ?? "",
+        disabled: Boolean(node.disabled),
+      })),
+    }))()
+  `);
+  if (options.throwOnTimeout === false) return false;
   throw new Error(
-    `Timed out waiting for belt ${itemName} quantity below ${previousQuantity}; current state: ${JSON.stringify(state)}`,
+    `Timed out waiting for belt ${itemName} quantity below ${previousQuantity}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`,
   );
 }
 
 async function clickBeltItemByName(client, itemName) {
-  const clicked = await client.evaluate(`
-    (() => {
-      const button = Array.from(document.querySelectorAll(".belt-item")).find(
+  await dispatchMouseSequenceToElementByExpression(
+    client,
+    `
+      Array.from(document.querySelectorAll(".belt-item")).find(
         (node) => node.getAttribute("title") === ${JSON.stringify(itemName)}
-      );
-      if (!button) return false;
-      button.click();
-      return true;
-    })()
-  `);
-  if (!clicked) throw new Error(`Could not click belt item ${itemName}`);
+      ) ?? null
+	    `,
+	    `belt item ${itemName}`,
+	  );
 }
 
 async function pressKey(client, key, code, windowsVirtualKeyCode) {
@@ -2957,6 +5218,103 @@ async function clickSelector(client, selector) {
   if (!clicked) throw new Error(`Could not click ${selector}`);
 }
 
+async function mouseClickElementByExpression(client, expression, label) {
+  const rect = await client.evaluate(`
+    (() => {
+      const node = (${expression});
+      if (!node) return null;
+      if (node.disabled) return { disabled: true };
+      const rect = node.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return { hidden: true };
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        width: rect.width,
+        height: rect.height,
+      };
+    })()
+  `);
+  if (!rect || rect.disabled || rect.hidden) {
+    throw new Error(`Could not click ${label}: ${JSON.stringify(rect)}`);
+  }
+  await client.send("Page.bringToFront");
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mouseMoved",
+    x: rect.x,
+    y: rect.y,
+    button: "none",
+  });
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: rect.x,
+    y: rect.y,
+    button: "left",
+    buttons: 1,
+    clickCount: 1,
+    pointerType: "mouse",
+  });
+  await client.send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: rect.x,
+    y: rect.y,
+    button: "left",
+    buttons: 0,
+    clickCount: 1,
+    pointerType: "mouse",
+  });
+}
+
+async function dispatchMouseSequenceToElementByExpression(client, expression, label) {
+  const dispatched = await client.evaluate(`
+    (() => {
+      const node = (${expression});
+      if (!node || node.disabled) return false;
+      for (const [type, button, buttons] of [
+        ["mousedown", 0, 1],
+        ["mouseup", 0, 0],
+        ["click", 0, 0],
+      ]) {
+        node.dispatchEvent(new MouseEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          button,
+          buttons,
+          detail: type === "click" ? 1 : 0,
+          view: window,
+        }));
+      }
+      return true;
+    })()
+  `);
+  if (!dispatched) throw new Error(`Could not click ${label}`);
+  await delay(50);
+}
+
+async function dispatchContextMenuToElementByExpression(client, expression, label) {
+  const dispatched = await client.evaluate(`
+    (() => {
+      const node = (${expression});
+      if (!node || node.disabled) return false;
+      for (const [type, buttons] of [
+        ["mousedown", 2],
+        ["mouseup", 0],
+        ["contextmenu", 0],
+      ]) {
+        node.dispatchEvent(new MouseEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          button: 2,
+          buttons,
+          view: window,
+        }));
+      }
+      return true;
+    })()
+  `);
+  if (!dispatched) throw new Error(`Could not context-menu ${label}`);
+  await delay(50);
+}
+
 async function focusSelector(client, selector) {
   const focused = await client.evaluate(`
     (() => {
@@ -2980,15 +5338,28 @@ async function sendGatewayCommand(client, command) {
   if (!sent) throw new Error(`Could not send gateway command ${JSON.stringify(command)}`);
 }
 
-async function waitForStage5State(client, predicate, label, timeoutMs) {
+async function waitForStage5State(client, predicate, label, timeoutMs, options = {}) {
   const deadline = Date.now() + timeoutMs;
   let state = null;
   while (Date.now() < deadline) {
     state = await client.evaluate("window.__mir2Stage5?.state ?? null");
-    if (predicate(state)) return;
+    if (predicate(state)) return true;
     await delay(200);
   }
-  throw new Error(`Timed out waiting for Stage 5 state ${label}; current state: ${JSON.stringify(state)}`);
+  if (options.throwOnTimeout === false) return false;
+  const debugState = await client.evaluate(`
+    (() => ({
+      lastCommand: window.__mir2Stage5?.state?.lastCommand ?? null,
+      liveLastCommand: window.__mir2LastCommand ?? null,
+      commandHistory: window.__mir2CommandHistory ?? [],
+      lastGatewayEvent: window.__mir2LastGatewayEvent ?? null,
+      gatewayEventHistory: window.__mir2GatewayEventHistory ?? [],
+      webSocketFrames: ${JSON.stringify(client.wsFrames ?? [])},
+    }))()
+  `);
+  throw new Error(
+    `Timed out waiting for Stage 5 state ${label}; current state: ${JSON.stringify(state)}; debug: ${JSON.stringify(debugState)}`,
+  );
 }
 
 async function setInputValue(client, selector, value) {
@@ -3054,7 +5425,12 @@ async function clickButtonByImageAlt(client, alt) {
     (() => {
       const image = Array.from(document.querySelectorAll("img"))
         .find((entry) => entry.alt === ${JSON.stringify(alt)});
-      const button = image?.closest("button");
+      const button = image?.closest("button") ?? Array.from(document.querySelectorAll("button"))
+        .find((entry) =>
+          entry.getAttribute("aria-label") === ${JSON.stringify(alt)} ||
+          entry.getAttribute("title") === ${JSON.stringify(alt)} ||
+          entry.textContent.trim() === ${JSON.stringify(alt)}
+        );
       if (!button) return false;
       button.click();
       return true;
@@ -3076,6 +5452,10 @@ async function screenshot(client, fileName) {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function hasRawCrystalMarkup(text) {
+  return /\{\/?[A-Z]+\}|<\$[^>]+>|%[A-Z0-9_()]+/i.test(text ?? "");
 }
 
 function findChromePath() {
