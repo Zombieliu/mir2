@@ -20,6 +20,7 @@ const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_A
 const characterName = args.characterName ?? defaultCharacterName();
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9500 + (process.pid % 1000));
+const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
 const sampleMs = numberArg(args.sampleMs, 50);
 const interaction = args.interaction ?? "click";
 const holdButton = args.button ?? args.holdButton ?? "right";
@@ -436,20 +437,31 @@ async function installSendProbe(client) {
 }
 
 async function login(client) {
-  await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'login'", "login screen", 15_000);
-  await fillInput(client, ".login-input.account", account);
-  await fillInput(client, ".login-input.password", password);
+  await waitUntil(
+    client,
+    "['login', 'select', 'game'].includes(window.__mir2Stage5?.state?.screen)",
+    "client stage ready",
+    20_000,
+  );
 
-  if (createAccount) {
-    await click(client, ".login-button.account button");
-    await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "account creation socket", 15_000);
-    await delay(800);
+  let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
+
+  if (screen === "login") {
+    await fillInput(client, ".login-input.account", account);
+    await fillInput(client, ".login-input.password", password);
+
+    if (createAccount) {
+      await click(client, ".login-button.account button");
+      await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "account creation socket", 15_000);
+      await delay(800);
+    }
+
+    await click(client, ".login-button.ok button");
+    await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 15_000);
+    screen = "select";
   }
 
-  await click(client, ".login-button.ok button");
-  await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 15_000);
-
-  if (createAccount) {
+  if (screen === "select" && createAccount) {
     const created = await client.evaluate(`
       window.__mir2Stage5?.send?.(${JSON.stringify({
         type: "newCharacter",
@@ -479,7 +491,7 @@ async function login(client) {
       })()
     `);
     if (!started) throw new Error(`Failed to start movement QA character ${characterName}`);
-  } else {
+  } else if (screen === "select") {
     await click(client, ".select-action.start button");
   }
 
@@ -784,8 +796,10 @@ async function launchChrome() {
     [
       `--remote-debugging-port=${debugPort}`,
       `--user-data-dir=${userDataDir}`,
-      "--headless=new",
+      ...(headed ? [] : ["--headless=new"]),
       "--disable-gpu",
+      "--no-proxy-server",
+      "--proxy-bypass-list=*",
       "--no-first-run",
       "--no-default-browser-check",
       `--window-size=${DEFAULT_VIEWPORT.width},${DEFAULT_VIEWPORT.height}`,
@@ -863,7 +877,19 @@ async function waitUntil(client, expression, label, timeoutMs) {
     if (lastValue) return;
     await delay(100);
   }
-  throw new Error(`Timed out waiting for ${label}; last=${JSON.stringify(lastValue)}`);
+  const debug = await client
+    .evaluate(`
+      (() => ({
+        url: location.href,
+        readyState: document.readyState,
+        title: document.title,
+        stageScreen: window.__mir2Stage5?.state?.screen ?? null,
+        stageKeys: window.__mir2Stage5?.state ? Object.keys(window.__mir2Stage5.state).slice(0, 20) : [],
+        bodyText: document.body?.innerText?.slice(0, 500) ?? "",
+      }))()
+    `)
+    .catch((error) => ({ debugError: String(error) }));
+  throw new Error(`Timed out waiting for ${label}; last=${JSON.stringify(lastValue)}; debug=${JSON.stringify(debug)}`);
 }
 
 async function stopChrome(chrome) {
@@ -874,6 +900,10 @@ async function stopChrome(chrome) {
 
 function findChromePath() {
   const candidates = [
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
     "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
