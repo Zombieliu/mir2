@@ -296,9 +296,12 @@ img {
 .entity-quest-icon {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  width: 28px;
+  height: 29px;
+  transform: none;
   image-rendering: pixelated;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: var(--mir-cursor-npc);
 }
 
 .hidden {

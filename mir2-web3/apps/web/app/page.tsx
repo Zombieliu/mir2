@@ -98,6 +98,7 @@ type GatewayWorldEntity = {
   objectId: number;
   kind: EntityKind;
   name: string;
+  ownerName?: string | null;
   x: number;
   y: number;
   direction: string;
@@ -283,6 +284,7 @@ type WorldEntity = {
   objectId: string;
   kind: EntityKind;
   name: string;
+  ownerName?: string;
   x: number;
   y: number;
   direction?: string;
@@ -557,8 +559,9 @@ const SCENE_CHUNK_HEIGHT = Math.max(VIEWPORT_RANGE_Y, 1);
 const WALK_STEP_INTERVAL_MS = 600;
 const RUN_STEP_INTERVAL_MS = 600;
 const CRYSTAL_ENTITY_MOVE_ACTION_MS = 600;
-const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 1800;
-const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 10;
+const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
+const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 3600;
+const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
 const DEFAULT_GATEWAY_WS_URL =
   process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws";
 const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
@@ -603,8 +606,15 @@ type DirectionStepRequest = {
 type DirectionStepPending = {
   x: number;
   y: number;
+  direction?: string;
   mode: "walk" | "run";
   sentAt: number;
+};
+
+type PredictedPlayerMotion = {
+  x: number;
+  y: number;
+  direction?: string;
 };
 
 export default function HomePage() {
@@ -615,13 +625,15 @@ export default function HomePage() {
   const pendingNewAccountRef = useRef(false);
   const pendingTransferRef = useRef<string | null>(null);
   const pendingNpcInteractRef = useRef<string | null>(null);
+  const npcCallGuardRef = useRef<{ objectId: string; until: number } | null>(null);
   const gameEntryChatSeededRef = useRef(false);
   const movementPlanRef = useRef<MovementPlan | null>(null);
   const directionStepNextAtRef = useRef(0);
   const directionStepVisualUntilRef = useRef(0);
   const queuedDirectionStepRef = useRef<DirectionStepRequest | null>(null);
   const directionStepPendingRef = useRef<DirectionStepPending | null>(null);
-  const predictedPlayerPositionRef = useRef<{ x: number; y: number } | null>(null);
+  const directionStepPendingQueueRef = useRef<DirectionStepPending[]>([]);
+  const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
   const lastCommandRef = useRef<Record<string, unknown> | null>(null);
@@ -646,7 +658,7 @@ export default function HomePage() {
   const [activeInventoryTab, setActiveInventoryTab] = useState<"bag1" | "bag2" | "quest">("bag1");
   const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
-  const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<{ x: number; y: number } | null>(null);
+  const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
   const t = buildTranslator(language);
   const locale = languageLocale(language);
 
@@ -668,20 +680,30 @@ export default function HomePage() {
     () =>
       self &&
       predictedPlayerPosition &&
-      (self.x !== predictedPlayerPosition.x || self.y !== predictedPlayerPosition.y) &&
       Math.max(Math.abs(self.x - predictedPlayerPosition.x), Math.abs(self.y - predictedPlayerPosition.y)) <=
         MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES
-        ? { ...self, x: predictedPlayerPosition.x, y: predictedPlayerPosition.y }
+        ? {
+            ...self,
+            x: predictedPlayerPosition.x,
+            y: predictedPlayerPosition.y,
+            direction: predictedPlayerPosition.direction ?? self.direction,
+          }
         : self,
     [self, predictedPlayerPosition],
   );
   const displayEntities = useMemo(() => {
-    if (!predictedSelf || !self || (predictedSelf.x === self.x && predictedSelf.y === self.y)) {
+    if (
+      !predictedSelf ||
+      !self ||
+      (predictedSelf.x === self.x && predictedSelf.y === self.y && predictedSelf.direction === self.direction)
+    ) {
       return world.entities;
     }
 
     return world.entities.map((entity) =>
-      entity.objectId === world.playerObjectId ? { ...entity, x: predictedSelf.x, y: predictedSelf.y } : entity,
+      entity.objectId === world.playerObjectId
+        ? { ...entity, x: predictedSelf.x, y: predictedSelf.y, direction: predictedSelf.direction }
+        : entity,
     );
   }, [predictedSelf, self, world.entities, world.playerObjectId]);
   const selectedEntity =
@@ -864,8 +886,13 @@ export default function HomePage() {
     const visualUntil = movementPlanRef.current?.visualUntil ?? 0;
     const directionVisualUntil = directionStepVisualUntilRef.current;
     const directionPending = directionStepPendingRef.current;
-    if (directionPending && self.x === directionPending.x && self.y === directionPending.y) {
-      directionStepPendingRef.current = null;
+    if (
+      directionPending &&
+      self.x === directionPending.x &&
+      self.y === directionPending.y &&
+      (!directionPending.direction || self.direction === directionPending.direction)
+    ) {
+      clearDirectionStepPendingQueue();
       setPredictedPlayerPosition(null);
       return;
     }
@@ -910,7 +937,7 @@ export default function HomePage() {
     if (screen !== "game" || wsState !== "open") {
       movementPlanRef.current = null;
       queuedDirectionStepRef.current = null;
-      directionStepPendingRef.current = null;
+      clearDirectionStepPendingQueue();
       setPredictedPlayerPosition(null);
       return;
     }
@@ -925,17 +952,30 @@ export default function HomePage() {
         animationFrame = window.requestAnimationFrame(tickMovementPlan);
         return;
       }
-      if (plan.packetMode === "direction") {
-        animationFrame = window.requestAnimationFrame(tickMovementPlan);
-        return;
-      }
       if (plan.pendingX !== undefined && plan.pendingY !== undefined) {
-        if (Date.now() - (plan.pendingSentAt ?? plan.nextStepAt) >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+        const leadX = Math.abs((plan.actionX ?? plan.pendingX) - player.x);
+        const leadY = Math.abs((plan.actionY ?? plan.pendingY) - player.y);
+        if (Math.max(leadX, leadY) >= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+          if (Date.now() - (plan.pendingSentAt ?? plan.nextStepAt) >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+            movementPlanRef.current = null;
+            setPredictedPlayerPosition(null);
+          }
+          animationFrame = window.requestAnimationFrame(tickMovementPlan);
+          return;
+        }
+        if (Date.now() < plan.nextStepAt) {
+          animationFrame = window.requestAnimationFrame(tickMovementPlan);
+          return;
+        }
+        if (
+          Date.now() - (plan.pendingSentAt ?? plan.nextStepAt) >= MOVEMENT_SERVER_CORRECTION_GRACE_MS &&
+          Math.max(leadX, leadY) > 0
+        ) {
           movementPlanRef.current = null;
           setPredictedPlayerPosition(null);
+          animationFrame = window.requestAnimationFrame(tickMovementPlan);
+          return;
         }
-        animationFrame = window.requestAnimationFrame(tickMovementPlan);
-        return;
       }
 
       const server = { x: player.x, y: player.y };
@@ -949,34 +989,40 @@ export default function HomePage() {
 
       if (Date.now() >= plan.nextStepAt) {
         if (source.x === plan.targetX && source.y === plan.targetY) {
-          movementPlanRef.current = null;
-          setPredictedPlayerPosition(null);
-        } else {
-          const nextPoint = stepPointTowardBy(
-            source,
-            { x: plan.targetX, y: plan.targetY },
-            plan.mode === "run" ? 2 : 1,
-          );
-
-          if (nextPoint.x === source.x && nextPoint.y === source.y) {
+          if (server.x === plan.targetX && server.y === plan.targetY) {
             movementPlanRef.current = null;
             setPredictedPlayerPosition(null);
-          } else {
-            movementPlanRef.current = {
-              ...plan,
-              actionX: nextPoint.x,
-              actionY: nextPoint.y,
-              pendingX: nextPoint.x,
-              pendingY: nextPoint.y,
-              pendingSentAt: Date.now(),
-              nextStepAt: Date.now() + (plan.mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS),
-              visualUntil: Date.now() + (plan.mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS),
-            };
-            setPredictedPlayerPosition(nextPoint);
-            send({ type: "moveTo", x: nextPoint.x, y: nextPoint.y, mode: plan.mode });
+          }
+        } else {
+            const nextAction = crystalMovementActionToward(source, { x: plan.targetX, y: plan.targetY }, plan.mode);
+            const nextPoint = nextAction.point;
+
+            if (nextPoint.x === source.x && nextPoint.y === source.y) {
+              movementPlanRef.current = null;
+              setPredictedPlayerPosition(null);
+            } else {
+              const movementNow = Date.now();
+              const stepInterval = movementStepIntervalMs(nextAction.mode);
+              movementPlanRef.current = {
+                ...plan,
+                mode: nextAction.mode,
+                actionX: nextPoint.x,
+                actionY: nextPoint.y,
+                pendingX: nextPoint.x,
+                pendingY: nextPoint.y,
+                pendingSentAt: movementNow,
+                nextStepAt: movementNow + movementCommandDelayMs(nextAction.mode),
+                visualUntil: movementNow + stepInterval,
+              };
+              setPredictedPlayerPosition({ ...nextPoint, direction: nextAction.direction });
+              if (plan.packetMode === "target") {
+                send({ type: "moveTo", x: nextPoint.x, y: nextPoint.y, mode: nextAction.mode });
+              } else {
+                send({ type: nextAction.mode === "run" ? "run" : "walk", direction: nextAction.direction });
+              }
+            }
           }
         }
-      }
 
       animationFrame = window.requestAnimationFrame(tickMovementPlan);
     };
@@ -1074,8 +1120,9 @@ export default function HomePage() {
           characters: SelectCharacterEntry[];
           mapFileName: string | null;
           mapTitle: string | null;
+          playerObjectId: string | null;
           player: { x: number; y: number } | null;
-          predictedPlayer: { x: number; y: number } | null;
+          predictedPlayer: PredictedPlayerMotion | null;
           movementPlan: MovementPlan | null;
           directionStepPending: DirectionStepPending | null;
           playerHp: number | undefined;
@@ -1129,6 +1176,7 @@ export default function HomePage() {
         characters,
         mapFileName: world.mapFileName,
         mapTitle: world.mapTitle,
+        playerObjectId: world.playerObjectId,
         player: self ? { x: self.x, y: self.y } : null,
         predictedPlayer: predictedPlayerPosition,
         movementPlan: movementPlanRef.current,
@@ -1293,8 +1341,10 @@ export default function HomePage() {
     pendingNewAccountRef.current = false;
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
+    npcCallGuardRef.current = null;
     movementPlanRef.current = null;
     queuedDirectionStepRef.current = null;
+    clearDirectionStepPendingQueue();
     gameEntryChatSeededRef.current = false;
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       send({ type: "disconnect" });
@@ -1327,7 +1377,7 @@ export default function HomePage() {
       }));
   }
 
-  function moveToTile(x: number, y: number, mode: "walk" | "run", packetMode: "target" | "direction" = "target") {
+  function moveToTile(x: number, y: number, mode: "walk" | "run", packetMode: "target" | "direction" = "direction") {
     queuedDirectionStepRef.current = null;
     const currentPlan = movementPlanRef.current;
     movementPlanRef.current = currentPlan
@@ -1628,12 +1678,13 @@ export default function HomePage() {
     }
 
     if (entity.kind === "npc") {
-      if (tileDistance(self, entity) > 1) {
-        const destination = approachDestination(self, entity);
-        pendingNpcInteractRef.current = objectId;
-        moveToTile(destination.x, destination.y, "run");
+      const now = Date.now();
+      const existingGuard = npcCallGuardRef.current;
+      const sameDialogVisible = world.activeNpcDialog?.npcObjectId === objectId;
+      if (existingGuard?.objectId === objectId && (sameDialogVisible || now <= existingGuard.until)) {
         return;
       }
+      npcCallGuardRef.current = { objectId, until: now + 5000 };
       interactTarget(objectId);
       return;
     }
@@ -1659,6 +1710,14 @@ export default function HomePage() {
     );
     if (occupant) {
       activateEntity(occupant.objectId);
+      return;
+    }
+    const nearbyNpc = world.entities
+      .filter((entity) => entity.objectId !== world.playerObjectId && !entity.dead && entity.kind === "npc")
+      .sort((left, right) => pointTileDistance({ x, y }, left) - pointTileDistance({ x, y }, right))
+      .find((entity) => pointTileDistance({ x, y }, entity) <= 2 && tileDistance(self, entity) <= 3);
+    if (nearbyNpc) {
+      activateEntity(nearbyNpc.objectId);
       return;
     }
     const drop = world.groundDrops.find((entry) => entry.x === x && entry.y === y);
@@ -1691,7 +1750,7 @@ export default function HomePage() {
         ? { x: currentPlan.actionX, y: currentPlan.actionY }
         : serverSelf;
 
-    const nextPoint = stepPointTowardBy(currentSelf, { x, y }, mode === "run" ? 2 : 1);
+    const nextPoint = crystalMovementActionToward(currentSelf, { x, y }, mode).point;
     const occupant = currentWorld.entities.find(
       (entity) =>
         entity.objectId !== currentWorld.playerObjectId && !entity.dead && entity.x === nextPoint.x && entity.y === nextPoint.y,
@@ -1730,44 +1789,50 @@ export default function HomePage() {
       return false;
     }
 
-    const pending = directionStepPendingRef.current;
-    if (pending) {
-      if (serverSelf.x === pending.x && serverSelf.y === pending.y) {
-        directionStepPendingRef.current = null;
-        if (
-          predictedPlayerPositionRef.current?.x === pending.x &&
-          predictedPlayerPositionRef.current?.y === pending.y
-        ) {
-          setPredictedPlayerPosition(null);
-        }
-      } else if (now - pending.sentAt < MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
-        return false;
-      } else {
-        directionStepPendingRef.current = null;
-        setPredictedPlayerPosition(null);
-      }
+    reconcileDirectionStepQueueWithServer(serverSelf.x, serverSelf.y, now);
+    const pendingQueue = directionStepPendingQueueRef.current;
+    const actionSelf = pendingQueue[pendingQueue.length - 1] ?? predictedPlayerPositionRef.current ?? serverSelf;
+    const lead = Math.max(Math.abs(actionSelf.x - serverSelf.x), Math.abs(actionSelf.y - serverSelf.y));
+    if (lead >= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+      return false;
     }
 
     queuedDirectionStepRef.current = null;
-    const actionSelf = serverSelf;
-    const direction = directionFromPoint(actionSelf, { x: queued.x, y: queued.y }, actionSelf.direction ?? "Down");
-    const nextPoint = stepPointTowardBy(actionSelf, { x: queued.x, y: queued.y }, queued.mode === "run" ? 2 : 1);
-    directionStepNextAtRef.current = now + (queued.mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS);
-    directionStepVisualUntilRef.current = directionStepNextAtRef.current;
+    const nextAction = crystalMovementActionToward(actionSelf, { x: queued.x, y: queued.y }, queued.mode);
+    const direction = nextAction.direction;
+    const nextPoint = nextAction.point;
+    directionStepNextAtRef.current = now + movementCommandDelayMs(nextAction.mode);
+    directionStepVisualUntilRef.current = now + movementStepIntervalMs(nextAction.mode);
     movementPlanRef.current = null;
     if (nextPoint.x !== actionSelf.x || nextPoint.y !== actionSelf.y) {
-      directionStepPendingRef.current = {
-        x: nextPoint.x,
-        y: nextPoint.y,
-        mode: queued.mode,
-        sentAt: now,
-      };
-      setPredictedPlayerPosition(nextPoint);
-    } else {
-      directionStepPendingRef.current = null;
+      setDirectionStepPendingQueue([
+        ...directionStepPendingQueueRef.current,
+        {
+          x: nextPoint.x,
+          y: nextPoint.y,
+          direction,
+          mode: nextAction.mode,
+          sentAt: now,
+        },
+      ]);
+      setPredictedPlayerPosition({ ...nextPoint, direction });
+    } else if (direction !== actionSelf.direction) {
+      setDirectionStepPendingQueue([
+        ...directionStepPendingQueueRef.current,
+        {
+          x: actionSelf.x,
+          y: actionSelf.y,
+          direction,
+          mode: nextAction.mode,
+          sentAt: now,
+        },
+      ]);
+      setPredictedPlayerPosition({ x: actionSelf.x, y: actionSelf.y, direction });
+    } else if (directionStepPendingQueueRef.current.length === 0) {
+      clearDirectionStepPendingQueue();
       setPredictedPlayerPosition(null);
     }
-    send({ type: queued.mode === "run" ? "run" : "walk", direction });
+    send({ type: nextAction.mode === "run" ? "run" : "walk", direction });
     return true;
   }
 
@@ -1969,11 +2034,12 @@ export default function HomePage() {
           event.packet === "UserLocation" ? worldRef.current.playerObjectId ?? "0" : stringifyId(payload.objectId);
         const x = numberOrZero(payload.x);
         const y = numberOrZero(payload.y);
+        const direction = stringOrNull(payload.direction) ?? undefined;
         const movementPacket = event.packet;
         const movementNow = Date.now();
         if (movementObjectId === worldRef.current.playerObjectId) {
           reconcileMovementPlanWithServer(x, y);
-          reconcileDirectionStepWithServer(x, y);
+          reconcileDirectionStepWithServer(x, y, direction);
         }
         setWorld((current) => ({
           ...current,
@@ -1984,7 +2050,7 @@ export default function HomePage() {
                     ...entity,
                     x,
                     y,
-                    direction: stringOrNull(payload.direction) ?? undefined,
+                    direction,
                   },
                   entity,
                   movementPacket,
@@ -1996,6 +2062,9 @@ export default function HomePage() {
         break;
       }
       case "ObjectPlayer":
+        setWorldEntityFromPacket(payload, "player", "friendly");
+        break;
+      case "ObjectHero":
         setWorldEntityFromPacket(payload, "player", "friendly");
         break;
       case "NewMonsterInfo":
@@ -2328,6 +2397,7 @@ export default function HomePage() {
           payload.name,
           kind === "npc" ? t("ui.npc") : kind === "monster" ? t("ui.monster") : t("ui.player"),
         ),
+        ownerName: stringOrNull(payload.ownerName) ?? undefined,
         x: numberOrZero(location?.x),
         y: numberOrZero(location?.y),
         direction: stringOrNull(payload.direction) ?? undefined,
@@ -2727,6 +2797,7 @@ export default function HomePage() {
       objectId: String(entity.objectId),
       kind: entity.kind,
       name: entity.name,
+      ownerName: entity.ownerName ?? undefined,
       x: entity.x,
       y: entity.y,
       direction: entity.direction,
@@ -3056,24 +3127,43 @@ export default function HomePage() {
     setPredictedPlayerPosition(null);
   }
 
-  function reconcileDirectionStepWithServer(x: number, y: number) {
-    const pending = directionStepPendingRef.current;
-    if (!pending) {
+  function reconcileDirectionStepWithServer(x: number, y: number, direction?: string) {
+    reconcileDirectionStepQueueWithServer(x, y, Date.now(), direction);
+  }
+
+  function reconcileDirectionStepQueueWithServer(x: number, y: number, now: number, direction?: string) {
+    const queue = directionStepPendingQueueRef.current;
+    if (queue.length === 0) {
       return;
     }
 
-    if (x === pending.x && y === pending.y) {
-      directionStepPendingRef.current = null;
-      if (predictedPlayerPositionRef.current?.x === x && predictedPlayerPositionRef.current?.y === y) {
+    const matchedIndex = queue.findIndex(
+      (pending) => pending.x === x && pending.y === y && (!pending.direction || !direction || pending.direction === direction),
+    );
+    if (matchedIndex >= 0) {
+      const nextQueue = queue.slice(matchedIndex + 1);
+      setDirectionStepPendingQueue(nextQueue);
+      if (nextQueue.length === 0 && predictedPlayerPositionRef.current?.x === x && predictedPlayerPositionRef.current?.y === y) {
         setPredictedPlayerPosition(null);
       }
       return;
     }
 
-    if (Date.now() - pending.sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
-      directionStepPendingRef.current = null;
+    if (now - queue[0].sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+      clearDirectionStepPendingQueue();
       setPredictedPlayerPosition(null);
     }
+  }
+
+  function setDirectionStepPendingQueue(queue: DirectionStepPending[]) {
+    directionStepPendingQueueRef.current = queue.slice(-1);
+    directionStepPendingRef.current =
+      directionStepPendingQueueRef.current[directionStepPendingQueueRef.current.length - 1] ?? null;
+  }
+
+  function clearDirectionStepPendingQueue() {
+    directionStepPendingQueueRef.current = [];
+    directionStepPendingRef.current = null;
   }
 
   return (
@@ -3801,6 +3891,10 @@ function stringOrFallback(value: unknown, fallback: string) {
 
 function tileDistance(source: WorldEntity | null, target: WorldEntity) {
   if (!source) return 0;
+  return pointTileDistance(source, target);
+}
+
+function pointTileDistance(source: { x: number; y: number }, target: { x: number; y: number }) {
   return Math.max(Math.abs(source.x - target.x), Math.abs(source.y - target.y));
 }
 
@@ -3816,6 +3910,60 @@ function entitySortRank(entity: WorldEntity, playerObjectId: string | null, sele
 function directionToward(source: WorldEntity | null, target: WorldEntity) {
   if (!source) return target.direction ?? "Down";
   return directionFromPoint(source, target, target.direction ?? "Down");
+}
+
+function movementStepIntervalMs(mode: "walk" | "run") {
+  return mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS;
+}
+
+function movementCommandDelayMs(mode: "walk" | "run") {
+  return Math.max(100, movementStepIntervalMs(mode) - MOVEMENT_QUEUE_INPUT_LEAD_MS);
+}
+
+function crystalMovementActionToward(
+  source: { x: number; y: number; direction?: string },
+  target: { x: number; y: number },
+  requestedMode: "walk" | "run",
+): { point: { x: number; y: number }; direction: string; mode: "walk" | "run" } {
+  if (source.x === target.x && source.y === target.y) {
+    return {
+      point: { x: source.x, y: source.y },
+      direction: source.direction ?? "Down",
+      mode: "walk",
+    };
+  }
+
+  const remainingDistance = Math.max(Math.abs(target.x - source.x), Math.abs(target.y - source.y));
+  const mode = requestedMode === "run" && remainingDistance > 1 ? "run" : "walk";
+  const direction = directionFromPoint(source, target, source.direction ?? "Down");
+  return {
+    point: pointMoveInDirection(source, direction, mode === "run" ? 2 : 1),
+    direction,
+    mode,
+  };
+}
+
+function pointMoveInDirection(source: { x: number; y: number }, direction: string, distance: number) {
+  switch (direction) {
+    case "Up":
+      return { x: source.x, y: source.y - distance };
+    case "UpRight":
+      return { x: source.x + distance, y: source.y - distance };
+    case "Right":
+      return { x: source.x + distance, y: source.y };
+    case "DownRight":
+      return { x: source.x + distance, y: source.y + distance };
+    case "Down":
+      return { x: source.x, y: source.y + distance };
+    case "DownLeft":
+      return { x: source.x - distance, y: source.y + distance };
+    case "Left":
+      return { x: source.x - distance, y: source.y };
+    case "UpLeft":
+      return { x: source.x - distance, y: source.y - distance };
+    default:
+      return { x: source.x, y: source.y };
+  }
 }
 
 function directionFromPoint(
@@ -3838,25 +3986,20 @@ function directionFromPoint(
 
 function approachDestination(source: WorldEntity | null, target: WorldEntity) {
   if (!source) return { x: target.x, y: target.y };
+  if (tileDistance(source, target) <= 1) return { x: source.x, y: source.y };
+
   const dx = Math.sign(target.x - source.x);
   const dy = Math.sign(target.y - source.y);
-  if (tileDistance(source, target) <= 1) return { x: source.x, y: source.y };
-  return { x: target.x - dx, y: target.y - dy };
-}
+  const absX = Math.abs(target.x - source.x);
+  const absY = Math.abs(target.y - source.y);
 
-function stepPointTowardBy(
-  source: { x: number; y: number },
-  target: { x: number; y: number },
-  distance: number,
-) {
-  const dx = target.x - source.x;
-  const dy = target.y - source.y;
-  const stepX = Math.sign(dx) * Math.min(Math.abs(dx), distance);
-  const stepY = Math.sign(dy) * Math.min(Math.abs(dy), distance);
-  return {
-    x: source.x + stepX,
-    y: source.y + stepY,
-  };
+  if (dx !== 0 && absX >= absY) {
+    return { x: target.x - dx, y: target.y };
+  }
+  if (dy !== 0) {
+    return { x: target.x, y: target.y - dy };
+  }
+  return { x: target.x - dx, y: target.y - dy };
 }
 
 function entityKindClassName(kind: EntityKind) {
