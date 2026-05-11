@@ -1,0 +1,155 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:13010/?gatewayWs=ws%3A%2F%2F127.0.0.1%3A7210%2Fws&autoTick=0",
+  "account": "deepnpc232056",
+  "password": "demo",
+  "characterName": "NpcQa56582",
+  "target": {
+    "map": "0",
+    "x": 335,
+    "y": 265,
+    "npcPattern": "MirGuide|Peter|村庄向导|Village Guide"
+  },
+  "before": {
+    "player": {
+      "x": 329,
+      "y": 259
+    },
+    "npc": {
+      "objectId": "26",
+      "kind": "npc",
+      "name": "MirGuide_Peter",
+      "x": 328,
+      "y": 258,
+      "direction": "Up",
+      "nameColourArgb": -16711936,
+      "dead": false,
+      "disposition": "neutral",
+      "sprite": {
+        "altBodyLibrary": null,
+        "altFrameBaseOffset": null,
+        "altHairLibrary": null,
+        "altWeaponFrameOffset": null,
+        "altWeaponLibrary": null,
+        "altWeaponLibrarySecondary": null,
+        "bodyLibrary": "NPC/08",
+        "directionStride": 4,
+        "frameBaseOffset": 0,
+        "frameCount": 4,
+        "hairLibrary": null,
+        "weaponFrameOffset": null,
+        "weaponLibrary": null,
+        "weaponLibrarySecondary": null
+      },
+      "questIds": [
+        9,
+        12,
+        15,
+        18,
+        21,
+        26
+      ]
+    },
+    "activeNpcDialog": null,
+    "commands": [
+      {
+        "type": "transferMap",
+        "key": "crystal:0:329:259",
+        "at": 1778340062642
+      },
+      {
+        "type": "transferMap",
+        "key": "crystal:0:335:265",
+        "at": 1778340061820
+      }
+    ],
+    "interactCount": 0,
+    "moveCount": 0,
+    "questIconCount": 0,
+    "villageIconBounds": null
+  },
+  "after": {
+    "player": {
+      "x": 329,
+      "y": 259
+    },
+    "npc": {
+      "objectId": "26",
+      "kind": "npc",
+      "name": "MirGuide_Peter",
+      "x": 328,
+      "y": 258,
+      "direction": "Up",
+      "nameColourArgb": -16711936,
+      "dead": false,
+      "disposition": "neutral",
+      "sprite": {
+        "altBodyLibrary": null,
+        "altFrameBaseOffset": null,
+        "altHairLibrary": null,
+        "altWeaponFrameOffset": null,
+        "altWeaponLibrary": null,
+        "altWeaponLibrarySecondary": null,
+        "bodyLibrary": "NPC/08",
+        "directionStride": 4,
+        "frameBaseOffset": 0,
+        "frameCount": 4,
+        "hairLibrary": null,
+        "weaponFrameOffset": null,
+        "weaponLibrary": null,
+        "weaponLibrarySecondary": null
+      },
+      "questIds": [
+        9,
+        12,
+        15,
+        18,
+        21,
+        26
+      ]
+    },
+    "activeNpcDialog": {
+      "npcObjectId": "26",
+      "npcName": "MirGuide_Peter",
+      "title": "MirGuide_Peter",
+      "body": [
+        "Welcome to the Mir world.",
+        "It's my job to guide newbies.",
+        "Anything I can help with?",
+        ">",
+        ">",
+        ">",
+        "-------------------------------------------------------------------------------------------------------"
+      ],
+      "footer": "<Hunting",
+      "links": [
+        {
+          "text": "<Hunting",
+          "target": "@hunting"
+        },
+        {
+          "text": "<Combat & Skill",
+          "target": "@combat"
+        },
+        {
+          "text": "<Basic Information",
+          "target": "@basic"
+        }
+      ],
+      "input": null
+    },
+    "commands": [
+      {
+        "type": "interact",
+        "objectId": 26,
+        "at": 1778340063303
+      }
+    ],
+    "interactCount": 1,
+    "moveCount": 0,
+    "questIconCount": 0,
+    "villageIconBounds": null
+  },
+  "consoleErrors": [],
+  "nonFaviconNetwork404s": []
+}

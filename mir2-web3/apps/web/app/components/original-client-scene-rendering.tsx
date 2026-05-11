@@ -113,6 +113,9 @@ type QuestIconKey =
   | "exclamationGreen"
   | "questionGreen";
 
+const SCENE_SPRITE_FRAME_INTERVAL_MS = 120;
+const CRYSTAL_QUEST_ICON_FRAME_INTERVAL_MS = 500;
+
 type ViewportSpriteAnimationMeta = {
   frameBaseOffset: number;
   weaponFrameOffset: number | null;
@@ -848,7 +851,10 @@ export function questIconForEntity(
           : "questionGreen";
 
   const frames = ORIGINAL_UI.game.questIcons[iconKey];
-  return frames[animationFrameIndex % frames.length] ?? null;
+  const questAnimationFrameIndex = Math.floor(
+    (animationFrameIndex * SCENE_SPRITE_FRAME_INTERVAL_MS) / CRYSTAL_QUEST_ICON_FRAME_INTERVAL_MS,
+  );
+  return frames[questAnimationFrameIndex % frames.length] ?? null;
 }
 
 export function portraitFramesForCharacter(character: SelectCharacterEntry) {

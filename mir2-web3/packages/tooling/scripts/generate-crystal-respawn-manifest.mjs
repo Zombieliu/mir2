@@ -136,6 +136,7 @@ function main() {
           monster_can_tame: monster?.can_tame ?? false,
           monster_auto_rev: monster?.auto_rev ?? false,
           monster_undead: monster?.undead ?? false,
+          monster_agility: monster?.agility ?? 0,
           route: loadRoute(respawn.route_path),
         };
       });
@@ -151,6 +152,7 @@ function main() {
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
         no_mount: map.no_mount,
+        no_hero: map.no_hero,
         need_bridle: map.need_bridle,
         safe_zones: map.safe_zones,
         safe_zone_spells: objectInfo.safe_zone_spells,
@@ -393,6 +395,7 @@ function parseMaps(reader) {
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
+    const no_hero = reader.readBoolean();
     reader.readInt32();
     reader.readBoolean();
     reader.readBoolean();
@@ -409,6 +412,7 @@ function parseMaps(reader) {
       no_drop_player,
       no_drop_monster,
       no_mount,
+      no_hero,
       need_bridle,
       safe_zones,
       movements,
@@ -537,6 +541,7 @@ function parseMonsters(reader) {
     const max_mc = stats.get(7) ?? 0;
     const min_sc = stats.get(8) ?? 0;
     const max_sc = stats.get(9) ?? 0;
+    const agility = stats.get(11) ?? 0;
     const light = reader.readUInt8();
     const attack_speed = reader.readUInt16();
     const move_speed = reader.readUInt16();
@@ -569,6 +574,7 @@ function parseMonsters(reader) {
       max_mc,
       min_sc,
       max_sc,
+      agility,
       light,
       attack_speed,
       move_speed,

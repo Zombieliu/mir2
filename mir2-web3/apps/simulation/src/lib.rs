@@ -17,7 +17,10 @@ pub use config::{
     WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
     WorldItemSnapshot, WorldSnapshot,
 };
-pub use runtime::{ActiveSessionIdentity, SharedTradeOffer, SimulationSession};
+pub use runtime::{
+    ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
+};
 pub use world_runtime::{
     InProcessWorldRuntime, WorldCommand, WorldCommandExecution, WorldCommandKind,
     WorldCommandOutcome, WorldRuntime, ZoneRuntimeHandle,

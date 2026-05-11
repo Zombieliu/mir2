@@ -1,0 +1,5402 @@
+{
+  "ok": false,
+  "baseUrl": "http://127.0.0.1:13010/?gatewayWs=ws://127.0.0.1:7210/ws&codexBust=packetnoprobe-073107",
+  "account": "QAPRNOP073107",
+  "createAccount": true,
+  "characterName": "QPN073107",
+  "interaction": "packetRun",
+  "startTarget": {
+    "map": "0",
+    "x": 330,
+    "y": 270
+  },
+  "startedAt": "2026-05-10T23:31:33.230Z",
+  "start": {
+    "capturedAt": 1778455886326,
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "Starter Field",
+    "player": {
+      "x": 330,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "directionStepPending": null,
+    "directionStepPendingQueue": [],
+    "selfEntity": {
+      "x": 330,
+      "y": 270,
+      "direction": "Down",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 472.98,
+      "top": 283,
+      "width": 64.03,
+      "height": 12
+    },
+    "floor": {
+      "left": -298,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-7:314:254:0",
+    "centerSprite": {
+      "left": 470,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-9:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:31:25 AM] [Pet: Attack and Move]",
+      "[7:31:25 AM] [Mode: Peaceful]",
+      "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+      "[7:31:17 AM] Character created.",
+      "[7:31:11 AM] Your account was created successfully."
+    ],
+    "sentMoveTail": [],
+    "commandTail": [],
+    "receivedMoveTail": [],
+    "gatewayMoveTail": [
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 3002,
+          "x": 333,
+          "y": 267
+        },
+        "at": 1778455885893
+      }
+    ]
+  },
+  "finalState": {
+    "capturedAt": 1778455893044,
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "Starter Field",
+    "player": {
+      "x": 330,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "directionStepPending": null,
+    "directionStepPendingQueue": [],
+    "selfEntity": {
+      "x": 330,
+      "y": 270,
+      "direction": "Down",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 472.98,
+      "top": 283,
+      "width": 64.03,
+      "height": 12
+    },
+    "floor": {
+      "left": -298,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-7:314:254:0",
+    "centerSprite": {
+      "left": 470,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-9:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:31:25 AM] [Pet: Attack and Move]",
+      "[7:31:25 AM] [Mode: Peaceful]",
+      "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+      "[7:31:17 AM] Character created.",
+      "[7:31:11 AM] Your account was created successfully."
+    ],
+    "sentMoveTail": [],
+    "commandTail": [
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455889497
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455888668
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455887931
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455887187
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455886439
+      }
+    ],
+    "receivedMoveTail": [],
+    "gatewayMoveTail": [
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 3002,
+          "x": 331,
+          "y": 269
+        },
+        "at": 1778455887078
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 3002,
+          "x": 332,
+          "y": 268
+        },
+        "at": 1778455886439
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 3002,
+          "x": 333,
+          "y": 267
+        },
+        "at": 1778455885893
+      }
+    ]
+  },
+  "sampleMs": 80,
+  "directionLagMs": 260,
+  "stalePredictedMs": 1200,
+  "slowCommandQueueMs": 1200,
+  "maxDirectionQueueLength": 1,
+  "strictMovementChecks": true,
+  "allowBlockedResidual": false,
+  "settleMs": 2000,
+  "settle": {
+    "status": "settled",
+    "strictStatus": "settled",
+    "clean": true,
+    "pendingPlanAtEnd": null,
+    "observedBlockedTarget": null,
+    "waitedMs": 6,
+    "capturedAt": 1778455893045,
+    "finalState": {
+      "capturedAt": 1778455893044,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    }
+  },
+  "pendingPlanAtEnd": null,
+  "assertions": [
+    {
+      "name": "noVisualJumps",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "noRouteSpamWarnings",
+      "pass": false,
+      "count": 1
+    },
+    {
+      "name": "noLogicalTileRollback",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "directionAnimationWithinCrystalWindow",
+      "pass": false,
+      "count": 5
+    },
+    {
+      "name": "stalePredictedPlayerCleared",
+      "pass": true,
+      "count": 0,
+      "maxAgeMs": 1200,
+      "strict": true,
+      "warnings": []
+    },
+    {
+      "name": "movementCommandQueueResponsive",
+      "pass": true,
+      "count": 0,
+      "maxPendingMs": 1200,
+      "maxDirectionQueueLength": 1,
+      "strict": true,
+      "warnings": []
+    },
+    {
+      "name": "movementSettledWithoutResidualPlan",
+      "pass": true,
+      "status": "settled",
+      "strictStatus": "settled",
+      "strict": true,
+      "allowBlockedResidual": false,
+      "pendingPlanAtEnd": null
+    },
+    {
+      "name": "noConsoleErrors",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "noNonFaviconNetwork404s",
+      "pass": true,
+      "count": 0
+    }
+  ],
+  "sampleCount": 31,
+  "actions": [
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 0
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 1
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 2
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887931
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 3
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887931
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455888668
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887931
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 4
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455888668
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887931
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 472.98,
+          "top": 283,
+          "width": 64.03,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455889497
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455888668
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887931
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455887187
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778455886439
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 331,
+              "y": 269
+            },
+            "at": 1778455887078
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 332,
+              "y": 268
+            },
+            "at": 1778455886439
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 3002,
+              "x": 333,
+              "y": 267
+            },
+            "at": 1778455885893
+          }
+        ]
+      }
+    }
+  ],
+  "jumps": [],
+  "routeSpamWarnings": [
+    {
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "commandKey": "run:Right",
+      "count": 5,
+      "durationMs": 3058
+    }
+  ],
+  "logicalRollbackWarnings": [],
+  "directionLagWarnings": [
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455886439
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455887187
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455887931
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455888668
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778455889497
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    }
+  ],
+  "stalePredictionWarnings": [],
+  "commandQueueWarnings": [],
+  "feelMetrics": {
+    "logicalRollbackCount": 0,
+    "directionLagWindowMs": 260,
+    "directionLagCheckCount": 5,
+    "directionLagWarningCount": 5,
+    "stalePredictedWindowMs": 1200,
+    "stalePredictionWarningCount": 0,
+    "slowCommandQueueWindowMs": 1200,
+    "slowCommandQueueWarningCount": 0
+  },
+  "summary": [
+    {
+      "label": "packetRun-Right",
+      "count": 31,
+      "firstPlayer": {
+        "x": 330,
+        "y": 270
+      },
+      "lastPlayer": {
+        "x": 330,
+        "y": 270
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    }
+  ],
+  "samples": [
+    {
+      "label": "packetRun-Right",
+      "t": 0,
+      "capturedAt": 1778455890232,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 93,
+      "capturedAt": 1778455890317,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 178,
+      "capturedAt": 1778455890410,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 272,
+      "capturedAt": 1778455890510,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 373,
+      "capturedAt": 1778455890600,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 461,
+      "capturedAt": 1778455890685,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 548,
+      "capturedAt": 1778455890772,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 633,
+      "capturedAt": 1778455890857,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 719,
+      "capturedAt": 1778455890943,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 805,
+      "capturedAt": 1778455891029,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 891,
+      "capturedAt": 1778455891116,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 977,
+      "capturedAt": 1778455891202,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1062,
+      "capturedAt": 1778455891294,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1157,
+      "capturedAt": 1778455891406,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1270,
+      "capturedAt": 1778455891504,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1366,
+      "capturedAt": 1778455891594,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1455,
+      "capturedAt": 1778455891680,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1542,
+      "capturedAt": 1778455891769,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1632,
+      "capturedAt": 1778455891856,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1717,
+      "capturedAt": 1778455891943,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1805,
+      "capturedAt": 1778455892033,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1896,
+      "capturedAt": 1778455892117,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1979,
+      "capturedAt": 1778455892202,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2064,
+      "capturedAt": 1778455892289,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2153,
+      "capturedAt": 1778455892409,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2271,
+      "capturedAt": 1778455892502,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2363,
+      "capturedAt": 1778455892593,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2456,
+      "capturedAt": 1778455892689,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2550,
+      "capturedAt": 1778455892777,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2640,
+      "capturedAt": 1778455892862,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2725,
+      "capturedAt": 1778455892956,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "Starter Field",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 472.98,
+        "top": 283,
+        "width": 64.03,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:31:25 AM] [Pet: Attack and Move]",
+        "[7:31:25 AM] [Mode: Peaceful]",
+        "[7:31:25 AM] Welcome to the Legend of Mir 2 Server.",
+        "[7:31:17 AM] Character created.",
+        "[7:31:11 AM] Your account was created successfully."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455889497
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455888668
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887931
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455887187
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778455886439
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 331,
+            "y": 269
+          },
+          "at": 1778455887078
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 332,
+            "y": 268
+          },
+          "at": 1778455886439
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 3002,
+            "x": 333,
+            "y": 267
+          },
+          "at": 1778455885893
+        }
+      ]
+    }
+  ],
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": [],
+  "screenshotPath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/movement-jitter/r-packet-run-no-probe-073107.png"
+}

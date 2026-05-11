@@ -4,9 +4,10 @@ use std::sync::{Arc, Mutex};
 
 use mir2_protocol::{ClientPacket, ServerPacket};
 use mir2_simulation::{
-    ActiveSessionIdentity, GroundDropSnapshot, InProcessWorldRuntime, SharedTradeOffer,
-    WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
-    WorldSnapshot, ZoneRuntimeHandle,
+    ActiveSessionIdentity, GroundDropSnapshot, InProcessWorldRuntime, SharedItemRentalAgreement,
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
+    SharedTradeOffer, WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldRuntime, WorldSnapshot, ZoneRuntimeHandle,
 };
 
 use crate::GatewayConfig;
@@ -148,6 +149,7 @@ struct ZonePlayerPresence {
     zone_object_id: u32,
     map_file_name: String,
     entity: WorldEntitySnapshot,
+    free_bag_slots: u16,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -158,6 +160,12 @@ struct ZoneMapSnapshotLayer {
     removed_drop_ids: BTreeSet<u32>,
 }
 
+#[derive(Debug, Clone)]
+struct SharedItemRentalInvite {
+    partner_name: String,
+    renting: bool,
+}
+
 #[derive(Debug)]
 struct SharedInProcessZoneState {
     next_zone_object_id: u32,
@@ -166,6 +174,11 @@ struct SharedInProcessZoneState {
     trade_offers: BTreeMap<ZonePresenceKey, SharedTradeOffer>,
     pending_trade_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
     pending_trade_rollbacks: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
+    pending_rental_invites: BTreeMap<ZonePresenceKey, Vec<SharedItemRentalInvite>>,
+    pending_rental_cancels: BTreeMap<ZonePresenceKey, usize>,
+    rental_item_offers: BTreeMap<ZonePresenceKey, SharedItemRentalItemOffer>,
+    rental_fee_offers: BTreeMap<ZonePresenceKey, SharedItemRentalFeeOffer>,
+    pending_rental_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedItemRentalDelivery>>,
 }
 
 impl SharedInProcessZoneState {
@@ -177,6 +190,11 @@ impl SharedInProcessZoneState {
             trade_offers: BTreeMap::new(),
             pending_trade_deliveries: BTreeMap::new(),
             pending_trade_rollbacks: BTreeMap::new(),
+            pending_rental_invites: BTreeMap::new(),
+            pending_rental_cancels: BTreeMap::new(),
+            rental_item_offers: BTreeMap::new(),
+            rental_fee_offers: BTreeMap::new(),
+            pending_rental_deliveries: BTreeMap::new(),
         }
     }
 
@@ -186,6 +204,7 @@ impl SharedInProcessZoneState {
         character_name: &str,
         map_file_name: String,
         self_entity: WorldEntitySnapshot,
+        free_bag_slots: u16,
     ) {
         let zone_object_id = self
             .players
@@ -209,6 +228,7 @@ impl SharedInProcessZoneState {
                 zone_object_id,
                 map_file_name,
                 entity,
+                free_bag_slots,
             },
         );
     }
@@ -328,6 +348,124 @@ impl SharedInProcessZoneState {
         self.pending_trade_rollbacks.remove(key).unwrap_or_default()
     }
 
+    fn queue_rental_invite(&mut self, key: ZonePresenceKey, partner_name: String, renting: bool) {
+        self.pending_rental_invites
+            .entry(key)
+            .or_default()
+            .push(SharedItemRentalInvite {
+                partner_name,
+                renting,
+            });
+    }
+
+    fn take_pending_rental_invites(
+        &mut self,
+        key: &ZonePresenceKey,
+    ) -> Vec<SharedItemRentalInvite> {
+        self.pending_rental_invites.remove(key).unwrap_or_default()
+    }
+
+    fn queue_rental_cancel(&mut self, key: ZonePresenceKey) {
+        *self.pending_rental_cancels.entry(key).or_default() += 1;
+    }
+
+    fn take_pending_rental_cancel_count(&mut self, key: &ZonePresenceKey) -> usize {
+        self.pending_rental_cancels.remove(key).unwrap_or_default()
+    }
+
+    fn take_pending_rental_deliveries(
+        &mut self,
+        key: &ZonePresenceKey,
+    ) -> Vec<SharedItemRentalDelivery> {
+        self.pending_rental_deliveries
+            .remove(key)
+            .unwrap_or_default()
+    }
+
+    fn rental_fee_offer_matching_item(
+        &self,
+        item_offer: &SharedItemRentalItemOffer,
+    ) -> Option<(ZonePresenceKey, SharedItemRentalFeeOffer)> {
+        self.rental_fee_offers
+            .iter()
+            .find(|(_, fee_offer)| {
+                fee_offer
+                    .character_name
+                    .eq_ignore_ascii_case(&item_offer.partner_name)
+                    && fee_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&item_offer.character_name)
+            })
+            .map(|(key, offer)| (key.clone(), offer.clone()))
+    }
+
+    fn rental_item_offer_matching_fee(
+        &self,
+        fee_offer: &SharedItemRentalFeeOffer,
+    ) -> Option<(ZonePresenceKey, SharedItemRentalItemOffer)> {
+        self.rental_item_offers
+            .iter()
+            .find(|(_, item_offer)| {
+                item_offer
+                    .character_name
+                    .eq_ignore_ascii_case(&fee_offer.partner_name)
+                    && item_offer
+                        .partner_name
+                        .eq_ignore_ascii_case(&fee_offer.character_name)
+            })
+            .map(|(key, offer)| (key.clone(), offer.clone()))
+    }
+
+    fn cancel_rental_offers_for_presence(
+        &mut self,
+        key: &ZonePresenceKey,
+        character_name: &str,
+    ) -> Vec<ZonePresenceKey> {
+        let mut cancel_keys = Vec::new();
+        if let Some(item_offer) = self.rental_item_offers.remove(key) {
+            if let Some((fee_key, _)) = self.rental_fee_offer_matching_item(&item_offer) {
+                self.rental_fee_offers.remove(&fee_key);
+                cancel_keys.push(fee_key);
+            }
+        }
+        if let Some(fee_offer) = self.rental_fee_offers.remove(key) {
+            if let Some((item_key, _)) = self.rental_item_offer_matching_fee(&fee_offer) {
+                self.rental_item_offers.remove(&item_key);
+                cancel_keys.push(item_key);
+            }
+        }
+
+        let item_keys = self
+            .rental_item_offers
+            .iter()
+            .filter(|(_, offer)| {
+                offer.partner_name.eq_ignore_ascii_case(character_name)
+                    || offer.character_name.eq_ignore_ascii_case(character_name)
+            })
+            .map(|(key, _)| key.clone())
+            .collect::<Vec<_>>();
+        for item_key in item_keys {
+            self.rental_item_offers.remove(&item_key);
+            cancel_keys.push(item_key);
+        }
+        let fee_keys = self
+            .rental_fee_offers
+            .iter()
+            .filter(|(_, offer)| {
+                offer.partner_name.eq_ignore_ascii_case(character_name)
+                    || offer.character_name.eq_ignore_ascii_case(character_name)
+            })
+            .map(|(key, _)| key.clone())
+            .collect::<Vec<_>>();
+        for fee_key in fee_keys {
+            self.rental_fee_offers.remove(&fee_key);
+            cancel_keys.push(fee_key);
+        }
+        cancel_keys.sort();
+        cancel_keys.dedup();
+        cancel_keys
+    }
+
     fn cancel_trade_offers_for_presence(
         &mut self,
         key: &ZonePresenceKey,
@@ -378,6 +516,10 @@ impl Default for SharedInProcessZoneRuntimeFactory {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn shared_trade_offer_fits(free_bag_slots: u16, offer: &SharedTradeOffer) -> bool {
+    usize::from(free_bag_slots) >= offer.items.len()
 }
 
 impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
@@ -474,6 +616,7 @@ impl SharedInProcessZoneSessionRuntime {
             &identity.character_name,
             map_file_name,
             self_entity,
+            snapshot.free_bag_slots,
         );
         self.presence_key = Some(key);
     }
@@ -523,6 +666,37 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    fn apply_pending_shared_rental_packets(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let (invites, cancel_count, deliveries) = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            (
+                zone_state.take_pending_rental_invites(&key),
+                zone_state.take_pending_rental_cancel_count(&key),
+                zone_state.take_pending_rental_deliveries(&key),
+            )
+        };
+        let mut packets = Vec::new();
+        for invite in invites {
+            packets.extend(
+                self.inner
+                    .item_rental_request(&invite.partner_name, invite.renting),
+            );
+        }
+        for _ in 0..cancel_count {
+            packets.extend(self.inner.item_rental_cancel());
+        }
+        for delivery in deliveries {
+            packets.extend(self.inner.apply_shared_item_rental_delivery(&delivery));
+        }
+        packets
+    }
+
     fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
         let Some(key) = self.current_presence_key() else {
             return Vec::new();
@@ -539,6 +713,135 @@ impl SharedInProcessZoneSessionRuntime {
             .cancel_trade_offers_for_presence(&key, &character_name);
         own_offer
             .map(|offer| self.inner.rollback_shared_trade_offer(&offer))
+            .unwrap_or_default()
+    }
+
+    fn cancel_pending_shared_rental_offers(&mut self) {
+        let Some(key) = self.current_presence_key() else {
+            return;
+        };
+        let character_name = self
+            .inner
+            .active_identity()
+            .map(|identity| identity.character_name)
+            .unwrap_or_default();
+        let cancel_keys = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .cancel_rental_offers_for_presence(&key, &character_name);
+        if cancel_keys.is_empty() {
+            return;
+        }
+        let mut zone_state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        for cancel_key in cancel_keys {
+            if cancel_key != key {
+                zone_state.queue_rental_cancel(cancel_key);
+            }
+        }
+    }
+
+    fn execute_shared_item_rental_request(&mut self, partner_name: String) -> Vec<ServerPacket> {
+        let packets = self.inner.item_rental_request(&partner_name, false);
+        let Some(identity) = self.inner.active_identity() else {
+            return packets;
+        };
+        let partner_key = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .player_key_by_name(&partner_name);
+        if let Some(partner_key) = partner_key {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .queue_rental_invite(partner_key, identity.character_name, true);
+        }
+        packets
+    }
+
+    fn execute_shared_item_rental_lock_fee(&mut self) -> Vec<ServerPacket> {
+        let (packets, offer) = self.inner.shared_item_rental_lock_fee();
+        if let (Some(key), Some(offer)) = (self.current_presence_key(), offer) {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .rental_fee_offers
+                .insert(key, offer);
+        }
+        packets
+    }
+
+    fn execute_shared_item_rental_lock_item(&mut self) -> Vec<ServerPacket> {
+        let (packets, offer) = self.inner.shared_item_rental_lock_item();
+        if let (Some(key), Some(offer)) = (self.current_presence_key(), offer) {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .rental_item_offers
+                .insert(key, offer);
+        }
+        packets
+    }
+
+    fn execute_shared_item_rental_confirm(&mut self) -> Vec<ServerPacket> {
+        let Some(self_key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+
+        let delivery = {
+            let mut zone_state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if let Some(item_offer) = zone_state.rental_item_offers.get(&self_key).cloned() {
+                if let Some((fee_key, fee_offer)) =
+                    zone_state.rental_fee_offer_matching_item(&item_offer)
+                {
+                    zone_state.rental_item_offers.remove(&self_key);
+                    zone_state.rental_fee_offers.remove(&fee_key);
+                    let agreement = SharedItemRentalAgreement {
+                        item: item_offer,
+                        fee: fee_offer,
+                    };
+                    zone_state
+                        .pending_rental_deliveries
+                        .entry(fee_key)
+                        .or_default()
+                        .push(SharedItemRentalDelivery::Borrower(agreement.clone()));
+                    Some(SharedItemRentalDelivery::Lender(agreement))
+                } else {
+                    None
+                }
+            } else if let Some(fee_offer) = zone_state.rental_fee_offers.get(&self_key).cloned() {
+                if let Some((item_key, item_offer)) =
+                    zone_state.rental_item_offer_matching_fee(&fee_offer)
+                {
+                    zone_state.rental_fee_offers.remove(&self_key);
+                    zone_state.rental_item_offers.remove(&item_key);
+                    let agreement = SharedItemRentalAgreement {
+                        item: item_offer,
+                        fee: fee_offer,
+                    };
+                    zone_state
+                        .pending_rental_deliveries
+                        .entry(item_key)
+                        .or_default()
+                        .push(SharedItemRentalDelivery::Lender(agreement.clone()));
+                    Some(SharedItemRentalDelivery::Borrower(agreement))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        };
+
+        delivery
+            .map(|delivery| self.inner.apply_shared_item_rental_delivery(&delivery))
             .unwrap_or_default()
     }
 
@@ -559,6 +862,7 @@ impl SharedInProcessZoneSessionRuntime {
             packets.extend(self.inner.rollback_shared_trade_offer(&offer));
             return packets;
         };
+        let self_free_bag_slots = self.inner.world_snapshot().free_bag_slots;
 
         let mut deliver_to_self = Vec::new();
         let mut rollback_self = None;
@@ -570,12 +874,28 @@ impl SharedInProcessZoneSessionRuntime {
             let partner_key = zone_state.player_key_by_name(&offer.partner_name);
             if let Some(partner_key) = partner_key {
                 if let Some(partner_offer) = zone_state.trade_offers.remove(&partner_key) {
-                    zone_state
-                        .pending_trade_deliveries
-                        .entry(partner_key)
-                        .or_default()
-                        .push(offer.clone());
-                    deliver_to_self.push(partner_offer);
+                    let partner_free_bag_slots = zone_state
+                        .players
+                        .get(&partner_key)
+                        .map(|presence| presence.free_bag_slots)
+                        .unwrap_or_default();
+                    if shared_trade_offer_fits(self_free_bag_slots, &partner_offer)
+                        && shared_trade_offer_fits(partner_free_bag_slots, &offer)
+                    {
+                        zone_state
+                            .pending_trade_deliveries
+                            .entry(partner_key)
+                            .or_default()
+                            .push(offer.clone());
+                        deliver_to_self.push(partner_offer);
+                    } else {
+                        zone_state
+                            .pending_trade_rollbacks
+                            .entry(partner_key)
+                            .or_default()
+                            .push(partner_offer);
+                        rollback_self = Some(offer.clone());
+                    }
                 } else {
                     zone_state.trade_offers.insert(self_key, offer.clone());
                 }
@@ -680,6 +1000,22 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked }) => Some(*locked),
             _ => None,
         };
+        let is_item_rental_lock_fee = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::ItemRentalLockFee)
+        );
+        let is_item_rental_lock_item = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::ItemRentalLockItem)
+        );
+        let is_item_rental_confirm = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::ConfirmItemRental)
+        );
+        let is_item_rental_cancel = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::CancelItemRental)
+        );
         let shared_rental_partner = matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::ItemRentalRequest)
@@ -698,8 +1034,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             _ => None,
         };
         let mut packets = self.apply_pending_shared_trade_packets();
+        packets.extend(self.apply_pending_shared_rental_packets());
         if removes_presence {
             packets.extend(self.cancel_pending_shared_trade_offers());
+            self.cancel_pending_shared_rental_offers();
         }
         let command_packets = if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
@@ -710,8 +1048,17 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             } else {
                 cancel_packets
             }
+        } else if is_item_rental_lock_fee {
+            self.execute_shared_item_rental_lock_fee()
+        } else if is_item_rental_lock_item {
+            self.execute_shared_item_rental_lock_item()
+        } else if is_item_rental_confirm {
+            self.execute_shared_item_rental_confirm()
+        } else if is_item_rental_cancel {
+            self.cancel_pending_shared_rental_offers();
+            self.inner.execute(command)?
         } else if let Some(partner_name) = shared_rental_partner {
-            self.inner.item_rental_request(&partner_name, false)
+            self.execute_shared_item_rental_request(partner_name)
         } else if let Some(partner_name) = shared_trade_partner {
             self.inner.trade_request(&partner_name)
         } else {
@@ -1219,6 +1566,148 @@ mod tests {
     }
 
     #[test]
+    fn shared_in_process_registry_commits_two_sided_item_rental_delivery() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        first.handle_packet(ClientPacket::DropGold { amount: 10 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .first()
+            .cloned()
+            .expect("second session should see rental funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+
+        let first_starting_gold = first.world_snapshot().gold;
+        let second_starting_gold = second.world_snapshot().gold;
+        let first_dagger_slot = inventory_slot_for_key(&first, "dagger");
+
+        let request_packets = first.handle_packet(ClientPacket::ItemRentalRequest);
+        assert!(request_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRentalRequest {
+                name,
+                renting: false
+            } if name == "Blade"
+        )));
+
+        let invite_packets = second.handle_packet(ClientPacket::KeepAlive { time: 10 });
+        assert!(invite_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ItemRentalRequest {
+                name,
+                renting: true
+            } if name == "Scout"
+        )));
+
+        let fee_packets = second.handle_packet(ClientPacket::ItemRentalFee { amount: 10 });
+        assert!(fee_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 10 })));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 10);
+        assert!(second
+            .handle_packet(ClientPacket::ItemRentalLockFee)
+            .iter()
+            .any(|packet| matches!(
+                packet,
+                ServerPacket::ItemRentalLock {
+                    success: true,
+                    gold_locked: true,
+                    item_locked: false
+                }
+            )));
+
+        first.handle_packet(ClientPacket::ItemRentalPeriod { days: 3 });
+        first.handle_packet(ClientPacket::DepositRentalItem {
+            from: first_dagger_slot,
+            to: 0,
+        });
+        assert!(first
+            .handle_packet(ClientPacket::ItemRentalLockItem)
+            .iter()
+            .any(|packet| matches!(
+                packet,
+                ServerPacket::ItemRentalLock {
+                    success: true,
+                    gold_locked: false,
+                    item_locked: true
+                }
+            )));
+
+        let lender_confirm = first.handle_packet(ClientPacket::ConfirmItemRental);
+        assert!(lender_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 10 })));
+        assert!(lender_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ConfirmItemRental)));
+        assert!(lender_confirm.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GetRentedItems { rented_items }
+                if rented_items.len() == 1
+                    && rented_items[0].item_name == "Dagger"
+                    && rented_items[0].renting_player_name == "Blade"
+        )));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold + 10);
+        assert!(!has_inventory_key(&first, "dagger"));
+
+        let borrower_delivery = second.handle_packet(ClientPacket::KeepAlive { time: 11 });
+        assert!(borrower_delivery.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item }
+                if item
+                    .rental_information
+                    .as_ref()
+                    .is_some_and(|info| info.owner_name == "Scout"
+                        && info.expiry_binary_datetime != 0)
+        )));
+        assert!(borrower_delivery
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ConfirmItemRental)));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 10);
+    }
+
+    #[test]
+    fn shared_in_process_registry_rolls_back_item_rental_when_partner_cancels() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        first.handle_packet(ClientPacket::DropGold { amount: 10 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .first()
+            .cloned()
+            .expect("second session should see rental funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+
+        let second_starting_gold = second.world_snapshot().gold;
+        let first_dagger_slot = inventory_slot_for_key(&first, "dagger");
+        first.handle_packet(ClientPacket::ItemRentalRequest);
+        second.handle_packet(ClientPacket::KeepAlive { time: 20 });
+        second.handle_packet(ClientPacket::ItemRentalFee { amount: 10 });
+        second.handle_packet(ClientPacket::ItemRentalLockFee);
+        first.handle_packet(ClientPacket::DepositRentalItem {
+            from: first_dagger_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::ItemRentalLockItem);
+        assert!(!has_inventory_key(&first, "dagger"));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold - 10);
+
+        let cancel_packets = second.handle_packet(ClientPacket::CancelItemRental);
+        assert!(cancel_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::CancelItemRental)));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold);
+
+        let lender_cancel = first.handle_packet(ClientPacket::KeepAlive { time: 21 });
+        assert!(lender_cancel
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::CancelItemRental)));
+        assert!(has_inventory_key(&first, "dagger"));
+    }
+
+    #[test]
     fn shared_in_process_registry_uses_adjacent_remote_player_for_trade_request() {
         let (mut first, _second) = started_shared_zone_sessions();
 
@@ -1326,6 +1815,94 @@ mod tests {
         assert!(has_inventory_key(&first, "red-potion"));
     }
 
+    #[test]
+    fn shared_in_process_registry_rolls_back_pending_trade_when_partner_disconnects() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        let first_starting_gold = first.world_snapshot().gold;
+        let first_red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: first_red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        second.handle_packet(ClientPacket::LogOut);
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 3 });
+
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(rollback.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+    }
+
+    #[test]
+    fn shared_in_process_registry_rolls_back_two_sided_trade_when_receiver_is_full() {
+        let (mut first, mut second) = started_shared_zone_sessions();
+        first.handle_packet(ClientPacket::DropGold { amount: 100 });
+        let funding_drop = second
+            .world_snapshot()
+            .ground_drops
+            .first()
+            .cloned()
+            .expect("second session should see funding gold");
+        second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
+        second.pick_up(funding_drop.object_id);
+        fill_gateway_bag(&mut second);
+
+        let first_starting_gold = first.world_snapshot().gold;
+        let second_starting_gold = second.world_snapshot().gold;
+        let first_red_slot = inventory_slot_for_key(&first, "red-potion");
+
+        first.handle_packet(ClientPacket::TradeRequest);
+        second.handle_packet(ClientPacket::TradeRequest);
+        first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        first.handle_packet(ClientPacket::DepositTradeItem {
+            from: first_red_slot,
+            to: 0,
+        });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
+        assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
+        assert!(!has_inventory_key(&first, "red-potion"));
+
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        let failed_confirm = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
+
+        assert!(failed_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
+        assert!(failed_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 40 })));
+        assert!(failed_confirm
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+        assert!(failed_confirm
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::GainedItem { .. })));
+        assert_eq!(second.world_snapshot().gold, second_starting_gold);
+
+        let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 4 });
+        assert!(rollback
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 30 })));
+        assert!(rollback.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.count == 5
+        )));
+        assert_eq!(first.world_snapshot().gold, first_starting_gold);
+        assert!(has_inventory_key(&first, "red-potion"));
+    }
+
     fn inventory_slot_for_key(session: &GatewaySession, key: &str) -> i32 {
         session
             .world_snapshot()
@@ -1342,6 +1919,16 @@ mod tests {
             .inventory_items
             .iter()
             .any(|item| item.key == key)
+    }
+
+    fn fill_gateway_bag(session: &mut GatewaySession) {
+        for index in 0..100 {
+            if session.world_snapshot().free_bag_slots == 0 {
+                return;
+            }
+            session.stage5_command("qa.giveItem", vec![format!("trade-filler-{index}")]);
+        }
+        assert_eq!(session.world_snapshot().free_bag_slots, 0);
     }
 
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {
@@ -1397,6 +1984,7 @@ mod tests {
             object_id,
             kind: WorldEntityKind::Monster,
             name: "Deer".to_string(),
+            owner_name: None,
             x: 329,
             y: 269,
             direction: MirDirection::Down,

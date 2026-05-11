@@ -2236,6 +2236,7 @@ pub enum ServerPacket {
     },
     ObjectHero {
         info: ObjectPlayerInfo,
+        owner_name: String,
     },
     ObjectRemove {
         object_id: u32,
@@ -3691,7 +3692,11 @@ impl ServerPacket {
             Self::MapInformation { info } => info.encode(writer)?,
             Self::UserInformation { info } => info.encode(writer)?,
             Self::UserLocation { location } => location.encode(writer),
-            Self::ObjectPlayer { info } | Self::ObjectHero { info } => info.encode(writer)?,
+            Self::ObjectPlayer { info } => info.encode(writer)?,
+            Self::ObjectHero { info, owner_name } => {
+                info.encode(writer)?;
+                writer.write_string(owner_name)?;
+            }
             Self::ObjectRemove { object_id }
             | Self::ObjectHide { object_id }
             | Self::ObjectShow { object_id } => writer.write_u32(*object_id),
@@ -5024,6 +5029,7 @@ impl ServerPacket {
             },
             ServerPacketId::ObjectHero => Self::ObjectHero {
                 info: ObjectPlayerInfo::decode(reader)?,
+                owner_name: reader.read_string()?,
             },
             ServerPacketId::ObjectRemove => Self::ObjectRemove {
                 object_id: reader.read_u32()?,
@@ -7159,6 +7165,7 @@ mod tests {
         let packets = vec![
             ServerPacket::ObjectHero {
                 info: test_object_player_info(1_001),
+                owner_name: "Scout".to_string(),
             },
             ServerPacket::NewHeroInfo {
                 info: current_hero.clone(),

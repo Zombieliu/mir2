@@ -29,10 +29,10 @@ use super::map::{
 use super::packets::*;
 use super::quests::QuestState;
 use super::resources::{
-    current_language, BuffResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
-    NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource, PlayerRuntimeResource,
-    PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, SkillResource, Stage5SystemsResource,
+    current_language, BuffResource, HeroInventoryResource, InventoryResource, ItemRentalResource,
+    MapRuntimeResource, NpcStateResource, ObjectIdAllocatorResource, PlayerPermissionResource,
+    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 use super::skills::seed_skills;
@@ -112,6 +112,7 @@ where
 
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
     let resources = world.resource::<InventoryResource>();
+    let hero_inventory = world.resource::<HeroInventoryResource>();
     let player_runtime = world.resource::<PlayerRuntimeResource>();
     let map = world.resource::<MapRuntimeResource>();
     let quests = world.resource::<QuestResource>();
@@ -146,6 +147,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         chat_ban_until_ms: player_runtime.chat_ban_until_ms,
         inventory_items_json: encode_state_vec(&resources.inventory_items),
         belt_items_json: encode_state_vec(&resources.belt_items),
+        hero_inventory_items_json: encode_state_vec(&hero_inventory.items),
         storage_items_json: encode_state_vec(&resources.storage_items),
         equipment_items_json: encode_state_vec(&resources.equipment_items),
         equipment_items_explicit_empty: resources.equipment_items.is_empty(),
@@ -606,12 +608,13 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     world
         .resource_mut::<PlayerPermissionResource>()
         .free_server_shout = false;
-    world
-        .resource_mut::<PotionRecoveryResource>()
-        .pending_pot_health_amount = 0;
-    world
-        .resource_mut::<PotionRecoveryResource>()
-        .pending_pot_mana_amount = 0;
+    {
+        let mut recovery = world.resource_mut::<PotionRecoveryResource>();
+        recovery.pending_pot_health_amount = 0;
+        recovery.pending_pot_mana_amount = 0;
+        recovery.hero_pending_pot_health_amount = 0;
+        recovery.hero_pending_pot_mana_amount = 0;
+    }
     {
         let mut npc_state = world.resource_mut::<NpcStateResource>();
         npc_state.npc_variables = Vec::new();
@@ -624,6 +627,9 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_monster_spawns = Vec::new();
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions = Vec::new();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
     {
         let mut map = world.resource_mut::<MapRuntimeResource>();
@@ -669,6 +675,8 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
     normalize_inventory_known_item_metadata(&mut resources);
     normalize_inventory_unique_ids(&mut resources);
     drop(resources);
+    world.resource_mut::<HeroInventoryResource>().items =
+        decode_state_vec(&save.hero_inventory_items_json).unwrap_or_default();
     world.resource_mut::<Stage5SystemsResource>().stage5_systems = save
         .stage5_systems_json
         .as_deref()
@@ -704,6 +712,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         let mut queue = world.resource_mut::<RuntimeQueueResource>();
         queue.pending_combat_actions = Vec::new();
         queue.pending_monster_spawns = Vec::new();
+        queue.pending_ground_spell_actions = Vec::new();
     }
     world.resource_mut::<QuestResource>().quests =
         decode_state_vec(&save.quest_states_json).unwrap_or_default();

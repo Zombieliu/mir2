@@ -4,28 +4,33 @@ use mir2_protocol::{MirDirection, ObjectMovement, ObjectSpellInfo, Point, Server
 
 use crate::config::WorldEntityDisposition;
 
-use super::buffs::{tick_buffs, tick_crystal_normal_potion_restore};
+use super::buffs::{
+    tick_buffs, tick_crystal_normal_hero_potion_restore, tick_crystal_normal_potion_restore,
+};
 use super::combat::*;
 use super::components::{
-    current_player_object_id, entity_facing, entity_name, entity_object_id, entity_position,
-    player_entity, DisplayName, Facing, GeneralMeowMeowState, Monster, MonsterAgent,
-    MonsterAiState, MonsterVitals, ObjectId, Position, SummonedMonster, WoomaTaurusState,
-    WorldObject, YimoogiState,
+    current_player_is_dead, current_player_object_id, entity_facing, entity_name, entity_object_id,
+    entity_position, player_entity, DisplayName, Facing, GeneralMeowMeowState, Monster,
+    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, Position,
+    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
 use super::drops::tick_ground_drop_expiry;
 use super::equipment::total_defence_bonus;
 use super::fishing::tick_fishing;
+use super::hero_ai::tick_stage5_hero_combat_ai;
 use super::inventory::sync_expired_expanded_storage;
 use super::monsters::*;
 use super::movement::*;
 use super::npc::process_crystal_npc_goods_expiry;
 use super::packets::*;
+use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
     advance_runtime_tick, current_language, is_in_world, runtime_tick, BuffResource,
     InventoryResource, MapRuntimeResource,
 };
 use super::session::SimulationSession;
+use super::skills::tick_ground_spell_actions;
 
 pub(super) fn monster_step_toward_with_fallback(
     world: &World,
@@ -1281,6 +1286,9 @@ pub(super) fn spawn_yimoogi_runtime_monster(
         MonsterVitals {
             hp: template.monster_hp.max(1),
             max_hp: template.monster_hp.max(1),
+        },
+        MonsterCombatStats {
+            agility: template.monster_agility,
         },
     ));
     if template.monster_ai == 36 {
@@ -3177,6 +3185,9 @@ pub(super) fn spawn_trap_rock_child_rocks(
                     hp: template.monster_hp.max(1),
                     max_hp: template.monster_hp.max(1),
                 },
+                MonsterCombatStats {
+                    agility: template.monster_agility,
+                },
                 SummonedMonster {
                     summoner_object_id: parent_object_id,
                     visible_extra: false,
@@ -3902,13 +3913,22 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     let tick = advance_runtime_tick(world);
     process_crystal_npc_goods_expiry(world);
     let mut packets = Vec::new();
+    process_expired_rental_items(world, &mut packets);
+    if current_player_is_dead(world) {
+        return_rented_items_on_player_death(world, &mut packets);
+    }
     tick_buffs(world, &mut packets);
     sync_expired_expanded_storage(world, &mut packets);
     tick_crystal_normal_potion_restore(world, &mut packets);
+    tick_crystal_normal_hero_potion_restore(world, &mut packets);
+    tick_stage5_hero_auto_pot(world, tick, &mut packets);
+    tick_stage5_hero_combat_ai(world, tick, &mut packets);
     tick_ground_drop_expiry(world, tick);
     tick_stage5_intelligent_creatures(world, tick, &mut packets);
     tick_fishing(world, &mut packets);
     resolve_pending_combat_actions(world, tick, &mut packets);
+    tick_ground_spell_actions(world, tick, &mut packets);
+    tick_monster_poisons(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
     resolve_pending_monster_spawns(world, tick);
     let revived_entities = tick_respawns(world);

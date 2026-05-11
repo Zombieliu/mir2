@@ -1,0 +1,8007 @@
+{
+  "ok": false,
+  "baseUrl": "http://127.0.0.1:13010/?gatewayWs=ws://127.0.0.1:7210/ws&codexBust=packetdemo-073507",
+  "account": "demo",
+  "createAccount": false,
+  "interaction": "packetRun",
+  "startTarget": {
+    "map": "0",
+    "x": 330,
+    "y": 270
+  },
+  "startedAt": "2026-05-10T23:35:32.279Z",
+  "start": {
+    "capturedAt": 1778456125432,
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 330,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "directionStepPending": null,
+    "directionStepPendingQueue": [],
+    "selfEntity": {
+      "x": 330,
+      "y": 270,
+      "direction": "Down",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 490.15,
+      "top": 283,
+      "width": 29.7,
+      "height": 12
+    },
+    "floor": {
+      "left": -298,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-7:314:254:0",
+    "centerSprite": {
+      "left": 470,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-9:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:35:13 AM] Online Players: 1",
+      "[7:35:13 AM] [Pet: Attack and Move]",
+      "[7:35:13 AM] [Mode: Peaceful]",
+      "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+    ],
+    "sentMoveTail": [],
+    "commandTail": [],
+    "receivedMoveTail": [],
+    "gatewayMoveTail": [
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownRight",
+          "objectId": 200348,
+          "x": 320,
+          "y": 271
+        },
+        "at": 1778456125157
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 200347,
+          "x": 340,
+          "y": 276
+        },
+        "at": 1778456125142
+      },
+      {
+        "type": "packet",
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Down",
+          "x": 330,
+          "y": 270
+        },
+        "at": 1778456124522
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "UpLeft",
+          "objectId": 200348,
+          "x": 320,
+          "y": 271
+        },
+        "at": 1778456123904
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "UpRight",
+          "objectId": 200347,
+          "x": 340,
+          "y": 276
+        },
+        "at": 1778456123884
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "UpLeft",
+          "objectId": 200348,
+          "x": 321,
+          "y": 272
+        },
+        "at": 1778456123341
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "UpRight",
+          "objectId": 200347,
+          "x": 339,
+          "y": 277
+        },
+        "at": 1778456123300
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "UpLeft",
+          "objectId": 200348,
+          "x": 322,
+          "y": 273
+        },
+        "at": 1778456122717
+      }
+    ]
+  },
+  "finalState": {
+    "capturedAt": 1778456132073,
+    "screen": "game",
+    "mapFileName": "0",
+    "mapTitle": "BichonProvince",
+    "player": {
+      "x": 330,
+      "y": 270
+    },
+    "predictedPlayer": null,
+    "movementPlan": null,
+    "directionStepPending": null,
+    "directionStepPendingQueue": [],
+    "selfEntity": {
+      "x": 330,
+      "y": 270,
+      "direction": "Down",
+      "kind": "selfPlayer",
+      "objectId": "1000"
+    },
+    "sprite": {
+      "left": 480,
+      "top": 352,
+      "width": 0,
+      "height": 0
+    },
+    "nameplate": {
+      "left": 490.15,
+      "top": 283,
+      "width": 29.7,
+      "height": 12
+    },
+    "floor": {
+      "left": -298,
+      "top": -160,
+      "width": 96,
+      "height": 64
+    },
+    "floorKey": "sprite-7:314:254:0",
+    "centerSprite": {
+      "left": 470,
+      "top": 352,
+      "width": 96,
+      "height": 64
+    },
+    "centerSpriteKey": "sprite-9:330:270:0",
+    "stage": {
+      "left": 0,
+      "top": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "logsTail": [
+      "[7:35:13 AM] Online Players: 1",
+      "[7:35:13 AM] [Pet: Attack and Move]",
+      "[7:35:13 AM] [Mode: Peaceful]",
+      "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+    ],
+    "sentMoveTail": [],
+    "commandTail": [
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456128468
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456127682
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456126936
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456126202
+      },
+      {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456125465
+      }
+    ],
+    "receivedMoveTail": [],
+    "gatewayMoveTail": [
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownRight",
+          "objectId": 200348,
+          "x": 323,
+          "y": 274
+        },
+        "at": 1778456132001
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 200347,
+          "x": 337,
+          "y": 279
+        },
+        "at": 1778456131986
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownRight",
+          "objectId": 200348,
+          "x": 322,
+          "y": 273
+        },
+        "at": 1778456131490
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 200347,
+          "x": 338,
+          "y": 278
+        },
+        "at": 1778456131476
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownRight",
+          "objectId": 200348,
+          "x": 321,
+          "y": 272
+        },
+        "at": 1778456131001
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 200347,
+          "x": 339,
+          "y": 277
+        },
+        "at": 1778456130984
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownRight",
+          "objectId": 200348,
+          "x": 320,
+          "y": 271
+        },
+        "at": 1778456130474
+      },
+      {
+        "type": "packet",
+        "packet": "ObjectWalk",
+        "payload": {
+          "direction": "DownLeft",
+          "objectId": 200347,
+          "x": 340,
+          "y": 276
+        },
+        "at": 1778456130438
+      }
+    ]
+  },
+  "sampleMs": 80,
+  "directionLagMs": 260,
+  "stalePredictedMs": 1200,
+  "slowCommandQueueMs": 1200,
+  "maxDirectionQueueLength": 1,
+  "strictMovementChecks": true,
+  "allowBlockedResidual": false,
+  "settleMs": 2000,
+  "settle": {
+    "status": "settled",
+    "strictStatus": "settled",
+    "clean": true,
+    "pendingPlanAtEnd": null,
+    "observedBlockedTarget": null,
+    "waitedMs": 6,
+    "capturedAt": 1778456132074,
+    "finalState": {
+      "capturedAt": 1778456132073,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456132001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456131986
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        }
+      ]
+    }
+  },
+  "pendingPlanAtEnd": null,
+  "assertions": [
+    {
+      "name": "noVisualJumps",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "noRouteSpamWarnings",
+      "pass": false,
+      "count": 1
+    },
+    {
+      "name": "noLogicalTileRollback",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "directionAnimationWithinCrystalWindow",
+      "pass": false,
+      "count": 5
+    },
+    {
+      "name": "stalePredictedPlayerCleared",
+      "pass": true,
+      "count": 0,
+      "maxAgeMs": 1200,
+      "strict": true,
+      "warnings": []
+    },
+    {
+      "name": "movementCommandQueueResponsive",
+      "pass": true,
+      "count": 0,
+      "maxPendingMs": 1200,
+      "maxDirectionQueueLength": 1,
+      "strict": true,
+      "warnings": []
+    },
+    {
+      "name": "movementSettledWithoutResidualPlan",
+      "pass": true,
+      "status": "settled",
+      "strictStatus": "settled",
+      "strict": true,
+      "allowBlockedResidual": false,
+      "pendingPlanAtEnd": null
+    },
+    {
+      "name": "noConsoleErrors",
+      "pass": true,
+      "count": 0
+    },
+    {
+      "name": "noNonFaviconNetwork404s",
+      "pass": true,
+      "count": 0
+    }
+  ],
+  "sampleCount": 32,
+  "actions": [
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 0
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456125157
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456125142
+          },
+          {
+            "type": "packet",
+            "packet": "UserLocation",
+            "payload": {
+              "direction": "Down",
+              "x": 330,
+              "y": 270
+            },
+            "at": 1778456124522
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456123904
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456123884
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456123341
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456123300
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456122717
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456125157
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456125142
+          },
+          {
+            "type": "packet",
+            "packet": "UserLocation",
+            "payload": {
+              "direction": "Down",
+              "x": 330,
+              "y": 270
+            },
+            "at": 1778456124522
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456123904
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456123884
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456123341
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 1
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456125157
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456125142
+          },
+          {
+            "type": "packet",
+            "packet": "UserLocation",
+            "payload": {
+              "direction": "Down",
+              "x": 330,
+              "y": 270
+            },
+            "at": 1778456124522
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456123904
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456123884
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456123341
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456126245
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456126232
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456125157
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456125142
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 2
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456126245
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456126232
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 320,
+              "y": 271
+            },
+            "at": 1778456125157
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 340,
+              "y": 276
+            },
+            "at": 1778456125142
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126936
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 324,
+              "y": 275
+            },
+            "at": 1778456127273
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 336,
+              "y": 280
+            },
+            "at": 1778456127259
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456126245
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456126232
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 3
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126936
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 324,
+              "y": 275
+            },
+            "at": 1778456127273
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 336,
+              "y": 280
+            },
+            "at": 1778456127259
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456126245
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456126232
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456125734
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456125720
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456127682
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126936
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456128379
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456128337
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 324,
+              "y": 275
+            },
+            "at": 1778456127273
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 336,
+              "y": 280
+            },
+            "at": 1778456127259
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          }
+        ]
+      }
+    },
+    {
+      "label": "packetRun-Right",
+      "mode": "run",
+      "x": 330,
+      "y": 270,
+      "durationMs": 2800,
+      "interaction": "packetRun",
+      "dispatch": {
+        "type": "run",
+        "direction": "Right",
+        "ok": true,
+        "index": 4
+      },
+      "before": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456127682
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126936
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456128379
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456128337
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 324,
+              "y": 275
+            },
+            "at": 1778456127273
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 336,
+              "y": 280
+            },
+            "at": 1778456127259
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456126735
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456126720
+          }
+        ]
+      },
+      "afterDispatch": {
+        "player": {
+          "x": 330,
+          "y": 270
+        },
+        "predictedPlayer": null,
+        "movementPlan": null,
+        "directionStepPending": null,
+        "directionStepPendingQueue": [],
+        "selfEntity": {
+          "x": 330,
+          "y": 270,
+          "direction": "Down",
+          "kind": "selfPlayer",
+          "objectId": "1000"
+        },
+        "sprite": {
+          "left": 480,
+          "top": 352,
+          "width": 0,
+          "height": 0
+        },
+        "centerSprite": {
+          "left": 470,
+          "top": 352,
+          "width": 96,
+          "height": 64
+        },
+        "centerSpriteKey": "sprite-9:330:270:0",
+        "nameplate": {
+          "left": 490.15,
+          "top": 283,
+          "width": 29.7,
+          "height": 12
+        },
+        "floor": {
+          "left": -298,
+          "top": -160,
+          "width": 96,
+          "height": 64
+        },
+        "floorKey": "sprite-7:314:254:0",
+        "commandTail": [
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456128468
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456127682
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126936
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456126202
+          },
+          {
+            "type": "run",
+            "direction": "Right",
+            "at": 1778456125465
+          }
+        ],
+        "gatewayMoveTail": [
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 321,
+              "y": 272
+            },
+            "at": 1778456128865
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 339,
+              "y": 277
+            },
+            "at": 1778456128851
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 322,
+              "y": 273
+            },
+            "at": 1778456128379
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 338,
+              "y": 278
+            },
+            "at": 1778456128337
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpLeft",
+              "objectId": 200348,
+              "x": 323,
+              "y": 274
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "UpRight",
+              "objectId": 200347,
+              "x": 337,
+              "y": 279
+            },
+            "at": 1778456127810
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownRight",
+              "objectId": 200348,
+              "x": 324,
+              "y": 275
+            },
+            "at": 1778456127273
+          },
+          {
+            "type": "packet",
+            "packet": "ObjectWalk",
+            "payload": {
+              "direction": "DownLeft",
+              "objectId": 200347,
+              "x": 336,
+              "y": 280
+            },
+            "at": 1778456127259
+          }
+        ]
+      }
+    }
+  ],
+  "jumps": [],
+  "routeSpamWarnings": [
+    {
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "commandKey": "run:Right",
+      "count": 5,
+      "durationMs": 3003
+    }
+  ],
+  "logicalRollbackWarnings": [],
+  "directionLagWarnings": [
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456125465
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456126202
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456126936
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456127682
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    },
+    {
+      "command": {
+        "type": "run",
+        "direction": "Right",
+        "at": 1778456128468
+      },
+      "maxLagMs": 260,
+      "observedDirections": [],
+      "observedAtDeltaMs": null,
+      "sample": null
+    }
+  ],
+  "stalePredictionWarnings": [],
+  "commandQueueWarnings": [],
+  "feelMetrics": {
+    "logicalRollbackCount": 0,
+    "directionLagWindowMs": 260,
+    "directionLagCheckCount": 5,
+    "directionLagWarningCount": 5,
+    "stalePredictedWindowMs": 1200,
+    "stalePredictionWarningCount": 0,
+    "slowCommandQueueWindowMs": 1200,
+    "slowCommandQueueWarningCount": 0
+  },
+  "summary": [
+    {
+      "label": "packetRun-Right",
+      "count": 32,
+      "firstPlayer": {
+        "x": 330,
+        "y": 270
+      },
+      "lastPlayer": {
+        "x": 330,
+        "y": 270
+      },
+      "minSpriteLeft": 480,
+      "maxSpriteLeft": 480,
+      "minSpriteTop": 352,
+      "maxSpriteTop": 352,
+      "spriteLeftRange": 0,
+      "spriteTopRange": 0
+    }
+  ],
+  "samples": [
+    {
+      "label": "packetRun-Right",
+      "t": 0,
+      "capturedAt": 1778456129186,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 324,
+            "y": 275
+          },
+          "at": 1778456127273
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 336,
+            "y": 280
+          },
+          "at": 1778456127259
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 95,
+      "capturedAt": 1778456129276,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 324,
+            "y": 275
+          },
+          "at": 1778456127273
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 336,
+            "y": 280
+          },
+          "at": 1778456127259
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 184,
+      "capturedAt": 1778456129387,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 324,
+            "y": 275
+          },
+          "at": 1778456127273
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 296,
+      "capturedAt": 1778456129479,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 388,
+      "capturedAt": 1778456129569,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 478,
+      "capturedAt": 1778456129659,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 568,
+      "capturedAt": 1778456129746,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 656,
+      "capturedAt": 1778456129831,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 323,
+            "y": 274
+          },
+          "at": 1778456127810
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 337,
+            "y": 279
+          },
+          "at": 1778456127810
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 741,
+      "capturedAt": 1778456129917,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 825,
+      "capturedAt": 1778456130006,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 915,
+      "capturedAt": 1778456130095,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1004,
+      "capturedAt": 1778456130181,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1090,
+      "capturedAt": 1778456130269,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1179,
+      "capturedAt": 1778456130357,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456128379
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456128337
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1265,
+      "capturedAt": 1778456130474,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1383,
+      "capturedAt": 1778456130564,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1474,
+      "capturedAt": 1778456130651,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1562,
+      "capturedAt": 1778456130738,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1648,
+      "capturedAt": 1778456130827,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1735,
+      "capturedAt": 1778456130913,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456128865
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456128851
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1822,
+      "capturedAt": 1778456131001,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1908,
+      "capturedAt": 1778456131086,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 1996,
+      "capturedAt": 1778456131174,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2082,
+      "capturedAt": 1778456131260,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2170,
+      "capturedAt": 1778456131346,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2255,
+      "capturedAt": 1778456131441,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456129428
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456129387
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2350,
+      "capturedAt": 1778456131534,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2444,
+      "capturedAt": 1778456131622,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2530,
+      "capturedAt": 1778456131710,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2619,
+      "capturedAt": 1778456131802,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2711,
+      "capturedAt": 1778456131890,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    },
+    {
+      "label": "packetRun-Right",
+      "t": 2798,
+      "capturedAt": 1778456131986,
+      "screen": "game",
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "player": {
+        "x": 330,
+        "y": 270
+      },
+      "predictedPlayer": null,
+      "movementPlan": null,
+      "directionStepPending": null,
+      "directionStepPendingQueue": [],
+      "selfEntity": {
+        "x": 330,
+        "y": 270,
+        "direction": "Down",
+        "kind": "selfPlayer",
+        "objectId": "1000"
+      },
+      "sprite": {
+        "left": 480,
+        "top": 352,
+        "width": 0,
+        "height": 0
+      },
+      "nameplate": {
+        "left": 490.15,
+        "top": 283,
+        "width": 29.7,
+        "height": 12
+      },
+      "floor": {
+        "left": -298,
+        "top": -160,
+        "width": 96,
+        "height": 64
+      },
+      "floorKey": "sprite-7:314:254:0",
+      "centerSprite": {
+        "left": 470,
+        "top": 352,
+        "width": 96,
+        "height": 64
+      },
+      "centerSpriteKey": "sprite-9:330:270:0",
+      "stage": {
+        "left": 0,
+        "top": 0,
+        "width": 1024,
+        "height": 768
+      },
+      "logsTail": [
+        "[7:35:13 AM] Online Players: 1",
+        "[7:35:13 AM] [Pet: Attack and Move]",
+        "[7:35:13 AM] [Mode: Peaceful]",
+        "[7:35:13 AM] Welcome to the Legend of Mir 2 Server."
+      ],
+      "sentMoveTail": [],
+      "commandTail": [
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456128468
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456127682
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126936
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456126202
+        },
+        {
+          "type": "run",
+          "direction": "Right",
+          "at": 1778456125465
+        }
+      ],
+      "receivedMoveTail": [],
+      "gatewayMoveTail": [
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 322,
+            "y": 273
+          },
+          "at": 1778456131490
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 338,
+            "y": 278
+          },
+          "at": 1778456131476
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 321,
+            "y": 272
+          },
+          "at": 1778456131001
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 339,
+            "y": 277
+          },
+          "at": 1778456130984
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownRight",
+            "objectId": 200348,
+            "x": 320,
+            "y": 271
+          },
+          "at": 1778456130474
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "DownLeft",
+            "objectId": 200347,
+            "x": 340,
+            "y": 276
+          },
+          "at": 1778456130438
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpLeft",
+            "objectId": 200348,
+            "x": 319,
+            "y": 270
+          },
+          "at": 1778456129917
+        },
+        {
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "direction": "UpRight",
+            "objectId": 200347,
+            "x": 341,
+            "y": 275
+          },
+          "at": 1778456129903
+        }
+      ]
+    }
+  ],
+  "nonFaviconNetwork404s": [],
+  "consoleErrors": [],
+  "screenshotPath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/movement-jitter/r-packet-run-demo-no-probe-073507.png"
+}

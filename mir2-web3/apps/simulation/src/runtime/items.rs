@@ -1,13 +1,15 @@
 use serde::{Deserialize, Serialize};
 
-use crate::config::{EquipmentSlot, ItemContainer, ItemGrade, WorldItemSnapshot};
+use crate::config::{
+    EquipmentSlot, ItemContainer, ItemGrade, Stage5HeroMagicState, WorldItemSnapshot,
+};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_item_by_index, crystal_item_by_name, localized_text_or_fallback, CrystalItemTemplate,
     LanguageCode,
 };
 use mir2_protocol::{
-    ChatType, ItemInfo, MirClass, MirGender, MirGridType, ServerPacket, UserItem,
+    ChatType, ClientMagic, ItemInfo, MirClass, MirGender, MirGridType, ServerPacket, UserItem,
     UserItemRentalInformation, UserItemSealedInfo, UserItemStat,
 };
 
@@ -47,8 +49,8 @@ use super::packets::{
     prepend_optional_packet, use_item_ack,
 };
 use super::resources::{
-    BuffResource, InventoryResource, PlayerPermissionResource, PlayerRuntimeResource,
-    SessionResource, SkillResource,
+    BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
+    PlayerRuntimeResource, SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::{
     current_language, hint_chat_key, hint_chat_key_args, is_in_world, runtime_tick,
@@ -95,6 +97,12 @@ pub(super) struct ItemState {
     pub(super) sealed_next_time_binary_datetime: i64,
     #[serde(default)]
     pub(super) rental_binding_flags: i16,
+    #[serde(default)]
+    pub(super) rental_owner_name: String,
+    #[serde(default)]
+    pub(super) rental_expiry_binary_datetime: i64,
+    #[serde(default)]
+    pub(super) rental_locked: bool,
     pub(super) attack: i32,
     pub(super) defence: i32,
     pub(super) heal_hp: i32,
@@ -330,7 +338,12 @@ pub(super) fn user_item_from_item_state(item: &ItemState) -> UserItem {
         refine_success_chance: 0,
         wedding_ring: -1,
         expire_info: None,
-        rental_information: user_item_rental_information(item.rental_binding_flags),
+        rental_information: user_item_rental_information(
+            item.rental_binding_flags,
+            &item.rental_owner_name,
+            item.rental_expiry_binary_datetime,
+            item.rental_locked,
+        ),
         is_shop_item: false,
         sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
             expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -398,13 +411,17 @@ pub(super) fn user_item_added_attack_defence(item: &UserItem) -> (i32, i32) {
 
 pub(super) fn user_item_rental_information(
     binding_flags: i16,
+    owner_name: &str,
+    expiry_binary_datetime: i64,
+    rental_locked: bool,
 ) -> Option<UserItemRentalInformation> {
-    (binding_flags != 0).then_some(UserItemRentalInformation {
-        owner_name: String::new(),
-        binding_flags,
-        expiry_binary_datetime: 0,
-        rental_locked: false,
-    })
+    (binding_flags != 0 || rental_locked || !owner_name.is_empty() || expiry_binary_datetime != 0)
+        .then_some(UserItemRentalInformation {
+            owner_name: owner_name.to_string(),
+            binding_flags,
+            expiry_binary_datetime,
+            rental_locked,
+        })
 }
 
 pub(super) fn crystal_socket_slot_limit_for_item_key(key: &str) -> Option<u8> {
@@ -1906,6 +1923,132 @@ pub(super) fn crystal_learn_book_skill(
     }
     skills.skills.push(skill.clone());
     Some(skill)
+}
+
+fn hero_inventory_item_is_broken(item: &ItemState) -> bool {
+    item.durability_max.unwrap_or_default() > 0 && item.durability_current.unwrap_or_default() == 0
+}
+
+fn hero_inventory_requirement_stat(item: &ItemState, stat: u8) -> i32 {
+    if item
+        .equip_slot
+        .or_else(|| crystal_equipment_slot_for_item_key(&item.key))
+        .is_none()
+        || hero_inventory_item_is_broken(item)
+    {
+        return 0;
+    }
+
+    let modeled_base = match stat {
+        CRYSTAL_STAT_MAX_AC => item.defence,
+        CRYSTAL_STAT_MAX_DC => item.attack,
+        _ => 0,
+    };
+    let template_base = crystal_item_template_for_item_key(&item.key)
+        .map(|template| crystal_item_stat_value(&template, stat))
+        .unwrap_or_default();
+    let base = if modeled_base != 0 {
+        modeled_base
+    } else {
+        template_base
+    };
+    base.saturating_add(crystal_item_added_stat_value(item, stat))
+}
+
+fn current_hero_required_stat_total(world: &World, stat: u8) -> i32 {
+    world
+        .resource::<HeroInventoryResource>()
+        .items
+        .iter()
+        .map(|item| hero_inventory_requirement_stat(item, stat))
+        .sum()
+}
+
+fn crystal_hero_item_requirement_rejected(
+    world: &World,
+    hero_level: u16,
+    hero_class: MirClass,
+    hero_gender: MirGender,
+    template: &CrystalItemTemplate,
+) -> bool {
+    if template.required_gender & crystal_required_gender_flag(hero_gender) == 0 {
+        return true;
+    }
+    if template.required_class & crystal_required_class_flag(hero_class) == 0 {
+        return true;
+    }
+
+    let required_amount = i32::from(template.required_amount);
+    match template.required_type {
+        CRYSTAL_REQUIRED_TYPE_LEVEL => hero_level < u16::from(template.required_amount),
+        CRYSTAL_REQUIRED_TYPE_MAX_AC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MAX_AC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_MAC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MAX_MAC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_DC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MAX_DC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_MC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MAX_MC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_SC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MAX_SC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MAX_LEVEL => hero_level > u16::from(template.required_amount),
+        CRYSTAL_REQUIRED_TYPE_MIN_AC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MIN_AC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_MAC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MIN_MAC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_DC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MIN_DC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_MC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MIN_MC) < required_amount
+        }
+        CRYSTAL_REQUIRED_TYPE_MIN_SC => {
+            current_hero_required_stat_total(world, CRYSTAL_STAT_MIN_SC) < required_amount
+        }
+        _ => false,
+    }
+}
+
+pub(super) fn crystal_learn_hero_book_magic(
+    world: &mut World,
+    template: &CrystalItemTemplate,
+) -> Option<ClientMagic> {
+    if template.item_type != CRYSTAL_ITEM_TYPE_BOOK {
+        return None;
+    }
+    let hero = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .clone()?;
+    if crystal_hero_item_requirement_rejected(world, hero.level, hero.class, hero.gender, template)
+    {
+        return None;
+    }
+    let skill = crystal_book_skill_state(template)?;
+    let magic = client_magic_for_skill_state(&skill, runtime_tick(world))?;
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let learned_magics = &mut stage5.stage5_systems.hero_learned_magics;
+    if learned_magics
+        .iter()
+        .any(|learned| learned.spell == magic.spell)
+    {
+        return None;
+    }
+    learned_magics.push(Stage5HeroMagicState {
+        spell: magic.spell,
+        level: skill.level,
+        key: 0,
+        experience: skill.experience,
+    });
+    Some(magic)
 }
 
 pub(super) fn crystal_item_template_for_item_key(key: &str) -> Option<CrystalItemTemplate> {

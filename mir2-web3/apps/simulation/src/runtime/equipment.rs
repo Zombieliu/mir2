@@ -79,6 +79,12 @@ pub(super) struct EquipmentState {
     pub(super) sealed_next_time_binary_datetime: i64,
     #[serde(default)]
     pub(super) rental_binding_flags: i16,
+    #[serde(default)]
+    pub(super) rental_owner_name: String,
+    #[serde(default)]
+    pub(super) rental_expiry_binary_datetime: i64,
+    #[serde(default)]
+    pub(super) rental_locked: bool,
     pub(super) attack: i32,
     pub(super) defence: i32,
 }
@@ -343,6 +349,9 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
         rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
         attack: template.attack,
         defence: template.defence,
     }
@@ -460,6 +469,9 @@ fn seed_equipment(
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
         rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
         attack,
         defence,
     }
@@ -577,7 +589,12 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
         refine_success_chance: 0,
         wedding_ring: -1,
         expire_info: None,
-        rental_information: user_item_rental_information(item.rental_binding_flags),
+        rental_information: user_item_rental_information(
+            item.rental_binding_flags,
+            &item.rental_owner_name,
+            item.rental_expiry_binary_datetime,
+            item.rental_locked,
+        ),
         is_shop_item: false,
         sealed_info: (item.sealed_expiry_time_binary_datetime != 0).then_some(UserItemSealedInfo {
             expiry_binary_datetime: item.sealed_expiry_time_binary_datetime,
@@ -633,6 +650,9 @@ pub(super) fn item_state_from_equipment_state(
         sealed_expiry_time_binary_datetime: equipment.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: equipment.sealed_next_time_binary_datetime,
         rental_binding_flags: equipment.rental_binding_flags,
+        rental_owner_name: equipment.rental_owner_name,
+        rental_expiry_binary_datetime: equipment.rental_expiry_binary_datetime,
+        rental_locked: equipment.rental_locked,
         attack: equipment.attack,
         defence: equipment.defence,
         heal_hp: 0,
@@ -668,6 +688,9 @@ pub(super) fn equipment_state_from_item_state(
         sealed_expiry_time_binary_datetime: item.sealed_expiry_time_binary_datetime,
         sealed_next_time_binary_datetime: item.sealed_next_time_binary_datetime,
         rental_binding_flags: item.rental_binding_flags,
+        rental_owner_name: item.rental_owner_name.clone(),
+        rental_expiry_binary_datetime: item.rental_expiry_binary_datetime,
+        rental_locked: item.rental_locked,
         attack: item.attack,
         defence: item.defence,
     }

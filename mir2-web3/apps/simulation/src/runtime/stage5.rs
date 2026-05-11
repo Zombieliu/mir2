@@ -9,8 +9,8 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use crate::config::{
-    EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5HeroState,
-    Stage5MailMessage, Stage5TradeState, WorldEntityDisposition,
+    EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
+    Stage5HeroState, Stage5MailMessage, Stage5TradeState, WorldEntityDisposition,
 };
 
 use super::components::{
@@ -33,16 +33,21 @@ use super::items::{
     crystal_seal_minutes_for_source_item, crystal_socket_slot_limit_for_item_key,
     crystal_socket_source_valid_for_item, item_icon_for_key, ItemState,
 };
+use super::map::spawn_stage5_hero;
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, spawn_runtime_monster,
 };
 use super::npc::ActiveNpcServiceState;
-use super::packets::object_health_info_for_entity;
+use super::packets::{object_health_info_for_entity, stage5_guild_request_war_packet};
 use super::resources::{
     InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource, Stage5SystemsResource,
 };
 use super::session::{current_language, system_message, SimulationSession};
+use super::social_economy::{
+    stage5_mail_exact_item_slots, stage5_social_add_friend_entry, stage5_trade_item_can_enter,
+    Stage5SocialAddResult,
+};
 
 pub(super) fn stage5_player_name(world: &World) -> String {
     world
@@ -68,6 +73,69 @@ pub(super) fn unique_strings(values: impl IntoIterator<Item = String>) -> Vec<St
         push_unique(&mut result, value);
     }
     result
+}
+
+fn stage5_guild_rank_is_leader(rank: &str) -> bool {
+    let rank = rank.trim();
+    rank.is_empty()
+        || rank.eq_ignore_ascii_case("Guild Chief")
+        || rank.eq_ignore_ascii_case("Leader")
+}
+
+fn stage5_guild_permission_key(permission: &str) -> String {
+    permission
+        .chars()
+        .filter(|ch| ch.is_ascii_alphanumeric())
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+fn stage5_guild_can_alter_alliance(guild: &Stage5GuildState) -> bool {
+    stage5_guild_rank_is_leader(&guild.rank)
+        || guild.permissions.iter().any(|permission| {
+            matches!(
+                stage5_guild_permission_key(permission).as_str(),
+                "alteralliance" | "alliance" | "conquest"
+            )
+        })
+}
+
+fn stage5_guild_canonical_alliance_target(
+    guild: &Stage5GuildState,
+    territory_owner: &str,
+    name: &str,
+) -> Option<String> {
+    let target = name.trim();
+    if target.is_empty() {
+        return None;
+    }
+    if guild.name.eq_ignore_ascii_case(target) {
+        return Some(guild.name.clone());
+    }
+    guild
+        .known_guilds
+        .iter()
+        .find(|known| known.eq_ignore_ascii_case(target))
+        .cloned()
+        .or_else(|| {
+            guild
+                .allied_guilds
+                .iter()
+                .find(|ally| ally.eq_ignore_ascii_case(target))
+                .cloned()
+        })
+        .or_else(|| {
+            let territory_owner = territory_owner.trim();
+            (!territory_owner.is_empty() && territory_owner.eq_ignore_ascii_case(target))
+                .then(|| territory_owner.to_string())
+        })
+}
+
+fn stage5_guild_is_allied(guild: &Stage5GuildState, target: &str) -> bool {
+    guild
+        .allied_guilds
+        .iter()
+        .any(|ally| ally.eq_ignore_ascii_case(target))
 }
 
 pub(super) fn parse_u32_arg(args: &[String], index: usize) -> Option<u32> {
@@ -166,6 +234,9 @@ impl SimulationSession {
             "group.leave" => self.stage5_group_leave(),
             "guild.create" => self.stage5_guild_create(args),
             "guild.rank" => self.stage5_guild_rank(args),
+            "guild.requestWar" => stage5_guild_request_war_packet(self.app.world()),
+            "guild.ally" | "guild.alliance" => self.stage5_guild_ally(args),
+            "guild.unally" | "guild.endAlliance" => self.stage5_guild_unally(args),
             "guild.chat" => self.stage5_guild_chat(args),
             "social.friend" => self.stage5_social_friend(args),
             "social.unfriend" => self.stage5_social_unfriend(args),
@@ -251,14 +322,26 @@ impl SimulationSession {
         let language = current_language(self.app.world());
         let player_name = stage5_player_name(self.app.world());
         let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
-        stage5.stage5_systems.guild.name = name.clone();
-        stage5.stage5_systems.guild.members = unique_strings([player_name]);
-        stage5.stage5_systems.guild.rank = "Guild Chief".to_string();
-        stage5.stage5_systems.guild.permissions = vec![
-            "invite".to_string(),
-            "rank".to_string(),
-            "storage".to_string(),
-            "conquest".to_string(),
+        let guild = &mut stage5.stage5_systems.guild;
+        guild.name = name.clone();
+        guild.members = unique_strings([player_name]);
+        guild.rank = "Guild Chief".to_string();
+        push_unique(&mut guild.known_guilds, name.clone());
+        guild.active_wars.clear();
+        guild.active_war_ticks_remaining.clear();
+        guild.allied_guilds.clear();
+        guild.ally_count = 0;
+        guild.alliance_broadcasts.clear();
+        guild.war_broadcasts.clear();
+        guild.permissions = vec![
+            "changeRank".to_string(),
+            "recruit".to_string(),
+            "kick".to_string(),
+            "storeItem".to_string(),
+            "retrieveItem".to_string(),
+            "alterAlliance".to_string(),
+            "changeNotice".to_string(),
+            "activateBuff".to_string(),
         ];
         vec![system_message(&format_localized_text(
             language,
@@ -279,6 +362,115 @@ impl SimulationSession {
             .guild
             .rank = rank.clone();
         Vec::new()
+    }
+
+    fn stage5_guild_ally(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        self.stage5_guild_alliance_change(args, true)
+    }
+
+    fn stage5_guild_unally(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        self.stage5_guild_alliance_change(args, false)
+    }
+
+    fn stage5_guild_alliance_change(
+        &mut self,
+        args: Vec<String>,
+        create: bool,
+    ) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
+        let target_name = args.first().map(|name| name.trim()).unwrap_or_default();
+        let (guild_name, can_alter, canonical_target, already_allied, at_war) = {
+            let resources = self.app.world().resource::<Stage5SystemsResource>();
+            let guild = &resources.stage5_systems.guild;
+            let guild_name = guild.name.trim().to_string();
+            let canonical_target = stage5_guild_canonical_alliance_target(
+                guild,
+                &resources.stage5_systems.guild_territory.owner,
+                target_name,
+            );
+            let already_allied = canonical_target
+                .as_deref()
+                .is_some_and(|target| stage5_guild_is_allied(guild, target));
+            let at_war = canonical_target.as_deref().is_some_and(|target| {
+                guild
+                    .active_wars
+                    .iter()
+                    .any(|war| war.eq_ignore_ascii_case(target))
+            });
+            (
+                guild_name,
+                stage5_guild_can_alter_alliance(guild),
+                canonical_target,
+                already_allied,
+                at_war,
+            )
+        };
+
+        if guild_name.is_empty() {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotInGuild",
+                "server.NotInGuild",
+            ))];
+        }
+        if !can_alter {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NoCorrectGuildRank",
+                "server.NoCorrectGuildRank",
+            ))];
+        }
+        let Some(target_name) = canonical_target else {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.GuildNotFound",
+                [target_name.to_string()],
+            ))];
+        };
+        if guild_name.eq_ignore_ascii_case(&target_name) {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.CannotWarOwnGuild",
+                "server.CannotWarOwnGuild",
+            ))];
+        }
+        if create && at_war {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.AlreadyAtWarWithGuild",
+                "server.AlreadyAtWarWithGuild",
+            ))];
+        }
+        if create && already_allied {
+            return Vec::new();
+        }
+        if !create && !already_allied {
+            return Vec::new();
+        }
+
+        let message = if create {
+            format!("Alliance formed with {target_name}.")
+        } else {
+            format!("Alliance ended with {target_name}.")
+        };
+        {
+            let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
+            let guild = &mut resources.stage5_systems.guild;
+            if create {
+                push_unique(&mut guild.allied_guilds, target_name);
+            } else {
+                guild
+                    .allied_guilds
+                    .retain(|ally| !ally.eq_ignore_ascii_case(&target_name));
+            }
+            guild.ally_count = u32::try_from(guild.allied_guilds.len()).unwrap_or(u32::MAX);
+            guild.alliance_broadcasts.push(message.clone());
+        }
+
+        vec![ServerPacket::Chat {
+            message,
+            chat_type: ChatType::Guild,
+        }]
     }
 
     fn stage5_guild_chat(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -307,9 +499,45 @@ impl SimulationSession {
             .first()
             .cloned()
             .unwrap_or_else(|| "Friend".to_string());
-        let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
-        push_unique(&mut stage5.stage5_systems.social.friends, name.clone());
-        Vec::new()
+        let player_name = stage5_player_name(self.app.world());
+        let result = {
+            let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
+            stage5_social_add_friend_entry(
+                &mut stage5.stage5_systems.social,
+                &player_name,
+                &name,
+                false,
+            )
+        };
+        self.stage5_social_add_result(result)
+    }
+
+    fn stage5_social_add_result(&self, result: Stage5SocialAddResult) -> Vec<ServerPacket> {
+        let language = current_language(self.app.world());
+        match result {
+            Stage5SocialAddResult::Added => Vec::new(),
+            Stage5SocialAddResult::EmptyTarget => {
+                vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.PlayerDoesNotExist",
+                    "server.PlayerDoesNotExist",
+                ))]
+            }
+            Stage5SocialAddResult::SelfTarget => {
+                vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.CannotAddYourself",
+                    "server.CannotAddYourself",
+                ))]
+            }
+            Stage5SocialAddResult::AlreadyAdded => {
+                vec![system_message(&localized_text_or_fallback(
+                    language,
+                    "server.PlayerAlreadyAdded",
+                    "server.PlayerAlreadyAdded",
+                ))]
+            }
+        }
     }
 
     fn stage5_social_unfriend(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -332,14 +560,17 @@ impl SimulationSession {
             .first()
             .cloned()
             .unwrap_or_else(|| "Blocked".to_string());
-        let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
-        push_unique(&mut stage5.stage5_systems.social.blocked, name.clone());
-        stage5
-            .stage5_systems
-            .social
-            .friends
-            .retain(|friend| !friend.eq_ignore_ascii_case(&name));
-        Vec::new()
+        let player_name = stage5_player_name(self.app.world());
+        let result = {
+            let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
+            stage5_social_add_friend_entry(
+                &mut stage5.stage5_systems.social,
+                &player_name,
+                &name,
+                true,
+            )
+        };
+        self.stage5_social_add_result(result)
     }
 
     fn stage5_social_unblock(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -392,6 +623,9 @@ impl SimulationSession {
             body,
             gold,
             items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
             claimed: false,
             deleted: false,
         });
@@ -408,7 +642,7 @@ impl SimulationSession {
             ))];
         };
         let language = current_language(self.app.world());
-        let (index, gold, items) = {
+        let (index, gold, items, item_states_json) = {
             let stage5 = self.app.world().resource::<Stage5SystemsResource>();
             let Some(index) = stage5
                 .stage5_systems
@@ -429,11 +663,34 @@ impl SimulationSession {
                 index,
                 stage5.stage5_systems.mail[index].gold,
                 stage5.stage5_systems.mail[index].items.clone(),
+                stage5.stage5_systems.mail[index].item_states_json.clone(),
             )
         };
+        let item_states = item_states_json
+            .iter()
+            .filter_map(|state| serde_json::from_str::<ItemState>(state).ok())
+            .collect::<Vec<_>>();
+        let has_exact_item_states = !item_states.is_empty();
+        let keyed_items = if has_exact_item_states {
+            Vec::new()
+        } else {
+            items
+        };
+        let exact_item_slots;
         {
             let resources = self.app.world().resource::<InventoryResource>();
-            for key in &items {
+            exact_item_slots =
+                match stage5_mail_exact_item_slots(&resources.inventory_items, &item_states) {
+                    Some(slots) => slots,
+                    None => {
+                        return vec![system_message(&localized_text_or_fallback(
+                            language,
+                            "server.YouCannotCarryAnymore",
+                            "server.YouCannotCarryAnymore",
+                        ))];
+                    }
+                };
+            for key in &keyed_items {
                 if !can_gain_item_quantity(&resources, ItemContainer::Bag1, key, 1) {
                     return vec![system_message(&localized_text_or_fallback(
                         language,
@@ -453,7 +710,21 @@ impl SimulationSession {
             .stage5_systems
             .mail[index]
             .claimed = true;
-        for key in items {
+        for (mut item, (container, slot)) in item_states.into_iter().zip(exact_item_slots) {
+            item.container = container;
+            item.slot = slot;
+            item.unique_id = allocate_item_unique_id(
+                self.app.world().resource::<InventoryResource>(),
+                item.container,
+                item.slot,
+            );
+            self.app
+                .world_mut()
+                .resource_mut::<InventoryResource>()
+                .inventory_items
+                .push(item);
+        }
+        for key in keyed_items {
             add_or_increment_item(
                 self.app.world_mut(),
                 ItemContainer::Bag1,
@@ -464,6 +735,13 @@ impl SimulationSession {
                 1,
                 1,
             );
+        }
+        if has_exact_item_states {
+            let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
+            let mail = &mut stage5.stage5_systems.mail[index];
+            mail.gold = 0;
+            mail.items.clear();
+            mail.item_states_json.clear();
         }
         Vec::new()
     }
@@ -535,7 +813,16 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
+        if trade.completed || trade.locked {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
+        }
         trade.offered_gold = amount;
+        trade.accepted = false;
+        trade.locked = false;
         Vec::new()
     }
 
@@ -546,11 +833,22 @@ impl SimulationSession {
             .unwrap_or_else(|| "red-potion".to_string());
         let language = current_language(self.app.world());
         let resources = self.app.world_mut().resource_mut::<InventoryResource>();
-        if !resources.inventory_items.iter().any(|item| item.key == key) {
+        let Some(item) = resources
+            .inventory_items
+            .iter()
+            .find(|item| item.key == key)
+        else {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",
                 "server.NotFound",
+            ))];
+        };
+        if !stage5_trade_item_can_enter(item) {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "client.CantTrade",
+                "client.CantTrade",
             ))];
         }
         drop(resources);
@@ -562,20 +860,29 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
+        if trade.completed || trade.locked {
+            return vec![system_message(&localized_text_or_fallback(
+                language,
+                "server.NotFound",
+                "server.NotFound",
+            ))];
+        }
         push_unique(&mut trade.offered_items, key.clone());
+        trade.accepted = false;
+        trade.locked = false;
         Vec::new()
     }
 
     fn stage5_trade_accept(&mut self) -> Vec<ServerPacket> {
         let language = current_language(self.app.world());
-        let Some(offered_gold) = self
+        let Some((offered_gold, offered_items)) = self
             .app
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
             .trade
             .as_ref()
-            .map(|trade| trade.offered_gold)
+            .map(|trade| (trade.offered_gold, trade.offered_items.clone()))
         else {
             return vec![system_message(&localized_text_or_fallback(
                 language,
@@ -583,6 +890,29 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
+        {
+            let inventory = self.app.world().resource::<InventoryResource>();
+            for offered_item in offered_items {
+                let Some(item) = inventory
+                    .inventory_items
+                    .iter()
+                    .find(|item| item.key == offered_item)
+                else {
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "server.NotFound",
+                        "server.NotFound",
+                    ))];
+                };
+                if !stage5_trade_item_can_enter(item) {
+                    return vec![system_message(&localized_text_or_fallback(
+                        language,
+                        "client.CantTrade",
+                        "client.CantTrade",
+                    ))];
+                }
+            }
+        }
         let mut player = self.app.world_mut().resource_mut::<PlayerRuntimeResource>();
         if player.gold < offered_gold {
             return vec![system_message(&localized_text_or_fallback(
@@ -708,6 +1038,9 @@ impl SimulationSession {
                 body: format!("{key} was sent from the game shop."),
                 gold: 0,
                 items: vec![key.clone()],
+                item_states_json: Vec::new(),
+                opened: false,
+                locked: false,
                 claimed: false,
                 deleted: false,
             });
@@ -816,6 +1149,9 @@ impl SimulationSession {
                 body: format!("{item_name} was sent from the game shop."),
                 gold: 0,
                 items: vec![item_key],
+                item_states_json: Vec::new(),
+                opened: false,
+                locked: false,
                 claimed: false,
                 deleted: false,
             });
@@ -1099,7 +1435,13 @@ impl SimulationSession {
             behaviour: 0,
             experience: 0,
             spawned: true,
+            auto_pot: true,
+            auto_hp_percent: 0,
+            auto_mp_percent: 0,
+            hp_item_index: 0,
+            mp_item_index: 0,
         });
+        let _ = spawn_stage5_hero(self.app.world_mut());
         Vec::new()
     }
 
@@ -1505,6 +1847,9 @@ impl SimulationSession {
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
+            rental_owner_name: String::new(),
+            rental_expiry_binary_datetime: 0,
+            rental_locked: false,
             attack: 0,
             defence: 0,
             heal_hp,

@@ -14,22 +14,22 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
 use super::components::{
-    entity_position, player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent,
-    MonsterVitals, Npc, NpcAgent, ObjectId, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
-    WorldObject,
+    entity_position, player_entity, CharacterBody, DisplayName, Facing, Hero, Monster,
+    MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals,
+    Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
     build_crystal_current_map_visible_spawn_table, build_spawn_table,
     initial_general_meow_meow_state, initial_monster_ai_state_for_object, initial_yimoogi_state,
 };
-use super::movement::{current_location, point_in_bounds, tile_key};
+use super::movement::{current_location, point_in_bounds, summon_spawn_position_near, tile_key};
 use super::packets::{
     localized_monster_name_key, localized_npc_name_key, localized_visible_player_name_key,
 };
 use super::resources::{
     current_language, is_in_world, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, Stage5SystemsResource,
 };
 use super::save::{active_character_runtime_state, ActiveCharacterRuntimeState};
 use super::session::{system_message, SimulationSession};
@@ -175,6 +175,21 @@ pub(super) fn current_map_disallows_mount(world: &World) -> bool {
     current_map_manifest_disallows_mount(map)
         || current_map_drop_rule(config, map)
             .map(|rule| rule.no_mount)
+            .unwrap_or(false)
+}
+
+pub(super) fn current_map_manifest_disallows_hero(map: &MapRuntimeResource) -> bool {
+    crystal_map_respawns_by_file_name(&map.current_map.file_name)
+        .map(|map| map.no_hero)
+        .unwrap_or(false)
+}
+
+pub(super) fn current_map_disallows_hero(world: &World) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    current_map_manifest_disallows_hero(map)
+        || current_map_drop_rule(config, map)
+            .map(|rule| rule.no_hero)
             .unwrap_or(false)
 }
 
@@ -432,6 +447,9 @@ pub(super) fn relocate_player_to_map(
         .resource_mut::<RuntimeQueueResource>()
         .pending_monster_spawns = Vec::new();
     world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions = Vec::new();
+    world
         .entity_mut(player)
         .insert((Position(position), Facing(direction)));
 
@@ -459,6 +477,7 @@ pub(super) fn relocate_player_to_map(
             chat_type: ChatType::System,
         });
     }
+    despawn_stage5_hero_for_no_hero_map(world, &mut packets);
     packets
 }
 
@@ -540,6 +559,9 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
                         hp: rule.max_hp,
                         max_hp: rule.max_hp,
                     },
+                    MonsterCombatStats {
+                        agility: rule.agility,
+                    },
                 ))
                 .id();
             if rule.ai == 36 {
@@ -550,7 +572,104 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
     }
 
     spawn_crystal_current_map_npcs(world);
+    spawn_stage5_hero(world);
     world.insert_resource(spawn_table);
+}
+
+pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
+    let existing: Vec<Entity> = {
+        let mut query = world.query_filtered::<Entity, With<Hero>>();
+        query.iter(world).collect()
+    };
+    for entity in existing {
+        let _ = world.despawn(entity);
+    }
+
+    let hero_allowed = !current_map_disallows_hero(world);
+    let hero = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .as_ref()
+        .filter(|hero| hero.spawned && hero_allowed)
+        .cloned()?;
+    let owner_name = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.name.clone())?;
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let player = player_entity(world)?;
+    let player_position = entity_position(world, player)?;
+    let player_direction = world
+        .entity(player)
+        .get::<Facing>()
+        .map(|facing| facing.0)?;
+    let spawn_position =
+        summon_spawn_position_near(world, &player_position, player_direction, 1, Some(player));
+    let max_hp = 60 + i32::from(hero.level).saturating_mul(6);
+    let max_mp = 30 + i32::from(hero.level).saturating_mul(4);
+
+    Some(
+        world
+            .spawn((
+                WorldObject,
+                Hero {
+                    owner_name: owner_name.clone(),
+                    next_attack_tick: 0,
+                    next_move_tick: 0,
+                },
+                ObjectId(config.object_id.saturating_add(1)),
+                DisplayName::literal(hero.name),
+                Position(spawn_position),
+                Facing(player_direction),
+                CharacterBody {
+                    class: hero.class,
+                    gender: hero.gender,
+                    level: hero.level,
+                    armour_shape: None,
+                    weapon_shape: None,
+                },
+                PlayerVitals {
+                    hp: max_hp,
+                    max_hp,
+                    mp: max_mp,
+                },
+            ))
+            .id(),
+    )
+}
+
+fn despawn_stage5_hero_for_no_hero_map(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if !current_map_disallows_hero(world) {
+        return;
+    }
+
+    let was_spawned = world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .as_mut()
+        .map(|hero| {
+            let was_spawned = hero.spawned;
+            hero.spawned = false;
+            was_spawned
+        })
+        .unwrap_or(false);
+    if !was_spawned {
+        return;
+    }
+
+    packets.push(ServerPacket::UpdateHeroSpawnState { state: 1 });
+    let language = super::session::current_language(world);
+    packets.push(ServerPacket::Chat {
+        message: localized_text_or_fallback(
+            language,
+            "server.HeroesNotAllowedOnMap",
+            "Heroes are not allowed on this map. Your Hero has been unsummoned.",
+        ),
+        chat_type: ChatType::System,
+    });
 }
 
 pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
@@ -1389,6 +1508,9 @@ pub(super) fn rebuild_world(world: &mut World) {
                         hp: rule.max_hp,
                         max_hp: rule.max_hp,
                     },
+                    MonsterCombatStats {
+                        agility: rule.agility,
+                    },
                 ))
                 .id();
             if rule.ai == 123 {
@@ -1419,6 +1541,7 @@ pub(super) fn rebuild_world(world: &mut World) {
         ));
     }
 
+    spawn_stage5_hero(world);
     world.insert_resource(spawn_table);
 }
 

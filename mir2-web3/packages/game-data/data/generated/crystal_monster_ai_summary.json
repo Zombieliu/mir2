@@ -1326,7 +1326,7 @@
       "crystal_todo": false,
       "runtime_status": "implemented_special",
       "runtime_notes": [
-        "ThunderElement two-tile CompleteAttack baseline, delayed due-time ObjectAttack packet, DC-based damage, random near-target repositioning, nearby opposing-target fanout, and normal-damage immunity are covered; Repulsion push-damage from player skills remains pending."
+        "ThunderElement two-tile CompleteAttack baseline, delayed due-time ObjectAttack packet, DC-based damage, random near-target repositioning, nearby opposing-target fanout, normal-damage immunity, and player Repulsion-family ObjectPushed push-damage are covered."
       ],
       "monster_count": 2,
       "boss_monster_count": 0,

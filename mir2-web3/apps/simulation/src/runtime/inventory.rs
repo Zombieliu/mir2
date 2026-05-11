@@ -66,6 +66,9 @@ fn seed_item(
         sealed_expiry_time_binary_datetime: 0,
         sealed_next_time_binary_datetime: 0,
         rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
         attack,
         defence,
         heal_hp,
@@ -1482,6 +1485,9 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
+            rental_owner_name: String::new(),
+            rental_expiry_binary_datetime: 0,
+            rental_locked: false,
             attack: 0,
             defence: 0,
             heal_hp: 0,
@@ -2206,7 +2212,7 @@ pub(super) fn split_item_impl(
             resources.storage_items[index].quantity -= u32::from(count);
             let mut split = resources.storage_items[index].clone();
             split.slot = next_slot;
-            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
+            split.unique_id = default_item_unique_id(split.container, next_slot);
             split.quantity = u32::from(count);
             let split_packet_item = user_item_from_item_state(&split);
             resources.storage_items.push(split);

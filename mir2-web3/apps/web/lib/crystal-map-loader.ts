@@ -30,6 +30,14 @@ const PACKAGED_STARTER_MAP_REGION_PATH = path.join(
   "generated",
   "crystal_starter_map_region.json",
 );
+const PACKAGED_STARTER_MAP_COLLISION_PATH = path.join(
+  REPO_ROOT,
+  "packages",
+  "game-data",
+  "data",
+  "generated",
+  "crystal_starter_map_collision.json",
+);
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const CELL_WIDTH = 48;
 const CELL_HEIGHT = 32;
@@ -51,6 +59,11 @@ type CrystalMapManifestEntry = {
   }>;
   respawns?: Array<{ location?: { x?: number; y?: number } }>;
   safe_zones?: Array<{ location?: { x?: number; y?: number } }>;
+};
+
+type PackagedMapCollision = {
+  blockedCells?: Array<{ x?: number; y?: number }>;
+  doors?: Array<{ x?: number; y?: number; closed?: boolean }>;
 };
 
 type ParsedMap = {
@@ -543,6 +556,9 @@ async function exportMapRegion(
       if (!cell) continue;
 
       const outputCell: OriginalMapRegion["cells"][number] = { x: cell.x, y: cell.y };
+      if (parsedCellBlocksMovement(cell)) {
+        outputCell.blocked = true;
+      }
       if (cell.x % 2 === 0 && cell.y % 2 === 0) {
         const backLayer = backLayerForCell(cell);
         if (backLayer) outputCell.back = registerSprite(backLayer, "back");
@@ -706,7 +722,7 @@ function loadPackagedStarterMapRegion(): OriginalMapRegion | null {
     const source = JSON.parse(readFileSync(PACKAGED_STARTER_MAP_REGION_PATH, "utf8")) as Partial<OriginalMapRegion>;
     const maxCellX = Math.max(...(source.cells ?? []).map((cell) => cell.x), source.regionBounds?.maxX ?? 0);
     const maxCellY = Math.max(...(source.cells ?? []).map((cell) => cell.y), source.regionBounds?.maxY ?? 0);
-    return {
+    return withPackagedStarterCollision({
       mapFileName: source.mapFileName ?? "0",
       mapWidth: source.mapWidth ?? maxCellX + 1,
       mapHeight: source.mapHeight ?? maxCellY + 1,
@@ -716,10 +732,48 @@ function loadPackagedStarterMapRegion(): OriginalMapRegion | null {
       playBounds: source.playBounds ?? { minX: 0, maxX: maxCellX, minY: 0, maxY: maxCellY },
       sprites: source.sprites ?? {},
       cells: source.cells ?? [],
-    };
+    });
   } catch {
     return null;
   }
+}
+
+function withPackagedStarterCollision(region: OriginalMapRegion): OriginalMapRegion {
+  try {
+    const collision = JSON.parse(readFileSync(PACKAGED_STARTER_MAP_COLLISION_PATH, "utf8")) as PackagedMapCollision;
+    const cellsByKey = new Map(region.cells.map((cell) => [`${cell.x}:${cell.y}`, { ...cell }]));
+
+    for (const point of collision.blockedCells ?? []) {
+      const x = Math.trunc(point.x ?? Number.NaN);
+      const y = Math.trunc(point.y ?? Number.NaN);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (!pointInRegion(region.regionBounds, x, y)) continue;
+      const key = `${x}:${y}`;
+      cellsByKey.set(key, { ...(cellsByKey.get(key) ?? { x, y }), blocked: true });
+    }
+
+    for (const door of collision.doors ?? []) {
+      if (!door.closed) continue;
+      const x = Math.trunc(door.x ?? Number.NaN);
+      const y = Math.trunc(door.y ?? Number.NaN);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      if (!pointInRegion(region.regionBounds, x, y)) continue;
+      const key = `${x}:${y}`;
+      cellsByKey.set(key, { ...(cellsByKey.get(key) ?? { x, y }), closedDoor: true });
+    }
+
+    return { ...region, cells: [...cellsByKey.values()] };
+  } catch {
+    return region;
+  }
+}
+
+function pointInRegion(
+  bounds: { minX: number; maxX: number; minY: number; maxY: number },
+  x: number,
+  y: number,
+) {
+  return x >= bounds.minX && x <= bounds.maxX && y >= bounds.minY && y <= bounds.maxY;
 }
 
 function backLayerForCell(cell: ParsedMapCell) {
@@ -727,6 +781,10 @@ function backLayerForCell(cell: ParsedMapCell) {
   const frameIndex = (cell.backImage & 0x1fffffff) - 1;
   if (frameIndex < 0) return null;
   return { libraryKey: mapLibraryKeyForIndex(cell.backIndex), drawMode: "floor" as const, frames: [frameIndex] };
+}
+
+function parsedCellBlocksMovement(cell: ParsedMapCell) {
+  return (cell.backImage & 0x20000000) !== 0 || (cell.frontImage & 0x8000) !== 0;
 }
 
 function middleLayerForCell(cell: ParsedMapCell) {

@@ -1,0 +1,107 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:13010/?gatewayWs=ws%3A%2F%2F127.0.0.1%3A7213%2Fws&codexBust=npc-marker-quest-0511a",
+  "target": {
+    "map": "0",
+    "x": 329,
+    "y": 259,
+    "npcPattern": "MirGuide|Peter|村庄向导|Village Guide",
+    "transferMode": "crystal"
+  },
+  "results": [
+    {
+      "scenario": "outOfRange",
+      "ok": true,
+      "statePath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/npc-click/r-npc-click-marker-quest-0511a-outOfRange.json",
+      "screenshotPath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/npc-click/r-npc-click-marker-quest-0511a-outOfRange.png",
+      "dialogTitle": "MirGuide_Peter",
+      "interactCount": 1,
+      "moveCount": 2,
+      "markerAnchor": {
+        "icon": {
+          "x": 456,
+          "y": 225,
+          "width": 28,
+          "height": 29
+        },
+        "npcBody": {
+          "x": 440,
+          "y": 265,
+          "width": 60,
+          "height": 80
+        },
+        "npcHit": {
+          "x": 440,
+          "y": 265,
+          "width": 60,
+          "height": 80
+        },
+        "nameplate": {
+          "x": 444.31,
+          "y": 224,
+          "width": 51.38,
+          "height": 26
+        },
+        "iconCenter": {
+          "x": 470,
+          "y": 239.5
+        },
+        "npcAnchorCenter": {
+          "x": 470,
+          "y": 305
+        },
+        "horizontalDeltaPx": 0,
+        "iconBottomToNpcTopPx": -11,
+        "iconCenterToNameplateLeftPx": 25.69,
+        "ok": true
+      }
+    },
+    {
+      "scenario": "adjacent",
+      "ok": true,
+      "statePath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/npc-click/r-npc-click-marker-quest-0511a-adjacent.json",
+      "screenshotPath": "/Users/henryliu/obelisk/ai/numeron/mir2/mir2-web3/docs/generated/player-qa/npc-click/r-npc-click-marker-quest-0511a-adjacent.png",
+      "dialogTitle": "MirGuide_Peter",
+      "interactCount": 1,
+      "moveCount": 0,
+      "markerAnchor": {
+        "icon": {
+          "x": 456,
+          "y": 225,
+          "width": 28,
+          "height": 29
+        },
+        "npcBody": {
+          "x": 440,
+          "y": 265,
+          "width": 60,
+          "height": 80
+        },
+        "npcHit": {
+          "x": 440,
+          "y": 265,
+          "width": 60,
+          "height": 80
+        },
+        "nameplate": {
+          "x": 444.31,
+          "y": 224,
+          "width": 51.38,
+          "height": 26
+        },
+        "iconCenter": {
+          "x": 470,
+          "y": 239.5
+        },
+        "npcAnchorCenter": {
+          "x": 470,
+          "y": 305
+        },
+        "horizontalDeltaPx": 0,
+        "iconBottomToNpcTopPx": -11,
+        "iconCenterToNameplateLeftPx": 25.69,
+        "ok": true
+      }
+    }
+  ]
+}
