@@ -1,6 +1,6 @@
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{LanguageCode, MapBounds};
-use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point};
+use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
@@ -198,6 +198,9 @@ pub(super) fn intelligent_creature_default_rules(pet_type: u8) -> IntelligentCre
 
 pub(super) fn set_runtime_tick(world: &mut World, tick: u64) {
     world.resource_mut::<RuntimeClockResource>().tick = tick;
+    if let Some(mut timing) = world.get_resource_mut::<PlayerActionTimingResource>() {
+        timing.reset();
+    }
 }
 
 pub(super) fn advance_runtime_tick(world: &mut World) -> u64 {
@@ -217,6 +220,81 @@ impl RuntimeConfigResource {
             config: config.clone(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum PlayerActionKind {
+    Move,
+    Attack,
+    Spell,
+}
+
+#[derive(Resource, Debug, Clone)]
+pub(super) struct PlayerActionTimingResource {
+    next_move_tick: u64,
+    next_attack_tick: u64,
+    next_spell_tick: u64,
+}
+
+impl PlayerActionTimingResource {
+    pub(super) fn new() -> Self {
+        Self {
+            next_move_tick: 0,
+            next_attack_tick: 0,
+            next_spell_tick: 0,
+        }
+    }
+
+    fn reset(&mut self) {
+        self.next_move_tick = 0;
+        self.next_attack_tick = 0;
+        self.next_spell_tick = 0;
+    }
+
+    fn next_tick_for(&self, kind: PlayerActionKind) -> u64 {
+        match kind {
+            PlayerActionKind::Move => self.next_move_tick,
+            PlayerActionKind::Attack => self.next_attack_tick,
+            PlayerActionKind::Spell => self.next_spell_tick,
+        }
+    }
+
+    fn set_next_tick_for(&mut self, kind: PlayerActionKind, tick: u64) {
+        match kind {
+            PlayerActionKind::Move => self.next_move_tick = tick,
+            PlayerActionKind::Attack => self.next_attack_tick = tick,
+            PlayerActionKind::Spell => self.next_spell_tick = tick,
+        }
+    }
+}
+
+pub(super) fn crystal_packet_action_ready(world: &World, kind: PlayerActionKind) -> bool {
+    let current_tick = runtime_tick(world);
+    let timing = world.resource::<PlayerActionTimingResource>();
+    current_tick >= timing.next_tick_for(kind)
+}
+
+pub(super) fn mark_crystal_packet_action(
+    world: &mut World,
+    kind: PlayerActionKind,
+    delay_ticks: u64,
+) {
+    let next_tick = runtime_tick(world).saturating_add(delay_ticks.max(1));
+    world
+        .resource_mut::<PlayerActionTimingResource>()
+        .set_next_tick_for(kind, next_tick);
+}
+
+pub(super) fn crystal_packet_move_delay_ticks(_running: bool) -> u64 {
+    2
+}
+
+pub(super) fn crystal_packet_attack_delay_ticks() -> u64 {
+    2
+}
+
+pub(super) fn crystal_packet_spell_delay_ticks() -> u64 {
+    1
 }
 
 #[derive(Resource, Debug, Clone)]
@@ -340,6 +418,17 @@ impl InventoryResource {
     }
 }
 
+#[derive(Resource, Debug, Clone)]
+pub(super) struct HeroInventoryResource {
+    pub(super) items: Vec<ItemState>,
+}
+
+impl HeroInventoryResource {
+    pub(super) fn new() -> Self {
+        Self { items: Vec::new() }
+    }
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(super) struct ItemRentalRecordState {
     pub(super) item_id: u64,
@@ -388,6 +477,8 @@ pub(super) struct FishingResource {
     pub(super) fishing_attribute: i8,
     pub(super) rod_has_hook: bool,
     pub(super) rod_has_reel: bool,
+    pub(super) chance_counter: i32,
+    pub(super) slot_items: Vec<Option<ItemState>>,
 }
 
 impl FishingResource {
@@ -401,6 +492,8 @@ impl FishingResource {
             fishing_attribute: 0,
             rod_has_hook: true,
             rod_has_reel: true,
+            chance_counter: 0,
+            slot_items: vec![None; 5],
         }
     }
 }
@@ -419,11 +512,29 @@ impl QuestResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct SkillResource {
     pub(super) skills: Vec<SkillState>,
+    pub(super) spell_toggles: Vec<(Spell, bool)>,
+    pub(super) mental_state: u8,
+    pub(super) slaying_armed: bool,
+    pub(super) fatal_sword_armed: bool,
+    pub(super) mp_eater_armed: bool,
+    pub(super) mp_eater_count: u16,
+    pub(super) hemorrhage_armed: bool,
+    pub(super) hemorrhage_attack_count: u16,
 }
 
 impl SkillResource {
     pub(super) fn new() -> Self {
-        Self { skills: Vec::new() }
+        Self {
+            skills: Vec::new(),
+            spell_toggles: Vec::new(),
+            mental_state: 0,
+            slaying_armed: false,
+            fatal_sword_armed: false,
+            mp_eater_armed: false,
+            mp_eater_count: 0,
+            hemorrhage_armed: false,
+            hemorrhage_attack_count: 0,
+        }
     }
 }
 
@@ -435,6 +546,21 @@ pub(super) struct BuffResource {
 impl BuffResource {
     pub(super) fn new() -> Self {
         Self { buffs: Vec::new() }
+    }
+}
+
+#[derive(Resource, Debug, Clone, Copy)]
+pub(super) struct ElementalResource {
+    pub(super) has_elemental: bool,
+    pub(super) elements_level: u32,
+}
+
+impl ElementalResource {
+    pub(super) fn new() -> Self {
+        Self {
+            has_elemental: false,
+            elements_level: 0,
+        }
     }
 }
 
@@ -488,6 +614,7 @@ impl NpcStateResource {
 pub(super) struct RuntimeQueueResource {
     pub(super) pending_combat_actions: Vec<PendingCombatAction>,
     pub(super) pending_monster_spawns: Vec<PendingMonsterSpawnAction>,
+    pub(super) pending_ground_spell_actions: Vec<PendingGroundSpellAction>,
 }
 
 impl RuntimeQueueResource {
@@ -495,8 +622,20 @@ impl RuntimeQueueResource {
         Self {
             pending_combat_actions: Vec::new(),
             pending_monster_spawns: Vec::new(),
+            pending_ground_spell_actions: Vec::new(),
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub(super) struct PendingGroundSpellAction {
+    pub(super) spell: Spell,
+    pub(super) caster_object_id: u32,
+    pub(super) locations: Vec<Point>,
+    pub(super) damage: i32,
+    pub(super) next_tick: u64,
+    pub(super) expires_at_tick: u64,
+    pub(super) tick_interval: u64,
 }
 
 #[derive(Resource, Debug, Clone)]
@@ -546,6 +685,8 @@ impl PlayerPermissionResource {
 pub(super) struct PotionRecoveryResource {
     pub(super) pending_pot_health_amount: i32,
     pub(super) pending_pot_mana_amount: i32,
+    pub(super) hero_pending_pot_health_amount: i32,
+    pub(super) hero_pending_pot_mana_amount: i32,
 }
 
 impl PotionRecoveryResource {
@@ -553,6 +694,8 @@ impl PotionRecoveryResource {
         Self {
             pending_pot_health_amount: 0,
             pending_pot_mana_amount: 0,
+            hero_pending_pot_health_amount: 0,
+            hero_pending_pot_mana_amount: 0,
         }
     }
 }

@@ -11,8 +11,9 @@ use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
 use super::resources::{
-    BuffResource, FishingResource, GroupResource, InventoryResource, ItemRentalResource,
-    MapRuntimeResource, MountResource, NpcStateResource, ObjectIdAllocatorResource,
+    BuffResource, ElementalResource, FishingResource, GroupResource, HeroInventoryResource,
+    InventoryResource, ItemRentalRecordState, ItemRentalResource, MapRuntimeResource,
+    MountResource, NpcStateResource, ObjectIdAllocatorResource, PlayerActionTimingResource,
     PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource, QuestResource,
     RuntimeClockResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
     SkillResource, Stage5SystemsResource,
@@ -23,7 +24,7 @@ use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{ItemContainer, SimulationConfig, WorldSnapshot};
 use mir2_game_data::LanguageCode;
-use mir2_protocol::ServerPacket;
+use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
 
 #[cfg(test)]
 #[allow(unused_imports)]
@@ -103,6 +104,39 @@ pub struct SharedTradeOffer {
     pub items: Vec<SharedTradeOfferItem>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedItemRentalItemOffer {
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub partner_name: String,
+    pub item_state_json: String,
+    pub item_id: u64,
+    pub item_name: String,
+    pub days: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedItemRentalFeeOffer {
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub partner_name: String,
+    pub fee: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedItemRentalAgreement {
+    pub item: SharedItemRentalItemOffer,
+    pub fee: SharedItemRentalFeeOffer,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SharedItemRentalDelivery {
+    Lender(SharedItemRentalAgreement),
+    Borrower(SharedItemRentalAgreement),
+}
+
 impl SimulationSession {
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
@@ -124,6 +158,7 @@ impl SimulationSession {
         inventory.storage_items = seed_storage_items();
         inventory.equipment_items = seed_equipment_items();
         app.insert_resource(inventory);
+        app.insert_resource(HeroInventoryResource::new());
         let mut quests = QuestResource::new();
         quests.quests = vec![QuestState::guide_training()];
         app.insert_resource(quests);
@@ -131,6 +166,7 @@ impl SimulationSession {
         skills.skills = seed_skills();
         app.insert_resource(skills);
         app.insert_resource(BuffResource::new());
+        app.insert_resource(ElementalResource::new());
         app.insert_resource(ItemRentalResource::new());
         app.insert_resource(FishingResource::new());
         app.insert_resource(MountResource::new());
@@ -140,6 +176,7 @@ impl SimulationSession {
         app.insert_resource(GroupResource::new(&config));
         app.insert_resource(PlayerPermissionResource::new());
         app.insert_resource(PotionRecoveryResource::new());
+        app.insert_resource(PlayerActionTimingResource::new());
         app.insert_resource(RuntimeClockResource::new());
         app.insert_resource(ObjectIdAllocatorResource::new());
         app.insert_resource(CrystalNpcRandomState::new());
@@ -181,11 +218,64 @@ impl SimulationSession {
         )
     }
 
+    pub fn item_rental_cancel(&mut self) -> Vec<ServerPacket> {
+        let packets = super::rental::cancel_item_rental_impl(self.app.world_mut());
+        self.finalize_packets(packets)
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         super::packets::stage5_trade_request_packet(
             self.app.world_mut(),
             Some(partner_name.to_string()),
         )
+    }
+
+    pub fn shared_item_rental_lock_fee(
+        &mut self,
+    ) -> (Vec<ServerPacket>, Option<SharedItemRentalFeeOffer>) {
+        let packets = super::rental::item_rental_lock_fee_impl(self.app.world_mut());
+        let locked = packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ItemRentalLock {
+                    success: true,
+                    gold_locked: true,
+                    ..
+                }
+            )
+        });
+        let offer = locked
+            .then(|| build_shared_item_rental_fee_offer(self.app.world()))
+            .flatten();
+        (self.finalize_packets(packets), offer)
+    }
+
+    pub fn shared_item_rental_lock_item(
+        &mut self,
+    ) -> (Vec<ServerPacket>, Option<SharedItemRentalItemOffer>) {
+        let packets = super::rental::item_rental_lock_item_impl(self.app.world_mut());
+        let locked = packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ItemRentalLock {
+                    success: true,
+                    item_locked: true,
+                    ..
+                }
+            )
+        });
+        let offer = locked
+            .then(|| build_shared_item_rental_item_offer(self.app.world()))
+            .flatten();
+        (self.finalize_packets(packets), offer)
+    }
+
+    pub fn apply_shared_item_rental_delivery(
+        &mut self,
+        delivery: &SharedItemRentalDelivery,
+    ) -> Vec<ServerPacket> {
+        let packets = apply_shared_item_rental_delivery(self.app.world_mut(), delivery);
+        self.finalize_packets(packets)
     }
 
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
@@ -241,6 +331,54 @@ impl SimulationSession {
     }
 }
 
+fn build_shared_item_rental_fee_offer(world: &World) -> Option<SharedItemRentalFeeOffer> {
+    if !is_in_world(world) {
+        return None;
+    }
+    let session = world.resource::<SessionResource>();
+    let account_id = session.account_id.clone()?;
+    let character = session.selected_character.as_ref()?;
+    let rental = world.resource::<ItemRentalResource>();
+    let active = rental.active.as_ref()?;
+    if !active.gold_locked || active.fee == 0 {
+        return None;
+    }
+
+    Some(SharedItemRentalFeeOffer {
+        account_id,
+        character_index: character.index,
+        character_name: character.name.clone(),
+        partner_name: active.partner_name.clone(),
+        fee: active.fee,
+    })
+}
+
+fn build_shared_item_rental_item_offer(world: &World) -> Option<SharedItemRentalItemOffer> {
+    if !is_in_world(world) {
+        return None;
+    }
+    let session = world.resource::<SessionResource>();
+    let account_id = session.account_id.clone()?;
+    let character = session.selected_character.as_ref()?;
+    let rental = world.resource::<ItemRentalResource>();
+    let active = rental.active.as_ref()?;
+    let item = active.deposited_item.as_ref()?;
+    if !active.item_locked {
+        return None;
+    }
+
+    Some(SharedItemRentalItemOffer {
+        account_id,
+        character_index: character.index,
+        character_name: character.name.clone(),
+        partner_name: active.partner_name.clone(),
+        item_state_json: serde_json::to_string(item).ok()?,
+        item_id: item_unique_id(item),
+        item_name: item.name.clone(),
+        days: active.days,
+    })
+}
+
 fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     if !is_in_world(world) {
         return None;
@@ -288,26 +426,53 @@ fn apply_shared_trade_offer(
         return Vec::new();
     }
     let mut packets = Vec::new();
+
+    let mut staged_inventory = world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .clone();
+    let mut delivered_items = Vec::new();
+    for offered_item in &offer.items {
+        let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        };
+        let Some((container, slot)) = preferred_or_empty_trade_delivery_slot_for_items(
+            &staged_inventory,
+            item.container,
+            item.slot,
+        ) else {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        };
+        item.container = container;
+        item.slot = slot;
+        let unique_id = item_unique_id(&item);
+        if staged_inventory
+            .iter()
+            .any(|existing| item_unique_id(existing) == unique_id)
+        {
+            let mut next_unique_id =
+                allocate_item_unique_id(world.resource::<InventoryResource>(), container, slot);
+            while staged_inventory
+                .iter()
+                .any(|existing| item_unique_id(existing) == next_unique_id)
+            {
+                next_unique_id = next_unique_id.saturating_add(1);
+            }
+            item.unique_id = next_unique_id;
+        } else {
+            item.unique_id = unique_id;
+        }
+        staged_inventory.push(item.clone());
+        delivered_items.push(item);
+    }
+
     if offer.gold > 0 {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(offer.gold);
         packets.push(ServerPacket::GainedGold { gold: offer.gold });
     }
 
-    for offered_item in &offer.items {
-        let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
-            continue;
-        };
-        let Some((container, slot)) = preferred_or_empty_trade_delivery_slot(
-            world.resource::<InventoryResource>(),
-            item.container,
-            item.slot,
-        ) else {
-            packets.push(system_message("Trade delivery failed: inventory is full."));
-            continue;
-        };
-        item.container = container;
-        item.slot = slot;
+    for item in delivered_items {
         let user_item = user_item_from_item_state(&item);
         world
             .resource_mut::<InventoryResource>()
@@ -327,22 +492,140 @@ fn apply_shared_trade_offer(
     packets
 }
 
+fn trade_offer_delivery_failed_packets(world: &mut World, rollback: bool) -> Vec<ServerPacket> {
+    let mut packets = vec![system_message_key(world, "server.YouCannotCarryAnymore")];
+    if rollback {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade = None;
+    }
+    packets.push(ServerPacket::TradeCancel { unlock: false });
+    packets
+}
+
+fn apply_shared_item_rental_delivery(
+    world: &mut World,
+    delivery: &SharedItemRentalDelivery,
+) -> Vec<ServerPacket> {
+    if !is_in_world(world) {
+        return Vec::new();
+    }
+    let agreement = match delivery {
+        SharedItemRentalDelivery::Lender(agreement)
+        | SharedItemRentalDelivery::Borrower(agreement) => agreement,
+    };
+    let expiry = future_binary_datetime(u64::from(agreement.item.days));
+
+    match delivery {
+        SharedItemRentalDelivery::Lender(_) => {
+            {
+                let mut rental = world.resource_mut::<ItemRentalResource>();
+                rental.active = None;
+                rental.rented_items.push(ItemRentalRecordState {
+                    item_id: agreement.item.item_id,
+                    item_name: agreement.item.item_name.clone(),
+                    renting_player_name: agreement.fee.character_name.clone(),
+                    item_return_date_binary_datetime: expiry,
+                });
+            }
+            {
+                let mut player = world.resource_mut::<PlayerRuntimeResource>();
+                player.gold = player.gold.saturating_add(agreement.fee.fee);
+            }
+            let rented_items = world
+                .resource::<ItemRentalResource>()
+                .rented_items
+                .iter()
+                .map(|record| ItemRentalInformation {
+                    item_id: record.item_id,
+                    item_name: record.item_name.clone(),
+                    renting_player_name: record.renting_player_name.clone(),
+                    item_return_date_binary_datetime: record.item_return_date_binary_datetime,
+                })
+                .collect();
+            vec![
+                ServerPacket::GainedGold {
+                    gold: agreement.fee.fee,
+                },
+                ServerPacket::ConfirmItemRental,
+                ServerPacket::GetRentedItems { rented_items },
+            ]
+        }
+        SharedItemRentalDelivery::Borrower(_) => {
+            let Ok(mut item) = serde_json::from_str::<ItemState>(&agreement.item.item_state_json)
+            else {
+                return vec![ServerPacket::CancelItemRental];
+            };
+            let Some((container, slot)) = preferred_or_empty_trade_delivery_slot(
+                world.resource::<InventoryResource>(),
+                item.container,
+                item.slot,
+            ) else {
+                return vec![
+                    system_message("Unable to accept the rental item."),
+                    ServerPacket::CancelItemRental,
+                ];
+            };
+            item.container = container;
+            item.slot = slot;
+            item.rental_binding_flags = super::rental::CRYSTAL_RENTAL_BINDING_FLAGS;
+            item.rental_owner_name = agreement.item.character_name.clone();
+            item.rental_expiry_binary_datetime = expiry;
+            item.rental_locked = false;
+
+            let mut loan_item = user_item_from_item_state(&item);
+            loan_item.rental_information = Some(UserItemRentalInformation {
+                owner_name: agreement.item.character_name.clone(),
+                binding_flags: super::rental::CRYSTAL_RENTAL_BINDING_FLAGS,
+                expiry_binary_datetime: expiry,
+                rental_locked: false,
+            });
+            world
+                .resource_mut::<InventoryResource>()
+                .inventory_items
+                .push(item);
+            {
+                let mut rental = world.resource_mut::<ItemRentalResource>();
+                rental.active = None;
+                rental.has_rented_item = true;
+            }
+
+            vec![
+                ServerPacket::GainedItem { item: loan_item },
+                ServerPacket::ConfirmItemRental,
+            ]
+        }
+    }
+}
+
 fn preferred_or_empty_trade_delivery_slot(
     inventory: &InventoryResource,
+    preferred_container: ItemContainer,
+    preferred_slot: u8,
+) -> Option<(ItemContainer, u8)> {
+    preferred_or_empty_trade_delivery_slot_for_items(
+        &inventory.inventory_items,
+        preferred_container,
+        preferred_slot,
+    )
+}
+
+fn preferred_or_empty_trade_delivery_slot_for_items(
+    items: &[ItemState],
     preferred_container: ItemContainer,
     preferred_slot: u8,
 ) -> Option<(ItemContainer, u8)> {
     if matches!(
         preferred_container,
         ItemContainer::Bag1 | ItemContainer::Bag2
-    ) && !inventory
-        .inventory_items
+    ) && !items
         .iter()
         .any(|item| item.container == preferred_container && item.slot == preferred_slot)
     {
         return Some((preferred_container, preferred_slot));
     }
-    find_empty_inventory_item_slot(&inventory.inventory_items, ItemContainer::Bag1)
+    find_empty_inventory_item_slot(items, ItemContainer::Bag1)
 }
 
 #[cfg(test)]

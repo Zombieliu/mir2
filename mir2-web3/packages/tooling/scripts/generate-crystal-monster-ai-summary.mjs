@@ -363,7 +363,7 @@ const RUNTIME_COVERAGE = new Map([
     49,
     {
       status: "implemented_special",
-      notes: ["ThunderElement two-tile CompleteAttack baseline, delayed due-time ObjectAttack packet, DC-based damage, random near-target repositioning, nearby opposing-target fanout, and normal-damage immunity are covered; Repulsion push-damage from player skills remains pending."],
+      notes: ["ThunderElement two-tile CompleteAttack baseline, delayed due-time ObjectAttack packet, DC-based damage, random near-target repositioning, nearby opposing-target fanout, normal-damage immunity, and player Repulsion-family ObjectPushed push-damage are covered."],
     },
   ],
   [

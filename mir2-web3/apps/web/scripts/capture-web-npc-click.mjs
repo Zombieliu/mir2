@@ -19,9 +19,11 @@ const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9700 + (process.pid % 800));
 const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
 const map = args.map ?? "0";
-const x = numberArg(args.x, 326);
-const y = numberArg(args.y, 270);
-const npcPattern = args.npcPattern ?? "村庄向导|Village Guide";
+const x = numberArg(args.x, 329);
+const y = numberArg(args.y, 259);
+const npcPattern = args.npcPattern ?? "MirGuide|Peter|村庄向导|Village Guide";
+const scenario = args.scenario ?? "both";
+const transferMode = args.transfer ?? "crystal";
 
 if (!chromePath) {
   throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
@@ -108,6 +110,54 @@ class CdpClient {
 
 async function main() {
   await fs.mkdir(outputDir, { recursive: true });
+  const scenarios = scenario === "both" ? ["outOfRange", "adjacent"] : [scenario];
+  const results = [];
+
+  for (const [index, scenarioName] of scenarios.entries()) {
+    if (!["outOfRange", "adjacent"].includes(scenarioName)) {
+      throw new Error(`Unsupported scenario: ${scenarioName}`);
+    }
+
+    const scenarioPrefix = scenarios.length > 1 ? `${prefix}-${scenarioName}` : prefix;
+    const identity =
+      createAccount && scenarios.length > 1
+        ? {
+            account: `${account}${index + 1}`,
+            password,
+            characterName: `${characterName}${index + 1}`,
+          }
+        : { account, password, characterName };
+    results.push(await runScenario(scenarioName, scenarioPrefix, identity));
+  }
+
+  if (scenarios.length > 1) {
+    const summaryPath = path.join(outputDir, `${prefix}-summary.json`);
+    const summary = {
+      ok: results.every((result) => result.ok),
+      baseUrl,
+      target: { map, x, y, npcPattern, transferMode },
+      results: results.map((result) => ({
+        scenario: result.scenario,
+        ok: result.ok,
+        statePath: result.statePath,
+        screenshotPath: result.screenshotPath,
+        dialogTitle: result.after.activeNpcDialog?.title ?? null,
+        interactCount: result.after.interactCount,
+        moveCount: result.after.moveCount,
+        markerAnchor: result.markerAnchor,
+      })),
+    };
+    await fs.writeFile(summaryPath, JSON.stringify(summary, null, 2));
+    console.log(JSON.stringify({ ...summary, summaryPath }, null, 2));
+    if (!summary.ok) {
+      process.exitCode = 1;
+    }
+  } else if (!results[0]?.ok) {
+    process.exitCode = 1;
+  }
+}
+
+async function runScenario(scenarioName, scenarioPrefix, identity) {
   const chrome = await launchChrome();
   let client;
 
@@ -121,9 +171,11 @@ async function main() {
     await client.send("Page.enable");
     await setViewport(client, DEFAULT_VIEWPORT);
     await navigate(client, `${baseUrl}${baseUrl.includes("?") ? "&" : "?"}npcSmoke=${Date.now()}`);
-    await login(client);
+    await login(client, identity);
     await clearCommandHistory(client);
-    await transferTo(client, map, x, y);
+    if (transferMode !== "none") {
+      await transferTo(client, map, x, y);
+    }
     await waitUntil(
       client,
       `
@@ -138,13 +190,13 @@ async function main() {
       20_000,
     );
 
-    let before = await readNpcSmokeState(client, npcPattern);
-    if (!before.npc) {
-      throw new Error(`NPC not found before click: ${JSON.stringify(before)}`);
+    let beforeInitial = await readNpcSmokeState(client, npcPattern);
+    if (!beforeInitial.npc) {
+      throw new Error(`NPC not found before click: ${JSON.stringify(beforeInitial)}`);
     }
-    if (tileDistance(before.player, before.npc) > 1) {
-      const adjacent = adjacentToNpc(before.player, before.npc);
-      await transferTo(client, map, adjacent.x, adjacent.y);
+    if (scenarioName === "adjacent" && tileDistance(beforeInitial.player, beforeInitial.npc) > 1) {
+      const adjacent = adjacentToNpc(beforeInitial.player, beforeInitial.npc);
+      await relocateTo(client, map, adjacent.x, adjacent.y);
       await waitUntil(
         client,
         `
@@ -158,8 +210,26 @@ async function main() {
         "NPC entity visible after adjacent transfer",
         20_000,
       );
-      before = await readNpcSmokeState(client, npcPattern);
+    } else if (scenarioName === "outOfRange" && tileDistance(beforeInitial.player, beforeInitial.npc) <= 1) {
+      const far = outOfRangeFromNpc(beforeInitial.npc);
+      await relocateTo(client, map, far.x, far.y);
+      await waitUntil(
+        client,
+        `
+          (() => {
+            const pattern = new RegExp(${JSON.stringify(npcPattern)});
+            return window.__mir2Stage5?.state?.entities?.some?.((entity) =>
+              entity?.kind === "npc" && pattern.test(entity?.name ?? "")
+            );
+          })()
+        `,
+        "NPC entity visible after out-of-range transfer",
+        20_000,
+      );
     }
+    await delay(250);
+    await waitUntil(client, npcDomTargetExpression(npcPattern), "NPC DOM target visible", 5_000);
+    const before = await readNpcSmokeState(client, npcPattern);
     await clearCommandHistory(client);
 
     const clicked = await clickNpc(client, npcPattern);
@@ -175,36 +245,55 @@ async function main() {
     );
 
     const after = await readNpcSmokeState(client, npcPattern);
+    const markerAnchor = markerAnchorSummary(after.markerAnchor ?? before.markerAnchor);
+    const clickOk =
+      scenarioName === "adjacent"
+        ? after.interactCount === 1 && after.moveCount === 0
+        : after.interactCount >= 1 && after.moveCount >= 1 && tileDistance(after.player, after.npc) <= 1;
+    const markerOk =
+      after.expectedQuestIcon || before.expectedQuestIcon
+        ? Boolean(markerAnchor?.ok)
+        : markerAnchor?.ok ?? true;
     const result = {
       ok:
         Boolean(after.activeNpcDialog?.npcObjectId) &&
-        after.interactCount === 1 &&
-        after.moveCount === 0 &&
+        clickOk &&
+        markerOk &&
         client.consoleErrors.length === 0 &&
         client.network404s.length === 0,
+      scenario: scenarioName,
       baseUrl,
-      account,
-      password,
-      characterName,
-      target: { map, x, y, npcPattern },
+      account: identity.account,
+      password: identity.password,
+      characterName: identity.characterName,
+      target: { map, x, y, npcPattern, transferMode },
+      beforeInitial,
       before,
       after,
+      markerAnchor,
       consoleErrors: client.consoleErrors,
       nonFaviconNetwork404s: client.network404s,
     };
-    const statePath = path.join(outputDir, `${prefix}.json`);
+    const statePath = path.join(outputDir, `${scenarioPrefix}.json`);
+    const screenshotPath = path.join(outputDir, `${scenarioPrefix}.png`);
+    result.statePath = statePath;
+    result.screenshotPath = screenshotPath;
+    await captureScreenshot(client, screenshotPath);
     await fs.writeFile(statePath, JSON.stringify(result, null, 2));
     console.log(
       JSON.stringify(
         {
+          scenario: scenarioName,
           ok: result.ok,
           statePath,
-          account,
-          password,
-          characterName,
+          screenshotPath,
+          account: identity.account,
+          password: identity.password,
+          characterName: identity.characterName,
           dialogTitle: after.activeNpcDialog?.title ?? null,
           interactCount: after.interactCount,
           moveCount: after.moveCount,
+          markerAnchor,
           consoleErrors: client.consoleErrors,
           nonFaviconNetwork404s: client.network404s,
         },
@@ -212,16 +301,14 @@ async function main() {
         2,
       ),
     );
-    if (!result.ok) {
-      process.exitCode = 1;
-    }
+    return result;
   } finally {
     client?.close();
     await stopChrome(chrome).catch(() => undefined);
   }
 }
 
-async function login(client) {
+async function login(client, identity) {
   await waitUntil(
     client,
     "['login', 'select', 'game'].includes(window.__mir2Stage5?.state?.screen)",
@@ -231,8 +318,8 @@ async function login(client) {
 
   let screen = await client.evaluate("window.__mir2Stage5?.state?.screen ?? null");
   if (screen === "login") {
-    await fillInput(client, ".login-input.account", account);
-    await fillInput(client, ".login-input.password", password);
+    await fillInput(client, ".login-input.account", identity.account);
+    await fillInput(client, ".login-input.password", identity.password);
 
     if (createAccount) {
       await click(client, ".login-button.account button");
@@ -249,18 +336,18 @@ async function login(client) {
     const created = await client.evaluate(`
       window.__mir2Stage5?.send?.(${JSON.stringify({
         type: "newCharacter",
-        name: characterName,
+        name: identity.characterName,
         gender: "male",
         class: "warrior",
       })}) === true
     `);
-    if (!created) throw new Error(`Failed to create NPC QA character ${characterName}`);
+    if (!created) throw new Error(`Failed to create NPC QA character ${identity.characterName}`);
 
     await waitUntil(
       client,
       `
         Array.isArray(window.__mir2Stage5?.state?.characters)
-          && window.__mir2Stage5.state.characters.some((character) => character?.name === ${JSON.stringify(characterName)})
+          && window.__mir2Stage5.state.characters.some((character) => character?.name === ${JSON.stringify(identity.characterName)})
       `,
       "NPC QA character creation",
       15_000,
@@ -269,12 +356,12 @@ async function login(client) {
     const started = await client.evaluate(`
       (() => {
         const state = window.__mir2Stage5?.state;
-        const character = state?.characters?.find((entry) => entry?.name === ${JSON.stringify(characterName)});
+        const character = state?.characters?.find((entry) => entry?.name === ${JSON.stringify(identity.characterName)});
         if (!character) return false;
         return window.__mir2Stage5?.send?.({ type: "startGame", characterIndex: character.index ?? 0 }) === true;
       })()
     `);
-    if (!started) throw new Error(`Failed to start NPC QA character ${characterName}`);
+    if (!started) throw new Error(`Failed to start NPC QA character ${identity.characterName}`);
   } else if (screen === "select") {
     await click(client, ".select-action.start button");
   }
@@ -316,6 +403,39 @@ async function transferTo(client, mapFileName, tileX, tileY) {
   );
 }
 
+async function relocateTo(client, mapFileName, tileX, tileY) {
+  if (transferMode === "none") {
+    await moveToPosition(client, tileX, tileY);
+    return;
+  }
+  await transferTo(client, mapFileName, tileX, tileY);
+}
+
+async function moveToPosition(client, tileX, tileY) {
+  const alreadyThere = await client.evaluate(`
+    (() => {
+      const state = window.__mir2Stage5?.state;
+      return state?.player?.x === ${Number(tileX)} && state?.player?.y === ${Number(tileY)};
+    })()
+  `);
+  if (alreadyThere) return;
+
+  await client.evaluate(`
+    window.__mir2Stage5?.send?.(${JSON.stringify({ type: "moveTo", x: Number(tileX), y: Number(tileY), mode: "run" })}) === true
+  `);
+  await waitUntil(
+    client,
+    `
+      (() => {
+        const state = window.__mir2Stage5?.state;
+        return state?.player?.x === ${Number(tileX)} && state?.player?.y === ${Number(tileY)};
+      })()
+    `,
+    "NPC smoke move",
+    20_000,
+  );
+}
+
 async function readNpcSmokeState(client, patternSource) {
   return client.evaluate(`
     (() => {
@@ -323,21 +443,44 @@ async function readNpcSmokeState(client, patternSource) {
       const pattern = new RegExp(${JSON.stringify(patternSource)});
       const commands = window.__mir2CommandHistory?.slice?.(0, 30) ?? [];
       const npc = state?.entities?.find?.((entity) => entity?.kind === "npc" && pattern.test(entity?.name ?? "")) ?? null;
-      const icon = document.querySelector(".entity-quest-icon");
+      const activeQuest = state?.questLog?.find?.((quest) => quest?.stage !== "completed") ?? null;
+      const expectedQuestIcon = Boolean(activeQuest && npc?.questIds?.includes?.(activeQuest.questId));
+      const spriteStack = [...document.querySelectorAll(".entity-sprite-stack")]
+        .find((node) => {
+          const hit = node.querySelector(".entity-sprite-hit");
+          return pattern.test(hit?.getAttribute("aria-label") ?? "");
+        });
+      const icon = spriteStack?.querySelector(".entity-quest-icon") ?? null;
+      const hit = spriteStack?.querySelector(".entity-sprite-hit") ?? null;
+      const body = spriteStack?.querySelector(".entity-sprite-layer.body") ?? null;
       const nameplate = [...document.querySelectorAll("button.entity-nameplate")]
         .find((node) => pattern.test(node.textContent ?? ""));
+      const markerAnchor = icon
+        ? markerAnchorToJson(
+            icon.getBoundingClientRect(),
+            (body ?? hit)?.getBoundingClientRect?.() ?? null,
+            hit?.getBoundingClientRect?.() ?? null,
+            nameplate?.getBoundingClientRect?.() ?? null,
+          )
+        : null;
       return {
         player: state?.player ?? null,
         npc,
         activeNpcDialog: state?.activeNpcDialog ?? null,
+        questLog: state?.questLog ?? [],
+        activeQuest,
+        expectedQuestIcon,
         commands,
         interactCount: commands.filter((entry) => entry?.type === "interact").length,
         moveCount: commands.filter((entry) => ["moveTo", "walk", "run", "turn"].includes(entry?.type)).length,
         questIconCount: document.querySelectorAll(".entity-quest-icon").length,
+        markerAnchor,
         villageIconBounds:
           icon && nameplate
             ? {
                 icon: rectToJson(icon.getBoundingClientRect()),
+                npcBody: body ? rectToJson(body.getBoundingClientRect()) : null,
+                npcHit: hit ? rectToJson(hit.getBoundingClientRect()) : null,
                 nameplate: rectToJson(nameplate.getBoundingClientRect()),
               }
             : null,
@@ -349,6 +492,44 @@ async function readNpcSmokeState(client, patternSource) {
           y: Math.round(rect.y * 100) / 100,
           width: Math.round(rect.width * 100) / 100,
           height: Math.round(rect.height * 100) / 100,
+        };
+      }
+
+      function center(rect) {
+        return {
+          x: Math.round((rect.x + rect.width / 2) * 100) / 100,
+          y: Math.round((rect.y + rect.height / 2) * 100) / 100,
+        };
+      }
+
+      function markerAnchorToJson(iconRect, npcBodyRect, npcHitRect, nameplateRect) {
+        const npcAnchorRect = npcBodyRect ?? npcHitRect;
+        const icon = rectToJson(iconRect);
+        const npcBody = npcBodyRect ? rectToJson(npcBodyRect) : null;
+        const npcHit = npcHitRect ? rectToJson(npcHitRect) : null;
+        const nameplate = nameplateRect ? rectToJson(nameplateRect) : null;
+        const iconCenter = center(icon);
+        const npcAnchor = npcAnchorRect ? rectToJson(npcAnchorRect) : null;
+        const npcAnchorCenter = npcAnchor ? center(npcAnchor) : null;
+        const expectedIconLeft = npcAnchorCenter ? npcAnchorCenter.x - 28 : null;
+        const expectedIconTop = npcAnchor ? npcAnchor.y - 40 : null;
+        return {
+          icon,
+          npcBody,
+          npcHit,
+          nameplate,
+          iconCenter,
+          npcAnchorCenter,
+          horizontalDeltaPx: npcAnchorCenter ? Math.round((iconCenter.x - npcAnchorCenter.x) * 100) / 100 : null,
+          iconRightToNpcCenterPx: npcAnchorCenter ? Math.round((icon.x + icon.width - npcAnchorCenter.x) * 100) / 100 : null,
+          expectedIconLeft,
+          expectedIconTop,
+          crystalLeftDeltaPx:
+            expectedIconLeft === null ? null : Math.round((icon.x - expectedIconLeft) * 100) / 100,
+          crystalTopDeltaPx:
+            expectedIconTop === null ? null : Math.round((icon.y - expectedIconTop) * 100) / 100,
+          iconBottomToNpcTopPx: npcBody ? Math.round((icon.y + icon.height - npcBody.y) * 100) / 100 : null,
+          iconCenterToNameplateLeftPx: nameplate ? Math.round((iconCenter.x - nameplate.x) * 100) / 100 : null,
         };
       }
     })()
@@ -371,6 +552,16 @@ async function clickNpc(client, patternSource) {
       return true;
     })()
   `);
+}
+
+function npcDomTargetExpression(patternSource) {
+  return `
+    (() => {
+      const pattern = new RegExp(${JSON.stringify(patternSource)});
+      return [...document.querySelectorAll("button.entity-nameplate, button.entity-sprite-hit")]
+        .some((entry) => pattern.test(entry.textContent ?? entry.getAttribute("aria-label") ?? ""));
+    })()
+  `;
 }
 
 async function fillInput(client, selector, value) {
@@ -448,6 +639,14 @@ async function setViewport(client, viewport) {
   await client.send("Emulation.setVisibleSize", { width: viewport.width, height: viewport.height });
 }
 
+async function captureScreenshot(client, screenshotPath) {
+  const result = await client.send("Page.captureScreenshot", {
+    format: "png",
+    fromSurface: true,
+  });
+  await fs.writeFile(screenshotPath, Buffer.from(result.data, "base64"));
+}
+
 async function navigate(client, url) {
   await client.send("Page.navigate", { url });
   await waitUntil(client, "document.readyState === 'complete' || document.readyState === 'interactive'", "page load", 15_000);
@@ -502,6 +701,30 @@ function adjacentToNpc(player, npc) {
     return { x: Number(npc.x) + dx, y: Number(npc.y) + dy };
   }
   return { x: Number(npc.x) + 1, y: Number(npc.y) };
+}
+
+function outOfRangeFromNpc(npc) {
+  return { x: Number(npc.x) + 2, y: Number(npc.y) + 2 };
+}
+
+function markerAnchorSummary(markerAnchor) {
+  if (!markerAnchor) {
+    return null;
+  }
+  const horizontalDelta = finiteMetric(markerAnchor.horizontalDeltaPx);
+  const verticalGap = finiteMetric(markerAnchor.iconBottomToNpcTopPx);
+  const crystalLeftDelta = finiteMetric(markerAnchor.crystalLeftDeltaPx);
+  const crystalTopDelta = finiteMetric(markerAnchor.crystalTopDeltaPx);
+  return {
+    ...markerAnchor,
+    ok:
+      (crystalLeftDelta !== null ? Math.abs(crystalLeftDelta) <= 2 : horizontalDelta !== null && Math.abs(horizontalDelta) <= 2) &&
+      (crystalTopDelta !== null ? Math.abs(crystalTopDelta) <= 2 : verticalGap === null || verticalGap <= 4),
+  };
+}
+
+function finiteMetric(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function parseArgs(argv) {

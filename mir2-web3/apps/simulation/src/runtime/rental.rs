@@ -1,19 +1,25 @@
 use bevy_ecs::prelude::World;
 use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
 
+use crate::config::{CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState};
+
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_DROP, CRYSTAL_BIND_DONT_SELL, CRYSTAL_BIND_DONT_STORE,
     CRYSTAL_BIND_DONT_TRADE, CRYSTAL_BIND_DONT_UPGRADE, CRYSTAL_BIND_UNABLE_TO_DISASSEMBLE,
     CRYSTAL_BIND_UNABLE_TO_RENT,
 };
-use super::inventory::{future_binary_datetime, inventory_container_and_slot_for_index};
+use super::equipment::{equipment_slot_unique_id, item_state_from_equipment_state};
+use super::inventory::{
+    add_minutes_to_binary_datetime, binary_datetime_ticks, current_binary_datetime,
+    future_binary_datetime, inventory_container_and_slot_for_index,
+};
 use super::items::{
     crystal_item_has_bind_flag, item_has_rental_bind_flag, item_unique_id,
     user_item_from_item_state,
 };
 use super::resources::{
     ActiveItemRentalState, InventoryResource, ItemRentalRecordState, ItemRentalResource,
-    PlayerRuntimeResource, SessionResource,
+    PlayerRuntimeResource, RuntimeConfigResource, SessionResource, Stage5SystemsResource,
 };
 
 const MAX_RENTED_ITEMS: usize = 3;
@@ -34,6 +40,300 @@ pub(super) fn get_rented_items_impl(world: &World) -> Vec<ServerPacket> {
         .map(rental_information_packet)
         .collect();
     vec![ServerPacket::GetRentedItems { rented_items }]
+}
+
+pub(super) fn process_expired_rental_items(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if !super::resources::is_in_world(world) {
+        return;
+    }
+    let now = current_binary_datetime();
+    return_matching_rented_items(world, RentalReturnTrigger::Expired(now), packets);
+
+    let changed_records = {
+        let mut rental = world.resource_mut::<ItemRentalResource>();
+        let now_ticks = binary_datetime_ticks(now);
+        let original_len = rental.rented_items.len();
+        rental.rented_items.retain(|record| {
+            record.item_return_date_binary_datetime == 0
+                || binary_datetime_ticks(record.item_return_date_binary_datetime) > now_ticks
+        });
+        rental.rented_items.len() != original_len
+    };
+    if changed_records {
+        packets.extend(get_rented_items_impl(world));
+    }
+}
+
+pub(super) fn return_rented_items_on_player_death(
+    world: &mut World,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if !super::resources::is_in_world(world) {
+        return;
+    }
+    return_matching_rented_items(world, RentalReturnTrigger::Death, packets);
+}
+
+#[derive(Debug, Clone, Copy)]
+enum RentalReturnTrigger {
+    Expired(i64),
+    Death,
+}
+
+impl RentalReturnTrigger {
+    fn should_return(self, expiry_binary_datetime: i64) -> bool {
+        match self {
+            Self::Death => true,
+            Self::Expired(now) => {
+                expiry_binary_datetime != 0
+                    && binary_datetime_ticks(expiry_binary_datetime) <= binary_datetime_ticks(now)
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct ReturnedRentalItem {
+    owner_name: String,
+    item_name: String,
+    item_key: String,
+    item_state_json: String,
+}
+
+fn return_matching_rented_items(
+    world: &mut World,
+    trigger: RentalReturnTrigger,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let mut returned = Vec::new();
+    let inventory_candidates = {
+        let inventory = world.resource::<InventoryResource>();
+        inventory
+            .inventory_items
+            .iter()
+            .enumerate()
+            .filter(|(_, item)| rented_item_matches_trigger(item, trigger))
+            .map(|(index, item)| {
+                (
+                    index,
+                    item_unique_id(item),
+                    item.quantity.min(u32::from(u16::MAX)) as u16,
+                    item.clone(),
+                )
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (index, unique_id, count, item) in inventory_candidates.into_iter().rev() {
+        let Some(returned_item) = returned_rental_item(item) else {
+            continue;
+        };
+        if !queue_rental_return_mail(world, &returned_item) {
+            continue;
+        }
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        if index < inventory.inventory_items.len()
+            && item_unique_id(&inventory.inventory_items[index]) == unique_id
+        {
+            inventory.inventory_items.remove(index);
+        } else if let Some(current_index) = inventory
+            .inventory_items
+            .iter()
+            .position(|item| item_unique_id(item) == unique_id)
+        {
+            inventory.inventory_items.remove(current_index);
+        }
+        packets.push(ServerPacket::DeleteItem {
+            unique_id,
+            count: count.max(1),
+        });
+        returned.push(returned_item);
+    }
+
+    let equipment_candidates = {
+        let inventory = world.resource::<InventoryResource>();
+        inventory
+            .equipment_items
+            .iter()
+            .enumerate()
+            .filter(|(_, item)| {
+                !item.rental_owner_name.is_empty()
+                    && trigger.should_return(item.rental_expiry_binary_datetime)
+            })
+            .filter_map(|(index, item)| {
+                let unique_id = equipment_slot_unique_id(item.slot)?;
+                let item_state = item_state_from_equipment_state(
+                    item.clone(),
+                    crate::config::ItemContainer::Bag1,
+                    0,
+                );
+                Some((index, unique_id, item_state))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (index, unique_id, item) in equipment_candidates.into_iter().rev() {
+        let Some(returned_item) = returned_rental_item(item) else {
+            continue;
+        };
+        if !queue_rental_return_mail(world, &returned_item) {
+            continue;
+        }
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        if index < inventory.equipment_items.len()
+            && equipment_slot_unique_id(inventory.equipment_items[index].slot) == Some(unique_id)
+        {
+            inventory.equipment_items.remove(index);
+        } else if let Some(current_index) = inventory
+            .equipment_items
+            .iter()
+            .position(|item| equipment_slot_unique_id(item.slot) == Some(unique_id))
+        {
+            inventory.equipment_items.remove(current_index);
+        }
+        packets.push(ServerPacket::DeleteItem {
+            unique_id,
+            count: 1,
+        });
+        returned.push(returned_item);
+    }
+
+    if !returned.is_empty() {
+        let still_has_rented_item = current_character_has_rented_item(world);
+        world.resource_mut::<ItemRentalResource>().has_rented_item = still_has_rented_item;
+    }
+}
+
+fn rented_item_matches_trigger(
+    item: &super::items::ItemState,
+    trigger: RentalReturnTrigger,
+) -> bool {
+    !item.rental_owner_name.is_empty() && trigger.should_return(item.rental_expiry_binary_datetime)
+}
+
+fn current_character_has_rented_item(world: &World) -> bool {
+    let inventory = world.resource::<InventoryResource>();
+    inventory
+        .inventory_items
+        .iter()
+        .any(|item| !item.rental_owner_name.is_empty())
+        || inventory
+            .equipment_items
+            .iter()
+            .any(|item| !item.rental_owner_name.is_empty())
+}
+
+fn returned_rental_item(mut item: super::items::ItemState) -> Option<ReturnedRentalItem> {
+    if item.rental_owner_name.is_empty() {
+        return None;
+    }
+    let owner_name = item.rental_owner_name.clone();
+    item.rental_binding_flags = 0;
+    item.rental_locked = true;
+    let expiry_base = if item.rental_expiry_binary_datetime == 0 {
+        current_binary_datetime()
+    } else {
+        item.rental_expiry_binary_datetime
+    };
+    item.rental_expiry_binary_datetime = add_minutes_to_binary_datetime(expiry_base, 24 * 60);
+    let item_state_json = serde_json::to_string(&item).ok()?;
+    Some(ReturnedRentalItem {
+        owner_name,
+        item_name: item.name.clone(),
+        item_key: item.key.clone(),
+        item_state_json,
+    })
+}
+
+fn queue_rental_return_mail(world: &mut World, returned: &ReturnedRentalItem) -> bool {
+    let borrower_name = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.name.clone())
+        .unwrap_or_else(|| "Borrower".to_string());
+    let current_name = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.name.clone());
+    if current_name.as_deref() == Some(returned.owner_name.as_str()) {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        push_rental_return_mail(
+            &mut stage5.stage5_systems,
+            &returned.owner_name,
+            &borrower_name,
+            returned,
+        );
+        return true;
+    }
+
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let delivered = {
+        let Ok(mut store) = config.account_store.lock() else {
+            return false;
+        };
+        let mut delivered = false;
+        'accounts: for account in store.accounts.values_mut() {
+            for character in account.characters.clone() {
+                if character.name != returned.owner_name {
+                    continue;
+                }
+                let save = account
+                    .saves
+                    .entry(character.index)
+                    .or_insert_with(|| CharacterSaveRecord::new(character.clone()));
+                let mut systems = save
+                    .stage5_systems_json
+                    .as_deref()
+                    .and_then(|state| serde_json::from_str::<Stage5SystemsState>(state).ok())
+                    .unwrap_or_default();
+                push_rental_return_mail(
+                    &mut systems,
+                    &returned.owner_name,
+                    &borrower_name,
+                    returned,
+                );
+                save.stage5_systems_json = serde_json::to_string(&systems).ok();
+                delivered = true;
+                break 'accounts;
+            }
+        }
+        delivered
+    };
+    if delivered {
+        let _ = config.save_account_store();
+    }
+    delivered
+}
+
+fn push_rental_return_mail(
+    systems: &mut Stage5SystemsState,
+    owner_name: &str,
+    borrower_name: &str,
+    returned: &ReturnedRentalItem,
+) {
+    let id = systems
+        .mail
+        .iter()
+        .map(|mail| mail.id)
+        .max()
+        .unwrap_or(0)
+        .saturating_add(1);
+    systems.mail.push(Stage5MailMessage {
+        id,
+        from: borrower_name.to_string(),
+        to: owner_name.to_string(),
+        subject: "Rental item returned".to_string(),
+        body: format!("{} was returned from item rental.", returned.item_name),
+        gold: 0,
+        items: vec![returned.item_key.clone()],
+        item_states_json: vec![returned.item_state_json.clone()],
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    });
 }
 
 pub(super) fn item_rental_request_impl(
@@ -384,6 +684,9 @@ pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
         .as_ref()
         .map(|character| character.name.clone())
         .unwrap_or_else(|| "Owner".to_string());
+    item.rental_owner_name = owner_name.clone();
+    item.rental_expiry_binary_datetime = expiry;
+    item.rental_locked = false;
     let item_id = item_unique_id(&item);
     let item_name = item.name.clone();
     let mut loan_item = user_item_from_item_state(&item);

@@ -1,11 +1,11 @@
 use bevy_ecs::entity::Entity;
-use bevy_ecs::prelude::World;
+use bevy_ecs::prelude::{With, World};
 use mir2_game_data::{DecorKind, MapBounds, TerrainKind};
 use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket, UserLocation};
 
 use super::components::{
     current_player_object_id, entity_facing, entity_position, player_entity, Facing, GroundDrop,
-    MonsterAgent, MonsterAiState, Npc, Position, RemotePlayer, SelfPlayer,
+    Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, Position, RemotePlayer, SelfPlayer,
 };
 use super::crystal_compat::CAVE_MAGGOT_PARALYSIS_BUFF_KEY;
 use super::map::relocate_player_to_map;
@@ -289,6 +289,65 @@ pub(super) fn push_player_in_direction(
     Some(destination)
 }
 
+pub(super) fn follow_player_with_stage5_hero(
+    world: &mut World,
+    previous_player_position: Point,
+    previous_player_direction: MirDirection,
+    running: bool,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return;
+    };
+    let Some(hero_entity) = ({
+        let mut query = world.query_filtered::<Entity, With<Hero>>();
+        query.iter(world).next()
+    }) else {
+        return;
+    };
+    let Some(hero_object_id) = world.entity(hero_entity).get::<ObjectId>().map(|id| id.0) else {
+        return;
+    };
+    let Some(hero_position) = entity_position(world, hero_entity) else {
+        return;
+    };
+
+    let desired_position = if can_occupy(world, previous_player_position.clone(), Some(hero_entity))
+    {
+        previous_player_position
+    } else {
+        summon_spawn_position_near(
+            world,
+            &player_position,
+            previous_player_direction,
+            1,
+            Some(hero_entity),
+        )
+    };
+    if hero_position == desired_position {
+        return;
+    }
+
+    let direction =
+        direction_toward(&hero_position, &desired_position).unwrap_or(previous_player_direction);
+    world
+        .entity_mut(hero_entity)
+        .insert((Position(desired_position.clone()), Facing(direction)));
+    let movement = ObjectMovement {
+        object_id: hero_object_id,
+        position: desired_position,
+        direction,
+    };
+    if running {
+        packets.push(ServerPacket::ObjectRun { movement });
+    } else {
+        packets.push(ServerPacket::ObjectWalk { movement });
+    }
+}
+
 pub(super) fn move_distance_for_mode(running: bool) -> i32 {
     if running {
         2
@@ -397,6 +456,7 @@ pub(super) fn has_blocking_entity(
 
         let position = entity.get::<Position>();
         let is_blocker = entity.get::<SelfPlayer>().is_some()
+            || entity.get::<Hero>().is_some()
             || entity.get::<RemotePlayer>().is_some()
             || entity.get::<Npc>().is_some()
             || entity
@@ -440,6 +500,13 @@ impl SimulationSession {
             let entity = self.app.world().entity(player_entity);
             entity.get::<Position>().expect("player position").0.clone()
         };
+        let previous_player_direction = self
+            .app
+            .world()
+            .entity(player_entity)
+            .get::<Facing>()
+            .expect("player facing")
+            .0;
         let mut packets = Vec::new();
 
         if next_position != target {
@@ -480,6 +547,13 @@ impl SimulationSession {
                             .insert((Position(next_step), Facing(direction)));
 
                         packets.push(player_motion_packet(self.app.world(), running));
+                        follow_player_with_stage5_hero(
+                            self.app.world_mut(),
+                            next_position.clone(),
+                            previous_player_direction,
+                            running,
+                            &mut packets,
+                        );
                     }
                 }
             }
@@ -496,6 +570,8 @@ impl SimulationSession {
         let Some(player) = player_entity(self.app.world()) else {
             return Vec::new();
         };
+        let previous_position = entity_position(self.app.world(), player).expect("player position");
+        let previous_direction = entity_facing(self.app.world(), player).unwrap_or(direction);
 
         self.app
             .world_mut()
@@ -507,6 +583,16 @@ impl SimulationSession {
         let mut packets = vec![ServerPacket::UserLocation {
             location: current_location(self.app.world()),
         }];
+        let current_position = entity_position(self.app.world(), player).expect("player position");
+        if current_position != previous_position {
+            follow_player_with_stage5_hero(
+                self.app.world_mut(),
+                previous_position,
+                previous_direction,
+                running,
+                &mut packets,
+            );
+        }
 
         packets.extend(advance_world(self.app.world_mut()));
         packets

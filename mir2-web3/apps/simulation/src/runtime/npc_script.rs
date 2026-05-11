@@ -2910,6 +2910,11 @@ pub(super) fn crystal_npc_revive_hero(world: &mut World) {
         behaviour: 0,
         experience: 0,
         spawned: true,
+        auto_pot: true,
+        auto_hp_percent: 0,
+        auto_mp_percent: 0,
+        hp_item_index: 0,
+        mp_item_index: 0,
     });
 }
 

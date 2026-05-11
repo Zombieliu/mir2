@@ -5,7 +5,7 @@ use mir2_game_data::{
 };
 use mir2_protocol::{ClientBuff, ServerPacket, UserItemStat};
 
-use super::components::{player_entity, PlayerVitals};
+use super::components::{hero_entity, player_entity, PlayerVitals};
 use super::crystal_compat::*;
 use super::items::{crystal_item_stat_value, user_item_stat_total};
 use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
@@ -104,25 +104,45 @@ pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
         })
         .map(|object_id| object_id.0)
         .unwrap_or_default();
-    let expired_types = world
+    let expired_buffs = world
         .resource::<BuffResource>()
         .buffs
         .iter()
         .filter(|buff| buff.expires_at_tick <= tick)
-        .filter_map(|buff| crystal_buff_type_for_key(&buff.key))
+        .map(|buff| (buff.key.clone(), crystal_buff_type_for_key(&buff.key)))
         .collect::<Vec<_>>();
     world
         .resource_mut::<BuffResource>()
         .buffs
         .retain(|buff| buff.expires_at_tick > tick);
-    packets.extend(
-        expired_types
-            .into_iter()
-            .map(|buff_type| ServerPacket::RemoveBuff {
+    for (key, buff_type) in expired_buffs {
+        if let Some(buff_type) = buff_type {
+            packets.push(ServerPacket::RemoveBuff {
                 buff_type,
                 object_id,
-            }),
-    );
+            });
+        }
+        if key == "concentration" {
+            packets.push(ServerPacket::SetConcentration {
+                object_id,
+                enabled: false,
+                interrupted: false,
+            });
+        }
+        if matches!(key.as_str(), "hiding" | "moon-light" | "dark-body") {
+            let still_hidden = world
+                .resource::<BuffResource>()
+                .buffs
+                .iter()
+                .any(|buff| matches!(buff.key.as_str(), "hiding" | "moon-light" | "dark-body"));
+            if !still_hidden {
+                packets.push(ServerPacket::ObjectHidden {
+                    object_id,
+                    hidden: false,
+                });
+            }
+        }
+    }
 }
 
 pub(super) fn client_buff_packet_for_state(
@@ -247,6 +267,23 @@ pub(super) fn restore_current_player_vitals(world: &mut World, heal_hp: i32, hea
     world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored_vitals;
 }
 
+pub(super) fn restore_current_hero_vitals(world: &mut World, heal_hp: i32, heal_mp: i32) -> bool {
+    let Some(hero) = hero_entity(world) else {
+        return false;
+    };
+
+    {
+        let mut entity = world.entity_mut(hero);
+        let Some(mut vitals) = entity.get_mut::<PlayerVitals>() else {
+            return false;
+        };
+        vitals.hp = (vitals.hp + heal_hp.max(0)).min(vitals.max_hp);
+        vitals.mp = (vitals.mp + heal_mp.max(0)).min(100);
+    }
+
+    true
+}
+
 pub(super) fn queue_crystal_normal_potion_restore(
     world: &mut World,
     template: &CrystalItemTemplate,
@@ -272,6 +309,27 @@ pub(super) fn queue_crystal_normal_potion_restore_amounts(
         .min(i32::from(u16::MAX));
     recovery.pending_pot_mana_amount = recovery
         .pending_pot_mana_amount
+        .saturating_add(mp)
+        .min(i32::from(u16::MAX));
+    true
+}
+
+pub(super) fn queue_crystal_normal_hero_potion_restore_amounts(
+    world: &mut World,
+    hp: i32,
+    mp: i32,
+) -> bool {
+    if hp == 0 && mp == 0 {
+        return false;
+    }
+
+    let mut recovery = world.resource_mut::<PotionRecoveryResource>();
+    recovery.hero_pending_pot_health_amount = recovery
+        .hero_pending_pot_health_amount
+        .saturating_add(hp)
+        .min(i32::from(u16::MAX));
+    recovery.hero_pending_pot_mana_amount = recovery
+        .hero_pending_pot_mana_amount
         .saturating_add(mp)
         .min(i32::from(u16::MAX));
     true
@@ -303,6 +361,39 @@ pub(super) fn tick_crystal_normal_potion_restore(
             if let Some(info) = object_mana_info_for_entity(world, player) {
                 packets.push(ServerPacket::ObjectMana { info });
             }
+        }
+    }
+}
+
+pub(super) fn tick_crystal_normal_hero_potion_restore(
+    world: &mut World,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let Some(hero) = hero_entity(world) else {
+        return;
+    };
+    let (hp_tick, mp_tick) = {
+        let mut recovery = world.resource_mut::<PotionRecoveryResource>();
+        let hp_tick = recovery.hero_pending_pot_health_amount.min(10);
+        let mp_tick = recovery.hero_pending_pot_mana_amount.min(10);
+        recovery.hero_pending_pot_health_amount -= hp_tick;
+        recovery.hero_pending_pot_mana_amount -= mp_tick;
+        (hp_tick, mp_tick)
+    };
+
+    if hp_tick <= 0 && mp_tick <= 0 {
+        return;
+    }
+
+    if !restore_current_hero_vitals(world, hp_tick, mp_tick) {
+        return;
+    }
+    if let Some(info) = object_health_info_for_entity(world, hero, 0) {
+        packets.push(ServerPacket::ObjectHealth { info });
+    }
+    if mp_tick > 0 {
+        if let Some(info) = object_mana_info_for_entity(world, hero) {
+            packets.push(ServerPacket::ObjectMana { info });
         }
     }
 }

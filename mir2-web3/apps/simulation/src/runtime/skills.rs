@@ -1,34 +1,67 @@
 use serde::{Deserialize, Serialize};
 
 use crate::config::SkillSnapshot;
+use crate::EquipmentSlot;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_magic_by_spell, crystal_magic_manifest, localized_text_or_fallback,
-    starter_server_data, CrystalItemTemplate, CrystalMagicTemplate, CrystalRespawnTemplate,
-    LanguageCode, SkillEffectTemplate, SkillTemplate,
+    crystal_magic_by_spell, crystal_magic_manifest, crystal_monster_by_name,
+    localized_text_or_fallback, starter_server_data, CrystalItemTemplate, CrystalMagicTemplate,
+    CrystalRespawnTemplate, LanguageCode, SkillEffectTemplate, SkillTemplate,
 };
-use mir2_protocol::{ClientMagic, MirDirection, Point, ServerPacket, Spell, UserItemStat};
+use mir2_protocol::{
+    ClientBuff, ClientMagic, MirClass, MirDirection, ObjectAttackInfo, ObjectEffectInfo,
+    ObjectMovement, ObjectSpellInfo, Point, ServerPacket, Spell, UserItemStat, UserLocation,
+};
 
-use super::buffs::{apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state, BuffState};
+use super::buffs::{
+    apply_or_refresh_buff, buff_metadata, client_buff_packet_for_state, crystal_buff_type_for_key,
+    BuffState,
+};
 use super::combat::{
-    combat_delay_ticks, queued_before_world_tick_due_tick, ranged_attack_delay_ticks,
-    schedule_damage_to_monster, PendingMonsterDefeatAction,
+    apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
+    queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
+    schedule_heal_to_player, PendingMonsterDefeatAction,
 };
 use super::components::{
-    current_player_object_id, entity_by_object_id, entity_facing, entity_name,
-    entity_player_vitals, entity_position, player_entity, DisplayName, MonsterAgent, PlayerVitals,
-    Position, SummonedMonster,
+    current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
+    entity_player_vitals, entity_position, hero_entity, player_entity, CharacterBody, DisplayName,
+    MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
-use super::crystal_compat::CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT;
-use super::items::merged_user_item_stats;
+use super::crystal_compat::{
+    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_AGILITY, CRYSTAL_STAT_ATTACK_SPEED,
+    CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
+    CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN, CRYSTAL_STAT_ENERGY_SHIELD_PERCENT, CRYSTAL_STAT_LUCK,
+    CRYSTAL_STAT_MANA_PENALTY_PERCENT, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
+    CRYSTAL_STAT_MAX_DC_RATE_PERCENT, CRYSTAL_STAT_MAX_MAC, CRYSTAL_STAT_MAX_MC,
+    CRYSTAL_STAT_MAX_MC_RATE_PERCENT, CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MAX_SC_RATE_PERCENT,
+    CRYSTAL_STAT_MIN_AC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MIN_SC,
+    CRYSTAL_STAT_POISON_ATTACK, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER,
+    CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
+};
+use super::equipment::equipment_slot_unique_id;
+use super::items::{
+    crystal_item_template_for_dynamic_key, current_player_required_stat_total,
+    merged_user_item_stats,
+};
+use super::map::{current_map_disallows_random_teleport, current_map_disallows_reincarnation};
 use super::monsters::{
-    active_summoned_monster_count, crystal_dynamic_monster_template, queue_pending_monster_spawn,
+    active_summoned_monster_count, allocate_runtime_monster_object_id,
+    crystal_dynamic_monster_template, deterministic_roll, queue_pending_monster_spawn,
     PendingMonsterSpawnAction,
 };
-use super::movement::summon_spawn_position_near;
-use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
-use super::resources::{is_in_world, SkillResource};
+use super::movement::{
+    can_occupy, direction_toward, is_blocked_tile, offset_point, rotated_direction,
+    summon_spawn_position_near, tile_distance,
+};
+use super::packets::{
+    object_died_info_for_entity, object_health_info_for_entity, object_mana_info_for_entity,
+    object_struck_packet,
+};
+use super::resources::{
+    is_in_world, BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
+    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
+};
 use super::session::SimulationSession;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -267,6 +300,7 @@ pub(super) fn skill_key_for_crystal_spell(spell: Spell) -> Option<String> {
 
 pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key: u8) {
     if key > 16 || old_key > 16 {
+        assign_hero_magic_key(world, spell, key);
         return;
     }
     let Some(skill_key) = skill_key_for_crystal_spell(spell) else {
@@ -279,6 +313,37 @@ pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key
             skill.hotkey = key;
         } else if key != 0 && skill.hotkey == key {
             skill.hotkey = 0;
+        }
+    }
+}
+
+fn assign_hero_magic_key(world: &mut World, spell: Spell, key: u8) {
+    if !world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .as_ref()
+        .is_some_and(|hero| hero.spawned)
+    {
+        return;
+    }
+    if hero_entity(world)
+        .and_then(|entity| world.entity(entity).get::<PlayerVitals>().copied())
+        .is_some_and(|vitals| vitals.hp <= 0)
+    {
+        return;
+    }
+
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let learned_magics = &mut stage5.stage5_systems.hero_learned_magics;
+    if !learned_magics.iter().any(|learned| learned.spell == spell) {
+        return;
+    }
+    for learned in learned_magics {
+        if learned.spell == spell {
+            learned.key = key;
+        } else if key != 0 && learned.key == key {
+            learned.key = 0;
         }
     }
 }
@@ -312,6 +377,14 @@ pub(super) fn cast_skill_with_context(
         .and_then(|definition| definition.crystal_spell.as_deref())
         .or_else(|| crystal_magic.as_ref().map(|magic| magic.spell.as_str()));
     let spell_packet = crystal_spell.and_then(Spell::from_crystal_name);
+    let override_default_magic_packets = crystal_spell.is_some_and(|spell| {
+        matches!(
+            spell,
+            "MeteorShower" | "BackStep" | "ShoulderDash" | "FlashDash"
+        )
+    });
+    let manifest_handles_magic_progression = crystal_spell
+        .is_some_and(|spell| matches!(spell, "BackStep" | "ShoulderDash" | "FlashDash"));
     let Some(mana_cost) = definition
         .as_ref()
         .map(|definition| definition.mana_cost)
@@ -343,16 +416,34 @@ pub(super) fn cast_skill_with_context(
         packets.push(ServerPacket::ObjectMana { info });
     }
 
-    if let Some(definition) = definition.as_ref() {
+    let crystal_self_buff_packets = crystal_magic
+        .as_ref()
+        .and_then(|magic| apply_crystal_self_buff_spell(world, &skill, magic, tick));
+    if let Some(crystal_self_buff_packets) = crystal_self_buff_packets {
+        packets.extend(crystal_self_buff_packets);
+    } else if let Some(definition) = definition.as_ref() {
         match &definition.effect {
             SkillEffectTemplate::Heal { hp } => {
+                if let Some(magic) = crystal_magic
+                    .as_ref()
+                    .filter(|magic| magic.spell == "Healing")
                 {
-                    let mut entity = world.entity_mut(player);
-                    let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
-                    vitals.hp = (vitals.hp + *hp).min(vitals.max_hp);
-                }
-                if let Some(info) = object_health_info_for_entity(world, player, 0) {
-                    packets.push(ServerPacket::ObjectHealth { info });
+                    packets.extend(apply_crystal_healing_spell(
+                        world,
+                        &skill,
+                        magic,
+                        context.as_ref(),
+                        tick,
+                    ));
+                } else {
+                    {
+                        let mut entity = world.entity_mut(player);
+                        let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
+                        vitals.hp = (vitals.hp + *hp).min(vitals.max_hp);
+                    }
+                    if let Some(info) = object_health_info_for_entity(world, player, 0) {
+                        packets.push(ServerPacket::ObjectHealth { info });
+                    }
                 }
             }
             SkillEffectTemplate::Buff {
@@ -398,6 +489,7 @@ pub(super) fn cast_skill_with_context(
             world,
             player,
             &skill,
+            index,
             crystal_magic.as_ref(),
             spell_packet,
             context.as_ref(),
@@ -405,7 +497,7 @@ pub(super) fn cast_skill_with_context(
         ));
     }
 
-    if let Some(spell) = spell_packet {
+    if let Some(spell) = spell_packet.filter(|_| !override_default_magic_packets) {
         let object_id = current_player_object_id(world).unwrap_or_default();
         let location = entity_position(world, player).unwrap_or(Point { x: 0, y: 0 });
         let direction = context
@@ -449,14 +541,39 @@ pub(super) fn cast_skill_with_context(
             self_broadcast: false,
             secondary_target_ids: Vec::new(),
         });
+        if context
+            .as_ref()
+            .is_some_and(|context| context.target_id != 0)
+            && matches!(
+                spell,
+                Spell::FireBall
+                    | Spell::GreatFireBall
+                    | Spell::ThunderBolt
+                    | Spell::SoulFireBall
+                    | Spell::FireBounce
+                    | Spell::CatTongue
+            )
+        {
+            packets.push(ServerPacket::ObjectProjectile {
+                spell,
+                source_id: object_id,
+                destination_id: target_id,
+            });
+        }
     }
 
+    let skill_level_for_timing = world
+        .resource::<SkillResource>()
+        .skills
+        .get(index)
+        .map(|skill| skill.level)
+        .unwrap_or(skill.level);
     let (cooldown_ticks, delay_ms) = crystal_magic
         .as_ref()
         .map(|magic| {
             (
-                crystal_magic_cooldown_ticks(magic, skill.level),
-                crystal_magic_delay_ms(magic, skill.level),
+                crystal_magic_cooldown_ticks(magic, skill_level_for_timing),
+                crystal_magic_delay_ms(magic, skill_level_for_timing),
             )
         })
         .unwrap_or((skill.cooldown_ticks, skill.delay_ms));
@@ -468,8 +585,10 @@ pub(super) fn cast_skill_with_context(
         skill.cooldown_ends_at = tick + u64::from(cooldown_ticks);
         skill.cast_time_ms = i64::try_from(tick.saturating_mul(1_000)).unwrap_or(i64::MAX);
     }
-    if let (Some(spell), Some(magic)) = (spell_packet, crystal_magic.as_ref()) {
-        packets.extend(advance_magic_progression(world, index, spell, magic, tick));
+    if !manifest_handles_magic_progression {
+        if let (Some(spell), Some(magic)) = (spell_packet, crystal_magic.as_ref()) {
+            packets.extend(advance_magic_progression(world, index, spell, magic, tick));
+        }
     }
     packets
 }
@@ -478,6 +597,7 @@ fn apply_manifest_spell_effect(
     world: &mut World,
     player: Entity,
     skill: &SkillState,
+    skill_index: usize,
     crystal_magic: Option<&CrystalMagicTemplate>,
     spell: Option<Spell>,
     context: Option<&SkillCastContext>,
@@ -489,19 +609,228 @@ fn apply_manifest_spell_effect(
     };
 
     match magic.spell.as_str() {
-        "MagicShield" => {
+        "Fury" | "Haste" | "SwiftFeet" | "ProtectionField" | "Rage" | "LightBody" | "MoonLight"
+        | "DarkBody" | "Hiding" | "MassHiding" | "ImmortalSkin" => {
+            if let Some(buff_packets) = apply_crystal_self_buff_spell(world, skill, magic, tick) {
+                packets.extend(buff_packets);
+            }
+            return packets;
+        }
+        "SoulShield" | "BlessedArmour" | "UltimateEnhancer" => {
+            packets.extend(apply_crystal_taoist_support_spell(
+                world, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Concentration" => {
+            packets.extend(apply_crystal_concentration_spell(world, skill, tick));
+            return packets;
+        }
+        "EnergyShield" => {
+            packets.extend(apply_crystal_energy_shield_spell(world, skill, magic, tick));
+            return packets;
+        }
+        "PetEnhancer" => {
+            packets.extend(apply_crystal_pet_enhancer_spell(
+                world, skill, context, tick,
+            ));
+            return packets;
+        }
+        "LionRoar" | "BattleCry" => {
+            packets.extend(apply_crystal_warrior_area_control_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "ElementalShot" => {
+            packets.extend(apply_crystal_elemental_shot_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "ElementalBarrier" => {
+            packets.extend(apply_crystal_elemental_barrier_spell(
+                world, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "BackStep" => {
+            packets.extend(apply_crystal_back_step_spell(world, player, skill, context));
+            let moved = packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserBackStep { .. }));
+            packets.push(ServerPacket::MagicCast {
+                spell: Spell::BackStep,
+            });
+            if moved {
+                if let Some(spell) = spell {
+                    packets.extend(advance_magic_progression(
+                        world,
+                        skill_index,
+                        spell,
+                        magic,
+                        tick,
+                    ));
+                }
+            }
+            return packets;
+        }
+        "ShoulderDash" => {
+            packets.extend(apply_crystal_shoulder_dash_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            if packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserDash { .. }))
+            {
+                if let Some(spell) = spell {
+                    packets.extend(advance_magic_progression(
+                        world,
+                        skill_index,
+                        spell,
+                        magic,
+                        tick,
+                    ));
+                }
+            }
+            return packets;
+        }
+        "SlashingBurst" => {
+            packets.extend(apply_crystal_slashing_burst_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FlashDash" => {
+            let (flash_packets, hit_target) =
+                apply_crystal_flash_dash_spell(world, player, skill, magic, context, tick);
+            packets.extend(flash_packets);
+            if hit_target {
+                if let Some(spell) = spell {
+                    packets.extend(advance_magic_progression(
+                        world,
+                        skill_index,
+                        spell,
+                        magic,
+                        tick,
+                    ));
+                }
+            }
+            return packets;
+        }
+        "MassHealing" => {
+            packets.extend(apply_crystal_area_healing_spell(
+                world, player, skill, magic, context, tick, false,
+            ));
+            return packets;
+        }
+        "HealingCircle" => {
+            packets.extend(apply_crystal_area_healing_spell(
+                world, player, skill, magic, context, tick, true,
+            ));
+            return packets;
+        }
+        "Curse" => {
+            packets.extend(apply_crystal_curse_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "TrapHexagon" => {
+            packets.extend(apply_crystal_trap_hexagon_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "Poisoning" => {
+            packets.extend(apply_crystal_poisoning_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "PoisonCloud" => {
+            packets.extend(apply_crystal_poison_cloud_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Plague" => {
+            packets.extend(apply_crystal_plague_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Purification" => {
+            packets.extend(apply_crystal_purification_spell(
+                world, skill, context, tick,
+            ));
+            return packets;
+        }
+        "Revelation" => {
+            packets.extend(apply_crystal_revelation_spell(
+                world, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "BindingShot" => {
+            packets.extend(apply_crystal_binding_shot(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "Trap" => {
+            packets.extend(apply_crystal_trap_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "PoisonSword" => {
+            packets.extend(apply_crystal_poison_sword_spell(
+                world, player, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "ExplosiveTrap" => {
+            packets.extend(apply_crystal_explosive_trap_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "StraightShot" | "DoubleShot" => {
+            packets.extend(apply_crystal_archer_basic_shot(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "VampireShot" | "PoisonShot" | "CrippleShot" => {
+            packets.extend(apply_crystal_special_arrow_shot(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "MagicBooster" => {
+            let magic_bonus = 6 + i32::from(skill.level) * 6;
             let buff = BuffState {
-                key: "magic-shield".to_string(),
-                name: "Magic Shield".to_string(),
-                description: "Crystal magic shield buff is active.".to_string(),
-                expires_at_tick: tick
-                    + combat_delay_ticks(60_000 + u64::from(skill.level).saturating_mul(10_000)),
+                key: "magic-booster".to_string(),
+                name: "Magic Booster".to_string(),
+                description: "Crystal magic booster buff is active.".to_string(),
+                expires_at_tick: tick + combat_delay_ticks(60_000),
                 attack_bonus: 0,
                 defence_bonus: 0,
-                stats: vec![UserItemStat {
-                    stat: CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
-                    value: (i32::from(skill.level) + 2) * 10,
-                }],
+                stats: vec![
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MIN_MC,
+                        value: magic_bonus,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_MC,
+                        value: magic_bonus,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MANA_PENALTY_PERCENT,
+                        value: 6 + i32::from(skill.level),
+                    },
+                ],
             };
             apply_or_refresh_buff(world, buff.clone());
             if let Some(packet) = client_buff_packet_for_state(world, &buff) {
@@ -509,12 +838,242 @@ fn apply_manifest_spell_effect(
             }
             return packets;
         }
+        "Repulsion" | "EnergyRepulsor" | "FireBurst" => {
+            packets.extend(apply_crystal_repulsion_spell(
+                world, player, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "StormEscape" => {
+            packets.extend(apply_crystal_storm_escape_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FireWall" => {
+            packets.extend(apply_crystal_fire_wall_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "HellFire" => {
+            packets.extend(apply_crystal_hell_fire_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FireBang" | "IceStorm" => {
+            packets.extend(apply_crystal_fire_bang_family_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Blizzard" | "MeteorStrike" => {
+            packets.extend(apply_crystal_blizzard_family_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "MeteorShower" => {
+            packets.extend(apply_crystal_meteor_shower_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FireBounce" => {
+            packets.extend(apply_crystal_fire_bounce_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FireBall" | "GreatFireBall" => {
+            packets.extend(apply_crystal_projectile_damage_spell(
+                world, player, skill, magic, context, tick, false,
+            ));
+            return packets;
+        }
+        "SoulFireBall" => {
+            packets.extend(apply_crystal_projectile_damage_spell(
+                world, player, skill, magic, context, tick, true,
+            ));
+            return packets;
+        }
+        "Healing" => {
+            packets.extend(apply_crystal_healing_spell(
+                world, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Lightning" => {
+            packets.extend(apply_crystal_lightning_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "ThunderBolt" => {
+            packets.extend(apply_crystal_thunder_bolt_spell(
+                world, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "ElectricShock" => {
+            packets.extend(apply_crystal_electric_shock_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "FlameDisruptor" => {
+            packets.extend(apply_crystal_flame_disruptor_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "IceThrust" => {
+            packets.extend(apply_crystal_ice_thrust_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "FrostCrunch" => {
+            packets.extend(apply_crystal_frost_crunch_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Vampirism" => {
+            packets.extend(apply_crystal_vampirism_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "TurnUndead" => {
+            packets.extend(apply_crystal_turn_undead_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "NapalmShot" => {
+            packets.extend(apply_crystal_napalm_shot_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "DelayedExplosion" => {
+            packets.extend(apply_crystal_delayed_explosion_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "ThunderStorm" | "FlameField" => {
+            packets.extend(apply_crystal_thunder_storm_family_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "MagicShield" => {
+            packets.extend(apply_crystal_magic_shield_spell(world, skill, magic, tick));
+            return packets;
+        }
         "Teleport" => {
-            if let Some(target) = context.map(|context| context.target.clone()) {
-                if super::movement::can_occupy(world, target.clone(), Some(player)) {
-                    world.entity_mut(player).insert(Position(target));
-                }
-            }
+            packets.extend(apply_crystal_teleport_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "Blink" => {
+            packets.extend(apply_crystal_blink_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "SummonSkeleton" | "SummonHolyDeva" => {
+            packets.extend(apply_crystal_taoist_summon_spell(
+                world, player, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "BladeAvalanche" => {
+            packets.extend(apply_crystal_blade_avalanche_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "HalfMoon" | "CrossHalfMoon" => {
+            packets.extend(apply_crystal_half_moon_family_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "DoubleSlash" => {
+            packets.extend(apply_crystal_double_slash_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "TwinDrakeBlade" => {
+            packets.extend(apply_crystal_twin_drake_blade_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "HeavenlySword" => {
+            packets.extend(apply_crystal_heavenly_sword_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Entrapment" => {
+            packets.extend(apply_crystal_entrapment_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "CrescentSlash" => {
+            packets.extend(apply_crystal_crescent_slash_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Mirroring" => {
+            packets.extend(apply_crystal_mirroring_spell(world, player, skill, tick));
+            return packets;
+        }
+        "CounterAttack" | "FatalSword" | "Fencing" | "FlamingSword" | "Focus" | "Hemorrhage"
+        | "Meditation" | "MentalState" | "MPEater" | "Slaying" | "SpiritSword" | "Thrusting" => {
+            return packets;
+        }
+        "MoonMist" => {
+            packets.extend(apply_crystal_moon_mist_spell(
+                world, player, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "CatTongue" => {
+            packets.extend(apply_crystal_cat_tongue_spell(
+                world, player, skill, magic, context, tick,
+            ));
+            return packets;
+        }
+        "Hallucination" => {
+            packets.extend(apply_crystal_hallucination_spell(
+                world, player, skill, context, tick,
+            ));
+            return packets;
+        }
+        "OneWithNature" => {
+            packets.extend(apply_crystal_one_with_nature_spell(
+                world, player, skill, magic, tick,
+            ));
+            return packets;
+        }
+        "Reincarnation" => {
+            packets.extend(apply_crystal_reincarnation_spell(world, player, tick));
+            return packets;
+        }
+        "Portal" => {
+            packets.extend(apply_crystal_portal_spell(
+                world, player, skill, magic, context, tick,
+            ));
             return packets;
         }
         _ => {}
@@ -550,7 +1109,5217 @@ fn apply_manifest_spell_effect(
     packets
 }
 
-fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i32 {
+fn apply_crystal_self_buff_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Option<Vec<ServerPacket>> {
+    let level = i32::from(skill.level);
+    let (key, name, description, duration_ms, stats) = match magic.spell.as_str() {
+        "Fury" => (
+            "battle-focus",
+            "Fury",
+            "Crystal Fury buff is active.",
+            60_000_u64 + u64::from(skill.level).saturating_mul(10_000),
+            vec![UserItemStat {
+                stat: CRYSTAL_STAT_ATTACK_SPEED,
+                value: 4,
+            }],
+        ),
+        "Haste" => (
+            "haste",
+            "Haste",
+            "Crystal Haste buff is active.",
+            25_000_u64 + u64::from(skill.level).saturating_mul(15_000),
+            vec![UserItemStat {
+                stat: CRYSTAL_STAT_ATTACK_SPEED,
+                value: level.saturating_mul(2).saturating_add(2),
+            }],
+        ),
+        "SwiftFeet" => (
+            "swift-feet",
+            "Swift Feet",
+            "Crystal Swift Feet buff is active.",
+            25_000_u64 + u64::from(skill.level).saturating_mul(5_000),
+            Vec::new(),
+        ),
+        "LightBody" => (
+            "light-body",
+            "Light Body",
+            "Crystal Light Body buff is active.",
+            (u64::from(skill.level) + 1).saturating_mul(30_000),
+            vec![UserItemStat {
+                stat: CRYSTAL_STAT_AGILITY,
+                value: (i32::from(skill.level) + 1).saturating_mul(2),
+            }],
+        ),
+        "MoonLight" | "DarkBody" => {
+            let defence = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_AC)
+                .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_AC));
+            let duration_ms = u64::try_from(
+                defence
+                    .saturating_add((i32::from(skill.level) + 1).saturating_mul(5))
+                    .max(1),
+            )
+            .unwrap_or(1)
+            .saturating_mul(500);
+            if magic.spell == "MoonLight" {
+                (
+                    "moon-light",
+                    "Moon Light",
+                    "Crystal Moon Light buff is active.",
+                    duration_ms,
+                    Vec::new(),
+                )
+            } else {
+                (
+                    "dark-body",
+                    "Dark Body",
+                    "Crystal Dark Body buff is active.",
+                    duration_ms,
+                    Vec::new(),
+                )
+            }
+        }
+        "Hiding" | "MassHiding" => (
+            "hiding",
+            if magic.spell == "MassHiding" {
+                "Mass Hiding"
+            } else {
+                "Hiding"
+            },
+            "Crystal hiding buff is active.",
+            (10_u64 + u64::from(skill.level).saturating_mul(10)).saturating_mul(1_000),
+            Vec::new(),
+        ),
+        "ImmortalSkin" => {
+            let attack = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC);
+            let defence = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_AC);
+            let attack_penalty =
+                crystal_scaled_stat_bonus(attack, 0.05 + 0.01 * f64::from(level)).saturating_neg();
+            let defence_bonus = crystal_scaled_stat_bonus(defence, 0.10 + 0.07 * f64::from(level));
+            (
+                "immortal-skin",
+                "Immortal Skin",
+                "Crystal Immortal Skin buff is active.",
+                60_000_u64 + u64::from(skill.level).saturating_mul(1_000),
+                vec![
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_DC,
+                        value: attack_penalty,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_AC,
+                        value: defence_bonus,
+                    },
+                ],
+            )
+        }
+        "ProtectionField" => {
+            let defence = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_AC);
+            let add_value = crystal_scaled_stat_bonus(defence, 0.20 + 0.03 * f64::from(level));
+            (
+                "protection-field",
+                "Protection Field",
+                "Crystal Protection Field buff is active.",
+                (45_u64 + u64::from(skill.level).saturating_mul(15)).saturating_mul(1_000),
+                vec![
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MIN_AC,
+                        value: add_value,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_AC,
+                        value: add_value,
+                    },
+                ],
+            )
+        }
+        "Rage" => {
+            let attack = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC);
+            let add_value = crystal_scaled_stat_bonus(attack, 0.12 + 0.03 * f64::from(level));
+            (
+                "rage",
+                "Rage",
+                "Crystal Rage buff is active.",
+                (18_u64 + u64::from(skill.level).saturating_mul(6)).saturating_mul(1_000),
+                vec![
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MIN_DC,
+                        value: add_value,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_DC,
+                        value: add_value,
+                    },
+                ],
+            )
+        }
+        _ => return None,
+    };
+
+    let buff = BuffState {
+        key: key.to_string(),
+        name: name.to_string(),
+        description: description.to_string(),
+        expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+        attack_bonus: stats
+            .iter()
+            .filter(|stat| stat.stat == CRYSTAL_STAT_MAX_DC)
+            .map(|stat| stat.value)
+            .sum(),
+        defence_bonus: stats
+            .iter()
+            .filter(|stat| stat.stat == CRYSTAL_STAT_MAX_AC)
+            .map(|stat| stat.value)
+            .sum(),
+        stats,
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    let mut packets: Vec<ServerPacket> = client_buff_packet_for_state(world, &buff)
+        .into_iter()
+        .collect();
+    if matches!(key, "hiding" | "moon-light" | "dark-body") {
+        if let Some(object_id) = current_player_object_id(world) {
+            packets.push(ServerPacket::ObjectHidden {
+                object_id,
+                hidden: true,
+            });
+        }
+    }
+    Some(packets)
+}
+
+fn current_player_crystal_stat(world: &World, stat: u8) -> i32 {
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    let buffs = world.resource::<super::resources::BuffResource>();
+    current_player_required_stat_total(inventory, buffs, stat)
+}
+
+fn crystal_scaled_stat_bonus(base: i32, multiplier: f64) -> i32 {
+    ((f64::from(base) * multiplier).round() as i32).max(0)
+}
+
+fn apply_crystal_energy_shield_spell(
+    world: &mut World,
+    skill: &SkillState,
+    _magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let level = i32::from(skill.level);
+    let luck = current_player_crystal_stat(world, CRYSTAL_STAT_LUCK).max(0);
+    let chance = (10 - (luck / 3 + level + 1)).max(2);
+    let shield_percent = (100 + chance / 2) / chance;
+    let hp_gain = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
+        .saturating_add((level + 1).saturating_mul(5))
+        .max(1);
+    let duration_ms = (30_u64 + u64::from(skill.level).saturating_mul(50)).saturating_mul(1_000);
+    let buff = BuffState {
+        key: "energy-shield".to_string(),
+        name: "Energy Shield".to_string(),
+        description: "Crystal Energy Shield buff is active.".to_string(),
+        expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![
+            UserItemStat {
+                stat: CRYSTAL_STAT_ENERGY_SHIELD_PERCENT,
+                value: shield_percent,
+            },
+            UserItemStat {
+                stat: CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN,
+                value: hp_gain,
+            },
+        ],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    client_buff_packet_for_state(world, &buff)
+        .into_iter()
+        .collect()
+}
+
+const CRYSTAL_SPELL_EFFECT_TELEPORT: u8 = 2;
+const CRYSTAL_SPELL_EFFECT_HEALING: u8 = 3;
+const CRYSTAL_SPELL_EFFECT_TWIN_DRAKE_BLADE: u8 = 5;
+const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP: u8 = 6;
+const CRYSTAL_SPELL_EFFECT_ENTRAPMENT: u8 = 9;
+const CRYSTAL_SPELL_EFFECT_MOON_MIST: u8 = 34;
+
+fn apply_crystal_magic_shield_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if world
+        .resource::<super::resources::BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == "magic-shield")
+    {
+        return Vec::new();
+    }
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let duration_seconds = crystal_magic_damage(magic, skill.level)
+        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_MC))
+        .saturating_add(15)
+        .max(1);
+    let duration_ms = u64::try_from(duration_seconds)
+        .unwrap_or(1)
+        .saturating_mul(1_000);
+    let buff = BuffState {
+        key: "magic-shield".to_string(),
+        name: "Magic Shield".to_string(),
+        description: "Crystal magic shield buff is active.".to_string(),
+        expires_at_tick: tick + combat_delay_ticks(duration_ms),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
+            value: (i32::from(skill.level) + 2) * 10,
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    let mut packets: Vec<ServerPacket> = client_buff_packet_for_state(world, &buff)
+        .into_iter()
+        .collect();
+    packets.push(ServerPacket::ObjectEffect {
+        info: ObjectEffectInfo {
+            object_id,
+            effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP,
+            effect_type: 0,
+            delay_time: 0,
+            time: 0,
+        },
+    });
+    packets
+}
+
+fn apply_crystal_teleport_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if current_map_disallows_random_teleport(world) {
+        return Vec::new();
+    }
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let destination = context
+        .map(|context| context.target.clone())
+        .filter(|target| can_occupy(world, target.clone(), Some(player)))
+        .or_else(|| deterministic_teleport_destination(world, player, &origin, skill.level));
+    let Some(destination) = destination else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world.entity_mut(player).insert((
+        Position(destination.clone()),
+        super::components::Facing(direction),
+    ));
+    let buff = BuffState {
+        key: "temporal-flux".to_string(),
+        name: "Temporal Flux".to_string(),
+        description: "Crystal temporal flux teleport penalty is active.".to_string(),
+        expires_at_tick: tick + combat_delay_ticks(30_000),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
+            value: 30,
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    let mut packets = vec![
+        ServerPacket::UserLocation {
+            location: UserLocation {
+                position: destination,
+                direction,
+            },
+        },
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id,
+                effect: CRYSTAL_SPELL_EFFECT_TELEPORT,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    ];
+    if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+        packets.push(packet);
+    }
+    packets
+}
+
+fn apply_crystal_blink_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if current_map_disallows_random_teleport(world) {
+        return Vec::new();
+    }
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    if tile_distance(&origin, &context.target) > i32::from(magic.range) {
+        return Vec::new();
+    }
+    if !can_occupy(world, context.target.clone(), Some(player)) {
+        return Vec::new();
+    }
+    let succeeds = skill.level >= 3
+        || deterministic_roll(
+            tick,
+            usize::try_from(object_id).unwrap_or_default(),
+            1_507 + usize::from(skill.level),
+            4,
+        ) < u64::from(skill.level) + 1;
+    if !succeeds {
+        return Vec::new();
+    }
+
+    let destination = context.target.clone();
+    world.entity_mut(player).insert((
+        Position(destination.clone()),
+        super::components::Facing(context.direction),
+    ));
+    let buff = BuffState {
+        key: "temporal-flux".to_string(),
+        name: "Temporal Flux".to_string(),
+        description: "Crystal temporal flux teleport penalty is active.".to_string(),
+        expires_at_tick: tick + combat_delay_ticks(30_000),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
+            value: 30,
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+
+    let mut packets = vec![
+        ServerPacket::UserLocation {
+            location: UserLocation {
+                position: destination,
+                direction: context.direction,
+            },
+        },
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id,
+                effect: CRYSTAL_SPELL_EFFECT_TELEPORT,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    ];
+    if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+        packets.push(packet);
+    }
+    packets
+}
+
+fn deterministic_teleport_destination(
+    world: &World,
+    player: Entity,
+    origin: &Point,
+    skill_level: u8,
+) -> Option<Point> {
+    let radius = 4 + i32::from(skill_level).saturating_mul(3);
+    let object_id = current_player_object_id(world).unwrap_or_default();
+    let mut candidates = Vec::new();
+    for y in origin.y - radius..=origin.y + radius {
+        for x in origin.x - radius..=origin.x + radius {
+            let point = Point { x, y };
+            if point == *origin || tile_distance(origin, &point) > radius {
+                continue;
+            }
+            if can_occupy(world, point.clone(), Some(player)) {
+                candidates.push(point);
+            }
+        }
+    }
+    if candidates.is_empty() {
+        return None;
+    }
+    let index = deterministic_roll(
+        u64::from(skill_level).saturating_add(1),
+        usize::try_from(object_id).unwrap_or_default(),
+        1011 + usize::from(skill_level),
+        u64::try_from(candidates.len()).unwrap_or(1),
+    ) as usize;
+    candidates.get(index).cloned()
+}
+
+fn apply_crystal_pet_enhancer_spell(
+    world: &mut World,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if agent.dead
+        || (agent.hostile_to_player
+            && world
+                .entity(target_entity)
+                .get::<SummonedMonster>()
+                .is_none())
+    {
+        return Vec::new();
+    }
+
+    let target_level = i32::from(monster_level(world, target_entity)).max(1);
+    let dc_inc = 2 + target_level.saturating_mul(2);
+    let ac_inc = 4 + target_level;
+    let duration_ms = (10_u64 + u64::from(skill.level).saturating_mul(5)).saturating_mul(1_000);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: crystal_buff_type_for_key("pet-enhancer").unwrap_or(22),
+                visible: true,
+                object_id: context.target_id,
+                expire_time: i64::try_from(duration_ms).unwrap_or(i64::MAX),
+                infinite: false,
+                paused: false,
+                stats: vec![
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MIN_DC,
+                        value: dc_inc,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_DC,
+                        value: dc_inc,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MIN_AC,
+                        value: ac_inc,
+                    },
+                    UserItemStat {
+                        stat: CRYSTAL_STAT_MAX_AC,
+                        value: ac_inc,
+                    },
+                ],
+                values: Vec::new(),
+            },
+        },
+    );
+    Vec::new()
+}
+
+fn apply_crystal_warrior_area_control_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const CRYSTAL_LION_ROAR_PARALYSIS: u16 = 256;
+
+    let center = context
+        .map(|context| context.target.clone())
+        .or_else(|| entity_position(world, player))
+        .unwrap_or(Point { x: 0, y: 0 });
+    let player_level = crystal_player_level(world, player);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let targets = hostile_monsters_in_square(world, &center, 2);
+
+    for target_entity in targets {
+        let Some(object_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        if magic.spell == "LionRoar" {
+            if player_level.saturating_add(3) < monster_level(world, target_entity) {
+                continue;
+            }
+            let duration_ms = (u64::from(skill.level) + 2).saturating_mul(1_000);
+            let release_tick = tick.saturating_add(combat_delay_ticks(duration_ms));
+            if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+                agent.next_move_tick = agent.next_move_tick.max(release_tick);
+                agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+            }
+            apply_monster_poison(
+                world,
+                target_entity,
+                CRYSTAL_LION_ROAR_PARALYSIS,
+                0,
+                due_tick,
+                combat_delay_ticks(duration_ms),
+            );
+            queue_due_packet(
+                world,
+                due_tick,
+                ServerPacket::ObjectPoisoned {
+                    object_id,
+                    poison: CRYSTAL_LION_ROAR_PARALYSIS,
+                },
+            );
+            continue;
+        }
+
+        let success_chance = match skill.level {
+            0 => 10,
+            1 => 30,
+            2 => 50,
+            _ => 70,
+        };
+        let success = skill.level >= 3
+            || deterministic_roll(
+                tick,
+                usize::try_from(object_id).unwrap_or_default(),
+                907 + usize::from(skill.level),
+                100,
+            ) < success_chance;
+        if !success {
+            continue;
+        }
+        if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+            agent.tracking_player = true;
+            agent.next_move_tick = agent.next_move_tick.min(tick);
+            agent.next_attack_tick = agent.next_attack_tick.min(tick);
+        }
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_taoist_support_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+
+    match magic.spell.as_str() {
+        "SoulShield" | "BlessedArmour" => {
+            let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+                return packets;
+            };
+            let player_level = active_player_level(world);
+            let value = player_level / 7 + 4;
+            let stat = if magic.spell == "SoulShield" {
+                CRYSTAL_STAT_MAX_MAC
+            } else {
+                CRYSTAL_STAT_MAX_AC
+            };
+            let duration_ms = u64::try_from(taoist_support_duration_seconds(world, skill))
+                .unwrap_or_default()
+                .saturating_mul(1_000);
+            let key = if magic.spell == "SoulShield" {
+                "soul-shield"
+            } else {
+                "blessed-armour"
+            };
+            let name = if magic.spell == "SoulShield" {
+                "Soul Shield"
+            } else {
+                "Blessed Armour"
+            };
+            let buff = BuffState {
+                key: key.to_string(),
+                name: name.to_string(),
+                description: format!("Crystal {name} buff is active."),
+                expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+                attack_bonus: 0,
+                defence_bonus: (stat == CRYSTAL_STAT_MAX_AC).then_some(value).unwrap_or(0),
+                stats: vec![UserItemStat { stat, value }],
+            };
+            packets.push(delete_packet);
+            apply_or_refresh_buff(world, buff.clone());
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+            packets
+        }
+        "UltimateEnhancer" => {
+            if !context_targets_current_player(world, context) {
+                return packets;
+            }
+            let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+                return packets;
+            };
+            let max_sc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC);
+            let value = if max_sc >= 5 { (max_sc / 5).min(8) } else { 1 };
+            let stat = match active_player_class(world) {
+                Some(MirClass::Wizard | MirClass::Archer) => CRYSTAL_STAT_MAX_MC,
+                Some(MirClass::Taoist) => CRYSTAL_STAT_MAX_SC,
+                _ => CRYSTAL_STAT_MAX_DC,
+            };
+            let duration_ms = u64::try_from(taoist_support_duration_seconds(world, skill))
+                .unwrap_or_default()
+                .saturating_mul(1_000);
+            let buff = BuffState {
+                key: "ultimate-enhancer".to_string(),
+                name: "Ultimate Enhancer".to_string(),
+                description: "Crystal Ultimate Enhancer buff is active.".to_string(),
+                expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+                attack_bonus: (stat == CRYSTAL_STAT_MAX_DC).then_some(value).unwrap_or(0),
+                defence_bonus: 0,
+                stats: vec![UserItemStat { stat, value }],
+            };
+            packets.push(delete_packet);
+            apply_or_refresh_buff(world, buff.clone());
+            if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+                packets.push(packet);
+            }
+            packets
+        }
+        _ => packets,
+    }
+}
+
+fn apply_crystal_concentration_spell(
+    world: &mut World,
+    skill: &SkillState,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let duration_ms = (45_u64 + u64::from(skill.level).saturating_mul(15)).saturating_mul(1_000);
+    let buff = BuffState {
+        key: "concentration".to_string(),
+        name: "Concentration".to_string(),
+        description: "Crystal Concentration buff is active.".to_string(),
+        expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: Vec::new(),
+    };
+    apply_or_refresh_buff(world, buff.clone());
+
+    let mut packets = Vec::new();
+    if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+        packets.push(packet);
+    }
+    packets.push(ServerPacket::SetConcentration {
+        object_id,
+        enabled: true,
+        interrupted: false,
+    });
+    packets
+}
+
+fn apply_crystal_elemental_shot_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if !world.resource::<ElementalResource>().has_elemental {
+        return gather_crystal_element(world, true).into_iter().collect();
+    }
+
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let orb_power =
+        crystal_elemental_orb_power(world.resource::<ElementalResource>().elements_level, false);
+    let damage = crystal_magic_damage(magic, skill.level).saturating_add(orb_power);
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+    if let Some(packet) = clear_crystal_element(world, false) {
+        queue_due_packet(world, due_tick, packet);
+    }
+    Vec::new()
+}
+
+fn apply_crystal_elemental_barrier_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if !world.resource::<ElementalResource>().has_elemental {
+        return gather_crystal_element(world, true).into_iter().collect();
+    }
+
+    let orb_power =
+        crystal_elemental_orb_power(world.resource::<ElementalResource>().elements_level, true);
+    let duration_seconds = crystal_magic_damage(magic, skill.level)
+        .saturating_add(orb_power)
+        .max(1);
+    let buff = BuffState {
+        key: "elemental-barrier".to_string(),
+        name: "Elemental Barrier".to_string(),
+        description: "Crystal elemental barrier buff is active.".to_string(),
+        expires_at_tick: tick.saturating_add(combat_delay_ticks(
+            u64::try_from(duration_seconds)
+                .unwrap_or(1)
+                .saturating_mul(1_000),
+        )),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
+            value: (i32::from(skill.level) + 1).saturating_mul(10),
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    let mut packets = Vec::new();
+    if let Some(packet) = clear_crystal_element(world, false) {
+        packets.push(packet);
+    }
+    if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+        packets.push(packet);
+    }
+    packets
+}
+
+fn apply_crystal_back_step_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+) -> Vec<ServerPacket> {
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let back_direction = rotated_direction(direction, 4);
+    let max_distance = if skill.level == 0 {
+        1
+    } else {
+        i32::from(skill.level)
+    };
+
+    let mut destination = origin.clone();
+    let mut distance = 0_i32;
+    for _ in 0..max_distance.max(1) {
+        let next = offset_point(&destination, back_direction, 1);
+        if !can_occupy(world, next.clone(), Some(player)) {
+            break;
+        }
+        destination = next;
+        distance += 1;
+    }
+
+    if distance > 0 {
+        world.entity_mut(player).insert((
+            Position(destination.clone()),
+            super::components::Facing(direction),
+        ));
+    }
+
+    let movement = ObjectMovement {
+        object_id,
+        position: destination.clone(),
+        direction,
+    };
+    let mut packets = Vec::new();
+    if distance > 0 {
+        packets.push(ServerPacket::UserBackStep {
+            location: destination,
+            direction,
+        });
+    }
+    packets.push(ServerPacket::ObjectBackStep { movement, distance });
+    packets
+}
+
+fn apply_crystal_shoulder_dash_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+
+    let player_level = crystal_player_level(world, player);
+    let max_distance = i32::from(skill.level)
+        .saturating_add(2)
+        .saturating_add(deterministic_roll(
+            tick,
+            usize::try_from(object_id).unwrap_or_default(),
+            773 + usize::from(skill.level),
+            2,
+        ) as i32);
+    let mut packets = Vec::new();
+    let mut current = origin.clone();
+    let mut travelled = 0_i32;
+    let mut pushed_target =
+        hostile_monster_at_position(world, &offset_point(&current, direction, 1))
+            .filter(|entity| monster_level(world, *entity) < player_level);
+
+    for _ in 0..max_distance.max(1) {
+        let next = offset_point(&current, direction, 1);
+        if let Some(target_entity) = pushed_target {
+            if push_monster_one_tile_for_dash(world, target_entity, direction, &mut packets) == 0 {
+                break;
+            }
+        }
+        if !can_occupy(world, next.clone(), Some(player)) {
+            break;
+        }
+        current = next.clone();
+        world
+            .entity_mut(player)
+            .insert((Position(next.clone()), super::components::Facing(direction)));
+        packets.push(ServerPacket::UserDash {
+            location: next.clone(),
+            direction,
+        });
+        packets.push(ServerPacket::ObjectDash {
+            object_id,
+            location: next,
+            direction,
+        });
+        travelled += 1;
+    }
+
+    if travelled == 0 {
+        packets.push(ServerPacket::UserDashFail {
+            location: origin.clone(),
+            direction,
+        });
+        packets.push(ServerPacket::ObjectDashFail {
+            object_id,
+            location: origin,
+            direction,
+        });
+    } else if let Some(target_entity) = pushed_target.take() {
+        if let Some(packet) = object_struck_packet(world, target_entity, object_id) {
+            packets.push(packet);
+        }
+        damage_monster_entity(
+            world,
+            target_entity,
+            crystal_magic_damage(magic, skill.level).max(1),
+            tick,
+            &mut packets,
+        );
+    }
+
+    packets.push(ServerPacket::MagicCast {
+        spell: Spell::ShoulderDash,
+    });
+    packets
+}
+
+fn apply_crystal_slashing_burst_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let front = offset_point(&origin, direction, 1);
+    if let Some(target_entity) = hostile_monster_at_position(world, &front) {
+        let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        if let Some(target_id) = entity_object_id(world, target_entity) {
+            schedule_damage_to_monster(
+                world,
+                due_tick,
+                object_id,
+                target_entity,
+                crystal_magic_damage(magic, skill.level),
+                Some(target_name.clone()),
+                Some(PendingMonsterDefeatAction {
+                    object_id: target_id,
+                    name: target_name,
+                }),
+            );
+        }
+    }
+
+    let destination = offset_point(&origin, direction, 2);
+    if !can_occupy(world, destination.clone(), Some(player)) {
+        return Vec::new();
+    }
+
+    world.entity_mut(player).insert((
+        Position(destination.clone()),
+        super::components::Facing(direction),
+    ));
+    vec![ServerPacket::UserAttackMove {
+        location: destination,
+        direction,
+    }]
+}
+
+fn apply_crystal_flash_dash_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> (Vec<ServerPacket>, bool) {
+    const CRYSTAL_STUN_POISON: u16 = 16;
+
+    let Some(object_id) = current_player_object_id(world) else {
+        return (Vec::new(), false);
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return (Vec::new(), false);
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let mut location = origin.clone();
+    let mut distance = 0_i32;
+    if skill.level > 1 {
+        let destination = offset_point(&origin, direction, 1);
+        if can_occupy(world, destination.clone(), Some(player)) {
+            location = destination.clone();
+            distance = 1;
+            world.entity_mut(player).insert((
+                Position(destination.clone()),
+                super::components::Facing(direction),
+            ));
+        }
+    } else {
+        world
+            .entity_mut(player)
+            .insert(super::components::Facing(direction));
+    }
+
+    let mut packets = Vec::new();
+    if distance > 0 {
+        packets.push(ServerPacket::UserDashAttack {
+            location: location.clone(),
+            direction,
+        });
+        packets.push(ServerPacket::ObjectDashAttack {
+            object_id,
+            location: location.clone(),
+            direction,
+            distance,
+        });
+    } else {
+        packets.push(ServerPacket::ObjectAttack {
+            info: ObjectAttackInfo {
+                object_id,
+                location: origin,
+                direction,
+                spell: Spell::FlashDash as u8,
+                level: skill.level,
+                attack_type: 0,
+            },
+        });
+    }
+
+    let mut hit_target = false;
+    let hit_location = offset_point(&location, direction, 1);
+    if let Some(target_entity) = hostile_monster_at_position(world, &hit_location) {
+        let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(300));
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        if let Some(target_id) = entity_object_id(world, target_entity) {
+            hit_target = true;
+            schedule_damage_to_monster(
+                world,
+                due_tick,
+                object_id,
+                target_entity,
+                crystal_magic_damage(magic, skill.level),
+                Some(target_name.clone()),
+                Some(PendingMonsterDefeatAction {
+                    object_id: target_id,
+                    name: target_name,
+                }),
+            );
+            apply_monster_poison(
+                world,
+                target_entity,
+                CRYSTAL_STUN_POISON,
+                0,
+                due_tick,
+                combat_delay_ticks(
+                    u64::from(skill.level)
+                        .saturating_add(1)
+                        .saturating_mul(1_000),
+                ),
+            );
+            queue_due_packet(
+                world,
+                due_tick,
+                ServerPacket::ObjectPoisoned {
+                    object_id: target_id,
+                    poison: CRYSTAL_STUN_POISON,
+                },
+            );
+        }
+    }
+
+    packets.push(ServerPacket::MagicCast {
+        spell: Spell::FlashDash,
+    });
+    (packets, hit_target)
+}
+
+fn push_monster_one_tile_for_dash(
+    world: &mut World,
+    entity: Entity,
+    direction: MirDirection,
+    packets: &mut Vec<ServerPacket>,
+) -> i32 {
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return 0;
+    };
+    let Some(position) = entity_position(world, entity) else {
+        return 0;
+    };
+    let destination = offset_point(&position, direction, 1);
+    if !can_occupy(world, destination.clone(), Some(entity)) {
+        return 0;
+    }
+    let reverse = rotated_direction(direction, 4);
+    world.entity_mut(entity).insert((
+        Position(destination.clone()),
+        super::components::Facing(reverse),
+    ));
+    packets.push(ServerPacket::ObjectPushed {
+        object_id,
+        location: destination,
+        direction: reverse,
+    });
+    1
+}
+
+#[allow(deprecated)]
+fn hostile_monster_at_position(world: &World, position: &Point) -> Option<Entity> {
+    world.iter_entities().find_map(|entity| {
+        let agent = entity.get::<MonsterAgent>()?;
+        if agent.dead || !agent.hostile_to_player {
+            return None;
+        }
+        let entity_position = entity.get::<Position>()?;
+        (&entity_position.0 == position).then_some(entity.id())
+    })
+}
+
+#[allow(deprecated)]
+fn hostile_monsters_at_position(world: &World, position: &Point) -> Vec<Entity> {
+    world
+        .iter_entities()
+        .filter_map(|entity| {
+            let agent = entity.get::<MonsterAgent>()?;
+            if agent.dead || !agent.hostile_to_player {
+                return None;
+            }
+            let entity_position = entity.get::<Position>()?;
+            (&entity_position.0 == position).then_some(entity.id())
+        })
+        .collect()
+}
+
+#[allow(deprecated)]
+fn hostile_monsters_in_square(world: &World, center: &Point, radius: i32) -> Vec<Entity> {
+    world
+        .iter_entities()
+        .filter_map(|entity| {
+            let agent = entity.get::<MonsterAgent>()?;
+            if agent.dead || !agent.hostile_to_player {
+                return None;
+            }
+            let position = entity.get::<Position>()?;
+            let dx = (position.0.x - center.x).abs();
+            let dy = (position.0.y - center.y).abs();
+            (dx <= radius && dy <= radius).then_some(entity.id())
+        })
+        .collect()
+}
+
+fn schedule_damage_to_hostile_monsters_at(
+    world: &mut World,
+    position: &Point,
+    due_tick: u64,
+    caster_object_id: u32,
+    damage: i32,
+) {
+    for target_entity in hostile_monsters_at_position(world, position) {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            caster_object_id,
+            damage,
+        );
+    }
+}
+
+fn schedule_damage_to_hostile_monster_entity(
+    world: &mut World,
+    target_entity: Entity,
+    due_tick: u64,
+    caster_object_id: u32,
+    damage: i32,
+) {
+    let Some(target_id) = entity_object_id(world, target_entity) else {
+        return;
+    };
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        caster_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: target_id,
+            name: target_name,
+        }),
+    );
+}
+
+fn monster_is_undead(world: &World, entity: Entity) -> bool {
+    entity_name(world, entity)
+        .and_then(|name| crystal_monster_by_name(&name).map(|template| template.undead))
+        .unwrap_or(false)
+}
+
+fn crystal_player_level(world: &World, player: Entity) -> u16 {
+    world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level)
+        .or_else(|| {
+            world
+                .entity(player)
+                .get::<CharacterBody>()
+                .map(|body| body.level)
+        })
+        .unwrap_or(1)
+}
+
+fn monster_level(world: &World, entity: Entity) -> u16 {
+    entity_name(world, entity)
+        .and_then(|name| crystal_monster_by_name(&name).map(|template| template.level))
+        .unwrap_or(0)
+}
+
+fn apply_crystal_repulsion_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let player_level = world
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.level)
+        .or_else(|| {
+            world
+                .entity(player)
+                .get::<CharacterBody>()
+                .map(|body| body.level)
+        })
+        .unwrap_or_default();
+    let candidates = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead || !agent.hostile_to_player {
+                    return None;
+                }
+                let position = entity.get::<Position>()?;
+                (tile_distance(&player_position, &position.0) <= 1).then_some(entity.id())
+            })
+            .collect::<Vec<_>>()
+    };
+
+    let mut packets = Vec::new();
+    let mut success_index = 0_usize;
+    for entity in candidates {
+        let Some(object_id) = entity_object_id(world, entity) else {
+            continue;
+        };
+        let Some(name) = entity_name(world, entity) else {
+            continue;
+        };
+        if !crystal_dynamic_monster_template(&name)
+            .map(|template| template.monster_can_push)
+            .unwrap_or(true)
+        {
+            continue;
+        }
+        let monster_level = crystal_monster_by_name(&name)
+            .map(|template| template.level)
+            .unwrap_or_default();
+        if monster_level >= player_level {
+            continue;
+        }
+
+        let chance = 6_i32
+            .saturating_add(i32::from(skill.level).saturating_mul(3))
+            .saturating_add(i32::from(player_level))
+            .saturating_sub(i32::from(monster_level));
+        if chance <= 0 {
+            continue;
+        }
+        if chance < 20 {
+            let roll = deterministic_roll(
+                tick,
+                usize::try_from(object_id).unwrap_or_default(),
+                701 + usize::from(skill.level),
+                20,
+            );
+            if roll >= u64::try_from(chance).unwrap_or_default() {
+                continue;
+            }
+        }
+
+        let Some(start) = entity_position(world, entity) else {
+            continue;
+        };
+        let Some(push_direction) = direction_toward(&player_position, &start) else {
+            continue;
+        };
+        let distance = 1_i32
+            .saturating_add((i32::from(skill.level) - 1).max(0))
+            .saturating_add(
+                i32::try_from(deterministic_roll(
+                    tick,
+                    usize::try_from(object_id).unwrap_or_default(),
+                    719 + success_index,
+                    2,
+                ))
+                .unwrap_or_default(),
+            );
+        let pushed = push_monster_for_crystal_repulsion(
+            world,
+            entity,
+            object_id,
+            push_direction,
+            distance,
+            &mut packets,
+        );
+        if pushed == 0 {
+            continue;
+        }
+        success_index += 1;
+
+        let thunder_element_repulsion = world
+            .entity(entity)
+            .get::<MonsterAgent>()
+            .map(|agent| agent.ai == 49)
+            .unwrap_or(false);
+        if thunder_element_repulsion {
+            if let Some(packet) = object_struck_packet(world, entity, player_object_id) {
+                packets.push(packet);
+            }
+            let damage = crystal_magic_damage(magic, skill.level)
+                .max(50)
+                .saturating_mul(pushed.max(1));
+            if let Some(mut vitals) = world.entity_mut(entity).get_mut::<MonsterVitals>() {
+                vitals.hp = (vitals.hp - damage).max(1);
+            }
+            if let Some(info) = object_health_info_for_entity(world, entity, 0) {
+                packets.push(ServerPacket::ObjectHealth { info });
+            }
+        }
+    }
+
+    packets
+}
+
+fn push_monster_for_crystal_repulsion(
+    world: &mut World,
+    entity: Entity,
+    object_id: u32,
+    direction: MirDirection,
+    distance: i32,
+    packets: &mut Vec<ServerPacket>,
+) -> i32 {
+    let mut pushed = 0_i32;
+    let reverse = rotated_direction(direction, 4);
+    let Some(mut position) = entity_position(world, entity) else {
+        return pushed;
+    };
+
+    for _ in 0..distance.max(1) {
+        let next = offset_point(&position, direction, 1);
+        if !can_occupy(world, next.clone(), Some(entity)) {
+            break;
+        }
+        position = next.clone();
+        world
+            .entity_mut(entity)
+            .insert((Position(next.clone()), super::components::Facing(reverse)));
+        packets.push(ServerPacket::ObjectPushed {
+            object_id,
+            location: next,
+            direction: reverse,
+        });
+        pushed += 1;
+    }
+
+    pushed
+}
+
+fn apply_crystal_storm_escape_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const CRYSTAL_STORM_ESCAPE_EFFECT: u8 = 23;
+
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+
+    let damage_due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let damage = crystal_magic_damage(magic, skill.level);
+    let targets = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead || !agent.hostile_to_player {
+                    return None;
+                }
+                let position = entity.get::<Position>()?;
+                (tile_distance(&origin, &position.0) <= 2).then_some(entity.id())
+            })
+            .collect::<Vec<_>>()
+    };
+    for target_entity in targets {
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        let Some(target_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        schedule_damage_to_monster(
+            world,
+            damage_due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+    }
+
+    let teleport_success = skill.level >= 3
+        || deterministic_roll(
+            tick,
+            usize::try_from(player_object_id).unwrap_or_default(),
+            751,
+            4,
+        ) < u64::from(skill.level) + 1;
+    if !teleport_success || !can_occupy(world, context.target.clone(), Some(player)) {
+        return Vec::new();
+    }
+
+    let destination = context.target.clone();
+    world.entity_mut(player).insert((
+        Position(destination.clone()),
+        super::components::Facing(context.direction),
+    ));
+    let buff = BuffState {
+        key: "temporal-flux".to_string(),
+        name: "Temporal Flux".to_string(),
+        description: "Crystal temporal flux teleport penalty is active.".to_string(),
+        expires_at_tick: tick + combat_delay_ticks(30_000),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: vec![UserItemStat {
+            stat: CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
+            value: 30,
+        }],
+    };
+    apply_or_refresh_buff(world, buff.clone());
+
+    let mut packets = vec![
+        ServerPacket::UserLocation {
+            location: UserLocation {
+                position: destination,
+                direction: context.direction,
+            },
+        },
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id: player_object_id,
+                effect: CRYSTAL_STORM_ESCAPE_EFFECT,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    ];
+    if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+        packets.push(packet);
+    }
+    packets
+}
+
+fn apply_crystal_fire_wall_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or(player_position);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let damage = crystal_magic_damage(magic, skill.level);
+    let locations = fire_wall_cross_locations(world, &target);
+
+    for (index, location) in locations.iter().enumerate() {
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::ObjectSpell {
+                info: ObjectSpellInfo {
+                    object_id: player_object_id
+                        .saturating_add(80_000)
+                        .saturating_add(u32::try_from(index).unwrap_or_default()),
+                    location: location.clone(),
+                    spell: Spell::FireWall,
+                    direction: MirDirection::Up,
+                    param: false,
+                },
+            },
+        );
+    }
+
+    if !locations.is_empty() {
+        world
+            .resource_mut::<RuntimeQueueResource>()
+            .pending_ground_spell_actions
+            .push(PendingGroundSpellAction {
+                spell: Spell::FireWall,
+                caster_object_id: player_object_id,
+                locations,
+                damage,
+                next_tick: due_tick,
+                expires_at_tick: due_tick.saturating_add(combat_delay_ticks(
+                    10_000_u64.saturating_add(
+                        u64::try_from(damage.max(0) / 2)
+                            .unwrap_or_default()
+                            .saturating_mul(1_000),
+                    ),
+                )),
+                tick_interval: combat_delay_ticks(2_000),
+            });
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_lightning_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let damage = crystal_magic_damage(magic, skill.level);
+
+    let mut location = origin;
+    for _ in 0..6 {
+        location = offset_point(&location, direction, 1);
+        if is_blocked_tile(world, &location) {
+            continue;
+        }
+        let Some(target_entity) = hostile_monster_at_position(world, &location) else {
+            continue;
+        };
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        let Some(target_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        schedule_damage_to_monster(
+            world,
+            due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_hell_fire_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let mut directions = vec![direction];
+    if skill.level == 3 {
+        directions.push(rotated_direction(direction, 1));
+        directions.push(rotated_direction(direction, -1));
+    }
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+
+    for direction in directions {
+        let mut location = origin.clone();
+        for _ in 0..4 {
+            location = offset_point(&location, direction, 1);
+            if is_blocked_tile(world, &location) {
+                break;
+            }
+            schedule_damage_to_hostile_monsters_at(
+                world,
+                &location,
+                due_tick,
+                player_object_id,
+                damage,
+            );
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_fire_bang_family_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .or_else(|| entity_position(world, player))
+        .unwrap_or(Point { x: 0, y: 0 });
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for target_entity in hostile_monsters_in_square(world, &target, 1) {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            player_object_id,
+            damage,
+        );
+    }
+    Vec::new()
+}
+
+fn apply_crystal_blizzard_family_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .or_else(|| entity_position(world, player))
+        .unwrap_or(Point { x: 0, y: 0 });
+    let spell = if magic.spell == "MeteorStrike" {
+        Spell::MeteorStrike
+    } else {
+        Spell::Blizzard
+    };
+    let locations = square_locations(&target, 2);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for location in &locations {
+        let object_id = allocate_runtime_monster_object_id(world);
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::ObjectSpell {
+                info: ObjectSpellInfo {
+                    object_id,
+                    location: location.clone(),
+                    spell,
+                    direction: MirDirection::Up,
+                    param: location == &target,
+                },
+            },
+        );
+    }
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell,
+            caster_object_id: player_object_id,
+            damage: crystal_magic_damage(magic, skill.level),
+            locations,
+            next_tick: due_tick.saturating_add(combat_delay_ticks(800)),
+            expires_at_tick: due_tick.saturating_add(combat_delay_ticks(3_000)),
+            tick_interval: combat_delay_ticks(440),
+        });
+    Vec::new()
+}
+
+fn apply_crystal_meteor_shower_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let player_position = entity_position(world, player).unwrap_or(Point { x: 0, y: 0 });
+    let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    schedule_damage_to_hostile_monster_entity(
+        world,
+        target_entity,
+        due_tick,
+        player_object_id,
+        damage,
+    );
+
+    let mut secondary_targets = hostile_monsters_in_square(world, &target_position, 4)
+        .into_iter()
+        .filter(|entity| *entity != target_entity)
+        .filter_map(|entity| {
+            let position = entity_position(world, entity)?;
+            let object_id = entity_object_id(world, entity)?;
+            Some((
+                entity,
+                object_id,
+                tile_distance(&target_position, &position),
+            ))
+        })
+        .collect::<Vec<_>>();
+    secondary_targets.sort_by_key(|(_, object_id, distance)| (*distance, *object_id));
+    secondary_targets.truncate(3);
+
+    let secondary_target_ids = secondary_targets
+        .iter()
+        .map(|(_, object_id, _)| *object_id)
+        .collect::<Vec<_>>();
+    for (entity, _, _) in secondary_targets {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            entity,
+            due_tick,
+            player_object_id,
+            damage.saturating_div(2).max(1),
+        );
+    }
+
+    vec![
+        ServerPacket::Magic {
+            spell: Spell::MeteorShower,
+            target_id: context.target_id,
+            target: target_position.clone(),
+            cast: true,
+            level: skill.level,
+            secondary_target_ids: secondary_target_ids.clone(),
+        },
+        ServerPacket::ObjectMagic {
+            object_id: player_object_id,
+            location: player_position,
+            direction,
+            spell: Spell::MeteorShower,
+            target_id: context.target_id,
+            target: target_position,
+            cast: true,
+            level: skill.level,
+            self_broadcast: false,
+            secondary_target_ids,
+        },
+    ]
+}
+
+fn apply_crystal_fire_bounce_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let player_position = entity_position(world, player).unwrap_or(Point { x: 0, y: 0 });
+    let mut chain = vec![target_entity];
+    let mut previous_position =
+        entity_position(world, target_entity).unwrap_or_else(|| context.target.clone());
+    let max_bounces = usize::from(skill.level).saturating_add(2);
+    for _ in 0..max_bounces {
+        let mut candidates = hostile_monsters_in_square(world, &previous_position, 4)
+            .into_iter()
+            .filter(|entity| !chain.contains(entity))
+            .filter_map(|entity| {
+                let position = entity_position(world, entity)?;
+                let object_id = entity_object_id(world, entity)?;
+                Some((
+                    entity,
+                    object_id,
+                    tile_distance(&previous_position, &position),
+                ))
+            })
+            .collect::<Vec<_>>();
+        candidates.sort_by_key(|(_, object_id, distance)| (*distance, *object_id));
+        let Some((next_entity, _, _)) = candidates.into_iter().next() else {
+            break;
+        };
+        previous_position =
+            entity_position(world, next_entity).unwrap_or_else(|| previous_position.clone());
+        chain.push(next_entity);
+    }
+
+    let damage = crystal_magic_damage(magic, skill.level);
+    let mut due_tick = tick;
+    let mut source_object_id = player_object_id;
+    let mut source_position = player_position;
+    for (index, target_entity) in chain.into_iter().enumerate() {
+        let Some(target_position) = entity_position(world, target_entity) else {
+            continue;
+        };
+        let Some(target_object_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        let delay_ticks = if index == 0 {
+            ranged_attack_delay_ticks(&source_position, &target_position)
+        } else {
+            let distance = u64::try_from(tile_distance(&source_position, &target_position).max(0))
+                .unwrap_or_default();
+            combat_delay_ticks(distance.saturating_mul(50).max(1))
+        };
+        due_tick = queued_before_world_tick_due_tick(due_tick, delay_ticks);
+        if index > 0 {
+            queue_due_packet(
+                world,
+                due_tick,
+                ServerPacket::ObjectProjectile {
+                    spell: Spell::FireBounce,
+                    source_id: source_object_id,
+                    destination_id: target_object_id,
+                },
+            );
+        }
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            player_object_id,
+            damage,
+        );
+        source_object_id = target_object_id;
+        source_position = target_position;
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_thunder_bolt_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let mut damage = crystal_magic_damage(magic, skill.level);
+    if monster_is_undead(world, target_entity) {
+        damage = damage.saturating_mul(3).saturating_div(2).max(1);
+    }
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    schedule_damage_to_hostile_monster_entity(
+        world,
+        target_entity,
+        due_tick,
+        player_object_id,
+        damage,
+    );
+    Vec::new()
+}
+
+fn apply_crystal_electric_shock_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if agent.dead || !agent.hostile_to_player {
+        return Vec::new();
+    }
+    if monster_level(world, target_entity) > crystal_player_level(world, player).saturating_add(2) {
+        return Vec::new();
+    }
+    let release_tick = tick.saturating_add(combat_delay_ticks(
+        (u64::from(skill.level).saturating_mul(5) + 10).saturating_mul(1_000),
+    ));
+    if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+        agent.tracking_player = false;
+        agent.next_move_tick = agent.next_move_tick.max(release_tick);
+        agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+    }
+    Vec::new()
+}
+
+fn apply_crystal_flame_disruptor_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let mut damage = crystal_magic_damage(magic, skill.level);
+    if !monster_is_undead(world, target_entity) {
+        damage = damage.saturating_mul(3).saturating_div(2).max(1);
+    }
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    schedule_damage_to_hostile_monster_entity(
+        world,
+        target_entity,
+        due_tick,
+        player_object_id,
+        damage,
+    );
+    Vec::new()
+}
+
+fn apply_crystal_ice_thrust_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const CRYSTAL_POISON_FROZEN: u16 = 8;
+
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(origin) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    let front = offset_point(&origin, direction, 1);
+    let starts = [
+        offset_point(&front, rotated_direction(direction, -1), 1),
+        offset_point(&front, direction, 1),
+        offset_point(&front, rotated_direction(direction, 1), 1),
+    ];
+    let near_damage = crystal_magic_damage(magic, skill.level);
+    let far_damage = near_damage.saturating_mul(3).saturating_div(5).max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(1_500));
+
+    for start in starts {
+        for row in 0..3 {
+            let hit_point = offset_point(&start, direction, row);
+            let damage = if row <= 1 { near_damage } else { far_damage };
+            for target_entity in hostile_monsters_at_position(world, &hit_point) {
+                schedule_damage_to_hostile_monster_entity(
+                    world,
+                    target_entity,
+                    due_tick,
+                    player_object_id,
+                    damage,
+                );
+                if monster_level(world, target_entity) <= crystal_player_level(world, player) + 10 {
+                    if let Some(object_id) = entity_object_id(world, target_entity) {
+                        apply_monster_poison(
+                            world,
+                            target_entity,
+                            CRYSTAL_POISON_FROZEN,
+                            0,
+                            tick,
+                            combat_delay_ticks(
+                                (5_u64 + u64::from(skill.level)).saturating_mul(1_000),
+                            ),
+                        );
+                        queue_due_packet(
+                            world,
+                            due_tick,
+                            ServerPacket::ObjectPoisoned {
+                                object_id,
+                                poison: CRYSTAL_POISON_FROZEN,
+                            },
+                        );
+                    }
+                }
+            }
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_frost_crunch_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+
+    let freeze_ms = (2_u64 + u64::from(skill.level)).saturating_mul(1_000);
+    let release_tick = tick.saturating_add(combat_delay_ticks(freeze_ms));
+    if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+        agent.next_move_tick = agent.next_move_tick.max(release_tick);
+        agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+    }
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::AddBuff {
+            buff: ClientBuff {
+                buff_type: crystal_buff_type_for_key("magic").unwrap_or(201),
+                visible: false,
+                object_id: context.target_id,
+                expire_time: i64::try_from(freeze_ms).unwrap_or(i64::MAX),
+                infinite: false,
+                paused: false,
+                stats: Vec::new(),
+                values: Vec::new(),
+            },
+        },
+    );
+
+    Vec::new()
+}
+
+fn apply_crystal_vampirism_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+    schedule_heal_to_player(
+        world,
+        due_tick,
+        damage
+            .saturating_mul(i32::from(skill.level).saturating_add(1))
+            .saturating_div(3)
+            .max(1),
+    );
+
+    Vec::new()
+}
+
+fn apply_crystal_turn_undead_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead
+        || !target_agent.hostile_to_player
+        || !monster_is_undead(world, target_entity)
+    {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let player_level = crystal_player_level(world, player);
+    let target_level = monster_level(world, target_entity);
+    let target_hp = world
+        .entity(target_entity)
+        .get::<MonsterVitals>()
+        .map(|vitals| vitals.hp)
+        .unwrap_or_default();
+    let base_damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(i32::from(skill.level).saturating_mul(5));
+    let damage = if player_level >= target_level {
+        target_hp.max(base_damage)
+    } else {
+        base_damage.max(1)
+    };
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+
+    Vec::new()
+}
+
+fn apply_crystal_thunder_storm_family_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    _context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let base_damage = crystal_magic_damage(magic, skill.level);
+    let targets = hostile_monsters_in_square(world, &player_position, 2);
+
+    for target_entity in targets {
+        let mut damage = base_damage;
+        if magic.spell == "ThunderStorm" && !monster_is_undead(world, target_entity) {
+            damage = (damage / 10).max(1);
+        }
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        let Some(target_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        schedule_damage_to_monster(
+            world,
+            due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_napalm_shot_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(center_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(center_agent) = world.entity(center_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if center_agent.dead || !center_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(center_position) = entity_position(world, center_entity) else {
+        return Vec::new();
+    };
+
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &center_position),
+    );
+    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    for target_entity in hostile_monsters_in_square(world, &center_position, 2) {
+        let Some(target_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        schedule_damage_to_monster(
+            world,
+            due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+    }
+    Vec::new()
+}
+
+fn apply_crystal_delayed_explosion_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const CRYSTAL_POISON_DELAYED_EXPLOSION: u16 = 64;
+    const CRYSTAL_SPELL_EFFECT_DELAYED_EXPLOSION: u8 = 15;
+
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let damage = crystal_magic_damage(magic, skill.level);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+
+    let duration_seconds = damage
+        .saturating_mul(2)
+        .saturating_add((i32::from(skill.level) + 1).saturating_mul(7))
+        .max(1);
+    apply_monster_poison(
+        world,
+        target_entity,
+        CRYSTAL_POISON_DELAYED_EXPLOSION,
+        0,
+        due_tick,
+        combat_delay_ticks(
+            u64::try_from(duration_seconds)
+                .unwrap_or(1)
+                .saturating_mul(1_000),
+        ),
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectPoisoned {
+            object_id: context.target_id,
+            poison: CRYSTAL_POISON_DELAYED_EXPLOSION,
+        },
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id: context.target_id,
+                effect: CRYSTAL_SPELL_EFFECT_DELAYED_EXPLOSION,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    );
+
+    let explosion_tick = due_tick.saturating_add(combat_delay_ticks(4_000));
+    queue_due_packet(
+        world,
+        explosion_tick,
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id: context.target_id,
+                effect: CRYSTAL_SPELL_EFFECT_DELAYED_EXPLOSION,
+                effect_type: 2,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    );
+    for affected_entity in hostile_monsters_in_square(world, &target_position, 1) {
+        let Some(affected_id) = entity_object_id(world, affected_entity) else {
+            continue;
+        };
+        let affected_name =
+            entity_name(world, affected_entity).unwrap_or_else(|| "Target".to_string());
+        schedule_damage_to_monster(
+            world,
+            explosion_tick,
+            player_object_id,
+            affected_entity,
+            damage,
+            Some(affected_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: affected_id,
+                name: affected_name,
+            }),
+        );
+    }
+    queue_due_packet(
+        world,
+        explosion_tick.saturating_add(1),
+        ServerPacket::RemoveDelayedExplosion {
+            object_id: context.target_id,
+        },
+    );
+
+    Vec::new()
+}
+
+pub(super) fn tick_ground_spell_actions(
+    world: &mut World,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let actions = {
+        let mut queue = world.resource_mut::<RuntimeQueueResource>();
+        std::mem::take(&mut queue.pending_ground_spell_actions)
+    };
+    let mut retained = Vec::new();
+
+    for mut action in actions {
+        if tick >= action.expires_at_tick {
+            continue;
+        }
+        if tick >= action.next_tick {
+            let mut detonated_trap = false;
+            if matches!(
+                action.spell,
+                Spell::FireWall
+                    | Spell::Blizzard
+                    | Spell::MeteorStrike
+                    | Spell::PoisonCloud
+                    | Spell::ExplosiveTrap
+            ) {
+                for location in &action.locations {
+                    for target_entity in hostile_monsters_at_position(world, location) {
+                        if let Some(packet) =
+                            object_struck_packet(world, target_entity, action.caster_object_id)
+                        {
+                            packets.push(packet);
+                        }
+                        damage_monster_entity(world, target_entity, action.damage, tick, packets);
+                        if action.spell == Spell::PoisonCloud {
+                            if let Some(object_id) = entity_object_id(world, target_entity) {
+                                apply_monster_poison(
+                                    world,
+                                    target_entity,
+                                    1,
+                                    action.damage.saturating_div(3).max(1),
+                                    tick,
+                                    combat_delay_ticks(12_000),
+                                );
+                                packets.push(ServerPacket::ObjectPoisoned {
+                                    object_id,
+                                    poison: 1,
+                                });
+                            }
+                        }
+                        if action.spell == Spell::ExplosiveTrap {
+                            detonated_trap = true;
+                        }
+                    }
+                }
+            }
+            if detonated_trap {
+                continue;
+            }
+            action.next_tick = tick.saturating_add(action.tick_interval.max(1));
+        }
+        if action.next_tick < action.expires_at_tick {
+            retained.push(action);
+        }
+    }
+
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions = retained;
+}
+
+fn fire_wall_cross_locations(world: &World, target: &Point) -> Vec<Point> {
+    [
+        target.clone(),
+        offset_point(target, MirDirection::Up, 1),
+        offset_point(target, MirDirection::Right, 1),
+        offset_point(target, MirDirection::Down, 1),
+        offset_point(target, MirDirection::Left, 1),
+    ]
+    .into_iter()
+    .filter(|location| !is_blocked_tile(world, location))
+    .collect()
+}
+
+fn apply_crystal_area_healing_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+    healing_circle: bool,
+) -> Vec<ServerPacket> {
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or_else(|| player_position.clone());
+    if tile_distance(&player_position, &target) > 1 {
+        return Vec::new();
+    }
+
+    let delay_ms = if healing_circle { 1_700 } else { 500 };
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
+    let heal = if healing_circle {
+        25
+    } else {
+        crystal_magic_damage(magic, skill.level)
+    };
+    schedule_heal_to_player(world, due_tick, heal);
+
+    if healing_circle {
+        let object_id = current_player_object_id(world)
+            .unwrap_or_default()
+            .saturating_add(70_000)
+            .saturating_add((tick as u32) % 1_000);
+        let direction = context
+            .map(|context| context.direction)
+            .or_else(|| entity_facing(world, player))
+            .unwrap_or(MirDirection::Up);
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::ObjectSpell {
+                info: ObjectSpellInfo {
+                    object_id,
+                    location: target,
+                    spell: Spell::HealingCircle,
+                    direction,
+                    param: false,
+                },
+            },
+        );
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_curse_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+        return packets;
+    };
+    packets.push(delete_packet);
+
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return packets;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return packets;
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or_else(|| player_position.clone());
+    let success_window = (10_i32 - ((i32::from(skill.level) + 1) * 2)).max(1) as usize;
+    let roll = deterministic_roll(
+        tick,
+        usize::try_from(player_object_id).unwrap_or_default(),
+        491 + usize::from(skill.level),
+        u64::try_from(success_window).unwrap_or(1),
+    );
+    if roll > 2 {
+        return packets;
+    }
+
+    let delay_ms = u64::from(tile_distance(&player_position, &target) as u32)
+        .saturating_mul(50)
+        .saturating_add(500);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
+    let duration_seconds = crystal_magic_damage(magic, skill.level).max(1);
+    let stat_penalty = 1 + (i32::from(skill.level) + 1) * 2;
+    let duration_ms = i64::from(duration_seconds).saturating_mul(1_000);
+    let curse_stats = vec![
+        UserItemStat {
+            stat: CRYSTAL_STAT_MAX_DC_RATE_PERCENT,
+            value: stat_penalty.saturating_neg(),
+        },
+        UserItemStat {
+            stat: CRYSTAL_STAT_MAX_MC_RATE_PERCENT,
+            value: stat_penalty.saturating_neg(),
+        },
+        UserItemStat {
+            stat: CRYSTAL_STAT_MAX_SC_RATE_PERCENT,
+            value: stat_penalty.saturating_neg(),
+        },
+        UserItemStat {
+            stat: CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT,
+            value: 0,
+        },
+    ];
+
+    let affected = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead || !agent.hostile_to_player {
+                    return None;
+                }
+                let position = entity.get::<Position>()?;
+                (tile_distance(&position.0, &target) <= 3).then_some(entity.id())
+            })
+            .collect::<Vec<_>>()
+    };
+    let release_tick = tick.saturating_add(combat_delay_ticks(
+        u64::try_from(duration_seconds)
+            .unwrap_or_default()
+            .saturating_mul(1_000),
+    ));
+    for entity in affected {
+        if let Some(mut agent) = world.entity_mut(entity).get_mut::<MonsterAgent>() {
+            agent.next_move_tick = agent.next_move_tick.max(release_tick);
+            agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+        }
+        let Some(object_id) = entity_object_id(world, entity) else {
+            continue;
+        };
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::AddBuff {
+                buff: ClientBuff {
+                    buff_type: 12,
+                    visible: false,
+                    object_id,
+                    expire_time: duration_ms,
+                    infinite: false,
+                    paused: false,
+                    stats: curse_stats.clone(),
+                    values: Vec::new(),
+                },
+            },
+        );
+    }
+
+    packets
+}
+
+fn apply_crystal_trap_hexagon_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or_else(|| player_position.clone());
+    let affected = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead || !agent.hostile_to_player {
+                    return None;
+                }
+                let position = entity.get::<Position>()?;
+                (tile_distance(&position.0, &target) <= 1).then_some(entity.id())
+            })
+            .collect::<Vec<_>>()
+    };
+    if affected.is_empty() {
+        return Vec::new();
+    }
+
+    let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+        return Vec::new();
+    };
+
+    let duration_ms = (u64::from(skill.level).saturating_mul(5) + 10).saturating_mul(1_000);
+    let release_tick = tick.saturating_add(combat_delay_ticks(duration_ms));
+    for entity in affected {
+        if let Some(mut agent) = world.entity_mut(entity).get_mut::<MonsterAgent>() {
+            agent.tracking_player = false;
+            agent.next_move_tick = agent.next_move_tick.max(release_tick);
+            agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+        }
+    }
+
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for spawnpoint in trap_hexagon_spell_points(&target) {
+        let object_id = allocate_runtime_monster_object_id(world);
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::ObjectSpell {
+                info: ObjectSpellInfo {
+                    object_id,
+                    location: spawnpoint,
+                    spell: Spell::TrapHexagon,
+                    direction: MirDirection::Up,
+                    param: false,
+                },
+            },
+        );
+    }
+
+    vec![delete_packet]
+}
+
+fn trap_hexagon_spell_points(center: &Point) -> Vec<Point> {
+    [
+        MirDirection::Up,
+        MirDirection::Right,
+        MirDirection::Down,
+        MirDirection::Left,
+    ]
+    .into_iter()
+    .flat_map(|direction| {
+        let start = offset_point(center, direction, 2);
+        let side_direction = if matches!(direction, MirDirection::Up | MirDirection::Down) {
+            MirDirection::Right
+        } else {
+            MirDirection::Up
+        };
+        [
+            offset_point(&start, side_direction, 1),
+            offset_point(&start, side_direction, -1),
+        ]
+    })
+    .filter(|point| point.x > 0 && point.y > 0)
+    .collect()
+}
+
+fn apply_crystal_poisoning_spell(
+    world: &mut World,
+    _player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const GREEN_POISON: u16 = 1;
+    const RED_POISON: u16 = 2;
+
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+
+    let Some((delete_packet, poison_shape)) = consume_equipped_crystal_poison(world, None, 1)
+    else {
+        return Vec::new();
+    };
+
+    let player_object_id = current_player_object_id(world).unwrap_or_default();
+    let power = crystal_magic_damage(magic, skill.level).max(1);
+    let poison_attack = current_player_crystal_stat(world, CRYSTAL_STAT_POISON_ATTACK).max(0);
+    let poison_attack_bonus = if poison_attack > 0 {
+        deterministic_roll(
+            tick,
+            usize::try_from(player_object_id).unwrap_or_default(),
+            617 + usize::from(skill.level),
+            u64::try_from(poison_attack).unwrap_or_default(),
+        ) as i32
+    } else {
+        0
+    };
+    let green_damage = power
+        .saturating_div(15)
+        .saturating_add(i32::from(skill.level) + 1)
+        .saturating_add(poison_attack_bonus)
+        .max(1);
+    let duration = power
+        .saturating_mul(2)
+        .saturating_add((i32::from(skill.level) + 1).saturating_mul(7))
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let poison = if poison_shape == 1 {
+        GREEN_POISON
+    } else {
+        RED_POISON
+    };
+
+    apply_monster_poison(
+        world,
+        target_entity,
+        poison,
+        if poison == GREEN_POISON {
+            green_damage
+        } else {
+            0
+        },
+        due_tick,
+        u64::try_from(duration)
+            .unwrap_or_default()
+            .saturating_mul(2),
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectPoisoned {
+            object_id: context.target_id,
+            poison,
+        },
+    );
+
+    vec![delete_packet]
+}
+
+fn apply_crystal_poison_cloud_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    if !has_equipped_crystal_amulet(world, 0) || !has_equipped_crystal_poison(world, Some(1)) {
+        return Vec::new();
+    }
+    let Some(amulet_delete_packet) = consume_equipped_crystal_amulet(world, 0, 5) else {
+        return Vec::new();
+    };
+    let Some((poison_delete_packet, poison_shape)) =
+        consume_equipped_crystal_poison(world, Some(1), 5)
+    else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .or_else(|| entity_position(world, player))
+        .unwrap_or(Point { x: 0, y: 0 });
+    let locations = square_locations(&target, 1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let damage = crystal_magic_damage(magic, skill.level).max(1);
+    let object_id = allocate_runtime_monster_object_id(world);
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id,
+                location: target,
+                spell: Spell::PoisonCloud,
+                direction: MirDirection::Up,
+                param: false,
+            },
+        },
+    );
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell: Spell::PoisonCloud,
+            caster_object_id: player_object_id,
+            damage: damage.saturating_add(i32::from(poison_shape)),
+            locations,
+            next_tick: due_tick,
+            expires_at_tick: due_tick.saturating_add(combat_delay_ticks(6_000)),
+            tick_interval: combat_delay_ticks(1_000),
+        });
+
+    vec![amulet_delete_packet, poison_delete_packet]
+}
+
+fn apply_crystal_plague_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const GREEN_POISON: u16 = 1;
+    const RED_POISON: u16 = 2;
+    const SLOW_POISON: u16 = 4;
+    const FROZEN_POISON: u16 = 8;
+
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(amulet_delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+        return Vec::new();
+    };
+    let poison_delete_packet = consume_equipped_crystal_poison(world, None, 1);
+    let held_poison = poison_delete_packet
+        .as_ref()
+        .map(|(_, poison_shape)| {
+            if *poison_shape == 1 {
+                GREEN_POISON
+            } else {
+                RED_POISON
+            }
+        })
+        .unwrap_or(0);
+    let target = context
+        .map(|context| context.target.clone())
+        .or_else(|| entity_position(world, player))
+        .unwrap_or(Point { x: 0, y: 0 });
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let spell_power = crystal_magic_damage(magic, skill.level)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC))
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
+        .max(1);
+    let direct_damage = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
+        .saturating_mul(2)
+        .max(spell_power);
+    let duration_ticks = combat_delay_ticks(
+        u64::try_from(
+            (2_i32.saturating_mul(i32::from(skill.level) + 1))
+                .saturating_add(spell_power.saturating_div(10))
+                .max(1),
+        )
+        .unwrap_or(1)
+        .saturating_mul(1_000),
+    );
+    let targets = hostile_monsters_in_square(world, &target, 1);
+    for target_entity in targets {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            player_object_id,
+            direct_damage,
+        );
+        let Some(object_id) = entity_object_id(world, target_entity) else {
+            continue;
+        };
+        let roll = (u64::from(object_id)
+            .saturating_add(tick)
+            .saturating_add(u64::from(skill.level)))
+            % 15;
+        let poison = match roll {
+            0..=2 => SLOW_POISON,
+            3..=4 => FROZEN_POISON,
+            5..=9 if held_poison != 0 => held_poison,
+            _ => 0,
+        };
+        if poison != 0 {
+            let green_damage = if poison == GREEN_POISON {
+                spell_power
+                    .saturating_add((i32::from(skill.level) + 1).saturating_mul(2))
+                    .max(1)
+            } else {
+                0
+            };
+            apply_monster_poison(
+                world,
+                target_entity,
+                poison,
+                green_damage,
+                due_tick,
+                duration_ticks,
+            );
+            queue_due_packet(
+                world,
+                due_tick,
+                ServerPacket::ObjectPoisoned { object_id, poison },
+            );
+        }
+    }
+
+    let mut packets = vec![amulet_delete_packet];
+    if let Some((delete_packet, _)) = poison_delete_packet {
+        packets.push(delete_packet);
+    }
+    packets
+}
+
+fn apply_crystal_purification_spell(
+    world: &mut World,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    if !context_targets_current_player(world, context) {
+        return Vec::new();
+    }
+    let roll = deterministic_roll(
+        tick,
+        usize::try_from(player_object_id).unwrap_or_default(),
+        503 + usize::from(skill.level),
+        4,
+    );
+    if roll > u64::from(skill.level) {
+        return Vec::new();
+    }
+
+    let removed = {
+        let mut buffs = world.resource_mut::<super::resources::BuffResource>();
+        let removed = buffs
+            .buffs
+            .iter()
+            .filter(|buff| buff.key == "curse")
+            .filter_map(|buff| crystal_buff_type_for_key(&buff.key))
+            .collect::<Vec<_>>();
+        buffs.buffs.retain(|buff| buff.key != "curse");
+        removed
+    };
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for buff_type in removed {
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::RemoveBuff {
+                buff_type,
+                object_id: player_object_id,
+            },
+        );
+    }
+
+    Vec::new()
+}
+
+fn apply_crystal_revelation_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let roll = deterministic_roll(
+        tick,
+        usize::try_from(context.target_id).unwrap_or_default(),
+        509 + usize::from(skill.level),
+        4,
+    );
+    if roll > u64::from(skill.level) {
+        return Vec::new();
+    }
+
+    let duration = crystal_magic_damage(magic, skill.level)
+        .max(1)
+        .min(i32::from(u8::MAX)) as u8;
+    if let Some(info) = object_health_info_for_entity(world, target_entity, duration) {
+        queue_due_packet(
+            world,
+            queued_before_world_tick_due_tick(tick, combat_delay_ticks(500)),
+            ServerPacket::ObjectHealth { info },
+        );
+    }
+    Vec::new()
+}
+
+fn apply_crystal_binding_shot(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let target = world.entity(target_entity);
+    let Some(center_agent) = target.get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if center_agent.dead {
+        return Vec::new();
+    }
+    let Some(center_object_id) = target.get::<super::components::ObjectId>().map(|id| id.0) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(center_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let duration_ms = (u64::from(skill.level).saturating_mul(5) + 10).saturating_mul(1_000);
+    let duration_ticks = combat_delay_ticks(duration_ms);
+    let release_tick = tick.saturating_add(duration_ticks);
+    let affected = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead {
+                    return None;
+                }
+                let position = entity.get::<Position>()?;
+                (tile_distance(&position.0, &center_position) <= 1).then_some(entity.id())
+            })
+            .collect::<Vec<_>>()
+    };
+    for entity in affected {
+        if let Some(mut agent) = world.entity_mut(entity).get_mut::<MonsterAgent>() {
+            agent.tracking_player = false;
+            agent.next_move_tick = agent.next_move_tick.max(release_tick);
+            agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+        }
+    }
+
+    let visual_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &center_position),
+    );
+    queue_due_packet(
+        world,
+        visual_tick,
+        ServerPacket::SetBindingShot {
+            object_id: center_object_id,
+            enabled: true,
+            value: i64::try_from(duration_ms).unwrap_or(i64::MAX),
+        },
+    );
+    Vec::new()
+}
+
+fn apply_crystal_trap_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if agent.dead || !agent.hostile_to_player {
+        return Vec::new();
+    }
+    let player_level = crystal_player_level(world, player);
+    if monster_level(world, target_entity) >= player_level.saturating_add(2) {
+        return Vec::new();
+    }
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let duration_ms = 60_000_u64;
+    let release_tick = tick.saturating_add(combat_delay_ticks(duration_ms));
+    if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+        agent.tracking_player = false;
+        agent.next_move_tick = agent.next_move_tick.max(release_tick);
+        agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+    }
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let object_id = allocate_runtime_monster_object_id(world);
+    let direction = context.direction;
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id,
+                location: target_position,
+                spell: Spell::Trap,
+                direction,
+                param: skill.level > 0,
+            },
+        },
+    );
+    Vec::new()
+}
+
+fn apply_crystal_explosive_trap_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    _context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
+    let front = offset_point(&player_position, direction, 1);
+    if is_blocked_tile(world, &front) {
+        return Vec::new();
+    }
+
+    let side_direction = rotated_direction(direction, 2);
+    let mut trap_locations = vec![front.clone()];
+    for side_offset in [-1, 1] {
+        let location = offset_point(&front, side_direction, side_offset);
+        if !is_blocked_tile(world, &location) {
+            trap_locations.push(location);
+        }
+    }
+
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for location in &trap_locations {
+        let object_id = allocate_runtime_monster_object_id(world);
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::ObjectSpell {
+                info: ObjectSpellInfo {
+                    object_id,
+                    location: location.clone(),
+                    spell: Spell::ExplosiveTrap,
+                    direction,
+                    param: false,
+                },
+            },
+        );
+    }
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .push(PendingGroundSpellAction {
+            spell: Spell::ExplosiveTrap,
+            caster_object_id: player_object_id,
+            damage: crystal_magic_damage(magic, skill.level),
+            locations: trap_locations,
+            next_tick: due_tick,
+            expires_at_tick: due_tick.saturating_add(combat_delay_ticks(10_000)),
+            tick_interval: combat_delay_ticks(500),
+        });
+
+    Vec::new()
+}
+
+fn apply_crystal_poison_sword_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const GREEN_POISON: u16 = 1;
+
+    let Some((delete_packet, _)) = consume_equipped_crystal_poison(world, None, 1) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let power = crystal_magic_damage(magic, skill.level).max(1);
+    let poison_attack = current_player_crystal_stat(world, CRYSTAL_STAT_POISON_ATTACK).max(0);
+    let poison_attack_bonus = if poison_attack > 0 {
+        deterministic_roll(
+            tick,
+            usize::try_from(current_player_object_id(world).unwrap_or_default())
+                .unwrap_or_default(),
+            907 + usize::from(skill.level),
+            u64::try_from(poison_attack).unwrap_or_default(),
+        ) as i32
+    } else {
+        0
+    };
+    let green_damage = power
+        .saturating_div(10)
+        .saturating_add(i32::from(skill.level) + 1)
+        .saturating_add(poison_attack_bonus)
+        .max(1);
+    let duration_ticks = combat_delay_ticks(
+        u64::try_from(
+            3_i32
+                .saturating_add(power.saturating_div(10))
+                .saturating_add(i32::from(skill.level).saturating_mul(3))
+                .max(1),
+        )
+        .unwrap_or(1)
+        .saturating_mul(1_000),
+    );
+
+    for offset in -1..=3 {
+        let hit_point = offset_point(&player_position, rotated_direction(direction, offset), 1);
+        for target_entity in hostile_monsters_at_position(world, &hit_point) {
+            let Some(object_id) = entity_object_id(world, target_entity) else {
+                continue;
+            };
+            apply_monster_poison(
+                world,
+                target_entity,
+                GREEN_POISON,
+                green_damage,
+                due_tick,
+                duration_ticks,
+            );
+            queue_due_packet(
+                world,
+                due_tick,
+                ServerPacket::ObjectPoisoned {
+                    object_id,
+                    poison: GREEN_POISON,
+                },
+            );
+        }
+    }
+
+    vec![delete_packet]
+}
+
+fn apply_crystal_projectile_damage_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+    consume_amulet: bool,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let mut packets = Vec::new();
+    if consume_amulet {
+        let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+            return Vec::new();
+        };
+        packets.push(delete_packet);
+    }
+
+    let stat_bonus = if magic.spell == "SoulFireBall" {
+        current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
+            .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
+    } else {
+        current_player_crystal_stat(world, CRYSTAL_STAT_MAX_MC)
+            .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_MC))
+    }
+    .max(0);
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(stat_bonus)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+    packets
+}
+
+fn apply_crystal_healing_spell(
+    world: &mut World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    if context
+        .map(|context| context.target_id != 0 && context.target_id != player_object_id)
+        .unwrap_or(false)
+    {
+        return Vec::new();
+    }
+    let current_hp = world
+        .entity(player)
+        .get::<PlayerVitals>()
+        .map(|vitals| vitals.hp)
+        .unwrap_or(0);
+    let max_hp = world
+        .entity(player)
+        .get::<PlayerVitals>()
+        .map(|vitals| vitals.max_hp)
+        .unwrap_or(0);
+    if current_hp >= max_hp {
+        return Vec::new();
+    }
+
+    let tao_power = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
+        .max(0);
+    let level_bonus = i32::from(crystal_player_level(world, player));
+    let heal = crystal_magic_damage(magic, skill.level)
+        .saturating_add(tao_power.saturating_mul(2))
+        .saturating_add(level_bonus)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    schedule_heal_to_player(world, due_tick, heal);
+    let effect_packet = ServerPacket::ObjectEffect {
+        info: ObjectEffectInfo {
+            object_id: player_object_id,
+            effect: CRYSTAL_SPELL_EFFECT_HEALING,
+            effect_type: 0,
+            delay_time: 0,
+            time: 0,
+        },
+    };
+    queue_due_packet(world, due_tick, effect_packet.clone());
+    vec![effect_packet]
+}
+
+fn apply_crystal_taoist_summon_spell(
+    world: &mut World,
+    player: Entity,
+    _skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
+    let (monster_name, amulet_count, delay_ms, max_minions) = match magic.spell.as_str() {
+        "SummonSkeleton" => ("BoneFamiliar", 1, 500, 2),
+        "SummonHolyDeva" => ("HolyDeva", 2, 1_500, 2),
+        _ => return Vec::new(),
+    };
+    if recall_existing_summon(
+        world,
+        player_object_id,
+        monster_name,
+        &player_position,
+        true,
+    ) {
+        return Vec::new();
+    }
+    if active_summoned_monster_count(world, player_object_id) >= max_minions {
+        return Vec::new();
+    }
+    let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, amulet_count) else {
+        return Vec::new();
+    };
+    let Some(template) = crystal_dynamic_monster_template(monster_name) else {
+        return Vec::new();
+    };
+    let spawn_position =
+        summon_spawn_position_near(world, &player_position, direction, 1, Some(player));
+    queue_pending_monster_spawn(
+        world,
+        PendingMonsterSpawnAction {
+            due_tick: tick + combat_delay_ticks(delay_ms),
+            summoner_entity: player,
+            template: CrystalRespawnTemplate {
+                location: spawn_position,
+                ..template
+            },
+            target_entity: None,
+            summon_metadata: Some(SummonedMonster {
+                summoner_object_id: player_object_id,
+                visible_extra: true,
+                expire_tick: None,
+                require_summoner_within: Some(15),
+                despawn_tick_after_death: None,
+                totem_master_object_id: None,
+                max_minions: Some(max_minions),
+            }),
+            hostile_to_player_override: Some(false),
+        },
+    );
+    vec![delete_packet]
+}
+
+fn apply_crystal_blade_avalanche_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
+        .max(0);
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(dc)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+
+    for lane in [-1, 0, 1] {
+        let start = offset_point(&player_position, rotated_direction(direction, lane), 1);
+        for row in 0..3 {
+            let hit_point = offset_point(&start, direction, row);
+            let row_damage = if row <= 1 {
+                damage
+            } else {
+                damage.saturating_mul(3).saturating_div(5).max(1)
+            };
+            for target_entity in hostile_monsters_at_position(world, &hit_point) {
+                schedule_damage_to_hostile_monster_entity(
+                    world,
+                    target_entity,
+                    due_tick,
+                    player_object_id,
+                    row_damage,
+                );
+            }
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_crescent_slash_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let back = rotated_direction(direction, 4);
+    let pre_back = rotated_direction(back, -1);
+    let next_back = rotated_direction(back, 1);
+    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
+        .max(0);
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(dc)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+
+    for offset in -4..=3 {
+        let hit_direction = rotated_direction(direction, offset);
+        if hit_direction == back || hit_direction == pre_back || hit_direction == next_back {
+            continue;
+        }
+        let hit_point = offset_point(&player_position, hit_direction, 1);
+        for target_entity in hostile_monsters_at_position(world, &hit_point) {
+            schedule_damage_to_hostile_monster_entity(
+                world,
+                target_entity,
+                due_tick,
+                player_object_id,
+                damage,
+            );
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_half_moon_family_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
+        .max(0);
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(dc)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(300));
+    let full_ring = magic.spell == "CrossHalfMoon";
+    let offsets: &[i32] = if full_ring {
+        &[-4, -3, -2, -1, 1, 2, 3]
+    } else {
+        &[-1, 1, 2, 3]
+    };
+    for offset in offsets {
+        let hit_point = offset_point(&player_position, rotated_direction(direction, *offset), 1);
+        for target_entity in hostile_monsters_at_position(world, &hit_point) {
+            schedule_damage_to_hostile_monster_entity(
+                world,
+                target_entity,
+                due_tick,
+                player_object_id,
+                damage,
+            );
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_double_slash_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some((player_object_id, target_entity, target_id)) =
+        crystal_hostile_target_for_context(world, context)
+    else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| {
+            entity_position(world, player)
+                .and_then(|origin| direction_toward(&origin, &target_position))
+        })
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let damage = crystal_melee_magic_damage(world, skill, magic);
+    for delay_ms in [300, 400] {
+        let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
+        let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+        schedule_damage_to_monster(
+            world,
+            due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+    }
+    Vec::new()
+}
+
+fn apply_crystal_twin_drake_blade_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some((player_object_id, target_entity, target_id)) =
+        crystal_hostile_target_for_context(world, context)
+    else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| {
+            entity_position(world, player)
+                .and_then(|origin| direction_toward(&origin, &target_position))
+        })
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let damage = crystal_melee_magic_damage(world, skill, magic);
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    schedule_damage_to_monster(
+        world,
+        queued_before_world_tick_due_tick(tick, combat_delay_ticks(300)),
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: target_id,
+            name: target_name.clone(),
+        }),
+    );
+    schedule_damage_to_monster(
+        world,
+        queued_before_world_tick_due_tick(tick, combat_delay_ticks(400)),
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: target_id,
+            name: target_name,
+        }),
+    );
+    let stun_due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(400));
+    let duration_ticks = combat_delay_ticks(
+        u64::from(skill.level)
+            .saturating_add(2)
+            .saturating_mul(1_000),
+    );
+    apply_monster_poison(
+        world,
+        target_entity,
+        CRYSTAL_POISON_STUN,
+        0,
+        stun_due_tick,
+        duration_ticks,
+    );
+    queue_due_packet(
+        world,
+        stun_due_tick,
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id: target_id,
+                effect: CRYSTAL_SPELL_EFFECT_TWIN_DRAKE_BLADE,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    );
+    queue_due_packet(
+        world,
+        stun_due_tick,
+        ServerPacket::ObjectPoisoned {
+            object_id: target_id,
+            poison: CRYSTAL_POISON_STUN,
+        },
+    );
+    Vec::new()
+}
+
+fn apply_crystal_heavenly_sword_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let direction = context
+        .map(|context| context.direction)
+        .or_else(|| entity_facing(world, player))
+        .unwrap_or(MirDirection::Down);
+    world
+        .entity_mut(player)
+        .insert(super::components::Facing(direction));
+    let damage = crystal_melee_magic_damage(world, skill, magic);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let mut hit_point = player_position;
+    for _ in 0..3 {
+        hit_point = offset_point(&hit_point, direction, 1);
+        for target_entity in hostile_monsters_at_position(world, &hit_point) {
+            schedule_damage_to_hostile_monster_entity(
+                world,
+                target_entity,
+                due_tick,
+                player_object_id,
+                damage,
+            );
+        }
+    }
+    Vec::new()
+}
+
+fn apply_crystal_entrapment_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    const CRYSTAL_POISON_PARALYSIS: u16 = 256;
+
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    if tile_distance(&player_position, &target_position) > 7 {
+        return Vec::new();
+    }
+    if monster_level(world, target_entity) >= crystal_player_level(world, player).saturating_add(5)
+    {
+        return Vec::new();
+    }
+    let pull_direction = rotated_direction(context.direction, 4);
+    let pull_distance = (tile_distance(&player_position, &target_position) - 2).max(0);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let duration_ticks = combat_delay_ticks(
+        u64::from(skill.level)
+            .saturating_add(1)
+            .saturating_mul(1_000),
+    );
+    apply_monster_poison(
+        world,
+        target_entity,
+        CRYSTAL_POISON_PARALYSIS,
+        0,
+        due_tick,
+        duration_ticks,
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectEffect {
+            info: ObjectEffectInfo {
+                object_id: context.target_id,
+                effect: CRYSTAL_SPELL_EFFECT_ENTRAPMENT,
+                effect_type: 0,
+                delay_time: 0,
+                time: 0,
+            },
+        },
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectPoisoned {
+            object_id: context.target_id,
+            poison: CRYSTAL_POISON_PARALYSIS,
+        },
+    );
+    if pull_distance > 0 {
+        let mut packets = Vec::new();
+        let pushed = push_monster_for_crystal_repulsion(
+            world,
+            target_entity,
+            context.target_id,
+            pull_direction,
+            pull_distance,
+            &mut packets,
+        );
+        if pushed > 0 {
+            for packet in packets {
+                queue_due_packet(world, due_tick, packet);
+            }
+        }
+    }
+    Vec::new()
+}
+
+fn crystal_hostile_target_for_context(
+    world: &World,
+    context: Option<&SkillCastContext>,
+) -> Option<(u32, Entity, u32)> {
+    let context = context?;
+    if context.target_id == 0 {
+        return None;
+    }
+    let target_entity = entity_by_object_id(world, context.target_id)?;
+    let agent = world.entity(target_entity).get::<MonsterAgent>()?;
+    if agent.dead || !agent.hostile_to_player {
+        return None;
+    }
+    let player_object_id = current_player_object_id(world)?;
+    Some((player_object_id, target_entity, context.target_id))
+}
+
+fn crystal_melee_magic_damage(
+    world: &World,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+) -> i32 {
+    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
+        .max(0);
+    crystal_magic_damage(magic, skill.level)
+        .saturating_add(dc)
+        .max(1)
+}
+
+fn apply_crystal_mirroring_spell(
+    world: &mut World,
+    player: Entity,
+    _skill: &SkillState,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let existing = {
+        #[allow(deprecated)]
+        world.iter_entities().find_map(|entity| {
+            let summoned = entity.get::<SummonedMonster>()?;
+            if summoned.summoner_object_id != player_object_id {
+                return None;
+            }
+            let agent = entity.get::<MonsterAgent>()?;
+            if agent.dead {
+                return None;
+            }
+            let name = entity.get::<DisplayName>()?;
+            (name.value == "Clone").then_some(entity.id())
+        })
+    };
+    if let Some(existing) = existing {
+        let mut packets = Vec::new();
+        if let Some(mut vitals) = world.entity_mut(existing).get_mut::<MonsterVitals>() {
+            vitals.hp = 0;
+        }
+        if let Some(mut agent) = world.entity_mut(existing).get_mut::<MonsterAgent>() {
+            agent.dead = true;
+        }
+        if let Some(info) = object_died_info_for_entity(world, existing, 0) {
+            packets.push(ServerPacket::ObjectDied { info });
+        }
+        return packets;
+    }
+
+    let Some(template) = crystal_dynamic_monster_template("Clone") else {
+        return Vec::new();
+    };
+    let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
+    let spawn_position =
+        summon_spawn_position_near(world, &player_position, direction, 1, Some(player));
+    queue_pending_monster_spawn(
+        world,
+        PendingMonsterSpawnAction {
+            due_tick: tick + combat_delay_ticks(500),
+            summoner_entity: player,
+            template: CrystalRespawnTemplate {
+                location: spawn_position,
+                ..template
+            },
+            target_entity: None,
+            summon_metadata: Some(SummonedMonster {
+                summoner_object_id: player_object_id,
+                visible_extra: true,
+                expire_tick: None,
+                require_summoner_within: Some(15),
+                despawn_tick_after_death: None,
+                totem_master_object_id: None,
+                max_minions: Some(1),
+            }),
+            hostile_to_player_override: Some(false),
+        },
+    );
+    Vec::new()
+}
+
+fn apply_crystal_moon_mist_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if world
+        .resource::<super::resources::BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == "moon-light")
+    {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let duration_ms = u64::try_from(
+        current_player_crystal_stat(world, CRYSTAL_STAT_MAX_AC)
+            .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_AC))
+            .saturating_add((i32::from(skill.level) + 1).saturating_mul(5))
+            .max(1),
+    )
+    .unwrap_or(1)
+    .saturating_mul(500);
+    let buff = BuffState {
+        key: "moon-light".to_string(),
+        name: "Moon Light".to_string(),
+        description: "Crystal moon mist stealth is active.".to_string(),
+        expires_at_tick: tick + combat_delay_ticks(duration_ms),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: Vec::new(),
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    let mut packets: Vec<ServerPacket> = client_buff_packet_for_state(world, &buff)
+        .into_iter()
+        .collect();
+    packets.push(ServerPacket::ObjectHidden {
+        object_id: player_object_id,
+        hidden: true,
+    });
+    packets.push(ServerPacket::ObjectEffect {
+        info: ObjectEffectInfo {
+            object_id: player_object_id,
+            effect: CRYSTAL_SPELL_EFFECT_MOON_MIST,
+            effect_type: 0,
+            delay_time: 0,
+            time: 0,
+        },
+    });
+
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC))
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    for target_entity in hostile_monsters_in_square(world, &player_position, 2) {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            player_object_id,
+            damage,
+        );
+        if monster_is_undead(world, target_entity) {
+            if let Some(object_id) = entity_object_id(world, target_entity) {
+                apply_monster_poison(
+                    world,
+                    target_entity,
+                    CRYSTAL_POISON_STUN,
+                    0,
+                    due_tick,
+                    combat_delay_ticks((u64::from(skill.level) + 2).saturating_mul(1_000)),
+                );
+                queue_due_packet(
+                    world,
+                    due_tick,
+                    ServerPacket::ObjectPoisoned {
+                        object_id,
+                        poison: CRYSTAL_POISON_STUN,
+                    },
+                );
+            }
+        }
+    }
+
+    packets
+}
+
+fn apply_crystal_cat_tongue_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC))
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    schedule_damage_to_hostile_monster_entity(
+        world,
+        target_entity,
+        due_tick,
+        player_object_id,
+        damage,
+    );
+    let roll = deterministic_roll(
+        tick,
+        usize::try_from(context.target_id).unwrap_or_default(),
+        1117 + usize::from(skill.level),
+        10,
+    );
+    let poison = match roll {
+        0..=4 => CRYSTAL_POISON_STUN,
+        5..=7 => CRYSTAL_POISON_SLOW,
+        _ => CRYSTAL_POISON_FROZEN,
+    };
+    apply_crystal_control_poison(
+        world,
+        target_entity,
+        context.target_id,
+        poison,
+        skill.level,
+        due_tick,
+    );
+    Vec::new()
+}
+
+fn apply_crystal_hallucination_spell(
+    world: &mut World,
+    _player: Entity,
+    skill: &SkillState,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if agent.dead || !agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(delete_packet) = consume_equipped_crystal_amulet(world, 0, 1) else {
+        return Vec::new();
+    };
+    let release_tick = tick.saturating_add(combat_delay_ticks(
+        (10_u64 + u64::from(skill.level).saturating_mul(5)).saturating_mul(1_000),
+    ));
+    if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+        agent.tracking_player = false;
+        agent.next_move_tick = tick;
+        agent.next_attack_tick = release_tick;
+    }
+    vec![delete_packet]
+}
+
+fn apply_crystal_one_with_nature_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let (has_vampire, has_poison) = {
+        let buffs = world.resource::<super::resources::BuffResource>();
+        (
+            buffs.buffs.iter().any(|buff| buff.key == "vampire-shot"),
+            buffs.buffs.iter().any(|buff| buff.key == "poison-shot"),
+        )
+    };
+    let damage = crystal_magic_damage(magic, skill.level)
+        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_MC))
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let targets = hostile_monsters_in_square(world, &player_position, 2);
+    for target_entity in targets {
+        schedule_damage_to_hostile_monster_entity(
+            world,
+            target_entity,
+            due_tick,
+            player_object_id,
+            damage,
+        );
+        if has_poison {
+            if let Some(object_id) = entity_object_id(world, target_entity) {
+                apply_crystal_arrow_green_poison(
+                    world,
+                    target_entity,
+                    object_id,
+                    damage,
+                    skill.level,
+                    tick,
+                    due_tick,
+                    1211,
+                );
+            }
+        }
+    }
+    if has_vampire {
+        schedule_heal_to_player(
+            world,
+            due_tick,
+            damage
+                .saturating_mul(i32::from(skill.level) + 1)
+                .saturating_div(4)
+                .max(1),
+        );
+    }
+    let mut packets = Vec::new();
+    for (_, buff_type) in consume_crystal_arrow_buffs(world) {
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::RemoveBuff {
+                buff_type,
+                object_id: player_object_id,
+            },
+        );
+        packets.push(ServerPacket::RemoveBuff {
+            buff_type,
+            object_id: player_object_id,
+        });
+    }
+    packets
+}
+
+fn apply_crystal_reincarnation_spell(
+    world: &mut World,
+    player: Entity,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    if current_map_disallows_reincarnation(world) {
+        return Vec::new();
+    }
+    let Some(delete_packet) = consume_equipped_crystal_amulet(world, 3, 1) else {
+        return Vec::new();
+    };
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return vec![delete_packet];
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return vec![delete_packet];
+    };
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let spell_object_id = allocate_runtime_monster_object_id(world);
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id: spell_object_id,
+                location: player_position,
+                spell: Spell::Reincarnation,
+                direction: entity_facing(world, player).unwrap_or(MirDirection::Up),
+                param: true,
+            },
+        },
+    );
+    let mut packets = vec![delete_packet];
+    packets.push(ServerPacket::RequestReincarnation);
+    queue_due_packet(
+        world,
+        due_tick.saturating_add(combat_delay_ticks(6_000)),
+        ServerPacket::CancelReincarnation,
+    );
+    let _ = player_object_id;
+    packets
+}
+
+fn apply_crystal_portal_spell(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let target = context
+        .map(|context| context.target.clone())
+        .unwrap_or(player_position);
+    if !can_occupy(world, target.clone(), Some(player)) {
+        return Vec::new();
+    }
+    let duration = 30_u64 + u64::from(skill.level).saturating_mul(30);
+    let pass_through_count = i32::from(skill.level)
+        .saturating_mul(2)
+        .saturating_sub(1)
+        .max(1);
+    let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
+    let spell_object_id = allocate_runtime_monster_object_id(world);
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectSpell {
+            info: ObjectSpellInfo {
+                object_id: spell_object_id,
+                location: target,
+                spell: Spell::Portal,
+                direction: entity_facing(world, player).unwrap_or(MirDirection::Up),
+                param: pass_through_count > crystal_magic_damage(magic, skill.level),
+            },
+        },
+    );
+    let _ = duration;
+    Vec::new()
+}
+
+const CRYSTAL_POISON_SLOW: u16 = 4;
+const CRYSTAL_POISON_FROZEN: u16 = 8;
+const CRYSTAL_POISON_STUN: u16 = 16;
+
+fn apply_crystal_control_poison(
+    world: &mut World,
+    target_entity: Entity,
+    object_id: u32,
+    poison: u16,
+    skill_level: u8,
+    due_tick: u64,
+) {
+    let duration_ms = (u64::from(skill_level) + 1).saturating_mul(3_000);
+    apply_monster_poison(
+        world,
+        target_entity,
+        poison,
+        0,
+        due_tick,
+        combat_delay_ticks(duration_ms),
+    );
+    let release_tick = due_tick.saturating_add(combat_delay_ticks(duration_ms));
+    if let Some(mut agent) = world.entity_mut(target_entity).get_mut::<MonsterAgent>() {
+        if poison != CRYSTAL_POISON_SLOW {
+            agent.next_move_tick = agent.next_move_tick.max(release_tick);
+            agent.next_attack_tick = agent.next_attack_tick.max(release_tick);
+        } else {
+            agent.next_move_tick = agent.next_move_tick.max(due_tick.saturating_add(1));
+        }
+    }
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectPoisoned { object_id, poison },
+    );
+}
+
+fn apply_crystal_special_arrow_shot(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+
+    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    schedule_damage_to_monster(
+        world,
+        due_tick,
+        player_object_id,
+        target_entity,
+        damage,
+        Some(target_name.clone()),
+        Some(PendingMonsterDefeatAction {
+            object_id: context.target_id,
+            name: target_name,
+        }),
+    );
+
+    match magic.spell.as_str() {
+        "VampireShot" => {
+            schedule_heal_to_player(
+                world,
+                due_tick,
+                damage.saturating_mul(i32::from(skill.level) + 1) / 4,
+            );
+            apply_crystal_arrow_marker_buff(
+                world,
+                player_object_id,
+                skill,
+                tick,
+                "vampire-shot",
+                "poison-shot",
+                133,
+                "Vampire Shot",
+            )
+        }
+        "PoisonShot" => {
+            apply_crystal_arrow_green_poison(
+                world,
+                target_entity,
+                context.target_id,
+                damage,
+                skill.level,
+                tick,
+                due_tick,
+                135,
+            );
+            apply_crystal_arrow_marker_buff(
+                world,
+                player_object_id,
+                skill,
+                tick,
+                "poison-shot",
+                "vampire-shot",
+                135,
+                "Poison Shot",
+            )
+        }
+        "CrippleShot" => apply_crystal_cripple_arrow_followup(
+            world,
+            skill,
+            &target_position,
+            damage,
+            tick,
+            due_tick,
+        ),
+        _ => Vec::new(),
+    }
+}
+
+fn apply_crystal_archer_basic_shot(
+    world: &mut World,
+    player: Entity,
+    skill: &SkillState,
+    magic: &CrystalMagicTemplate,
+    context: Option<&SkillCastContext>,
+    tick: u64,
+) -> Vec<ServerPacket> {
+    let Some(context) = context else {
+        return Vec::new();
+    };
+    if context.target_id == 0 {
+        return Vec::new();
+    }
+    let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+        return Vec::new();
+    };
+    let Some(target_agent) = world.entity(target_entity).get::<MonsterAgent>() else {
+        return Vec::new();
+    };
+    if target_agent.dead || !target_agent.hostile_to_player {
+        return Vec::new();
+    }
+    let Some(player_object_id) = current_player_object_id(world) else {
+        return Vec::new();
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return Vec::new();
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return Vec::new();
+    };
+    let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
+    let due_tick = queued_before_world_tick_due_tick(
+        tick,
+        ranged_attack_delay_ticks(&player_position, &target_position),
+    );
+    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    let hit_count = if magic.spell == "DoubleShot" { 2 } else { 1 };
+    for hit in 0..hit_count {
+        schedule_damage_to_monster(
+            world,
+            due_tick.saturating_add(hit),
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: context.target_id,
+                name: target_name.clone(),
+            }),
+        );
+    }
+    Vec::new()
+}
+
+fn crystal_archer_state_damage(world: &World, damage: i32) -> i32 {
+    let skills = world.resource::<SkillResource>();
+    let mental_state_level = skill_key_for_crystal_spell(Spell::MentalState)
+        .and_then(|key| {
+            skills
+                .skills
+                .iter()
+                .find(|skill| skill.key == key)
+                .map(|skill| i32::from(skill.level))
+        })
+        .unwrap_or(0);
+    let percent = match skills.mental_state {
+        1 => 55 + mental_state_level.saturating_mul(5),
+        2 => 80,
+        _ => 100,
+    };
+    damage.saturating_mul(percent).saturating_div(100).max(1)
+}
+
+fn apply_crystal_arrow_marker_buff(
+    world: &mut World,
+    player_object_id: u32,
+    skill: &SkillState,
+    tick: u64,
+    buff_key: &'static str,
+    other_buff_key: &'static str,
+    spell_salt: usize,
+    name: &'static str,
+) -> Vec<ServerPacket> {
+    let has_arrow_buff = world
+        .resource::<super::resources::BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == buff_key || buff.key == other_buff_key);
+    if has_arrow_buff {
+        return Vec::new();
+    }
+
+    let roll = deterministic_roll(
+        tick,
+        usize::try_from(player_object_id).unwrap_or_default(),
+        usize::from(skill.level).saturating_add(spell_salt),
+        20,
+    );
+    if roll < 8 {
+        return Vec::new();
+    }
+
+    let duration_ms = (5_u64 + u64::from(skill.level).saturating_mul(5)).saturating_mul(1_000);
+    let buff = BuffState {
+        key: buff_key.to_string(),
+        name: name.to_string(),
+        description: format!("Crystal {name} buff is active."),
+        expires_at_tick: tick.saturating_add(combat_delay_ticks(duration_ms)),
+        attack_bonus: 0,
+        defence_bonus: 0,
+        stats: Vec::new(),
+    };
+    apply_or_refresh_buff(world, buff.clone());
+    client_buff_packet_for_state(world, &buff)
+        .into_iter()
+        .collect()
+}
+
+fn square_locations(center: &Point, radius: i32) -> Vec<Point> {
+    let mut locations = Vec::new();
+    for y in center.y - radius..=center.y + radius {
+        for x in center.x - radius..=center.x + radius {
+            locations.push(Point { x, y });
+        }
+    }
+    locations
+}
+
+fn apply_crystal_cripple_arrow_followup(
+    world: &mut World,
+    skill: &SkillState,
+    target_position: &Point,
+    damage: i32,
+    tick: u64,
+    due_tick: u64,
+) -> Vec<ServerPacket> {
+    let consumed_buffs = consume_crystal_arrow_buffs(world);
+    if consumed_buffs.is_empty() {
+        return Vec::new();
+    }
+
+    let player_object_id = current_player_object_id(world).unwrap_or_default();
+    for (_, buff_type) in &consumed_buffs {
+        queue_due_packet(
+            world,
+            due_tick,
+            ServerPacket::RemoveBuff {
+                buff_type: *buff_type,
+                object_id: player_object_id,
+            },
+        );
+    }
+
+    if consumed_buffs.iter().any(|(key, _)| key == "vampire-shot") {
+        schedule_heal_to_player(
+            world,
+            due_tick,
+            damage.saturating_mul(i32::from(skill.level) + 1) / 4,
+        );
+    }
+
+    if consumed_buffs.iter().any(|(key, _)| key == "poison-shot") {
+        let affected = {
+            #[allow(deprecated)]
+            world
+                .iter_entities()
+                .filter_map(|entity| {
+                    let agent = entity.get::<MonsterAgent>()?;
+                    if agent.dead || !agent.hostile_to_player {
+                        return None;
+                    }
+                    let position = entity.get::<Position>()?;
+                    (tile_distance(&position.0, target_position) <= 1).then_some(entity.id())
+                })
+                .collect::<Vec<_>>()
+        };
+        for (index, entity) in affected.into_iter().enumerate() {
+            if let Some(object_id) = entity_object_id(world, entity) {
+                apply_crystal_arrow_green_poison(
+                    world,
+                    entity,
+                    object_id,
+                    damage,
+                    skill.level,
+                    tick,
+                    due_tick,
+                    171 + index,
+                );
+            }
+        }
+    }
+
+    Vec::new()
+}
+
+fn consume_crystal_arrow_buffs(world: &mut World) -> Vec<(String, u8)> {
+    let mut consumed = Vec::new();
+    let mut buffs = world.resource_mut::<super::resources::BuffResource>();
+    buffs.buffs.retain(|buff| {
+        if !matches!(buff.key.as_str(), "vampire-shot" | "poison-shot") {
+            return true;
+        }
+        if let Some(buff_type) = crystal_buff_type_for_key(&buff.key) {
+            consumed.push((buff.key.clone(), buff_type));
+        }
+        false
+    });
+    consumed
+}
+
+fn apply_crystal_arrow_green_poison(
+    world: &mut World,
+    target_entity: Entity,
+    object_id: u32,
+    damage: i32,
+    skill_level: u8,
+    tick: u64,
+    due_tick: u64,
+    salt: usize,
+) {
+    const GREEN_POISON: u16 = 1;
+
+    let poison_attack = current_player_crystal_stat(world, CRYSTAL_STAT_POISON_ATTACK).max(0);
+    let poison_attack_bonus = if poison_attack > 0 {
+        deterministic_roll(
+            tick,
+            usize::try_from(object_id).unwrap_or_default(),
+            salt.saturating_add(usize::from(skill_level)),
+            u64::try_from(poison_attack).unwrap_or_default(),
+        ) as i32
+    } else {
+        0
+    };
+    let green_damage = damage
+        .saturating_div(25)
+        .saturating_add(i32::from(skill_level) + 1)
+        .saturating_add(poison_attack_bonus)
+        .max(1);
+    let duration = damage
+        .saturating_mul(2)
+        .saturating_add((i32::from(skill_level) + 1).saturating_mul(7))
+        .max(1);
+
+    apply_monster_poison(
+        world,
+        target_entity,
+        GREEN_POISON,
+        green_damage,
+        due_tick,
+        u64::try_from(duration)
+            .unwrap_or_default()
+            .saturating_mul(2),
+    );
+    queue_due_packet(
+        world,
+        due_tick,
+        ServerPacket::ObjectPoisoned {
+            object_id,
+            poison: GREEN_POISON,
+        },
+    );
+}
+
+fn taoist_support_duration_seconds(world: &World, skill: &SkillState) -> i32 {
+    let spell_power = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
+        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC));
+    spell_power
+        .saturating_mul(4)
+        .saturating_add((i32::from(skill.level) + 1).saturating_mul(50))
+        .max(1)
+}
+
+fn active_player_level(world: &World) -> i32 {
+    world
+        .resource::<super::resources::SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| i32::from(character.level))
+        .unwrap_or(1)
+}
+
+fn active_player_class(world: &World) -> Option<MirClass> {
+    world
+        .resource::<super::resources::SessionResource>()
+        .selected_character
+        .as_ref()
+        .map(|character| character.class)
+}
+
+fn context_targets_current_player(world: &World, context: Option<&SkillCastContext>) -> bool {
+    let Some(context) = context else {
+        return true;
+    };
+    context.target_id == 0
+        || current_player_object_id(world).is_some_and(|object_id| object_id == context.target_id)
+}
+
+fn gather_crystal_element(world: &mut World, casted: bool) -> Option<ServerPacket> {
+    let object_id = current_player_object_id(world)?;
+    {
+        let mut elemental = world.resource_mut::<ElementalResource>();
+        elemental.has_elemental = true;
+        elemental.elements_level = CRYSTAL_ORB_EXP[0];
+    }
+    Some(ServerPacket::SetElemental {
+        object_id,
+        enabled: true,
+        casted,
+        value: CRYSTAL_ORB_EXP[0],
+        element_type: 1,
+        exp_last: crystal_elemental_exp_last(),
+    })
+}
+
+fn clear_crystal_element(world: &mut World, casted: bool) -> Option<ServerPacket> {
+    let object_id = current_player_object_id(world)?;
+    {
+        let mut elemental = world.resource_mut::<ElementalResource>();
+        elemental.has_elemental = false;
+        elemental.elements_level = 0;
+    }
+    Some(ServerPacket::SetElemental {
+        object_id,
+        enabled: false,
+        casted,
+        value: 0,
+        element_type: 0,
+        exp_last: crystal_elemental_exp_last(),
+    })
+}
+
+const CRYSTAL_ORB_EXP: [u32; 4] = [50, 100, 150, 200];
+const CRYSTAL_ORB_DEF: [i32; 4] = [2, 4, 6, 8];
+const CRYSTAL_ORB_DMG: [i32; 4] = [4, 8, 12, 16];
+
+fn crystal_elemental_exp_last() -> u32 {
+    *CRYSTAL_ORB_EXP.last().unwrap_or(&200)
+}
+
+fn crystal_elemental_orb_count(elements_level: u32) -> usize {
+    CRYSTAL_ORB_EXP
+        .iter()
+        .rposition(|threshold| elements_level >= *threshold)
+        .map(|index| index + 1)
+        .unwrap_or(1)
+}
+
+fn crystal_elemental_orb_power(elements_level: u32, defensive: bool) -> i32 {
+    let index = crystal_elemental_orb_count(elements_level).saturating_sub(1);
+    if defensive {
+        CRYSTAL_ORB_DEF[index]
+    } else {
+        CRYSTAL_ORB_DMG[index]
+    }
+}
+
+fn consume_equipped_crystal_amulet(
+    world: &mut World,
+    shape: u16,
+    count: u16,
+) -> Option<ServerPacket> {
+    let mut inventory = world.resource_mut::<super::resources::InventoryResource>();
+    let index = inventory.equipment_items.iter().position(|item| {
+        item.slot == EquipmentSlot::Amulet && item.shape == Some(shape) && !item.is_broken()
+    })?;
+    let unique_id = equipment_slot_unique_id(inventory.equipment_items[index].slot).unwrap_or(9);
+    inventory.equipment_items.remove(index);
+    Some(ServerPacket::DeleteItem { unique_id, count })
+}
+
+fn has_equipped_crystal_amulet(world: &World, shape: u16) -> bool {
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    inventory.equipment_items.iter().any(|item| {
+        item.slot == EquipmentSlot::Amulet && item.shape == Some(shape) && !item.is_broken()
+    })
+}
+
+fn has_equipped_crystal_poison(world: &World, shape: Option<u16>) -> bool {
+    let inventory = world.resource::<super::resources::InventoryResource>();
+    inventory.equipment_items.iter().any(|item| {
+        if item.is_broken() {
+            return false;
+        }
+        let item_shape = item.shape.unwrap_or_default();
+        let shape_matches = shape
+            .map(|shape| item_shape == shape)
+            .unwrap_or_else(|| matches!(item_shape, 1 | 2));
+        if !shape_matches {
+            return false;
+        }
+        crystal_item_template_for_dynamic_key(&item.key)
+            .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+            .unwrap_or(false)
+    })
+}
+
+fn consume_equipped_crystal_poison(
+    world: &mut World,
+    shape: Option<u16>,
+    count: u16,
+) -> Option<(ServerPacket, u16)> {
+    let mut inventory = world.resource_mut::<super::resources::InventoryResource>();
+    let index = inventory.equipment_items.iter().position(|item| {
+        if item.is_broken() {
+            return false;
+        }
+        let item_shape = item.shape.unwrap_or_default();
+        let shape_matches = shape
+            .map(|shape| item_shape == shape)
+            .unwrap_or_else(|| matches!(item_shape, 1 | 2));
+        if !shape_matches {
+            return false;
+        }
+        crystal_item_template_for_dynamic_key(&item.key)
+            .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+            .unwrap_or(false)
+    })?;
+    let slot = inventory.equipment_items[index].slot;
+    let poison_shape = inventory.equipment_items[index].shape.unwrap_or_default();
+    let unique_id = equipment_slot_unique_id(slot).unwrap_or(9);
+    inventory.equipment_items.remove(index);
+    Some((ServerPacket::DeleteItem { unique_id, count }, poison_shape))
+}
+
+pub(super) fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i32 {
     let level = i32::from(level) + 1;
     let defence_power = i32::from(magic.power_base) + i32::from(magic.power_bonus) / 2;
     let magic_power = i32::from(magic.mpower_base) + i32::from(magic.mpower_bonus) / 2;
@@ -559,7 +6328,7 @@ fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i32 {
     ((base.max(1) as f32) * multiplier.max(1.0)).round() as i32
 }
 
-fn advance_magic_progression(
+pub(super) fn advance_magic_progression(
     world: &mut World,
     index: usize,
     spell: Spell,
@@ -573,7 +6342,8 @@ fn advance_magic_progression(
         .map(|character| character.level)
         .unwrap_or(1);
     let object_id = current_player_object_id(world).unwrap_or_default();
-    let gain = magic_experience_gain(tick, object_id, spell);
+    let gain = magic_experience_gain(tick, object_id, spell)
+        .saturating_mul(crystal_skill_gain_multiplier(world));
     let mut packets = Vec::new();
     let mut skills = world.resource_mut::<SkillResource>();
     let skill = &mut skills.skills[index];
@@ -612,6 +6382,15 @@ fn advance_magic_progression(
 
 fn magic_experience_gain(tick: u64, object_id: u32, spell: Spell) -> u16 {
     1 + ((tick + u64::from(object_id) + u64::from(spell as u8)) % 3) as u16
+}
+
+fn crystal_skill_gain_multiplier(world: &World) -> u16 {
+    let multiplier = current_player_required_stat_total(
+        world.resource::<InventoryResource>(),
+        world.resource::<BuffResource>(),
+        CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER,
+    );
+    u16::try_from(multiplier.clamp(1, i32::from(u8::MAX))).unwrap_or(1)
 }
 
 fn magic_experience_threshold(

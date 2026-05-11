@@ -755,6 +755,8 @@ pub struct CrystalMonsterTemplate {
     pub max_mc: i32,
     pub min_sc: i32,
     pub max_sc: i32,
+    #[serde(default)]
+    pub agility: i32,
     pub light: u8,
     pub attack_speed: u16,
     pub move_speed: u16,
@@ -859,6 +861,8 @@ pub struct CrystalRespawnMap {
     #[serde(default)]
     pub no_mount: bool,
     #[serde(default)]
+    pub no_hero: bool,
+    #[serde(default)]
     pub need_bridle: bool,
     #[serde(default)]
     pub safe_zones: Vec<CrystalSafeZoneTemplate>,
@@ -922,6 +926,8 @@ pub struct CrystalRespawnTemplate {
     pub monster_can_tame: bool,
     pub monster_auto_rev: bool,
     pub monster_undead: bool,
+    #[serde(default)]
+    pub monster_agility: i32,
     pub route: Vec<CrystalRoutePoint>,
 }
 
@@ -1980,6 +1986,7 @@ mod tests {
         assert!(bug_bat.attack_speed > 0);
         assert!(bug_bat.move_speed > 0);
         assert!(bug_bat.max_dc >= bug_bat.min_dc);
+        assert!(bug_bat.agility >= 0);
         assert_eq!(
             crystal_monster_by_index(bug_bat.monster_index)
                 .expect("BugBat should resolve by index")
@@ -1990,6 +1997,7 @@ mod tests {
         let bomb_spider = crystal_monster_by_name("BombSpider").expect("BombSpider should exist");
         assert!(bomb_spider.max_dc > 0);
         assert!(bomb_spider.max_sc >= bomb_spider.min_sc);
+        assert!(bomb_spider.agility >= 0);
     }
 
     #[test]

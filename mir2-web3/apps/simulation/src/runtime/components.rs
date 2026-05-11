@@ -74,6 +74,19 @@ pub(super) struct MonsterVitals {
     pub(super) max_hp: i32,
 }
 
+#[derive(Component, Clone, Copy, Default)]
+pub(super) struct MonsterCombatStats {
+    pub(super) agility: i32,
+}
+
+#[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
+pub(super) struct MonsterPoisonState {
+    pub(super) poison: u16,
+    pub(super) green_damage: i32,
+    pub(super) next_damage_tick: u64,
+    pub(super) expires_at_tick: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct RouteStep {
     pub(super) location: Point,
@@ -186,6 +199,13 @@ pub(super) struct SelfPlayer;
 #[derive(Component)]
 pub(super) struct RemotePlayer;
 
+#[derive(Component, Clone)]
+pub(super) struct Hero {
+    pub(super) owner_name: String,
+    pub(super) next_attack_tick: u64,
+    pub(super) next_move_tick: u64,
+}
+
 #[derive(Component)]
 pub(super) struct Monster;
 
@@ -225,8 +245,19 @@ pub(super) fn player_entity(world: &World) -> Option<Entity> {
         .find_map(|entity| entity.contains::<SelfPlayer>().then_some(entity.id()))
 }
 
+#[allow(deprecated)]
+pub(super) fn hero_entity(world: &World) -> Option<Entity> {
+    world
+        .iter_entities()
+        .find_map(|entity| entity.contains::<Hero>().then_some(entity.id()))
+}
+
 pub(super) fn current_player_object_id(world: &World) -> Option<u32> {
     player_entity(world).and_then(|entity| entity_object_id(world, entity))
+}
+
+pub(super) fn current_hero_object_id(world: &World) -> Option<u32> {
+    hero_entity(world).and_then(|entity| entity_object_id(world, entity))
 }
 
 pub(super) fn current_character_index(world: &World) -> Option<i32> {

@@ -1,4 +1,6 @@
-use crate::runtime::SharedTradeOffer;
+use crate::runtime::{
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer,
+};
 use crate::{
     ActiveSessionIdentity, GroundDropSnapshot, SimulationConfig, SimulationSession, WorldSnapshot,
 };
@@ -140,12 +142,35 @@ impl InProcessWorldRuntime {
         self.session.item_rental_request(partner_name, renting)
     }
 
+    pub fn item_rental_cancel(&mut self) -> Vec<ServerPacket> {
+        self.session.item_rental_cancel()
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         self.session.trade_request(partner_name)
     }
 
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
         self.session.shared_trade_confirm()
+    }
+
+    pub fn shared_item_rental_lock_fee(
+        &mut self,
+    ) -> (Vec<ServerPacket>, Option<SharedItemRentalFeeOffer>) {
+        self.session.shared_item_rental_lock_fee()
+    }
+
+    pub fn shared_item_rental_lock_item(
+        &mut self,
+    ) -> (Vec<ServerPacket>, Option<SharedItemRentalItemOffer>) {
+        self.session.shared_item_rental_lock_item()
+    }
+
+    pub fn apply_shared_item_rental_delivery(
+        &mut self,
+        delivery: &SharedItemRentalDelivery,
+    ) -> Vec<ServerPacket> {
+        self.session.apply_shared_item_rental_delivery(delivery)
     }
 
     pub fn shared_trade_cancel(&mut self, unlock: bool) -> Vec<ServerPacket> {

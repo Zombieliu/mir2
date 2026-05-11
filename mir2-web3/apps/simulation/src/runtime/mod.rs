@@ -5,6 +5,7 @@ mod crystal_compat;
 mod drops;
 mod equipment;
 mod fishing;
+mod hero_ai;
 mod inventory;
 mod items;
 mod map;
@@ -20,6 +21,10 @@ mod resources;
 mod save;
 mod session;
 mod skills;
+mod social_economy;
 mod stage5;
 
-pub use session::{ActiveSessionIdentity, SharedTradeOffer, SimulationSession};
+pub use session::{
+    ActiveSessionIdentity, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedTradeOffer, SimulationSession,
+};

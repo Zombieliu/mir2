@@ -25,11 +25,38 @@ const sampleMs = numberArg(args.sampleMs, 50);
 const interaction = args.interaction ?? "click";
 const holdButton = args.button ?? args.holdButton ?? "right";
 const holdMs = numberArg(args.holdMs, 2200);
+const preHoldMs = numberArg(args.preHoldMs, 900);
+const clickCount = numberArg(args.clickCount, 8);
+const clickIntervalMs = numberArg(args.clickIntervalMs, 180);
+const directionLagMs = numberArg(args.directionLagMs ?? process.env.MIR2_MOVEMENT_DIRECTION_LAG_MS, 260);
+const stalePredictedMs = numberArg(args.stalePredictedMs ?? process.env.MIR2_MOVEMENT_STALE_PREDICTED_MS, 1200);
+const slowCommandQueueMs = numberArg(
+  args.slowCommandQueueMs ?? process.env.MIR2_MOVEMENT_SLOW_COMMAND_QUEUE_MS,
+  1200,
+);
+const maxDirectionQueueLength = numberArg(
+  args.maxDirectionQueueLength ?? process.env.MIR2_MOVEMENT_MAX_DIRECTION_QUEUE_LENGTH,
+  1,
+);
+const strictMovementChecks = booleanArg(
+  args.strictMovementChecks ?? process.env.MIR2_MOVEMENT_STRICT_CHECKS,
+  true,
+);
+const allowBlockedResidual = booleanArg(
+  args.allowBlockedResidual ?? process.env.MIR2_MOVEMENT_ALLOW_BLOCKED_RESIDUAL,
+  false,
+);
+const settleMs = numberArg(
+  args.settleMs ?? process.env.MIR2_MOVEMENT_SETTLE_MS,
+  isStrictMovementInteraction(interaction) ? 5200 : 1200,
+);
 const startMap = args.map ?? "0";
 const startX = numberArg(args.x, 330);
 const startY = numberArg(args.y, 270);
 const targetDx = numberArg(args.targetDx, 10);
 const targetDy = numberArg(args.targetDy, 0);
+const target2Dx = numberArg(args.target2Dx ?? args.secondTargetDx, targetDx);
+const target2Dy = numberArg(args.target2Dy ?? args.secondTargetDy, targetDy - 4);
 const fixedSpriteX = numberArg(args.fixedSpriteX ?? args.x, startX);
 const fixedSpriteY = numberArg(args.fixedSpriteY ?? args.y, startY);
 
@@ -76,9 +103,10 @@ class CdpClient {
     }
 
     if (message.method === "Runtime.exceptionThrown") {
+      const details = message.params?.exceptionDetails;
       this.consoleErrors.push({
         source: "exception",
-        text: message.params?.exceptionDetails?.text ?? "runtime exception",
+        text: details?.exception?.description ?? details?.text ?? "runtime exception",
       });
     }
 
@@ -223,6 +251,138 @@ async function main() {
         afterDispatch: compactState(afterDispatch),
       });
       samples.push(...(await sampleMovement(client, step.label, step.durationMs)));
+    } else if (interaction === "spamClickTarget") {
+      const step = {
+        label: `spam-click-target-${targetDx},${targetDy}`,
+        mode: holdButton === "left" ? "walk" : "run",
+        x: start.player.x + targetDx,
+        y: start.player.y + targetDy,
+        durationMs: Math.max(holdMs, clickCount * clickIntervalMs + 2400),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const clickDispatches = [];
+      for (let index = 0; index < clickCount; index += 1) {
+        clickDispatches.push(await clickTile(client, step.x, step.y, step.mode === "run" ? "right" : "left"));
+        await delay(clickIntervalMs);
+      }
+      await delay(Math.min(120, sampleMs));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch: { type: "spam-click-target", clickCount, clickIntervalMs, clicks: clickDispatches },
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
+    } else if (interaction === "holdThenSpamClickTarget") {
+      const step = {
+        label: `hold-then-spam-click-target-${targetDx},${targetDy}`,
+        mode: holdButton === "left" ? "walk" : "run",
+        x: start.player.x + targetDx,
+        y: start.player.y + targetDy,
+        durationMs: Math.max(holdMs, preHoldMs + clickCount * clickIntervalMs + 2800),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const hold = await beginHoldTile(client, step.x, step.y, holdButton);
+      await delay(preHoldMs);
+      await hold.release();
+      const clickDispatches = [];
+      for (let index = 0; index < clickCount; index += 1) {
+        clickDispatches.push(await clickTile(client, step.x, step.y, step.mode === "run" ? "right" : "left"));
+        await delay(clickIntervalMs);
+      }
+      await delay(Math.min(120, sampleMs));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch: {
+          type: "hold-then-spam-click-target",
+          hold: hold.dispatch,
+          preHoldMs,
+          clickCount,
+          clickIntervalMs,
+          clicks: clickDispatches,
+        },
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
+    } else if (interaction === "routeSpamObstacle") {
+      const step = {
+        label: `route-spam-obstacle-${targetDx},${targetDy}-then-${target2Dx},${target2Dy}`,
+        mode: holdButton === "left" ? "walk" : "run",
+        x: start.player.x + targetDx,
+        y: start.player.y + targetDy,
+        x2: start.player.x + target2Dx,
+        y2: start.player.y + target2Dy,
+        durationMs: Math.max(holdMs, clickCount * clickIntervalMs + 3600),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const clickDispatches = [];
+      for (let index = 0; index < clickCount; index += 1) {
+        const useSecondTarget = index >= Math.ceil(clickCount / 2);
+        const x = useSecondTarget ? step.x2 : step.x;
+        const y = useSecondTarget ? step.y2 : step.y;
+        clickDispatches.push({
+          target: useSecondTarget ? "reroute" : "primary",
+          ...(await clickTile(client, x, y, step.mode === "run" ? "right" : "left")),
+        });
+        await delay(clickIntervalMs);
+      }
+      await delay(Math.min(160, sampleMs * 2));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch: {
+          type: "route-spam-obstacle",
+          clickCount,
+          clickIntervalMs,
+          primary: { x: step.x, y: step.y },
+          reroute: { x: step.x2, y: step.y2 },
+          clicks: clickDispatches,
+        },
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
+    } else if (interaction === "blockedTarget") {
+      const step = {
+        label: `blocked-target-${targetDx},${targetDy}`,
+        mode: holdButton === "left" ? "walk" : "run",
+        x: start.player.x + targetDx,
+        y: start.player.y + targetDy,
+        durationMs: Math.max(holdMs, clickCount * clickIntervalMs + 4200),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const clickDispatches = [];
+      for (let index = 0; index < clickCount; index += 1) {
+        clickDispatches.push(await clickTile(client, step.x, step.y, step.mode === "run" ? "right" : "left"));
+        await delay(clickIntervalMs);
+      }
+      await delay(Math.min(160, sampleMs * 2));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        blockedTarget: true,
+        dispatch: {
+          type: "blocked-target",
+          clickCount,
+          clickIntervalMs,
+          target: { x: step.x, y: step.y },
+          clicks: clickDispatches,
+        },
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
     } else {
       for (const step of route) {
         const before = await readMovementState(client);
@@ -245,28 +405,80 @@ async function main() {
       }
     }
 
-    const finalState = await readMovementState(client);
+    const settle = await waitForMovementSettle(client, settleMs, { allowBlockedResidual });
+    const finalState = settle.finalState;
     const screenshotPath = path.join(outputDir, `${prefix}.png`);
     const statePath = path.join(outputDir, `${prefix}.json`);
     const screenshot = await client.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     await fs.writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
+    const jumps = detectJumps(samples);
+    const routeSpamWarnings = detectRouteSpam(samples);
+    const logicalRollbackWarnings = detectLogicalRollbacks(samples);
+    const directionLagWarnings = detectDirectionAnimationLag(samples, directionLagMs);
+    const stalePredictionWarnings = detectStalePredictedPlayer(samples, stalePredictedMs);
+    const commandQueueWarnings = detectSlowCommandQueue(samples, {
+      maxPendingMs: slowCommandQueueMs,
+      maxDirectionQueueLength,
+    });
+    const pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, settle.capturedAt);
+    const assertions = buildAssertions({
+      interaction,
+      strictMovementChecks,
+      allowBlockedResidual,
+      jumps,
+      routeSpamWarnings,
+      logicalRollbackWarnings,
+      directionLagWarnings,
+      stalePredictionWarnings,
+      commandQueueWarnings,
+      pendingPlanAtEnd,
+      consoleErrors: client.consoleErrors,
+      network404s: client.network404s,
+    });
 
     const report = {
-      ok: true,
+      ok: assertions.every((assertion) => assertion.pass),
       baseUrl,
       account,
       createAccount,
       characterName: createAccount ? characterName : undefined,
       interaction,
+      blockedTarget: interaction === "blockedTarget" ? true : undefined,
       startTarget: { map: startMap, x: startX, y: startY },
       startedAt: new Date().toISOString(),
       start,
       finalState,
       sampleMs,
+      directionLagMs,
+      stalePredictedMs,
+      slowCommandQueueMs,
+      maxDirectionQueueLength,
+      strictMovementChecks,
+      allowBlockedResidual,
       holdMs: interaction === "hold" ? holdMs : undefined,
+      preHoldMs: interaction === "holdThenSpamClickTarget" ? preHoldMs : undefined,
+      settleMs,
+      settle,
+      pendingPlanAtEnd,
+      assertions,
       sampleCount: samples.length,
       actions,
-      jumps: detectJumps(samples),
+      jumps,
+      routeSpamWarnings,
+      logicalRollbackWarnings,
+      directionLagWarnings,
+      stalePredictionWarnings,
+      commandQueueWarnings,
+      feelMetrics: {
+        logicalRollbackCount: logicalRollbackWarnings.length,
+        directionLagWindowMs: directionLagMs,
+        directionLagCheckCount: movementDirectionCommandsFromSamples(samples).length,
+        directionLagWarningCount: directionLagWarnings.length,
+        stalePredictedWindowMs: stalePredictedMs,
+        stalePredictionWarningCount: stalePredictionWarnings.length,
+        slowCommandQueueWindowMs: slowCommandQueueMs,
+        slowCommandQueueWarningCount: commandQueueWarnings.length,
+      },
       summary: summarizeSamples(samples),
       samples,
       nonFaviconNetwork404s: [...new Set(client.network404s)],
@@ -274,7 +486,30 @@ async function main() {
       screenshotPath,
     };
     await fs.writeFile(statePath, `${JSON.stringify(report, null, 2)}\n`);
-    console.log(JSON.stringify({ ok: true, statePath, screenshotPath, summary: report.summary, jumps: report.jumps }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          ok: report.ok,
+          statePath,
+          screenshotPath,
+          settle: report.settle,
+          pendingPlanAtEnd: report.pendingPlanAtEnd,
+          assertions: report.assertions,
+          summary: report.summary,
+          jumps: report.jumps,
+          routeSpamWarnings: report.routeSpamWarnings,
+          logicalRollbackWarnings: report.logicalRollbackWarnings,
+          directionLagWarnings: report.directionLagWarnings,
+          stalePredictionWarnings: report.stalePredictionWarnings,
+          commandQueueWarnings: report.commandQueueWarnings,
+          feelMetrics: report.feelMetrics,
+          nonFaviconNetwork404s: report.nonFaviconNetwork404s,
+          consoleErrors: report.consoleErrors,
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
     client?.close();
     await stopChrome(chrome);
@@ -314,123 +549,8 @@ async function transferTo(client, map, x, y) {
 async function installSendProbe(client) {
   await client.evaluate(`
     (() => {
-      const sentKey = "__mir2MovementSentCommands";
-      const receivedKey = "__mir2MovementReceivedPackets";
-      window[sentKey] = [];
-      window[receivedKey] = [];
-
-      if (!window.__mir2MovementWebSocketProbeWrapped) {
-        const NativeWebSocket = window.WebSocket;
-        window.WebSocket = class Mir2MovementProbeWebSocket extends NativeWebSocket {
-          constructor(...args) {
-            super(...args);
-            this.addEventListener("message", (event) => {
-              try {
-                const message = JSON.parse(String(event.data ?? ""));
-                if (
-                  message &&
-                  message.type === "packet" &&
-                  ["UserLocation", "ObjectWalk", "ObjectRun", "ObjectBackStep", "ObjectSitDown"].includes(message.packet)
-                ) {
-                  window[receivedKey].push({
-                    t: Date.now(),
-                    packet: message.packet,
-                    payload: message.payload,
-                  });
-                }
-              } catch {
-                // Best-effort QA probe only.
-              }
-            });
-          }
-        };
-        Object.defineProperty(window.WebSocket, "__mir2MovementWebSocketProbeWrapped", {
-          value: true,
-          configurable: true,
-        });
-        Object.defineProperty(window, "__mir2MovementWebSocketProbeWrapped", {
-          value: true,
-          configurable: true,
-        });
-      }
-
-      if (!WebSocket.prototype.__mir2MovementSendProbeWrapped) {
-        const originalWebSocketSend = WebSocket.prototype.send;
-        WebSocket.prototype.send = function(data) {
-          try {
-            const text =
-              typeof data === "string"
-                ? data
-                : data instanceof ArrayBuffer
-                  ? new TextDecoder().decode(data)
-                  : "";
-            const command = JSON.parse(text);
-            if (command && ["moveTo", "walk", "run", "turn"].includes(command.type)) {
-              window[sentKey].push({
-                t: Date.now(),
-                command,
-              });
-            }
-          } catch {
-            // Best-effort QA probe only.
-          }
-          return originalWebSocketSend.apply(this, arguments);
-        };
-        Object.defineProperty(WebSocket.prototype, "__mir2MovementSendProbeWrapped", {
-          value: true,
-          configurable: true,
-        });
-      }
-
-      const wrapStage = (stage) => {
-        if (!stage || stage.__mir2MovementSendProbeWrapped || typeof stage.send !== "function") {
-          return stage;
-        }
-
-        const originalSend = stage.send;
-        stage.send = function(command) {
-          try {
-            if (command && ["moveTo", "walk", "run", "turn"].includes(command.type)) {
-              window[sentKey].push({
-                t: Date.now(),
-                command: JSON.parse(JSON.stringify(command)),
-              });
-            }
-          } catch {
-            // Best-effort QA probe only.
-          }
-          return originalSend.apply(this, arguments);
-        };
-        Object.defineProperty(stage, "__mir2MovementSendProbeWrapped", {
-          value: true,
-          configurable: true,
-        });
-        return stage;
-      };
-
-      const descriptor = Object.getOwnPropertyDescriptor(window, "__mir2Stage5");
-      if (descriptor && descriptor.get?.__mir2MovementSendProbeAccessor) {
-        wrapStage(window.__mir2Stage5);
-        return true;
-      }
-      if (descriptor && descriptor.configurable === false) {
-        wrapStage(window.__mir2Stage5);
-        return false;
-      }
-
-      let currentStage = wrapStage(window.__mir2Stage5);
-      const getter = function() {
-        return currentStage;
-      };
-      getter.__mir2MovementSendProbeAccessor = true;
-      Object.defineProperty(window, "__mir2Stage5", {
-        configurable: true,
-        enumerable: true,
-        get: getter,
-        set: (nextStage) => {
-          currentStage = wrapStage(nextStage);
-        },
-      });
+      window.__mir2MovementSentCommands = [];
+      window.__mir2MovementReceivedPackets = [];
       return true;
     })()
   `);
@@ -611,6 +731,44 @@ async function sampleMovement(client, label, durationMs) {
   return samples;
 }
 
+async function waitForMovementSettle(client, timeoutMs, options = {}) {
+  const allowBlockedAsSettled = options.allowBlockedResidual === true;
+  const startedAt = Date.now();
+  let finalState = await readMovementState(client);
+  let pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, Date.now());
+  let observedBlockedTarget = pendingPlanAtEnd?.targetBlocked ? pendingPlanAtEnd : null;
+  while (
+    pendingPlanAtEnd &&
+    !(allowBlockedAsSettled && pendingPlanAtEnd.nonFailure) &&
+    Date.now() - startedAt < timeoutMs
+  ) {
+    await delay(Math.min(Math.max(sampleMs, 50), 160));
+    finalState = await readMovementState(client);
+    pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, Date.now());
+    if (pendingPlanAtEnd?.targetBlocked) {
+      observedBlockedTarget = pendingPlanAtEnd;
+    }
+  }
+  const capturedAt = Date.now();
+  const blockedResidual = pendingPlanAtEnd?.targetBlocked ? true : undefined;
+  return {
+    status: pendingPlanAtEnd?.targetBlocked ? "blocked" : pendingPlanAtEnd ? "pending" : "settled",
+    strictStatus: pendingPlanAtEnd
+      ? pendingPlanAtEnd.targetBlocked
+        ? "blockedResidual"
+        : "pendingResidual"
+      : "settled",
+    clean: !pendingPlanAtEnd,
+    blockedTarget: pendingPlanAtEnd?.targetBlocked || observedBlockedTarget ? true : undefined,
+    blockedResidual,
+    pendingPlanAtEnd,
+    observedBlockedTarget,
+    waitedMs: capturedAt - startedAt,
+    capturedAt,
+    finalState,
+  };
+}
+
 async function readMovementState(client) {
   return client.evaluate(`
     (() => {
@@ -649,6 +807,7 @@ async function readMovementState(client) {
         height: Math.round(value.height * 100) / 100,
       }) : null;
       return {
+        capturedAt: Date.now(),
         screen: state.screen ?? null,
         mapFileName: state.mapFileName ?? null,
         mapTitle: state.mapTitle ?? null,
@@ -656,6 +815,7 @@ async function readMovementState(client) {
         predictedPlayer: state.predictedPlayer ?? null,
         movementPlan: state.movementPlan ?? null,
         directionStepPending: state.directionStepPending ?? null,
+        directionStepPendingQueue: state.directionStepPendingQueue ?? [],
         selfEntity: self ? { x: self.x, y: self.y, direction: self.direction, kind: self.kind, objectId: self.objectId } : null,
         sprite: rect(sprite),
         nameplate: rect(nameplate),
@@ -671,7 +831,22 @@ async function readMovementState(client) {
           .slice(0, 8),
         receivedMoveTail: receivedMoves.slice(-8),
         gatewayMoveTail: gatewayEvents
-          .filter((entry) => ["UserLocation", "ObjectWalk", "ObjectRun", "ObjectBackStep", "ObjectSitDown"].includes(entry?.packet))
+          .filter((entry) => [
+            "UserLocation",
+            "Pushed",
+            "UserDash",
+            "UserDashFail",
+            "UserDashAttack",
+            "UserAttackMove",
+            "ObjectWalk",
+            "ObjectRun",
+            "ObjectPushed",
+            "ObjectDash",
+            "ObjectDashFail",
+            "ObjectDashAttack",
+            "ObjectBackStep",
+            "ObjectSitDown",
+          ].includes(entry?.packet))
           .slice(0, 8),
       };
     })()
@@ -695,7 +870,7 @@ function detectJumps(samples) {
         sample.centerSpriteKey && previous.centerSpriteKey && sample.centerSpriteKey === previous.centerSpriteKey
           ? delta(sample.centerSprite?.top, previous.centerSprite?.top)
           : 0;
-      const centerBacktrack = centerDx > 12 || Math.abs(centerDy) > 12;
+      const centerBacktrack = isUnexpectedCenterSpriteDelta(centerDx, centerDy, sample, previous);
       if (Math.max(Math.abs(spriteDx), Math.abs(spriteDy), Math.abs(nameDx), Math.abs(nameDy)) > 12 || centerBacktrack) {
         jumps.push({
           label: sample.label,
@@ -714,6 +889,717 @@ function detectJumps(samples) {
     previous = sample;
   }
   return jumps;
+}
+
+function detectRouteSpam(samples) {
+  const commandsByKey = new Map();
+  for (const sample of samples) {
+    for (const command of sample.commandTail ?? []) {
+      if (typeof command?.at !== "number") continue;
+      const key = `${command.at}:${JSON.stringify(command)}`;
+      const distance =
+        typeof sample.capturedAt === "number" ? Math.abs(sample.capturedAt - command.at) : Number.POSITIVE_INFINITY;
+      const existing = commandsByKey.get(key);
+      if (!existing || distance < existing.distance) {
+        commandsByKey.set(key, {
+          command,
+          player: routeSpamCommandSource(sample, command),
+          distance,
+        });
+      }
+    }
+  }
+
+  const buckets = new Map();
+  for (const entry of commandsByKey.values()) {
+    const command = entry.command;
+    const player = entry.player;
+    if (!player) continue;
+    const commandKey =
+      command.type === "moveTo"
+        ? `moveTo:${command.x},${command.y}:${command.mode ?? ""}`
+        : `${command.type}:${command.direction ?? ""}`;
+    const key = `${player.x},${player.y}:${commandKey}`;
+    const bucket = buckets.get(key) ?? {
+      player,
+      commandKey,
+      count: 0,
+      firstAt: command.at,
+      lastAt: command.at,
+    };
+    bucket.count += 1;
+    bucket.firstAt = Math.min(bucket.firstAt, command.at);
+    bucket.lastAt = Math.max(bucket.lastAt, command.at);
+    buckets.set(key, bucket);
+  }
+
+  return Array.from(buckets.values())
+    .filter((bucket) => bucket.count >= 4)
+    .map((bucket) => ({
+      player: bucket.player,
+      commandKey: bucket.commandKey,
+      count: bucket.count,
+      durationMs: bucket.lastAt - bucket.firstAt,
+    }));
+}
+
+function routeSpamCommandSource(sample, command) {
+  const plan = sample?.movementPlan;
+  if (
+    plan &&
+    typeof plan.pendingSentAt === "number" &&
+    Math.abs(plan.pendingSentAt - command.at) <= 120 &&
+    Number.isFinite(plan.sentFromX) &&
+    Number.isFinite(plan.sentFromY)
+  ) {
+    return { x: plan.sentFromX, y: plan.sentFromY };
+  }
+
+  return sample?.player ?? null;
+}
+
+function buildAssertions({
+  interaction,
+  strictMovementChecks,
+  allowBlockedResidual,
+  jumps,
+  routeSpamWarnings,
+  logicalRollbackWarnings,
+  directionLagWarnings,
+  stalePredictionWarnings,
+  commandQueueWarnings,
+  pendingPlanAtEnd,
+  consoleErrors,
+  network404s,
+}) {
+  const assertions = [
+    {
+      name: "noVisualJumps",
+      pass: jumps.length === 0,
+      count: jumps.length,
+    },
+    {
+      name: "noRouteSpamWarnings",
+      pass: routeSpamWarnings.length === 0,
+      count: routeSpamWarnings.length,
+    },
+    {
+      name: "noLogicalTileRollback",
+      pass: logicalRollbackWarnings.length === 0,
+      count: logicalRollbackWarnings.length,
+    },
+    {
+      name: "directionAnimationWithinCrystalWindow",
+      pass: directionLagWarnings.length === 0,
+      count: directionLagWarnings.length,
+    },
+    {
+      name: "stalePredictedPlayerCleared",
+      pass: !strictMovementChecks || stalePredictionWarnings.length === 0,
+      count: stalePredictionWarnings.length,
+      maxAgeMs: stalePredictedMs,
+      strict: strictMovementChecks,
+      warnings: stalePredictionWarnings,
+    },
+    {
+      name: "movementCommandQueueResponsive",
+      pass: !strictMovementChecks || commandQueueWarnings.length === 0,
+      count: commandQueueWarnings.length,
+      maxPendingMs: slowCommandQueueMs,
+      maxDirectionQueueLength,
+      strict: strictMovementChecks,
+      warnings: commandQueueWarnings,
+    },
+    {
+      name: "movementSettledWithoutResidualPlan",
+      pass: !strictMovementChecks || !pendingPlanAtEnd || (allowBlockedResidual && pendingPlanAtEnd.nonFailure === true),
+      status: pendingPlanAtEnd?.status ?? "settled",
+      strictStatus: pendingPlanAtEnd
+        ? pendingPlanAtEnd.targetBlocked
+          ? "blockedResidual"
+          : "pendingResidual"
+        : "settled",
+      strict: strictMovementChecks,
+      allowBlockedResidual,
+      pendingPlanAtEnd,
+    },
+    {
+      name: "noConsoleErrors",
+      pass: consoleErrors.length === 0,
+      count: consoleErrors.length,
+    },
+    {
+      name: "noNonFaviconNetwork404s",
+      pass: network404s.length === 0,
+      count: network404s.length,
+    },
+  ];
+
+  if (isBlockedTargetInteraction(interaction)) {
+    assertions.push({
+      name: `${interaction}BlockedResidualCleared`,
+      pass:
+        !strictMovementChecks ||
+        !pendingPlanAtEnd ||
+        (allowBlockedResidual && pendingPlanAtEnd.nonFailure === true),
+      status: pendingPlanAtEnd?.status ?? "settled",
+      strictStatus: pendingPlanAtEnd
+        ? pendingPlanAtEnd.targetBlocked
+          ? "blockedResidual"
+          : "pendingResidual"
+        : "settled",
+      targetBlocked: pendingPlanAtEnd?.targetBlocked ?? false,
+      hasMovementPlan: pendingPlanAtEnd?.hasMovementPlan ?? false,
+      hasPredictedPlayer: pendingPlanAtEnd?.hasPredictedPlayer ?? false,
+      hasDirectionStepPending: pendingPlanAtEnd?.hasDirectionStepPending ?? false,
+      directionQueueLength: pendingPlanAtEnd?.directionQueueLength ?? 0,
+      strict: strictMovementChecks,
+      allowBlockedResidual,
+      pendingPlanAtEnd,
+    });
+  }
+
+  if (interaction === "holdThenSpamClickTarget") {
+    assertions.push({
+      name: "holdThenSpamClickTargetQueueStrict",
+      pass:
+        !strictMovementChecks ||
+        (logicalRollbackWarnings.length === 0 &&
+          commandQueueWarnings.length === 0 &&
+          !pendingPlanAtEnd &&
+          stalePredictionWarnings.length === 0),
+      logicalRollbackCount: logicalRollbackWarnings.length,
+      commandQueueWarningCount: commandQueueWarnings.length,
+      stalePredictionWarningCount: stalePredictionWarnings.length,
+      status: pendingPlanAtEnd?.status ?? "settled",
+      strict: strictMovementChecks,
+    });
+  }
+
+  return assertions;
+}
+
+function isBlockedTargetInteraction(value) {
+  return value === "routeSpamObstacle" || value === "blockedTarget";
+}
+
+function isStrictMovementInteraction(value) {
+  return isBlockedTargetInteraction(value) || value === "holdThenSpamClickTarget";
+}
+
+function detectStalePredictedPlayer(samples, maxAgeMs) {
+  const warnings = [];
+  let active = null;
+
+  const closeActive = () => {
+    if (!active) return;
+    const durationMs = active.lastAt - active.firstAt;
+    if (durationMs >= maxAgeMs) {
+      warnings.push({
+        label: active.label,
+        durationMs,
+        maxAgeMs,
+        player: active.player,
+        predicted: active.predicted,
+        movementPlan: active.lastSample?.movementPlan ?? null,
+        first: compactSample(active.firstSample),
+        last: compactSample(active.lastSample),
+      });
+    }
+    active = null;
+  };
+
+  for (const sample of samples) {
+    const player = normalizedPoint(sample?.player);
+    const predicted = normalizedPoint(sample?.predictedPlayer);
+    const stale = Boolean(player && predicted && !samePoint(player, predicted));
+    const key = stale ? `${sample.label}:${tileKey(player)}:${tileKey(predicted)}` : null;
+    const capturedAt = numericTimestamp(sample?.capturedAt, sample?.t);
+
+    if (!stale || !Number.isFinite(capturedAt)) {
+      closeActive();
+      continue;
+    }
+
+    if (!active || active.key !== key) {
+      closeActive();
+      active = {
+        key,
+        label: sample.label,
+        player,
+        predicted: {
+          ...predicted,
+          direction: sample.predictedPlayer?.direction ?? null,
+        },
+        firstAt: capturedAt,
+        lastAt: capturedAt,
+        firstSample: sample,
+        lastSample: sample,
+      };
+      continue;
+    }
+
+    active.lastAt = capturedAt;
+    active.lastSample = sample;
+    active.predicted = {
+      ...predicted,
+      direction: sample.predictedPlayer?.direction ?? active.predicted.direction ?? null,
+    };
+  }
+
+  closeActive();
+  return warnings;
+}
+
+function detectSlowCommandQueue(samples, { maxPendingMs, maxDirectionQueueLength }) {
+  const warnings = [];
+  const pendingSpans = new Map();
+  const queueSpans = new Map();
+
+  for (const sample of samples) {
+    const capturedAt = numericTimestamp(sample?.capturedAt, sample?.t);
+    if (!Number.isFinite(capturedAt)) continue;
+
+    const plan = sample?.movementPlan ?? null;
+    if (plan && typeof plan.pendingSentAt === "number") {
+      const pending = normalizedPoint({ x: plan.pendingX, y: plan.pendingY });
+      const player = normalizedPoint(sample?.player);
+      const pendingAgeMs = capturedAt - plan.pendingSentAt;
+      if (pending && player && !samePoint(player, pending) && pendingAgeMs > maxPendingMs) {
+        const key = `${sample.label}:${plan.pendingSentAt}:${tileKey(player)}:${tileKey(pending)}:${plan.sentDirection ?? ""}`;
+        updateSpan(pendingSpans, key, {
+          label: sample.label,
+          type: "pendingMovementPlan",
+          maxPendingMs,
+          player,
+          pending,
+          target: normalizedPoint({ x: plan.targetX, y: plan.targetY }),
+          sentDirection: plan.sentDirection ?? null,
+          sentMode: plan.sentMode ?? plan.mode ?? null,
+          pendingSentAt: plan.pendingSentAt,
+          ageMs: pendingAgeMs,
+          sample,
+        });
+      }
+    }
+
+    const queue = Array.isArray(sample?.directionStepPendingQueue) ? sample.directionStepPendingQueue : [];
+    if (queue.length > maxDirectionQueueLength) {
+      const key = `${sample.label}:direction-queue`;
+      updateSpan(queueSpans, key, {
+        label: sample.label,
+        type: "directionStepPendingQueue",
+        maxDirectionQueueLength,
+        queueLength: queue.length,
+        sample,
+      });
+    }
+
+    const pendingStep = sample?.directionStepPending ?? null;
+    const pendingStepAt = directionStepTimestamp(pendingStep);
+    if (pendingStep && Number.isFinite(pendingStepAt) && capturedAt - pendingStepAt > maxPendingMs) {
+      const key = `${sample.label}:direction-step:${pendingStepAt}`;
+      updateSpan(queueSpans, key, {
+        label: sample.label,
+        type: "directionStepPending",
+        maxPendingMs,
+        ageMs: capturedAt - pendingStepAt,
+        pendingStep,
+        sample,
+      });
+    }
+  }
+
+  for (const span of [...pendingSpans.values(), ...queueSpans.values()]) {
+    warnings.push({
+      label: span.label,
+      type: span.type,
+      durationMs: span.lastAt - span.firstAt,
+      maxAgeMs: span.maxPendingMs,
+      maxPendingMs: span.maxPendingMs,
+      maxDirectionQueueLength: span.maxDirectionQueueLength,
+      maxObservedAgeMs: span.maxObservedAgeMs ?? null,
+      maxObservedQueueLength: span.maxObservedQueueLength ?? null,
+      player: span.player,
+      pending: span.pending,
+      target: span.target,
+      sentDirection: span.sentDirection,
+      sentMode: span.sentMode,
+      pendingSentAt: span.pendingSentAt,
+      first: compactSample(span.firstSample),
+      last: compactSample(span.lastSample),
+    });
+  }
+
+  return warnings;
+}
+
+function updateSpan(spans, key, detail) {
+  const capturedAt = numericTimestamp(detail.sample?.capturedAt, detail.sample?.t);
+  const existing = spans.get(key);
+  if (!existing) {
+    spans.set(key, {
+      ...detail,
+      firstAt: capturedAt,
+      lastAt: capturedAt,
+      firstSample: detail.sample,
+      lastSample: detail.sample,
+      maxObservedAgeMs: Number.isFinite(detail.ageMs) ? detail.ageMs : null,
+      maxObservedQueueLength: Number.isFinite(detail.queueLength) ? detail.queueLength : null,
+    });
+    return;
+  }
+
+  existing.lastAt = capturedAt;
+  existing.lastSample = detail.sample;
+  if (Number.isFinite(detail.ageMs)) {
+    existing.maxObservedAgeMs = Math.max(existing.maxObservedAgeMs ?? 0, detail.ageMs);
+  }
+  if (Number.isFinite(detail.queueLength)) {
+    existing.maxObservedQueueLength = Math.max(existing.maxObservedQueueLength ?? 0, detail.queueLength);
+  }
+}
+
+function detectLogicalRollbacks(samples) {
+  const warnings = [];
+  let previous = null;
+  for (const sample of samples) {
+    if (previous && sample.label === previous.label) {
+      const direction = activeMovementDirection(sample) ?? activeMovementDirection(previous);
+      const previousDirection = activeMovementDirection(previous);
+      const vector = direction && direction === previousDirection ? directionVector(direction) : null;
+      const from = visualPlayerPoint(previous);
+      const to = visualPlayerPoint(sample);
+      if (vector && from && to) {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        if (logicalAxisBacktracked(dx, vector.x) || logicalAxisBacktracked(dy, vector.y)) {
+          warnings.push({
+            label: sample.label,
+            t: sample.t,
+            direction,
+            dx,
+            dy,
+            from: compactSample(previous),
+            to: compactSample(sample),
+          });
+        }
+      }
+    }
+    previous = sample;
+  }
+  return warnings;
+}
+
+function detectDirectionAnimationLag(samples, maxLagMs) {
+  const warnings = [];
+  for (const command of movementDirectionCommandsFromSamples(samples)) {
+    const observed = samples.find(
+      (sample) =>
+        typeof sample.capturedAt === "number" &&
+        sample.capturedAt >= command.at &&
+        sample.capturedAt - command.at <= maxLagMs &&
+        activeMovementDirections(sample).includes(command.direction),
+    );
+    if (observed) {
+      continue;
+    }
+
+    const nearest = samples.find(
+      (sample) =>
+        typeof sample.capturedAt === "number" &&
+        sample.capturedAt >= command.at &&
+        sample.capturedAt - command.at <= maxLagMs,
+    );
+    warnings.push({
+      command,
+      maxLagMs,
+      observedDirections: nearest ? activeMovementDirections(nearest) : [],
+      observedAtDeltaMs: nearest ? nearest.capturedAt - command.at : null,
+      sample: nearest ? compactSample(nearest) : null,
+    });
+  }
+  return warnings;
+}
+
+function movementDirectionCommandsFromSamples(samples) {
+  return movementCommandsFromSamples(samples).filter(
+    (command) =>
+      (command.type === "walk" || command.type === "run" || command.type === "turn") &&
+      typeof command.direction === "string",
+  );
+}
+
+function movementCommandsFromSamples(samples) {
+  const commands = new Map();
+  for (const sample of samples) {
+    for (const command of sample.commandTail ?? []) {
+      if (!command || typeof command.at !== "number" || typeof command.type !== "string") {
+        continue;
+      }
+      if (!["moveTo", "walk", "run", "turn"].includes(command.type)) {
+        continue;
+      }
+      const key = `${command.at}:${command.type}:${command.direction ?? ""}:${command.x ?? ""}:${command.y ?? ""}`;
+      commands.set(key, command);
+    }
+  }
+  return Array.from(commands.values()).sort((left, right) => left.at - right.at);
+}
+
+function analyzePendingPlanAtEnd(state, capturedAt = Date.now()) {
+  const plan = state?.movementPlan ?? null;
+  const predicted = state?.predictedPlayer ?? null;
+  const directionStepPending = state?.directionStepPending ?? null;
+  const directionStepPendingQueue = Array.isArray(state?.directionStepPendingQueue)
+    ? state.directionStepPendingQueue
+    : [];
+  if (!plan && !predicted && !directionStepPending && directionStepPendingQueue.length === 0) {
+    return null;
+  }
+
+  const player = state?.player ?? null;
+  const target =
+    plan && Number.isFinite(plan.targetX) && Number.isFinite(plan.targetY)
+      ? { x: plan.targetX, y: plan.targetY }
+      : null;
+  const pending =
+    plan && Number.isFinite(plan.pendingX) && Number.isFinite(plan.pendingY)
+      ? { x: plan.pendingX, y: plan.pendingY }
+      : null;
+  const blockedSteps = Array.isArray(plan?.blockedSteps) ? plan.blockedSteps : [];
+  const lastMovementCommand = lastTimedEntry(state?.commandTail ?? []);
+  const lastSelfPacket = lastTimedEntry(
+    (state?.gatewayMoveTail ?? []).filter((entry) => isSelfMovementPacket(entry?.packet)),
+  );
+  const targetReached = Boolean(player && target && player.x === target.x && player.y === target.y);
+  const pendingReached = Boolean(player && pending && player.x === pending.x && player.y === pending.y);
+  const predictedReached = Boolean(player && predicted && player.x === predicted.x && player.y === predicted.y);
+  const serverCorrectedPending = Boolean(
+    pending &&
+      lastSelfPacket &&
+      typeof plan?.pendingSentAt === "number" &&
+      lastSelfPacket.at >= plan.pendingSentAt &&
+      (packetX(lastSelfPacket) !== pending.x || packetY(lastSelfPacket) !== pending.y),
+  );
+  const recentBlockedStep = blockedSteps
+    .filter((step) => typeof step?.at === "number")
+    .sort((left, right) => right.at - left.at)[0];
+  const blockedAtCurrentTile = Boolean(
+    player && blockedSteps.some((step) => step?.fromX === player.x && step?.fromY === player.y),
+  );
+  const hasRecentBlockedCorrection = Boolean(recentBlockedStep && capturedAt - recentBlockedStep.at <= 5000);
+  const targetBlocked = !targetReached && (serverCorrectedPending || blockedAtCurrentTile || hasRecentBlockedCorrection);
+  const inFlight = Boolean(
+    pending &&
+      typeof plan?.pendingSentAt === "number" &&
+      capturedAt - plan.pendingSentAt < 900 &&
+      !serverCorrectedPending,
+  );
+  const status = targetReached
+    ? "staleAfterTargetReached"
+    : targetBlocked
+      ? "targetBlocked"
+      : inFlight
+        ? "pendingInFlight"
+        : "pendingUnresolved";
+
+  return {
+    status,
+    nonFailure: status === "targetBlocked",
+    hasMovementPlan: Boolean(plan),
+    hasPredictedPlayer: Boolean(predicted),
+    hasDirectionStepPending: Boolean(directionStepPending),
+    directionQueueLength: directionStepPendingQueue.length,
+    movementPlan: compactMovementPlan(plan),
+    targetBlocked,
+    targetReached,
+    pendingReached,
+    predictedReached,
+    player,
+    target,
+    pending,
+    predicted,
+    directionStepPending,
+    directionStepPendingQueue,
+    blockedSteps,
+    lastMovementCommand,
+    lastSelfMovementPacket: lastSelfPacket,
+    capturedAt,
+    pendingAgeMs: typeof plan?.pendingSentAt === "number" ? capturedAt - plan.pendingSentAt : null,
+  };
+}
+
+function compactMovementPlan(plan) {
+  if (!plan) return null;
+  return {
+    targetX: plan.targetX,
+    targetY: plan.targetY,
+    mode: plan.mode,
+    packetMode: plan.packetMode,
+    actionX: plan.actionX,
+    actionY: plan.actionY,
+    pendingX: plan.pendingX,
+    pendingY: plan.pendingY,
+    pendingSentAt: plan.pendingSentAt,
+    visualUntil: plan.visualUntil,
+    sentFromX: plan.sentFromX,
+    sentFromY: plan.sentFromY,
+    sentDirection: plan.sentDirection,
+    sentMode: plan.sentMode,
+    blockedSteps: Array.isArray(plan.blockedSteps) ? plan.blockedSteps : [],
+  };
+}
+
+function isSelfMovementPacket(packet) {
+  return [
+    "UserLocation",
+    "Pushed",
+    "UserDash",
+    "UserDashFail",
+    "UserDashAttack",
+    "UserAttackMove",
+  ].includes(packet);
+}
+
+function lastTimedEntry(entries) {
+  let latest = null;
+  for (const entry of entries) {
+    if (typeof entry?.at !== "number") continue;
+    if (!latest || entry.at > latest.at) {
+      latest = entry;
+    }
+  }
+  return latest;
+}
+
+function packetX(entry) {
+  const payload = entry?.payload ?? {};
+  return payload.x ?? payload.location?.x ?? null;
+}
+
+function packetY(entry) {
+  const payload = entry?.payload ?? {};
+  return payload.y ?? payload.location?.y ?? null;
+}
+
+function normalizedPoint(value) {
+  if (!value || !Number.isFinite(value.x) || !Number.isFinite(value.y)) return null;
+  return { x: value.x, y: value.y };
+}
+
+function samePoint(left, right) {
+  return Boolean(left && right && left.x === right.x && left.y === right.y);
+}
+
+function tileKey(point) {
+  return point ? `${point.x},${point.y}` : "null";
+}
+
+function numericTimestamp(...values) {
+  for (const value of values) {
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+function directionStepTimestamp(step) {
+  if (!step || typeof step !== "object") return null;
+  return numericTimestamp(step.at, step.sentAt, step.pendingSentAt, step.createdAt, step.startedAt);
+}
+
+function isUnexpectedCenterSpriteDelta(centerDx, centerDy, sample, previous) {
+  const direction = activeMovementDirection(sample) ?? activeMovementDirection(previous);
+  const vector = directionVector(direction);
+  if (!vector) {
+    return centerDx > 12 || Math.abs(centerDy) > 12;
+  }
+
+  const expectedMapX = -vector.x;
+  const expectedMapY = -vector.y;
+  return (
+    axisBacktracked(centerDx, expectedMapX) ||
+    axisBacktracked(centerDy, expectedMapY) ||
+    axisMovedOffDirection(centerDx, expectedMapX) ||
+    axisMovedOffDirection(centerDy, expectedMapY)
+  );
+}
+
+function axisBacktracked(deltaValue, expectedSign) {
+  return expectedSign !== 0 && Math.sign(deltaValue) === -expectedSign && Math.abs(deltaValue) > 12;
+}
+
+function axisMovedOffDirection(deltaValue, expectedSign) {
+  return expectedSign === 0 && Math.abs(deltaValue) > 12;
+}
+
+function activeMovementDirection(sample) {
+  if (!sample) return null;
+  return activeMovementDirections(sample)[0] ?? null;
+}
+
+function activeMovementDirections(sample) {
+  if (!sample) return [];
+  return uniqueCompact([
+    sample.predictedPlayer?.direction,
+    lastQueuedDirection(sample.directionStepPendingQueue),
+    sample.directionStepPending?.direction,
+    sample.movementPlan?.sentDirection,
+    lastMovementCommandDirection(sample.commandTail),
+    sample.selfEntity?.direction,
+  ]);
+}
+
+function lastQueuedDirection(queue) {
+  if (!Array.isArray(queue) || queue.length === 0) return null;
+  return queue[queue.length - 1]?.direction ?? null;
+}
+
+function lastMovementCommandDirection(commands) {
+  if (!Array.isArray(commands) || commands.length === 0) return null;
+  return commands.find((command) => ["walk", "run", "turn"].includes(command?.type))?.direction ?? null;
+}
+
+function visualPlayerPoint(sample) {
+  if (!sample) return null;
+  if (sample.predictedPlayer && Number.isFinite(sample.predictedPlayer.x) && Number.isFinite(sample.predictedPlayer.y)) {
+    return { x: sample.predictedPlayer.x, y: sample.predictedPlayer.y };
+  }
+  if (sample.player && Number.isFinite(sample.player.x) && Number.isFinite(sample.player.y)) {
+    return { x: sample.player.x, y: sample.player.y };
+  }
+  return null;
+}
+
+function logicalAxisBacktracked(deltaValue, expectedSign) {
+  return expectedSign !== 0 && Math.sign(deltaValue) === -expectedSign && Math.abs(deltaValue) >= 1;
+}
+
+function uniqueCompact(values) {
+  return [...new Set(values.filter((value) => typeof value === "string" && value.length > 0))];
+}
+
+function directionVector(direction) {
+  switch (direction) {
+    case "Up":
+      return { x: 0, y: -1 };
+    case "UpRight":
+      return { x: 1, y: -1 };
+    case "Right":
+      return { x: 1, y: 0 };
+    case "DownRight":
+      return { x: 1, y: 1 };
+    case "Down":
+      return { x: 0, y: 1 };
+    case "DownLeft":
+      return { x: -1, y: 1 };
+    case "Left":
+      return { x: -1, y: 0 };
+    case "UpLeft":
+      return { x: -1, y: -1 };
+    default:
+      return null;
+  }
 }
 
 function summarizeSamples(samples) {
@@ -754,6 +1640,7 @@ function compactSample(sample) {
     predictedPlayer: sample.predictedPlayer,
     movementPlan: sample.movementPlan,
     directionStepPending: sample.directionStepPending,
+    directionStepPendingQueue: sample.directionStepPendingQueue,
     sprite: sample.sprite,
     centerSprite: sample.centerSprite,
     centerSpriteKey: sample.centerSpriteKey,
@@ -767,6 +1654,7 @@ function compactState(state) {
     predictedPlayer: state.predictedPlayer,
     movementPlan: state.movementPlan,
     directionStepPending: state.directionStepPending,
+    directionStepPendingQueue: state.directionStepPendingQueue,
     selfEntity: state.selfEntity,
     sprite: state.sprite,
     centerSprite: state.centerSprite,

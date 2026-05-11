@@ -15,7 +15,7 @@ use mir2_game_data::{
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
-    SelectInfo, UserItemStat,
+    SelectInfo, Spell, UserItemStat,
 };
 use postgres::{Client, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
@@ -525,6 +525,8 @@ pub struct CharacterSaveRecord {
     pub inventory_items_json: Vec<String>,
     pub belt_items_json: Vec<String>,
     #[serde(default)]
+    pub hero_inventory_items_json: Vec<String>,
+    #[serde(default)]
     pub storage_items_json: Vec<String>,
     pub equipment_items_json: Vec<String>,
     #[serde(default)]
@@ -586,6 +588,7 @@ impl CharacterSaveRecord {
             chat_ban_until_ms: None,
             inventory_items_json: Vec::new(),
             belt_items_json: Vec::new(),
+            hero_inventory_items_json: Vec::new(),
             storage_items_json: Vec::new(),
             equipment_items_json: Vec::new(),
             equipment_items_explicit_empty: false,
@@ -1240,6 +1243,7 @@ pub struct MapDropRuleRecord {
     pub no_drop_player: bool,
     pub no_drop_monster: bool,
     pub no_mount: bool,
+    pub no_hero: bool,
     pub need_bridle: bool,
 }
 
@@ -2010,6 +2014,7 @@ pub struct WorldEntitySnapshot {
     pub object_id: u32,
     pub kind: WorldEntityKind,
     pub name: String,
+    pub owner_name: Option<String>,
     pub x: i32,
     pub y: i32,
     pub direction: MirDirection,
@@ -2184,6 +2189,8 @@ pub struct Stage5SystemsState {
     #[serde(default)]
     pub guild_territory: Stage5GuildTerritoryState,
     pub hero: Option<Stage5HeroState>,
+    #[serde(default)]
+    pub hero_learned_magics: Vec<Stage5HeroMagicState>,
     pub profession: Stage5ProfessionState,
     #[serde(default)]
     pub appearance: Stage5AppearanceState,
@@ -2210,6 +2217,7 @@ impl Default for Stage5SystemsState {
             conquest: Stage5ConquestState::default(),
             guild_territory: Stage5GuildTerritoryState::default(),
             hero: None,
+            hero_learned_magics: Vec::new(),
             profession: Stage5ProfessionState::default(),
             appearance: Stage5AppearanceState::default(),
             name_lists: Vec::new(),
@@ -2273,6 +2281,32 @@ pub struct Stage5GuildState {
     pub rank: String,
     pub permissions: Vec<String>,
     pub chat_log: Vec<String>,
+    #[serde(default)]
+    pub known_guilds: Vec<String>,
+    #[serde(default)]
+    pub active_wars: Vec<String>,
+    #[serde(default)]
+    pub active_war_ticks_remaining: BTreeMap<String, u64>,
+    // Crystal stores AllyGuilds/AllyCount only on GuildObject runtime state. Keep these
+    // serializable for Web snapshots, but do not rehydrate them from saved Stage 5 JSON.
+    #[serde(default, skip_deserializing)]
+    pub allied_guilds: Vec<String>,
+    #[serde(default, skip_deserializing)]
+    pub ally_count: u32,
+    #[serde(default, skip_deserializing)]
+    pub alliance_broadcasts: Vec<String>,
+    #[serde(default)]
+    pub war_broadcasts: Vec<String>,
+    #[serde(default)]
+    pub notice: Vec<String>,
+    #[serde(default)]
+    pub storage_gold: u32,
+    #[serde(default)]
+    pub storage_items: BTreeMap<u8, String>,
+    #[serde(default)]
+    pub storage_item_states: BTreeMap<u8, String>,
+    #[serde(default)]
+    pub storage_item_users: BTreeMap<u8, i32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -2369,6 +2403,12 @@ pub struct Stage5MailMessage {
     pub gold: u32,
     #[serde(default)]
     pub items: Vec<String>,
+    #[serde(default)]
+    pub item_states_json: Vec<String>,
+    #[serde(default)]
+    pub opened: bool,
+    #[serde(default)]
+    pub locked: bool,
     pub claimed: bool,
     pub deleted: bool,
 }
@@ -2454,6 +2494,9 @@ pub fn deliver_stage5_system_mail(
             body: delivery.body.clone(),
             gold: delivery.gold,
             items: delivery.items.clone(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
             claimed: false,
             deleted: false,
         });
@@ -2653,7 +2696,17 @@ pub struct Stage5ConquestState {
 pub struct Stage5GuildTerritoryState {
     pub owned: bool,
     pub map_file_name: String,
+    #[serde(default)]
+    pub owner: String,
+    #[serde(default)]
+    pub leader: String,
+    #[serde(default)]
+    pub leader2: String,
+    #[serde(default)]
+    pub price: i32,
     pub rental_days_left: u32,
+    #[serde(default)]
+    pub begin: i32,
     pub recall_log: Vec<String>,
 }
 
@@ -2662,7 +2715,12 @@ impl Default for Stage5GuildTerritoryState {
         Self {
             owned: false,
             map_file_name: "GA0".to_string(),
+            owner: String::new(),
+            leader: String::new(),
+            leader2: String::new(),
+            price: 0,
             rental_days_left: 0,
+            begin: 0,
             recall_log: Vec::new(),
         }
     }
@@ -2688,6 +2746,28 @@ pub struct Stage5HeroState {
     pub experience: u32,
     #[serde(default)]
     pub spawned: bool,
+    #[serde(default)]
+    pub auto_pot: bool,
+    #[serde(default)]
+    pub auto_hp_percent: u8,
+    #[serde(default)]
+    pub auto_mp_percent: u8,
+    #[serde(default)]
+    pub hp_item_index: i32,
+    #[serde(default)]
+    pub mp_item_index: i32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5HeroMagicState {
+    pub spell: Spell,
+    #[serde(default)]
+    pub level: u8,
+    #[serde(default)]
+    pub key: u8,
+    #[serde(default)]
+    pub experience: u16,
 }
 
 fn default_stage5_hero_class() -> MirClass {
@@ -2750,6 +2830,8 @@ pub struct WorldSnapshot {
     pub ground_drops: Vec<GroundDropSnapshot>,
     pub belt_items: Vec<WorldItemSnapshot>,
     pub inventory_items: Vec<WorldItemSnapshot>,
+    #[serde(default)]
+    pub hero_inventory_items: Vec<WorldItemSnapshot>,
     #[serde(default)]
     pub storage_items: Vec<WorldItemSnapshot>,
     pub equipment_items: Vec<EquipmentItemSnapshot>,

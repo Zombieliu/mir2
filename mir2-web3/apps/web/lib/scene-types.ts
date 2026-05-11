@@ -55,6 +55,8 @@ export type OriginalMapCell = {
   middle?: string | null;
   front?: string | null;
   tileAnimation?: string | null;
+  blocked?: boolean;
+  closedDoor?: boolean;
 };
 
 export type OriginalMapRegion = {

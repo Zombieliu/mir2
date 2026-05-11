@@ -1,16 +1,18 @@
 use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_game_data::{
-    crystal_monster_by_name, crystal_monster_manifest, format_localized_text,
-    localized_text_or_fallback, CrystalRespawnTemplate,
+    crystal_magic_by_spell, crystal_monster_by_name, crystal_monster_manifest,
+    format_localized_text, localized_text_or_fallback, CrystalMagicTemplate,
+    CrystalRespawnTemplate,
 };
 use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
+use mir2_protocol::{ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo, Spell};
 
 use super::buffs::{apply_or_refresh_buff, BuffState};
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
     entity_position, player_entity, Facing, GeneralMeowMeowState, Monster, MonsterAgent,
-    MonsterAiState, MonsterVitals, ObjectId, PlayerVitals, Position, SpawnSlotRef, SummonedMonster,
-    TrainerDamageState,
+    MonsterAiState, MonsterCombatStats, MonsterPoisonState, MonsterVitals, ObjectId, PlayerVitals,
+    Position, SpawnSlotRef, SummonedMonster, TrainerDamageState,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -18,6 +20,7 @@ use super::drops::{
     HarvestTargetSelection,
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability, total_attack_bonus};
+use super::items::crystal_equipment_added_stat_total;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
 };
@@ -35,20 +38,32 @@ use super::movement::{
 };
 use super::npc::dismiss_dialog;
 use super::packets::{
-    object_died_info_for_entity, object_health_info_for_entity, object_struck_packet,
-    player_struck_packet, system_message_key, visible_object_bundle_for_entity,
+    object_died_info_for_entity, object_health_info_for_entity, object_mana_info_for_entity,
+    object_struck_packet, player_struck_packet, system_message_key,
+    visible_object_bundle_for_entity,
 };
 use super::resources::{
-    is_in_world, runtime_tick, BuffResource, InventoryResource, RuntimeClockResource,
-    RuntimeQueueResource, SessionResource,
+    is_in_world, runtime_tick, BuffResource, ElementalResource, InventoryResource,
+    PlayerRuntimeResource, RuntimeClockResource, RuntimeQueueResource, SessionResource,
+    SkillResource,
 };
 use super::session::SimulationSession;
+use super::skills::{advance_magic_progression, crystal_magic_damage, normalize_crystal_skill_key};
 
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
+    attack_target_in_direction_at_distance(world, direction, 1)
+}
+
+#[allow(deprecated)]
+fn attack_target_in_direction_at_distance(
+    world: &World,
+    direction: MirDirection,
+    distance: i32,
+) -> Option<u32> {
     let player = player_entity(world)?;
     let player_position = entity_position(world, player)?;
-    let target_position = offset_point(&player_position, direction, 1);
+    let target_position = offset_point(&player_position, direction, distance);
 
     world
         .iter_entities()
@@ -67,6 +82,310 @@ pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection)
             Some(entity.get::<ObjectId>()?.0)
         })
         .min()
+}
+
+const CRYSTAL_SPELL_EFFECT_FATAL_SWORD: u8 = 1;
+const CRYSTAL_SPELL_EFFECT_MP_EATER: u8 = 17;
+const CRYSTAL_SPELL_EFFECT_HEMORRHAGE: u8 = 18;
+const CRYSTAL_POISON_BLEEDING: u16 = 128;
+
+fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
+    let key = normalize_crystal_skill_key(spell_name);
+    world
+        .resource::<SkillResource>()
+        .skills
+        .iter()
+        .find(|skill| skill.key == key)
+        .map(|skill| skill.level)
+}
+
+fn crystal_skill_magic(world: &World, spell_name: &str) -> Option<(CrystalMagicTemplate, u8)> {
+    let level = crystal_skill_level(world, spell_name)?;
+    Some((crystal_magic_by_spell(spell_name)?, level))
+}
+
+fn skill_toggle_state(world: &World, spell: Spell) -> bool {
+    world
+        .resource::<SkillResource>()
+        .spell_toggles
+        .iter()
+        .find(|(candidate, _)| *candidate == spell)
+        .map(|(_, enabled)| *enabled)
+        .unwrap_or(false)
+}
+
+fn set_skill_toggle_state(world: &mut World, spell: Spell, enabled: bool) {
+    let mut skills = world.resource_mut::<SkillResource>();
+    if let Some((_, existing)) = skills
+        .spell_toggles
+        .iter_mut()
+        .find(|(candidate, _)| *candidate == spell)
+    {
+        *existing = enabled;
+    } else {
+        skills.spell_toggles.push((spell, enabled));
+    }
+}
+
+fn crystal_player_melee_damage(world: &World) -> i32 {
+    let resources = world.resource::<InventoryResource>();
+    let session = world.resource::<SessionResource>();
+    let level_bonus = i32::from(
+        session
+            .selected_character
+            .as_ref()
+            .map(|c| c.level)
+            .unwrap_or(1)
+            / 2,
+    );
+    let mut damage =
+        18 + level_bonus + total_attack_bonus(&resources, world.resource::<BuffResource>());
+    if let Some(level) = crystal_skill_level(world, "Slaying") {
+        let bonuses = [5, 6, 7, 8];
+        let index = usize::from(level).min(bonuses.len() - 1);
+        damage = damage.saturating_add(bonuses[index]);
+    }
+    damage.max(1)
+}
+
+fn crystal_skill_accuracy_bonus(world: &World) -> i32 {
+    let fencing = crystal_skill_level(world, "Fencing")
+        .map(|level| i32::from(level) * 3)
+        .unwrap_or(0);
+    let slaying = crystal_skill_level(world, "Slaying")
+        .map(i32::from)
+        .unwrap_or(0);
+    let spirit_sword = crystal_skill_level(world, "SpiritSword")
+        .map(|level| match level {
+            0 => 0,
+            1 => 3,
+            2 => 5,
+            _ => 8,
+        })
+        .unwrap_or(0);
+
+    fencing.saturating_add(slaying).saturating_add(spirit_sword)
+}
+
+fn crystal_player_accuracy(world: &World) -> i32 {
+    crystal_equipment_added_stat_total(world.resource::<InventoryResource>(), CRYSTAL_STAT_ACCURACY)
+        .saturating_add(crystal_skill_accuracy_bonus(world))
+}
+
+fn crystal_monster_agility(world: &World, monster_entity: Entity) -> i32 {
+    world
+        .entity(monster_entity)
+        .get::<MonsterCombatStats>()
+        .map(|stats| stats.agility.max(0))
+        .unwrap_or(0)
+}
+
+fn crystal_player_hit_roll_succeeds(
+    world: &World,
+    attacker_id: u32,
+    target_entity: Entity,
+    current_tick: u64,
+) -> bool {
+    if Some(attacker_id) != current_player_object_id(world) {
+        return true;
+    }
+
+    let agility = crystal_monster_agility(world, target_entity);
+    if agility <= 0 {
+        return true;
+    }
+
+    let roll = deterministic_roll(
+        current_tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        target_entity.index() as usize,
+        u64::try_from(agility.saturating_add(1)).unwrap_or(1),
+    );
+    roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)
+}
+
+fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
+    for (spell_name, spell) in [
+        ("Fencing", Spell::Fencing),
+        ("SpiritSword", Spell::SpiritSword),
+    ] {
+        let Some(magic) = crystal_magic_by_spell(spell_name) else {
+            continue;
+        };
+        let key = normalize_crystal_skill_key(spell_name);
+        let Some(index) = ({
+            let skills = world.resource::<SkillResource>();
+            skills.skills.iter().position(|skill| skill.key == key)
+        }) else {
+            continue;
+        };
+
+        for packet in advance_magic_progression(world, index, spell, &magic, tick) {
+            queue_due_packet(world, due_tick, packet);
+        }
+    }
+}
+
+fn crystal_magic_damage_from_base(
+    magic: &CrystalMagicTemplate,
+    level: u8,
+    base_damage: i32,
+) -> i32 {
+    let flat = crystal_magic_damage(magic, level);
+    let level = i32::from(level) + 1;
+    let multiplier = magic.multiplier_base + f32::from(level as u16 - 1) * magic.multiplier_bonus;
+    ((base_damage.saturating_add(flat).max(1) as f32) * multiplier.max(0.1)).round() as i32
+}
+
+fn object_attack_packet_for_player(
+    world: &World,
+    player: Entity,
+    location: &Point,
+    direction: MirDirection,
+    spell: Spell,
+    level: u8,
+) -> Option<ServerPacket> {
+    Some(ServerPacket::ObjectAttack {
+        info: ObjectAttackInfo {
+            object_id: entity_object_id(world, player)?,
+            location: location.clone(),
+            direction,
+            spell: spell as u8,
+            level,
+            attack_type: 0,
+        },
+    })
+}
+
+fn object_effect_packet(object_id: u32, effect: u8, effect_type: u32) -> ServerPacket {
+    ServerPacket::ObjectEffect {
+        info: ObjectEffectInfo {
+            object_id,
+            effect,
+            effect_type,
+            delay_time: 0,
+            time: 0,
+        },
+    }
+}
+
+fn restore_player_mp(world: &mut World, amount: i32, packets: &mut Vec<ServerPacket>) {
+    if amount <= 0 {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let restored = {
+        let mut entity = world.entity_mut(player);
+        entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+            vitals.mp = (vitals.mp + amount).min(100);
+            *vitals
+        })
+    };
+    if let Some(restored) = restored {
+        world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored;
+        if let Some(info) = object_mana_info_for_entity(world, player) {
+            packets.push(ServerPacket::ObjectMana { info });
+        }
+    }
+}
+
+fn gather_meditation_element_packet(world: &mut World, casted: bool) -> Option<ServerPacket> {
+    let object_id = current_player_object_id(world)?;
+    let mut elemental = world.resource_mut::<ElementalResource>();
+    if elemental.has_elemental {
+        return None;
+    }
+    elemental.has_elemental = true;
+    elemental.elements_level = 50;
+    Some(ServerPacket::SetElemental {
+        object_id,
+        enabled: true,
+        casted,
+        value: elemental.elements_level,
+        element_type: 1,
+        exp_last: 200,
+    })
+}
+
+fn queue_counter_attack_proc(
+    world: &mut World,
+    current_tick: u64,
+    attacker_id: u32,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if !skill_toggle_state(world, Spell::CounterAttack)
+        || !world
+            .resource::<BuffResource>()
+            .buffs
+            .iter()
+            .any(|buff| buff.key == "counter-attack")
+    {
+        return;
+    }
+
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(attacker) = entity_by_object_id(world, attacker_id) else {
+        return;
+    };
+    if !monster_is_damageable(world, attacker) {
+        return;
+    }
+    let Some(player_object_id) = entity_object_id(world, player) else {
+        return;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return;
+    };
+    let Some(attacker_position) = entity_position(world, attacker) else {
+        return;
+    };
+    if tile_distance(&player_position, &attacker_position) > 1 {
+        return;
+    }
+    let Some((magic, level)) = crystal_skill_magic(world, "CounterAttack") else {
+        return;
+    };
+    let threshold = u64::from(level).saturating_add(6).min(9);
+    if deterministic_roll(
+        current_tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        usize::try_from(player_object_id).unwrap_or_default(),
+        10,
+    ) > threshold
+    {
+        return;
+    }
+
+    set_skill_toggle_state(world, Spell::CounterAttack, false);
+    let direction = direction_toward(&player_position, &attacker_position)
+        .unwrap_or_else(|| entity_facing(world, player).unwrap_or(MirDirection::Down));
+    packets.push(ServerPacket::ObjectMagic {
+        object_id: player_object_id,
+        location: player_position.clone(),
+        direction,
+        spell: Spell::CounterAttack,
+        target_id: attacker_id,
+        target: attacker_position.clone(),
+        cast: true,
+        level,
+        self_broadcast: false,
+        secondary_target_ids: Vec::new(),
+    });
+
+    let damage = crystal_magic_damage_from_base(&magic, level, crystal_player_melee_damage(world));
+    schedule_damage_to_monster(
+        world,
+        current_tick + melee_attack_delay_ticks(),
+        player_object_id,
+        attacker,
+        damage,
+        entity_name(world, attacker),
+        None,
+    );
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -188,6 +507,26 @@ pub(super) fn queue_due_packet(world: &mut World, due_tick: u64, packet: ServerP
             damage: 0,
             player_status_effect: None,
             due_packet: Some(packet),
+            player_movement: None,
+            on_monster_defeat: None,
+        },
+    );
+}
+
+pub(super) fn schedule_heal_to_player(world: &mut World, due_tick: u64, heal: i32) {
+    if heal <= 0 {
+        return;
+    }
+
+    queue_pending_combat_action(
+        world,
+        PendingCombatAction {
+            due_tick,
+            attacker_id: 0,
+            target: PendingCombatTarget::Player,
+            damage: heal.saturating_neg(),
+            player_status_effect: None,
+            due_packet: None,
             player_movement: None,
             on_monster_defeat: None,
         },
@@ -341,6 +680,78 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
             on_monster_defeat: defeat_action,
         },
     );
+}
+
+pub(super) fn apply_monster_poison(
+    world: &mut World,
+    monster_entity: Entity,
+    poison: u16,
+    green_damage: i32,
+    current_tick: u64,
+    duration_ticks: u64,
+) {
+    if poison == 0 || duration_ticks == 0 {
+        return;
+    }
+
+    world.entity_mut(monster_entity).insert(MonsterPoisonState {
+        poison,
+        green_damage: green_damage.max(0),
+        next_damage_tick: current_tick.saturating_add(2),
+        expires_at_tick: current_tick.saturating_add(duration_ticks),
+    });
+}
+
+pub(super) fn tick_monster_poisons(
+    world: &mut World,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    const GREEN_POISON: u16 = 1;
+
+    let poisoned_entities = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let state = *entity.get::<MonsterPoisonState>()?;
+                Some((entity.id(), state))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (entity, mut state) in poisoned_entities {
+        let object_id = entity_object_id(world, entity);
+        let dead = world
+            .entity(entity)
+            .get::<MonsterAgent>()
+            .map(|agent| agent.dead)
+            .unwrap_or(true);
+        if dead || current_tick >= state.expires_at_tick {
+            world.entity_mut(entity).remove::<MonsterPoisonState>();
+            if let Some(object_id) = object_id {
+                packets.push(ServerPacket::ObjectPoisoned {
+                    object_id,
+                    poison: 0,
+                });
+            }
+            continue;
+        }
+
+        if state.poison & GREEN_POISON != 0
+            && state.green_damage > 0
+            && current_tick >= state.next_damage_tick
+        {
+            let died =
+                damage_monster_entity(world, entity, state.green_damage, current_tick, packets);
+            if died {
+                world.entity_mut(entity).remove::<MonsterPoisonState>();
+                continue;
+            }
+            state.next_damage_tick = current_tick.saturating_add(2);
+            world.entity_mut(entity).insert(state);
+        }
+    }
 }
 
 pub(super) fn combat_delay_ticks(delay_ms: u64) -> u64 {
@@ -790,6 +1201,22 @@ pub(super) fn resolve_pending_combat_actions(
                     }
                     packets.push(player_struck_packet(action.attacker_id));
                     packets.extend(damage_worn_durability(world, current_tick));
+                    queue_counter_attack_proc(world, current_tick, action.attacker_id, packets);
+                } else if action.damage < 0 {
+                    let restored = {
+                        let mut entity = world.entity_mut(player);
+                        entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                            let heal = action.damage.saturating_neg();
+                            vitals.hp = (vitals.hp + heal).min(vitals.max_hp);
+                            *vitals
+                        })
+                    };
+                    if let Some(restored) = restored {
+                        world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored;
+                        if let Some(info) = object_health_info_for_entity(world, player, 0) {
+                            packets.push(ServerPacket::ObjectHealth { info });
+                        }
+                    }
                 }
                 if let Some(effect) = action.player_status_effect {
                     apply_pending_player_status_effect(
@@ -814,6 +1241,23 @@ pub(super) fn resolve_pending_combat_actions(
             }
             PendingCombatTarget::Monster(target_entity) => {
                 if !monster_is_damageable(world, target_entity) {
+                    continue;
+                }
+                if action.damage > 0
+                    && !crystal_player_hit_roll_succeeds(
+                        world,
+                        action.attacker_id,
+                        target_entity,
+                        current_tick,
+                    )
+                {
+                    if let Some(object_id) = entity_object_id(world, target_entity) {
+                        packets.push(ServerPacket::DamageIndicator {
+                            damage: 0,
+                            damage_type: 1,
+                            object_id,
+                        });
+                    }
                     continue;
                 }
                 if let Some(packet) = action.due_packet {
@@ -1658,6 +2102,14 @@ impl SimulationSession {
     }
 
     pub(super) fn attack_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
+        self.attack_impl_with_spell(object_id, Spell::None)
+    }
+
+    pub(super) fn attack_impl_with_spell(
+        &mut self,
+        object_id: u32,
+        requested_spell: Spell,
+    ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
@@ -1706,33 +2158,215 @@ impl SimulationSession {
             }
         }
 
-        if tile_distance(&player_position, &target_position) > 1 {
+        let target_distance = tile_distance(&player_position, &target_position);
+        let thrusting_requested = requested_spell == Spell::Thrusting
+            && crystal_skill_magic(self.app.world(), "Thrusting").is_some()
+            && skill_toggle_state(self.app.world(), Spell::Thrusting);
+        if target_distance > 1 && !(thrusting_requested && target_distance == 2) {
             return packets;
         }
 
-        let damage = {
-            let resources = self.app.world().resource::<InventoryResource>();
-            let session = self.app.world().resource::<SessionResource>();
-            18 + i32::from(
-                session
-                    .selected_character
-                    .as_ref()
-                    .map(|c| c.level)
-                    .unwrap_or(1)
-                    / 2,
-            ) + total_attack_bonus(&resources, self.app.world().resource::<BuffResource>())
-        };
         let current_tick = runtime_tick(self.app.world());
         let player_object_id =
             current_player_object_id(self.app.world()).expect("player object id");
         let hit_due_tick =
             queued_before_world_tick_due_tick(current_tick, melee_attack_delay_ticks());
+        let target_object_id =
+            entity_object_id(self.app.world(), monster_entity).unwrap_or(object_id);
+        let mut damage = crystal_player_melee_damage(self.app.world());
+        let mut attack_spell = Spell::None;
+        let mut attack_spell_level = 0;
+        let mut due_packet = None;
 
-        if let Some(packet) = monster_melee_attack_packet(
+        if thrusting_requested {
+            if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "Thrusting") {
+                attack_spell = Spell::Thrusting;
+                attack_spell_level = level;
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+            }
+        } else if requested_spell == Spell::Slaying {
+            let slaying_armed = {
+                let skills = self.app.world().resource::<SkillResource>();
+                skills.slaying_armed || skill_toggle_state(self.app.world(), Spell::Slaying)
+            };
+            if slaying_armed {
+                if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "Slaying") {
+                    attack_spell = Spell::Slaying;
+                    attack_spell_level = level;
+                    damage = crystal_magic_damage_from_base(&magic, level, damage);
+                    self.app
+                        .world_mut()
+                        .resource_mut::<SkillResource>()
+                        .slaying_armed = false;
+                    set_skill_toggle_state(self.app.world_mut(), Spell::Slaying, false);
+                }
+            }
+        } else if requested_spell == Spell::FlamingSword
+            && skill_toggle_state(self.app.world(), Spell::FlamingSword)
+        {
+            if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "FlamingSword") {
+                attack_spell = Spell::FlamingSword;
+                attack_spell_level = level;
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+                set_skill_toggle_state(self.app.world_mut(), Spell::FlamingSword, false);
+            }
+        }
+
+        if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "FatalSword") {
+            let should_proc = {
+                let mut skills = self.app.world_mut().resource_mut::<SkillResource>();
+                if skills.fatal_sword_armed {
+                    skills.fatal_sword_armed = false;
+                    true
+                } else if level >= 3
+                    || deterministic_chance_roll(current_tick, player_object_id, 91, 10)
+                {
+                    skills.fatal_sword_armed = true;
+                    false
+                } else {
+                    false
+                }
+            };
+            if should_proc {
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+                due_packet = Some(object_effect_packet(
+                    target_object_id,
+                    CRYSTAL_SPELL_EFFECT_FATAL_SWORD,
+                    0,
+                ));
+            }
+        }
+
+        if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "MPEater") {
+            let accuracy = crystal_player_accuracy(self.app.world()).max(0);
+            let should_proc = {
+                let mut skills = self.app.world_mut().resource_mut::<SkillResource>();
+                if skills.mp_eater_armed {
+                    skills.mp_eater_armed = false;
+                    skills.mp_eater_count = 0;
+                    true
+                } else {
+                    let base_count = 1_i32.saturating_add(accuracy / 2);
+                    let max_count = base_count.saturating_add(i32::from(level) * 5);
+                    let gain_range =
+                        u64::try_from(max_count.saturating_sub(base_count).max(1)).unwrap_or(1);
+                    let gain = base_count.saturating_add(
+                        i32::try_from(deterministic_roll(
+                            current_tick,
+                            usize::try_from(player_object_id).unwrap_or_default(),
+                            309,
+                            gain_range,
+                        ))
+                        .unwrap_or(0),
+                    );
+                    skills.mp_eater_count = skills
+                        .mp_eater_count
+                        .saturating_add(u16::try_from(gain.max(0)).unwrap_or(u16::MAX));
+                    if skills.mp_eater_count >= 100 {
+                        skills.mp_eater_armed = true;
+                    }
+                    false
+                }
+            };
+            if should_proc {
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+                packets.push(object_effect_packet(
+                    target_object_id,
+                    CRYSTAL_SPELL_EFFECT_MP_EATER,
+                    player_object_id,
+                ));
+                restore_player_mp(
+                    self.app.world_mut(),
+                    5 * (i32::from(level) + accuracy / 4),
+                    &mut packets,
+                );
+            }
+        }
+
+        if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "Hemorrhage") {
+            let should_proc = {
+                let mut skills = self.app.world_mut().resource_mut::<SkillResource>();
+                if skills.hemorrhage_armed {
+                    skills.hemorrhage_armed = false;
+                    skills.hemorrhage_attack_count = 0;
+                    true
+                } else {
+                    let gain = 20_u16.saturating_add(u16::from(level).saturating_mul(20));
+                    skills.hemorrhage_attack_count =
+                        skills.hemorrhage_attack_count.saturating_add(gain);
+                    if skills.hemorrhage_attack_count >= 55 {
+                        skills.hemorrhage_armed = true;
+                    }
+                    false
+                }
+            };
+            if should_proc {
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+                packets.push(object_effect_packet(
+                    target_object_id,
+                    CRYSTAL_SPELL_EFFECT_HEMORRHAGE,
+                    0,
+                ));
+                apply_monster_poison(
+                    self.app.world_mut(),
+                    monster_entity,
+                    CRYSTAL_POISON_BLEEDING,
+                    0,
+                    current_tick,
+                    u64::from(level).saturating_mul(2).max(1),
+                );
+                packets.push(ServerPacket::ObjectPoisoned {
+                    object_id: target_object_id,
+                    poison: CRYSTAL_POISON_BLEEDING,
+                });
+            }
+        }
+
+        if let Some(level) = crystal_skill_level(self.app.world(), "Slaying") {
+            let should_arm = {
+                let skills = self.app.world().resource::<SkillResource>();
+                !skills.slaying_armed
+                    && !skill_toggle_state(self.app.world(), Spell::Slaying)
+                    && (level >= 3
+                        || deterministic_chance_roll(current_tick, player_object_id, 2, 12))
+            };
+            if should_arm {
+                self.app
+                    .world_mut()
+                    .resource_mut::<SkillResource>()
+                    .slaying_armed = true;
+                set_skill_toggle_state(self.app.world_mut(), Spell::Slaying, true);
+                packets.push(ServerPacket::SpellToggle {
+                    object_id: player_object_id,
+                    spell: Spell::Slaying,
+                    can_use: true,
+                });
+            }
+        }
+
+        if let Some(level) = crystal_skill_level(self.app.world(), "Meditation") {
+            if level >= 3
+                || deterministic_chance_roll(
+                    current_tick,
+                    player_object_id,
+                    126,
+                    8_u64.saturating_sub(u64::from(level)).max(1),
+                )
+            {
+                if let Some(packet) = gather_meditation_element_packet(self.app.world_mut(), false)
+                {
+                    queue_due_packet(self.app.world_mut(), hit_due_tick, packet);
+                }
+            }
+        }
+
+        if let Some(packet) = object_attack_packet_for_player(
             self.app.world(),
             player_entity,
             &player_position,
             direction,
+            attack_spell,
+            attack_spell_level,
         ) {
             packets.push(packet);
         }
@@ -1751,7 +2385,7 @@ impl SimulationSession {
             .world_mut()
             .entity_mut(monster_entity)
             .insert(agent);
-        schedule_damage_to_monster(
+        schedule_damage_to_monster_with_due_packet(
             self.app.world_mut(),
             hit_due_tick,
             player_object_id,
@@ -1762,13 +2396,19 @@ impl SimulationSession {
                 object_id,
                 name: target_name.clone(),
             }),
+            due_packet,
         );
+        queue_melee_passive_skill_progression(self.app.world_mut(), hit_due_tick, current_tick);
 
         packets.extend(advance_world(self.app.world_mut()));
         packets
     }
 
-    pub(super) fn attack_in_direction(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
+    pub(super) fn attack_in_direction_with_spell(
+        &mut self,
+        direction: MirDirection,
+        requested_spell: Spell,
+    ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
@@ -1780,13 +2420,140 @@ impl SimulationSession {
                 .insert(Facing(direction));
         }
 
-        let Some(object_id) = attack_target_in_direction(self.app.world(), direction) else {
+        let object_id = attack_target_in_direction(self.app.world(), direction).or_else(|| {
+            if requested_spell == Spell::Thrusting
+                && skill_toggle_state(self.app.world(), Spell::Thrusting)
+            {
+                attack_target_in_direction_at_distance(self.app.world(), direction, 2)
+            } else {
+                None
+            }
+        });
+
+        let Some(object_id) = object_id else {
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];
         };
 
-        self.attack_impl(object_id)
+        self.attack_impl_with_spell(object_id, requested_spell)
+    }
+
+    pub(super) fn range_attack_impl(
+        &mut self,
+        direction: MirDirection,
+        target_id: u32,
+        target_location: Point,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        dismiss_dialog(self.app.world_mut());
+        let Some(target_entity) = entity_by_object_id(self.app.world(), target_id) else {
+            return Vec::new();
+        };
+        let Some(player) = player_entity(self.app.world()) else {
+            return Vec::new();
+        };
+        let Some(player_position) = entity_position(self.app.world(), player) else {
+            return Vec::new();
+        };
+        let Some(target_position) = entity_position(self.app.world(), target_entity) else {
+            return Vec::new();
+        };
+        let target_entry = self.app.world().entity(target_entity);
+        let Some(target_agent) = target_entry.get::<MonsterAgent>() else {
+            return Vec::new();
+        };
+        let target_ai_state = target_entry
+            .get::<MonsterAiState>()
+            .copied()
+            .unwrap_or_default();
+        if target_agent.dead
+            || target_ai_state.hidden
+            || monster_is_stoned_zuma(target_agent, &target_ai_state)
+            || !target_agent.hostile_to_player
+        {
+            return Vec::new();
+        }
+
+        self.app
+            .world_mut()
+            .entity_mut(player)
+            .insert(Facing(direction));
+        let current_tick = runtime_tick(self.app.world());
+        let player_object_id =
+            current_player_object_id(self.app.world()).expect("player object id");
+        let mut damage = crystal_player_melee_damage(self.app.world());
+        let mut spell = Spell::None;
+        let mut spell_level = 0;
+        if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "Focus") {
+            if level >= 3
+                || deterministic_chance_roll(
+                    current_tick,
+                    player_object_id,
+                    121,
+                    5_u64.saturating_sub(u64::from(level)).max(1),
+                )
+            {
+                spell = Spell::Focus;
+                spell_level = level;
+                damage = crystal_magic_damage_from_base(&magic, level, damage);
+            }
+        }
+        let due_tick = queued_before_world_tick_due_tick(
+            current_tick,
+            ranged_attack_delay_ticks(&player_position, &target_position),
+        );
+        let target_name =
+            entity_name(self.app.world(), target_entity).unwrap_or_else(|| "Target".to_string());
+        schedule_damage_to_monster(
+            self.app.world_mut(),
+            due_tick,
+            player_object_id,
+            target_entity,
+            damage,
+            Some(target_name.clone()),
+            Some(PendingMonsterDefeatAction {
+                object_id: target_id,
+                name: target_name,
+            }),
+        );
+
+        let mut packets = vec![
+            ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            },
+            ServerPacket::RangeAttack {
+                target_id,
+                target: target_location.clone(),
+                spell,
+            },
+        ];
+        if let Some(packet) = object_attack_packet_for_player(
+            self.app.world(),
+            player,
+            &player_position,
+            direction,
+            Spell::None,
+            0,
+        ) {
+            packets.push(packet);
+        }
+        packets.push(ServerPacket::ObjectRangeAttack {
+            info: ObjectRangeAttackInfo {
+                object_id: player_object_id,
+                location: player_position,
+                direction,
+                target_id,
+                target: target_location,
+                attack_type: 0,
+                spell: spell as u8,
+                level: spell_level,
+            },
+        });
+        packets.extend(advance_world(self.app.world_mut()));
+        packets
     }
 
     pub(super) fn harvest_impl(&mut self, direction: MirDirection) -> Vec<ServerPacket> {

@@ -1957,12 +1957,13 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "levelEffects": info.level_effects
             }
         }),
-        ServerPacket::ObjectHero { info } => json!({
+        ServerPacket::ObjectHero { info, owner_name } => json!({
             "type": "packet",
             "packet": "ObjectHero",
             "payload": {
                 "objectId": info.object_id,
                 "name": info.name,
+                "ownerName": owner_name,
                 "class": format!("{:?}", info.class),
                 "gender": format!("{:?}", info.gender),
                 "level": info.level,
@@ -3107,6 +3108,43 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "packet": "ObjectDashFail",
             "payload": {
                 "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::UserDashAttack {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserDashAttack",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
+        ServerPacket::ObjectDashAttack {
+            object_id,
+            location,
+            direction,
+            distance,
+        } => json!({
+            "type": "packet",
+            "packet": "ObjectDashAttack",
+            "payload": {
+                "objectId": object_id,
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction),
+                "distance": distance
+            }
+        }),
+        ServerPacket::UserAttackMove {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserAttackMove",
+            "payload": {
                 "location": {"x": location.x, "y": location.y},
                 "direction": format!("{:?}", direction)
             }
