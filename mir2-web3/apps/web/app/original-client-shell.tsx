@@ -772,9 +772,10 @@ export function OriginalClientShell({
     const latest = latestMoveInputRef.current;
     const basePlayer = latest.renderPlayer ?? latest.player;
     if (!basePlayer) return null;
+    const cameraOffset = latest.playerCameraMotionOffset;
     return {
-      x: basePlayer.x + Math.floor(sceneX / VIEWPORT_CELL_WIDTH) - VIEWPORT_OFFSET_X,
-      y: basePlayer.y + Math.floor(sceneY / VIEWPORT_CELL_HEIGHT) - VIEWPORT_OFFSET_Y,
+      x: basePlayer.x + Math.floor((sceneX - cameraOffset.x) / VIEWPORT_CELL_WIDTH) - VIEWPORT_OFFSET_X,
+      y: basePlayer.y + Math.floor((sceneY - cameraOffset.y) / VIEWPORT_CELL_HEIGHT) - VIEWPORT_OFFSET_Y,
     };
   }
 
@@ -951,8 +952,8 @@ export function OriginalClientShell({
                 type="button"
                 className="tile-hit"
                 style={{
-                  left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH}px`,
-                  top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT}px`,
+                  left: `${VIEWPORT_MOUSE_TILE_CENTER_X + tile.dx * VIEWPORT_CELL_WIDTH + playerCameraMotionOffset.x}px`,
+                  top: `${VIEWPORT_MOUSE_TILE_CENTER_Y + tile.dy * VIEWPORT_CELL_HEIGHT + playerCameraMotionOffset.y}px`,
                 }}
                 data-ui-interactive="true"
                 onMouseDown={(event) => {
