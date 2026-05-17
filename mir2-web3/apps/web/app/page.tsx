@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { OriginalClientShell } from "./original-client-shell";
 import {
@@ -10,6 +11,16 @@ import {
   normalizeLanguage,
   type Mir2Language,
 } from "../lib/localization";
+import { playOriginalSoundId } from "../lib/original-audio";
+import {
+  requestSuiLoginToken,
+  sendBootstrapSequence as sendGatewayBootstrapSequence,
+  sendNewAccountCommand as sendGatewayNewAccountCommand,
+  sendPasswordLoginCommand,
+  sendSuiLoginCommand,
+  type SuiLoginKind,
+  type SuiLoginToken,
+} from "../lib/client-login-runtime";
 import type {
   DecorObject,
   OriginalMapRegion,
@@ -39,6 +50,8 @@ type UiLogChannel =
   | "trade"
   | "group"
   | "guild"
+  | "mentor"
+  | "relationship"
   | "system"
   | "hint"
   | "server"
@@ -558,23 +571,28 @@ const SCENE_CHUNK_WIDTH = Math.max(VIEWPORT_RANGE_X, 1);
 const SCENE_CHUNK_HEIGHT = Math.max(VIEWPORT_RANGE_Y, 1);
 const WALK_STEP_INTERVAL_MS = 600;
 const RUN_STEP_INTERVAL_MS = 600;
-const CRYSTAL_GAMEPLAY_TICK_MS = 100;
-const GATEWAY_WORLD_TICK_INTERVAL_MS = 1200;
-const GATEWAY_WORLD_TICK_COMMAND_GRACE_MS = 900;
+const CRYSTAL_GAMEPLAY_TICK_MS = 1200;
 const CRYSTAL_KEEPALIVE_INTERVAL_MS = 30_000;
 const CRYSTAL_INPUT_CORRECTION_DELAY_MS = 400;
 const CRYSTAL_ENTITY_MOVE_ACTION_MS = 600;
+const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
+const MOVEMENT_CONFIRM_TICK_DELAY_MS = 160;
 const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
 const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 3600;
-const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 2;
+const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 12;
 const MOVEMENT_PENDING_ACTION_RECOVERY_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_PREDICTED_CORRECTION_HOLD_MS = CRYSTAL_INPUT_CORRECTION_DELAY_MS;
-const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
+const MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 2;
+const MOVEMENT_ACTION_PREDICTION_BLOCK_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
+const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS = 360;
+const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 4;
+const MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES = MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
 const MOVEMENT_DIRECTION_PENDING_MAX = 1;
 const MOVEMENT_ROUTE_REROUTE_AFTER_MS = 900;
 const MOVEMENT_ROUTE_RETRY_DELAY_MS = 120;
 const MOVEMENT_ROUTE_BLOCK_MEMORY_MS = 5600;
 const MOVEMENT_ROUTE_MAX_BLOCKED_STEPS = 12;
+const CRYSTAL_RUN_PRIME_WINDOW_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + 600;
 const DEFAULT_GATEWAY_WS_URL =
   process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL ?? "ws://127.0.0.1:7110/ws";
 const QUICK_TRANSFER_OPTIONS: QuickTransferOption[] = [
@@ -623,8 +641,9 @@ type MovementBlockedStep = {
 };
 
 type DirectionStepRequest = {
-  x: number;
-  y: number;
+  x?: number;
+  y?: number;
+  direction?: string;
   mode: "walk" | "run";
   requestedAt: number;
 };
@@ -635,6 +654,8 @@ type DirectionStepPending = {
   direction?: string;
   mode: "walk" | "run";
   sentAt: number;
+  sentFromX?: number;
+  sentFromY?: number;
 };
 
 type PredictedPlayerMotion = {
@@ -643,12 +664,87 @@ type PredictedPlayerMotion = {
   direction?: string;
 };
 
+type LocalMovementAnchor = PredictedPlayerMotion & {
+  until: number;
+};
+
+type CrystalSelfActionFeedEntry = {
+  fromX: number;
+  fromY: number;
+  x: number;
+  y: number;
+  direction: string;
+  mode: "walk" | "run";
+  sentAt: number;
+  visualUntil: number;
+};
+
+type CrystalSelfAckDisposition = "none" | "confirmed" | "staleEcho" | "correction";
+
+type MovementDiagnosticPoint = {
+  x: number;
+  y: number;
+  direction?: string;
+};
+
+type MovementDiagnosticSample = {
+  screen: ClientScreen;
+  mapFileName: string | null;
+  mapTitle: string | null;
+  worldTick: number;
+  worldSnapshotVersion: number;
+  self: (MovementDiagnosticPoint & {
+    movementAnimation?: string;
+    movementStartedAt?: number;
+    movementUntil?: number;
+  }) | null;
+  render: MovementDiagnosticPoint | null;
+  predicted: PredictedPlayerMotion | null;
+  scene: {
+    motionNow?: number;
+    playerCameraMotionOffset?: unknown;
+    playerMotionSnapshot?: unknown;
+  } | null;
+  queues: {
+    movementPlan: MovementPlan | null;
+    queuedDirectionStep: DirectionStepRequest | null;
+    directionStepPending: DirectionStepPending | null;
+    directionStepPendingQueueLength: number;
+    crystalSelfActionFeedLength: number;
+    outstandingSelfMovementActionsLength: number;
+    movementInputBlockedForMs: number;
+  };
+  transport: {
+    lastMovementCommand: Record<string, unknown> | null;
+    lastSelfMovementAck: { x: number; y: number; direction?: string; at: number } | null;
+    lastSelfNoProgressAck: {
+      x: number;
+      y: number;
+      direction?: string;
+      at: number;
+      count: number;
+    } | null;
+  };
+};
+
+type MovementDiagnosticState = {
+  enabled: boolean;
+  sessionId: string;
+  startedAt: number;
+  events: Array<Record<string, unknown>>;
+  pendingFlush: boolean;
+  lastSample: MovementDiagnosticSample | null;
+  lastMovementCommand: Record<string, unknown> | null;
+};
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  const screenRef = useRef<ClientScreen>("login");
   const pendingLoginRef = useRef(false);
   const pendingNewAccountRef = useRef(false);
+  const pendingSuiLoginRef = useRef<SuiLoginToken | null>(null);
   const pendingTransferRef = useRef<string | null>(null);
   const pendingNpcInteractRef = useRef<string | null>(null);
   const npcCallGuardRef = useRef<{ objectId: string; until: number } | null>(null);
@@ -658,16 +754,39 @@ export default function HomePage() {
   const directionStepNextAtRef = useRef(0);
   const directionStepVisualUntilRef = useRef(0);
   const movementInputBlockedUntilRef = useRef(0);
+  const crystalRunPrimedUntilRef = useRef(0);
   const queuedDirectionStepRef = useRef<DirectionStepRequest | null>(null);
   const directionStepPendingRef = useRef<DirectionStepPending | null>(null);
   const directionStepPendingQueueRef = useRef<DirectionStepPending[]>([]);
+  const crystalSelfActionFeedRef = useRef<CrystalSelfActionFeedEntry[]>([]);
+  const outstandingSelfMovementActionsRef = useRef<CrystalSelfActionFeedEntry[]>([]);
+  const recentSelfMovementActionHistoryRef = useRef<CrystalSelfActionFeedEntry[]>([]);
   const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const predictedPlayerHoldUntilRef = useRef(0);
-  const lastGameplayCommandAtRef = useRef(0);
+  const predictedPlayerUpdateSeqRef = useRef(0);
+  const localMovementAnchorRef = useRef<LocalMovementAnchor | null>(null);
+  const lastCrystalSelfRenderPositionRef = useRef<PredictedPlayerMotion | null>(null);
+  const lastSelfMovementAckRef = useRef<{ x: number; y: number; direction?: string; at: number } | null>(null);
+  const lastSelfNoProgressAckRef = useRef<{
+    x: number;
+    y: number;
+    direction?: string;
+    at: number;
+    count: number;
+  } | null>(null);
+  const heldDirectionBlockedUntilRef = useRef<{
+    x: number;
+    y: number;
+    direction: string;
+    until: number;
+  } | null>(null);
+  const movementPredictionBlockedUntilRef = useRef(0);
   const loadedSceneKeyRef = useRef<string | null>(null);
   const loadingSceneKeyRef = useRef<string | null>(null);
   const lastCommandRef = useRef<Record<string, unknown> | null>(null);
+  const movementConfirmTickTimerRef = useRef<number | null>(null);
   const worldSnapshotVersionRef = useRef(0);
+  const movementDiagnosticsRef = useRef<MovementDiagnosticState | null>(null);
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
@@ -706,31 +825,51 @@ export default function HomePage() {
   }, [language]);
 
   const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+  const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
+  const activeCrystalSelfActionPosition = self ? activeCrystalSelfActionSource(selfPredictionAnchor) : null;
+  const activeOutstandingSelfActionPosition = self
+    ? activeOutstandingSelfActionSource(selfPredictionAnchor)
+    : null;
+  const activeLocalMovementAnchorPosition = self ? activeLocalMovementAnchor(selfPredictionAnchor) : null;
+  const activeDirectionStepVisualPosition = self ? activeDirectionStepVisualSource(selfPredictionAnchor) : null;
+  const localSelfRenderPosition = preserveCrystalSelfRenderPosition(
+    selfPredictionAnchor,
+    chooseCrystalSelfRenderPosition(
+      selfPredictionAnchor,
+      renderableSelfPrediction(selfPredictionAnchor, predictedPlayerPosition),
+      activeCrystalSelfActionPosition,
+      activeOutstandingSelfActionPosition,
+      activeLocalMovementAnchorPosition,
+      activeDirectionStepVisualPosition,
+    ),
+  );
   const activePredictedPlayerPosition =
     self &&
-    predictedPlayerPosition &&
-    self.x === predictedPlayerPosition.x &&
-    self.y === predictedPlayerPosition.y &&
-    (!predictedPlayerPosition.direction || self.direction === predictedPlayerPosition.direction) &&
-    !movementPlanRef.current &&
-    !directionStepPendingRef.current &&
-    directionStepPendingQueueRef.current.length === 0
+    localSelfRenderPosition &&
+    self.x === localSelfRenderPosition.x &&
+    self.y === localSelfRenderPosition.y &&
+    (!localSelfRenderPosition.direction || self.direction === localSelfRenderPosition.direction) &&
+    !hasSelfMovementTransportEvidence()
       ? null
-      : predictedPlayerPosition;
+      : localSelfRenderPosition;
   const predictedSelf = useMemo(
     () =>
       self &&
       activePredictedPlayerPosition &&
-      Math.max(Math.abs(self.x - activePredictedPlayerPosition.x), Math.abs(self.y - activePredictedPlayerPosition.y)) <=
-        MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES
+      selfPredictionAnchor &&
+      Math.max(
+        Math.abs(selfPredictionAnchor.x - activePredictedPlayerPosition.x),
+        Math.abs(selfPredictionAnchor.y - activePredictedPlayerPosition.y),
+      ) <= MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES
         ? {
             ...self,
             x: activePredictedPlayerPosition.x,
             y: activePredictedPlayerPosition.y,
             direction: activePredictedPlayerPosition.direction ?? self.direction,
+            ...localSelfMovementAnimationForPosition(activePredictedPlayerPosition),
           }
         : self,
-    [self, activePredictedPlayerPosition],
+    [self, selfPredictionAnchor, activePredictedPlayerPosition],
   );
   const displayEntities = useMemo(() => {
     if (
@@ -743,7 +882,7 @@ export default function HomePage() {
 
     return world.entities.map((entity) =>
       entity.objectId === world.playerObjectId
-        ? { ...entity, x: predictedSelf.x, y: predictedSelf.y, direction: predictedSelf.direction }
+        ? { ...entity, ...predictedSelf }
         : entity,
     );
   }, [predictedSelf, self, world.entities, world.playerObjectId]);
@@ -754,6 +893,10 @@ export default function HomePage() {
     predictedPlayerPositionRef.current = predictedPlayerPosition;
   }, [predictedPlayerPosition]);
 
+  useEffect(() => {
+    screenRef.current = screen;
+  }, [screen]);
+
   function setPredictedPlayerMotion(position: PredictedPlayerMotion | null, holdUntil = 0) {
     if (position) {
       if (holdUntil > 0) {
@@ -762,10 +905,1067 @@ export default function HomePage() {
         predictedPlayerHoldUntilRef.current = 0;
       }
     } else {
+      if (predictedPlayerPositionRef.current && predictedPlayerHoldUntilRef.current > Date.now()) {
+        return;
+      }
       predictedPlayerHoldUntilRef.current = 0;
     }
     predictedPlayerPositionRef.current = position;
-    setPredictedPlayerPosition(position);
+    const updateSeq = ++predictedPlayerUpdateSeqRef.current;
+    queueMicrotask(() => {
+      if (predictedPlayerUpdateSeqRef.current !== updateSeq) {
+        return;
+      }
+      flushSync(() => {
+        setPredictedPlayerPosition(predictedPlayerPositionRef.current);
+      });
+    });
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const enabled =
+      params.get("movementDiag") === "1" ||
+      params.get("moveDiag") === "1" ||
+      params.get("movementDiagnostics") === "1";
+    if (!enabled) {
+      return;
+    }
+
+    const startedAt = Date.now();
+    const sessionId = `manual-${startedAt.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    movementDiagnosticsRef.current = {
+      enabled: true,
+      sessionId,
+      startedAt,
+      events: [],
+      pendingFlush: false,
+      lastSample: null,
+      lastMovementCommand: null,
+    };
+
+    const diagnosticWindow = window as typeof window & {
+      __mir2MovementDiagnostics?: Record<string, unknown>;
+    };
+    diagnosticWindow.__mir2MovementDiagnostics = {
+      sessionId,
+      startedAt,
+      flush: () => flushMovementDiagnostics("manual"),
+      latestFile: "/api/movement-diagnostics",
+    };
+
+    appendLog(`Movement diagnostics enabled: ${sessionId}`, "system");
+    recordMovementDiagnostic("diag:start", {
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+    });
+
+    const sampleTimer = window.setInterval(() => {
+      const sample = captureMovementDiagnosticSample();
+      const anomalies = movementDiagnosticAnomalies(sample, movementDiagnosticsRef.current?.lastSample ?? null);
+      recordMovementDiagnostic("sample", sample, anomalies);
+      if (anomalies.length > 0) {
+        recordMovementDiagnostic("anomaly", { sample, anomalies });
+      }
+      if (movementDiagnosticsRef.current) {
+        movementDiagnosticsRef.current.lastSample = sample;
+      }
+    }, 100);
+    const flushTimer = window.setInterval(() => flushMovementDiagnostics("interval"), 2500);
+    const handlePageHide = () => flushMovementDiagnostics("pagehide", true);
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      window.clearInterval(sampleTimer);
+      window.clearInterval(flushTimer);
+      window.removeEventListener("pagehide", handlePageHide);
+      recordMovementDiagnostic("diag:stop", { url: window.location.href });
+      flushMovementDiagnostics("unmount", true);
+      delete diagnosticWindow.__mir2MovementDiagnostics;
+    };
+  }, []);
+
+  function recordMovementDiagnostic(
+    type: string,
+    payload?: unknown,
+    anomalies: string[] = [],
+    at = Date.now(),
+  ) {
+    const state = movementDiagnosticsRef.current;
+    if (!state?.enabled) {
+      return;
+    }
+
+    const event: Record<string, unknown> = { type, at };
+    if (payload !== undefined) {
+      event.payload = payload;
+    }
+    if (anomalies.length > 0) {
+      event.anomalies = anomalies;
+    }
+
+    if (type === "tx:movementCommand" && payload && typeof payload === "object") {
+      const command = (payload as { command?: Record<string, unknown> }).command;
+      if (command) {
+        state.lastMovementCommand = {
+          type: command.type,
+          direction: command.direction,
+          x: command.x,
+          y: command.y,
+          at,
+        };
+      }
+    }
+
+    state.events.push(event);
+    if (state.events.length > 1200) {
+      state.events.splice(0, state.events.length - 1200);
+    }
+
+    const diagnosticWindow = window as typeof window & {
+      __mir2MovementDiagnostics?: Record<string, unknown>;
+    };
+    if (diagnosticWindow.__mir2MovementDiagnostics) {
+      diagnosticWindow.__mir2MovementDiagnostics.pendingEvents = state.events.length;
+      diagnosticWindow.__mir2MovementDiagnostics.lastEvent = event;
+    }
+
+    if (state.events.length >= 300) {
+      flushMovementDiagnostics("buffer");
+    }
+  }
+
+  function flushMovementDiagnostics(reason = "manual", useBeacon = false) {
+    const state = movementDiagnosticsRef.current;
+    if (!state?.enabled || state.pendingFlush || state.events.length === 0) {
+      return;
+    }
+
+    const events = state.events.splice(0, state.events.length);
+    const body = JSON.stringify({
+      sessionId: state.sessionId,
+      startedAt: state.startedAt,
+      reason,
+      pageUrl: window.location.href,
+      userAgent: navigator.userAgent,
+      events,
+    });
+
+    if (useBeacon && navigator.sendBeacon) {
+      const ok = navigator.sendBeacon(
+        "/api/movement-diagnostics",
+        new Blob([body], { type: "application/json" }),
+      );
+      if (ok) {
+        return;
+      }
+    }
+
+    state.pendingFlush = true;
+    fetch("/api/movement-diagnostics", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
+      keepalive: useBeacon,
+    })
+      .catch(() => {
+        state.events = [...events, ...state.events].slice(-1200);
+      })
+      .finally(() => {
+        state.pendingFlush = false;
+      });
+  }
+
+  function captureMovementDiagnosticSample(now = Date.now()): MovementDiagnosticSample {
+    const currentWorld = worldRef.current;
+    const currentSelf =
+      currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+    const debugWindow = window as typeof window & {
+      __mir2SceneMotionDebug?: {
+        motionNow?: number;
+        renderPlayer?: (MovementDiagnosticPoint & {
+          movementAnimation?: string;
+          movementStartedAt?: number;
+          movementUntil?: number;
+        }) | null;
+        playerCameraMotionOffset?: unknown;
+        playerMotionSnapshot?: unknown;
+      };
+    };
+    const sceneDebug = debugWindow.__mir2SceneMotionDebug;
+    const renderPlayer = sceneDebug?.renderPlayer ?? null;
+
+    return {
+      screen: screenRef.current,
+      mapFileName: currentWorld.mapFileName,
+      mapTitle: currentWorld.mapTitle,
+      worldTick: currentWorld.worldTick,
+      worldSnapshotVersion: worldSnapshotVersionRef.current,
+      self: currentSelf
+        ? {
+            x: currentSelf.x,
+            y: currentSelf.y,
+            direction: currentSelf.direction,
+            movementAnimation: currentSelf.movementAnimation,
+            movementStartedAt: currentSelf.movementStartedAt,
+            movementUntil: currentSelf.movementUntil,
+          }
+        : null,
+      render: renderPlayer
+        ? {
+            x: renderPlayer.x,
+            y: renderPlayer.y,
+            direction: renderPlayer.direction,
+          }
+        : null,
+      predicted: predictedPlayerPositionRef.current,
+      scene: sceneDebug
+        ? {
+            motionNow: sceneDebug.motionNow,
+            playerCameraMotionOffset: sceneDebug.playerCameraMotionOffset,
+            playerMotionSnapshot: sceneDebug.playerMotionSnapshot,
+          }
+        : null,
+      queues: {
+        movementPlan: movementPlanRef.current,
+        queuedDirectionStep: queuedDirectionStepRef.current,
+        directionStepPending: directionStepPendingRef.current,
+        directionStepPendingQueueLength: directionStepPendingQueueRef.current.length,
+        crystalSelfActionFeedLength: crystalSelfActionFeedRef.current.length,
+        outstandingSelfMovementActionsLength: outstandingSelfMovementActionsRef.current.length,
+        movementInputBlockedForMs: Math.max(0, movementInputBlockedUntilRef.current - now),
+      },
+      transport: {
+        lastMovementCommand: movementDiagnosticsRef.current?.lastMovementCommand ?? null,
+        lastSelfMovementAck: lastSelfMovementAckRef.current,
+        lastSelfNoProgressAck: lastSelfNoProgressAckRef.current,
+      },
+    };
+  }
+
+  function movementDiagnosticAnomalies(
+    sample: MovementDiagnosticSample,
+    previous: MovementDiagnosticSample | null,
+  ) {
+    const anomalies: string[] = [];
+    const lastCommand = sample.transport.lastMovementCommand;
+    const commandDirection =
+      typeof lastCommand?.direction === "string" ? lastCommand.direction : undefined;
+    const commandAt = typeof lastCommand?.at === "number" ? lastCommand.at : 0;
+    const commandVector = directionVector(commandDirection);
+    if (previous && commandVector && Date.now() - commandAt <= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+      const selfDelta = movementDiagnosticDelta(previous.self, sample.self);
+      if (selfDelta && selfDelta.x * commandVector.x + selfDelta.y * commandVector.y < 0) {
+        anomalies.push("worldTileMovedAgainstLastCommand");
+      }
+
+      const renderDelta = movementDiagnosticDelta(previous.render, sample.render);
+      if (renderDelta && renderDelta.x * commandVector.x + renderDelta.y * commandVector.y < 0) {
+        anomalies.push("renderTileMovedAgainstLastCommand");
+      }
+    }
+
+    if (sample.self && sample.render) {
+      const renderLead = Math.max(Math.abs(sample.render.x - sample.self.x), Math.abs(sample.render.y - sample.self.y));
+      if (renderLead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES) {
+        anomalies.push("renderLeadTooLarge");
+      }
+    }
+
+    const cameraOffset = movementDiagnosticCameraOffset(sample);
+    const previousCameraOffset = previous ? movementDiagnosticCameraOffset(previous) : null;
+    if (
+      cameraOffset &&
+      previousCameraOffset &&
+      Math.max(Math.abs(cameraOffset.x - previousCameraOffset.x), Math.abs(cameraOffset.y - previousCameraOffset.y)) >
+        Math.max(VIEWPORT_CELL_WIDTH, VIEWPORT_CELL_HEIGHT)
+    ) {
+      anomalies.push("cameraOffsetJump");
+    }
+
+    if (
+      sample.queues.directionStepPendingQueueLength > MOVEMENT_DIRECTION_PENDING_MAX ||
+      sample.queues.outstandingSelfMovementActionsLength > MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES + 1
+    ) {
+      anomalies.push("movementQueueBacklog");
+    }
+
+    return anomalies;
+  }
+
+  function movementDiagnosticDelta(
+    previous: MovementDiagnosticPoint | null,
+    current: MovementDiagnosticPoint | null,
+  ) {
+    if (!previous || !current) {
+      return null;
+    }
+    const x = current.x - previous.x;
+    const y = current.y - previous.y;
+    return x === 0 && y === 0 ? null : { x, y };
+  }
+
+  function movementDiagnosticCameraOffset(sample: MovementDiagnosticSample) {
+    const offset = sample.scene?.playerCameraMotionOffset;
+    if (!offset || typeof offset !== "object") {
+      return null;
+    }
+    const x = (offset as { x?: unknown }).x;
+    const y = (offset as { y?: unknown }).y;
+    return typeof x === "number" && typeof y === "number" ? { x, y } : null;
+  }
+
+  function commitLocalSelfTransform(position: PredictedPlayerMotion) {
+    const currentWorld = worldRef.current;
+    if (!currentWorld.playerObjectId) {
+      return false;
+    }
+
+    let foundSelf = false;
+    let changed = false;
+    const nextEntities = currentWorld.entities.map((entity) => {
+      if (entity.objectId !== currentWorld.playerObjectId) {
+        return entity;
+      }
+      foundSelf = true;
+      const nextDirection = position.direction ?? entity.direction;
+      if (entity.x === position.x && entity.y === position.y && entity.direction === nextDirection) {
+        return entity;
+      }
+      changed = true;
+      return {
+        ...entity,
+        x: position.x,
+        y: position.y,
+        direction: nextDirection,
+      };
+    });
+
+    if (!foundSelf || !changed) {
+      return false;
+    }
+
+    const nextWorld = {
+      ...currentWorld,
+      sceneView: currentWorld.sceneView
+        ? {
+            ...currentWorld.sceneView,
+            center: { x: position.x, y: position.y },
+          }
+        : currentWorld.sceneView,
+      entities: nextEntities,
+    };
+    worldRef.current = nextWorld;
+    setWorld(nextWorld);
+    runtimeRef.current?.setMir2WorldState?.(JSON.stringify(nextWorld));
+    return true;
+  }
+
+  function clearLocalSelfPrediction() {
+    predictedPlayerHoldUntilRef.current = 0;
+    localMovementAnchorRef.current = null;
+    lastCrystalSelfRenderPositionRef.current = null;
+    setPredictedPlayerMotion(null);
+  }
+
+  function rememberLocalMovementAnchor(position: PredictedPlayerMotion, now: number, holdUntil = 0) {
+    const requestedUntil = holdUntil > 0 ? holdUntil : now + MOVEMENT_PENDING_ACTION_MAX_AGE_MS;
+    const nextUntil = Math.max(
+      localMovementAnchorRef.current?.until ?? 0,
+      requestedUntil,
+    );
+    const current = localMovementAnchorRef.current;
+    if (
+      current &&
+      now <= current.until &&
+      current.direction === position.direction &&
+      predictedPlayerAheadOfServer(position, current, current.direction ?? position.direction)
+    ) {
+      localMovementAnchorRef.current = {
+        ...current,
+        until: nextUntil,
+      };
+      return;
+    }
+    localMovementAnchorRef.current = {
+      ...position,
+      until: nextUntil,
+    };
+  }
+
+  function clearLocalMovementAnchor() {
+    localMovementAnchorRef.current = null;
+  }
+
+  function pruneCrystalSelfActionFeed(now: number) {
+    const keepAfter = now - MOVEMENT_PENDING_ACTION_MAX_AGE_MS;
+    crystalSelfActionFeedRef.current = crystalSelfActionFeedRef.current.filter(
+      (entry) => entry.sentAt >= keepAfter,
+    );
+    outstandingSelfMovementActionsRef.current = outstandingSelfMovementActionsRef.current.filter(
+      (entry) => entry.sentAt >= keepAfter,
+    );
+    recentSelfMovementActionHistoryRef.current = recentSelfMovementActionHistoryRef.current.filter(
+      (entry) => entry.sentAt >= keepAfter,
+    );
+  }
+
+  function pruneLocallySettledDirectionStepPending(now: number) {
+    const queue = directionStepPendingQueueRef.current;
+    if (queue.length === 0) {
+      return false;
+    }
+
+    let settledThrough = -1;
+    for (let index = queue.length - 1; index >= 0; index -= 1) {
+      if (directionStepPendingLocallySettled(queue[index], now)) {
+        settledThrough = index;
+        break;
+      }
+    }
+    if (settledThrough < 0) {
+      return false;
+    }
+
+    setDirectionStepPendingQueue(queue.slice(settledThrough + 1));
+    return true;
+  }
+
+  function directionStepPendingLocallySettled(pending: DirectionStepPending, now: number) {
+    if (
+      !pending.direction ||
+      now < pending.sentAt + movementStepIntervalMs(pending.mode) + MOVEMENT_CONFIRM_TICK_DELAY_MS
+    ) {
+      return false;
+    }
+
+    const currentWorld = worldRef.current;
+    const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+    const lastAck = lastSelfMovementAckRef.current;
+    const candidates = [
+      serverSelf ? { x: serverSelf.x, y: serverSelf.y, direction: serverSelf.direction } : null,
+      lastAck ? { x: lastAck.x, y: lastAck.y, direction: lastAck.direction } : null,
+    ];
+
+    return candidates.some(
+      (candidate) =>
+        candidate &&
+        (!candidate.direction || candidate.direction === pending.direction) &&
+        directionStepReachedOrPassed(pending, candidate.x, candidate.y),
+    );
+  }
+
+  function rememberCrystalSelfAction(
+    source: { x: number; y: number },
+    action: { point: { x: number; y: number }; direction: string; mode: "walk" | "run" },
+    now: number,
+  ) {
+    if (action.point.x === source.x && action.point.y === source.y) {
+      return;
+    }
+    pruneCrystalSelfActionFeed(now);
+    const entry: CrystalSelfActionFeedEntry = {
+      fromX: source.x,
+      fromY: source.y,
+      x: action.point.x,
+      y: action.point.y,
+      direction: action.direction,
+      mode: action.mode,
+      sentAt: now,
+      visualUntil: now + movementStepIntervalMs(action.mode),
+    };
+    crystalSelfActionFeedRef.current = [...crystalSelfActionFeedRef.current, entry].slice(-8);
+    outstandingSelfMovementActionsRef.current = [
+      ...outstandingSelfMovementActionsRef.current,
+      entry,
+    ].slice(-16);
+    recentSelfMovementActionHistoryRef.current = [
+      ...recentSelfMovementActionHistoryRef.current,
+      entry,
+    ].slice(-32);
+    commitLocalSelfTransform({ x: action.point.x, y: action.point.y, direction: action.direction });
+  }
+
+  function clearCrystalSelfActionFeed() {
+    crystalSelfActionFeedRef.current = [];
+  }
+
+  function clearOutstandingSelfMovementActions() {
+    outstandingSelfMovementActionsRef.current = [];
+  }
+
+  function clearRecentSelfMovementActionHistory() {
+    recentSelfMovementActionHistoryRef.current = [];
+  }
+
+  function selfLocalMovementActive() {
+    return (
+      hasSelfMovementTransportEvidence() ||
+      crystalSelfActionFeedRef.current.length > 0 ||
+      Boolean(predictedPlayerPositionRef.current)
+    );
+  }
+
+  function hasSelfMovementTransportEvidence(now = Date.now()) {
+    const anchor = localMovementAnchorRef.current;
+    return (
+      Boolean(movementPlanRef.current) ||
+      Boolean(directionStepPendingRef.current) ||
+      directionStepPendingQueueRef.current.length > 0 ||
+      outstandingSelfMovementActionsRef.current.length > 0 ||
+      Boolean(anchor && now <= anchor.until)
+    );
+  }
+
+  function hasSelfMovementAckInFlight() {
+    const plan = movementPlanRef.current;
+    return (
+      Boolean(
+        plan &&
+          plan.pendingX !== undefined &&
+          plan.pendingY !== undefined &&
+          plan.pendingSentAt !== undefined,
+      ) ||
+      Boolean(directionStepPendingRef.current) ||
+      directionStepPendingQueueRef.current.length > 0 ||
+      outstandingSelfMovementActionsRef.current.length > 0
+    );
+  }
+
+  function authoritativeSelfForPrediction(serverSelf: WorldEntity | null) {
+    const ack = lastSelfMovementAckRef.current;
+    if (!ack) {
+      return serverSelf;
+    }
+    return {
+      x: ack.x,
+      y: ack.y,
+      direction: ack.direction ?? serverSelf?.direction,
+    };
+  }
+
+  function rememberSnapshotSelfAck(
+    entity: { x: number; y: number; direction?: string },
+    now: number,
+    force = false,
+  ) {
+    if (force || !lastSelfMovementAckRef.current || !selfLocalMovementActive()) {
+      lastSelfMovementAckRef.current = {
+        x: entity.x,
+        y: entity.y,
+        direction: entity.direction,
+        at: now,
+      };
+    }
+  }
+
+  function activeCrystalSelfActionSource(
+    serverSelf: { x: number; y: number; direction?: string } | null,
+    now = Date.now(),
+  ) {
+    pruneCrystalSelfActionFeed(now);
+    const feed = serverSelf
+      ? crystalSelfActionFeedRef.current.filter((entry) =>
+          crystalMovementCandidateNotBehindServer(serverSelf, entry, entry.direction),
+        )
+      : crystalSelfActionFeedRef.current;
+    if (feed.length === 0) {
+      return null;
+    }
+    const latest = serverSelf
+      ? feed.reduce((best, entry) => {
+          const bestLead = Math.max(Math.abs(best.x - serverSelf.x), Math.abs(best.y - serverSelf.y));
+          const entryLead = Math.max(Math.abs(entry.x - serverSelf.x), Math.abs(entry.y - serverSelf.y));
+          return entryLead >= bestLead ? entry : best;
+        })
+      : feed[feed.length - 1];
+    if (
+      serverSelf &&
+      !hasSelfMovementTransportEvidence(now) &&
+      (latest.x !== serverSelf.x || latest.y !== serverSelf.y)
+    ) {
+      return null;
+    }
+    return {
+      x: latest.x,
+      y: latest.y,
+      direction: latest.direction,
+    };
+  }
+
+  function activeOutstandingSelfActionSource(
+    serverSelf: { x: number; y: number; direction?: string } | null,
+    now = Date.now(),
+  ) {
+    pruneCrystalSelfActionFeed(now);
+    const actions = serverSelf
+      ? outstandingSelfMovementActionsRef.current.filter((entry) =>
+          crystalMovementCandidateNotBehindServer(serverSelf, entry, entry.direction),
+        )
+      : outstandingSelfMovementActionsRef.current;
+    if (actions.length === 0) {
+      return null;
+    }
+    const latest = serverSelf
+      ? actions.reduce((best, entry) => {
+          const bestLead = Math.max(Math.abs(best.x - serverSelf.x), Math.abs(best.y - serverSelf.y));
+          const entryLead = Math.max(Math.abs(entry.x - serverSelf.x), Math.abs(entry.y - serverSelf.y));
+          return entryLead >= bestLead ? entry : best;
+        })
+      : actions[actions.length - 1];
+    return {
+      x: latest.x,
+      y: latest.y,
+      direction: latest.direction,
+    };
+  }
+
+  function renderableSelfPrediction(
+    serverSelf: { x: number; y: number; direction?: string } | null,
+    candidate: PredictedPlayerMotion | null,
+    now = Date.now(),
+  ) {
+    if (!serverSelf || !candidate) {
+      return candidate;
+    }
+    if (candidate.x === serverSelf.x && candidate.y === serverSelf.y) {
+      return candidate;
+    }
+    return hasSelfMovementTransportEvidence(now) ? candidate : null;
+  }
+
+  function localSelfMovementAnimationForPosition(position: PredictedPlayerMotion) {
+    const action = [
+      ...crystalSelfActionFeedRef.current,
+      ...outstandingSelfMovementActionsRef.current,
+    ]
+      .slice()
+      .reverse()
+      .find((entry) => entry.x === position.x && entry.y === position.y);
+    const pending =
+      directionStepPendingRef.current &&
+      directionStepPendingRef.current.x === position.x &&
+      directionStepPendingRef.current.y === position.y
+        ? directionStepPendingRef.current
+        : null;
+    const source = action ?? pending;
+    if (!source) {
+      return {};
+    }
+    const movementStartedAt = Math.max(source.sentAt, Date.now() - CRYSTAL_MOVE_FRAME_INTERVAL_MS);
+    return {
+      movementAnimation: source.mode === "run" ? "running" : "walking",
+      movementStartedAt,
+      movementUntil: movementStartedAt + movementStepIntervalMs(source.mode),
+    } satisfies Pick<WorldEntity, "movementAnimation" | "movementStartedAt" | "movementUntil">;
+  }
+
+  function hasOpposingOutstandingSelfMovement(
+    serverSelf: WorldEntity,
+    requestedDirection: string,
+    now = Date.now(),
+  ) {
+    pruneCrystalSelfActionFeed(now);
+    const hasLead = (candidate: { x: number; y: number }) =>
+      candidate.x !== serverSelf.x || candidate.y !== serverSelf.y;
+
+    if (
+      directionStepPendingQueueRef.current.some(
+        (pending) =>
+          movementDirectionsOppose(pending.direction, requestedDirection) &&
+          (hasLead(pending) ||
+            pending.sentFromX !== serverSelf.x ||
+            pending.sentFromY !== serverSelf.y),
+      )
+    ) {
+      return true;
+    }
+
+    if (
+      directionStepPendingRef.current &&
+      movementDirectionsOppose(directionStepPendingRef.current.direction, requestedDirection) &&
+      (hasLead(directionStepPendingRef.current) ||
+        directionStepPendingRef.current.sentFromX !== serverSelf.x ||
+        directionStepPendingRef.current.sentFromY !== serverSelf.y)
+    ) {
+      return true;
+    }
+
+    if (
+      crystalSelfActionFeedRef.current.some(
+        (entry) => movementDirectionsOppose(entry.direction, requestedDirection) && hasLead(entry),
+      )
+    ) {
+      return true;
+    }
+
+    if (
+      outstandingSelfMovementActionsRef.current.some(
+        (entry) => movementDirectionsOppose(entry.direction, requestedDirection) && hasLead(entry),
+      )
+    ) {
+      return true;
+    }
+
+    const predicted = predictedPlayerPositionRef.current;
+    if (
+      predicted &&
+      movementDirectionsOppose(predicted.direction, requestedDirection) &&
+      hasLead(predicted) &&
+      crystalMovementCandidateNotBehindServer(serverSelf, predicted, predicted.direction)
+    ) {
+      return true;
+    }
+
+    const anchor = localMovementAnchorRef.current;
+    return Boolean(
+      anchor &&
+        now <= anchor.until &&
+        movementDirectionsOppose(anchor.direction, requestedDirection) &&
+        hasLead(anchor) &&
+        crystalMovementCandidateNotBehindServer(serverSelf, anchor, anchor.direction),
+    );
+  }
+
+  function crystalActionReachedOrPassed(entry: CrystalSelfActionFeedEntry, x: number, y: number) {
+    const vectorX = Math.sign(entry.x - entry.fromX);
+    const vectorY = Math.sign(entry.y - entry.fromY);
+    if (vectorX === 0 && x !== entry.x) {
+      return false;
+    }
+    if (vectorY === 0 && y !== entry.y) {
+      return false;
+    }
+    if (vectorX !== 0 && Math.sign(x - entry.fromX) !== vectorX) {
+      return false;
+    }
+    if (vectorY !== 0 && Math.sign(y - entry.fromY) !== vectorY) {
+      return false;
+    }
+    const movedX = vectorX === 0 ? 0 : Math.abs(x - entry.fromX);
+    const movedY = vectorY === 0 ? 0 : Math.abs(y - entry.fromY);
+    const targetX = Math.abs(entry.x - entry.fromX);
+    const targetY = Math.abs(entry.y - entry.fromY);
+    return movedX >= targetX && movedY >= targetY;
+  }
+
+  function crystalActionMatchesAck(
+    entry: CrystalSelfActionFeedEntry,
+    x: number,
+    y: number,
+    direction: string | undefined,
+  ) {
+    if (direction && entry.direction !== direction) {
+      return false;
+    }
+    if (entry.x === x && entry.y === y) {
+      return true;
+    }
+    if (entry.mode !== "run") {
+      return false;
+    }
+    const intermediate = pointMoveInDirection(
+      { x: entry.fromX, y: entry.fromY },
+      entry.direction,
+      1,
+    );
+    return intermediate.x === x && intermediate.y === y;
+  }
+
+  function staleSelfAckOverrideFromRecentActions(
+    x: number,
+    y: number,
+    direction: string | undefined,
+    currentSelf: { x: number; y: number; direction?: string },
+    now: number,
+  ): PredictedPlayerMotion | null {
+    pruneCrystalSelfActionFeed(now);
+    const history = recentSelfMovementActionHistoryRef.current;
+    let matchedIndex = -1;
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      if (crystalActionMatchesAck(history[index], x, y, direction)) {
+        matchedIndex = index;
+        break;
+      }
+    }
+    if (matchedIndex < 0) {
+      return null;
+    }
+
+    const matched = history[matchedIndex];
+    const newerAction = history
+      .slice(matchedIndex + 1)
+      .find(
+        (entry) =>
+          entry.sentAt > matched.sentAt &&
+          (crystalActionReachedOrPassed(entry, currentSelf.x, currentSelf.y) ||
+            (entry.x === currentSelf.x && entry.y === currentSelf.y)),
+      );
+    if (!newerAction || (currentSelf.x === x && currentSelf.y === y)) {
+      return null;
+    }
+
+    return {
+      x: currentSelf.x,
+      y: currentSelf.y,
+      direction: currentSelf.direction ?? newerAction.direction,
+    };
+  }
+
+  function reconcileOutstandingSelfMovementActionsWithServer(
+    x: number,
+    y: number,
+    direction: string | undefined,
+  ) {
+    const actions = outstandingSelfMovementActionsRef.current;
+    if (actions.length === 0) {
+      return;
+    }
+
+    let reachedIndex = -1;
+    for (let index = actions.length - 1; index >= 0; index -= 1) {
+      const action = actions[index];
+      if (
+        crystalActionReachedOrPassed(action, x, y) ||
+        (action.x === x && action.y === y && (!direction || action.direction === direction))
+      ) {
+        reachedIndex = index;
+        break;
+      }
+    if (action.mode === "run") {
+      const intermediate = pointMoveInDirection(
+        { x: action.fromX, y: action.fromY },
+          action.direction,
+          1,
+        );
+        if (
+          intermediate.x === x &&
+          intermediate.y === y &&
+          (!direction || action.direction === direction)
+        ) {
+          reachedIndex = index;
+          break;
+        }
+      }
+    }
+
+    if (reachedIndex >= 0) {
+      outstandingSelfMovementActionsRef.current = actions.slice(reachedIndex + 1);
+    }
+  }
+
+  function clearSettledSelfActionsAt(x: number, y: number, direction: string | undefined) {
+    reconcileOutstandingSelfMovementActionsWithServer(x, y, direction);
+    crystalSelfActionFeedRef.current = crystalSelfActionFeedRef.current.filter((entry) => {
+      if (crystalActionReachedOrPassed(entry, x, y)) {
+        return false;
+      }
+      if (entry.mode === "run") {
+        const intermediate = pointMoveInDirection(
+          { x: entry.fromX, y: entry.fromY },
+          entry.direction,
+          1,
+        );
+        if (
+          intermediate.x === x &&
+          intermediate.y === y &&
+          (!direction || entry.direction === direction)
+        ) {
+          return false;
+        }
+      }
+      return !(entry.x === x && entry.y === y && (!direction || entry.direction === direction));
+    });
+  }
+
+  function reconcileCrystalSelfActionFeedWithServer(
+    x: number,
+    y: number,
+    direction: string | undefined,
+    packet: string,
+    now: number,
+  ): CrystalSelfAckDisposition {
+    pruneCrystalSelfActionFeed(now);
+    reconcileOutstandingSelfMovementActionsWithServer(x, y, direction);
+    const feed = crystalSelfActionFeedRef.current;
+    if (feed.length === 0) {
+      return "none";
+    }
+
+    let passedIndex = -1;
+    for (let index = feed.length - 1; index >= 0; index -= 1) {
+      if (crystalActionReachedOrPassed(feed[index], x, y)) {
+        passedIndex = index;
+        break;
+      }
+    }
+    if (passedIndex >= 0) {
+      crystalSelfActionFeedRef.current = feed.slice(passedIndex + 1);
+      return "confirmed";
+    }
+
+    const matchedIndex = feed.findIndex(
+      (entry) => entry.x === x && entry.y === y && (!direction || entry.direction === direction),
+    );
+    if (matchedIndex >= 0) {
+      const matched = feed[matchedIndex];
+      crystalSelfActionFeedRef.current = feed.slice(matchedIndex + 1);
+      directionStepNextAtRef.current = Math.max(
+        directionStepNextAtRef.current,
+        matched.sentAt + movementCommandDelayMs(matched.mode),
+      );
+      if (directionStepPendingRef.current?.x === x && directionStepPendingRef.current.y === y) {
+        clearDirectionStepPendingQueue();
+      }
+      return "confirmed";
+    }
+
+    const partialRunIndex = feed.findIndex((entry) => {
+      if (entry.mode !== "run") {
+        return false;
+      }
+      const intermediate = pointMoveInDirection(
+        { x: entry.fromX, y: entry.fromY },
+        entry.direction,
+        1,
+      );
+      return intermediate.x === x && intermediate.y === y && (!direction || entry.direction === direction);
+    });
+    if (partialRunIndex >= 0) {
+      const partial = feed[partialRunIndex];
+      crystalSelfActionFeedRef.current = feed.slice(partialRunIndex + 1);
+      movementBlockedStepsRef.current = [
+        ...recentMovementBlockedSteps(movementBlockedStepsRef.current, now),
+        {
+          fromX: x,
+          fromY: y,
+          direction: partial.direction,
+          mode: partial.mode,
+          at: now,
+        },
+      ].slice(-MOVEMENT_ROUTE_MAX_BLOCKED_STEPS);
+      return "confirmed";
+    }
+
+    const oldest = feed[0];
+    const correctedToKnownSource = feed.some((entry) => entry.fromX === x && entry.fromY === y);
+    const predicted = predictedPlayerPositionRef.current;
+    const predictedStillPlausible =
+      predicted &&
+      Math.max(Math.abs(predicted.x - x), Math.abs(predicted.y - y)) <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
+    const predictedStillAhead =
+      predictedStillPlausible &&
+      predictedPlayerAheadOfServer({ x, y }, predicted, predicted.direction ?? direction);
+    const isHardFailurePacket = packet === "UserDashFail";
+    if (!isHardFailurePacket && (correctedToKnownSource || predictedStillAhead)) {
+      scheduleMovementConfirmTick();
+      return "staleEcho";
+    }
+
+    return "correction";
+  }
+
+  function activeLocalMovementAnchor(
+    serverSelf: { x: number; y: number; direction?: string } | null,
+    now = Date.now(),
+  ) {
+    const anchor = localMovementAnchorRef.current;
+    if (!anchor) {
+      return null;
+    }
+    if (now > anchor.until) {
+      localMovementAnchorRef.current = null;
+      return null;
+    }
+    if (!serverSelf) {
+      return anchor;
+    }
+    const lead = Math.max(Math.abs(anchor.x - serverSelf.x), Math.abs(anchor.y - serverSelf.y));
+    if (lead > MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+      localMovementAnchorRef.current = null;
+      return null;
+    }
+    if (!crystalMovementCandidateNotBehindServer(serverSelf, anchor, anchor.direction ?? serverSelf.direction)) {
+      localMovementAnchorRef.current = null;
+      return null;
+    }
+    return anchor;
+  }
+
+  function activeCrystalLocalCurrentLocation(
+    authoritativeSelf: { x: number; y: number; direction?: string } | null,
+    now = Date.now(),
+  ) {
+    if (!authoritativeSelf) {
+      return null;
+    }
+    const candidate = chooseCrystalSelfRenderPosition(
+      authoritativeSelf,
+      activeCrystalSelfActionSource(authoritativeSelf, now),
+      activeOutstandingSelfActionSource(authoritativeSelf, now),
+      activeLocalMovementAnchor(authoritativeSelf, now),
+      renderableSelfPrediction(authoritativeSelf, predictedPlayerPositionRef.current, now),
+      activeDirectionStepVisualSource(authoritativeSelf),
+    );
+    if (!candidate || (candidate.x === authoritativeSelf.x && candidate.y === authoritativeSelf.y)) {
+      return null;
+    }
+    return hasSelfMovementTransportEvidence(now) ? candidate : null;
+  }
+
+  function preserveCrystalSelfRenderPosition(
+    serverSelf: { x: number; y: number; direction?: string } | null,
+    candidate: PredictedPlayerMotion | null,
+  ) {
+    if (!serverSelf) {
+      lastCrystalSelfRenderPositionRef.current = candidate;
+      return candidate;
+    }
+
+    const movementActive =
+      hasSelfMovementTransportEvidence();
+    const last = lastCrystalSelfRenderPositionRef.current;
+    let next = candidate;
+    if (
+      movementActive &&
+      last &&
+      crystalMovementCandidateNotBehindServer(serverSelf, last, last.direction ?? serverSelf.direction)
+    ) {
+      const lead = Math.max(Math.abs(last.x - serverSelf.x), Math.abs(last.y - serverSelf.y));
+      const lastStillRenderable = lead <= MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES;
+      const lastAheadOfCandidate =
+        !next || predictedPlayerAheadOfServer(next, last, last.direction ?? next.direction ?? serverSelf.direction);
+      if (lastStillRenderable && lastAheadOfCandidate) {
+        next = last;
+      }
+    }
+
+    if (
+      next &&
+      next.x === serverSelf.x &&
+      next.y === serverSelf.y &&
+      !movementActive
+    ) {
+      lastCrystalSelfRenderPositionRef.current = null;
+      return null;
+    }
+
+    lastCrystalSelfRenderPositionRef.current = next;
+    return next;
+  }
+
+  function rememberCrystalRunPrime(now: number) {
+    crystalRunPrimedUntilRef.current = Math.max(
+      crystalRunPrimedUntilRef.current,
+      now + CRYSTAL_RUN_PRIME_WINDOW_MS,
+    );
+  }
+
+  function crystalEffectiveMovementMode(requestedMode: "walk" | "run", now: number): "walk" | "run" {
+    if (requestedMode !== "run") {
+      return "walk";
+    }
+    return now <= crystalRunPrimedUntilRef.current ? "run" : "walk";
   }
 
   const viewportCenter = predictedSelf ?? self;
@@ -823,6 +2023,25 @@ export default function HomePage() {
 
     async function bootRuntime() {
       try {
+        const runtimeWindow = window as typeof window & {
+          __mir2BevyRuntime?: RuntimeModule;
+          __mir2BevyRuntimeBooted?: boolean;
+        };
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("skipRuntime") === "1") {
+          const message = "Bevy runtime skipped by query parameter.";
+          setRuntimePhase("dom-only");
+          setRuntimeMessage(message);
+          appendLog(message, "network");
+          return;
+        }
+        if (runtimeWindow.__mir2BevyRuntimeBooted && runtimeWindow.__mir2BevyRuntime) {
+          runtimeRef.current = runtimeWindow.__mir2BevyRuntime;
+          runtimeWindow.__mir2BevyRuntime.setMir2WorldState?.(JSON.stringify(worldRef.current));
+          setRuntimePhase("running");
+          setRuntimeMessage("Bevy runtime already booted.");
+          return;
+        }
         if (!hasWebGl2Support()) {
           const message = "Bevy runtime skipped because WebGL2 is unavailable.";
           setRuntimePhase("dom-only");
@@ -850,6 +2069,8 @@ export default function HomePage() {
         runtime.bootMir2Runtime?.();
         runtime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
         runtimeRef.current = runtime;
+        runtimeWindow.__mir2BevyRuntime = runtime;
+        runtimeWindow.__mir2BevyRuntimeBooted = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setRuntimePhase("boot-error");
@@ -972,7 +2193,11 @@ export default function HomePage() {
       }
       return;
     }
-    if (!movementPlanRef.current && !directionStepPendingRef.current) {
+    if (
+      !movementPlanRef.current &&
+      !directionStepPendingRef.current &&
+      crystalSelfActionFeedRef.current.length === 0
+    ) {
       const now = Date.now();
       const visualUntil = directionStepVisualUntilRef.current;
       if (now >= visualUntil) {
@@ -996,21 +2221,13 @@ export default function HomePage() {
   useEffect(() => {
     if (!world.connected || wsState !== "open") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("autoTick") === "0") return;
+    if (params.get("autoTick") !== "1") return;
 
     const tickTimer = window.setInterval(() => {
-      if (socketRef.current?.readyState === WebSocket.OPEN) {
-        const now = Date.now();
-        const movementBusy =
-          Boolean(movementPlanRef.current) ||
-          directionStepPendingQueueRef.current.length > 0 ||
-          Boolean(queuedDirectionStepRef.current);
-        if (movementBusy || now - lastGameplayCommandAtRef.current < GATEWAY_WORLD_TICK_COMMAND_GRACE_MS) {
-          return;
-        }
-        socketRef.current.send(JSON.stringify({ type: "tick" }));
+      if (!isMovementBusy()) {
+        sendGatewayTick();
       }
-    }, GATEWAY_WORLD_TICK_INTERVAL_MS);
+    }, CRYSTAL_GAMEPLAY_TICK_MS);
 
     const keepAliveTimer = window.setInterval(() => {
       if (socketRef.current?.readyState === WebSocket.OPEN) {
@@ -1030,16 +2247,27 @@ export default function HomePage() {
       movementBlockedStepsRef.current = [];
       queuedDirectionStepRef.current = null;
       movementInputBlockedUntilRef.current = 0;
+      crystalRunPrimedUntilRef.current = 0;
+      predictedPlayerHoldUntilRef.current = 0;
+      movementPredictionBlockedUntilRef.current = 0;
+      lastSelfNoProgressAckRef.current = null;
+      heldDirectionBlockedUntilRef.current = null;
+      clearCrystalSelfActionFeed();
+      clearOutstandingSelfMovementActions();
+      clearRecentSelfMovementActionHistory();
+      clearLocalMovementAnchor();
+      lastCrystalSelfRenderPositionRef.current = null;
       clearDirectionStepPendingQueue();
-      setPredictedPlayerMotion(null);
+      clearLocalSelfPrediction();
       return;
     }
 
-    let animationFrame = 0;
-    const tickMovementPlan = () => {
-      consumeQueuedDirectionStep();
-      const tickNow = Date.now();
-      clearSettledPredictedPlayer(tickNow);
+	    let animationFrame = 0;
+	    const tickMovementPlan = () => {
+	      consumeQueuedDirectionStep();
+	      const tickNow = Date.now();
+	      pruneLocallySettledDirectionStepPending(tickNow);
+	      clearSettledPredictedPlayer(tickNow);
       const plan = movementPlanRef.current;
       const currentWorld = worldRef.current;
       const player = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId);
@@ -1064,8 +2292,13 @@ export default function HomePage() {
           return;
         }
         if (pendingStillAhead) {
-          if (tickNow - pendingSentAt >= MOVEMENT_PENDING_ACTION_RECOVERY_MS) {
-            recoverStaleMovementPlanFromServer(player.x, player.y, player.direction, tickNow);
+          if (tickNow - pendingSentAt >= MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
+            predictedPlayerHoldUntilRef.current = 0;
+            setPredictedPlayerMotion(null);
+          }
+          if (tickNow - pendingSentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+            movementPlanRef.current = null;
+            setPredictedPlayerMotion(null);
           }
           animationFrame = window.requestAnimationFrame(tickMovementPlan);
           return;
@@ -1099,6 +2332,64 @@ export default function HomePage() {
       }
 
       const server = { x: player.x, y: player.y };
+      const predictedPending = predictedPlayerPositionRef.current;
+      if (
+        plan.pendingX === undefined &&
+        plan.pendingY === undefined &&
+        predictedPending &&
+        (predictedPending.x !== player.x || predictedPending.y !== player.y)
+      ) {
+        const visualUntil = Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current);
+        const blockedSteps = recentMovementBlockedSteps(plan.blockedSteps, tickNow);
+        const predictedDirection = predictedPending.direction ?? player.direction;
+        const restoresBlockedStep =
+          predictedDirection &&
+          movementStepBlockedByRecentCorrection(
+            { x: player.x, y: player.y },
+            predictedDirection,
+            plan.mode,
+            blockedSteps,
+          );
+        if (tickNow <= visualUntil + MOVEMENT_SERVER_CORRECTION_GRACE_MS && !restoresBlockedStep) {
+          movementPlanRef.current = {
+            ...plan,
+            actionX: predictedPending.x,
+            actionY: predictedPending.y,
+            pendingX: predictedPending.x,
+            pendingY: predictedPending.y,
+            pendingSentAt: Math.max(0, visualUntil - movementStepIntervalMs(plan.mode)),
+            sentFromX: player.x,
+            sentFromY: player.y,
+            sentDirection: predictedPending.direction ?? player.direction,
+            sentMode: plan.mode,
+            nextStepAt: Math.max(plan.nextStepAt, visualUntil),
+            visualUntil,
+          };
+          scheduleMovementConfirmTick();
+          animationFrame = window.requestAnimationFrame(tickMovementPlan);
+          return;
+        }
+      }
+      if (
+        plan.pendingX === undefined &&
+        plan.pendingY === undefined &&
+        player.x === plan.targetX &&
+        player.y === plan.targetY
+      ) {
+        movementPlanRef.current = null;
+        setPredictedPlayerMotion(null);
+        animationFrame = window.requestAnimationFrame(tickMovementPlan);
+        return;
+      }
+      const confirmedActionReadyAt = confirmedMovementActionReadyAt(plan);
+      if (confirmedActionReadyAt > 0 && tickNow < confirmedActionReadyAt) {
+        movementPlanRef.current = {
+          ...plan,
+          nextStepAt: Math.max(plan.nextStepAt, confirmedActionReadyAt),
+        };
+        animationFrame = window.requestAnimationFrame(tickMovementPlan);
+        return;
+      }
       if (
         plan.pendingX === undefined &&
         plan.pendingY === undefined &&
@@ -1108,6 +2399,11 @@ export default function HomePage() {
           pointTileDistance({ x: plan.actionX, y: plan.actionY }, { x: plan.targetX, y: plan.targetY })
       ) {
         const visualUntil = Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current);
+        if (tickNow <= visualUntil + MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+          scheduleMovementConfirmTick();
+          animationFrame = window.requestAnimationFrame(tickMovementPlan);
+          return;
+        }
         movementPlanRef.current = null;
         clearPredictedPlayerAfterRouteCorrection(server.x, server.y, tickNow, visualUntil, player.direction);
         animationFrame = window.requestAnimationFrame(tickMovementPlan);
@@ -1130,10 +2426,11 @@ export default function HomePage() {
         } else {
           const movementNow = Date.now();
           const blockedSteps = recentMovementBlockedSteps(plan.blockedSteps, movementNow);
+          const effectiveMode = crystalEffectiveMovementMode(plan.mode, movementNow);
           const nextAction = crystalMovementActionTowardWithRouteHints(
             source,
             { x: plan.targetX, y: plan.targetY },
-            plan.mode,
+            effectiveMode,
             blockedSteps,
             currentWorld,
           );
@@ -1156,7 +2453,7 @@ export default function HomePage() {
             const stepInterval = movementStepIntervalMs(nextAction.mode);
             movementPlanRef.current = {
               ...plan,
-              mode: nextAction.mode,
+              mode: plan.mode,
               actionX: nextPoint.x,
               actionY: nextPoint.y,
               pendingX: nextPoint.x,
@@ -1170,6 +2467,23 @@ export default function HomePage() {
               sentMode: nextAction.mode,
               blockedSteps,
             };
+            const currentPredicted = predictedPlayerPositionRef.current;
+            const displayPoint =
+              currentPredicted &&
+              currentPredicted.direction === nextAction.direction &&
+              pointTileDistance(currentPredicted, { x: plan.targetX, y: plan.targetY }) <=
+                pointTileDistance(nextPoint, { x: plan.targetX, y: plan.targetY })
+                ? currentPredicted
+                : { x: nextPoint.x, y: nextPoint.y, direction: nextAction.direction };
+            rememberCrystalRunPrime(movementNow);
+            rememberCrystalSelfAction(source, nextAction, movementNow);
+            if (!movementPredictionShouldWaitForServer(source, nextAction, currentWorld)) {
+              rememberLocalMovementAnchor(displayPoint, movementNow, movementNow + MOVEMENT_PENDING_ACTION_MAX_AGE_MS);
+              setPredictedPlayerMotion(
+                displayPoint,
+                movementNow + Math.max(stepInterval, MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS),
+              );
+            }
             if (plan.packetMode === "target") {
               send({ type: "moveTo", x: nextPoint.x, y: nextPoint.y, mode: nextAction.mode });
             } else {
@@ -1248,25 +2562,108 @@ export default function HomePage() {
 
   function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
     if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
-    if (isGameplayCommand(command)) {
-      lastGameplayCommandAtRef.current = Date.now();
-    }
     lastCommandRef.current = command;
+    const commandNow = Date.now();
+    if (isMovementPredictionBlockingCommand(command)) {
+      movementPredictionBlockedUntilRef.current = Math.max(
+        movementPredictionBlockedUntilRef.current,
+        commandNow + MOVEMENT_ACTION_PREDICTION_BLOCK_MS,
+      );
+    }
     const debugWindow = window as typeof window & {
       __mir2LastCommand?: Record<string, unknown>;
       __mir2CommandHistory?: Array<Record<string, unknown>>;
+      __mir2MovementSentCommands?: Array<Record<string, unknown>>;
     };
-    const debugCommand = { ...command, at: Date.now() };
+    const debugCommand = { ...command, at: commandNow };
     debugWindow.__mir2LastCommand = command;
     debugWindow.__mir2CommandHistory = [debugCommand, ...(debugWindow.__mir2CommandHistory ?? [])].slice(0, 50);
+    if (isMovementCommand(command)) {
+      debugWindow.__mir2MovementSentCommands = [
+        debugCommand,
+        ...(debugWindow.__mir2MovementSentCommands ?? []),
+      ].slice(0, 50);
+      recordMovementDiagnostic("tx:movementCommand", {
+        command: debugCommand,
+        sample: captureMovementDiagnosticSample(commandNow),
+      });
+    }
     socketRef.current.send(JSON.stringify(command));
+    if (isMovementCommand(command)) {
+      scheduleMovementConfirmTick();
+    }
     if (!options?.quiet) appendLog(t("log.sent", [JSON.stringify(command)]), "network");
     return true;
   }
 
-  function isGameplayCommand(command: Record<string, unknown>) {
-    const type = typeof command.type === "string" ? command.type : "";
-    return !["", "keepAlive", "tick", "clientVersion", "login", "newAccount", "newCharacter", "startGame"].includes(type);
+  function sendGatewayTick() {
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ type: "tick" }));
+    }
+  }
+
+  function isMovementBusy() {
+    pruneLocallySettledDirectionStepPending(Date.now());
+    return (
+      Boolean(movementPlanRef.current) ||
+      crystalSelfActionFeedRef.current.length > 0 ||
+      directionStepPendingQueueRef.current.length > 0 ||
+      Boolean(directionStepPendingRef.current) ||
+      Boolean(queuedDirectionStepRef.current)
+    );
+  }
+
+  function scheduleMovementConfirmTick() {
+    if (movementConfirmTickTimerRef.current !== null) {
+      return;
+    }
+    movementConfirmTickTimerRef.current = window.setTimeout(() => {
+      movementConfirmTickTimerRef.current = null;
+      if (!isMovementBusy() && !predictedPlayerPositionRef.current) {
+        return;
+      }
+      const now = Date.now();
+      pruneLocallySettledDirectionStepPending(now);
+      const currentWorld = worldRef.current;
+      const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId);
+      if (serverSelf) {
+        recoverStaleMovementPlanFromServer(serverSelf.x, serverSelf.y, serverSelf.direction, now);
+        clearVisuallySettledDirectionStepPending(now);
+        clearSettledPredictedPlayer(now);
+      }
+      consumeQueuedDirectionStep();
+      if (isMovementBusy() || predictedPlayerPositionRef.current) {
+        scheduleMovementConfirmTick();
+      }
+    }, MOVEMENT_CONFIRM_TICK_DELAY_MS);
+  }
+
+  function isMovementCommand(command: Record<string, unknown>) {
+    return command.type === "walk" || command.type === "run" || command.type === "moveTo";
+  }
+
+  function isMovementPredictionBlockingCommand(command: Record<string, unknown>) {
+    return command.type === "attack" || command.type === "rangeAttack" || command.type === "castSkill";
+  }
+
+  function isMovementPacketName(packet: string) {
+    return (
+      packet === "UserLocation" ||
+      packet === "Pushed" ||
+      packet === "UserDash" ||
+      packet === "UserDashFail" ||
+      packet === "UserDashAttack" ||
+      packet === "UserAttackMove" ||
+      packet === "ObjectTurn" ||
+      packet === "ObjectWalk" ||
+      packet === "ObjectRun" ||
+      packet === "ObjectPushed" ||
+      packet === "ObjectDash" ||
+      packet === "ObjectDashFail" ||
+      packet === "ObjectDashAttack" ||
+      packet === "ObjectBackStep" ||
+      packet === "ObjectSitDown"
+    );
   }
 
   useEffect(() => {
@@ -1289,6 +2686,8 @@ export default function HomePage() {
           movementPlan: MovementPlan | null;
           directionStepPending: DirectionStepPending | null;
           directionStepPendingQueue: DirectionStepPending[];
+          crystalSelfActionFeed: CrystalSelfActionFeedEntry[];
+          outstandingSelfMovementActions: CrystalSelfActionFeedEntry[];
           movementInputBlockedUntil: number;
           playerHp: number | undefined;
           playerMaxHp: number | undefined;
@@ -1342,12 +2741,73 @@ export default function HomePage() {
         mapFileName: world.mapFileName,
         mapTitle: world.mapTitle,
         playerObjectId: world.playerObjectId,
-        player: self ? { x: self.x, y: self.y } : null,
-        predictedPlayer: activePredictedPlayerPosition,
-        movementPlan: movementPlanRef.current,
-        directionStepPending: directionStepPendingRef.current,
-        directionStepPendingQueue: directionStepPendingQueueRef.current,
-        movementInputBlockedUntil: movementInputBlockedUntilRef.current,
+        get player() {
+          const currentWorld = worldRef.current;
+          const currentSelf =
+            currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+          const predicted = preserveCrystalSelfRenderPosition(
+            currentSelf,
+            chooseCrystalSelfRenderPosition(
+            currentSelf,
+              renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
+              activeCrystalSelfActionSource(currentSelf),
+              activeOutstandingSelfActionSource(currentSelf),
+              activeLocalMovementAnchor(currentSelf),
+              activeDirectionStepVisualSource(currentSelf),
+            ),
+          );
+          if (currentSelf && predicted) {
+            const lead = Math.max(Math.abs(predicted.x - currentSelf.x), Math.abs(predicted.y - currentSelf.y));
+            if (lead <= MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES) {
+              return { x: predicted.x, y: predicted.y };
+            }
+          }
+          return currentSelf ? { x: currentSelf.x, y: currentSelf.y } : null;
+        },
+        get predictedPlayer() {
+          const currentWorld = worldRef.current;
+          const currentSelf =
+            currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+          const predicted = preserveCrystalSelfRenderPosition(
+            currentSelf,
+            chooseCrystalSelfRenderPosition(
+            currentSelf,
+              renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
+              activeCrystalSelfActionSource(currentSelf),
+              activeOutstandingSelfActionSource(currentSelf),
+              activeLocalMovementAnchor(currentSelf),
+              activeDirectionStepVisualSource(currentSelf),
+            ),
+          );
+          if (
+            currentSelf &&
+            predicted &&
+            predicted.x === currentSelf.x &&
+            predicted.y === currentSelf.y &&
+            !hasSelfMovementTransportEvidence()
+          ) {
+            return null;
+          }
+          return predicted;
+        },
+        get movementPlan() {
+          return movementPlanRef.current;
+        },
+        get directionStepPending() {
+          return directionStepPendingRef.current;
+        },
+        get directionStepPendingQueue() {
+          return directionStepPendingQueueRef.current;
+        },
+        get crystalSelfActionFeed() {
+          return crystalSelfActionFeedRef.current;
+        },
+        get outstandingSelfMovementActions() {
+          return outstandingSelfMovementActionsRef.current;
+        },
+        get movementInputBlockedUntil() {
+          return movementInputBlockedUntilRef.current;
+        },
         playerHp: world.playerHp,
         playerMaxHp: world.playerMaxHp,
         playerMp: world.playerMp,
@@ -1395,7 +2855,7 @@ export default function HomePage() {
 
   function connectGateway(bootstrapAfterOpen = false) {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
-      if (bootstrapAfterOpen) sendBootstrapSequence(accountId, password);
+      if (bootstrapAfterOpen) sendGatewayBootstrapSequence(send, accountId, password);
       return;
     }
 
@@ -1408,18 +2868,23 @@ export default function HomePage() {
       setWorld((current) => ({ ...current, connected: true }));
       appendLog(t("log.gatewayWsOpen"), "network");
       send({ type: "setLanguage", language }, { quiet: true });
+      if (pendingSuiLoginRef.current) {
+        const pending = pendingSuiLoginRef.current;
+        pendingSuiLoginRef.current = null;
+        sendSuiLoginCommand(send, pending.accountId, pending.token);
+        return;
+      }
       if (pendingNewAccountRef.current) {
         pendingNewAccountRef.current = false;
-        sendNewAccountCommand();
+        sendGatewayNewAccountCommand(send, accountId, password);
         return;
       }
       if (pendingLoginRef.current) {
         pendingLoginRef.current = false;
-        send({ type: "clientVersion" }, { quiet: true });
-        send({ type: "login", accountId, password });
+        sendPasswordLoginCommand(send, accountId, password, { quietClientVersion: true });
         return;
       }
-      if (bootstrapAfterOpen) sendBootstrapSequence(accountId, password);
+      if (bootstrapAfterOpen) sendGatewayBootstrapSequence(send, accountId, password);
     });
 
     socket.addEventListener("close", () => {
@@ -1443,26 +2908,6 @@ export default function HomePage() {
     }
   }, [language]);
 
-  function sendBootstrapSequence(nextAccountId: string, nextPassword: string) {
-    send({ type: "clientVersion" });
-    send({ type: "login", accountId: nextAccountId, password: nextPassword });
-    send({ type: "startGame", characterIndex: 0 });
-  }
-
-  function sendNewAccountCommand() {
-    send({ type: "clientVersion" }, { quiet: true });
-    send({
-      type: "newAccount",
-      accountId,
-      password,
-      birthDateBinary: 0,
-      userName: accountId,
-      secretQuestion: "",
-      secretAnswer: "",
-      emailAddress: "",
-    });
-  }
-
   function createAccount() {
     setLoginBusy(false);
     setLoginErrorKey(null);
@@ -1473,7 +2918,7 @@ export default function HomePage() {
       return;
     }
 
-    sendNewAccountCommand();
+    sendGatewayNewAccountCommand(send, accountId, password);
   }
 
   function submitLogin() {
@@ -1486,8 +2931,35 @@ export default function HomePage() {
       return;
     }
 
-    send({ type: "clientVersion" });
-    send({ type: "login", accountId, password });
+    sendPasswordLoginCommand(send, accountId, password);
+  }
+
+  async function submitSuiLogin(kind: SuiLoginKind) {
+    setLoginBusy(true);
+    setLoginErrorKey(null);
+
+    try {
+      const login = await requestSuiLoginToken(kind);
+      setAccountId(login.accountId);
+      if (socketRef.current?.readyState !== WebSocket.OPEN) {
+        pendingSuiLoginRef.current = login;
+        connectGateway();
+        return;
+      }
+      sendSuiLoginCommand(send, login.accountId, login.token);
+    } catch (error) {
+      setLoginBusy(false);
+      const label = kind === "passkey" ? "Passkey" : "Wallet";
+      setLoginErrorKey(`${label} login failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  function submitPasskeyLogin() {
+    void submitSuiLogin("passkey");
+  }
+
+  function submitWalletLogin() {
+    void submitSuiLogin("wallet");
   }
 
   function startSelectedCharacter() {
@@ -1500,19 +2972,33 @@ export default function HomePage() {
       connectGateway(true);
       return;
     }
-    sendBootstrapSequence(accountId, password);
+    sendGatewayBootstrapSequence(send, accountId, password);
   }
 
   function resetClient() {
     pendingLoginRef.current = false;
     pendingNewAccountRef.current = false;
+    pendingSuiLoginRef.current = null;
     pendingTransferRef.current = null;
     pendingNpcInteractRef.current = null;
     npcCallGuardRef.current = null;
     movementPlanRef.current = null;
     movementBlockedStepsRef.current = [];
     queuedDirectionStepRef.current = null;
+    crystalRunPrimedUntilRef.current = 0;
+    predictedPlayerHoldUntilRef.current = 0;
+    lastSelfMovementAckRef.current = null;
+    lastSelfNoProgressAckRef.current = null;
+    heldDirectionBlockedUntilRef.current = null;
+    clearCrystalSelfActionFeed();
+    clearOutstandingSelfMovementActions();
+    clearLocalMovementAnchor();
+    lastCrystalSelfRenderPositionRef.current = null;
     clearDirectionStepPendingQueue();
+    if (movementConfirmTickTimerRef.current !== null) {
+      window.clearTimeout(movementConfirmTickTimerRef.current);
+      movementConfirmTickTimerRef.current = null;
+    }
     gameEntryChatSeededRef.current = false;
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       send({ type: "disconnect" });
@@ -1553,8 +3039,27 @@ export default function HomePage() {
     const currentPlan = movementPlanRef.current;
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? self;
+    const planPending = movementPlanPendingStillAhead(currentPlan, serverSelf);
+    const directionPending = planPending ? null : pendingDirectionStepStillAhead(serverSelf);
+    const predictedPending = pendingPredictedPlayerStepStillAhead(serverSelf, mode, movementNow);
     const actionSource = localMovementActionSource(serverSelf, currentPlan);
-    const inheritedNextStepAt = currentPlan?.nextStepAt ?? (actionSource ? directionStepNextAtRef.current : 0);
+    const lastAckReadyAt = lastSelfMovementReadyAt(serverSelf, mode);
+    const carriedPlanPending =
+      currentPlan?.pendingX !== undefined && currentPlan.pendingY !== undefined ? currentPlan : null;
+    const inheritedActionX =
+      carriedPlanPending?.actionX ?? directionPending?.x ?? predictedPending?.x ?? currentPlan?.actionX ?? actionSource?.x;
+    const inheritedActionY =
+      carriedPlanPending?.actionY ?? directionPending?.y ?? predictedPending?.y ?? currentPlan?.actionY ?? actionSource?.y;
+    const inheritedPendingX = carriedPlanPending?.pendingX ?? directionPending?.x ?? predictedPending?.x;
+    const inheritedPendingY = carriedPlanPending?.pendingY ?? directionPending?.y ?? predictedPending?.y;
+    const inheritedNextStepAt = Math.max(
+      currentPlan?.nextStepAt ?? 0,
+      actionSource || directionPending ? directionStepNextAtRef.current : 0,
+      directionPending ? directionPending.sentAt + movementCommandDelayMs(directionPending.mode) : 0,
+      predictedPending ? predictedPending.sentAt + movementCommandDelayMs(predictedPending.mode) : 0,
+      lastAckReadyAt,
+    );
+    const inheritedVisualUntil = Math.max(currentPlan?.visualUntil ?? 0, directionStepVisualUntilRef.current);
     const inheritedBlockedSteps = recentMovementBlockedSteps(
       currentPlan?.blockedSteps ?? movementBlockedStepsRef.current,
       movementNow,
@@ -1569,12 +3074,17 @@ export default function HomePage() {
           targetY: y,
           mode,
           packetMode,
-          actionX: currentPlan.actionX,
-          actionY: currentPlan.actionY,
-          pendingX: currentPlan.pendingX,
-          pendingY: currentPlan.pendingY,
-          pendingSentAt: currentPlan.pendingSentAt,
-          nextStepAt: inheritedNextStepAt || Date.now(),
+          actionX: inheritedActionX,
+          actionY: inheritedActionY,
+          pendingX: inheritedPendingX,
+          pendingY: inheritedPendingY,
+          pendingSentAt: carriedPlanPending?.pendingSentAt ?? directionPending?.sentAt ?? predictedPending?.sentAt,
+          nextStepAt: inheritedNextStepAt || movementNow,
+          visualUntil: inheritedVisualUntil || currentPlan.visualUntil,
+          sentFromX: carriedPlanPending?.sentFromX ?? directionPending?.sentFromX ?? predictedPending?.sentFromX,
+          sentFromY: carriedPlanPending?.sentFromY ?? directionPending?.sentFromY ?? predictedPending?.sentFromY,
+          sentDirection: carriedPlanPending?.sentDirection ?? directionPending?.direction ?? predictedPending?.direction,
+          sentMode: carriedPlanPending?.sentMode ?? directionPending?.mode ?? predictedPending?.mode,
           blockedSteps: inheritedBlockedSteps,
         }
       : {
@@ -1582,11 +3092,50 @@ export default function HomePage() {
           targetY: y,
           mode,
           packetMode,
-          actionX: actionSource?.x,
-          actionY: actionSource?.y,
+          actionX: inheritedActionX,
+          actionY: inheritedActionY,
+          pendingX: inheritedPendingX,
+          pendingY: inheritedPendingY,
+          pendingSentAt: directionPending?.sentAt ?? predictedPending?.sentAt,
           nextStepAt: inheritedNextStepAt,
+          visualUntil: inheritedVisualUntil || undefined,
+          sentFromX: directionPending?.sentFromX ?? predictedPending?.sentFromX,
+          sentFromY: directionPending?.sentFromY ?? predictedPending?.sentFromY,
+          sentDirection: directionPending?.direction ?? predictedPending?.direction,
+          sentMode: directionPending?.mode ?? predictedPending?.mode,
           blockedSteps: inheritedBlockedSteps,
         };
+    const predictedCandidate = predictedPlayerPositionRef.current;
+    const predictedLead =
+      predictedCandidate && serverSelf
+        ? Math.max(Math.abs(predictedCandidate.x - serverSelf.x), Math.abs(predictedCandidate.y - serverSelf.y))
+        : 0;
+    const preservedActionSource =
+      predictedCandidate &&
+      serverSelf &&
+      predictedLead <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES &&
+      crystalMovementCandidateNotBehindServer(
+        serverSelf,
+        predictedCandidate,
+        predictedCandidate.direction ?? serverSelf.direction,
+      )
+        ? predictedCandidate
+        : actionSource;
+    if (preservedActionSource && movementNow >= movementPredictionBlockedUntilRef.current) {
+      setPredictedPlayerMotion(
+        {
+          x: preservedActionSource.x,
+          y: preservedActionSource.y,
+          direction: preservedActionSource.direction ?? actionSource?.direction ?? serverSelf?.direction,
+        },
+        Math.max(inheritedVisualUntil, movementNow + CRYSTAL_ENTITY_MOVE_ACTION_MS),
+      );
+      scheduleMovementConfirmTick();
+    } else if (movementNow < movementPredictionBlockedUntilRef.current) {
+      predictedPlayerHoldUntilRef.current = 0;
+      setPredictedPlayerMotion(null);
+      scheduleMovementConfirmTick();
+    }
   }
 
   function attackTarget(objectId: string) {
@@ -1806,6 +3355,7 @@ export default function HomePage() {
 
   function transferMap(key: string) {
     pendingTransferRef.current = null;
+    crystalRunPrimedUntilRef.current = 0;
     send({ type: "transferMap", key });
   }
 
@@ -1932,7 +3482,12 @@ export default function HomePage() {
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? self;
     if (!serverSelf) return;
     const currentPlan = movementPlanRef.current;
-    if (currentPlan?.packetMode === "direction" && Date.now() < currentPlan.nextStepAt) {
+    const now = Date.now();
+    if (
+      currentPlan?.packetMode === "direction" &&
+      (movementPlanBlockedByActionCadence(currentPlan, serverSelf, now) || now < currentPlan.nextStepAt)
+    ) {
+      moveToTile(x, y, mode, "direction");
       return;
     }
     const currentSelf =
@@ -1965,7 +3520,16 @@ export default function HomePage() {
   }
 
   function handleViewportDirectionStep(x: number, y: number, mode: "walk" | "run") {
+    if (movementPlanRef.current) {
+      moveToTile(x, y, mode, "direction");
+      return;
+    }
     queuedDirectionStepRef.current = { x, y, mode, requestedAt: Date.now() };
+    consumeQueuedDirectionStep();
+  }
+
+  function handleViewportDirectionIntent(direction: string, mode: "walk" | "run") {
+    queuedDirectionStepRef.current = { direction, mode, requestedAt: Date.now() };
     consumeQueuedDirectionStep();
   }
 
@@ -1973,6 +3537,11 @@ export default function HomePage() {
     const queued = queuedDirectionStepRef.current;
     if (!queued) return false;
     const now = Date.now();
+    pruneLocallySettledDirectionStepPending(now);
+    if (now - queued.requestedAt > MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS) {
+      queuedDirectionStepRef.current = null;
+      return false;
+    }
     if (now < movementInputBlockedUntilRef.current) return false;
     if (now < directionStepNextAtRef.current) return false;
 
@@ -1982,18 +3551,70 @@ export default function HomePage() {
       queuedDirectionStepRef.current = null;
       return false;
     }
+    clearVisuallySettledDirectionStepPending(now);
+    const heldBlocked = heldDirectionBlockedUntilRef.current;
+    if (heldBlocked && now > heldBlocked.until) {
+      heldDirectionBlockedUntilRef.current = null;
+    } else if (
+      queued.direction &&
+      heldBlocked &&
+      serverSelf.x === heldBlocked.x &&
+      serverSelf.y === heldBlocked.y &&
+      queued.direction === heldBlocked.direction
+    ) {
+      queuedDirectionStepRef.current = null;
+      return false;
+    }
 
-    reconcileDirectionStepQueueWithServer(serverSelf.x, serverSelf.y, now);
-    const pendingQueue = directionStepPendingQueueRef.current;
-    if (pendingQueue.length > 0) {
-      const oldestPending = pendingQueue[0];
-      if (now - oldestPending.sentAt >= MOVEMENT_PENDING_ACTION_RECOVERY_MS) {
-        applyCrystalInputCorrection(serverSelf.x, serverSelf.y, now, serverSelf.direction);
+    if (movementPlanRef.current) {
+      if (queued.direction) {
+        movementPlanRef.current = null;
+      } else if (queued.x !== undefined && queued.y !== undefined) {
+        moveToTile(queued.x, queued.y, queued.mode, "direction");
       }
       return false;
     }
 
-    const actionSelf = predictedPlayerPositionRef.current ?? serverSelf;
+    reconcileDirectionStepQueueWithServer(serverSelf.x, serverSelf.y, now, serverSelf.direction, false, false);
+    if (
+      queued.direction &&
+      hasOpposingOutstandingSelfMovement(serverSelf, queued.direction, now)
+    ) {
+      queuedDirectionStepRef.current = null;
+      scheduleMovementConfirmTick();
+      return false;
+    }
+    const pendingQueue = directionStepPendingQueueRef.current;
+    const actionFeed = crystalSelfActionFeedRef.current;
+    if (pendingQueue.length > 0 && actionFeed.length === 0) {
+      const oldestPending = pendingQueue[0];
+      const sameDirectionIntent =
+        queued.direction &&
+        oldestPending.direction === queued.direction &&
+        !movementDirectionsOppose(oldestPending.direction, queued.direction);
+      const actionCadenceReady = now >= oldestPending.sentAt + movementCommandDelayMs(oldestPending.mode);
+      if (sameDirectionIntent && actionCadenceReady) {
+        clearDirectionStepPendingQueue();
+      } else {
+      if (now - oldestPending.sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+        applyCrystalInputCorrection(serverSelf.x, serverSelf.y, now, serverSelf.direction);
+      }
+      return false;
+      }
+    }
+
+    const actionSelf =
+      activeLocalMovementAnchor(serverSelf, now) ??
+      activeCrystalSelfActionSource(serverSelf, now) ??
+      (predictedPlayerPositionRef.current &&
+      crystalMovementCandidateNotBehindServer(
+        serverSelf,
+        predictedPlayerPositionRef.current,
+        predictedPlayerPositionRef.current.direction ?? queued.direction ?? serverSelf.direction,
+      )
+        ? predictedPlayerPositionRef.current
+        : null) ??
+      serverSelf;
     const lead = Math.max(Math.abs(actionSelf.x - serverSelf.x), Math.abs(actionSelf.y - serverSelf.y));
     if (lead > MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
       return false;
@@ -2001,13 +3622,21 @@ export default function HomePage() {
 
     const blockedSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
     queuedDirectionStepRef.current = null;
-    const nextAction = crystalMovementActionTowardWithRouteHints(
-      actionSelf,
-      { x: queued.x, y: queued.y },
-      queued.mode,
-      blockedSteps,
-      currentWorld,
-    );
+    const effectiveMode = crystalEffectiveMovementMode(queued.mode, now);
+    const nextAction = queued.direction
+      ? crystalMovementActionForDirection(actionSelf, queued.direction, effectiveMode, blockedSteps, currentWorld)
+      : queued.x !== undefined && queued.y !== undefined
+        ? crystalMovementActionTowardWithRouteHints(
+            actionSelf,
+            { x: queued.x, y: queued.y },
+            effectiveMode,
+            blockedSteps,
+            currentWorld,
+          )
+        : null;
+    if (!nextAction) {
+      return false;
+    }
     const direction = nextAction.direction;
     const nextPoint = nextAction.point;
     const nextLead = Math.max(Math.abs(nextPoint.x - serverSelf.x), Math.abs(nextPoint.y - serverSelf.y));
@@ -2019,32 +3648,49 @@ export default function HomePage() {
     directionStepVisualUntilRef.current = now + movementStepIntervalMs(nextAction.mode);
     movementPlanRef.current = null;
     if (nextPoint.x !== actionSelf.x || nextPoint.y !== actionSelf.y) {
+      rememberCrystalSelfAction(actionSelf, nextAction, now);
+      const pendingSource = actionSelf;
+      const pendingPoint = nextPoint;
       setDirectionStepPendingQueue([
-        ...directionStepPendingQueueRef.current,
         {
-          x: nextPoint.x,
-          y: nextPoint.y,
+          x: pendingPoint.x,
+          y: pendingPoint.y,
           direction,
           mode: nextAction.mode,
           sentAt: now,
+          sentFromX: pendingSource.x,
+          sentFromY: pendingSource.y,
         },
       ]);
-      setPredictedPlayerMotion({ x: actionSelf.x, y: actionSelf.y, direction });
+      rememberCrystalRunPrime(now);
+      if (!movementPredictionShouldWaitForServer(actionSelf, nextAction, currentWorld)) {
+        rememberLocalMovementAnchor(
+          { x: pendingPoint.x, y: pendingPoint.y, direction },
+          now,
+          now + Math.max(movementStepIntervalMs(nextAction.mode), MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS),
+        );
+        setPredictedPlayerMotion(
+          { x: pendingPoint.x, y: pendingPoint.y, direction },
+          now + Math.max(movementStepIntervalMs(nextAction.mode), MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS),
+        );
+      }
     } else if (direction !== actionSelf.direction) {
-      setDirectionStepPendingQueue([
-        ...directionStepPendingQueueRef.current,
-        {
-          x: actionSelf.x,
-          y: actionSelf.y,
-          direction,
-          mode: nextAction.mode,
-          sentAt: now,
-        },
-      ]);
-      setPredictedPlayerMotion({ x: actionSelf.x, y: actionSelf.y, direction });
-    } else if (directionStepPendingQueueRef.current.length === 0) {
+      rememberLocalMovementAnchor(
+        { x: actionSelf.x, y: actionSelf.y, direction },
+        now,
+        now + MOVEMENT_CONFIRM_TICK_DELAY_MS,
+      );
+      setPredictedPlayerMotion(
+        { x: actionSelf.x, y: actionSelf.y, direction },
+        now + MOVEMENT_CONFIRM_TICK_DELAY_MS,
+      );
+      send({ type: "turn", direction });
+      return true;
+    } else {
       clearDirectionStepPendingQueue();
       setPredictedPlayerMotion(null);
+      rememberBlockedDirectionAtSource(actionSelf.x, actionSelf.y, direction, now);
+      return false;
     }
     send({ type: nextAction.mode === "run" ? "run" : "walk", direction });
     return true;
@@ -2062,13 +3708,19 @@ export default function HomePage() {
     const pendingQueue = directionStepPendingQueueRef.current;
     const queuedSource = pendingQueue[pendingQueue.length - 1] ?? null;
     const predictedSource = predictedPlayerPositionRef.current;
+    const anchorSource = activeLocalMovementAnchor(serverSelf);
+    const actionFeedSource = activeCrystalSelfActionSource(serverSelf);
 
-    for (const candidate of [planSource, queuedSource, predictedSource]) {
+    for (const candidate of [planSource, actionFeedSource, queuedSource, predictedSource, anchorSource]) {
       if (!candidate) {
         continue;
       }
       const lead = Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y));
-      if (lead > 0 && lead <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+      if (
+        lead > 0 &&
+        lead <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES &&
+        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction ?? serverSelf.direction)
+      ) {
         return {
           x: candidate.x,
           y: candidate.y,
@@ -2080,10 +3732,113 @@ export default function HomePage() {
     return null;
   }
 
+  function activeDirectionStepVisualSource(serverSelf: { x: number; y: number; direction?: string } | null) {
+    if (!serverSelf) {
+      return null;
+    }
+    const pending =
+      directionStepPendingQueueRef.current[directionStepPendingQueueRef.current.length - 1] ??
+      directionStepPendingRef.current;
+    if (!pending) {
+      return null;
+    }
+    const sentFrom =
+      pending.sentFromX !== undefined && pending.sentFromY !== undefined
+        ? {
+            x: pending.sentFromX,
+            y: pending.sentFromY,
+            direction: pending.direction ?? serverSelf.direction,
+          }
+        : null;
+    const pendingPoint = {
+      x: pending.x,
+      y: pending.y,
+      direction: pending.direction ?? serverSelf.direction,
+    };
+    return chooseCrystalSelfRenderPosition(serverSelf, sentFrom, pendingPoint);
+  }
+
+  function movementPlanPendingStillAhead(plan: MovementPlan | null, serverSelf: WorldEntity | null) {
+    if (!plan || plan.pendingX === undefined || plan.pendingY === undefined) {
+      return false;
+    }
+    if (!serverSelf) {
+      return true;
+    }
+    return plan.pendingX !== serverSelf.x || plan.pendingY !== serverSelf.y;
+  }
+
+  function lastSelfMovementReadyAt(serverSelf: { x: number; y: number } | null, mode: "walk" | "run") {
+    const ack = lastSelfMovementAckRef.current;
+    if (!ack || !serverSelf || ack.x !== serverSelf.x || ack.y !== serverSelf.y) {
+      return 0;
+    }
+    return ack.at + MOVEMENT_CONFIRM_TICK_DELAY_MS;
+  }
+
+  function pendingDirectionStepStillAhead(serverSelf: WorldEntity | null) {
+    const pending = directionStepPendingQueueRef.current[0] ?? directionStepPendingRef.current;
+    if (!pending) {
+      return null;
+    }
+    if (!serverSelf) {
+      return pending;
+    }
+    if (pending.x !== serverSelf.x || pending.y !== serverSelf.y) {
+      return pending;
+    }
+    if (pending.direction && serverSelf.direction && pending.direction !== serverSelf.direction) {
+      return pending;
+    }
+    return null;
+  }
+
+  function pendingPredictedPlayerStepStillAhead(
+    serverSelf: WorldEntity | null,
+    mode: "walk" | "run",
+    now: number,
+  ) {
+    const predicted = predictedPlayerPositionRef.current;
+    if (!predicted || !serverSelf || directionStepVisualUntilRef.current <= now) {
+      return null;
+    }
+    if (predicted.x === serverSelf.x && predicted.y === serverSelf.y) {
+      return null;
+    }
+    const lead = Math.max(Math.abs(predicted.x - serverSelf.x), Math.abs(predicted.y - serverSelf.y));
+    if (lead > MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+      return null;
+    }
+    if (!crystalMovementCandidateNotBehindServer(serverSelf, predicted, predicted.direction ?? serverSelf.direction)) {
+      return null;
+    }
+    return {
+      x: predicted.x,
+      y: predicted.y,
+      direction: predicted.direction,
+      mode,
+      sentAt: Math.max(0, directionStepVisualUntilRef.current - movementStepIntervalMs(mode)),
+      sentFromX: serverSelf.x,
+      sentFromY: serverSelf.y,
+    };
+  }
+
+  function movementPlanBlockedByActionCadence(plan: MovementPlan | null, serverSelf: WorldEntity | null, now: number) {
+    if (!plan) {
+      return false;
+    }
+    if (movementPlanPendingStillAhead(plan, serverSelf)) {
+      return true;
+    }
+    const confirmedActionReadyAt = confirmedMovementActionReadyAt(plan);
+    return confirmedActionReadyAt > 0 && now < confirmedActionReadyAt;
+  }
+
   function handleGatewayEvent(event: GatewayEvent) {
     const debugWindow = window as typeof window & {
       __mir2LastGatewayEvent?: Record<string, unknown>;
       __mir2GatewayEventHistory?: Array<Record<string, unknown>>;
+      __mir2MovementReceivedPackets?: Array<Record<string, unknown>>;
     };
     const debugEvent = {
       type: event.type,
@@ -2104,6 +3859,22 @@ export default function HomePage() {
     }
     if (event.type === "worldSnapshot") {
       worldSnapshotVersionRef.current += 1;
+      const snapshot = event.payload as GatewayWorldSnapshot;
+      const snapshotSelf = snapshot.entities.find(
+        (entity) => String(entity.objectId) === String(snapshot.playerObjectId),
+      );
+      recordMovementDiagnostic("rx:worldSnapshot", {
+        tick: snapshot.tick,
+        mapFileName: snapshot.mapFileName ?? null,
+        snapshotSelf: snapshotSelf
+          ? {
+              x: snapshotSelf.x,
+              y: snapshotSelf.y,
+              direction: snapshotSelf.direction,
+            }
+          : null,
+        before: captureMovementDiagnosticSample(),
+      });
       applyGatewayWorldSnapshot(event.payload as GatewayWorldSnapshot);
       return;
     }
@@ -2111,6 +3882,21 @@ export default function HomePage() {
 
     appendLog(t("log.recv", [event.packet]), "network");
     const payload = event.payload ?? {};
+    if (isMovementPacketName(event.packet)) {
+      debugWindow.__mir2MovementReceivedPackets = [
+        {
+          packet: event.packet,
+          payload,
+          at: Date.now(),
+        },
+        ...(debugWindow.__mir2MovementReceivedPackets ?? []),
+      ].slice(0, 50);
+      recordMovementDiagnostic("rx:movementPacket", {
+        packet: event.packet,
+        payload,
+        before: captureMovementDiagnosticSample(),
+      });
+    }
 
     switch (event.packet) {
       case "Connected":
@@ -2231,6 +4017,15 @@ export default function HomePage() {
       case "UserInformation": {
         const objectId = stringifyId(payload.objectId);
         const location = payload.location as { x?: number; y?: number } | undefined;
+        const userX = numberOrZero(location?.x);
+        const userY = numberOrZero(location?.y);
+        const userDirection = stringOrNull(payload.direction) ?? undefined;
+        lastSelfMovementAckRef.current = {
+          x: userX,
+          y: userY,
+          direction: userDirection,
+          at: Date.now(),
+        };
         setWorld((current) => ({
           ...current,
           playerObjectId: objectId,
@@ -2254,9 +4049,9 @@ export default function HomePage() {
             objectId,
             kind: "selfPlayer",
             name: stringOrFallback(payload.name, t("ui.self")),
-            x: numberOrZero(location?.x),
-            y: numberOrZero(location?.y),
-            direction: stringOrNull(payload.direction) ?? undefined,
+            x: userX,
+            y: userY,
+            direction: userDirection,
             level: numberOrUndefined(payload.level),
             hp: numberOrUndefined(payload.hp),
             maxHp: numberOrUndefined(payload.hp),
@@ -2301,9 +4096,104 @@ export default function HomePage() {
         const movementNow = Date.now();
         const hardSelfCorrectionPacket =
           event.packet === "UserLocation" || event.packet === "Pushed" || event.packet === "UserDashFail";
+        let selfPacketLocalOverride: PredictedPlayerMotion | null = null;
         if (movementObjectId === worldRef.current.playerObjectId) {
-          reconcileMovementPlanWithServer(x, y, direction, hardSelfCorrectionPacket);
-          reconcileDirectionStepWithServer(x, y, direction, hardSelfCorrectionPacket);
+          const previousSelf = worldRef.current.entities.find(
+            (entity) => entity.objectId === worldRef.current.playerObjectId,
+          );
+          const selfMovementAdvanced =
+            !previousSelf ||
+            previousSelf.x !== x ||
+            previousSelf.y !== y ||
+            (!!direction && previousSelf.direction !== direction);
+          const hadSelfMovementAckInFlightBeforeAck = hasSelfMovementAckInFlight();
+          const noProgressAck = selfMovementAdvanced
+            ? null
+            : recordSelfNoProgressAck(x, y, direction, movementNow);
+          const noProgressPendingAhead =
+            previousSelf &&
+            (Boolean(pendingDirectionStepStillAhead(previousSelf)) ||
+              Boolean(
+                predictedPlayerPositionRef.current &&
+                  predictedPlayerAheadOfServer(
+                    { x, y },
+                    predictedPlayerPositionRef.current,
+                    direction ?? predictedPlayerPositionRef.current.direction,
+                  ),
+              ));
+          const noProgressDirection = noProgressAck
+            ? outstandingSelfMovementDirectionFromSource(x, y, direction)
+            : undefined;
+          const repeatedNoProgressDirection =
+            noProgressDirection &&
+            !noProgressPendingAhead &&
+            noProgressAck &&
+            noProgressAck.count >= 2
+              ? noProgressDirection
+              : undefined;
+          if (repeatedNoProgressDirection) {
+            rememberBlockedDirectionAtSource(x, y, repeatedNoProgressDirection, movementNow);
+            clearCrystalSelfActionFeed();
+            clearOutstandingSelfMovementActions();
+          }
+          let crystalAckDisposition: CrystalSelfAckDisposition = repeatedNoProgressDirection
+            ? "correction"
+            : reconcileCrystalSelfActionFeedWithServer(
+                x,
+                y,
+                direction,
+                movementPacket,
+                movementNow,
+              );
+          const staleAckOverride =
+            previousSelf && selfMovementAdvanced && !repeatedNoProgressDirection
+              ? staleSelfAckOverrideFromRecentActions(x, y, direction, previousSelf, movementNow)
+              : null;
+          if (staleAckOverride) {
+            crystalAckDisposition = "staleEcho";
+            selfPacketLocalOverride = staleAckOverride;
+          }
+          if (selfMovementAdvanced && !staleAckOverride) {
+            lastSelfNoProgressAckRef.current = null;
+            if (heldDirectionBlockedUntilRef.current?.x !== x || heldDirectionBlockedUntilRef.current?.y !== y) {
+              heldDirectionBlockedUntilRef.current = null;
+            }
+            lastSelfMovementAckRef.current = { x, y, direction, at: movementNow };
+            directionStepNextAtRef.current = Math.max(
+              directionStepNextAtRef.current,
+              movementNow,
+            );
+            if (previousSelf && (previousSelf.x !== x || previousSelf.y !== y)) {
+              if (hadSelfMovementAckInFlightBeforeAck) {
+                rememberCrystalRunPrime(movementNow);
+              }
+              const predicted = predictedPlayerPositionRef.current;
+              const predictedAheadOfAck =
+                predicted &&
+                (predicted.x !== x || predicted.y !== y) &&
+                predictedPlayerAheadOfServer({ x, y }, predicted, direction);
+              if (!predictedAheadOfAck) {
+                rememberLocalMovementAnchor(
+                  { x, y, direction },
+                  movementNow,
+                  movementNow + MOVEMENT_CONFIRM_TICK_DELAY_MS,
+                );
+                setPredictedPlayerMotion({ x, y, direction }, movementNow + MOVEMENT_CONFIRM_TICK_DELAY_MS);
+              }
+            }
+          } else if (!lastSelfMovementAckRef.current) {
+            lastSelfMovementAckRef.current = { x, y, direction, at: movementNow };
+          }
+          if (staleAckOverride) {
+            // A later locally sent Crystal action is already rendered as the current state.
+            // Keep the ACK for diagnostics, but do not let an older server echo pull the player backward.
+          } else if (crystalAckDisposition === "correction" || crystalAckDisposition === "none") {
+            reconcileMovementPlanWithServer(x, y, direction, hardSelfCorrectionPacket, selfMovementAdvanced);
+            reconcileDirectionStepWithServer(x, y, direction, hardSelfCorrectionPacket);
+          } else {
+            reconcileMovementPlanWithServer(x, y, direction, false, selfMovementAdvanced);
+            reconcileDirectionStepWithServer(x, y, direction, false, false);
+          }
           if (
             predictedPlayerPositionRef.current?.x === x &&
             predictedPlayerPositionRef.current?.y === y &&
@@ -2312,6 +4202,26 @@ export default function HomePage() {
           ) {
             clearPredictedPlayerAfterDirectionVisual(x, y, movementNow);
           }
+          if (repeatedNoProgressDirection) {
+            lastCrystalSelfRenderPositionRef.current = { x, y, direction: direction ?? repeatedNoProgressDirection };
+          }
+          if (crystalAckDisposition === "confirmed" || crystalAckDisposition === "staleEcho") {
+            selfPacketLocalOverride = activeCrystalLocalCurrentLocation({ x, y, direction }, movementNow);
+          }
+          recordMovementDiagnostic("apply:selfMovementPacket", {
+            packet: movementPacket,
+            packetPoint: { x, y, direction },
+            previousSelf: previousSelf
+              ? { x: previousSelf.x, y: previousSelf.y, direction: previousSelf.direction }
+              : null,
+            selfMovementAdvanced,
+            crystalAckDisposition,
+            localOverride: selfPacketLocalOverride,
+            noProgressAck,
+            repeatedNoProgressDirection: repeatedNoProgressDirection ?? null,
+            staleAckOverride,
+            sample: captureMovementDiagnosticSample(movementNow),
+          });
         }
         setWorld((current) => {
           const nextWorld = {
@@ -2321,9 +4231,9 @@ export default function HomePage() {
                 ? withPacketMovementAnimation(
                     {
                       ...entity,
-                      x,
-                      y,
-                      direction,
+                      x: selfPacketLocalOverride?.x ?? x,
+                      y: selfPacketLocalOverride?.y ?? y,
+                      direction: selfPacketLocalOverride?.direction ?? direction,
                     },
                     entity,
                     movementPacket,
@@ -2432,6 +4342,9 @@ export default function HomePage() {
           t("ui.mapEffect", [String(numberOrZero(payload.effect))], `Map effect ${numberOrZero(payload.effect)}`),
           "system",
         );
+        break;
+      case "PlaySound":
+        playOriginalSoundId(numberOrZero(payload.sound));
         break;
       case "AddBuff":
         applyAddBuffPacket(payload);
@@ -3235,13 +5148,14 @@ export default function HomePage() {
         ]),
       );
       const mergedEntities = entities.map((entity) => {
+        const baseEntity = entity;
         const transient = transientByObjectId.get(entity.objectId);
         if (!transient) {
-          return entity;
+          return baseEntity;
         }
 
         return {
-          ...entity,
+          ...baseEntity,
           attackAnimation:
             typeof transient.attackUntil === "number" && transient.attackUntil > currentTime
               ? transient.attackAnimation
@@ -3280,15 +5194,57 @@ export default function HomePage() {
               : undefined,
         };
       });
-      const selfEntity = mergedEntities.find((entity) => entity.objectId === playerObjectId) ?? null;
-      if (selfEntity) {
-        reconcileMovementPlanWithServer(selfEntity.x, selfEntity.y, selfEntity.direction);
-        reconcileDirectionStepWithServer(selfEntity.x, selfEntity.y, selfEntity.direction);
-      }
+      const snapshotSelfEntity = mergedEntities.find((entity) => entity.objectId === playerObjectId) ?? null;
       const snapshotMapFileName = snapshot.mapFileName ?? current.mapFileName;
+      const snapshotMapChanged =
+        normalizeMapFileName(snapshotMapFileName) !== normalizeMapFileName(current.mapFileName);
+      if (snapshotSelfEntity) {
+        rememberSnapshotSelfAck(snapshotSelfEntity, currentTime, snapshotMapChanged);
+        reconcileMovementPlanWithServer(snapshotSelfEntity.x, snapshotSelfEntity.y, snapshotSelfEntity.direction);
+        reconcileDirectionStepWithServer(
+          snapshotSelfEntity.x,
+          snapshotSelfEntity.y,
+          snapshotSelfEntity.direction,
+          false,
+          false,
+        );
+      }
       const hasCurrentSceneForSnapshot =
         current.originalMapRegion !== null &&
         normalizeMapFileName(current.originalMapRegion.mapFileName) === normalizeMapFileName(snapshotMapFileName);
+      const snapshotSelfLocalOverride =
+        !snapshotMapChanged && snapshotSelfEntity
+          ? activeCrystalLocalCurrentLocation(snapshotSelfEntity, currentTime)
+          : null;
+      if (snapshotSelfEntity) {
+        recordMovementDiagnostic("apply:worldSnapshotSelf", {
+          tick: snapshot.tick,
+          mapChanged: snapshotMapChanged,
+          snapshotSelf: {
+            x: snapshotSelfEntity.x,
+            y: snapshotSelfEntity.y,
+            direction: snapshotSelfEntity.direction,
+          },
+          localOverride: snapshotSelfLocalOverride,
+          beforeSelf:
+            current.entities.find((entity) => entity.objectId === playerObjectId) ??
+            null,
+        });
+      }
+      const mergedEntitiesForWorld = snapshotSelfLocalOverride
+        ? mergedEntities.map((entity) =>
+            entity.objectId === playerObjectId
+              ? {
+                  ...entity,
+                  x: snapshotSelfLocalOverride.x,
+                  y: snapshotSelfLocalOverride.y,
+                  direction: snapshotSelfLocalOverride.direction ?? entity.direction,
+                }
+              : entity,
+          )
+        : mergedEntities;
+      const effectiveSelfEntity =
+        mergedEntitiesForWorld.find((entity) => entity.objectId === playerObjectId) ?? snapshotSelfEntity;
 
       return {
         ...current,
@@ -3296,7 +5252,7 @@ export default function HomePage() {
         mapFileName: snapshotMapFileName,
         inSafeZone: snapshot.inSafeZone ?? current.inSafeZone,
         playerObjectId,
-        playerName: selfEntity?.name ?? current.playerName,
+        playerName: effectiveSelfEntity?.name ?? current.playerName,
         playerHp: snapshot.playerHp ?? undefined,
         playerMaxHp: snapshot.playerMaxHp ?? undefined,
         playerMp: snapshot.playerMp ?? undefined,
@@ -3336,7 +5292,7 @@ export default function HomePage() {
               ? snapshot.decorObjects
               : current.decorObjects,
         originalMapRegion: current.originalMapRegion,
-        entities: mergedEntities,
+        entities: mergedEntitiesForWorld,
         groundDrops,
         beltItems,
         inventoryItems,
@@ -3377,14 +5333,58 @@ export default function HomePage() {
     }
   }
 
-  function reconcileMovementPlanWithServer(x: number, y: number, direction?: string, hardCorrection = false) {
+  function reconcileMovementPlanWithServer(
+    x: number,
+    y: number,
+    direction?: string,
+    hardCorrection = false,
+    selfMovementAdvanced = true,
+  ) {
     const plan = movementPlanRef.current;
-    if (!plan || plan.pendingX === undefined || plan.pendingY === undefined) {
+    if (!plan) {
       return;
     }
 
     const now = Date.now();
+    if (plan.pendingX === undefined || plan.pendingY === undefined) {
+      if (x === plan.actionX && y === plan.actionY) {
+        if (x === plan.targetX && y === plan.targetY) {
+          movementPlanRef.current = null;
+          setPredictedPlayerMotion(null);
+          return;
+        }
+        movementPlanRef.current = {
+          ...plan,
+          actionX: x,
+          actionY: y,
+          nextStepAt: Math.max(
+            plan.nextStepAt,
+            selfMovementAdvanced ? now + MOVEMENT_CONFIRM_TICK_DELAY_MS : lastSelfMovementReadyAt({ x, y }, plan.mode),
+          ),
+          blockedSteps: recentMovementBlockedSteps(plan.blockedSteps, now),
+        };
+        movementBlockedStepsRef.current = movementPlanRef.current.blockedSteps ?? [];
+        return;
+      }
+      if (hardCorrection) {
+        movementPlanRef.current = null;
+        applyCrystalInputCorrection(
+          x,
+          y,
+          now,
+          direction,
+          Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current),
+        );
+      }
+      return;
+    }
+
     if (x === plan.pendingX && y === plan.pendingY) {
+      if (x === plan.targetX && y === plan.targetY) {
+        movementPlanRef.current = null;
+        setPredictedPlayerMotion(null);
+        return;
+      }
       movementPlanRef.current = {
         ...plan,
         actionX: x,
@@ -3396,6 +5396,10 @@ export default function HomePage() {
         sentFromY: undefined,
         sentDirection: undefined,
         sentMode: undefined,
+        nextStepAt: Math.max(
+          plan.nextStepAt,
+          (plan.pendingSentAt ?? now) + movementCommandDelayMs(plan.sentMode ?? plan.mode),
+        ),
         blockedSteps: recentMovementBlockedSteps(plan.blockedSteps, now),
       };
       movementBlockedStepsRef.current = movementPlanRef.current.blockedSteps ?? [];
@@ -3409,13 +5413,29 @@ export default function HomePage() {
       plan.sentFromY !== undefined &&
       pointTileDistance({ x, y }, { x: plan.targetX, y: plan.targetY }) >=
         pointTileDistance({ x: plan.sentFromX, y: plan.sentFromY }, { x: plan.targetX, y: plan.targetY });
+    if (
+      correctedToSentSource &&
+      !hardCorrection &&
+      !selfMovementAdvanced &&
+      now - sentAt < MOVEMENT_ROUTE_REROUTE_AFTER_MS
+    ) {
+      scheduleMovementConfirmTick();
+      return;
+    }
     if (hardCorrection) {
       movementBlockedStepsRef.current = movementBlockedStepsAfterCorrection(plan, x, y, now, direction);
       movementPlanRef.current = null;
-      applyCrystalInputCorrection(x, y, now, direction, Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current));
+      applyCrystalInputCorrection(
+        x,
+        y,
+        now,
+        plan.sentDirection ?? direction,
+        Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current),
+      );
       return;
     }
-    if (correctedToSentSource && now - sentAt < MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+    if (correctedToSentSource && now - sentAt < MOVEMENT_ROUTE_REROUTE_AFTER_MS) {
+      retryMovementPlanAfterEarlyServerEcho(plan, now);
       return;
     }
     if (!correctedToSentSource && !correctedAwayFromTarget && now - sentAt < MOVEMENT_ROUTE_REROUTE_AFTER_MS) {
@@ -3425,7 +5445,11 @@ export default function HomePage() {
     const blockedSteps = movementBlockedStepsAfterCorrection(plan, x, y, now, direction);
     movementBlockedStepsRef.current = blockedSteps;
     const blockedAtSource = countMovementBlockedStepsAtSource(blockedSteps, x, y);
-    const visualUntil = Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current);
+    const visualUntil = Math.max(
+      plan.visualUntil ?? 0,
+      directionStepVisualUntilRef.current,
+      now + CRYSTAL_ENTITY_MOVE_ACTION_MS,
+    );
     if (
       plan.sentFromX !== undefined &&
       plan.sentFromY !== undefined &&
@@ -3433,12 +5457,12 @@ export default function HomePage() {
         pointTileDistance({ x: plan.sentFromX, y: plan.sentFromY }, { x: plan.targetX, y: plan.targetY })
     ) {
       movementPlanRef.current = null;
-      clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, direction);
+      clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, plan.sentDirection ?? direction);
       return;
     }
     if (blockedAtSource >= MOVEMENT_ROUTE_MAX_BLOCKED_STEPS) {
       movementPlanRef.current = null;
-      clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, direction);
+      clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, plan.sentDirection ?? direction);
       return;
     }
 
@@ -3456,12 +5480,47 @@ export default function HomePage() {
       nextStepAt: Math.max(now + MOVEMENT_ROUTE_RETRY_DELAY_MS, visualUntil),
       blockedSteps,
     };
-    clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, direction);
+    clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, plan.sentDirection ?? direction);
+  }
+
+  function retryMovementPlanAfterEarlyServerEcho(plan: MovementPlan, now: number) {
+    const retrySourceX = plan.sentFromX ?? plan.actionX;
+    const retrySourceY = plan.sentFromY ?? plan.actionY;
+    if (retrySourceX === undefined || retrySourceY === undefined) {
+      scheduleMovementConfirmTick();
+      return;
+    }
+
+    const visualUntil = Math.max(plan.visualUntil ?? 0, directionStepVisualUntilRef.current);
+    movementPlanRef.current = {
+      ...plan,
+      actionX: retrySourceX,
+      actionY: retrySourceY,
+      pendingX: undefined,
+      pendingY: undefined,
+      pendingSentAt: undefined,
+      sentFromX: undefined,
+      sentFromY: undefined,
+      sentDirection: undefined,
+      sentMode: undefined,
+      nextStepAt: Math.max(now + MOVEMENT_CONFIRM_TICK_DELAY_MS, movementInputBlockedUntilRef.current),
+      visualUntil,
+      blockedSteps: recentMovementBlockedSteps(plan.blockedSteps, now),
+    };
+    const predicted = predictedPlayerPositionRef.current;
+    if (predicted) {
+      setPredictedPlayerMotion(predicted, visualUntil);
+    }
+    scheduleMovementConfirmTick();
   }
 
   function recoverStaleMovementPlanFromServer(x: number, y: number, direction: string | undefined, now: number) {
     const plan = movementPlanRef.current;
     if (!plan || plan.pendingX === undefined || plan.pendingY === undefined) {
+      return;
+    }
+    const sentAt = plan.pendingSentAt ?? plan.nextStepAt;
+    if (now - sentAt < MOVEMENT_PENDING_ACTION_RECOVERY_MS) {
       return;
     }
 
@@ -3488,11 +5547,36 @@ export default function HomePage() {
       nextStepAt: Math.max(now + MOVEMENT_ROUTE_RETRY_DELAY_MS, movementInputBlockedUntilRef.current),
       blockedSteps,
     };
-    clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, direction);
+    if (predictedPlayerPositionRef.current?.x !== x || predictedPlayerPositionRef.current?.y !== y) {
+      predictedPlayerHoldUntilRef.current = 0;
+      setPredictedPlayerMotion({ x, y, direction });
+    } else {
+      clearPredictedPlayerAfterRouteCorrection(x, y, now, visualUntil, direction);
+    }
   }
 
-  function reconcileDirectionStepWithServer(x: number, y: number, direction?: string, hardCorrection = false) {
-    reconcileDirectionStepQueueWithServer(x, y, Date.now(), direction, hardCorrection);
+  function confirmedMovementActionReadyAt(plan: MovementPlan) {
+    if (plan.pendingX !== undefined || plan.pendingY !== undefined) {
+      return 0;
+    }
+    const ack = lastSelfMovementAckRef.current;
+    if (!ack || plan.actionX === undefined || plan.actionY === undefined) {
+      return 0;
+    }
+    if (ack.x !== plan.actionX || ack.y !== plan.actionY) {
+      return 0;
+    }
+    return ack.at + MOVEMENT_CONFIRM_TICK_DELAY_MS;
+  }
+
+  function reconcileDirectionStepWithServer(
+    x: number,
+    y: number,
+    direction?: string,
+    hardCorrection = false,
+    allowRecovery = true,
+  ) {
+    reconcileDirectionStepQueueWithServer(x, y, Date.now(), direction, hardCorrection, allowRecovery);
   }
 
   function reconcileDirectionStepQueueWithServer(
@@ -3501,6 +5585,7 @@ export default function HomePage() {
     now: number,
     direction?: string,
     hardCorrection = false,
+    allowRecovery = true,
   ) {
     const queue = directionStepPendingQueueRef.current;
     if (queue.length === 0) {
@@ -3511,15 +5596,25 @@ export default function HomePage() {
       return;
     }
 
-    const matchedIndex = queue.findIndex(
-      (pending) => pending.x === x && pending.y === y && (!pending.direction || !direction || pending.direction === direction),
-    );
+    let matchedIndex = -1;
+    for (let index = queue.length - 1; index >= 0; index -= 1) {
+      const pending = queue[index];
+      const directionMatches = !pending.direction || !direction || pending.direction === direction;
+      if (directionMatches && directionStepReachedOrPassed(pending, x, y)) {
+        matchedIndex = index;
+        break;
+      }
+    }
     if (matchedIndex >= 0) {
       const matchedPending = queue[matchedIndex];
       const nextQueue = queue.slice(matchedIndex + 1);
       setDirectionStepPendingQueue(nextQueue);
       if (nextQueue.length === 0) {
-        directionStepNextAtRef.current = Math.max(directionStepNextAtRef.current, now);
+        directionStepNextAtRef.current = Math.max(
+          directionStepNextAtRef.current,
+          matchedPending.sentAt + movementCommandDelayMs(matchedPending.mode),
+        );
+        scheduleMovementConfirmTick();
       }
       if (nextQueue.length === 0 && predictedPlayerPositionRef.current?.x === x && predictedPlayerPositionRef.current?.y === y) {
         clearPredictedPlayerAfterDirectionVisual(x, y, now, directionStepVisualUntil(matchedPending));
@@ -3527,8 +5622,33 @@ export default function HomePage() {
       return;
     }
 
-    if (hardCorrection || now - queue[0].sentAt >= MOVEMENT_PENDING_ACTION_RECOVERY_MS) {
+    const oldestPending = queue[0];
+    const correctedToSentSource =
+      oldestPending.sentFromX !== undefined &&
+      oldestPending.sentFromY !== undefined &&
+      x === oldestPending.sentFromX &&
+      y === oldestPending.sentFromY;
+    if (!hardCorrection && correctedToSentSource && now - oldestPending.sentAt < MOVEMENT_ROUTE_REROUTE_AFTER_MS) {
+      scheduleMovementConfirmTick();
+      return;
+    }
+    if (directionStepPartiallyAdvanced(oldestPending, x, y, direction)) {
+      clearSettledSelfActionsAt(x, y, direction);
+      clearLocalMovementAnchor();
+      setDirectionStepPendingQueue(queue.slice(1));
+      directionStepNextAtRef.current = Math.max(
+        directionStepNextAtRef.current,
+        oldestPending.sentAt + movementCommandDelayMs("walk"),
+      );
+      scheduleMovementConfirmTick();
+      return;
+    }
+
+    if (hardCorrection || (allowRecovery && now - oldestPending.sentAt >= MOVEMENT_PENDING_ACTION_RECOVERY_MS)) {
+      movementBlockedStepsRef.current = movementBlockedStepsAfterDirectionCorrection(oldestPending, x, y, now);
       applyCrystalInputCorrection(x, y, now, direction);
+    } else {
+      scheduleMovementConfirmTick();
     }
   }
 
@@ -3551,19 +5671,106 @@ export default function HomePage() {
     visualUntil = directionStepVisualUntilRef.current,
   ) {
     movementInputBlockedUntilRef.current = now + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
+    crystalRunPrimedUntilRef.current = 0;
     directionStepNextAtRef.current = movementInputBlockedUntilRef.current;
     directionStepVisualUntilRef.current = Math.min(directionStepVisualUntilRef.current, now);
     queuedDirectionStepRef.current = null;
+    clearLocalMovementAnchor();
+    clearOutstandingSelfMovementActions();
     clearDirectionStepPendingQueue();
     if (predictedPlayerPositionRef.current && now < visualUntil) {
       setPredictedPlayerMotion({ x, y, direction: direction ?? predictedPlayerPositionRef.current.direction });
       return;
     }
-    setPredictedPlayerMotion(null);
+    predictedPlayerHoldUntilRef.current = 0;
+    clearLocalSelfPrediction();
   }
 
   function directionStepVisualUntil(step: DirectionStepPending) {
     return Math.max(directionStepVisualUntilRef.current, step.sentAt + movementStepIntervalMs(step.mode));
+  }
+
+  function directionStepPartiallyAdvanced(
+    pending: DirectionStepPending,
+    x: number,
+    y: number,
+    direction?: string,
+  ) {
+    if (
+      pending.mode !== "run" ||
+      !pending.direction ||
+      (direction && direction !== pending.direction) ||
+      pending.sentFromX === undefined ||
+      pending.sentFromY === undefined
+    ) {
+      return false;
+    }
+    if (x === pending.x && y === pending.y) {
+      return false;
+    }
+
+    const intermediate = pointMoveInDirection(
+      { x: pending.sentFromX, y: pending.sentFromY },
+      pending.direction,
+      1,
+    );
+    return x === intermediate.x && y === intermediate.y;
+  }
+
+  function directionStepReachedOrPassed(pending: DirectionStepPending, x: number, y: number) {
+    if (pending.x === x && pending.y === y) {
+      return true;
+    }
+    if (!pending.direction || pending.sentFromX === undefined || pending.sentFromY === undefined) {
+      return false;
+    }
+    return crystalActionReachedOrPassed(
+      {
+        fromX: pending.sentFromX,
+        fromY: pending.sentFromY,
+        x: pending.x,
+        y: pending.y,
+        direction: pending.direction,
+        mode: pending.mode,
+        sentAt: pending.sentAt,
+        visualUntil: pending.sentAt + movementStepIntervalMs(pending.mode),
+      },
+      x,
+      y,
+    );
+  }
+
+  function movementBlockedStepsAfterDirectionCorrection(
+    pending: DirectionStepPending,
+    serverX: number,
+    serverY: number,
+    now: number,
+  ) {
+    const recentSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
+    if (!pending.direction) {
+      return recentSteps;
+    }
+    if (
+      recentSteps.some(
+        (step) =>
+          step.fromX === serverX &&
+          step.fromY === serverY &&
+          step.direction === pending.direction &&
+          step.mode === pending.mode,
+      )
+    ) {
+      return recentSteps;
+    }
+    return [
+      ...recentSteps,
+      {
+        fromX: serverX,
+        fromY: serverY,
+        direction: pending.direction,
+        mode: pending.mode,
+        at: now,
+      },
+    ].slice(-MOVEMENT_ROUTE_MAX_BLOCKED_STEPS);
   }
 
   function recentMovementBlockedSteps(steps: MovementBlockedStep[] | undefined, now: number) {
@@ -3574,6 +5781,64 @@ export default function HomePage() {
 
   function countMovementBlockedStepsAtSource(steps: MovementBlockedStep[], x: number, y: number) {
     return steps.filter((step) => step.fromX === x && step.fromY === y).length;
+  }
+
+  function recordSelfNoProgressAck(x: number, y: number, direction: string | undefined, now: number) {
+    const previous = lastSelfNoProgressAckRef.current;
+    const sameTile =
+      previous &&
+      previous.x === x &&
+      previous.y === y &&
+      (!direction || !previous.direction || previous.direction === direction) &&
+      now - previous.at <= MOVEMENT_ROUTE_BLOCK_MEMORY_MS;
+    const next = {
+      x,
+      y,
+      direction: direction ?? previous?.direction,
+      at: now,
+      count: sameTile ? previous.count + 1 : 1,
+    };
+    lastSelfNoProgressAckRef.current = next;
+    return next;
+  }
+
+  function outstandingSelfMovementDirectionFromSource(x: number, y: number, fallbackDirection?: string) {
+    for (let index = crystalSelfActionFeedRef.current.length - 1; index >= 0; index -= 1) {
+      const entry = crystalSelfActionFeedRef.current[index];
+      if (entry.fromX === x && entry.fromY === y) {
+        return entry.direction;
+      }
+    }
+    for (let index = directionStepPendingQueueRef.current.length - 1; index >= 0; index -= 1) {
+      const pending = directionStepPendingQueueRef.current[index];
+      if (pending.sentFromX === x && pending.sentFromY === y && pending.direction) {
+        return pending.direction;
+      }
+    }
+    if (directionStepPendingRef.current?.sentFromX === x && directionStepPendingRef.current.sentFromY === y) {
+      return directionStepPendingRef.current.direction ?? fallbackDirection;
+    }
+    return queuedDirectionStepRef.current?.direction ?? fallbackDirection;
+  }
+
+  function rememberBlockedDirectionAtSource(x: number, y: number, direction: string, now: number) {
+    const recentSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
+    const nextSteps = [...recentSteps];
+    for (const mode of ["walk", "run"] as const) {
+      const exists = nextSteps.some(
+        (step) => step.fromX === x && step.fromY === y && step.direction === direction && step.mode === mode,
+      );
+      if (!exists) {
+        nextSteps.push({ fromX: x, fromY: y, direction, mode, at: now });
+      }
+    }
+    movementBlockedStepsRef.current = nextSteps.slice(-MOVEMENT_ROUTE_MAX_BLOCKED_STEPS);
+    heldDirectionBlockedUntilRef.current = {
+      x,
+      y,
+      direction,
+      until: now + MOVEMENT_ROUTE_BLOCK_MEMORY_MS,
+    };
   }
 
   function crystalMovementActionTowardWithRouteHints(
@@ -3632,6 +5897,39 @@ export default function HomePage() {
     return { point: { x: source.x, y: source.y }, direction: direct.direction, mode: direct.mode };
   }
 
+  function crystalMovementActionForDirection(
+    source: { x: number; y: number; direction?: string },
+    direction: string,
+    requestedMode: "walk" | "run",
+    blockedSteps: MovementBlockedStep[],
+    currentWorld: WorldState,
+  ): { point: { x: number; y: number }; direction: string; mode: "walk" | "run" } {
+    const directMode = requestedMode;
+    const directBlocked =
+      movementStepBlockedByRecentCorrection(source, direction, directMode, blockedSteps) ||
+      movementStepBlockedByVisibleEntity(source, direction, directMode, currentWorld) ||
+      movementStepBlockedByVisibleMapCell(source, direction, directMode, currentWorld);
+
+    if (!directBlocked) {
+      return {
+        point: pointMoveInDirection(source, direction, directMode === "run" ? 2 : 1),
+        direction,
+        mode: directMode,
+      };
+    }
+
+    if (
+      directMode === "run" &&
+      !movementStepBlockedByRecentCorrection(source, direction, "walk", blockedSteps) &&
+      !movementStepBlockedByVisibleEntity(source, direction, "walk", currentWorld) &&
+      !movementStepBlockedByVisibleMapCell(source, direction, "walk", currentWorld)
+    ) {
+      return { point: pointMoveInDirection(source, direction, 1), direction, mode: "walk" };
+    }
+
+    return { point: { x: source.x, y: source.y }, direction, mode: "walk" };
+  }
+
   function movementStepBlockedByRecentCorrection(
     source: { x: number; y: number },
     direction: string,
@@ -3682,6 +5980,34 @@ export default function HomePage() {
     return false;
   }
 
+  function movementPredictionShouldWaitForServer(
+    source: { x: number; y: number },
+    action: { point: { x: number; y: number }; direction: string; mode: "walk" | "run" },
+    currentWorld: WorldState,
+  ) {
+    if (action.point.x === source.x && action.point.y === source.y) {
+      return false;
+    }
+    if (Date.now() < movementPredictionBlockedUntilRef.current) {
+      return true;
+    }
+    const distance = action.mode === "run" ? 2 : 1;
+    for (let step = 1; step <= distance; step += 1) {
+      const point = pointMoveInDirection(source, action.direction, step);
+      const dynamicBlockerNearPath = currentWorld.entities.some(
+        (entity) =>
+          entity.objectId !== currentWorld.playerObjectId &&
+          !entity.dead &&
+          (entity.kind === "monster" || entity.disposition === "hostile") &&
+          pointTileDistance(point, entity) <= 1,
+      );
+      if (dynamicBlockerNearPath) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function movementRerouteDirections(direction: string) {
     return [-1, 1, -2, 2, -3, 3, 4]
       .map((offset) => rotatedMovementDirection(direction, offset))
@@ -3717,6 +6043,18 @@ export default function HomePage() {
       return recentSteps;
     }
 
+    if (
+      recentSteps.some(
+        (step) =>
+          step.fromX === serverX &&
+          step.fromY === serverY &&
+          step.direction === plan.sentDirection &&
+          step.mode === (plan.sentMode ?? plan.mode),
+      )
+    ) {
+      return recentSteps;
+    }
+
     return [
       ...recentSteps,
       {
@@ -3743,7 +6081,7 @@ export default function HomePage() {
       return;
     }
 
-    setPredictedPlayerMotion(null);
+    clearLocalSelfPrediction();
   }
 
   function clearPredictedPlayerAfterRouteCorrection(
@@ -3771,6 +6109,28 @@ export default function HomePage() {
     }
   }
 
+  function clearVisuallySettledDirectionStepPending(now: number) {
+    const pending = directionStepPendingRef.current;
+    if (!pending) {
+      return;
+    }
+    if (now < pending.sentAt + movementStepIntervalMs(pending.mode)) {
+      return;
+    }
+    const currentWorld = worldRef.current;
+    const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+    const authoritativeSelf = authoritativeSelfForPrediction(serverSelf);
+    const candidateReached = (candidate: PredictedPlayerMotion | null | undefined) =>
+      Boolean(candidate && candidate.x === pending.x && candidate.y === pending.y);
+    if (
+      candidateReached(authoritativeSelf) ||
+      candidateReached(serverSelf)
+    ) {
+      clearDirectionStepPendingQueue();
+      clearLocalSelfPrediction();
+    }
+  }
+
   function clearSettledPredictedPlayer(now: number) {
     const predicted = predictedPlayerPositionRef.current;
     if (!predicted) {
@@ -3778,13 +6138,15 @@ export default function HomePage() {
     }
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId);
-    if (serverSelf?.x === predicted.x && serverSelf.y === predicted.y) {
+    const authoritativeSelf = authoritativeSelfForPrediction(serverSelf ?? null);
+    if (authoritativeSelf?.x === predicted.x && authoritativeSelf.y === predicted.y) {
+      clearSettledSelfActionsAt(predicted.x, predicted.y, predicted.direction ?? authoritativeSelf.direction);
       const plan = movementPlanRef.current;
       if (plan?.pendingX === predicted.x && plan.pendingY === predicted.y) {
         movementPlanRef.current = {
           ...plan,
-          actionX: serverSelf.x,
-          actionY: serverSelf.y,
+          actionX: authoritativeSelf.x,
+          actionY: authoritativeSelf.y,
           pendingX: undefined,
           pendingY: undefined,
           pendingSentAt: undefined,
@@ -3797,12 +6159,19 @@ export default function HomePage() {
       if (directionStepPendingRef.current?.x === predicted.x && directionStepPendingRef.current.y === predicted.y) {
         clearDirectionStepPendingQueue();
       }
-      setPredictedPlayerMotion(null);
+      clearLocalSelfPrediction();
       return;
     }
-    if (movementPlanRef.current || directionStepPendingRef.current) {
+    const movementIdle = !hasSelfMovementTransportEvidence(now);
+    if (!movementIdle) {
       return;
     } else if (serverSelf) {
+      if (serverSelf.x !== predicted.x || serverSelf.y !== predicted.y) {
+        predictedPlayerHoldUntilRef.current = 0;
+        lastCrystalSelfRenderPositionRef.current = null;
+        clearLocalSelfPrediction();
+        return;
+      }
       if (now < Math.max(directionStepVisualUntilRef.current, predictedPlayerHoldUntilRef.current)) {
         return;
       }
@@ -3812,7 +6181,7 @@ export default function HomePage() {
       ) {
         return;
       }
-      setPredictedPlayerMotion(null);
+      clearLocalSelfPrediction();
     }
   }
 
@@ -3825,7 +6194,28 @@ export default function HomePage() {
       wsState={wsState}
       world={world}
       player={self}
-      predictedPlayerPosition={activePredictedPlayerPosition}
+      predictedPlayerPosition={null}
+      getLivePlayerRenderPosition={() => {
+        const currentWorld = worldRef.current;
+        const currentSelf =
+          currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+        const predicted = preserveCrystalSelfRenderPosition(
+          currentSelf,
+            chooseCrystalSelfRenderPosition(
+              currentSelf,
+              renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
+              activeCrystalSelfActionSource(currentSelf),
+            activeOutstandingSelfActionSource(currentSelf),
+            activeLocalMovementAnchor(currentSelf),
+            activeDirectionStepVisualSource(currentSelf),
+          ),
+        );
+        if (!currentSelf || !predicted) {
+          return null;
+        }
+        const lead = Math.max(Math.abs(predicted.x - currentSelf.x), Math.abs(predicted.y - currentSelf.y));
+        return lead <= MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES ? predicted : null;
+      }}
       selectedEntity={selectedEntity}
       sortedEntities={sortedEntities}
       viewportEntities={viewportEntities}
@@ -3849,9 +6239,12 @@ export default function HomePage() {
       onChatMessageChange={setChatMessage}
       onCreateAccount={createAccount}
       onSubmitLogin={submitLogin}
+      onPasskeyLogin={submitPasskeyLogin}
+      onWalletLogin={submitWalletLogin}
       onQuickEnter={quickEnterWorld}
       onResetClient={resetClient}
-      onSendChat={() => send({ type: "chat", message: chatMessage })}
+      onSendChat={(message) => send({ type: "chat", message })}
+      onRequestTrade={() => send({ type: "tradeRequest" })}
       onRentExpandedStorage={rentExpandedStorage}
       onLogout={() => send({ type: "logOut" })}
       onCreateCharacter={createCharacter}
@@ -3892,6 +6285,7 @@ export default function HomePage() {
       onViewportTileStepClick={(x, y) => handleViewportTileStepAction(x, y, "walk")}
       onViewportTileStepSecondaryAction={(x, y) => handleViewportTileStepAction(x, y, "run")}
       onViewportDirectionStep={handleViewportDirectionStep}
+      onViewportDirectionIntent={handleViewportDirectionIntent}
       onPickGroundDrop={pickGroundDrop}
       onSelectEntity={selectEntity}
       onActivateEntity={activateEntity}
@@ -4059,6 +6453,8 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
 
   switch (value.toLowerCase()) {
     case "shout":
+    case "shout2":
+    case "shout3":
       return "shout";
     case "trade":
       return "trade";
@@ -4069,13 +6465,20 @@ function gatewayChatChannel(value: unknown): UiLogChannel {
       return "group";
     case "guild":
       return "guild";
+    case "mentor":
+      return "mentor";
+    case "relationship":
+      return "relationship";
     case "system":
+    case "system2":
       return "system";
     case "hint":
       return "server";
     case "server":
       return "server";
     case "announcement":
+    case "levelup":
+    case "linemessage":
       return "announcement";
     default:
       return "normal";
@@ -4588,6 +6991,27 @@ function directionToward(source: WorldEntity | null, target: WorldEntity) {
   return directionFromPoint(source, target, target.direction ?? "Down");
 }
 
+function chooseCrystalSelfRenderPosition(
+  serverSelf: { x: number; y: number } | null,
+  ...candidates: Array<PredictedPlayerMotion | null>
+) {
+  if (!serverSelf) return candidates.find(Boolean) ?? null;
+  return candidates
+    .filter(
+      (candidate): candidate is PredictedPlayerMotion =>
+        candidate !== null &&
+        crystalMovementCandidateNotBehindServer(serverSelf, candidate, candidate.direction) &&
+        Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y)) <=
+          MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES,
+    )
+    .reduce<PredictedPlayerMotion | null>((best, candidate) => {
+      if (!best) return candidate;
+      const bestLead = Math.max(Math.abs(best.x - serverSelf.x), Math.abs(best.y - serverSelf.y));
+      const candidateLead = Math.max(Math.abs(candidate.x - serverSelf.x), Math.abs(candidate.y - serverSelf.y));
+      return candidateLead >= bestLead ? candidate : best;
+    }, null);
+}
+
 function movementStepIntervalMs(mode: "walk" | "run") {
   return mode === "run" ? RUN_STEP_INTERVAL_MS : WALK_STEP_INTERVAL_MS;
 }
@@ -4642,6 +7066,38 @@ function pointMoveInDirection(source: { x: number; y: number }, direction: strin
   }
 }
 
+function directionVector(direction: string | undefined) {
+  switch (direction) {
+    case "Up":
+      return { x: 0, y: -1 };
+    case "UpRight":
+      return { x: 1, y: -1 };
+    case "Right":
+      return { x: 1, y: 0 };
+    case "DownRight":
+      return { x: 1, y: 1 };
+    case "Down":
+      return { x: 0, y: 1 };
+    case "DownLeft":
+      return { x: -1, y: 1 };
+    case "Left":
+      return { x: -1, y: 0 };
+    case "UpLeft":
+      return { x: -1, y: -1 };
+    default:
+      return null;
+  }
+}
+
+function movementDirectionsOppose(left: string | undefined, right: string | undefined) {
+  const leftVector = directionVector(left);
+  const rightVector = directionVector(right);
+  if (!leftVector || !rightVector) {
+    return false;
+  }
+  return leftVector.x * rightVector.x + leftVector.y * rightVector.y < 0;
+}
+
 function predictedPlayerAheadOfServer(
   server: { x: number; y: number },
   predicted: PredictedPlayerMotion,
@@ -4658,6 +7114,17 @@ function predictedPlayerAheadOfServer(
   }
 
   return false;
+}
+
+function crystalMovementCandidateNotBehindServer(
+  server: { x: number; y: number },
+  candidate: PredictedPlayerMotion,
+  direction?: string,
+) {
+  if (candidate.x === server.x && candidate.y === server.y) {
+    return true;
+  }
+  return predictedPlayerAheadOfServer(server, candidate, direction);
 }
 
 function directionFromPoint(
