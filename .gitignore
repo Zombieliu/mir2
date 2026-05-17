@@ -33,6 +33,8 @@ tools/procmon/
 **/screenshots/
 **/playwright-report/
 **/test-results/
+mir2-web3/docs/generated/player-qa/movement-diagnostics/
+mir2-web3/docs/generated/player-qa/movement-jitter/
 
 # Logs and temporary notes
 **/*.log
