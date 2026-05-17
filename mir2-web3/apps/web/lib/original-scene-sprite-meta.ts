@@ -82,6 +82,10 @@ export function loadOriginalSceneSpriteLibrary(
 }
 
 async function fetchOriginalSceneSpriteMeta(normalizedKey: string) {
+  if (!availableSceneSpriteLibraries.has(normalizedKey) && sourceSceneSpriteLibraries.has(normalizedKey)) {
+    return fetch(`/api/original-ui-meta?library=${encodeURIComponent(normalizedKey)}`);
+  }
+
   const staticResponse = await fetch(`/original-ui/${normalizedKey}/meta.json`);
   if (staticResponse.ok || !sourceSceneSpriteLibraries.has(normalizedKey)) {
     return staticResponse;

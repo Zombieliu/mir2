@@ -1857,6 +1857,13 @@ export default function HomePage() {
       predictedStillPlausible &&
       predictedPlayerAheadOfServer({ x, y }, predicted, predicted.direction ?? direction);
     const isHardFailurePacket = packet === "UserDashFail";
+    const correctedToOldestSource =
+      oldest.fromX === x &&
+      oldest.fromY === y &&
+      (!direction || !oldest.direction || oldest.direction === direction);
+    if (!isHardFailurePacket && correctedToOldestSource && (oldest.x !== x || oldest.y !== y)) {
+      return "correction";
+    }
     if (!isHardFailurePacket && (correctedToKnownSource || predictedStillAhead)) {
       scheduleMovementConfirmTick();
       return "staleEcho";
@@ -5676,6 +5683,7 @@ export default function HomePage() {
     directionStepVisualUntilRef.current = Math.min(directionStepVisualUntilRef.current, now);
     queuedDirectionStepRef.current = null;
     clearLocalMovementAnchor();
+    clearCrystalSelfActionFeed();
     clearOutstandingSelfMovementActions();
     clearDirectionStepPendingQueue();
     if (predictedPlayerPositionRef.current && now < visualUntil) {

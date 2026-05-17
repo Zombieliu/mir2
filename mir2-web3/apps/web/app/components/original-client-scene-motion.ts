@@ -12,6 +12,9 @@ import {
   type ViewportOffset,
 } from "./original-client-scene-layout";
 
+const MAX_ENTITY_CONTINUOUS_TILE_DELTA = 3;
+const MAX_PLAYER_CONTINUOUS_TILE_DELTA = 4;
+
 function animationStateForMovement(
   entity: DisplayEntity,
   tileDistance: number,
@@ -126,7 +129,18 @@ export function refreshEntityMotionSnapshots(
     const isRenderPlayer = Boolean(renderPlayer && entity.objectId === renderPlayer.objectId);
     const previous = snapshots[entity.objectId];
     if (previous && previous.toX === entity.x && previous.toY === entity.y) {
-      nextSnapshots[entity.objectId] = previous;
+      nextSnapshots[entity.objectId] =
+        previous.expiresAt > now
+          ? previous
+          : {
+              fromX: entity.x,
+              fromY: entity.y,
+              toX: entity.x,
+              toY: entity.y,
+              animationState: "standing",
+              startedAt: now,
+              expiresAt: 0,
+            };
       continue;
     }
 
@@ -138,19 +152,22 @@ export function refreshEntityMotionSnapshots(
       previousY = entity.y;
       tileDistance = 0;
     }
-    if (isRenderPlayer && previous && tileDistance > 3) {
+    const maxContinuousTileDelta = isRenderPlayer
+      ? MAX_PLAYER_CONTINUOUS_TILE_DELTA
+      : MAX_ENTITY_CONTINUOUS_TILE_DELTA;
+    if (isRenderPlayer && previous && tileDistance > maxContinuousTileDelta) {
       const previousTargetDistance = Math.max(
         Math.abs(entity.x - previous.toX),
         Math.abs(entity.y - previous.toY),
       );
-      if (previousTargetDistance <= 3) {
+      if (previousTargetDistance <= maxContinuousTileDelta) {
         previousX = previous.toX;
         previousY = previous.toY;
         tileDistance = previousTargetDistance;
       }
     }
 
-    if (tileDistance > 3) {
+    if (tileDistance > maxContinuousTileDelta) {
       nextSnapshots[entity.objectId] = {
         fromX: entity.x,
         fromY: entity.y,
