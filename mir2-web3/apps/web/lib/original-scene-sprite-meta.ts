@@ -1,4 +1,5 @@
 import originalSceneSpriteManifest from "../public/original-ui/manifest.generated.json";
+import originalSceneSpriteSourceIndex from "../public/original-ui/source-libraries.generated.json";
 
 export type OriginalSceneSpriteFrameMeta = {
   index: number;
@@ -32,13 +33,19 @@ const availableSceneSpriteLibraries = new Set(
     normalizeSceneSpriteLibraryKey,
   ),
 );
+const sourceSceneSpriteLibraries = new Set(
+  Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})
+    .map(normalizeSceneSpriteLibraryKey)
+    .filter((libraryKey) => !libraryKey.startsWith("Map/")),
+);
 
 export function normalizeSceneSpriteLibraryKey(libraryKey: string) {
   return libraryKey.replaceAll("\\", "/");
 }
 
 export function originalSceneSpriteLibraryExists(libraryKey: string) {
-  return availableSceneSpriteLibraries.has(normalizeSceneSpriteLibraryKey(libraryKey));
+  const normalizedKey = normalizeSceneSpriteLibraryKey(libraryKey);
+  return availableSceneSpriteLibraries.has(normalizedKey) || sourceSceneSpriteLibraries.has(normalizedKey);
 }
 
 export function loadOriginalSceneSpriteLibrary(
@@ -53,7 +60,7 @@ export function loadOriginalSceneSpriteLibrary(
     return Promise.reject(new Error(`sprite meta ${normalizedKey} is not exported`));
   }
 
-  const pending = fetch(`/original-ui/${normalizedKey}/meta.json`)
+  const pending = fetchOriginalSceneSpriteMeta(normalizedKey)
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(`sprite meta ${normalizedKey} returned ${response.status}`);
@@ -72,6 +79,15 @@ export function loadOriginalSceneSpriteLibrary(
 
   libraryCache.set(normalizedKey, pending);
   return pending;
+}
+
+async function fetchOriginalSceneSpriteMeta(normalizedKey: string) {
+  const staticResponse = await fetch(`/original-ui/${normalizedKey}/meta.json`);
+  if (staticResponse.ok || !sourceSceneSpriteLibraries.has(normalizedKey)) {
+    return staticResponse;
+  }
+
+  return fetch(`/api/original-ui-meta?library=${encodeURIComponent(normalizedKey)}`);
 }
 
 export function frameMetaForIndex(

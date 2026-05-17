@@ -1,0 +1,344 @@
+"use client";
+
+import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
+import type { DisplayEntity, DisplayWorld } from "./original-client-types";
+import {
+  EMPTY_VIEWPORT_MAP_SPRITES,
+  EMPTY_VIEWPORT_OFFSET,
+  VIEWPORT_CELL_HEIGHT,
+  VIEWPORT_CELL_WIDTH,
+  VIEWPORT_RANGE_X,
+  VIEWPORT_RANGE_Y,
+  VIEWPORT_TILE_LEFT_ORIGIN,
+  VIEWPORT_TILE_TOP_ORIGIN,
+  viewportDepthForCell,
+  type SceneBackdropTile,
+  type ViewportMapSprite,
+  type ViewportMapSprites,
+  type ViewportOffset,
+} from "./original-client-scene-layout";
+
+export function GameSceneBackdrop({
+  world,
+  player,
+  floorSprites,
+  cameraOffset,
+}: {
+  world: DisplayWorld;
+  player: DisplayEntity | null;
+  floorSprites: ViewportMapSprite[];
+  cameraOffset: ViewportOffset;
+}) {
+  if (floorSprites.length) {
+    return (
+      <div className="game-scene-backdrop">
+        {floorSprites.map((sprite) => (
+          <img
+            key={sprite.key}
+            className="scene-backdrop-sprite"
+            data-map-sprite-key={sprite.key}
+            src={sprite.path}
+            alt=""
+            draggable={false}
+            style={{
+              left: sprite.left + cameraOffset.x,
+              top: sprite.top + cameraOffset.y,
+              width: sprite.width,
+              height: sprite.height,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (!world.originalMapRegion) {
+    return null;
+  }
+
+  const tiles = buildSceneBackdropTiles(world, player);
+
+  if (!tiles.length) {
+    return null;
+  }
+
+  return (
+    <div className="game-scene-backdrop">
+      {tiles.map((tile) => (
+        <div
+          key={tile.key}
+          className="scene-backdrop-tile"
+          data-map-sprite-key={tile.key}
+          style={{
+            left: tile.left + cameraOffset.x,
+            top: tile.top + cameraOffset.y,
+            backgroundImage: `linear-gradient(${tile.tint}, ${tile.tint}), url("${tile.texture}")`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+
+
+export function buildViewportMapSprites(
+  world: DisplayWorld,
+  player: DisplayEntity,
+  animationFrameIndex: number,
+): ViewportMapSprites {
+  if (!world.originalMapRegion) {
+    return EMPTY_VIEWPORT_MAP_SPRITES;
+  }
+
+  const floorMinX = player.x - VIEWPORT_RANGE_X;
+  const floorMaxX = player.x + VIEWPORT_RANGE_X;
+  const floorMinY = player.y - VIEWPORT_RANGE_Y;
+  const floorMaxY = player.y + VIEWPORT_RANGE_Y;
+  const objectMinX = floorMinX - 4;
+  const objectMaxX = floorMaxX + 4;
+  const objectMinY = floorMinY - 4;
+  const objectMaxY = floorMaxY + 25;
+  const floor: ViewportMapSprite[] = [];
+  const objects: ViewportMapSprite[] = [];
+
+  for (const cell of world.originalMapRegion.cells) {
+    const inFloorBounds =
+      cell.x >= floorMinX && cell.x <= floorMaxX && cell.y >= floorMinY && cell.y <= floorMaxY;
+    const inObjectBounds =
+      cell.x >= objectMinX && cell.x <= objectMaxX && cell.y >= objectMinY && cell.y <= objectMaxY;
+
+    appendViewportMapSprite(
+      floor,
+      objects,
+      world.originalMapRegion,
+      cell.back,
+      cell,
+      player,
+      animationFrameIndex,
+      inFloorBounds,
+      inObjectBounds,
+    );
+    appendViewportMapSprite(
+      floor,
+      objects,
+      world.originalMapRegion,
+      cell.middle,
+      cell,
+      player,
+      animationFrameIndex,
+      inFloorBounds,
+      inObjectBounds,
+    );
+    appendViewportMapSprite(
+      floor,
+      objects,
+      world.originalMapRegion,
+      cell.front,
+      cell,
+      player,
+      animationFrameIndex,
+      inFloorBounds,
+      inObjectBounds,
+    );
+    appendViewportMapSprite(
+      floor,
+      objects,
+      world.originalMapRegion,
+      cell.tileAnimation,
+      cell,
+      player,
+      animationFrameIndex,
+      false,
+      inObjectBounds,
+    );
+  }
+
+  return {
+    floor,
+    objects,
+  };
+}
+
+function appendViewportMapSprite(
+  floorTarget: ViewportMapSprite[],
+  objectTarget: ViewportMapSprite[],
+  region: OriginalMapRegion,
+  spriteId: string | null | undefined,
+  cell: { x: number; y: number },
+  player: DisplayEntity,
+  animationFrameIndex: number,
+  inFloorBounds: boolean,
+  inObjectBounds: boolean,
+) {
+  if (!spriteId) {
+    return;
+  }
+
+  const sprite = region.sprites[spriteId];
+  if (!sprite || !sprite.frames.length) {
+    return;
+  }
+
+  const target =
+    sprite.drawMode === "floor"
+      ? inFloorBounds
+        ? floorTarget
+        : null
+      : inObjectBounds
+        ? objectTarget
+        : null;
+
+  if (!target) {
+    return;
+  }
+
+  const frame = sprite.frames[animationFrameIndex % sprite.frames.length] ?? sprite.frames[0];
+  if (!frame) {
+    return;
+  }
+
+  const cellLeft = VIEWPORT_TILE_LEFT_ORIGIN + (cell.x - player.x) * VIEWPORT_CELL_WIDTH;
+  const cellTop = VIEWPORT_TILE_TOP_ORIGIN + (cell.y - player.y) * VIEWPORT_CELL_HEIGHT;
+  const crystalOffset = crystalMapFrameOffset(frame);
+  const useCrystalOffset = sprite.drawMode === "object" && crystalMapFrameUsesOffset(frame);
+
+  target.push({
+    key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
+    path: frame.path,
+    cellX: cell.x,
+    cellY: cell.y,
+    left: cellLeft + (useCrystalOffset ? crystalOffset.x : 0),
+    top:
+      sprite.drawMode === "object"
+        ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height + (useCrystalOffset ? crystalOffset.y : 0)
+        : cellTop,
+    width: frame.width,
+    height: frame.height,
+    zIndex: viewportDepthForCell(cell.x, cell.y, player, sprite.drawMode === "object" ? 1 : 0),
+  });
+}
+
+function crystalMapFrameUsesOffset(frame: OriginalMapSpriteFrame) {
+  return crystalMapFrameHasCrystalOffsetMode(frame.path);
+}
+
+function crystalMapFrameOffset(frame: OriginalMapSpriteFrame): ViewportOffset {
+  if (!crystalMapFrameHasCrystalOffsetMode(frame.path)) {
+    return EMPTY_VIEWPORT_OFFSET;
+  }
+
+  if (typeof frame.offsetX === "number" || typeof frame.offsetY === "number") {
+    return {
+      x: frame.offsetX ?? 0,
+      y: frame.offsetY ?? 0,
+    };
+  }
+
+  // Crystal draws the Bichon torch/fire blend frames with the Lib frame offset enabled.
+  // Older packaged starter-map JSON predates offset export; these 100x100 light frames
+  // are anchored around the red torch head, not the tile floor or lamp base.
+  if (/\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(frame.path)) {
+    return { x: -50, y: -100 };
+  }
+
+  return EMPTY_VIEWPORT_OFFSET;
+}
+
+function crystalMapFrameHasCrystalOffsetMode(path: string) {
+  return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path);
+}
+
+function buildSceneBackdropTiles(world: DisplayWorld, player: DisplayEntity | null): SceneBackdropTile[] {
+  const center = player
+    ? { x: player.x, y: player.y }
+    : world.sceneView?.center
+      ? { x: world.sceneView.center.x, y: world.sceneView.center.y }
+      : null;
+
+  if (!center) {
+    return [];
+  }
+
+  const startX = center.x - VIEWPORT_RANGE_X;
+  const endX = center.x + VIEWPORT_RANGE_X;
+  const startY = center.y - VIEWPORT_RANGE_Y;
+  const endY = center.y + VIEWPORT_RANGE_Y;
+  const tiles: SceneBackdropTile[] = [];
+
+  for (let y = startY; y <= endY; y += 1) {
+    for (let x = startX; x <= endX; x += 1) {
+      const terrain = terrainKindAt(world.terrainPatches, x, y);
+      const variation = Math.abs((x * 31 + y * 17) % 2);
+
+      tiles.push({
+        key: `${x}:${y}`,
+        left: VIEWPORT_TILE_LEFT_ORIGIN + (x - center.x) * VIEWPORT_CELL_WIDTH,
+        top: VIEWPORT_TILE_TOP_ORIGIN + (y - center.y) * VIEWPORT_CELL_HEIGHT,
+        texture: sceneTextureForTerrain(terrain, variation),
+        tint: sceneTintForTerrain(terrain, variation),
+      });
+    }
+  }
+
+  return tiles;
+}
+
+function terrainKindAt(
+  patches: Array<{ x: number; y: number; width: number; height: number; kind: string }>,
+  x: number,
+  y: number,
+) {
+  for (let index = patches.length - 1; index >= 0; index -= 1) {
+    const patch = patches[index];
+    if (x >= patch.x && x < patch.x + patch.width && y >= patch.y && y < patch.y + patch.height) {
+      return patch.kind;
+    }
+  }
+
+  return patches[0]?.kind ?? "grass";
+}
+
+function sceneTextureForTerrain(terrain: string, variation: number) {
+  switch (terrain) {
+    case "dirt":
+      return variation === 0 ? "/debug/map-samples/smtile-0.png" : "/debug/map-samples/smtile-104.png";
+    case "road":
+      return variation === 0 ? "/debug/map-samples/smtile-32.png" : "/debug/map-samples/smtile-52.png";
+    case "water":
+      return variation === 0 ? "/debug/map-samples/smtile-0.png" : "/debug/map-samples/tiles-1.png";
+    case "stone":
+      return variation === 0 ? "/debug/map-samples/tiles-0.png" : "/debug/map-samples/tiles-1.png";
+    default:
+      return variation === 0 ? "/debug/map-samples/smtile-72.png" : "/debug/map-samples/smtile-80.png";
+  }
+}
+
+function sceneTintForTerrain(terrain: string, variation: number) {
+  switch (terrain) {
+    case "dirt":
+      return variation === 0 ? "rgba(121, 84, 38, 0.16)" : "rgba(88, 58, 24, 0.10)";
+    case "road":
+      return variation === 0 ? "rgba(146, 108, 52, 0.14)" : "rgba(117, 85, 39, 0.12)";
+    case "water":
+      return variation === 0 ? "rgba(34, 84, 106, 0.48)" : "rgba(20, 58, 79, 0.52)";
+    case "stone":
+      return variation === 0 ? "rgba(76, 74, 66, 0.34)" : "rgba(54, 53, 46, 0.28)";
+    default:
+      return variation === 0 ? "rgba(58, 96, 36, 0.10)" : "rgba(42, 74, 28, 0.08)";
+  }
+}
+
+export function mapSpriteBlendMode(path: string) {
+  return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path) ? "screen" : undefined;
+}
+
+export function mapSpriteRenderPath(path: string) {
+  const frame = bichonTorchLightFrame(path);
+  return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
+}
+
+function bichonTorchLightFrame(path: string) {
+  const match = path.match(/\/original-map\/WemadeMir2\/Objects\/(27(?:2[3-9]|3[0-2]))\.png$/i);
+  return match?.[1] ?? null;
+}
