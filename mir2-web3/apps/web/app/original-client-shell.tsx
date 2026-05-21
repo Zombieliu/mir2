@@ -22,18 +22,23 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import {
+  playOriginalSoundPath,
+  setOriginalMusic,
+  stopOriginalAudio,
+  unlockOriginalAudio,
+} from "../lib/original-audio";
+import {
   LanguageSelector,
   LoginOverlay,
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene } from "./components/original-client-game-ui-scene";
-import type { OriginalClientShellProps } from "./components/original-client-shell-types";
+import type { OriginalClientShellProps, SceneAssetReadiness } from "./components/original-client-shell-types";
 import {
   LOGIN_STATIC_BACKGROUND_FRAME,
   LOGIN_TRANSITION_FRAME_MS,
   ORIGINAL_AUDIO,
   ORIGINAL_EFFECT_VOLUME,
-  ORIGINAL_MUSIC_VOLUME,
   desiredMusicForScreen,
   entityKindLabelKey,
   selectedTargetActionLabel,
@@ -71,12 +76,15 @@ import {
   buildViewportMapSprites,
   cameraMotionOffsetForEntity,
   entityAnimationStateForEntity,
+  mapSpriteRenderPath,
   portraitFramesForCharacter,
   projectileProgress,
   refreshEntityMotionSnapshots,
+  sceneAssetCandidateUrls,
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
+import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -88,19 +96,71 @@ type HeldScenePointer = {
   tileY?: number;
 };
 
+type KeyboardMoveDirection = "up" | "down" | "left" | "right";
+
+const KEYBOARD_MOVE_KEYS = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
+
+function keyboardMoveDirectionForKey(key: string): KeyboardMoveDirection | null {
+  switch (key.toLowerCase()) {
+    case "w":
+    case "arrowup":
+      return "up";
+    case "s":
+    case "arrowdown":
+      return "down";
+    case "a":
+    case "arrowleft":
+      return "left";
+    case "d":
+    case "arrowright":
+      return "right";
+    default:
+      return null;
+  }
+}
+
+function crystalDirectionFromKeyboardVector(dx: number, dy: number): string | null {
+  if (dx === 0 && dy < 0) return "Up";
+  if (dx > 0 && dy < 0) return "UpRight";
+  if (dx > 0 && dy === 0) return "Right";
+  if (dx > 0 && dy > 0) return "DownRight";
+  if (dx === 0 && dy > 0) return "Down";
+  if (dx < 0 && dy > 0) return "DownLeft";
+  if (dx < 0 && dy === 0) return "Left";
+  if (dx < 0 && dy < 0) return "UpLeft";
+  return null;
+}
+
+function isKeyboardMoveKey(key: string) {
+  return KEYBOARD_MOVE_KEYS.has(key.toLowerCase());
+}
+
+function keyboardInputTargetIsEditable(target: EventTarget | null) {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
+
 export function OriginalClientShell({
   language,
   screen,
   runtimePhase,
   runtimeMessage,
   wsState,
+  reconnectStatus,
   world,
   player,
   predictedPlayerPosition,
+  getLivePlayerRenderPosition,
   selectedEntity,
   sortedEntities,
   viewportEntities,
   viewportTiles,
+  sceneInteractionReady,
+  onSceneAssetReadinessChange,
   logs,
   accountId,
   password,
@@ -120,10 +180,13 @@ export function OriginalClientShell({
   onChatMessageChange,
   onCreateAccount,
   onSubmitLogin,
+  onPasskeyLogin,
+  onWalletLogin,
   onQuickEnter,
   onResetClient,
   onExitSelect,
   onSendChat,
+  onRequestTrade,
   onRentExpandedStorage,
   onLogout,
   onCreateCharacter,
@@ -163,6 +226,7 @@ export function OriginalClientShell({
   onViewportTileStepClick,
   onViewportTileStepSecondaryAction,
   onViewportDirectionStep,
+  onViewportDirectionIntent,
   onPickGroundDrop,
   onSelectEntity,
   onActivateEntity,
@@ -184,15 +248,28 @@ export function OriginalClientShell({
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(() => Date.now());
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
+  const [forceMobileControls, setForceMobileControls] = useState(false);
   const previousScreenRef = useRef<ClientScreen>(screen);
-  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
-  const loginEffectAudioRef = useRef<HTMLAudioElement | null>(null);
-  const activeMusicSrcRef = useRef<string | null>(null);
-  const pendingMusicSrcRef = useRef<string | null>(null);
+  const reconnectSeconds =
+    reconnectStatus.nextAttemptAt === null
+      ? null
+      : Math.max(1, Math.ceil((reconnectStatus.nextAttemptAt - motionNow) / 1000));
+  const reconnectMessage =
+    reconnectStatus.mode === "scheduled"
+      ? t("ui.reconnectScheduled", [reconnectSeconds ?? 1], "Connection lost. Reconnecting in {0}s.")
+      : reconnectStatus.mode === "connecting"
+        ? t("ui.reconnectConnecting", [], "Reconnecting...")
+        : reconnectStatus.mode === "resuming"
+          ? t("ui.reconnectRestoring", [], "Restoring character...")
+          : reconnectStatus.mode === "failed"
+            ? t("ui.reconnectFailed", [], "Connection lost. Please log in again.")
+            : null;
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const heldKeyboardMoveKeysRef = useRef<Set<KeyboardMoveDirection>>(new Set());
+  const heldKeyboardRunModeRef = useRef(false);
   const latestMoveInputRef = useRef<{
     screen: ClientScreen;
     player: DisplayEntity | null;
@@ -204,6 +281,8 @@ export function OriginalClientShell({
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
   });
+  const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
+  sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
 
   const selectedCharacter = characters[selectedCharacterIndex] ?? null;
   const selectedPortraitFrames = selectedCharacter ? portraitFramesForCharacter(selectedCharacter) : [];
@@ -219,41 +298,27 @@ export function OriginalClientShell({
         ] ?? loginBackgroundFrame;
   const loginTransitionAudioActive = screen === "select" && loginTransitionFrame !== null;
 
-  const syncMusic = useCallback((src: string | null) => {
-    pendingMusicSrcRef.current = src;
-
-    if (!src) {
-      musicAudioRef.current?.pause();
-      activeMusicSrcRef.current = null;
-      return;
-    }
-
-    const audio = musicAudioRef.current ?? new Audio();
-    musicAudioRef.current = audio;
-
-    if (activeMusicSrcRef.current !== src) {
-      audio.pause();
-      audio.src = src;
-      audio.currentTime = 0;
-      activeMusicSrcRef.current = src;
-    }
-
-    audio.loop = true;
-    audio.volume = ORIGINAL_MUSIC_VOLUME;
-    void audio.play().catch(() => undefined);
-  }, []);
-
-  const playLoginEffect = useCallback(() => {
-    const audio = loginEffectAudioRef.current ?? new Audio();
-    loginEffectAudioRef.current = audio;
-    audio.src = ORIGINAL_AUDIO.loginEffect;
-    audio.currentTime = 0;
-    audio.volume = ORIGINAL_EFFECT_VOLUME;
-    void audio.play().catch(() => undefined);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setForceMobileControls(params.get("mobileControls") === "1" || params.get("mobile") === "1");
   }, []);
 
   useEffect(() => {
-    const handleUserAudioGesture = () => syncMusic(pendingMusicSrcRef.current);
+    if (screen === "game") {
+      stageFrameRef.current?.focus({ preventScroll: true });
+    }
+  }, [screen]);
+
+  const syncMusic = useCallback((src: string | null) => {
+    setOriginalMusic(src);
+  }, []);
+
+  const playLoginEffect = useCallback(() => {
+    playOriginalSoundPath(ORIGINAL_AUDIO.loginEffect, ORIGINAL_EFFECT_VOLUME);
+  }, []);
+
+  useEffect(() => {
+    const handleUserAudioGesture = () => unlockOriginalAudio();
 
     window.addEventListener("pointerdown", handleUserAudioGesture, true);
     window.addEventListener("keydown", handleUserAudioGesture, true);
@@ -261,10 +326,9 @@ export function OriginalClientShell({
     return () => {
       window.removeEventListener("pointerdown", handleUserAudioGesture, true);
       window.removeEventListener("keydown", handleUserAudioGesture, true);
-      musicAudioRef.current?.pause();
-      loginEffectAudioRef.current?.pause();
+      stopOriginalAudio();
     };
-  }, [syncMusic]);
+  }, []);
 
   useEffect(() => {
     const previousScreen = previousScreenRef.current;
@@ -379,13 +443,11 @@ export function OriginalClientShell({
         return;
       }
 
-      const target = event.target;
-      if (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement ||
-        (target instanceof HTMLElement && target.isContentEditable)
-      ) {
+      if (keyboardInputTargetIsEditable(event.target)) {
+        return;
+      }
+
+      if (isKeyboardMoveKey(event.key)) {
         return;
       }
 
@@ -396,7 +458,7 @@ export function OriginalClientShell({
           return;
         }
 
-        if (event.key.toLowerCase() === "a") {
+        if (event.key.toLowerCase() === "f") {
           event.preventDefault();
           onApproachTarget();
           return;
@@ -426,6 +488,95 @@ export function OriginalClientShell({
     return () => window.removeEventListener("keydown", handleShortcutKey);
   }, [screen, selectedEntity, world.beltItems, onApproachTarget, onPrimaryTargetAction, onUseItem]);
 
+  function dispatchKeyboardMoveInput() {
+    const latest = latestMoveInputRef.current;
+    if (latest.screen !== "game") return;
+    if (!sceneInteractionReady) return;
+    if (!latest.renderPlayer && !latest.player) return;
+
+    const heldKeys = heldKeyboardMoveKeysRef.current;
+    let dx = 0;
+    let dy = 0;
+    if (heldKeys.has("left")) dx -= 1;
+    if (heldKeys.has("right")) dx += 1;
+    if (heldKeys.has("up")) dy -= 1;
+    if (heldKeys.has("down")) dy += 1;
+    if (dx === 0 && dy === 0) return;
+
+    const direction = crystalDirectionFromKeyboardVector(dx, dy);
+    if (!direction) return;
+    onViewportDirectionIntent(direction, heldKeyboardRunModeRef.current ? "run" : "walk");
+  }
+
+  useEffect(() => {
+    if (screen !== "game") {
+      heldKeyboardMoveKeysRef.current.clear();
+      heldKeyboardRunModeRef.current = false;
+      return;
+    }
+
+    function handleKeyboardMoveDown(event: KeyboardEvent) {
+      if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
+        return;
+      }
+
+      if (event.key === "Shift") {
+        if (!sceneInteractionReady) {
+          return;
+        }
+        heldKeyboardRunModeRef.current = true;
+        return;
+      }
+
+      const direction = keyboardMoveDirectionForKey(event.key);
+      if (!direction) {
+        return;
+      }
+
+      event.preventDefault();
+      if (!sceneInteractionReady) {
+        return;
+      }
+      heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+      const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
+      heldKeyboardMoveKeysRef.current.add(direction);
+      if (!alreadyHeld && !event.repeat) {
+        dispatchKeyboardMoveInput();
+      }
+    }
+
+    function handleKeyboardMoveUp(event: KeyboardEvent) {
+      if (event.key === "Shift") {
+        heldKeyboardRunModeRef.current = false;
+        return;
+      }
+
+      const direction = keyboardMoveDirectionForKey(event.key);
+      if (direction) {
+        event.preventDefault();
+        heldKeyboardMoveKeysRef.current.delete(direction);
+        heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+      }
+    }
+
+    const timer = window.setInterval(dispatchKeyboardMoveInput, CRYSTAL_MOVE_INPUT_INTERVAL_MS);
+    const stop = () => {
+      heldKeyboardMoveKeysRef.current.clear();
+      heldKeyboardRunModeRef.current = false;
+    };
+
+    window.addEventListener("keydown", handleKeyboardMoveDown);
+    window.addEventListener("keyup", handleKeyboardMoveUp);
+    window.addEventListener("blur", stop);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("keydown", handleKeyboardMoveDown);
+      window.removeEventListener("keyup", handleKeyboardMoveUp);
+      window.removeEventListener("blur", stop);
+    };
+  }, [screen, sceneInteractionReady, onViewportDirectionIntent]);
+
   useEffect(() => {
     if (screen !== "game") {
       return;
@@ -441,19 +592,19 @@ export function OriginalClientShell({
     return () => window.cancelAnimationFrame(animationFrame);
   }, [screen]);
 
-  const renderPlayer = useMemo(() => (
+  const livePlayerRenderPosition = getLivePlayerRenderPosition?.() ?? predictedPlayerPosition;
+  const renderPlayer =
     player &&
-    predictedPlayerPosition &&
-    Math.max(Math.abs(player.x - predictedPlayerPosition.x), Math.abs(player.y - predictedPlayerPosition.y)) <=
+    livePlayerRenderPosition &&
+    Math.max(Math.abs(player.x - livePlayerRenderPosition.x), Math.abs(player.y - livePlayerRenderPosition.y)) <=
       MAX_PREDICTED_PLAYER_LEAD_TILES
       ? {
           ...player,
-          x: predictedPlayerPosition.x,
-          y: predictedPlayerPosition.y,
-          direction: predictedPlayerPosition.direction ?? player.direction,
+          x: livePlayerRenderPosition.x,
+          y: livePlayerRenderPosition.y,
+          direction: livePlayerRenderPosition.direction ?? player.direction,
         }
-      : player
-  ), [player, predictedPlayerPosition]);
+      : player;
 
   useEffect(() => {
     if (screen !== "game") {
@@ -563,6 +714,30 @@ export function OriginalClientShell({
   const playerCameraMotionOffset = renderPlayer
     ? cameraMotionOffsetForEntity(renderPlayer, entityMotionSnapshotsRef.current, motionNow)
     : EMPTY_VIEWPORT_OFFSET;
+  if (typeof window !== "undefined") {
+    (
+      window as typeof window & {
+        __mir2SceneMotionDebug?: unknown;
+      }
+    ).__mir2SceneMotionDebug = {
+      motionNow,
+      renderPlayer: renderPlayer
+        ? {
+            objectId: renderPlayer.objectId,
+            x: renderPlayer.x,
+            y: renderPlayer.y,
+            direction: renderPlayer.direction,
+            movementAnimation: renderPlayer.movementAnimation,
+            movementStartedAt: renderPlayer.movementStartedAt,
+            movementUntil: renderPlayer.movementUntil,
+          }
+        : null,
+      playerCameraMotionOffset,
+      playerMotionSnapshot: renderPlayer
+        ? entityMotionSnapshotsRef.current[renderPlayer.objectId] ?? null
+        : null,
+    };
+  }
   latestMoveInputRef.current = {
     screen,
     player,
@@ -617,6 +792,66 @@ export function OriginalClientShell({
   const viewportDepthPlayer = renderPlayer ?? player ?? { x: 0, y: 0 };
   const showSyntheticScene =
     screen === "game" && !viewportMapSprites.floor.length && Boolean(world.originalMapRegion);
+  const sceneAssetUrlsRef = useRef<string[]>([]);
+  sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites);
+  const sceneAssetReadinessKey =
+    screen === "game" && renderPlayer && world.originalMapRegion
+      ? [
+          world.originalMapRegion.mapFileName,
+          world.originalMapRegion.regionBounds.minX,
+          world.originalMapRegion.regionBounds.minY,
+          world.originalMapRegion.regionBounds.maxX,
+          world.originalMapRegion.regionBounds.maxY,
+          renderPlayer.x,
+          renderPlayer.y,
+          Object.keys(sceneSpriteLibraries).sort().join("|"),
+          viewportEntities.length,
+        ].join(":")
+      : `idle:${screen}`;
+
+  useEffect(() => {
+    const notify = (readiness: SceneAssetReadiness) => {
+      sceneAssetReadinessCallbackRef.current(readiness);
+    };
+
+    if (screen !== "game") {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "idle", 0));
+      return;
+    }
+
+    if (sceneInteractionReady) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", sceneAssetUrlsRef.current.length));
+      return;
+    }
+
+    if (!renderPlayer || !world.originalMapRegion) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 0));
+      return;
+    }
+
+    const urls = sceneAssetUrlsRef.current;
+    if (!urls.length) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0));
+      return;
+    }
+
+    let disposed = false;
+    notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
+    preloadSceneAssetUrls(urls, 7000).then((readiness) => {
+      if (disposed) {
+        return;
+      }
+      notify({
+        ...readiness,
+        key: sceneAssetReadinessKey,
+        ready: true,
+      });
+    });
+
+    return () => {
+      disposed = true;
+    };
+  }, [screen, sceneInteractionReady, sceneAssetReadinessKey]);
 
   function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
@@ -640,6 +875,7 @@ export function OriginalClientShell({
 
   function dispatchSceneMoveInput(pointer: HeldScenePointer) {
     if (latestMoveInputRef.current.screen !== "game") return;
+    if (!sceneInteractionReady) return;
     const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
     if (!tile) return;
 
@@ -652,6 +888,7 @@ export function OriginalClientShell({
 
   function dispatchSceneClickInput(pointer: HeldScenePointer) {
     if (latestMoveInputRef.current.screen !== "game") return;
+    if (!sceneInteractionReady) return;
     const tile =
       pointer.tileX !== undefined && pointer.tileY !== undefined
         ? { x: pointer.tileX, y: pointer.tileY }
@@ -666,7 +903,7 @@ export function OriginalClientShell({
   }
 
   function handleScenePointerAction(event: MouseEvent<HTMLDivElement>) {
-    if (screen !== "game" || !player) {
+    if (screen !== "game" || !player || !sceneInteractionReady) {
       return;
     }
 
@@ -696,9 +933,9 @@ export function OriginalClientShell({
 
   function handleScenePointerMove(event: MouseEvent<HTMLDivElement>) {
     const held = heldScenePointerRef.current;
-    if (!held || screen !== "game") {
-      return;
-    }
+      if (!held || screen !== "game" || !sceneInteractionReady) {
+        return;
+      }
 
     const point = scenePointFromMouseEvent(event);
     heldScenePointerRef.current = {
@@ -742,15 +979,19 @@ export function OriginalClientShell({
       window.removeEventListener("mouseup", stop);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, onViewportDirectionStep]);
+  }, [screen, sceneInteractionReady, onViewportDirectionStep]);
 
   return (
-    <main className="mir-client-page">
+    <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`}>
       <section className="mir-stage">
         <div
           ref={stageFrameRef}
-          className="client-stage-frame"
+          className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}
+          tabIndex={-1}
           onMouseDownCapture={(event) => {
+            if (screen === "game") {
+              stageFrameRef.current?.focus({ preventScroll: true });
+            }
             if (screen === "game" && event.button === 2) {
               event.preventDefault();
             }
@@ -817,6 +1058,10 @@ export function OriginalClientShell({
                   }
 
                   event.stopPropagation();
+                  if (!sceneInteractionReady) {
+                    event.preventDefault();
+                    return;
+                  }
                   const point = scenePointFromMouseEvent(event);
                   const pointer: HeldScenePointer = {
                     button: event.button,
@@ -891,6 +1136,8 @@ export function OriginalClientShell({
               onPasswordChange={onPasswordChange}
               onCreateAccount={onCreateAccount}
               onSubmitLogin={onSubmitLogin}
+              onPasskeyLogin={onPasskeyLogin}
+              onWalletLogin={onWalletLogin}
               onQuickEnter={onQuickEnter}
               onResetClient={onResetClient}
             />
@@ -927,6 +1174,7 @@ export function OriginalClientShell({
               storageServiceOpenVersion={storageServiceOpenVersion}
               onChatMessageChange={onChatMessageChange}
               onSendChat={onSendChat}
+              onRequestTrade={onRequestTrade}
               onRentExpandedStorage={onRentExpandedStorage}
               onLogout={onLogout}
               onToggleCharacter={onToggleCharacter}
@@ -963,8 +1211,156 @@ export function OriginalClientShell({
               transferOptions={transferOptions}
             />
           ) : null}
+          {screen !== "login" && reconnectMessage ? (
+            <div
+              className={`gateway-reconnect-overlay ${reconnectStatus.mode}`}
+              role="status"
+              aria-live="polite"
+              data-reconnect-mode={reconnectStatus.mode}
+            >
+              <span className="gateway-reconnect-dot" aria-hidden="true" />
+              <span className="gateway-reconnect-text">{reconnectMessage}</span>
+            </div>
+          ) : null}
         </div>
       </section>
+      <OriginalClientMobileControls
+        enabled={screen === "game" && sceneInteractionReady}
+        forceVisible={forceMobileControls}
+        t={t}
+        world={world}
+        player={player}
+        selectedEntity={selectedEntity}
+        onDirectionIntent={onViewportDirectionIntent}
+        onPrimaryTargetAction={onPrimaryTargetAction}
+        onApproachTarget={onApproachTarget}
+        onPickGroundDrop={onPickGroundDrop}
+        onToggleInventory={onToggleInventory}
+        onToggleCharacter={onToggleCharacter}
+        onCastSkill={onCastSkill}
+        onUseItem={onUseItem}
+      />
     </main>
   );
+}
+
+function collectVisibleSceneAssetUrls(
+  viewportMapSprites: {
+    floor: Array<{ path: string }>;
+    objects: Array<{ path: string }>;
+  },
+  viewportEntitySprites: Array<{
+    sprite: {
+      body: { path: string } | null;
+      hair: { path: string } | null;
+      rearWeapons: Array<{ path: string }>;
+      frontWeapons: Array<{ path: string }>;
+    } | null;
+  }>,
+) {
+  return [
+    ...viewportMapSprites.floor.map((sprite) => sprite.path),
+    ...viewportMapSprites.objects.map((sprite) => mapSpriteRenderPath(sprite.path)),
+    ...viewportEntitySprites.flatMap(({ sprite }) =>
+      sprite
+        ? [
+            sprite.body?.path,
+            sprite.hair?.path,
+            ...sprite.rearWeapons.map((weapon) => weapon.path),
+            ...sprite.frontWeapons.map((weapon) => weapon.path),
+          ]
+        : [],
+    ),
+  ].filter((url, index, list): url is string => Boolean(url) && list.indexOf(url) === index);
+}
+
+function createSceneAssetReadiness(
+  key: string,
+  ready: boolean,
+  status: SceneAssetReadiness["status"],
+  total: number,
+): SceneAssetReadiness {
+  return {
+    key,
+    ready,
+    status,
+    total,
+    loaded: ready ? total : 0,
+    failed: 0,
+    pending: ready ? 0 : total,
+    durationMs: 0,
+    failedUrls: [],
+  };
+}
+
+async function preloadSceneAssetUrls(urls: string[], timeoutMs: number): Promise<SceneAssetReadiness> {
+  const startedAt = performance.now();
+  const results = await Promise.all(urls.map((url) => preloadSceneImage(url, timeoutMs)));
+  const loaded = results.filter((result) => result.loaded).length;
+  const failedUrls = results.filter((result) => !result.loaded).map((result) => result.url);
+  const timedOut = performance.now() - startedAt >= timeoutMs - 16 && failedUrls.length > 0;
+
+  return {
+    key: "scene-assets",
+    ready: failedUrls.length === 0,
+    status: failedUrls.length === 0 ? "ready" : timedOut ? "timeout" : "ready",
+    total: urls.length,
+    loaded,
+    failed: failedUrls.length,
+    pending: 0,
+    durationMs: Math.round(performance.now() - startedAt),
+    failedUrls: failedUrls.slice(0, 20),
+  };
+}
+
+async function preloadSceneImage(url: string, timeoutMs: number): Promise<{ url: string; loaded: boolean }> {
+  const startedAt = performance.now();
+  const candidates = sceneAssetCandidateUrls(url);
+
+  for (const candidate of candidates) {
+    const remainingMs = timeoutMs - (performance.now() - startedAt);
+    if (remainingMs <= 0) {
+      break;
+    }
+    const loaded = await preloadSceneImageCandidate(candidate, Math.max(250, remainingMs));
+    if (loaded) {
+      return { url, loaded: true };
+    }
+  }
+
+  return { url, loaded: false };
+}
+
+function preloadSceneImageCandidate(url: string, timeoutMs: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const image = new Image();
+    let settled = false;
+    const timer = window.setTimeout(() => finish(false), timeoutMs);
+
+    const finish = (loaded: boolean) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      window.clearTimeout(timer);
+      resolve(loaded);
+    };
+
+    image.onload = () => {
+      if (typeof image.decode === "function") {
+        image
+          .decode()
+          .then(() => finish(image.naturalWidth > 0))
+          .catch(() => finish(image.naturalWidth > 0));
+        return;
+      }
+      finish(image.naturalWidth > 0);
+    };
+    image.onerror = () => finish(false);
+    image.decoding = "async";
+    image.src = url;
+    if (image.complete) {
+      finish(image.naturalWidth > 0);
+    }
+  });
 }

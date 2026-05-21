@@ -1,0 +1,8646 @@
+{
+  "generatedAt": "2026-05-14T12:59:22.039Z",
+  "libraryCount": 1440,
+  "libraries": {
+    "AArmour/00": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2229517
+    },
+    "AArmour/01": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 3012189
+    },
+    "AArmour/02": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2914111
+    },
+    "AArmour/09": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 3547100
+    },
+    "AArmour/10": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 3782170
+    },
+    "AArmour/11": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 4305559
+    },
+    "AArmour/12": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 5115510
+    },
+    "AArmour/13": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 3970507
+    },
+    "AArmour/14": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 4041819
+    },
+    "AArmour/15": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 4012501
+    },
+    "AArmour/19": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 4036449
+    },
+    "AArmour/20": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 1849182
+    },
+    "AArmour/21": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 1881342
+    },
+    "AArmour/22": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2109252
+    },
+    "AArmour/23": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2762254
+    },
+    "AArmour/24": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2164608
+    },
+    "AArmour/28": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2209518
+    },
+    "AArmour/29": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 3707185
+    },
+    "AArmour/30": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 4117605
+    },
+    "AArmour/34": {
+      "category": "AArmour",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 2122748
+    },
+    "AArmour/51": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 3607923
+    },
+    "AArmour/52": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 3355226
+    },
+    "AArmour/53": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 3114968
+    },
+    "AArmour/57": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 6253578
+    },
+    "AArmour/58": {
+      "category": "AArmour",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 7334140
+    },
+    "AHair/00": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 225573
+    },
+    "AHair/01": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 290713
+    },
+    "AHair/02": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 384831
+    },
+    "AHair/03": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 379962
+    },
+    "AHair/04": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 363238
+    },
+    "AHair/05": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 393906
+    },
+    "AHair/06": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 309950
+    },
+    "AHair/07": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 284522
+    },
+    "AHair/08": {
+      "category": "AHair",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 318683
+    },
+    "AHumEffect/00": {
+      "category": "AHumEffect",
+      "version": 2,
+      "frames": 1088,
+      "sourceBytes": 3840749
+    },
+    "AHumEffect/01": {
+      "category": "AHumEffect",
+      "version": 2,
+      "frames": 1088,
+      "sourceBytes": 7194328
+    },
+    "AHumEffect/02": {
+      "category": "AHumEffect",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 1187220
+    },
+    "ARArmour/00": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 1512381
+    },
+    "ARArmour/01": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2059116
+    },
+    "ARArmour/02": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 1995594
+    },
+    "ARArmour/09": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2438514
+    },
+    "ARArmour/10": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2602098
+    },
+    "ARArmour/11": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2979152
+    },
+    "ARArmour/12": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 3476098
+    },
+    "ARArmour/19": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2780500
+    },
+    "ARArmour/29": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2535956
+    },
+    "ARArmour/30": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2885883
+    },
+    "ARArmour/35": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2193766
+    },
+    "ARArmour/36": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 1874949
+    },
+    "ARArmour/37": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2238761
+    },
+    "ARArmour/38": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 1949021
+    },
+    "ARArmour/39": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2631769
+    },
+    "ARArmour/40": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2515860
+    },
+    "ARArmour/41": {
+      "category": "ARArmour",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2046861
+    },
+    "ARArmour/54": {
+      "category": "ARArmour",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 2712050
+    },
+    "ARArmour/55": {
+      "category": "ARArmour",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 2475889
+    },
+    "ARArmour/56": {
+      "category": "ARArmour",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 2647056
+    },
+    "ARArmour/57": {
+      "category": "ARArmour",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 4365876
+    },
+    "ARArmour/58": {
+      "category": "ARArmour",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 5120131
+    },
+    "ARHair/00": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 209648
+    },
+    "ARHair/01": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 239428
+    },
+    "ARHair/02": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 340720
+    },
+    "ARHair/03": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 314070
+    },
+    "ARHair/04": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 297187
+    },
+    "ARHair/05": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 340415
+    },
+    "ARHair/06": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 273518
+    },
+    "ARHair/07": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 251858
+    },
+    "ARHair/08": {
+      "category": "ARHair",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 283114
+    },
+    "ARHumEffect/00": {
+      "category": "ARHumEffect",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 2434258
+    },
+    "ARHumEffect/01": {
+      "category": "ARHumEffect",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 4590467
+    },
+    "ARHumEffect/02": {
+      "category": "ARHumEffect",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 682423
+    },
+    "ARWeapon/00 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 298385
+    },
+    "ARWeapon/00": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 357404
+    },
+    "ARWeapon/01 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 364281
+    },
+    "ARWeapon/01": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 433754
+    },
+    "ARWeapon/02 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 406481
+    },
+    "ARWeapon/02": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 486942
+    },
+    "ARWeapon/03 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 392096
+    },
+    "ARWeapon/03": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 467271
+    },
+    "ARWeapon/04 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 400754
+    },
+    "ARWeapon/04": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 482812
+    },
+    "ARWeapon/05 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 483271
+    },
+    "ARWeapon/05": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 570736
+    },
+    "ARWeapon/06 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 388136
+    },
+    "ARWeapon/06": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 461458
+    },
+    "ARWeapon/07 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 458669
+    },
+    "ARWeapon/07": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 546567
+    },
+    "ARWeapon/08 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 427601
+    },
+    "ARWeapon/08": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 510685
+    },
+    "ARWeapon/09 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 509617
+    },
+    "ARWeapon/09": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 608728
+    },
+    "ARWeapon/10 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 582161
+    },
+    "ARWeapon/10": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 688938
+    },
+    "ARWeapon/11 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 419623
+    },
+    "ARWeapon/11": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 502227
+    },
+    "ARWeapon/12 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 578422
+    },
+    "ARWeapon/12": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 683904
+    },
+    "ARWeapon/13 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 669104
+    },
+    "ARWeapon/13": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 806552
+    },
+    "ARWeapon/14 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 814389
+    },
+    "ARWeapon/14": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 992493
+    },
+    "ARWeapon/15 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 838100
+    },
+    "ARWeapon/15": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 964180
+    },
+    "ARWeapon/16 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 925390
+    },
+    "ARWeapon/16": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1098180
+    },
+    "ARWeapon/17 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 601304
+    },
+    "ARWeapon/17": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 716669
+    },
+    "ARWeapon/18 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 779378
+    },
+    "ARWeapon/18": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 925547
+    },
+    "ARWeapon/19 S": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 704,
+      "sourceBytes": 1091990
+    },
+    "ARWeapon/19": {
+      "category": "ARWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1304356
+    },
+    "ARWeapon/20 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 1079791
+    },
+    "ARWeapon/20": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1271985
+    },
+    "ARWeapon/21 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 871243
+    },
+    "ARWeapon/21": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1018755
+    },
+    "ARWeapon/22 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 836893
+    },
+    "ARWeapon/22": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1000060
+    },
+    "ARWeapon/23 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 733464
+    },
+    "ARWeapon/23": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 853389
+    },
+    "ARWeapon/24 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 859627
+    },
+    "ARWeapon/24": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1032108
+    },
+    "ARWeapon/25 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 1052324
+    },
+    "ARWeapon/25": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1829177
+    },
+    "ARWeapon/26 S": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 704,
+      "sourceBytes": 1513631
+    },
+    "ARWeapon/26": {
+      "category": "ARWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1265467
+    },
+    "AWeapon/00 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 197920
+    },
+    "AWeapon/00 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 200682
+    },
+    "AWeapon/01 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 272002
+    },
+    "AWeapon/01 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 273136
+    },
+    "AWeapon/02 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 308784
+    },
+    "AWeapon/02 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 307954
+    },
+    "AWeapon/03 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 285360
+    },
+    "AWeapon/03 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 285079
+    },
+    "AWeapon/04 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 351930
+    },
+    "AWeapon/04 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 347678
+    },
+    "AWeapon/05 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 295903
+    },
+    "AWeapon/05 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 300202
+    },
+    "AWeapon/06 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 454678
+    },
+    "AWeapon/06 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 455920
+    },
+    "AWeapon/07 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 369583
+    },
+    "AWeapon/07 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 374299
+    },
+    "AWeapon/08 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 473494
+    },
+    "AWeapon/08 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 477030
+    },
+    "AWeapon/09 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 539539
+    },
+    "AWeapon/09 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 539931
+    },
+    "AWeapon/10 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 445429
+    },
+    "AWeapon/10 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 446611
+    },
+    "AWeapon/11 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 501947
+    },
+    "AWeapon/11 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 499321
+    },
+    "AWeapon/12 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 394782
+    },
+    "AWeapon/12 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 393188
+    },
+    "AWeapon/13 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 544283
+    },
+    "AWeapon/13 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 540773
+    },
+    "AWeapon/14 L": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 515422
+    },
+    "AWeapon/14 R": {
+      "category": "AWeapon",
+      "version": 2,
+      "frames": 1024,
+      "sourceBytes": 668315
+    },
+    "AWeapon/15 L": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 633812
+    },
+    "AWeapon/15 R": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 645915
+    },
+    "AWeapon/16 L": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 633575
+    },
+    "AWeapon/16 R": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 635123
+    },
+    "AWeapon/17 L": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 779839
+    },
+    "AWeapon/17 R": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 786350
+    },
+    "AWeapon/18 L": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 1015761
+    },
+    "AWeapon/18 R": {
+      "category": "AWeapon",
+      "version": 3,
+      "frames": 1024,
+      "sourceBytes": 989784
+    },
+    "Background": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 100,
+      "sourceBytes": 21248217
+    },
+    "BuffIcon": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 265,
+      "sourceBytes": 148746
+    },
+    "CArmour/00": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 3335095
+    },
+    "CArmour/01": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4529875
+    },
+    "CArmour/02": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4366813
+    },
+    "CArmour/03": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 3540581
+    },
+    "CArmour/04": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 3660285
+    },
+    "CArmour/05": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 3148776
+    },
+    "CArmour/06": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5225212
+    },
+    "CArmour/07": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4262108
+    },
+    "CArmour/08": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4660939
+    },
+    "CArmour/09": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4449139
+    },
+    "CArmour/10": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5579595
+    },
+    "CArmour/11": {
+      "category": "CArmour",
+      "version": 3,
+      "frames": 1616,
+      "sourceBytes": 6636853
+    },
+    "CArmour/12": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 7897588
+    },
+    "CArmour/13": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4209144
+    },
+    "CArmour/14": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4246597
+    },
+    "CArmour/15": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4261411
+    },
+    "CArmour/16": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 24531033
+    },
+    "CArmour/17": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 23060278
+    },
+    "CArmour/18": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 20039348
+    },
+    "CArmour/19": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 30746138
+    },
+    "CArmour/20": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 13785168
+    },
+    "CArmour/21": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 13877983
+    },
+    "CArmour/22": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 15531878
+    },
+    "CArmour/23": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 20668858
+    },
+    "CArmour/24": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 15529948
+    },
+    "CArmour/25": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 24040318
+    },
+    "CArmour/26": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 22651103
+    },
+    "CArmour/27": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 21311858
+    },
+    "CArmour/28": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 16601333
+    },
+    "CArmour/29": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 8080,
+      "sourceBytes": 27606563
+    },
+    "CArmour/30": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 6464,
+      "sourceBytes": 25400104
+    },
+    "CArmour/31": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 6464,
+      "sourceBytes": 13116648
+    },
+    "CArmour/32": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 6464,
+      "sourceBytes": 14274584
+    },
+    "CArmour/33": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 6464,
+      "sourceBytes": 15370964
+    },
+    "CArmour/34": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 6464,
+      "sourceBytes": 12690816
+    },
+    "CArmour/35": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4830881
+    },
+    "CArmour/36": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4175455
+    },
+    "CArmour/37": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4886294
+    },
+    "CArmour/38": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4338720
+    },
+    "CArmour/39": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5768499
+    },
+    "CArmour/40": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5490787
+    },
+    "CArmour/41": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4468589
+    },
+    "CArmour/42": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 7242510
+    },
+    "CArmour/43": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 6433695
+    },
+    "CArmour/44": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 7681398
+    },
+    "CArmour/45": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5483776
+    },
+    "CArmour/46": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 6338739
+    },
+    "CArmour/47": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 7087361
+    },
+    "CArmour/48": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5523487
+    },
+    "CArmour/49": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 6265039
+    },
+    "CArmour/50": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4430435
+    },
+    "CArmour/51": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5561367
+    },
+    "CArmour/52": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5050325
+    },
+    "CArmour/53": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 4611113
+    },
+    "CArmour/54": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5990658
+    },
+    "CArmour/55": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5529017
+    },
+    "CArmour/56": {
+      "category": "CArmour",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 5928040
+    },
+    "CArmour/57": {
+      "category": "CArmour",
+      "version": 3,
+      "frames": 1616,
+      "sourceBytes": 9662311
+    },
+    "CArmour/58": {
+      "category": "CArmour",
+      "version": 3,
+      "frames": 1616,
+      "sourceBytes": 11286718
+    },
+    "CHair/00": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 476194
+    },
+    "CHair/01": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 559142
+    },
+    "CHair/02": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 785551
+    },
+    "CHair/03": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 718234
+    },
+    "CHair/04": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 678678
+    },
+    "CHair/05": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 777878
+    },
+    "CHair/06": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 627936
+    },
+    "CHair/07": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 544298
+    },
+    "CHair/08": {
+      "category": "CHair",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 653782
+    },
+    "CHelmet/00": {
+      "category": "CHelmet",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 355028
+    },
+    "CHelmet/01": {
+      "category": "CHelmet",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 297065
+    },
+    "CHelmet/02": {
+      "category": "CHelmet",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 277825
+    },
+    "CHumEffect/00": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 1680,
+      "sourceBytes": 5909774
+    },
+    "CHumEffect/01": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 1680,
+      "sourceBytes": 10989187
+    },
+    "CHumEffect/02": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 602655
+    },
+    "CHumEffect/03": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 1616,
+      "sourceBytes": 1637447
+    },
+    "CHumEffect/04": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 40,
+      "sourceBytes": 84156
+    },
+    "CHumEffect/05": {
+      "category": "CHumEffect",
+      "version": 2,
+      "frames": 1615,
+      "sourceBytes": 3842093
+    },
+    "CWeapon/00": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 187856
+    },
+    "CWeapon/01": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 134743
+    },
+    "CWeapon/02": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 206441
+    },
+    "CWeapon/03": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 312918
+    },
+    "CWeapon/04": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 321063
+    },
+    "CWeapon/05": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 379960
+    },
+    "CWeapon/06": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 394023
+    },
+    "CWeapon/07": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 355802
+    },
+    "CWeapon/08": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 304667
+    },
+    "CWeapon/09": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 283116
+    },
+    "CWeapon/10": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 439818
+    },
+    "CWeapon/11": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 285260
+    },
+    "CWeapon/12": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 172226
+    },
+    "CWeapon/13": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 299344
+    },
+    "CWeapon/14": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 408326
+    },
+    "CWeapon/15": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 356833
+    },
+    "CWeapon/16": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 561845
+    },
+    "CWeapon/17": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 414189
+    },
+    "CWeapon/18": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 267238
+    },
+    "CWeapon/19": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 367274
+    },
+    "CWeapon/20": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 260231
+    },
+    "CWeapon/21": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 536605
+    },
+    "CWeapon/22": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 497962
+    },
+    "CWeapon/23": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 467504
+    },
+    "CWeapon/24": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 324200
+    },
+    "CWeapon/25": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 291889
+    },
+    "CWeapon/26": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 454354
+    },
+    "CWeapon/27": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 688097
+    },
+    "CWeapon/28": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 461369
+    },
+    "CWeapon/29": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 523824
+    },
+    "CWeapon/30": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 601516
+    },
+    "CWeapon/31": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 330232
+    },
+    "CWeapon/32": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 892694
+    },
+    "CWeapon/33": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 565057
+    },
+    "CWeapon/34": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 503043
+    },
+    "CWeapon/35": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1105756
+    },
+    "CWeapon/36": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 768293
+    },
+    "CWeapon/37": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 620452
+    },
+    "CWeapon/38": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 691287
+    },
+    "CWeapon/39": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 785565
+    },
+    "CWeapon/40": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 314633
+    },
+    "CWeapon/41": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 976370
+    },
+    "CWeapon/42": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 407496
+    },
+    "CWeapon/43": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 345874
+    },
+    "CWeapon/44": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 927301
+    },
+    "CWeapon/45": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1120188
+    },
+    "CWeapon/46": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 684952
+    },
+    "CWeapon/47": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 513243
+    },
+    "CWeapon/48": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 483027
+    },
+    "CWeapon/49": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 484700
+    },
+    "CWeapon/50": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 441801
+    },
+    "CWeapon/51": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1367948
+    },
+    "CWeapon/52": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 487624
+    },
+    "CWeapon/53": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 394449
+    },
+    "CWeapon/54": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 458312
+    },
+    "CWeapon/55": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1380771
+    },
+    "CWeapon/56": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1141562
+    },
+    "CWeapon/57": {
+      "category": "CWeapon",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 872171
+    },
+    "CWeapon/58": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1364884
+    },
+    "CWeapon/59": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 811539
+    },
+    "CWeapon/60": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1484690
+    },
+    "CWeapon/61": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1601925
+    },
+    "CWeapon/62": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1208861
+    },
+    "CWeapon/63": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 754726
+    },
+    "CWeapon/64": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 860518
+    },
+    "CWeapon/65": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 933000
+    },
+    "CWeapon/66": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 963258
+    },
+    "CWeapon/67": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 809147
+    },
+    "CWeapon/68": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 596409
+    },
+    "CWeapon/69": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 554297
+    },
+    "CWeapon/70": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 682870
+    },
+    "CWeapon/71": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 831,
+      "sourceBytes": 263607
+    },
+    "CWeapon/72": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 838683
+    },
+    "CWeapon/73": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1319779
+    },
+    "CWeapon/74": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1499563
+    },
+    "CWeapon/75": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 500887
+    },
+    "CWeapon/76": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1023086
+    },
+    "CWeapon/77": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1429829
+    },
+    "CWeapon/78": {
+      "category": "CWeapon",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 1905420
+    },
+    "CWeaponEffect/01": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2406930
+    },
+    "CWeaponEffect/02": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2198642
+    },
+    "CWeaponEffect/03": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1721241
+    },
+    "CWeaponEffect/04": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2562814
+    },
+    "CWeaponEffect/05": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1476117
+    },
+    "CWeaponEffect/06": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2418853
+    },
+    "CWeaponEffect/07": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1539983
+    },
+    "CWeaponEffect/08": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2128485
+    },
+    "CWeaponEffect/09": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2657139
+    },
+    "CWeaponEffect/10": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 3333631
+    },
+    "CWeaponEffect/11": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2235775
+    },
+    "CWeaponEffect/12": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2651291
+    },
+    "CWeaponEffect/13": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 3209774
+    },
+    "CWeaponEffect/14": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2653003
+    },
+    "CWeaponEffect/15": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1216918
+    },
+    "CWeaponEffect/16": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2859436
+    },
+    "CWeaponEffect/17": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1942122
+    },
+    "CWeaponEffect/18": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2056297
+    },
+    "CWeaponEffect/19": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1494275
+    },
+    "CWeaponEffect/20": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2063914
+    },
+    "CWeaponEffect/21": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 881248
+    },
+    "CWeaponEffect/22": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 3617965
+    },
+    "CWeaponEffect/23": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1667889
+    },
+    "CWeaponEffect/24": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 397825
+    },
+    "CWeaponEffect/25": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 369600
+    },
+    "CWeaponEffect/26": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1064720
+    },
+    "CWeaponEffect/27": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 896,
+      "sourceBytes": 2028410
+    },
+    "CWeaponEffect/28": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2355776
+    },
+    "CWeaponEffect/29": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1864690
+    },
+    "CWeaponEffect/30": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 831,
+      "sourceBytes": 1152061
+    },
+    "CWeaponEffect/31": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2204163
+    },
+    "CWeaponEffect/32": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1437868
+    },
+    "CWeaponEffect/33": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2067076
+    },
+    "CWeaponEffect/34": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2824065
+    },
+    "CWeaponEffect/35": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2373242
+    },
+    "CWeaponEffect/36": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2786490
+    },
+    "CWeaponEffect/37": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2487075
+    },
+    "CWeaponEffect/38": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1937914
+    },
+    "CWeaponEffect/39": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1464441
+    },
+    "CWeaponEffect/40": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2351099
+    },
+    "CWeaponEffect/41": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2085087
+    },
+    "CWeaponEffect/42": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1489986
+    },
+    "CWeaponEffect/43": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2036633
+    },
+    "CWeaponEffect/44": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1579106
+    },
+    "CWeaponEffect/45": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1279051
+    },
+    "CWeaponEffect/46": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 396885
+    },
+    "CWeaponEffect/47": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 403213
+    },
+    "CWeaponEffect/48": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1220187
+    },
+    "CWeaponEffect/49": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 396087
+    },
+    "CWeaponEffect/50": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 405734
+    },
+    "CWeaponEffect/51": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1230527
+    },
+    "CWeaponEffect/52": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 389724
+    },
+    "CWeaponEffect/53": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 412074
+    },
+    "CWeaponEffect/54": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1219118
+    },
+    "CWeaponEffect/55": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2440115
+    },
+    "CWeaponEffect/56": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2265476
+    },
+    "CWeaponEffect/57": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1568442
+    },
+    "CWeaponEffect/58": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 3541747
+    },
+    "CWeaponEffect/59": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2884058
+    },
+    "CWeaponEffect/60": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2915532
+    },
+    "CWeaponEffect/61": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 828,
+      "sourceBytes": 3184420
+    },
+    "CWeaponEffect/62": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2717458
+    },
+    "CWeaponEffect/63": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 2789327
+    },
+    "CWeaponEffect/64": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 5299532
+    },
+    "CWeaponEffect/65": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 1879853
+    },
+    "CWeaponEffect/66": {
+      "category": "CWeaponEffect",
+      "version": 2,
+      "frames": 832,
+      "sourceBytes": 5573648
+    },
+    "ChrSel": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 1146,
+      "sourceBytes": 53289233
+    },
+    "Deco": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 317,
+      "sourceBytes": 2069338
+    },
+    "Dragon": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 527,
+      "sourceBytes": 10250374
+    },
+    "Effect": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 1271,
+      "sourceBytes": 7636358
+    },
+    "Effect2": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 320,
+      "sourceBytes": 526115
+    },
+    "Extra/WemadeMir3/MagicEx5": {
+      "category": "Extra",
+      "version": 2,
+      "frames": 6747,
+      "sourceBytes": 32743829
+    },
+    "Fishing/00": {
+      "category": "Fishing",
+      "version": 2,
+      "frames": 352,
+      "sourceBytes": 234162
+    },
+    "Fishing/01": {
+      "category": "Fishing",
+      "version": 2,
+      "frames": 352,
+      "sourceBytes": 215311
+    },
+    "Flag/00": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 79470
+    },
+    "Flag/01": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 63811
+    },
+    "Flag/02": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 71987
+    },
+    "Flag/03": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 70022
+    },
+    "Flag/04": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 71639
+    },
+    "Flag/05": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 88772
+    },
+    "Flag/06": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 71065
+    },
+    "Flag/07": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 81591
+    },
+    "Flag/08": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 82464
+    },
+    "Flag/09": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 88298
+    },
+    "Flag/10": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 80362
+    },
+    "Flag/11": {
+      "category": "Flag",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 80511
+    },
+    "Gate/00": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 70,
+      "sourceBytes": 281006
+    },
+    "Gate/01": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 9,
+      "sourceBytes": 48946
+    },
+    "Gate/02": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 9,
+      "sourceBytes": 54692
+    },
+    "Gate/03": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 9,
+      "sourceBytes": 55286
+    },
+    "Gate/04": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 29,
+      "sourceBytes": 372381
+    },
+    "Gate/05": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 29,
+      "sourceBytes": 363282
+    },
+    "Gate/06": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 29,
+      "sourceBytes": 370746
+    },
+    "Gate/07": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 5,
+      "sourceBytes": 81875
+    },
+    "Gate/08": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 5,
+      "sourceBytes": 55717
+    },
+    "Gate/09": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 5,
+      "sourceBytes": 60744
+    },
+    "Gate/10": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 37,
+      "sourceBytes": 247851
+    },
+    "Gate/11": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 37,
+      "sourceBytes": 261386
+    },
+    "Gate/12": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 52,
+      "sourceBytes": 11472417
+    },
+    "Gate/13": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 52,
+      "sourceBytes": 7586754
+    },
+    "Gate/14": {
+      "category": "Gate",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 199362
+    },
+    "GuildSkill": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 48,
+      "sourceBytes": 65609
+    },
+    "Help": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 4368106
+    },
+    "Items": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 5380,
+      "sourceBytes": 4035433
+    },
+    "MagIcon": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 199927
+    },
+    "MagIcon2": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 345567
+    },
+    "Magic": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 4038,
+      "sourceBytes": 9328415
+    },
+    "Magic2": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 2790,
+      "sourceBytes": 21144703
+    },
+    "Magic3": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 7898,
+      "sourceBytes": 34190081
+    },
+    "MagicC": {
+      "category": "(root)",
+      "version": 2,
+      "frames": 16,
+      "sourceBytes": 101004
+    },
+    "Map/ShandaMir2/AniTiles1": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2280,
+      "sourceBytes": 3542810
+    },
+    "Map/ShandaMir2/Objects": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9999,
+      "sourceBytes": 44683401
+    },
+    "Map/ShandaMir2/Objects10": {
+      "category": "Map",
+      "version": 2,
+      "frames": 8014,
+      "sourceBytes": 18254605
+    },
+    "Map/ShandaMir2/Objects13": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7032,
+      "sourceBytes": 15675072
+    },
+    "Map/ShandaMir2/Objects14": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3648,
+      "sourceBytes": 8520655
+    },
+    "Map/ShandaMir2/Objects15": {
+      "category": "Map",
+      "version": 2,
+      "frames": 26,
+      "sourceBytes": 42575
+    },
+    "Map/ShandaMir2/Objects16": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4252,
+      "sourceBytes": 13715236
+    },
+    "Map/ShandaMir2/Objects17": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5012,
+      "sourceBytes": 27747991
+    },
+    "Map/ShandaMir2/Objects18": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10402,
+      "sourceBytes": 63341745
+    },
+    "Map/ShandaMir2/Objects2": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10024,
+      "sourceBytes": 19730394
+    },
+    "Map/ShandaMir2/Objects20": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7312,
+      "sourceBytes": 52990895
+    },
+    "Map/ShandaMir2/Objects21": {
+      "category": "Map",
+      "version": 2,
+      "frames": 16372,
+      "sourceBytes": 94450395
+    },
+    "Map/ShandaMir2/Objects22": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10094,
+      "sourceBytes": 14062199
+    },
+    "Map/ShandaMir2/Objects23": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4387,
+      "sourceBytes": 6891493
+    },
+    "Map/ShandaMir2/Objects24": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10440,
+      "sourceBytes": 82325620
+    },
+    "Map/ShandaMir2/Objects25": {
+      "category": "Map",
+      "version": 2,
+      "frames": 19965,
+      "sourceBytes": 100205383
+    },
+    "Map/ShandaMir2/Objects26": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5752,
+      "sourceBytes": 12605527
+    },
+    "Map/ShandaMir2/Objects27": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11512,
+      "sourceBytes": 37886952
+    },
+    "Map/ShandaMir2/Objects28": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10081,
+      "sourceBytes": 19172960
+    },
+    "Map/ShandaMir2/Objects29": {
+      "category": "Map",
+      "version": 2,
+      "frames": 8712,
+      "sourceBytes": 18174810
+    },
+    "Map/ShandaMir2/Objects3": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9229,
+      "sourceBytes": 21215660
+    },
+    "Map/ShandaMir2/Objects30": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4201,
+      "sourceBytes": 5317088
+    },
+    "Map/ShandaMir2/Objects4": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10062,
+      "sourceBytes": 20297382
+    },
+    "Map/ShandaMir2/Objects5": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11196,
+      "sourceBytes": 19368191
+    },
+    "Map/ShandaMir2/Objects6": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7751,
+      "sourceBytes": 15748163
+    },
+    "Map/ShandaMir2/Objects7": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10055,
+      "sourceBytes": 19050350
+    },
+    "Map/ShandaMir2/Objects8": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9919,
+      "sourceBytes": 17420533
+    },
+    "Map/ShandaMir2/Objects9": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9067,
+      "sourceBytes": 12509814
+    },
+    "Map/ShandaMir2/SmTiles": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1176,
+      "sourceBytes": 372682
+    },
+    "Map/ShandaMir2/Tiles": {
+      "category": "Map",
+      "version": 2,
+      "frames": 31775,
+      "sourceBytes": 78884815
+    },
+    "Map/ShandaMir2/Tiles2": {
+      "category": "Map",
+      "version": 2,
+      "frames": 6297,
+      "sourceBytes": 18859956
+    },
+    "Map/ShandaMir2/Tiles4": {
+      "category": "Map",
+      "version": 2,
+      "frames": 13535,
+      "sourceBytes": 70554031
+    },
+    "Map/ShandaMir2/Tiles5": {
+      "category": "Map",
+      "version": 2,
+      "frames": 8550,
+      "sourceBytes": 35410884
+    },
+    "Map/ShandaMir2/Tiles6": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2369,
+      "sourceBytes": 11206731
+    },
+    "Map/ShandaMir2/Tiles7": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3311,
+      "sourceBytes": 16016560
+    },
+    "Map/ShandaMir2/Tiles8": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1216,
+      "sourceBytes": 3564098
+    },
+    "Map/ShandaMir2/smTiles2": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9915,
+      "sourceBytes": 18095495
+    },
+    "Map/ShandaMir2/smTiles3": {
+      "category": "Map",
+      "version": 2,
+      "frames": 31704,
+      "sourceBytes": 53213197
+    },
+    "Map/ShandaMir2/smTiles4": {
+      "category": "Map",
+      "version": 2,
+      "frames": 32913,
+      "sourceBytes": 73354075
+    },
+    "Map/ShandaMir2/smTiles5": {
+      "category": "Map",
+      "version": 2,
+      "frames": 31303,
+      "sourceBytes": 58444028
+    },
+    "Map/ShandaMir2/smTiles6": {
+      "category": "Map",
+      "version": 2,
+      "frames": 30724,
+      "sourceBytes": 51902862
+    },
+    "Map/ShandaMir2/smTiles7": {
+      "category": "Map",
+      "version": 2,
+      "frames": 26120,
+      "sourceBytes": 53957031
+    },
+    "Map/ShandaMir2/smTiles8": {
+      "category": "Map",
+      "version": 2,
+      "frames": 30083,
+      "sourceBytes": 65167942
+    },
+    "Map/ShandaMir2/smTiles9": {
+      "category": "Map",
+      "version": 2,
+      "frames": 17992,
+      "sourceBytes": 30030888
+    },
+    "Map/ShandaMir2/tiles3": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2654,
+      "sourceBytes": 16648323
+    },
+    "Map/WemadeMir2/Objects": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9999,
+      "sourceBytes": 44972450
+    },
+    "Map/WemadeMir2/Objects10": {
+      "category": "Map",
+      "version": 2,
+      "frames": 8006,
+      "sourceBytes": 18112450
+    },
+    "Map/WemadeMir2/Objects11": {
+      "category": "Map",
+      "version": 2,
+      "frames": 6140,
+      "sourceBytes": 9985409
+    },
+    "Map/WemadeMir2/Objects12": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5381,
+      "sourceBytes": 10535629
+    },
+    "Map/WemadeMir2/Objects13": {
+      "category": "Map",
+      "version": 2,
+      "frames": 8713,
+      "sourceBytes": 18232007
+    },
+    "Map/WemadeMir2/Objects14": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4202,
+      "sourceBytes": 5252976
+    },
+    "Map/WemadeMir2/Objects15": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4961,
+      "sourceBytes": 11453749
+    },
+    "Map/WemadeMir2/Objects16": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5622,
+      "sourceBytes": 11714590
+    },
+    "Map/WemadeMir2/Objects17": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10093,
+      "sourceBytes": 32730492
+    },
+    "Map/WemadeMir2/Objects18": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10081,
+      "sourceBytes": 19057016
+    },
+    "Map/WemadeMir2/Objects19": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9998,
+      "sourceBytes": 18099114
+    },
+    "Map/WemadeMir2/Objects2": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10024,
+      "sourceBytes": 19621227
+    },
+    "Map/WemadeMir2/Objects20": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9538,
+      "sourceBytes": 20487220
+    },
+    "Map/WemadeMir2/Objects21": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9965,
+      "sourceBytes": 32882025
+    },
+    "Map/WemadeMir2/Objects22": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9939,
+      "sourceBytes": 25664762
+    },
+    "Map/WemadeMir2/Objects23": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9974,
+      "sourceBytes": 36388949
+    },
+    "Map/WemadeMir2/Objects24": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9999,
+      "sourceBytes": 37980724
+    },
+    "Map/WemadeMir2/Objects25": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10168,
+      "sourceBytes": 38643300
+    },
+    "Map/WemadeMir2/Objects26": {
+      "category": "Map",
+      "version": 3,
+      "frames": 9981,
+      "sourceBytes": 27647811
+    },
+    "Map/WemadeMir2/Objects27": {
+      "category": "Map",
+      "version": 3,
+      "frames": 9164,
+      "sourceBytes": 68094990
+    },
+    "Map/WemadeMir2/Objects3": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9229,
+      "sourceBytes": 21164807
+    },
+    "Map/WemadeMir2/Objects4": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10062,
+      "sourceBytes": 20203938
+    },
+    "Map/WemadeMir2/Objects5": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9919,
+      "sourceBytes": 17504331
+    },
+    "Map/WemadeMir2/Objects6": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7751,
+      "sourceBytes": 15727931
+    },
+    "Map/WemadeMir2/Objects7": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9984,
+      "sourceBytes": 18454864
+    },
+    "Map/WemadeMir2/Objects8": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9919,
+      "sourceBytes": 17373903
+    },
+    "Map/WemadeMir2/Objects9": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9124,
+      "sourceBytes": 12662936
+    },
+    "Map/WemadeMir2/Objects_32bit": {
+      "category": "Map",
+      "version": 3,
+      "frames": 637,
+      "sourceBytes": 9194534
+    },
+    "Map/WemadeMir2/SmTiles": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1040,
+      "sourceBytes": 659983
+    },
+    "Map/WemadeMir2/Tiles": {
+      "category": "Map",
+      "version": 3,
+      "frames": 155305,
+      "sourceBytes": 450359772
+    },
+    "Map/WemadeMir3/Animationsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2921,
+      "sourceBytes": 13627636
+    },
+    "Map/WemadeMir3/Background": {
+      "category": "Map",
+      "version": 2,
+      "frames": 100,
+      "sourceBytes": 21248217
+    },
+    "Map/WemadeMir3/Cliffsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7619,
+      "sourceBytes": 21023068
+    },
+    "Map/WemadeMir3/Dungeonsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5364,
+      "sourceBytes": 12103953
+    },
+    "Map/WemadeMir3/Forest/Animationsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 116,
+      "sourceBytes": 152933
+    },
+    "Map/WemadeMir3/Forest/Cliffsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3140,
+      "sourceBytes": 21418133
+    },
+    "Map/WemadeMir3/Forest/Dungeonsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 5622,
+      "sourceBytes": 15853810
+    },
+    "Map/WemadeMir3/Forest/Furnituresc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Forest/Housesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7581,
+      "sourceBytes": 36064281
+    },
+    "Map/WemadeMir3/Forest/Innersc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Forest/SmObjectsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 6379,
+      "sourceBytes": 17375999
+    },
+    "Map/WemadeMir3/Forest/SmTilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Forest/Tiles30c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 180,
+      "sourceBytes": 1388065
+    },
+    "Map/WemadeMir3/Forest/Tiles5c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 73,
+      "sourceBytes": 141065
+    },
+    "Map/WemadeMir3/Forest/Tilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10933,
+      "sourceBytes": 39980750
+    },
+    "Map/WemadeMir3/Forest/Wallsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1564,
+      "sourceBytes": 6312381
+    },
+    "Map/WemadeMir3/Furnituresc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1714,
+      "sourceBytes": 2408742
+    },
+    "Map/WemadeMir3/Housesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11591,
+      "sourceBytes": 30525839
+    },
+    "Map/WemadeMir3/Innersc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 68,
+      "sourceBytes": 502949
+    },
+    "Map/WemadeMir3/Object1c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 33349,
+      "sourceBytes": 67764355
+    },
+    "Map/WemadeMir3/Object2c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 30000,
+      "sourceBytes": 42664218
+    },
+    "Map/WemadeMir3/Sand/Animationsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 173,
+      "sourceBytes": 1047794
+    },
+    "Map/WemadeMir3/Sand/Cliffsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 664,
+      "sourceBytes": 1201573
+    },
+    "Map/WemadeMir3/Sand/Dungeonsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 16654,
+      "sourceBytes": 44590925
+    },
+    "Map/WemadeMir3/Sand/Furnituresc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Sand/Housesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1815,
+      "sourceBytes": 7585156
+    },
+    "Map/WemadeMir3/Sand/Innersc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Sand/SmObjectsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3968,
+      "sourceBytes": 7150541
+    },
+    "Map/WemadeMir3/Sand/SmTilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Sand/Tiles30c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Sand/Tiles5c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 35,
+      "sourceBytes": 250446
+    },
+    "Map/WemadeMir3/Sand/Tilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9476,
+      "sourceBytes": 64007709
+    },
+    "Map/WemadeMir3/Sand/Wallsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1845,
+      "sourceBytes": 8121340
+    },
+    "Map/WemadeMir3/SmObjectsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10463,
+      "sourceBytes": 25051906
+    },
+    "Map/WemadeMir3/SmTilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10180,
+      "sourceBytes": 2277303
+    },
+    "Map/WemadeMir3/Snow/Animationsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1148,
+      "sourceBytes": 2370033
+    },
+    "Map/WemadeMir3/Snow/Cliffsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 13339,
+      "sourceBytes": 42584959
+    },
+    "Map/WemadeMir3/Snow/Dungeonsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 19767,
+      "sourceBytes": 46555623
+    },
+    "Map/WemadeMir3/Snow/Furnituresc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 196,
+      "sourceBytes": 223918
+    },
+    "Map/WemadeMir3/Snow/Housesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11616,
+      "sourceBytes": 36356159
+    },
+    "Map/WemadeMir3/Snow/Innersc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1739,
+      "sourceBytes": 2484407
+    },
+    "Map/WemadeMir3/Snow/SmObjectsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11622,
+      "sourceBytes": 23370319
+    },
+    "Map/WemadeMir3/Snow/SmTilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 240,
+      "sourceBytes": 487049
+    },
+    "Map/WemadeMir3/Snow/Tiles30c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 600,
+      "sourceBytes": 3937123
+    },
+    "Map/WemadeMir3/Snow/Tiles5c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 60,
+      "sourceBytes": 437073
+    },
+    "Map/WemadeMir3/Snow/Tilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9746,
+      "sourceBytes": 59473766
+    },
+    "Map/WemadeMir3/Snow/Wallsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3518,
+      "sourceBytes": 11931749
+    },
+    "Map/WemadeMir3/Tiles30c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1080,
+      "sourceBytes": 8054497
+    },
+    "Map/WemadeMir3/Tiles5c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 20000,
+      "sourceBytes": 23750227
+    },
+    "Map/WemadeMir3/Tilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 10146,
+      "sourceBytes": 72045645
+    },
+    "Map/WemadeMir3/Wallsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 36171,
+      "sourceBytes": 92489046
+    },
+    "Map/WemadeMir3/Wood/Animationsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 1420,
+      "sourceBytes": 6885402
+    },
+    "Map/WemadeMir3/Wood/Cliffsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 24662,
+      "sourceBytes": 78559038
+    },
+    "Map/WemadeMir3/Wood/Dungeonsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 9202,
+      "sourceBytes": 25035999
+    },
+    "Map/WemadeMir3/Wood/Furnituresc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 4887,
+      "sourceBytes": 23403184
+    },
+    "Map/WemadeMir3/Wood/Housesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 14607,
+      "sourceBytes": 47013688
+    },
+    "Map/WemadeMir3/Wood/SmObjectsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11386,
+      "sourceBytes": 34082739
+    },
+    "Map/WemadeMir3/Wood/SmTilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 2,
+      "sourceBytes": 50
+    },
+    "Map/WemadeMir3/Wood/Tiles30c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 389,
+      "sourceBytes": 2852772
+    },
+    "Map/WemadeMir3/Wood/Tiles5c": {
+      "category": "Map",
+      "version": 2,
+      "frames": 55,
+      "sourceBytes": 394770
+    },
+    "Map/WemadeMir3/Wood/Tilesc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 11631,
+      "sourceBytes": 92072527
+    },
+    "Map/WemadeMir3/Wood/Wallsc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 7380,
+      "sourceBytes": 35488987
+    },
+    "Map/WemadeMir3/Wood/innersc": {
+      "category": "Map",
+      "version": 2,
+      "frames": 3807,
+      "sourceBytes": 9409859
+    },
+    "MapLinkIcon": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 170,
+      "sourceBytes": 320177
+    },
+    "Monster/000": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 128,
+      "sourceBytes": 339120
+    },
+    "Monster/001": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 104,
+      "sourceBytes": 253528
+    },
+    "Monster/002": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 74,
+      "sourceBytes": 182091
+    },
+    "Monster/003": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 161598
+    },
+    "Monster/004": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 414018
+    },
+    "Monster/005": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 234,
+      "sourceBytes": 461795
+    },
+    "Monster/006": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 472097
+    },
+    "Monster/007": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 448,
+      "sourceBytes": 1055507
+    },
+    "Monster/008": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 427692
+    },
+    "Monster/009": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 752307
+    },
+    "Monster/010": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 164,
+      "sourceBytes": 686878
+    },
+    "Monster/011": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 176,
+      "sourceBytes": 803295
+    },
+    "Monster/012": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1485524
+    },
+    "Monster/013": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 1048854
+    },
+    "Monster/014": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 1073588
+    },
+    "Monster/015": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 66604
+    },
+    "Monster/016": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 651920
+    },
+    "Monster/017": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 800556
+    },
+    "Monster/018": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 988094
+    },
+    "Monster/019": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 232091
+    },
+    "Monster/020": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 221,
+      "sourceBytes": 270552
+    },
+    "Monster/021": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 855323
+    },
+    "Monster/022": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 244,
+      "sourceBytes": 738653
+    },
+    "Monster/023": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 767628
+    },
+    "Monster/024": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 707140
+    },
+    "Monster/025": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 732903
+    },
+    "Monster/026": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 925256
+    },
+    "Monster/027": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 264,
+      "sourceBytes": 615714
+    },
+    "Monster/028": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 489785
+    },
+    "Monster/029": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 727490
+    },
+    "Monster/030": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1017116
+    },
+    "Monster/031": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 955506
+    },
+    "Monster/032": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 280,
+      "sourceBytes": 1357631
+    },
+    "Monster/033": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1219005
+    },
+    "Monster/034": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1506416
+    },
+    "Monster/035": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 481953
+    },
+    "Monster/036": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 612457
+    },
+    "Monster/037": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 489954
+    },
+    "Monster/038": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 390878
+    },
+    "Monster/039": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 670496
+    },
+    "Monster/040": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1183491
+    },
+    "Monster/041": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 52,
+      "sourceBytes": 1191122
+    },
+    "Monster/042": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 232295
+    },
+    "Monster/043": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 69974
+    },
+    "Monster/044": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 484418
+    },
+    "Monster/045": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 694763
+    },
+    "Monster/046": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 703144
+    },
+    "Monster/047": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 848844
+    },
+    "Monster/048": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 888098
+    },
+    "Monster/049": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1137879
+    },
+    "Monster/050": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 145,
+      "sourceBytes": 351195
+    },
+    "Monster/051": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 66,
+      "sourceBytes": 1143193
+    },
+    "Monster/052": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 244,
+      "sourceBytes": 767311
+    },
+    "Monster/053": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 230,
+      "sourceBytes": 791993
+    },
+    "Monster/054": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 917733
+    },
+    "Monster/055": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1098604
+    },
+    "Monster/056": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1467338
+    },
+    "Monster/057": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1102178
+    },
+    "Monster/058": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1377149
+    },
+    "Monster/059": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1445723
+    },
+    "Monster/060": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1298594
+    },
+    "Monster/061": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 3269419
+    },
+    "Monster/062": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 38,
+      "sourceBytes": 591958
+    },
+    "Monster/063": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 457078
+    },
+    "Monster/064": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 240,
+      "sourceBytes": 767891
+    },
+    "Monster/065": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1073175
+    },
+    "Monster/066": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1067696
+    },
+    "Monster/067": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 512,
+      "sourceBytes": 1569095
+    },
+    "Monster/068": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 308,
+      "sourceBytes": 1936294
+    },
+    "Monster/069": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 312,
+      "sourceBytes": 768447
+    },
+    "Monster/070": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 635095
+    },
+    "Monster/071": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 543400
+    },
+    "Monster/072": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 498241
+    },
+    "Monster/073": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 340,
+      "sourceBytes": 3399820
+    },
+    "Monster/074": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 731997
+    },
+    "Monster/075": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 608,
+      "sourceBytes": 4171909
+    },
+    "Monster/076": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1628790
+    },
+    "Monster/077": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 390,
+      "sourceBytes": 3117312
+    },
+    "Monster/078": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 234,
+      "sourceBytes": 382901
+    },
+    "Monster/079": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 882523
+    },
+    "Monster/080": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1401384
+    },
+    "Monster/081": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 444919
+    },
+    "Monster/082": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 284148
+    },
+    "Monster/083": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 254394
+    },
+    "Monster/084": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 390394
+    },
+    "Monster/085": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 374009
+    },
+    "Monster/086": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1548316
+    },
+    "Monster/087": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 234,
+      "sourceBytes": 731263
+    },
+    "Monster/088": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 614944
+    },
+    "Monster/089": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 1654706
+    },
+    "Monster/090": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 866180
+    },
+    "Monster/091": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 785794
+    },
+    "Monster/092": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 804825
+    },
+    "Monster/093": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 8081704
+    },
+    "Monster/094": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 778758
+    },
+    "Monster/095": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1007649
+    },
+    "Monster/096": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 897275
+    },
+    "Monster/097": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 871602
+    },
+    "Monster/098": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 929081
+    },
+    "Monster/099": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 301,
+      "sourceBytes": 1342513
+    },
+    "Monster/100": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 360,
+      "sourceBytes": 1377548
+    },
+    "Monster/101": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 340,
+      "sourceBytes": 4074362
+    },
+    "Monster/102": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 314,
+      "sourceBytes": 1161455
+    },
+    "Monster/103": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 225,
+      "sourceBytes": 328440
+    },
+    "Monster/104": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 450,
+      "sourceBytes": 591762
+    },
+    "Monster/105": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 705985
+    },
+    "Monster/106": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 589735
+    },
+    "Monster/107": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 834313
+    },
+    "Monster/108": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 870612
+    },
+    "Monster/109": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 459019
+    },
+    "Monster/110": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 431723
+    },
+    "Monster/111": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 402313
+    },
+    "Monster/112": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 455031
+    },
+    "Monster/113": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 362,
+      "sourceBytes": 3153300
+    },
+    "Monster/114": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 448,
+      "sourceBytes": 1228605
+    },
+    "Monster/115": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 300978
+    },
+    "Monster/116": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 333684
+    },
+    "Monster/117": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 423,
+      "sourceBytes": 981230
+    },
+    "Monster/118": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1893574
+    },
+    "Monster/119": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1800190
+    },
+    "Monster/120": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 240,
+      "sourceBytes": 1663290
+    },
+    "Monster/121": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 274,
+      "sourceBytes": 1809419
+    },
+    "Monster/122": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 2089611
+    },
+    "Monster/123": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 2098869
+    },
+    "Monster/124": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 1330130
+    },
+    "Monster/125": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 1503013
+    },
+    "Monster/126": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 676,
+      "sourceBytes": 15113531
+    },
+    "Monster/127": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 266,
+      "sourceBytes": 1108055
+    },
+    "Monster/128": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 263,
+      "sourceBytes": 1430099
+    },
+    "Monster/129": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 382,
+      "sourceBytes": 1867291
+    },
+    "Monster/130": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 36,
+      "sourceBytes": 149671
+    },
+    "Monster/131": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 376294
+    },
+    "Monster/132": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 88,
+      "sourceBytes": 491919
+    },
+    "Monster/133": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 88,
+      "sourceBytes": 819282
+    },
+    "Monster/134": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 475,
+      "sourceBytes": 6724842
+    },
+    "Monster/135": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 827452
+    },
+    "Monster/136": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 950724
+    },
+    "Monster/137": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 718384
+    },
+    "Monster/138": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 862148
+    },
+    "Monster/139": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 608144
+    },
+    "Monster/140": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 519418
+    },
+    "Monster/141": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 264,
+      "sourceBytes": 678192
+    },
+    "Monster/142": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 351622
+    },
+    "Monster/143": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 587869
+    },
+    "Monster/144": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 16,
+      "sourceBytes": 89812
+    },
+    "Monster/145": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 1164317
+    },
+    "Monster/146": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 184,
+      "sourceBytes": 409622
+    },
+    "Monster/147": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 18188
+    },
+    "Monster/148": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 225,
+      "sourceBytes": 243124
+    },
+    "Monster/149": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 56,
+      "sourceBytes": 43517
+    },
+    "Monster/150": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 200,
+      "sourceBytes": 234133
+    },
+    "Monster/151": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 481086
+    },
+    "Monster/152": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 442195
+    },
+    "Monster/153": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 688,
+      "sourceBytes": 1459040
+    },
+    "Monster/154": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 397,
+      "sourceBytes": 880856
+    },
+    "Monster/155": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 653127
+    },
+    "Monster/156": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 19311
+    },
+    "Monster/157": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 1856257
+    },
+    "Monster/158": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 798,
+      "sourceBytes": 10631507
+    },
+    "Monster/159": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 604,
+      "sourceBytes": 4934154
+    },
+    "Monster/160": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 229,
+      "sourceBytes": 277855
+    },
+    "Monster/161": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 264,
+      "sourceBytes": 297762
+    },
+    "Monster/162": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 135,
+      "sourceBytes": 178407
+    },
+    "Monster/163": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 360,
+      "sourceBytes": 4101065
+    },
+    "Monster/164": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 6573
+    },
+    "Monster/165": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 13634
+    },
+    "Monster/166": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 96,
+      "sourceBytes": 184362
+    },
+    "Monster/167": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 1849836
+    },
+    "Monster/168": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 32310
+    },
+    "Monster/169": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1058585
+    },
+    "Monster/170": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1060917
+    },
+    "Monster/171": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 961859
+    },
+    "Monster/172": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 99,
+      "sourceBytes": 2506826
+    },
+    "Monster/173": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 68,
+      "sourceBytes": 1515480
+    },
+    "Monster/174": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 176,
+      "sourceBytes": 667525
+    },
+    "Monster/175": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 50,
+      "sourceBytes": 86372
+    },
+    "Monster/176": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 378353
+    },
+    "Monster/177": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 19,
+      "sourceBytes": 195899
+    },
+    "Monster/178": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1109,
+      "sourceBytes": 13638440
+    },
+    "Monster/179": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 362,
+      "sourceBytes": 3152607
+    },
+    "Monster/180": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 200,
+      "sourceBytes": 3523541
+    },
+    "Monster/181": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 200,
+      "sourceBytes": 3317568
+    },
+    "Monster/182": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 2383058
+    },
+    "Monster/183": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 314,
+      "sourceBytes": 1173470
+    },
+    "Monster/184": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 690,
+      "sourceBytes": 26340673
+    },
+    "Monster/185": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1034372
+    },
+    "Monster/186": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 330,
+      "sourceBytes": 1399226
+    },
+    "Monster/187": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 966,
+      "sourceBytes": 11566954
+    },
+    "Monster/188": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1164222
+    },
+    "Monster/189": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1252056
+    },
+    "Monster/190": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1510241
+    },
+    "Monster/191": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1605262
+    },
+    "Monster/192": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 240,
+      "sourceBytes": 1421231
+    },
+    "Monster/193": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1452263
+    },
+    "Monster/194": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1000071
+    },
+    "Monster/195": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1236947
+    },
+    "Monster/196": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 418378
+    },
+    "Monster/197": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 532422
+    },
+    "Monster/198": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 408580
+    },
+    "Monster/199": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 427448
+    },
+    "Monster/200": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 340,
+      "sourceBytes": 4279058
+    },
+    "Monster/201": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 667,
+      "sourceBytes": 13360269
+    },
+    "Monster/202": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 370,
+      "sourceBytes": 4219173
+    },
+    "Monster/203": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 244,
+      "sourceBytes": 1018660
+    },
+    "Monster/204": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1150741
+    },
+    "Monster/205": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 230,
+      "sourceBytes": 961004
+    },
+    "Monster/206": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1464648
+    },
+    "Monster/207": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1893180
+    },
+    "Monster/208": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 3826344
+    },
+    "Monster/209": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1267626
+    },
+    "Monster/210": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1300031
+    },
+    "Monster/211": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 510,
+      "sourceBytes": 2119257
+    },
+    "Monster/212": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 66,
+      "sourceBytes": 1651055
+    },
+    "Monster/213": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1436378
+    },
+    "Monster/214": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 1435547
+    },
+    "Monster/215": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 1617523
+    },
+    "Monster/216": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 312,
+      "sourceBytes": 1124481
+    },
+    "Monster/217": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 462,
+      "sourceBytes": 4920747
+    },
+    "Monster/218": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 48,
+      "sourceBytes": 2570095
+    },
+    "Monster/219": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 335,
+      "sourceBytes": 1556155
+    },
+    "Monster/220": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 368,
+      "sourceBytes": 2534327
+    },
+    "Monster/221": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 200,
+      "sourceBytes": 1052022
+    },
+    "Monster/222": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 224,
+      "sourceBytes": 881136
+    },
+    "Monster/223": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 384,
+      "sourceBytes": 3256301
+    },
+    "Monster/224": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 344,
+      "sourceBytes": 1911246
+    },
+    "Monster/225": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 337925
+    },
+    "Monster/226": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 393665
+    },
+    "Monster/227": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 502319
+    },
+    "Monster/228": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 400,
+      "sourceBytes": 5269720
+    },
+    "Monster/229": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 732,
+      "sourceBytes": 16677175
+    },
+    "Monster/230": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 11,
+      "sourceBytes": 199214
+    },
+    "Monster/231": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 32,
+      "sourceBytes": 541096
+    },
+    "Monster/232": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 176,
+      "sourceBytes": 893089
+    },
+    "Monster/233": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 467964
+    },
+    "Monster/234": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 208,
+      "sourceBytes": 1164607
+    },
+    "Monster/235": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 218,
+      "sourceBytes": 1308434
+    },
+    "Monster/236": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 212,
+      "sourceBytes": 1200626
+    },
+    "Monster/237": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 6475394
+    },
+    "Monster/238": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 624,
+      "sourceBytes": 2705104
+    },
+    "Monster/239": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 602,
+      "sourceBytes": 3720125
+    },
+    "Monster/240": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 595,
+      "sourceBytes": 2712451
+    },
+    "Monster/241": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 646,
+      "sourceBytes": 3624352
+    },
+    "Monster/242": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 739,
+      "sourceBytes": 7160902
+    },
+    "Monster/243": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 458,
+      "sourceBytes": 6962592
+    },
+    "Monster/244": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 477,
+      "sourceBytes": 8409256
+    },
+    "Monster/245": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 458,
+      "sourceBytes": 7610097
+    },
+    "Monster/246": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 458,
+      "sourceBytes": 6968756
+    },
+    "Monster/247": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 129,
+      "sourceBytes": 3918041
+    },
+    "Monster/248": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 288,
+      "sourceBytes": 852873
+    },
+    "Monster/249": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 273,
+      "sourceBytes": 1142474
+    },
+    "Monster/250": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 416,
+      "sourceBytes": 1269854
+    },
+    "Monster/251": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 304,
+      "sourceBytes": 906278
+    },
+    "Monster/252": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 783,
+      "sourceBytes": 13805812
+    },
+    "Monster/253": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2874001
+    },
+    "Monster/254": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2576017
+    },
+    "Monster/255": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2998694
+    },
+    "Monster/256": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2857699
+    },
+    "Monster/257": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2780618
+    },
+    "Monster/258": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2226307
+    },
+    "Monster/259": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 2201253
+    },
+    "Monster/260": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 362,
+      "sourceBytes": 2859708
+    },
+    "Monster/261": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 401,
+      "sourceBytes": 752197
+    },
+    "Monster/262": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 453,
+      "sourceBytes": 973834
+    },
+    "Monster/263": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 317,
+      "sourceBytes": 1092224
+    },
+    "Monster/264": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 1148204
+    },
+    "Monster/265": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 248,
+      "sourceBytes": 626874
+    },
+    "Monster/266": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 408,
+      "sourceBytes": 1569520
+    },
+    "Monster/267": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 381,
+      "sourceBytes": 3842225
+    },
+    "Monster/268": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 328,
+      "sourceBytes": 1582372
+    },
+    "Monster/269": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 328,
+      "sourceBytes": 1765388
+    },
+    "Monster/270": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 368,
+      "sourceBytes": 682839
+    },
+    "Monster/271": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 445,
+      "sourceBytes": 4696905
+    },
+    "Monster/272": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 754,
+      "sourceBytes": 23455756
+    },
+    "Monster/273": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 232,
+      "sourceBytes": 562199
+    },
+    "Monster/274": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 328,
+      "sourceBytes": 1110751
+    },
+    "Monster/275": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 280,
+      "sourceBytes": 1237256
+    },
+    "Monster/276": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 320,
+      "sourceBytes": 2008189
+    },
+    "Monster/277": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 800,
+      "sourceBytes": 5636164
+    },
+    "Monster/278": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 7115047
+    },
+    "Monster/279": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 753,
+      "sourceBytes": 1767691
+    },
+    "Monster/280": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 152,
+      "sourceBytes": 772328
+    },
+    "Monster/281": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 760,
+      "sourceBytes": 2223906
+    },
+    "Monster/282": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1265,
+      "sourceBytes": 8590874
+    },
+    "Monster/283": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 519,
+      "sourceBytes": 5012564
+    },
+    "Monster/284": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 536,
+      "sourceBytes": 11625182
+    },
+    "Monster/285": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 192,
+      "sourceBytes": 99838
+    },
+    "Monster/286": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 264,
+      "sourceBytes": 808532
+    },
+    "Monster/287": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 320,
+      "sourceBytes": 1509343
+    },
+    "Monster/288": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 376,
+      "sourceBytes": 2618486
+    },
+    "Monster/289": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 416,
+      "sourceBytes": 2541379
+    },
+    "Monster/290": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 604,
+      "sourceBytes": 2422312
+    },
+    "Monster/291": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 512,
+      "sourceBytes": 2044409
+    },
+    "Monster/292": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 82020
+    },
+    "Monster/293": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 248,
+      "sourceBytes": 618066
+    },
+    "Monster/294": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 457,
+      "sourceBytes": 1324299
+    },
+    "Monster/295": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 536,
+      "sourceBytes": 2954050
+    },
+    "Monster/296": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 762,
+      "sourceBytes": 13248561
+    },
+    "Monster/297": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 449,
+      "sourceBytes": 1299645
+    },
+    "Monster/298": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 312,
+      "sourceBytes": 1312497
+    },
+    "Monster/299": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 400,
+      "sourceBytes": 2265676
+    },
+    "Monster/300": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 401,
+      "sourceBytes": 1432931
+    },
+    "Monster/301": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 521,
+      "sourceBytes": 4102957
+    },
+    "Monster/302": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 504,
+      "sourceBytes": 6999818
+    },
+    "Monster/303": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 377,
+      "sourceBytes": 3298244
+    },
+    "Monster/304": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 432,
+      "sourceBytes": 5066495
+    },
+    "Monster/305": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 453,
+      "sourceBytes": 3839415
+    },
+    "Monster/306": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 728,
+      "sourceBytes": 12279242
+    },
+    "Monster/307": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 126,
+      "sourceBytes": 5156922
+    },
+    "Monster/308": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 806,
+      "sourceBytes": 19619418
+    },
+    "Monster/309": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 1177880
+    },
+    "Monster/310": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 408,
+      "sourceBytes": 1398306
+    },
+    "Monster/311": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 463,
+      "sourceBytes": 4032175
+    },
+    "Monster/312": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 432,
+      "sourceBytes": 6071099
+    },
+    "Monster/313": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 4548472
+    },
+    "Monster/314": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 352,
+      "sourceBytes": 1615335
+    },
+    "Monster/315": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 529,
+      "sourceBytes": 2926737
+    },
+    "Monster/316": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 869,
+      "sourceBytes": 9095951
+    },
+    "Monster/317": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 81,
+      "sourceBytes": 372677
+    },
+    "Monster/318": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 332538
+    },
+    "Monster/319": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 70,
+      "sourceBytes": 283863
+    },
+    "Monster/320": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1728,
+      "sourceBytes": 37560460
+    },
+    "Monster/321": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 28,
+      "sourceBytes": 227251
+    },
+    "Monster/322": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 300,
+      "sourceBytes": 1161178
+    },
+    "Monster/323": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 544,
+      "sourceBytes": 958322
+    },
+    "Monster/324": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 794942
+    },
+    "Monster/325": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 280,
+      "sourceBytes": 857447
+    },
+    "Monster/326": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1591222
+    },
+    "Monster/327": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 254,
+      "sourceBytes": 1770181
+    },
+    "Monster/328": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 376,
+      "sourceBytes": 2945570
+    },
+    "Monster/329": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 520,
+      "sourceBytes": 1289664
+    },
+    "Monster/330": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 399,
+      "sourceBytes": 1429634
+    },
+    "Monster/331": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 2440453
+    },
+    "Monster/332": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 110,
+      "sourceBytes": 215105
+    },
+    "Monster/333": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 575,
+      "sourceBytes": 1405562
+    },
+    "Monster/334": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1247,
+      "sourceBytes": 14475217
+    },
+    "Monster/335": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 403,
+      "sourceBytes": 1200668
+    },
+    "Monster/336": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 392,
+      "sourceBytes": 1533907
+    },
+    "Monster/337": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 599,
+      "sourceBytes": 3261076
+    },
+    "Monster/338": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 245,
+      "sourceBytes": 614757
+    },
+    "Monster/339": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 792,
+      "sourceBytes": 3028307
+    },
+    "Monster/340": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 250,
+      "sourceBytes": 284636
+    },
+    "Monster/341": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 497,
+      "sourceBytes": 2479113
+    },
+    "Monster/342": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 448,
+      "sourceBytes": 2455264
+    },
+    "Monster/343": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 930,
+      "sourceBytes": 5481635
+    },
+    "Monster/344": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 236,
+      "sourceBytes": 1224272
+    },
+    "Monster/345": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 395,
+      "sourceBytes": 2228316
+    },
+    "Monster/346": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1011,
+      "sourceBytes": 11836096
+    },
+    "Monster/347": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 565590
+    },
+    "Monster/348": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1208,
+      "sourceBytes": 45086436
+    },
+    "Monster/349": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 66,
+      "sourceBytes": 210981
+    },
+    "Monster/350": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 66,
+      "sourceBytes": 334519
+    },
+    "Monster/351": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 26,
+      "sourceBytes": 85147
+    },
+    "Monster/352": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 408,
+      "sourceBytes": 3807354
+    },
+    "Monster/353": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 832,
+      "sourceBytes": 11925898
+    },
+    "Monster/354": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 362,
+      "sourceBytes": 1258490
+    },
+    "Monster/355": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 248,
+      "sourceBytes": 614865
+    },
+    "Monster/356": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 564,
+      "sourceBytes": 1062121
+    },
+    "Monster/357": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1388,
+      "sourceBytes": 12788443
+    },
+    "Monster/358": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 135,
+      "sourceBytes": 493470
+    },
+    "Monster/359": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 301,
+      "sourceBytes": 450001
+    },
+    "Monster/360": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 376,
+      "sourceBytes": 582561
+    },
+    "Monster/361": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 22502
+    },
+    "Monster/362": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 52,
+      "sourceBytes": 156574
+    },
+    "Monster/363": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 266,
+      "sourceBytes": 932579
+    },
+    "Monster/364": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 424,
+      "sourceBytes": 2748402
+    },
+    "Monster/365": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 344,
+      "sourceBytes": 1174284
+    },
+    "Monster/366": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 466,
+      "sourceBytes": 3847202
+    },
+    "Monster/367": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 473,
+      "sourceBytes": 5492683
+    },
+    "Monster/368": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 843,
+      "sourceBytes": 5995205
+    },
+    "Monster/369": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 337,
+      "sourceBytes": 2011868
+    },
+    "Monster/370": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 615,
+      "sourceBytes": 18931429
+    },
+    "Monster/371": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 914,
+      "sourceBytes": 12047308
+    },
+    "Monster/372": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 546,
+      "sourceBytes": 6847875
+    },
+    "Monster/373": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 601,
+      "sourceBytes": 13372230
+    },
+    "Monster/374": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 670,
+      "sourceBytes": 6225386
+    },
+    "Monster/375": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 896,
+      "sourceBytes": 6288396
+    },
+    "Monster/376": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 952,
+      "sourceBytes": 8339407
+    },
+    "Monster/377": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 112,
+      "sourceBytes": 455679
+    },
+    "Monster/378": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 152,
+      "sourceBytes": 377377
+    },
+    "Monster/379": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 192,
+      "sourceBytes": 109794
+    },
+    "Monster/380": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 513,
+      "sourceBytes": 3018492
+    },
+    "Monster/381": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 618,
+      "sourceBytes": 7769537
+    },
+    "Monster/382": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 878,
+      "sourceBytes": 5525441
+    },
+    "Monster/383": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 656,
+      "sourceBytes": 7442837
+    },
+    "Monster/384": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 484,
+      "sourceBytes": 9800475
+    },
+    "Monster/385": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 842,
+      "sourceBytes": 9395335
+    },
+    "Monster/386": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 618,
+      "sourceBytes": 3854123
+    },
+    "Monster/387": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1187,
+      "sourceBytes": 18073423
+    },
+    "Monster/388": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 1086632
+    },
+    "Monster/389": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 1439408
+    },
+    "Monster/390": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 1268360
+    },
+    "Monster/391": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 1429288
+    },
+    "Monster/392": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 976928
+    },
+    "Monster/393": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 288,
+      "sourceBytes": 2003763
+    },
+    "Monster/394": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 532,
+      "sourceBytes": 7895448
+    },
+    "Monster/395": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 880732
+    },
+    "Monster/396": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 218,
+      "sourceBytes": 499128
+    },
+    "Monster/397": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 32,
+      "sourceBytes": 80253
+    },
+    "Monster/398": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 498,
+      "sourceBytes": 4356088
+    },
+    "Monster/399": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 858244
+    },
+    "Monster/400": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 344,
+      "sourceBytes": 2804808
+    },
+    "Monster/401": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 422,
+      "sourceBytes": 3376672
+    },
+    "Monster/402": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 274,
+      "sourceBytes": 425145
+    },
+    "Monster/403": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 490,
+      "sourceBytes": 5771669
+    },
+    "Monster/404": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 296,
+      "sourceBytes": 1094321
+    },
+    "Monster/405": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 384,
+      "sourceBytes": 2615136
+    },
+    "Monster/406": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 406,
+      "sourceBytes": 4737285
+    },
+    "Monster/407": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 509,
+      "sourceBytes": 2661302
+    },
+    "Monster/408": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 363,
+      "sourceBytes": 4789460
+    },
+    "Monster/409": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 615,
+      "sourceBytes": 17075532
+    },
+    "Monster/410": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 462,
+      "sourceBytes": 3716473
+    },
+    "Monster/411": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 354,
+      "sourceBytes": 3542909
+    },
+    "Monster/412": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 381,
+      "sourceBytes": 2529497
+    },
+    "Monster/413": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 518,
+      "sourceBytes": 7426441
+    },
+    "Monster/414": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 315,
+      "sourceBytes": 1608358
+    },
+    "Monster/415": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 293,
+      "sourceBytes": 2846158
+    },
+    "Monster/416": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 388,
+      "sourceBytes": 2053379
+    },
+    "Monster/417": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 307,
+      "sourceBytes": 1454706
+    },
+    "Monster/418": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 387,
+      "sourceBytes": 3132982
+    },
+    "Monster/419": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 465,
+      "sourceBytes": 6086197
+    },
+    "Monster/420": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 473,
+      "sourceBytes": 4565034
+    },
+    "Monster/421": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 720,
+      "sourceBytes": 16049706
+    },
+    "Monster/422": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 333,
+      "sourceBytes": 1827347
+    },
+    "Monster/423": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 650,
+      "sourceBytes": 3296539
+    },
+    "Monster/424": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 740,
+      "sourceBytes": 6014994
+    },
+    "Monster/425": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 677,
+      "sourceBytes": 4849587
+    },
+    "Monster/426": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 754,
+      "sourceBytes": 4255326
+    },
+    "Monster/427": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 575,
+      "sourceBytes": 3140613
+    },
+    "Monster/428": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 840,
+      "sourceBytes": 2121708
+    },
+    "Monster/429": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 580,
+      "sourceBytes": 4839129
+    },
+    "Monster/430": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1101,
+      "sourceBytes": 20044208
+    },
+    "Monster/431": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 600,
+      "sourceBytes": 4880256
+    },
+    "Monster/432": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 716,
+      "sourceBytes": 4064295
+    },
+    "Monster/433": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 750,
+      "sourceBytes": 2139309
+    },
+    "Monster/434": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 740,
+      "sourceBytes": 3013687
+    },
+    "Monster/435": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1039,
+      "sourceBytes": 6840462
+    },
+    "Monster/436": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 827,
+      "sourceBytes": 5151299
+    },
+    "Monster/437": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 827,
+      "sourceBytes": 2973112
+    },
+    "Monster/438": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 905,
+      "sourceBytes": 1925278
+    },
+    "Monster/439": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 676,
+      "sourceBytes": 6040819
+    },
+    "Monster/440": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 779,
+      "sourceBytes": 5713081
+    },
+    "Monster/441": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 774,
+      "sourceBytes": 6279771
+    },
+    "Monster/442": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 726,
+      "sourceBytes": 5473159
+    },
+    "Monster/443": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 2062,
+      "sourceBytes": 59236517
+    },
+    "Monster/444": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 410,
+      "sourceBytes": 6665471
+    },
+    "Monster/445": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 410,
+      "sourceBytes": 7267247
+    },
+    "Monster/446": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 430,
+      "sourceBytes": 1032476
+    },
+    "Monster/447": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 580,
+      "sourceBytes": 980733
+    },
+    "Monster/448": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 981,
+      "sourceBytes": 14230584
+    },
+    "Monster/449": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 790,
+      "sourceBytes": 7273246
+    },
+    "Monster/450": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 995,
+      "sourceBytes": 24529837
+    },
+    "Monster/451": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1840,
+      "sourceBytes": 32493626
+    },
+    "Monster/452": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1112,
+      "sourceBytes": 30700646
+    },
+    "Monster/453": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 883,
+      "sourceBytes": 14946164
+    },
+    "Monster/454": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 60,
+      "sourceBytes": 599511
+    },
+    "Monster/455": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1121,
+      "sourceBytes": 4232060
+    },
+    "Monster/456": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 423,
+      "sourceBytes": 1529192
+    },
+    "Monster/457": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 531,
+      "sourceBytes": 7633361
+    },
+    "Monster/458": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 577,
+      "sourceBytes": 10626752
+    },
+    "Monster/459": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 139,
+      "sourceBytes": 5573255
+    },
+    "Monster/460": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1010,
+      "sourceBytes": 7649377
+    },
+    "Monster/461": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 770,
+      "sourceBytes": 5195277
+    },
+    "Monster/462": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1070,
+      "sourceBytes": 15463249
+    },
+    "Monster/463": {
+      "category": "Monster",
+      "version": 2,
+      "frames": 1020,
+      "sourceBytes": 10337948
+    },
+    "Monster/464": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 600,
+      "sourceBytes": 2531633
+    },
+    "Monster/465": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 540,
+      "sourceBytes": 1072448
+    },
+    "Monster/466": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 630,
+      "sourceBytes": 2778267
+    },
+    "Monster/467": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 540,
+      "sourceBytes": 2259429
+    },
+    "Monster/468": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 840,
+      "sourceBytes": 2977355
+    },
+    "Monster/469": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1185,
+      "sourceBytes": 4682523
+    },
+    "Monster/470": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 255,
+      "sourceBytes": 782282
+    },
+    "Monster/471": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 780,
+      "sourceBytes": 2216391
+    },
+    "Monster/472": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 750,
+      "sourceBytes": 3367077
+    },
+    "Monster/473": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 590,
+      "sourceBytes": 1120874
+    },
+    "Monster/474": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 630,
+      "sourceBytes": 3718255
+    },
+    "Monster/475": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 600,
+      "sourceBytes": 2196531
+    },
+    "Monster/476": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 660,
+      "sourceBytes": 1560474
+    },
+    "Monster/477": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 420,
+      "sourceBytes": 671464
+    },
+    "Monster/478": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 690,
+      "sourceBytes": 3995982
+    },
+    "Monster/479": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 750,
+      "sourceBytes": 4295256
+    },
+    "Monster/480": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1140,
+      "sourceBytes": 14474009
+    },
+    "Monster/481": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1125,
+      "sourceBytes": 12498906
+    },
+    "Monster/482": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1140,
+      "sourceBytes": 13245601
+    },
+    "Monster/483": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1125,
+      "sourceBytes": 11986674
+    },
+    "Monster/484": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1139,
+      "sourceBytes": 13767536
+    },
+    "Monster/485": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1005,
+      "sourceBytes": 8807053
+    },
+    "Monster/486": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1020,
+      "sourceBytes": 29619022
+    },
+    "Monster/487": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1140,
+      "sourceBytes": 24273238
+    },
+    "Monster/488": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1290,
+      "sourceBytes": 48437262
+    },
+    "Monster/489": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 270,
+      "sourceBytes": 452785
+    },
+    "Monster/491": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 460,
+      "sourceBytes": 4991005
+    },
+    "Monster/492": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 350,
+      "sourceBytes": 9272490
+    },
+    "Monster/493": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 657,
+      "sourceBytes": 8002290
+    },
+    "Monster/494": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 400,
+      "sourceBytes": 6760174
+    },
+    "Monster/495": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 439,
+      "sourceBytes": 2547565
+    },
+    "Monster/496": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 496,
+      "sourceBytes": 2213795
+    },
+    "Monster/497": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 478,
+      "sourceBytes": 2294318
+    },
+    "Monster/498": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 496,
+      "sourceBytes": 1846467
+    },
+    "Monster/499": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 476,
+      "sourceBytes": 1778030
+    },
+    "Monster/500": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 670,
+      "sourceBytes": 23431275
+    },
+    "Monster/501": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 2297,
+      "sourceBytes": 42854121
+    },
+    "Monster/502": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 556,
+      "sourceBytes": 11413415
+    },
+    "Monster/503": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 851,
+      "sourceBytes": 24935030
+    },
+    "Monster/504": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 692,
+      "sourceBytes": 37878777
+    },
+    "Monster/505": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 676,
+      "sourceBytes": 2286023
+    },
+    "Monster/506": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 816,
+      "sourceBytes": 26338891
+    },
+    "Monster/507": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 759,
+      "sourceBytes": 22159657
+    },
+    "Monster/508": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 858,
+      "sourceBytes": 66250322
+    },
+    "Monster/509": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1053,
+      "sourceBytes": 28357964
+    },
+    "Monster/510": {
+      "category": "Monster",
+      "version": 3,
+      "frames": 1939,
+      "sourceBytes": 129869985
+    },
+    "Mount/00": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 977159
+    },
+    "Mount/01": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 952563
+    },
+    "Mount/02": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 859640
+    },
+    "Mount/03": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 860707
+    },
+    "Mount/04": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 905398
+    },
+    "Mount/05": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 985254
+    },
+    "Mount/06": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1076023
+    },
+    "Mount/07": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1850906
+    },
+    "Mount/08": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1837469
+    },
+    "Mount/09": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1719098
+    },
+    "Mount/10": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1729702
+    },
+    "Mount/11": {
+      "category": "Mount",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1750752
+    },
+    "NPC/00": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 95385
+    },
+    "NPC/01": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 72215
+    },
+    "NPC/02": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 82954
+    },
+    "NPC/03": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 94600
+    },
+    "NPC/04": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 80957
+    },
+    "NPC/05": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 80190
+    },
+    "NPC/06": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 80384
+    },
+    "NPC/07": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 83223
+    },
+    "NPC/08": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 102732
+    },
+    "NPC/09": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 77287
+    },
+    "NPC/10": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 111865
+    },
+    "NPC/100": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 40535
+    },
+    "NPC/101": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 43293
+    },
+    "NPC/102": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 12211
+    },
+    "NPC/103": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 54105
+    },
+    "NPC/104": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 54429
+    },
+    "NPC/105": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9473
+    },
+    "NPC/106": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 11641
+    },
+    "NPC/107": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 11355
+    },
+    "NPC/108": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 6039
+    },
+    "NPC/109": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 5881
+    },
+    "NPC/11": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 105002
+    },
+    "NPC/110": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 24633
+    },
+    "NPC/111": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 44126
+    },
+    "NPC/112": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 103922
+    },
+    "NPC/113": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 96785
+    },
+    "NPC/114": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 10207
+    },
+    "NPC/115": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 52391
+    },
+    "NPC/116": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 23252
+    },
+    "NPC/117": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 11208
+    },
+    "NPC/118": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 32781
+    },
+    "NPC/119": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 38840
+    },
+    "NPC/12": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 61139
+    },
+    "NPC/120": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 36,
+      "sourceBytes": 111352
+    },
+    "NPC/121": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 36,
+      "sourceBytes": 109498
+    },
+    "NPC/122": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 62087
+    },
+    "NPC/123": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 53078
+    },
+    "NPC/124": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 10491
+    },
+    "NPC/125": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 34411
+    },
+    "NPC/126": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 33831
+    },
+    "NPC/127": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 30959
+    },
+    "NPC/128": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 30925
+    },
+    "NPC/129": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 28009
+    },
+    "NPC/13": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 80422
+    },
+    "NPC/130": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 29309
+    },
+    "NPC/131": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 28781
+    },
+    "NPC/132": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 28159
+    },
+    "NPC/133": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 39399
+    },
+    "NPC/134": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 36425
+    },
+    "NPC/135": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 38157
+    },
+    "NPC/136": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 37229
+    },
+    "NPC/137": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 35449
+    },
+    "NPC/138": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 39901
+    },
+    "NPC/139": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 37355
+    },
+    "NPC/14": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 97703
+    },
+    "NPC/140": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 36521
+    },
+    "NPC/141": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 20211
+    },
+    "NPC/142": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 30288
+    },
+    "NPC/143": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 57572
+    },
+    "NPC/144": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 14643
+    },
+    "NPC/145": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 15023
+    },
+    "NPC/146": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 14585
+    },
+    "NPC/147": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 13297
+    },
+    "NPC/148": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 14597
+    },
+    "NPC/149": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 15327
+    },
+    "NPC/15": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 121520
+    },
+    "NPC/150": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 15227
+    },
+    "NPC/151": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 19916
+    },
+    "NPC/152": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 17800
+    },
+    "NPC/153": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 112976
+    },
+    "NPC/154": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 93262
+    },
+    "NPC/155": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 10070
+    },
+    "NPC/156": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 16781
+    },
+    "NPC/157": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 54059
+    },
+    "NPC/158": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 118001
+    },
+    "NPC/159": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 4,
+      "sourceBytes": 7427
+    },
+    "NPC/16": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 90111
+    },
+    "NPC/160": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 76423
+    },
+    "NPC/161": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 127903
+    },
+    "NPC/162": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 15,
+      "sourceBytes": 173791
+    },
+    "NPC/163": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 35695
+    },
+    "NPC/164": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 107595
+    },
+    "NPC/165": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 102955
+    },
+    "NPC/166": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 110223
+    },
+    "NPC/167": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 105962
+    },
+    "NPC/168": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 105621
+    },
+    "NPC/169": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 106292
+    },
+    "NPC/17": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 105596
+    },
+    "NPC/170": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 102675
+    },
+    "NPC/171": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 111066
+    },
+    "NPC/172": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 105249
+    },
+    "NPC/173": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 128948
+    },
+    "NPC/174": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 62087
+    },
+    "NPC/175": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 232444
+    },
+    "NPC/176": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 192155
+    },
+    "NPC/177": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 27,
+      "sourceBytes": 125550
+    },
+    "NPC/178": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 35257
+    },
+    "NPC/179": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 15,
+      "sourceBytes": 40407
+    },
+    "NPC/18": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 102883
+    },
+    "NPC/180": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 15,
+      "sourceBytes": 45292
+    },
+    "NPC/181": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 15,
+      "sourceBytes": 51619
+    },
+    "NPC/182": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 51,
+      "sourceBytes": 171708
+    },
+    "NPC/183": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 33,
+      "sourceBytes": 106964
+    },
+    "NPC/184": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 15,
+      "sourceBytes": 45638
+    },
+    "NPC/185": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 47823
+    },
+    "NPC/186": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 86106
+    },
+    "NPC/187": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 86132
+    },
+    "NPC/188": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 94373
+    },
+    "NPC/189": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 76863
+    },
+    "NPC/19": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 69359
+    },
+    "NPC/190": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 76653
+    },
+    "NPC/191": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 76881
+    },
+    "NPC/192": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 102086
+    },
+    "NPC/193": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 250487
+    },
+    "NPC/194": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 251360
+    },
+    "NPC/195": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 48,
+      "sourceBytes": 504253
+    },
+    "NPC/196": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 51,
+      "sourceBytes": 310221
+    },
+    "NPC/197": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 51,
+      "sourceBytes": 319633
+    },
+    "NPC/198": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 124767
+    },
+    "NPC/199": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 124773
+    },
+    "NPC/20": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 127890
+    },
+    "NPC/200": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 195729
+    },
+    "NPC/201": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 174057
+    },
+    "NPC/202": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 152686
+    },
+    "NPC/203": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 143689
+    },
+    "NPC/204": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 151909
+    },
+    "NPC/205": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 182467
+    },
+    "NPC/206": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 144788
+    },
+    "NPC/207": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 156360
+    },
+    "NPC/208": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 130715
+    },
+    "NPC/209": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 145433
+    },
+    "NPC/21": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 75034
+    },
+    "NPC/210": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 157146
+    },
+    "NPC/211": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 122643
+    },
+    "NPC/212": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 135562
+    },
+    "NPC/213": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 92415
+    },
+    "NPC/214": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 492469
+    },
+    "NPC/215": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 594985
+    },
+    "NPC/216": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 66178
+    },
+    "NPC/217": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 65740
+    },
+    "NPC/218": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 308047
+    },
+    "NPC/219": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 12497
+    },
+    "NPC/22": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 118881
+    },
+    "NPC/220": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 62441
+    },
+    "NPC/221": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 131589
+    },
+    "NPC/222": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 186135
+    },
+    "NPC/223": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 1,
+      "sourceBytes": 24378
+    },
+    "NPC/224": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 1,
+      "sourceBytes": 25767
+    },
+    "NPC/225": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 11463
+    },
+    "NPC/226": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 11636
+    },
+    "NPC/227": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 11796
+    },
+    "NPC/228": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 11204
+    },
+    "NPC/229": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 39,
+      "sourceBytes": 171487
+    },
+    "NPC/23": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 72,
+      "sourceBytes": 167100
+    },
+    "NPC/230": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 84,
+      "sourceBytes": 565767
+    },
+    "NPC/231": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 20517
+    },
+    "NPC/232": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 48551
+    },
+    "NPC/233": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 6939
+    },
+    "NPC/234": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 7117
+    },
+    "NPC/235": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 17801
+    },
+    "NPC/24": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 27632
+    },
+    "NPC/25": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 21502
+    },
+    "NPC/26": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 116058
+    },
+    "NPC/27": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 36809
+    },
+    "NPC/28": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 94357
+    },
+    "NPC/29": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 78887
+    },
+    "NPC/30": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 86434
+    },
+    "NPC/31": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 146591
+    },
+    "NPC/32": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 27151
+    },
+    "NPC/33": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 741207
+    },
+    "NPC/34": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 22,
+      "sourceBytes": 711795
+    },
+    "NPC/35": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 73137
+    },
+    "NPC/36": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 71025
+    },
+    "NPC/37": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 63333
+    },
+    "NPC/38": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 59781
+    },
+    "NPC/39": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 60201
+    },
+    "NPC/40": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 60789
+    },
+    "NPC/41": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 175442
+    },
+    "NPC/42": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 20,
+      "sourceBytes": 72635
+    },
+    "NPC/43": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 20,
+      "sourceBytes": 53610
+    },
+    "NPC/44": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 302121
+    },
+    "NPC/45": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 45801
+    },
+    "NPC/46": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 174891
+    },
+    "NPC/47": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 50,
+      "sourceBytes": 99867
+    },
+    "NPC/48": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 18,
+      "sourceBytes": 156342
+    },
+    "NPC/49": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 132743
+    },
+    "NPC/50": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 111003
+    },
+    "NPC/51": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 11079
+    },
+    "NPC/52": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 32942
+    },
+    "NPC/53": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 10,
+      "sourceBytes": 79221
+    },
+    "NPC/54": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 7619
+    },
+    "NPC/55": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 73182
+    },
+    "NPC/56": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 4651
+    },
+    "NPC/57": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 5,
+      "sourceBytes": 17892
+    },
+    "NPC/58": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 6,
+      "sourceBytes": 6197
+    },
+    "NPC/59": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 40,
+      "sourceBytes": 1702911
+    },
+    "NPC/60": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 30,
+      "sourceBytes": 69543
+    },
+    "NPC/61": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 29406
+    },
+    "NPC/62": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 4,
+      "sourceBytes": 8016
+    },
+    "NPC/63": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 4,
+      "sourceBytes": 9341
+    },
+    "NPC/64": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 14,
+      "sourceBytes": 33695
+    },
+    "NPC/65": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 4,
+      "sourceBytes": 8488
+    },
+    "NPC/66": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 4,
+      "sourceBytes": 8579
+    },
+    "NPC/67": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 8747
+    },
+    "NPC/68": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 25416
+    },
+    "NPC/69": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 15888
+    },
+    "NPC/70": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 11366
+    },
+    "NPC/71": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 11511
+    },
+    "NPC/72": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 615
+    },
+    "NPC/73": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9401
+    },
+    "NPC/74": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 108117
+    },
+    "NPC/75": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 25330
+    },
+    "NPC/76": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 29795
+    },
+    "NPC/77": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 29503
+    },
+    "NPC/78": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 42,
+      "sourceBytes": 94062
+    },
+    "NPC/79": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 59112
+    },
+    "NPC/80": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 11,
+      "sourceBytes": 44002
+    },
+    "NPC/81": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 24,
+      "sourceBytes": 48245
+    },
+    "NPC/82": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 24,
+      "sourceBytes": 45486
+    },
+    "NPC/83": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 24884
+    },
+    "NPC/84": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 36,
+      "sourceBytes": 73485
+    },
+    "NPC/85": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 29518
+    },
+    "NPC/86": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 25651
+    },
+    "NPC/87": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 407502
+    },
+    "NPC/88": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 172302
+    },
+    "NPC/89": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 8,
+      "sourceBytes": 172243
+    },
+    "NPC/90": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 32942
+    },
+    "NPC/91": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 26286
+    },
+    "NPC/92": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 49073
+    },
+    "NPC/93": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 43555
+    },
+    "NPC/94": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 51009
+    },
+    "NPC/95": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 12,
+      "sourceBytes": 19092
+    },
+    "NPC/96": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9273
+    },
+    "NPC/97": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9085
+    },
+    "NPC/98": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9339
+    },
+    "NPC/99": {
+      "category": "NPC",
+      "version": 3,
+      "frames": 2,
+      "sourceBytes": 9335
+    },
+    "Pet/00": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 368,
+      "sourceBytes": 348008
+    },
+    "Pet/01": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 432,
+      "sourceBytes": 252086
+    },
+    "Pet/02": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 360,
+      "sourceBytes": 277561
+    },
+    "Pet/03": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 440,
+      "sourceBytes": 360851
+    },
+    "Pet/04": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 320,
+      "sourceBytes": 323775
+    },
+    "Pet/05": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 312,
+      "sourceBytes": 119860
+    },
+    "Pet/06": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 360,
+      "sourceBytes": 309951
+    },
+    "Pet/07": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 280,
+      "sourceBytes": 576267
+    },
+    "Pet/08": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 312,
+      "sourceBytes": 581462
+    },
+    "Pet/09": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 219,
+      "sourceBytes": 541375
+    },
+    "Pet/10": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 336,
+      "sourceBytes": 482933
+    },
+    "Pet/11": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 368,
+      "sourceBytes": 572210
+    },
+    "Pet/12": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 376,
+      "sourceBytes": 685473
+    },
+    "Pet/13": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 416,
+      "sourceBytes": 852042
+    },
+    "Pet/14": {
+      "category": "Pet",
+      "version": 3,
+      "frames": 416,
+      "sourceBytes": 1213166
+    },
+    "Prguse": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 2447,
+      "sourceBytes": 12414386
+    },
+    "Prguse2": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 1602,
+      "sourceBytes": 3557648
+    },
+    "Prguse3": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 32,
+      "sourceBytes": 125886
+    },
+    "Siege/00": {
+      "category": "Siege",
+      "version": 3,
+      "frames": 298,
+      "sourceBytes": 2240330
+    },
+    "Siege/01": {
+      "category": "Siege",
+      "version": 3,
+      "frames": 272,
+      "sourceBytes": 1521952
+    },
+    "Siege/02": {
+      "category": "Siege",
+      "version": 3,
+      "frames": 334,
+      "sourceBytes": 5906099
+    },
+    "Siege/03": {
+      "category": "Siege",
+      "version": 3,
+      "frames": 288,
+      "sourceBytes": 4978604
+    },
+    "Siege/04": {
+      "category": "Siege",
+      "version": 3,
+      "frames": 288,
+      "sourceBytes": 4999435
+    },
+    "Stateitem": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 5192,
+      "sourceBytes": 3076805
+    },
+    "Title": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 899,
+      "sourceBytes": 5617784
+    },
+    "Transform/00": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1510239
+    },
+    "Transform/01": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1723135
+    },
+    "Transform/02": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1667731
+    },
+    "Transform/03": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1712424
+    },
+    "Transform/04": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1626577
+    },
+    "Transform/05": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1726408
+    },
+    "Transform/06": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 632,
+      "sourceBytes": 4116726
+    },
+    "Transform/07": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 634,
+      "sourceBytes": 2242699
+    },
+    "Transform/08": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 632,
+      "sourceBytes": 2647771
+    },
+    "Transform/09": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 632,
+      "sourceBytes": 7055096
+    },
+    "Transform/10": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1698662
+    },
+    "Transform/11": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1641720
+    },
+    "Transform/12": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1790939
+    },
+    "Transform/13": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1772233
+    },
+    "Transform/14": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1545863
+    },
+    "Transform/15": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1585405
+    },
+    "Transform/16": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 2121294
+    },
+    "Transform/17": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1860418
+    },
+    "Transform/18": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 4026951
+    },
+    "Transform/19": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 4435981
+    },
+    "Transform/20": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 792,
+      "sourceBytes": 1943959
+    },
+    "Transform/21": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 792,
+      "sourceBytes": 2075562
+    },
+    "Transform/22": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 792,
+      "sourceBytes": 2253709
+    },
+    "Transform/23": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 792,
+      "sourceBytes": 2230291
+    },
+    "Transform/24": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 792,
+      "sourceBytes": 2225574
+    },
+    "Transform/25": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 2023186
+    },
+    "Transform/26": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 2640066
+    },
+    "Transform/27": {
+      "category": "Transform",
+      "version": 2,
+      "frames": 809,
+      "sourceBytes": 2830056
+    },
+    "Transform/28": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 1128,
+      "sourceBytes": 17233856
+    },
+    "Transform/29": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 1144,
+      "sourceBytes": 18886891
+    },
+    "Transform/30": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 5443837
+    },
+    "Transform/31": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 5570301
+    },
+    "Transform/32": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 3940125
+    },
+    "Transform/33": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 807,
+      "sourceBytes": 2811962
+    },
+    "Transform/34": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 4007961
+    },
+    "Transform/35": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 2888144
+    },
+    "Transform/36": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 4077389
+    },
+    "Transform/37": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 2529343
+    },
+    "Transform/38": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 8115532
+    },
+    "Transform/39": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 7924326
+    },
+    "Transform/40": {
+      "category": "Transform",
+      "version": 3,
+      "frames": 808,
+      "sourceBytes": 6680480
+    },
+    "TransformEffect/00": {
+      "category": "TransformEffect",
+      "version": 2,
+      "frames": 808,
+      "sourceBytes": 1607024
+    },
+    "TransformEffect/01": {
+      "category": "TransformEffect",
+      "version": 2,
+      "frames": 840,
+      "sourceBytes": 12151483
+    },
+    "TransformEffect/02": {
+      "category": "TransformEffect",
+      "version": 3,
+      "frames": 137,
+      "sourceBytes": 3405197
+    },
+    "TransformEffect/03": {
+      "category": "TransformEffect",
+      "version": 3,
+      "frames": 23,
+      "sourceBytes": 359673
+    },
+    "TransformEffect/04": {
+      "category": "TransformEffect",
+      "version": 3,
+      "frames": 23,
+      "sourceBytes": 451442
+    },
+    "TransformRide2/00": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 258074
+    },
+    "TransformRide2/01": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 311567
+    },
+    "TransformRide2/02": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 309091
+    },
+    "TransformRide2/03": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 328936
+    },
+    "TransformRide2/04": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 433869
+    },
+    "TransformRide2/05": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 444359
+    },
+    "TransformRide2/06": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 1416126
+    },
+    "TransformRide2/07": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 568956
+    },
+    "TransformRide2/08": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 621056
+    },
+    "TransformRide2/09": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 2430685
+    },
+    "TransformRide2/10": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 362212
+    },
+    "TransformRide2/11": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 328754
+    },
+    "TransformRide2/12": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 394333
+    },
+    "TransformRide2/13": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 370270
+    },
+    "TransformRide2/14": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 290777
+    },
+    "TransformRide2/15": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 324519
+    },
+    "TransformRide2/16": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 373147
+    },
+    "TransformRide2/17": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 348169
+    },
+    "TransformRide2/18": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 856309
+    },
+    "TransformRide2/19": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 816562
+    },
+    "TransformRide2/20": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 415856
+    },
+    "TransformRide2/21": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 445745
+    },
+    "TransformRide2/22": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 500052
+    },
+    "TransformRide2/23": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 486426
+    },
+    "TransformRide2/24": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 482968
+    },
+    "TransformRide2/25": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 324519
+    },
+    "TransformRide2/26": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 562897
+    },
+    "TransformRide2/27": {
+      "category": "TransformRide2",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 581476
+    },
+    "TransformRide2/32": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 824524
+    },
+    "TransformRide2/33": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 534235
+    },
+    "TransformRide2/34": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 869851
+    },
+    "TransformRide2/35": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 712761
+    },
+    "TransformRide2/36": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 870619
+    },
+    "TransformRide2/37": {
+      "category": "TransformRide2",
+      "version": 3,
+      "frames": 216,
+      "sourceBytes": 527048
+    },
+    "TransformRide2Effect/00": {
+      "category": "TransformRide2Effect",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 392034
+    },
+    "TransformRide2Effect/01": {
+      "category": "TransformRide2Effect",
+      "version": 2,
+      "frames": 216,
+      "sourceBytes": 3207468
+    },
+    "TransformWeaponEffect/00": {
+      "category": "TransformWeaponEffect",
+      "version": 2,
+      "frames": 416,
+      "sourceBytes": 876533
+    },
+    "UI_32bit": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 474,
+      "sourceBytes": 6826921
+    },
+    "Weather": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 788,
+      "sourceBytes": 25548633
+    },
+    "dnitems": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 5280,
+      "sourceBytes": 1715976
+    },
+    "mmap": {
+      "category": "(root)",
+      "version": 3,
+      "frames": 450,
+      "sourceBytes": 23507526
+    }
+  }
+}

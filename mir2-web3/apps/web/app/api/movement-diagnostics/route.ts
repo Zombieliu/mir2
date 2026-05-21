@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { NextResponse } from "next/server";
 
+import { requestFileWritesDisabled } from "../../../lib/deployment-env";
+
 type MovementDiagnosticsBatch = {
   sessionId?: unknown;
   startedAt?: unknown;
@@ -28,6 +30,15 @@ export async function POST(request: Request) {
   const events = Array.isArray(body.events) ? body.events : [];
   if (!events.length) {
     return NextResponse.json({ ok: true, sessionId, eventCount: 0 });
+  }
+
+  if (requestFileWritesDisabled()) {
+    return NextResponse.json({
+      ok: true,
+      disabled: true,
+      sessionId,
+      eventCount: events.length,
+    });
   }
 
   await mkdir(OUTPUT_DIR, { recursive: true });
@@ -57,6 +68,13 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  if (requestFileWritesDisabled()) {
+    return NextResponse.json(
+      { ok: false, disabled: true, error: "movement diagnostics are disabled in this deployment" },
+      { status: 404 },
+    );
+  }
+
   try {
     const latest = await readFile(path.join(OUTPUT_DIR, "latest.json"), "utf8");
     return new NextResponse(latest, {

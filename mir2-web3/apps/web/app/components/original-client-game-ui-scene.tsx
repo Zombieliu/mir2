@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 
 import type { CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import { MainHud } from "./original-client-overlays";
-import { BeltDialog, ChatFilterBar, ChatFrame, DuraPanel } from "./original-client-panels";
+import {
+  BeltDialog,
+  ChatFilterBar,
+  ChatFrame,
+  DuraPanel,
+  chatPrefixForFilter,
+  formatChatMessageForFilter,
+  type ChatFilterKey,
+  type ChatOptionFilterKey,
+} from "./original-client-panels";
 import { MailPanel, NpcDialogPanel, ReportPanel } from "./original-client-dialogs";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow } from "./original-client-game-shop";
@@ -28,8 +37,6 @@ import type {
   TranslateFn,
 } from "./original-client-types";
 
-type ChatFilterKey = "all" | "shout" | "trade" | "whisper" | "lover" | "mentor" | "group" | "guild";
-
 type GameUiSceneProps = {
   t: TranslateFn;
   locale: string;
@@ -44,7 +51,8 @@ type GameUiSceneProps = {
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
   onChatMessageChange: (value: string) => void;
-  onSendChat: () => void;
+  onSendChat: (message: string) => void;
+  onRequestTrade: () => void;
   onRentExpandedStorage: () => void;
   onLogout: () => void;
   onToggleCharacter: () => void;
@@ -96,6 +104,7 @@ export function GameUiScene({
   storageServiceOpenVersion,
   onChatMessageChange,
   onSendChat,
+  onRequestTrade,
   onRentExpandedStorage,
   onLogout,
   onToggleCharacter,
@@ -135,6 +144,8 @@ export function GameUiScene({
   const [showBelt, setShowBelt] = useState(true);
   const [beltVertical, setBeltVertical] = useState(false);
   const [activeChatFilter, setActiveChatFilter] = useState<ChatFilterKey>("all");
+  const [hiddenChatFilters, setHiddenChatFilters] = useState<ChatOptionFilterKey[]>([]);
+  const [transparentChat, setTransparentChat] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(true);
   const [showChatSettings, setShowChatSettings] = useState(false);
   const [showMailPanel, setShowMailPanel] = useState(false);
@@ -150,6 +161,44 @@ export function GameUiScene({
     : null;
   const visibleDialog =
     world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
+
+  function selectChatFilter(filter: ChatFilterKey) {
+    const previousPrefix = chatPrefixForFilter(activeChatFilter);
+    const nextPrefix = chatPrefixForFilter(filter);
+    setActiveChatFilter(filter);
+
+    if (chatMessage === "" || chatMessage === previousPrefix) {
+      onChatMessageChange(nextPrefix);
+      return;
+    }
+
+    if (previousPrefix && chatMessage.startsWith(previousPrefix)) {
+      onChatMessageChange(`${nextPrefix}${chatMessage.slice(previousPrefix.length)}`);
+    }
+  }
+
+  function sendActiveChatMessage() {
+    const message = formatChatMessageForFilter(activeChatFilter, chatMessage);
+    if (!message) return;
+    onSendChat(message);
+    onChatMessageChange(chatPrefixForFilter(activeChatFilter));
+  }
+
+  function toggleHiddenChatFilter(filter: ChatOptionFilterKey) {
+    setHiddenChatFilters((current) =>
+      current.includes(filter)
+        ? current.filter((entry) => entry !== filter)
+        : [...current, filter],
+    );
+  }
+
+  function toggleAllHiddenChatFilters() {
+    setHiddenChatFilters((current) =>
+      current.length === 8
+        ? []
+        : ["normal", "whisper", "shout", "system", "lover", "mentor", "group", "guild"],
+    );
+  }
 
   useEffect(() => {
     if (!dialogKey) {
@@ -191,8 +240,8 @@ export function GameUiScene({
         activeFilter={activeChatFilter}
         chatExpanded={chatExpanded}
         showSettings={showChatSettings}
-        onSelectFilter={setActiveChatFilter}
-        onSelectTrade={() => setActiveChatFilter("trade")}
+        onSelectFilter={selectChatFilter}
+        onRequestTrade={onRequestTrade}
         onToggleExpanded={() => setChatExpanded((current) => !current)}
         onToggleSettings={() => setShowChatSettings((current) => !current)}
         onToggleReport={() => setShowReportPanel((current) => !current)}
@@ -204,11 +253,16 @@ export function GameUiScene({
         chatMessage={chatMessage}
         hints={world.interactionHints}
         activeFilter={activeChatFilter}
+        hiddenFilters={hiddenChatFilters}
         expanded={chatExpanded}
         showSettings={showChatSettings}
+        transparent={transparentChat}
         onChatMessageChange={onChatMessageChange}
-        onSendChat={onSendChat}
+        onSendChat={sendActiveChatMessage}
         onCloseSettings={() => setShowChatSettings(false)}
+        onToggleHiddenFilter={toggleHiddenChatFilter}
+        onToggleAllHiddenFilters={toggleAllHiddenChatFilters}
+        onToggleTransparent={() => setTransparentChat((current) => !current)}
       />
       <MainHud
         t={t}

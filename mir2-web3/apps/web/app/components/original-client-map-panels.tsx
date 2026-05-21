@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { CRYSTAL_BIG_MAP_NPCS } from "../../lib/generated/crystal-npc-info-data";
 import miniMapMeta from "../../public/original-ui/MMap/meta.json";
 import { SpriteButton } from "./original-client-overlays";
+import {
+  handleSceneAssetImageError,
+  handleSceneAssetImageLoad,
+} from "./original-client-scene-map-rendering";
 
 type TranslateFn = (
   key: string,
@@ -95,7 +99,15 @@ export function BigMapDialog({
 
   return (
     <section className="big-map-dialog" aria-label={t("client.BigMapKey", ["M"], t("ui.map"))}>
-      <img className="big-map-frame" src={ORIGINAL_UI.bigMap.frame} alt="" draggable={false} />
+      <img
+        className="big-map-frame"
+        src={ORIGINAL_UI.bigMap.frame}
+        alt=""
+        draggable={false}
+        data-mir2-original-src={ORIGINAL_UI.bigMap.frame}
+        onError={handleSceneAssetImageError}
+        onLoad={handleSceneAssetImageLoad}
+      />
       <div className="big-map-title">{world.mapTitle ?? world.mapFileName ?? ""}</div>
       <div className="big-map-close"><SpriteButton sprite={ORIGINAL_UI.bigMap.closeButton} label={t("ui.close")} onClick={onClose} /></div>
       <div className="big-map-scroll up"><SpriteButton sprite={ORIGINAL_UI.bigMap.upButton} label={t("ui.up", [], "Up")} onClick={() => undefined} /></div>
@@ -108,6 +120,9 @@ export function BigMapDialog({
             src={bigMapAsset.src}
             alt=""
             draggable={false}
+            data-mir2-original-src={bigMapAsset.src}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
             style={{ width: viewport.contentWidth, height: viewport.contentHeight, left: viewport.imageLeft, top: viewport.imageTop }}
           />
         ) : (
@@ -124,6 +139,9 @@ export function BigMapDialog({
             src={ORIGINAL_UI.bigMap.radarDot}
             alt=""
             draggable={false}
+            data-mir2-original-src={ORIGINAL_UI.bigMap.radarDot}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
             style={{ left: viewport.imageLeft + player.x * scaleX - 6, top: viewport.imageTop + player.y * scaleY - 5 }}
           />
         ) : null}
@@ -142,6 +160,9 @@ export function BigMapDialog({
               src={originalMapLinkIconPath(entity.icon)}
               alt=""
               draggable={false}
+              data-mir2-original-src={originalMapLinkIconPath(entity.icon)}
+              onError={handleSceneAssetImageError}
+              onLoad={handleSceneAssetImageLoad}
             />
             <span className="big-map-npc-name">{bigMapNpcDisplayName(entity.name)}</span>
           </button>
@@ -154,9 +175,33 @@ export function BigMapDialog({
       <input className="big-map-search-input" aria-label={t("ui.search", [], "Search")} readOnly />
       {showWorldMap ? (
         <div className="big-map-world-overlay">
-          <img className="big-map-world-image" src={ORIGINAL_UI.bigMap.worldMap} alt="" draggable={false} />
-          <img className="big-map-world-clouds" src={ORIGINAL_UI.bigMap.worldClouds} alt="" draggable={false} />
-          <img className="big-map-world-border" src={ORIGINAL_UI.bigMap.worldBorder} alt="" draggable={false} />
+          <img
+            className="big-map-world-image"
+            src={ORIGINAL_UI.bigMap.worldMap}
+            alt=""
+            draggable={false}
+            data-mir2-original-src={ORIGINAL_UI.bigMap.worldMap}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+          />
+          <img
+            className="big-map-world-clouds"
+            src={ORIGINAL_UI.bigMap.worldClouds}
+            alt=""
+            draggable={false}
+            data-mir2-original-src={ORIGINAL_UI.bigMap.worldClouds}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+          />
+          <img
+            className="big-map-world-border"
+            src={ORIGINAL_UI.bigMap.worldBorder}
+            alt=""
+            draggable={false}
+            data-mir2-original-src={ORIGINAL_UI.bigMap.worldBorder}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
+          />
         </div>
       ) : null}
     </section>
@@ -178,20 +223,32 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
   const [collapsed, setCollapsed] = useState(false);
   const miniMapAsset = originalMiniMapAssetPath(world.miniMapIndex);
   const hasRasterMiniMap = Boolean(miniMapAsset);
-  const panelFrame = hasRasterMiniMap ? ORIGINAL_UI.game.miniMap : ORIGINAL_UI.game.miniMapSmall;
+  const smallMode = collapsed || !hasRasterMiniMap;
+  const panelFrame = smallMode ? ORIGINAL_UI.game.miniMapSmall : ORIGINAL_UI.game.miniMap;
+  const mapTitle = crystalMiniMapTitle(world.mapTitle, t);
+
+  useEffect(() => {
+    if (hasRasterMiniMap) {
+      setCollapsed(false);
+    }
+  }, [world.miniMapIndex, hasRasterMiniMap]);
 
   return (
-    <section className={`mini-map-panel ${hasRasterMiniMap ? "large" : "small"}`}>
-      <img className="mini-map-bg" src={panelFrame} alt="" draggable={false} />
-      <div className={`mini-map-scene-shell ${collapsed || !hasRasterMiniMap ? "hidden" : ""}`}>
+    <section className={`mini-map-panel ${smallMode ? "small" : "large"}`}>
+      <img
+        className="mini-map-bg"
+        src={panelFrame}
+        alt=""
+        draggable={false}
+        data-mir2-original-src={panelFrame}
+        onError={handleSceneAssetImageError}
+        onLoad={handleSceneAssetImageLoad}
+      />
+      <div className={`mini-map-scene-shell ${smallMode ? "hidden" : ""}`}>
         <MiniMapScene world={world} player={player} />
       </div>
-      {hasRasterMiniMap ? <div className="mini-map-name">
-        <span>{world.mapTitle ?? t("content.scene.starterField.title")}</span>
-        {world.inSafeZone ? <>
-          {" "}
-          <span className="mini-map-safe-zone">{t("ui.safeZone", [], "Safe Zone")}</span>
-        </> : null}
+      {!smallMode ? <div className="mini-map-name">
+        <span>{mapTitle}</span>
       </div> : null}
       <div className="mini-map-coords">{player ? `${player.x}:${player.y}` : "--:--"}</div>
       <div className="mini-map-button mail">
@@ -208,7 +265,15 @@ export function MiniMapPanel({ t, world, player, showMailPanel, showBigMap, onTo
       {hasRasterMiniMap ? <div className="mini-map-button toggle">
         <SpriteButton sprite={ORIGINAL_UI.game.miniMapButtons.toggle} label={t("ui.toggleMiniMap")} onClick={() => setCollapsed((current) => !current)} />
       </div> : null}
-      <img className="mini-map-light" src={ORIGINAL_UI.game.miniMapIcons.light} alt="" draggable={false} />
+      <img
+        className="mini-map-light"
+        src={ORIGINAL_UI.game.miniMapIcons.light}
+        alt=""
+        draggable={false}
+        data-mir2-original-src={ORIGINAL_UI.game.miniMapIcons.light}
+        onError={handleSceneAssetImageError}
+        onLoad={handleSceneAssetImageLoad}
+      />
     </section>
   );
 }
@@ -240,6 +305,9 @@ function MiniMapScene({
           src={miniMapAssetPath.src}
           alt=""
           draggable={false}
+          data-mir2-original-src={miniMapAssetPath.src}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
           style={miniMapRasterStyle(bounds.raster)}
         />
       ) : (
@@ -275,6 +343,23 @@ function MiniMapScene({
 
 function originalMapLinkIconPath(icon: number) {
   return ORIGINAL_UI.bigMap.mapLinkIcon(icon);
+}
+
+function crystalMiniMapTitle(mapTitle: string | null, t: TranslateFn) {
+  const fallback = t("content.scene.starterField.title");
+  const safeZoneText = t("ui.safeZone", [], "Safe Zone");
+  const safeZoneLabels = [safeZoneText, "Safe Zone"].filter(Boolean);
+  const normalized = safeZoneLabels.reduce((title, label) => {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return title
+      .replace(new RegExp(`\\s*${escaped}\\s*$`, "i"), "")
+      .replace(new RegExp(`^\\s*${escaped}\\s*`, "i"), "");
+  }, mapTitle ?? fallback)
+    .split(/\r?\n/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => !safeZoneLabels.some((label) => part.toLocaleLowerCase() === label.toLocaleLowerCase()));
+  return normalized[0] ?? fallback;
 }
 
 function bigMapNpcKey(mapFileName: string | null | undefined, name: string, x: number, y: number) {
@@ -360,10 +445,10 @@ function miniMapBounds(
       width: viewWidth / scaleX,
       height: viewHeight / scaleY,
       raster: {
-        left: rasterLeft,
-        top: rasterTop,
-        width: viewWidth,
-        height: viewHeight,
+        left: -rasterLeft,
+        top: -rasterTop,
+        width: asset.width,
+        height: asset.height,
       },
     };
   }
@@ -444,14 +529,13 @@ function miniMapTerrainColor(kind: string) {
 function miniMapEntityColor(kind: string) {
   switch (kind) {
     case "selfPlayer":
-      return "#ffef5b";
     case "player":
-      return "#63d7ff";
+      return "#ffffff";
     case "npc":
-      return "#ff64c8";
+      return "#00ff32";
     case "monster":
     default:
-      return "#ef4444";
+      return "#ff0000";
   }
 }
 

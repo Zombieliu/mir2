@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
+import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -33,6 +34,9 @@ type DisplayEquipmentItem = {
   slot: EquipmentSlot;
   name: string;
   icon: number;
+  description: string;
+  durabilityCurrent: number;
+  durabilityMax: number;
   attack: number;
   defence: number;
 };
@@ -159,13 +163,13 @@ export function CharacterWindow({
                 key={slot.label}
                 className="character-slot"
                 style={{ left: slot.x + 8, top: slot.y + 90 }}
-                title={slot.label}
+                aria-label={slot.label}
               >
 	                {item ? (
 	                  <button
 	                    type="button"
 	                    className="character-slot-card"
-	                    title={item.name}
+	                    aria-label={item.name}
 	                    onClick={() => {
 	                      if (repairMode === "normal") {
 	                        onRepairItem({ slot: item.slot });
@@ -185,6 +189,16 @@ export function CharacterWindow({
                       src={originalItemIconPath(item.icon)}
                       alt=""
                       draggable={false}
+                    />
+                    <OriginalItemTooltip
+                      t={t}
+                      name={item.name}
+                      description={item.description}
+                      durabilityCurrent={item.durabilityCurrent}
+                      durabilityMax={item.durabilityMax}
+                      attack={item.attack}
+                      defence={item.defence}
+                      align={slot.x > 110 ? "left" : "right"}
                     />
                   </button>
                 ) : null}

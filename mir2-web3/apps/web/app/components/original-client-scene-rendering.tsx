@@ -13,8 +13,11 @@ import { transientFrameCycle } from "./original-client-scene-motion";
 export {
   GameSceneBackdrop,
   buildViewportMapSprites,
+  handleSceneAssetImageError,
+  handleSceneAssetImageLoad,
   mapSpriteBlendMode,
   mapSpriteRenderPath,
+  sceneAssetCandidateUrls,
 } from "./original-client-scene-map-rendering";
 export {
   cameraMotionOffsetForEntity,

@@ -5,10 +5,20 @@ Next.js host shell for the first visual client checkpoint.
 Responsibilities in this slice:
 
 - open a WebSocket session to the local gateway
-- send login / start-game commands
+- send password, Sui Passkey, Sui wallet, account creation, and start-game commands
 - project packet payloads into a small world snapshot
 - feed that snapshot into the Bevy WASM runtime
 - render HUD, event log, and quick controls around the canvas
+
+Login boundaries:
+
+- `lib/client-login-runtime.ts` owns Gateway login command sequencing.
+- `lib/passkey-auth.ts` owns Sui Passkey and wallet personal-message signing
+  plus `/api/passkey/login` token exchange.
+- `app/api/passkey/login/route.ts` verifies Sui personal-message signatures and
+  issues short-lived Gateway auth tokens.
+- production/staging deployments must set `MIR2_PASSKEY_AUTH_SECRET` to the
+  same value used by the Gateway.
 
 Gateway WebSocket configuration:
 
@@ -20,4 +30,176 @@ Local flow:
 
 1. build the WASM runtime with `npm run runtime:build:dev`
 2. start the web shell with `npm run dev`
-3. open the local page and click `Quick Enter`
+3. open the local page and choose password, Passkey, wallet, or `Quick Enter`
+
+Shared Zone browser smoke:
+
+- Start a Gateway, for example with `MIR2_GATEWAY_WEB_ADDR=127.0.0.1:7210`.
+- Start Web on `127.0.0.1:13010`.
+- Run `MIR2_GATEWAY_WS_URL=ws://127.0.0.1:7210/ws npm run smoke:two-client-zone`.
+- The smoke opens two isolated browser pages, creates throwaway accounts, joins
+  both characters into the same Zone, verifies mutual `ObjectPlayer`
+  visibility, verifies movement/chat broadcast delivery, and writes JSON plus
+  screenshots under `docs/generated/player-qa/two-client-zone/`.
+
+Crystal asset pipeline:
+
+- The local full-client source default is
+  `/Users/henryliu/obelisk/ai/numeron/mir2/downloads/crystal-client-full`; set
+  `CRYSTAL_CLIENT_ROOT` to override it.
+- `npm run generate:crystal-asset-index` scans full `Data/*.Lib`, `Map/*.map`,
+  and `Sound/*.wav`, then writes the public source-library index and the docs
+  full-client manifest.
+- `npm run export:crystal-sounds` parses Crystal `Sound/SoundList.lst`, copies
+  available referenced wavs into `public/original-ui/Sound`, and writes the
+  runtime sound index. Missing source wavs are recorded in the generated JSON.
+- `npm run assets:prepare` refreshes the source index, SoundList audio, and the
+  curated static sprite export. It is the local/dev preparation path.
+- `npm run smoke:crystal-assets`, `npm run smoke:crystal-minimap-assets`, and
+  `npm run audit:crystal-map-coverage` are the resource verification path.
+- Missing sprite libraries that are present in the full-client index are
+  converted on demand by `GET /api/original-ui-meta?library=<key>`. Production
+  deployments should either pre-run `assets:prepare` into a writable/static
+  asset volume or mount `CRYSTAL_CLIENT_ROOT` plus writable `public/original-ui`
+  for the on-demand cache.
+
+Game-grade asset cache:
+
+- Production serves `/original-ui`, `/original-map`, and
+  `/generated/original-map-blend` with
+  `Cache-Control: public, max-age=31536000, immutable`.
+- `/bevy-runtime/...` uses a short revalidation path plus a JS/WASM content
+  hash query. Do not put it in the long-lived Service Worker static cache:
+  the wasm-bindgen JS glue and `.wasm` must always come from the same runtime
+  build.
+- `/api/asset-manifest` returns a short-lived version manifest derived from the
+  generated Crystal indexes. The browser Service Worker uses that version to
+  partition runtime caches for static assets, scene blueprints, and metadata.
+- The manifest also declares critical prewarm packs: `login`,
+  `character-select`, `hud-core`, and `bichon-spawn`. Prewarm fetches scene
+  blueprints and the first visible scene sprite frames, not the full 7-8 GB
+  Crystal source tree.
+- The Service Worker is registered automatically in production. In local dev,
+  opt in with `?assetCache=1`; otherwise it stays disabled to avoid hiding
+  asset-generation changes during iteration.
+- In local dev, `?assetCache=1` also opts into prewarm. Use `?prewarm=1` to run
+  prewarm without relying on production mode, or `?prewarm=0` to suppress it.
+- Normal production prewarm shows a compact player-facing resource status strip
+  after the critical packs start loading. The strip aggregates logical pack
+  progress, local cache entries, remote transfer bytes, and failures, and stays
+  visible after completion so testers can keep reading cache state in-game.
+- Add `?cacheLog=1` for frontend test logging. It prints structured
+  `[mir2-cache]` and `[mir2-cache-progress]` console entries for the manifest,
+  Service Worker state, active pack, percent, local CacheStorage counts, remote
+  transfer bytes, and failures. `?cacheDebug=1` enables the same console stream
+  plus the detailed overlay.
+- `?cacheDebug=1` shows a small QA-only overlay and exposes
+  `window.__mir2CacheMetrics` with resource timing, scene cache hit/miss, and
+  prewarm summaries, plus navigation milestones such as login, StartGame,
+  scene readiness, first playable frame, CacheStorage cache/entry counts, and
+  browser storage usage/quota/persistence state.
+- When prewarm starts, the cache layer asks `navigator.storage.persist()` where
+  the browser supports it. The result is diagnostic only: Chromium may decline
+  persistence in fresh/headless profiles, but the metric records both current
+  persisted state and the grant result.
+- QA can call `window.__mir2AssetCacheReset({ reload: false })` to delete all
+  Mir2 CacheStorage buckets and unregister the asset Service Worker without
+  adding any player-facing controls. Omitting `reload: false` reloads the page
+  after the reset.
+- `npm run smoke:cache-metrics` launches a fresh Chrome profile, runs cold and
+  warm cache passes, reads `window.__mir2CacheMetrics`, and writes JSON evidence
+  to `docs/generated/player-qa/cache-metrics/`.
+- `npm run smoke:cache-maintenance` additionally seeds a fake legacy Mir2 cache,
+  reloads to prove the active manifest version cleans stale buckets, then calls
+  the QA reset API with `reload: false` to prove all Mir2 caches are cleared and
+  the Service Worker is unregistered. The smoke also enforces cache-budget
+  guardrails so a future manifest change cannot accidentally prewarm the full
+  Crystal source tree: default budgets are at most 1000 prewarm requests, 2500
+  warm CacheStorage entries, and 256 MB warm browser storage usage. Override
+  with `MIR2_CACHE_MAX_PREWARM_REQUESTS`, `MIR2_CACHE_MAX_WARM_ENTRIES`, or
+  `MIR2_CACHE_MAX_WARM_STORAGE_USAGE_BYTES` when intentionally changing the
+  startup pack shape.
+- `npm run smoke:playable-metrics` uses the same cold/warm profile flow, then
+  drives `demo/demo` through login, character select, `StartGame`, and the
+  first playable scene before asserting first-playable budgets and cache
+  prewarm completion. Both smoke modes assert that the warm run has populated
+  Mir2 CacheStorage entries. Set `MIR2_GATEWAY_WS_URL` when the Gateway is not
+  on the default WebSocket URL.
+- `GET /api/scene/crystal` uses a server-side memory plus disk blueprint cache
+  under `.next/cache/mir2-scene-blueprints`. Set
+  `MIR2_SCENE_BLUEPRINT_CACHE=0` to bypass it, or set
+  `MIR2_SCENE_CACHE_BUSTER` when changing scene-cache semantics.
+- Set `MIR2_ASSET_CACHE_BUSTER` when a deployment must rotate the browser asset
+  manifest version even if generated index files have not changed.
+
+Remote R2/CDN asset release:
+
+- The app can serve the first cache miss from an R2-backed CDN while keeping
+  the browser cache key as the local same-origin path. Set
+  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (or server-only `MIR2_ASSET_BASE_URL`) to
+  the public CDN prefix. The value may include `{version}`, for example
+  `https://assets.example.com/mir2/v/{version}`. The current production base is
+  `https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c`.
+- `/api/asset-manifest` exposes `remoteAssets` with the resolved CDN base URL,
+  object prefix, and path mode. The Service Worker maps
+  `/original-ui/...`, `/original-map/...`, and
+  `/generated/original-map-blend/...` to `${assetBaseUrl}/...` on a cache miss,
+  caches the successful response under the original local request, and falls
+  back to the app origin if the CDN request fails. `/bevy-runtime/...` remains
+  same-origin because the JS/WASM pair must match each Vercel build. The build
+  writes `lib/generated/bevy_runtime_version.json` from the runtime JS/WASM
+  hashes, and the page appends that version to both runtime URLs.
+- Object keys mirror the public asset path under
+  `MIR2_ASSET_OBJECT_PREFIX`, which defaults to `mir2/v/{version}`. With the
+  example above, `/original-ui/Prguse/4.png` uploads to
+  `mir2/v/<version>/original-ui/Prguse/4.png`.
+- Generate the uploadable release from a running Web server:
+  `npm run assets:remote:build -- --baseUrl http://127.0.0.1:13014 --assetBaseUrl https://assets.example.com/mir2/v/{version}`.
+  The script stages the manifest-declared critical packs, scene frames, and
+  generated scene sprite roots (`CArmour`, `CHair`, `CWeapon`, `AArmour`,
+  `AHair`, `AWeapon`, `ARArmour`, `ARHair`, `ARWeapon`, `NPC`, and `Monster`),
+  writes `docs/generated/remote-assets/latest-remote-asset-release.json`, and
+  keeps staged files under `.mir2-remote-assets/`. Pass
+  `--includeSceneSprites false` only for a tiny manifest smoke that should not
+  represent production gameplay coverage.
+- Dry-run the R2 upload:
+  `npm run assets:r2:dry-run -- --manifest ../../docs/generated/remote-assets/latest-remote-asset-release.json`.
+  Upload for real with `MIR2_R2_BUCKET=<bucket> npm run assets:r2:upload`.
+  The upload command defaults to Wrangler's remote R2 target; pass
+  `--remote false` only for local Wrangler storage tests.
+  Add `--ensureBucket true` only when the logged-in Cloudflare account already
+  has R2 enabled and you want Wrangler to create the bucket if missing.
+- For thousands of small generated files, deploy
+  `infra/cloudflare/mir2-r2-bulk-upload` and upload with
+  `MIR2_R2_UPLOAD_DRIVER=worker`, `MIR2_R2_UPLOAD_WORKER_URL`, and
+  `MIR2_R2_UPLOAD_SECRET`. This keeps R2 writes behind an authenticated Worker
+  binding and avoids one Wrangler process per object.
+- Public R2 objects need CORS for the Service Worker remote fetch. A public
+  GET/HEAD template is checked in at `cloudflare/r2-cors.public.json`; apply it
+  through the Cloudflare dashboard or Wrangler before pointing production at
+  the CDN/custom domain.
+- `infra/cloudflare/mir2-r2-asset-cache` is the production edge-cache Worker
+  for `assets.mir2.obelisk.build/*`. It serves the R2 bucket through a binding,
+  returns CORS headers, and caches immutable GET responses at Cloudflare's edge
+  so repeat player/resource requests do not keep hitting R2.
+- Current verified R2 production release:
+  `NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c`
+  with bucket `mir2-web3-assets` and prefix `mir2/v/37596e16d64fde7c`. The
+  current published manifest has 7,329 asset files, including 6,807 scene
+  sprite files plus the generated Bichon torch blend frames, and production
+  playable smoke records no non-favicon 404s.
+
+Vercel preview deployment notes:
+
+- The current Vercel project is rooted at `apps/web`, so its deployment archive
+  does not include sibling Rust runtime sources. `scripts/vercel-build.sh` uses
+  the prebuilt `public/bevy-runtime/pkg` package when those sources are absent.
+- Keep static PNG/WAV game media out of Serverless Function traces. The current
+  `next.config.ts` excludes `/original-ui` and `/original-map` media from the
+  API routes that only need metadata or URL paths.
+- The first R2-backed preview is
+  `https://mir2-web3-jv7m1fbai-obelisk-labs.vercel.app`.
+- The current Cloudflare-hosted player domain is `https://mir2.obelisk.build`.
+  It is served by `infra/cloudflare/mir2-domain-proxy`, which forwards to the
+  current Vercel preview and injects the Vercel automation bypass secret from a
+  Cloudflare Worker secret.

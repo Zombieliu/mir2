@@ -1,6 +1,6 @@
 import "server-only";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
@@ -8,34 +8,22 @@ import { deflateSync, gunzipSync } from "node:zlib";
 import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
-const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
 const PUBLIC_ORIGINAL_MAP_DIR = path.join(WORKSPACE_ROOT, "public", "original-map");
+const GENERATED_DATA_DIR = path.join(WORKSPACE_ROOT, "lib", "generated");
 const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 const CRYSTAL_CLIENT_ROOT = process.env.CRYSTAL_CLIENT_ROOT ?? DEFAULT_CRYSTAL_CLIENT_ROOT;
 const MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Map");
 const DATA_MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Data", "Map");
 const RESPAWN_MANIFEST_PATH = path.join(
-  REPO_ROOT,
-  "packages",
-  "game-data",
-  "data",
-  "generated",
+  GENERATED_DATA_DIR,
   "crystal_respawn_manifest.json",
 );
 const PACKAGED_STARTER_MAP_REGION_PATH = path.join(
-  REPO_ROOT,
-  "packages",
-  "game-data",
-  "data",
-  "generated",
+  GENERATED_DATA_DIR,
   "crystal_starter_map_region.json",
 );
 const PACKAGED_STARTER_MAP_COLLISION_PATH = path.join(
-  REPO_ROOT,
-  "packages",
-  "game-data",
-  "data",
-  "generated",
+  GENERATED_DATA_DIR,
   "crystal_starter_map_collision.json",
 );
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -1169,5 +1157,3 @@ function clampInt(value: number, min: number, max: number) {
   if (!Number.isFinite(value)) return min;
   return Math.max(min, Math.min(max, Math.trunc(value)));
 }
-
-mkdirSync(PUBLIC_ORIGINAL_MAP_DIR, { recursive: true });

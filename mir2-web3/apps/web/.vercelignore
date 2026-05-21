@@ -1,0 +1,8 @@
+.next/
+node_modules/
+tsconfig.tsbuildinfo
+
+public/debug/
+public/original-map/**/*.png
+public/original-ui/**/*.png
+public/original-ui/**/*.wav

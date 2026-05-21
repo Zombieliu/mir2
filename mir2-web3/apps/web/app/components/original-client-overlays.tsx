@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ORIGINAL_UI,
@@ -8,12 +8,28 @@ import {
   type InventoryTabKey,
   type SpriteState,
 } from "../../lib/original-ui";
-import { SELECT_PORTRAIT_ANCHOR, type SelectPortraitFrame } from "../../lib/select-portraits";
+import {
+  SELECT_PORTRAIT_ANCHOR,
+  SELECT_PORTRAIT_ANIMATIONS,
+  type SelectPortraitFrame,
+  type SelectPortraitKey,
+} from "../../lib/select-portraits";
 import {
   languageNativeName,
   SUPPORTED_LANGUAGES,
   type Mir2Language,
 } from "../../lib/localization";
+import { playOriginalSoundId } from "../../lib/original-audio";
+import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import {
+  handleSceneAssetImageError,
+  handleSceneAssetImageLoad,
+} from "./original-client-scene-map-rendering";
+import type {
+  CreateCharacterDraft,
+  EntityClassKey,
+  EntityGenderKey,
+} from "./original-client-types";
 
 type TranslateFn = (
   key: string,
@@ -21,14 +37,12 @@ type TranslateFn = (
   fallback?: string,
 ) => string;
 
-type EntityClassKey = "warrior" | "wizard" | "taoist" | "assassin" | "archer";
-
 type SelectCharacterEntryLike = {
   index: number;
   name: string;
   level: number;
   classKey: EntityClassKey;
-  gender: "male" | "female";
+  gender: EntityGenderKey;
   lastAccess?: string | null;
 };
 
@@ -52,6 +66,9 @@ type HudWorldLike = {
   maxBagSlots: number;
   currentWeight: number;
 };
+
+const CREATE_CLASS_OPTIONS: EntityClassKey[] = ["warrior", "wizard", "taoist", "assassin", "archer"];
+const CREATE_GENDER_OPTIONS: EntityGenderKey[] = ["male", "female"];
 
 export type LanguageSelectorProps = {
   language: Mir2Language;
@@ -112,6 +129,8 @@ export type LoginOverlayProps = {
   onPasswordChange: (value: string) => void;
   onCreateAccount: () => void;
   onSubmitLogin: () => void;
+  onPasskeyLogin: () => void;
+  onWalletLogin: () => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
 };
@@ -131,6 +150,8 @@ export function LoginOverlay({
   onPasswordChange,
   onCreateAccount,
   onSubmitLogin,
+  onPasskeyLogin,
+  onWalletLogin,
   onQuickEnter,
   onResetClient,
 }: LoginOverlayProps) {
@@ -146,6 +167,7 @@ export function LoginOverlay({
         className="login-language-selector"
         onLanguageChange={onLanguageChange}
       />
+      <OriginalAudioSettingsControls t={t} compact className="login-audio-settings" />
       <div className="login-dialog">
         <img className="login-panel" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
         <img className="login-title" src={ORIGINAL_UI.login.title} alt="" draggable={false} />
@@ -199,6 +221,14 @@ export function LoginOverlay({
         <div className="login-button close">
           <SpriteButton sprite={ORIGINAL_UI.login.buttons.close} label={t("ui.close")} onClick={onResetClient} />
         </div>
+        <div className="login-web3-actions" aria-label={t("ui.web3Login", [], "Web3 login")}>
+          <button type="button" onClick={onPasskeyLogin} disabled={loginBusy}>
+            {t("ui.passkeyLogin", [], "Passkey")}
+          </button>
+          <button type="button" onClick={onWalletLogin} disabled={loginBusy}>
+            {t("ui.walletLogin", [], "Wallet")}
+          </button>
+        </div>
       </div>
       {showAccountPanel ? (
         <div className="login-account-panel">
@@ -227,7 +257,7 @@ export type SelectOverlayProps = {
   onLanguageChange: (language: Mir2Language) => void;
   onSelectCharacter: (index: number) => void;
   onEnterWorld: () => void;
-  onCreateCharacter: () => void;
+  onCreateCharacter: (draft: CreateCharacterDraft) => void;
   onDeleteCharacter: () => void;
   onExit: () => void;
 };
@@ -249,6 +279,54 @@ export function SelectOverlay({
   const selected = characters[selectedCharacterIndex] ?? null;
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCreatePanel, setShowCreatePanel] = useState(false);
+  const [createName, setCreateName] = useState(() => randomCharacterName());
+  const [createClassKey, setCreateClassKey] = useState<EntityClassKey>("warrior");
+  const [createGender, setCreateGender] = useState<EntityGenderKey>("male");
+  const [createError, setCreateError] = useState<string | null>(null);
+  const createPortraitFrame = selectPortraitFrameFor(createClassKey, createGender);
+  const activePortraitFrame = showCreatePanel ? createPortraitFrame : selectedPortraitFrame;
+
+  useEffect(() => {
+    if (showCreatePanel) {
+      setShowCreditsPanel(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [showCreatePanel]);
+
+  function openCreatePanel() {
+    setCreateError(null);
+    setCreateName((current) => current.trim() || randomCharacterName());
+    setShowCreatePanel(true);
+  }
+
+  function closeCreatePanel() {
+    setShowCreatePanel(false);
+    setCreateError(null);
+  }
+
+  function submitCreateCharacter() {
+    const trimmedName = createName.trim();
+    if (!trimmedName) {
+      setCreateError(t("client.PleaseEnterCharacterName", [], createPanelText(language, "nameRequired")));
+      return;
+    }
+    if (characters.length >= 4) {
+      setCreateError(createPanelText(language, "slotsFull"));
+      return;
+    }
+    if (characters.some((character) => character.name.toLowerCase() === trimmedName.toLowerCase())) {
+      setCreateError(t("client.CharacterNameExists", [], createPanelText(language, "nameExists")));
+      return;
+    }
+    onCreateCharacter({
+      name: trimmedName,
+      classKey: createClassKey,
+      gender: createGender,
+    });
+    setCreateName(randomCharacterName());
+    closeCreatePanel();
+  }
 
   return (
     <section className="select-overlay">
@@ -260,6 +338,7 @@ export function SelectOverlay({
           className="select-language-selector"
           onLanguageChange={onLanguageChange}
         />
+        <OriginalAudioSettingsControls t={t} compact className="select-audio-settings" />
         <img className="select-background-frame" src={ORIGINAL_UI.select.background} alt="" draggable={false} />
         <img className="select-title" src={ORIGINAL_UI.select.title} alt="" draggable={false} />
         <div className="select-server-name">{t("client.GameName", [], "Legend of Mir 2")}</div>
@@ -268,13 +347,13 @@ export function SelectOverlay({
           className="select-portrait-anchor"
           style={{ left: SELECT_PORTRAIT_ANCHOR.x, top: SELECT_PORTRAIT_ANCHOR.y }}
         >
-          {selectedPortraitFrame ? (
+          {activePortraitFrame ? (
             <img
               className="select-portrait-frame"
-              src={selectedPortraitFrame.path}
+              src={activePortraitFrame.path}
               alt=""
               draggable={false}
-              style={{ left: selectedPortraitFrame.x, top: selectedPortraitFrame.y }}
+              style={{ left: activePortraitFrame.x, top: activePortraitFrame.y }}
             />
           ) : null}
         </div>
@@ -318,7 +397,7 @@ export function SelectOverlay({
         })}
 
         <div className="select-action start"><SpriteButton sprite={ORIGINAL_UI.select.buttons.start} label={t("ui.startGame")} onClick={onEnterWorld} /></div>
-        <div className="select-action new"><SpriteButton sprite={ORIGINAL_UI.select.buttons.newCharacter} label={t("ui.newCharacter")} onClick={onCreateCharacter} /></div>
+        <div className="select-action new"><SpriteButton sprite={ORIGINAL_UI.select.buttons.newCharacter} label={t("ui.newCharacter")} onClick={openCreatePanel} /></div>
         <div className="select-action delete">
           <SpriteButton
             sprite={ORIGINAL_UI.select.buttons.deleteCharacter}
@@ -334,6 +413,83 @@ export function SelectOverlay({
           />
         </div>
         <div className="select-action exit"><SpriteButton sprite={ORIGINAL_UI.select.buttons.exit} label={t("ui.exit")} onClick={onExit} /></div>
+        {showCreatePanel ? (
+          <div className="select-create-panel">
+            <div className="select-create-title">{t("ui.newCharacter")}</div>
+            <label className="select-create-name-field">
+              <span>{createPanelText(language, "name")}</span>
+              <input
+                value={createName}
+                maxLength={12}
+                autoComplete="off"
+                onChange={(event) => {
+                  setCreateName(event.target.value.replace(/\s+/g, ""));
+                  setCreateError(null);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    submitCreateCharacter();
+                  } else if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeCreatePanel();
+                  }
+                }}
+                autoFocus
+              />
+            </label>
+            <div className="select-create-gender-row" aria-label={createPanelText(language, "gender")}>
+              {CREATE_GENDER_OPTIONS.map((gender) => (
+                <button
+                  key={gender}
+                  type="button"
+                  className={`select-create-gender-button ${createGender === gender ? "active" : ""}`}
+                  aria-pressed={createGender === gender}
+                  onClick={() => {
+                    setCreateGender(gender);
+                    setCreateError(null);
+                  }}
+                >
+                  {createPanelText(language, gender)}
+                </button>
+              ))}
+            </div>
+            <div className="select-create-class-list" aria-label={createPanelText(language, "class")}>
+              {CREATE_CLASS_OPTIONS.map((classKey) => (
+                <button
+                  key={classKey}
+                  type="button"
+                  className={`select-create-class-card ${createClassKey === classKey ? "active" : ""}`}
+                  aria-pressed={createClassKey === classKey}
+                  onClick={() => {
+                    setCreateClassKey(classKey);
+                    setCreateError(null);
+                  }}
+                >
+                  <img
+                    src={classIconForKey(classKey, createClassKey === classKey)}
+                    alt=""
+                    draggable={false}
+                  />
+                  <span>{selectClassLabel(t, classKey)}</span>
+                </button>
+              ))}
+            </div>
+            {createError ? <div className="select-create-error">{createError}</div> : null}
+            <div className="select-create-actions">
+              <SpriteButton
+                sprite={ORIGINAL_UI.select.buttons.createCharacter}
+                label={createPanelText(language, "create")}
+                onClick={submitCreateCharacter}
+              />
+              <SpriteButton
+                sprite={ORIGINAL_UI.select.buttons.cancel}
+                label={t("ui.close")}
+                onClick={closeCreatePanel}
+              />
+            </div>
+          </div>
+        ) : null}
         {showCreditsPanel ? (
           <div className="select-credits-panel">
             <strong>{t("ui.credits")}</strong>
@@ -490,12 +646,15 @@ export type SpriteButtonProps = {
   sprite: SpriteState;
   label: string;
   onClick: () => void;
+  onPointerActivate?: () => void;
   active?: boolean;
 };
 
-export function SpriteButton({ sprite, label, onClick, active = false }: SpriteButtonProps) {
+export function SpriteButton({ sprite, label, onClick, onPointerActivate, active = false }: SpriteButtonProps) {
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const pointerActivatedRef = useRef(false);
+  const suppressClickRef = useRef(false);
 
   let source = sprite.base;
   if (pressed && sprite.pressed) {
@@ -510,18 +669,54 @@ export function SpriteButton({ sprite, label, onClick, active = false }: SpriteB
     <button
       type="button"
       className="sprite-button"
-      onClick={onClick}
+      onClick={(event) => {
+        if (onPointerActivate && event.detail !== 0 && suppressClickRef.current) {
+          suppressClickRef.current = false;
+          return;
+        }
+        playOriginalSoundId(10100);
+        onClick();
+      }}
+      onPointerDown={(event) => {
+        if (!onPointerActivate) return;
+        event.preventDefault();
+        pointerActivatedRef.current = true;
+        suppressClickRef.current = true;
+        setPressed(true);
+        playOriginalSoundId(10100);
+        onPointerActivate();
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => {
+        pointerActivatedRef.current = false;
+        suppressClickRef.current = false;
         setHovered(false);
         setPressed(false);
       }}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
+      onMouseDown={() => {
+        setPressed(true);
+        if (onPointerActivate && !pointerActivatedRef.current) {
+          pointerActivatedRef.current = true;
+          suppressClickRef.current = true;
+          playOriginalSoundId(10100);
+          onPointerActivate();
+        }
+      }}
+      onMouseUp={() => {
+        pointerActivatedRef.current = false;
+        setPressed(false);
+      }}
       aria-label={label}
       title={label}
     >
-      <img src={source} alt="" draggable={false} />
+      <img
+        src={source}
+        alt=""
+        draggable={false}
+        data-mir2-original-src={source}
+        onError={handleSceneAssetImageError}
+        onLoad={handleSceneAssetImageLoad}
+      />
     </button>
   );
 }
@@ -535,8 +730,66 @@ function ratio(value?: number, max?: number) {
 }
 
 function classCardForCharacter(character: SelectCharacterEntryLike, selected: boolean) {
-  const card = ORIGINAL_UI.select.classCards[character.classKey];
+  return classCardForKey(character.classKey, selected);
+}
+
+function classCardForKey(classKey: EntityClassKey, selected: boolean) {
+  const card = ORIGINAL_UI.select.classCards[classKey];
   return selected ? card.active : card.base;
+}
+
+function classIconForKey(classKey: EntityClassKey, selected: boolean) {
+  const sprite = ORIGINAL_UI.gameShop.classTabs[classKey];
+  return selected ? sprite.active ?? sprite.hover ?? sprite.base : sprite.base;
+}
+
+function selectPortraitFrameFor(classKey: EntityClassKey, gender: EntityGenderKey) {
+  const key = `${classKey}${gender === "male" ? "Male" : "Female"}` as SelectPortraitKey;
+  const frames = SELECT_PORTRAIT_ANIMATIONS[key];
+  return frames[0] ?? null;
+}
+
+function randomCharacterName() {
+  return `MIR${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
+
+function createPanelText(language: Mir2Language, key: "name" | "gender" | "class" | "male" | "female" | "create" | "nameRequired" | "nameExists" | "slotsFull") {
+  const dictionary: Record<Mir2Language, Record<typeof key, string>> = {
+    en: {
+      name: "Name",
+      gender: "Gender",
+      class: "Class",
+      male: "Male",
+      female: "Female",
+      create: "Create",
+      nameRequired: "Please enter the character name.",
+      nameExists: "A character with this name already exists.",
+      slotsFull: "All character slots are full.",
+    },
+    "zh-CN": {
+      name: "\u540d\u79f0",
+      gender: "\u6027\u522b",
+      class: "\u804c\u4e1a",
+      male: "\u7537",
+      female: "\u5973",
+      create: "\u521b\u5efa",
+      nameRequired: "\u8bf7\u8f93\u5165\u89d2\u8272\u540d\u3002",
+      nameExists: "\u5df2\u5b58\u5728\u540c\u540d\u89d2\u8272\u3002",
+      slotsFull: "\u89d2\u8272\u680f\u4f4d\u5df2\u6ee1\u3002",
+    },
+    es: {
+      name: "Nombre",
+      gender: "Genero",
+      class: "Clase",
+      male: "Hombre",
+      female: "Mujer",
+      create: "Crear",
+      nameRequired: "Enter a character name.",
+      nameExists: "A character with this name already exists.",
+      slotsFull: "All character slots are full.",
+    },
+  };
+  return dictionary[language]?.[key] ?? dictionary.en[key];
 }
 
 function selectClassLabel(t: TranslateFn, classKey: EntityClassKey) {

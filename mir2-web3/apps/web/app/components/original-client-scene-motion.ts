@@ -6,8 +6,6 @@ import type {
   EntitySpriteAnimationState,
 } from "./original-client-types";
 import {
-  CRYSTAL_MOVE_FRAME_COUNT,
-  CRYSTAL_MOVE_FRAME_INTERVAL_MS,
   EMPTY_VIEWPORT_OFFSET,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
@@ -120,20 +118,37 @@ export function refreshEntityMotionSnapshots(
   const nextSnapshots: Record<string, EntityMotionSnapshot> = {};
   const motionEntities = entities.map((entity) =>
     renderPlayer && entity.objectId === renderPlayer.objectId
-      ? { ...entity, x: renderPlayer.x, y: renderPlayer.y }
+      ? { ...entity, ...renderPlayer }
       : entity,
   );
 
   for (const entity of motionEntities) {
+    const isRenderPlayer = Boolean(renderPlayer && entity.objectId === renderPlayer.objectId);
     const previous = snapshots[entity.objectId];
     if (previous && previous.toX === entity.x && previous.toY === entity.y) {
       nextSnapshots[entity.objectId] = previous;
       continue;
     }
 
-    const previousX = previous ? currentMotionCoordinate(previous.fromX, previous.toX, previous, now) : entity.x;
-    const previousY = previous ? currentMotionCoordinate(previous.fromY, previous.toY, previous, now) : entity.y;
-    const tileDistance = Math.max(Math.abs(entity.x - previousX), Math.abs(entity.y - previousY));
+    let previousX = previous ? currentMotionCoordinate(previous.fromX, previous.toX, previous, now) : entity.x;
+    let previousY = previous ? currentMotionCoordinate(previous.fromY, previous.toY, previous, now) : entity.y;
+    let tileDistance = Math.max(Math.abs(entity.x - previousX), Math.abs(entity.y - previousY));
+    if (isRenderPlayer && tileDistance < 0.125) {
+      previousX = entity.x;
+      previousY = entity.y;
+      tileDistance = 0;
+    }
+    if (isRenderPlayer && previous && tileDistance > 3) {
+      const previousTargetDistance = Math.max(
+        Math.abs(entity.x - previous.toX),
+        Math.abs(entity.y - previous.toY),
+      );
+      if (previousTargetDistance <= 3) {
+        previousX = previous.toX;
+        previousY = previous.toY;
+        tileDistance = previousTargetDistance;
+      }
+    }
 
     if (tileDistance > 3) {
       nextSnapshots[entity.objectId] = {
@@ -234,12 +249,7 @@ function movementProgressRatio(snapshot: EntityMotionSnapshot, now: number) {
     return elapsed / duration;
   }
 
-  // Crystal ties walk/run displacement to the same six 100ms frames used by the body sprite.
-  const frameIndex = Math.min(
-    Math.floor(elapsed / CRYSTAL_MOVE_FRAME_INTERVAL_MS),
-    CRYSTAL_MOVE_FRAME_COUNT - 1,
-  );
-  return Math.min((frameIndex + 1) / CRYSTAL_MOVE_FRAME_COUNT, 1);
+  return elapsed / duration;
 }
 
 function crystalMovementPixelOffset(value: number) {
@@ -247,9 +257,7 @@ function crystalMovementPixelOffset(value: number) {
     return 0;
   }
 
-  const integer = value < 0 ? Math.ceil(value) : Math.floor(value);
-  const even = integer + (integer % 2);
-  return Object.is(even, -0) ? 0 : even;
+  return Object.is(value, -0) ? 0 : value;
 }
 
 function currentMotionCoordinate(from: number, to: number, snapshot: EntityMotionSnapshot, now: number) {

@@ -23,16 +23,36 @@ const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT
 const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
 const sampleMs = numberArg(args.sampleMs, 50);
 const interaction = args.interaction ?? "click";
+const viewport = {
+  width: numberArg(args.viewportWidth ?? args.width, DEFAULT_VIEWPORT.width),
+  height: numberArg(args.viewportHeight ?? args.height, DEFAULT_VIEWPORT.height),
+  deviceScaleFactor: numberArg(args.deviceScaleFactor, DEFAULT_VIEWPORT.deviceScaleFactor),
+  mobile: booleanArg(args.mobile, DEFAULT_VIEWPORT.mobile),
+};
 const holdButton = args.button ?? args.holdButton ?? "right";
 const holdMs = numberArg(args.holdMs, 2200);
+const keyboardKey = args.key ?? "w";
+const keyboardRun = booleanArg(args.run ?? args.shift, false);
+const mobileJoystickDirection = args.mobileDirection ?? args.direction ?? "Right";
+const mobileJoystickMode = args.mobileMode ?? args.mode ?? "run";
+const keyboardSequence = String(args.keys ?? args.sequence ?? "d,a,d,a")
+  .split(",")
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+const keyIntervalMs = numberArg(args.keyIntervalMs ?? args.keyInterval ?? args.clickIntervalMs, 90);
 const preHoldMs = numberArg(args.preHoldMs, 900);
 const clickCount = numberArg(args.clickCount, 8);
 const clickIntervalMs = numberArg(args.clickIntervalMs, 180);
+const preInteractionDelayMs = numberArg(args.preInteractionDelayMs ?? args.preInputDelayMs, 800);
 const directionLagMs = numberArg(args.directionLagMs ?? process.env.MIR2_MOVEMENT_DIRECTION_LAG_MS, 260);
 const stalePredictedMs = numberArg(args.stalePredictedMs ?? process.env.MIR2_MOVEMENT_STALE_PREDICTED_MS, 1200);
 const slowCommandQueueMs = numberArg(
   args.slowCommandQueueMs ?? process.env.MIR2_MOVEMENT_SLOW_COMMAND_QUEUE_MS,
   1200,
+);
+const maxCameraOffsetHoldMs = numberArg(
+  args.maxCameraOffsetHoldMs ?? process.env.MIR2_MOVEMENT_MAX_CAMERA_OFFSET_HOLD_MS,
+  Math.max(48, sampleMs * 3 + 4),
 );
 const maxDirectionQueueLength = numberArg(
   args.maxDirectionQueueLength ?? process.env.MIR2_MOVEMENT_MAX_DIRECTION_QUEUE_LENGTH,
@@ -53,12 +73,17 @@ const settleMs = numberArg(
 const startMap = args.map ?? "0";
 const startX = numberArg(args.x, 330);
 const startY = numberArg(args.y, 270);
+const skipStartTransfer = booleanArg(
+  args.skipStartTransfer ?? args.skipTransfer ?? process.env.MIR2_MOVEMENT_SKIP_START_TRANSFER,
+  false,
+);
 const targetDx = numberArg(args.targetDx, 10);
 const targetDy = numberArg(args.targetDy, 0);
 const target2Dx = numberArg(args.target2Dx ?? args.secondTargetDx, targetDx);
 const target2Dy = numberArg(args.target2Dy ?? args.secondTargetDy, targetDy - 4);
 const fixedSpriteX = numberArg(args.fixedSpriteX ?? args.x, startX);
 const fixedSpriteY = numberArg(args.fixedSpriteY ?? args.y, startY);
+let targetAlreadyNavigated = false;
 
 if (!chromePath) {
   throw new Error("Could not find Chrome. Set MIR2_CHROME_PATH.");
@@ -71,6 +96,10 @@ class CdpClient {
     this.pending = new Map();
     this.consoleErrors = [];
     this.network404s = [];
+    this.webSocketFramesSent = [];
+    this.webSocketFramesReceived = [];
+    this.movementWebSocketFramesSent = [];
+    this.movementWebSocketFramesReceived = [];
   }
 
   async connect() {
@@ -124,6 +153,34 @@ class CdpClient {
         this.network404s.push(response.url);
       }
     }
+
+    if (message.method === "Network.webSocketFrameSent") {
+      const payloadData = message.params?.response?.payloadData;
+      this.webSocketFramesSent.push({
+        requestId: message.params?.requestId,
+        payloadData,
+        at: Date.now(),
+      });
+      this.webSocketFramesSent = this.webSocketFramesSent.slice(-100);
+      if (isMovementWebSocketPayload(payloadData)) {
+        this.movementWebSocketFramesSent.push(this.webSocketFramesSent[this.webSocketFramesSent.length - 1]);
+        this.movementWebSocketFramesSent = this.movementWebSocketFramesSent.slice(-100);
+      }
+    }
+
+    if (message.method === "Network.webSocketFrameReceived") {
+      const payloadData = message.params?.response?.payloadData;
+      this.webSocketFramesReceived.push({
+        requestId: message.params?.requestId,
+        payloadData,
+        at: Date.now(),
+      });
+      this.webSocketFramesReceived = this.webSocketFramesReceived.slice(-100);
+      if (isMovementWebSocketPayload(payloadData)) {
+        this.movementWebSocketFramesReceived.push(this.webSocketFramesReceived[this.webSocketFramesReceived.length - 1]);
+        this.movementWebSocketFramesReceived = this.movementWebSocketFramesReceived.slice(-100);
+      }
+    }
   }
 
   send(method, params = {}) {
@@ -152,6 +209,13 @@ class CdpClient {
   }
 }
 
+function isMovementWebSocketPayload(payloadData) {
+  if (typeof payloadData !== "string") {
+    return false;
+  }
+  return /"type":"(?:walk|run|moveTo)"|"packet":"(?:UserLocation|Pushed|UserDash|UserDashFail|UserDashAttack|UserAttackMove|ObjectTurn|ObjectWalk|ObjectRun|ObjectPushed|ObjectDash|ObjectDashFail|ObjectDashAttack|ObjectBackStep|ObjectSitDown)"/.test(payloadData);
+}
+
 async function main() {
   await fs.mkdir(outputDir, { recursive: true });
   const chrome = await launchChrome();
@@ -165,19 +229,67 @@ async function main() {
     await client.send("Log.enable");
     await client.send("Network.enable");
     await client.send("Page.enable");
-    await setViewport(client, DEFAULT_VIEWPORT);
+    await setViewport(client, viewport);
     await navigate(client, baseUrl);
     await login(client);
     await installSendProbe(client);
-    await transferTo(client, startMap, startX, startY);
-    await delay(800);
+    if (!skipStartTransfer) {
+      await transferTo(client, startMap, startX, startY);
+    }
+    await delay(preInteractionDelayMs);
 
     const start = await readMovementState(client);
     const route = buildRoute(start.player);
     const samples = [];
     const actions = [];
 
-    if (interaction === "packetRun" || interaction === "packetWalk") {
+    if (interaction === "keyboard") {
+      const step = {
+        label: `keyboard-${keyboardRun ? "run" : "walk"}-${keyboardKey}`,
+        mode: keyboardRun ? "run" : "walk",
+        x: start.player.x,
+        y: start.player.y,
+        durationMs: Math.max(holdMs + 900, 2200),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const dispatch = await holdKeyboardMoveKey(client, keyboardKey, holdMs, keyboardRun);
+      await delay(Math.min(120, sampleMs));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch,
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
+    } else if (interaction === "keyboardSequence") {
+      const step = {
+        label: `keyboard-sequence-${keyboardRun ? "run" : "walk"}-${keyboardSequence.join("-")}`,
+        mode: keyboardRun ? "run" : "walk",
+        x: start.player.x,
+        y: start.player.y,
+        durationMs: Math.max(holdMs + 900, clickCount * keyIntervalMs + 2200),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const dispatch = await dispatchKeyboardMoveSequence(client, keyboardSequence, {
+        count: clickCount,
+        intervalMs: keyIntervalMs,
+        run: keyboardRun,
+      });
+      await delay(Math.min(120, sampleMs));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch,
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
+    } else if (interaction === "packetRun" || interaction === "packetWalk") {
       const commandType = interaction === "packetRun" ? "run" : "walk";
       const step = {
         label: `${interaction}-${args.direction ?? "Right"}`,
@@ -202,6 +314,32 @@ async function main() {
         });
       }
       samples.push(...(await sampleMovement(client, step.label, step.durationMs)));
+    } else if (interaction === "mobileJoystick") {
+      const step = {
+        label: `mobile-joystick-${mobileJoystickMode}-${mobileJoystickDirection}`,
+        mode: mobileJoystickMode,
+        x: start.player.x,
+        y: start.player.y,
+        durationMs: Math.max(holdMs + 900, clickCount * keyIntervalMs + 2200),
+      };
+      const before = await readMovementState(client);
+      const samplePromise = sampleMovement(client, step.label, step.durationMs);
+      const dispatch = await dispatchMobileJoystickSequence(client, {
+        direction: mobileJoystickDirection,
+        mode: mobileJoystickMode,
+        count: clickCount,
+        intervalMs: keyIntervalMs,
+      });
+      await delay(Math.min(120, sampleMs));
+      const afterDispatch = await readMovementState(client);
+      actions.push({
+        ...step,
+        interaction,
+        dispatch,
+        before: compactState(before),
+        afterDispatch: compactState(afterDispatch),
+      });
+      samples.push(...(await samplePromise));
     } else if (interaction === "hold") {
       const step = {
         label: `hold-${holdButton === "right" ? "run" : "walk"}-${targetDx},${targetDy}`,
@@ -420,7 +558,9 @@ async function main() {
       maxPendingMs: slowCommandQueueMs,
       maxDirectionQueueLength,
     });
+    const cameraOffsetStairStepWarnings = detectCameraOffsetStairSteps(samples, maxCameraOffsetHoldMs);
     const pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, settle.capturedAt);
+    const criticalConsoleErrors = client.consoleErrors.filter(isCriticalConsoleError);
     const assertions = buildAssertions({
       interaction,
       strictMovementChecks,
@@ -431,8 +571,9 @@ async function main() {
       directionLagWarnings,
       stalePredictionWarnings,
       commandQueueWarnings,
+      cameraOffsetStairStepWarnings,
       pendingPlanAtEnd,
-      consoleErrors: client.consoleErrors,
+      consoleErrors: criticalConsoleErrors,
       network404s: client.network404s,
     });
 
@@ -444,6 +585,7 @@ async function main() {
       characterName: createAccount ? characterName : undefined,
       interaction,
       blockedTarget: interaction === "blockedTarget" ? true : undefined,
+      viewport,
       startTarget: { map: startMap, x: startX, y: startY },
       startedAt: new Date().toISOString(),
       start,
@@ -452,11 +594,14 @@ async function main() {
       directionLagMs,
       stalePredictedMs,
       slowCommandQueueMs,
+      maxCameraOffsetHoldMs,
       maxDirectionQueueLength,
+      packetRuntimeModes: summarizePacketRuntimeModes(samples),
       strictMovementChecks,
       allowBlockedResidual,
       holdMs: interaction === "hold" ? holdMs : undefined,
       preHoldMs: interaction === "holdThenSpamClickTarget" ? preHoldMs : undefined,
+      preInteractionDelayMs,
       settleMs,
       settle,
       pendingPlanAtEnd,
@@ -469,6 +614,7 @@ async function main() {
       directionLagWarnings,
       stalePredictionWarnings,
       commandQueueWarnings,
+      cameraOffsetStairStepWarnings,
       feelMetrics: {
         logicalRollbackCount: logicalRollbackWarnings.length,
         directionLagWindowMs: directionLagMs,
@@ -478,11 +624,20 @@ async function main() {
         stalePredictionWarningCount: stalePredictionWarnings.length,
         slowCommandQueueWindowMs: slowCommandQueueMs,
         slowCommandQueueWarningCount: commandQueueWarnings.length,
+        cameraOffsetHoldWindowMs: maxCameraOffsetHoldMs,
+        cameraOffsetStairStepWarningCount: cameraOffsetStairStepWarnings.length,
+        packetRuntimeModes: summarizePacketRuntimeModes(samples),
       },
       summary: summarizeSamples(samples),
       samples,
+      webSocketFramesSentTail: client.webSocketFramesSent.slice(-20),
+      webSocketFramesReceivedTail: client.webSocketFramesReceived.slice(-20),
+      movementWebSocketFramesSent: client.movementWebSocketFramesSent,
+      movementWebSocketFramesReceived: client.movementWebSocketFramesReceived,
       nonFaviconNetwork404s: [...new Set(client.network404s)],
       consoleErrors: client.consoleErrors,
+      criticalConsoleErrors,
+      ignoredConsoleErrors: client.consoleErrors.filter((error) => !isCriticalConsoleError(error)),
       screenshotPath,
     };
     await fs.writeFile(statePath, `${JSON.stringify(report, null, 2)}\n`);
@@ -502,9 +657,16 @@ async function main() {
           directionLagWarnings: report.directionLagWarnings,
           stalePredictionWarnings: report.stalePredictionWarnings,
           commandQueueWarnings: report.commandQueueWarnings,
+          cameraOffsetStairStepWarnings: report.cameraOffsetStairStepWarnings,
           feelMetrics: report.feelMetrics,
+          packetRuntimeModes: report.packetRuntimeModes,
+          webSocketFramesSentTail: report.webSocketFramesSentTail,
+          webSocketFramesReceivedTail: report.webSocketFramesReceivedTail,
+          movementWebSocketFramesSent: report.movementWebSocketFramesSent,
+          movementWebSocketFramesReceived: report.movementWebSocketFramesReceived,
           nonFaviconNetwork404s: report.nonFaviconNetwork404s,
-          consoleErrors: report.consoleErrors,
+          criticalConsoleErrors: report.criticalConsoleErrors,
+          ignoredConsoleErrorCount: report.ignoredConsoleErrors.length,
         },
         null,
         2,
@@ -515,6 +677,240 @@ async function main() {
     await stopChrome(chrome);
     await fs.rm(chrome.userDataDir, { recursive: true, force: true }).catch(() => undefined);
   }
+}
+
+async function holdKeyboardMoveKey(client, key, durationMs, run) {
+  const descriptor = keyboardDescriptor(key);
+  const shiftDescriptor = { key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 };
+  const modifiers = run ? 8 : 0;
+  const activeBefore = await client.evaluate(`
+    (() => {
+      window.__mir2KeyboardProbe = [];
+      window.addEventListener("keydown", (event) => {
+        window.__mir2KeyboardProbe.push({
+          type: "keydown",
+          key: event.key,
+          code: event.code,
+          target: event.target?.tagName ?? null,
+          defaultPrevented: event.defaultPrevented,
+        });
+      }, true);
+      window.addEventListener("keyup", (event) => {
+        window.__mir2KeyboardProbe.push({
+          type: "keyup",
+          key: event.key,
+          code: event.code,
+          target: event.target?.tagName ?? null,
+          defaultPrevented: event.defaultPrevented,
+        });
+      }, true);
+      const stage = document.querySelector(".client-stage-frame");
+      stage?.focus?.({ preventScroll: true });
+      return {
+        activeTag: document.activeElement?.tagName ?? null,
+        activeClass: document.activeElement?.className ?? null,
+        screen: window.__mir2Stage5?.state?.screen ?? null,
+      };
+    })()
+  `);
+  if (run) {
+    await client.send("Input.dispatchKeyEvent", {
+      ...shiftDescriptor,
+      type: "keyDown",
+      modifiers,
+    });
+  }
+  await client.send("Input.dispatchKeyEvent", {
+    ...descriptor,
+    type: "keyDown",
+    modifiers,
+  });
+  await delay(durationMs);
+  await client.send("Input.dispatchKeyEvent", {
+    ...descriptor,
+    type: "keyUp",
+    modifiers,
+  });
+  if (run) {
+    await client.send("Input.dispatchKeyEvent", {
+      ...shiftDescriptor,
+      type: "keyUp",
+      modifiers: 0,
+    });
+  }
+  const activeAfter = await client.evaluate(`
+    (() => ({
+      activeTag: document.activeElement?.tagName ?? null,
+      activeClass: document.activeElement?.className ?? null,
+      probe: window.__mir2KeyboardProbe ?? [],
+      commandTail: (window.__mir2CommandHistory ?? []).filter((entry) => ["moveTo", "walk", "run", "turn"].includes(entry?.type)).slice(0, 8),
+    }))()
+  `);
+  return { type: "keyboard", key: descriptor.key, code: descriptor.code, durationMs, run, activeBefore, activeAfter };
+}
+
+async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, run }) {
+  if (!keys.length) {
+    throw new Error("keyboardSequence requires at least one key.");
+  }
+  const descriptors = keys.map((key) => keyboardDescriptor(key));
+  const shiftDescriptor = { key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 };
+  const modifiers = run ? 8 : 0;
+  const activeBefore = await client.evaluate(`
+    (() => {
+      window.__mir2KeyboardProbe = [];
+      window.addEventListener("keydown", (event) => {
+        window.__mir2KeyboardProbe.push({
+          type: "keydown",
+          key: event.key,
+          code: event.code,
+          target: event.target?.tagName ?? null,
+          defaultPrevented: event.defaultPrevented,
+        });
+      }, true);
+      window.addEventListener("keyup", (event) => {
+        window.__mir2KeyboardProbe.push({
+          type: "keyup",
+          key: event.key,
+          code: event.code,
+          target: event.target?.tagName ?? null,
+          defaultPrevented: event.defaultPrevented,
+        });
+      }, true);
+      const stage = document.querySelector(".client-stage-frame");
+      stage?.focus?.({ preventScroll: true });
+      return {
+        activeTag: document.activeElement?.tagName ?? null,
+        activeClass: document.activeElement?.className ?? null,
+        screen: window.__mir2Stage5?.state?.screen ?? null,
+      };
+    })()
+  `);
+  if (run) {
+    await client.send("Input.dispatchKeyEvent", {
+      ...shiftDescriptor,
+      type: "keyDown",
+      modifiers,
+    });
+  }
+
+  const presses = [];
+  const downMs = Math.max(24, Math.min(intervalMs - 8, Math.floor(intervalMs * 0.65)));
+  const upMs = Math.max(0, intervalMs - downMs);
+  for (let index = 0; index < count; index += 1) {
+    const descriptor = descriptors[index % descriptors.length];
+    await client.send("Input.dispatchKeyEvent", {
+      ...descriptor,
+      type: "keyDown",
+      modifiers,
+    });
+    await delay(downMs);
+    await client.send("Input.dispatchKeyEvent", {
+      ...descriptor,
+      type: "keyUp",
+      modifiers,
+    });
+    presses.push({ key: descriptor.key, code: descriptor.code, index });
+    if (upMs > 0) {
+      await delay(upMs);
+    }
+  }
+
+  if (run) {
+    await client.send("Input.dispatchKeyEvent", {
+      ...shiftDescriptor,
+      type: "keyUp",
+      modifiers: 0,
+    });
+  }
+  const activeAfter = await client.evaluate(`
+    (() => ({
+      activeTag: document.activeElement?.tagName ?? null,
+      activeClass: document.activeElement?.className ?? null,
+      probe: window.__mir2KeyboardProbe ?? [],
+      commandTail: (window.__mir2CommandHistory ?? []).filter((entry) => ["moveTo", "walk", "run", "turn"].includes(entry?.type)).slice(0, 12),
+    }))()
+  `);
+  return {
+    type: "keyboard-sequence",
+    keys: descriptors.map((descriptor) => descriptor.key),
+    count,
+    intervalMs,
+    run,
+    presses,
+    activeBefore,
+    activeAfter,
+  };
+}
+
+async function dispatchMobileJoystickSequence(client, { direction, mode, count, intervalMs }) {
+  const activeBefore = await client.evaluate(`
+    (() => {
+      const controls = window.__mir2MobileControls ?? null;
+      const joystick = document.querySelector(".mir-mobile-stick-zone .nipple");
+      const controlsPanel = document.querySelector(".mir-mobile-controls");
+      const stage = document.querySelector(".client-stage-frame");
+      return {
+        controlsReady: Boolean(controls?.dispatchDirection),
+        controlsActive: controls?.active ?? null,
+        runLocked: controls?.runLocked ?? null,
+        joystickVisible: Boolean(joystick),
+        panelDisplay: controlsPanel ? getComputedStyle(controlsPanel).display : null,
+        stageTransform: stage ? getComputedStyle(stage).transform : null,
+        screen: window.__mir2Stage5?.state?.screen ?? null,
+      };
+    })()
+  `);
+  if (!activeBefore.controlsReady) {
+    throw new Error(`Mobile controls are not ready: ${JSON.stringify(activeBefore)}`);
+  }
+
+  const presses = [];
+  for (let index = 0; index < count; index += 1) {
+    const ok = await client.evaluate(`
+      window.__mir2MobileControls?.dispatchDirection?.(${JSON.stringify(direction)}, ${JSON.stringify(mode)}) === true
+    `);
+    presses.push({ index, direction, mode, ok });
+    await delay(intervalMs);
+  }
+
+  const activeAfter = await client.evaluate(`
+    (() => ({
+      controls: window.__mir2MobileControls ?? null,
+      commandTail: (window.__mir2CommandHistory ?? []).filter((entry) => ["moveTo", "walk", "run", "turn"].includes(entry?.type)).slice(0, 12),
+      movementTail: (window.__mir2MovementSentCommands ?? []).slice(0, 12),
+    }))()
+  `);
+
+  return {
+    type: "mobile-joystick",
+    direction,
+    mode,
+    count,
+    intervalMs,
+    presses,
+    activeBefore,
+    activeAfter,
+  };
+}
+
+function keyboardDescriptor(key) {
+  const normalized = String(key).toLowerCase();
+  const descriptors = {
+    w: { key: "w", code: "KeyW", text: "w", unmodifiedText: "w", windowsVirtualKeyCode: 87 },
+    a: { key: "a", code: "KeyA", text: "a", unmodifiedText: "a", windowsVirtualKeyCode: 65 },
+    s: { key: "s", code: "KeyS", text: "s", unmodifiedText: "s", windowsVirtualKeyCode: 83 },
+    d: { key: "d", code: "KeyD", text: "d", unmodifiedText: "d", windowsVirtualKeyCode: 68 },
+    arrowup: { key: "ArrowUp", code: "ArrowUp", windowsVirtualKeyCode: 38 },
+    arrowdown: { key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40 },
+    arrowleft: { key: "ArrowLeft", code: "ArrowLeft", windowsVirtualKeyCode: 37 },
+    arrowright: { key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 },
+  };
+  const descriptor = descriptors[normalized];
+  if (!descriptor) {
+    throw new Error(`Unsupported keyboard movement key: ${key}`);
+  }
+  return descriptor;
 }
 
 async function transferTo(client, map, x, y) {
@@ -573,11 +969,11 @@ async function login(client) {
     if (createAccount) {
       await click(client, ".login-button.account button");
       await waitUntil(client, "window.__mir2Stage5?.state?.wsState === 'open'", "account creation socket", 15_000);
-      await delay(800);
+      await delay(2000);
     }
 
     await click(client, ".login-button.ok button");
-    await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 15_000);
+    await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'select'", "select screen", 30_000);
     screen = "select";
   }
 
@@ -617,6 +1013,12 @@ async function login(client) {
 
   await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'game'", "game screen", 20_000);
   await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
+  await waitUntil(
+    client,
+    "window.__mir2Stage5?.state?.screen === 'game' && window.__mir2Stage5?.state?.sceneInteractionReady === true",
+    "initial scene assets ready",
+    30_000,
+  );
 }
 
 function buildRoute(player) {
@@ -800,23 +1202,71 @@ async function readMovementState(client) {
       const gatewayEvents = Array.isArray(window.__mir2GatewayEventHistory)
         ? window.__mir2GatewayEventHistory
         : [];
+      const packetRuntime = window.__mir2PacketRuntime ?? null;
       const rect = (value) => value ? ({
         left: Math.round(value.left * 100) / 100,
         top: Math.round(value.top * 100) / 100,
         width: Math.round(value.width * 100) / 100,
         height: Math.round(value.height * 100) / 100,
       }) : null;
+      const compactEntities = (state.entities ?? []).map((entity) => ({
+        objectId: entity.objectId,
+        kind: entity.kind,
+        name: entity.name,
+        ownerName: entity.ownerName ?? null,
+        x: entity.x,
+        y: entity.y,
+        direction: entity.direction ?? null,
+        sprite: entity.sprite ?? null,
+      }));
+      const entitySpriteLayers = [...document.querySelectorAll(".entity-sprite-stack")]
+        .map((spriteStack) => {
+          const bounds = spriteStack?.getBoundingClientRect();
+          const images = [...(spriteStack?.querySelectorAll("img") ?? [])].map((image) => ({
+            src: image.getAttribute("src"),
+            complete: image.complete,
+            naturalWidth: image.naturalWidth,
+            naturalHeight: image.naturalHeight,
+            className: image.className,
+          }));
+          return {
+            text: spriteStack.innerText,
+            className: spriteStack?.className ?? null,
+            bounds: rect(bounds),
+            images,
+          };
+        })
+        .slice(0, 80);
       return {
         capturedAt: Date.now(),
         screen: state.screen ?? null,
         mapFileName: state.mapFileName ?? null,
         mapTitle: state.mapTitle ?? null,
+        sceneInteractionReady: state.sceneInteractionReady ?? null,
+        sceneAssetReadiness: state.sceneAssetReadiness ?? null,
+        worldSnapshotRealtimeMode: state.worldSnapshotRealtimeMode ?? packetRuntime?.snapshotMode ?? null,
+        packetRuntime,
         player,
         predictedPlayer: state.predictedPlayer ?? null,
         movementPlan: state.movementPlan ?? null,
         directionStepPending: state.directionStepPending ?? null,
         directionStepPendingQueue: state.directionStepPendingQueue ?? [],
-        selfEntity: self ? { x: self.x, y: self.y, direction: self.direction, kind: self.kind, objectId: self.objectId } : null,
+        outstandingSelfMovementActions: state.outstandingSelfMovementActions ?? [],
+        sceneMotion: window.__mir2SceneMotionDebug ?? null,
+        entities: compactEntities,
+        entitySpriteLayers,
+        selfEntity: self
+          ? {
+              x: self.x,
+              y: self.y,
+              direction: self.direction,
+              kind: self.kind,
+              objectId: self.objectId,
+              movementAnimation: self.movementAnimation ?? null,
+              movementStartedAt: self.movementStartedAt ?? null,
+              movementUntil: self.movementUntil ?? null,
+            }
+          : null,
         sprite: rect(sprite),
         nameplate: rect(nameplate),
         floor: rect(floor),
@@ -870,8 +1320,15 @@ function detectJumps(samples) {
         sample.centerSpriteKey && previous.centerSpriteKey && sample.centerSpriteKey === previous.centerSpriteKey
           ? delta(sample.centerSprite?.top, previous.centerSprite?.top)
           : 0;
-      const centerBacktrack = isUnexpectedCenterSpriteDelta(centerDx, centerDy, sample, previous);
-      if (Math.max(Math.abs(spriteDx), Math.abs(spriteDy), Math.abs(nameDx), Math.abs(nameDy)) > 12 || centerBacktrack) {
+      const centerDirectionChanged = activeMovementDirection(sample) !== activeMovementDirection(previous);
+      const centerBacktrack =
+        !centerDirectionChanged && isUnexpectedCenterSpriteDelta(centerDx, centerDy, sample, previous);
+      const centerBurst = Math.max(Math.abs(centerDx), Math.abs(centerDy)) > 48;
+      if (
+        Math.max(Math.abs(spriteDx), Math.abs(spriteDy), Math.abs(nameDx), Math.abs(nameDy)) > 12 ||
+        centerBacktrack ||
+        centerBurst
+      ) {
         jumps.push({
           label: sample.label,
           t: sample.t,
@@ -881,6 +1338,7 @@ function detectJumps(samples) {
           nameDy,
           centerDx,
           centerDy,
+          centerBurst,
           from: compactSample(previous),
           to: compactSample(sample),
         });
@@ -955,6 +1413,21 @@ function routeSpamCommandSource(sample, command) {
     return { x: plan.sentFromX, y: plan.sentFromY };
   }
 
+  const directionSteps = [
+    ...(Array.isArray(sample?.directionStepPendingQueue) ? sample.directionStepPendingQueue : []),
+    sample?.directionStepPending ?? null,
+  ].filter(Boolean);
+  const matchingDirectionStep = directionSteps.find(
+    (step) =>
+      typeof step?.sentAt === "number" &&
+      Math.abs(step.sentAt - command.at) <= 120 &&
+      Number.isFinite(step.sentFromX) &&
+      Number.isFinite(step.sentFromY),
+  );
+  if (matchingDirectionStep) {
+    return { x: matchingDirectionStep.sentFromX, y: matchingDirectionStep.sentFromY };
+  }
+
   return sample?.player ?? null;
 }
 
@@ -968,6 +1441,7 @@ function buildAssertions({
   directionLagWarnings,
   stalePredictionWarnings,
   commandQueueWarnings,
+  cameraOffsetStairStepWarnings,
   pendingPlanAtEnd,
   consoleErrors,
   network404s,
@@ -1009,6 +1483,14 @@ function buildAssertions({
       maxDirectionQueueLength,
       strict: strictMovementChecks,
       warnings: commandQueueWarnings,
+    },
+    {
+      name: "cameraOffsetMovesContinuously",
+      pass: !strictMovementChecks || cameraOffsetStairStepWarnings.length === 0,
+      count: cameraOffsetStairStepWarnings.length,
+      maxHoldMs: maxCameraOffsetHoldMs,
+      strict: strictMovementChecks,
+      warnings: cameraOffsetStairStepWarnings,
     },
     {
       name: "movementSettledWithoutResidualPlan",
@@ -1079,12 +1561,24 @@ function buildAssertions({
   return assertions;
 }
 
+function isCriticalConsoleError(error) {
+  if (error?.source === "network" && String(error.text ?? "").includes("net::ERR_FAILED")) {
+    return false;
+  }
+  return true;
+}
+
 function isBlockedTargetInteraction(value) {
   return value === "routeSpamObstacle" || value === "blockedTarget";
 }
 
 function isStrictMovementInteraction(value) {
-  return isBlockedTargetInteraction(value) || value === "holdThenSpamClickTarget";
+  return (
+    isBlockedTargetInteraction(value) ||
+    value === "holdThenSpamClickTarget" ||
+    value === "keyboardSequence" ||
+    value === "mobileJoystick"
+  );
 }
 
 function detectStalePredictedPlayer(samples, maxAgeMs) {
@@ -1231,6 +1725,72 @@ function detectSlowCommandQueue(samples, { maxPendingMs, maxDirectionQueueLength
     });
   }
 
+  return warnings;
+}
+
+function detectCameraOffsetStairSteps(samples, maxHoldMs) {
+  const warnings = [];
+  let active = null;
+
+  const closeActive = () => {
+    if (!active) return;
+    const durationMs = active.lastAt - active.firstAt;
+    if (durationMs > maxHoldMs) {
+      warnings.push({
+        type: "cameraOffsetStairStep",
+        label: active.label,
+        offset: active.offset,
+        durationMs,
+        maxHoldMs,
+        first: compactSample(active.firstSample),
+        last: compactSample(active.lastSample),
+      });
+    }
+    active = null;
+  };
+
+  for (const sample of samples) {
+    const motion = sample?.sceneMotion ?? null;
+    const snapshot = motion?.playerMotionSnapshot ?? null;
+    const offset = motion?.playerCameraMotionOffset ?? null;
+    const motionNow = Number(motion?.motionNow);
+    const capturedAt = numericTimestamp(sample?.capturedAt, sample?.t);
+    const snapshotMoving =
+      snapshot &&
+      Number.isFinite(motionNow) &&
+      snapshot.expiresAt > motionNow &&
+      (snapshot.fromX !== snapshot.toX || snapshot.fromY !== snapshot.toY);
+    const offsetMoving =
+      offset &&
+      Number.isFinite(offset.x) &&
+      Number.isFinite(offset.y) &&
+      (Math.abs(offset.x) > 0.001 || Math.abs(offset.y) > 0.001);
+
+    if (!snapshotMoving || !offsetMoving || !Number.isFinite(capturedAt)) {
+      closeActive();
+      continue;
+    }
+
+    const key = `${offset.x}:${offset.y}`;
+    if (!active || active.key !== key || active.label !== sample.label) {
+      closeActive();
+      active = {
+        key,
+        label: sample.label,
+        offset: { x: offset.x, y: offset.y },
+        firstAt: capturedAt,
+        lastAt: capturedAt,
+        firstSample: sample,
+        lastSample: sample,
+      };
+      continue;
+    }
+
+    active.lastAt = capturedAt;
+    active.lastSample = sample;
+  }
+
+  closeActive();
   return warnings;
 }
 
@@ -1633,11 +2193,22 @@ function summarizeSamples(samples) {
   }));
 }
 
+function summarizePacketRuntimeModes(samples) {
+  const counts = {};
+  for (const sample of samples) {
+    const mode = sample.worldSnapshotRealtimeMode ?? sample.packetRuntime?.snapshotMode ?? "unknown";
+    counts[mode] = (counts[mode] ?? 0) + 1;
+  }
+  return counts;
+}
+
 function compactSample(sample) {
   return {
     t: sample.t,
     player: sample.player,
     predictedPlayer: sample.predictedPlayer,
+    worldSnapshotRealtimeMode: sample.worldSnapshotRealtimeMode,
+    packetRuntime: sample.packetRuntime,
     movementPlan: sample.movementPlan,
     directionStepPending: sample.directionStepPending,
     directionStepPendingQueue: sample.directionStepPendingQueue,
@@ -1655,6 +2226,8 @@ function compactState(state) {
     movementPlan: state.movementPlan,
     directionStepPending: state.directionStepPending,
     directionStepPendingQueue: state.directionStepPendingQueue,
+    worldSnapshotRealtimeMode: state.worldSnapshotRealtimeMode,
+    packetRuntime: state.packetRuntime,
     selfEntity: state.selfEntity,
     sprite: state.sprite,
     centerSprite: state.centerSprite,
@@ -1701,14 +2274,16 @@ async function launchChrome() {
 }
 
 async function createPageTarget() {
-  const response = await fetch(`http://127.0.0.1:${debugPort}/json/new?about:blank`, { method: "PUT" });
+  const response = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(baseUrl)}`, { method: "PUT" });
   if (!response.ok) throw new Error(`Chrome target creation failed: ${response.status}`);
   const target = await response.json();
+  targetAlreadyNavigated = true;
+  await delay(3000);
   return target.webSocketDebuggerUrl;
 }
 
 async function waitForChrome() {
-  const deadline = Date.now() + 10_000;
+  const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
     try {
       const response = await fetch(`http://127.0.0.1:${debugPort}/json/version`);
@@ -1726,8 +2301,52 @@ async function setViewport(client, viewport) {
 }
 
 async function navigate(client, url) {
-  await client.send("Page.navigate", { url });
-  await waitUntil(client, "document.readyState === 'complete' || document.readyState === 'interactive'", "page load", 15_000);
+  if (targetAlreadyNavigated) {
+    try {
+      await waitUntil(
+        client,
+        "document.readyState === 'complete' || document.readyState === 'interactive'",
+        "page load",
+        15_000,
+      );
+      const currentUrl = await client.evaluate("window.location.href");
+      if (typeof currentUrl !== "string" || !currentUrl.startsWith("chrome-error://")) {
+        return;
+      }
+    } catch {
+      targetAlreadyNavigated = false;
+    }
+  }
+  const initialUrl = await client.evaluate("window.location.href").catch(() => null);
+  if (typeof initialUrl === "string" && initialUrl !== "about:blank" && !initialUrl.startsWith("chrome-error://")) {
+    try {
+      await waitUntil(
+        client,
+        "document.readyState === 'complete' || document.readyState === 'interactive'",
+        "page load",
+        15_000,
+      );
+      return;
+    } catch {
+      // Fall through to an explicit Page.navigate retry below.
+    }
+  }
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await client.send("Page.navigate", { url });
+      await waitUntil(client, "document.readyState === 'complete' || document.readyState === 'interactive'", "page load", 15_000);
+      const currentUrl = await client.evaluate("window.location.href");
+      if (typeof currentUrl !== "string" || !currentUrl.startsWith("chrome-error://")) {
+        return;
+      }
+      lastError = new Error(`Chrome landed on ${currentUrl}`);
+    } catch (error) {
+      lastError = error;
+    }
+    await delay(300);
+  }
+  throw lastError ?? new Error("Page navigation failed.");
 }
 
 async function fillInput(client, selector, value) {

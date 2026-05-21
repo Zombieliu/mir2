@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "count": 450,
+  "count": 452,
   "frames": [
     {
       "index": 0,
@@ -3150,6 +3150,34 @@
       "maskWidth": null,
       "maskHeight": null,
       "path": "/original-ui/MMap/449.png",
+      "maskPath": null
+    },
+    {
+      "index": 450,
+      "width": 225,
+      "height": 150,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/MMap/450.png",
+      "maskPath": null
+    },
+    {
+      "index": 451,
+      "width": 1200,
+      "height": 800,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/MMap/451.png",
       "maskPath": null
     }
   ]

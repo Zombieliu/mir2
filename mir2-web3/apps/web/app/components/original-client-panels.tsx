@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -11,7 +13,16 @@ type TranslateFn = (
   fallback?: string,
 ) => string;
 
-type ChatFilterKey = "all" | "shout" | "trade" | "whisper" | "lover" | "mentor" | "group" | "guild";
+export type ChatFilterKey = "all" | "shout" | "whisper" | "lover" | "mentor" | "group" | "guild";
+export type ChatOptionFilterKey =
+  | "normal"
+  | "whisper"
+  | "shout"
+  | "system"
+  | "lover"
+  | "mentor"
+  | "group"
+  | "guild";
 
 type DisplayLogLineLike = {
   text: string;
@@ -23,6 +34,8 @@ type DisplayLogLineLike = {
     | "whisper"
     | "group"
     | "guild"
+    | "mentor"
+    | "relationship"
     | "system"
     | "hint"
     | "server"
@@ -40,6 +53,9 @@ type DisplayItemLike = {
   slot: number;
   quantity: number;
   container: ItemContainer;
+  description?: string;
+  durabilityCurrent?: number;
+  durabilityMax?: number;
 };
 
 type ItemActionRef = Pick<DisplayItemLike, "key" | "uniqueId" | "slot" | "container">;
@@ -76,6 +92,43 @@ const CHAT_FILTER_BUTTONS: Array<{ key: ChatFilterKey; left: number; labelKey: s
   { key: "guild", left: 144, labelKey: "client.Chat_Guild" },
 ];
 
+export const CHAT_FILTER_PREFIX: Record<ChatFilterKey, string> = {
+  all: "",
+  shout: "!",
+  whisper: "/",
+  lover: ":)",
+  mentor: "!#",
+  group: "!!",
+  guild: "!~",
+};
+
+const CHAT_OPTION_FILTER_BUTTONS: Array<{
+  key: ChatOptionFilterKey;
+  labelKey: string;
+  fallback: string;
+}> = [
+  { key: "normal", labelKey: "client.Chat_All", fallback: "General" },
+  { key: "whisper", labelKey: "client.Chat_Whisper", fallback: "Whisper" },
+  { key: "shout", labelKey: "client.Chat_Short", fallback: "Shout" },
+  { key: "system", labelKey: "ui.system", fallback: "System" },
+  { key: "lover", labelKey: "client.Chat_Lover", fallback: "Lover" },
+  { key: "mentor", labelKey: "client.Chat_Mentor", fallback: "Mentor" },
+  { key: "group", labelKey: "client.Chat_Group", fallback: "Group" },
+  { key: "guild", labelKey: "client.Chat_Guild", fallback: "Guild" },
+];
+
+export function chatPrefixForFilter(filter: ChatFilterKey) {
+  return CHAT_FILTER_PREFIX[filter];
+}
+
+export function formatChatMessageForFilter(filter: ChatFilterKey, value: string) {
+  const prefix = chatPrefixForFilter(filter);
+  const message = value.trimEnd();
+  if (!message || message === prefix) return "";
+  if (!prefix || message.startsWith(prefix)) return message;
+  return `${prefix}${message}`;
+}
+
 export type ChatFrameProps = {
   t: TranslateFn;
   runtimeMessage: string;
@@ -83,11 +136,16 @@ export type ChatFrameProps = {
   chatMessage: string;
   hints: string[];
   activeFilter: ChatFilterKey;
+  hiddenFilters: ChatOptionFilterKey[];
   expanded: boolean;
   showSettings: boolean;
+  transparent: boolean;
   onChatMessageChange: (value: string) => void;
   onSendChat: () => void;
   onCloseSettings: () => void;
+  onToggleHiddenFilter: (filter: ChatOptionFilterKey) => void;
+  onToggleAllHiddenFilters: () => void;
+  onToggleTransparent: () => void;
 };
 
 export function ChatFrame({
@@ -95,13 +153,20 @@ export function ChatFrame({
   logs,
   chatMessage,
   activeFilter,
+  hiddenFilters,
   expanded,
   showSettings,
+  transparent,
   onChatMessageChange,
   onSendChat,
   onCloseSettings,
+  onToggleHiddenFilter,
+  onToggleAllHiddenFilters,
+  onToggleTransparent,
 }: ChatFrameProps) {
-  const lines = playerFacingChatLines(logs, activeFilter);
+  const lines = playerFacingChatLines(logs, hiddenFilters);
+  const activePrefix = chatPrefixForFilter(activeFilter);
+  const hiddenFilterSet = new Set(hiddenFilters);
   const [scrollOffset, setScrollOffset] = useState(0);
   const previousMaxScrollOffsetRef = useRef(0);
   const previousActiveFilterRef = useRef(activeFilter);
@@ -129,7 +194,7 @@ export function ChatFrame({
   }, [activeFilter, expanded, maxScrollOffset]);
 
   return (
-    <section className={`chat-frame ${expanded ? "" : "collapsed"}`}>
+    <section className={`chat-frame ${expanded ? "" : "collapsed"} ${transparent ? "transparent" : ""}`}>
       <img className="chat-frame-bg" src={ORIGINAL_UI.game.chatDialog} alt="" draggable={false} />
       <div className="chat-scroll-buttons">
         <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.home} label={t("ui.home")} onClick={() => setScrollOffset(0)} />
@@ -154,7 +219,38 @@ export function ChatFrame({
       {showSettings ? (
         <div className="chat-settings-panel">
           <div className="chat-settings-title">{t("ui.settings")}</div>
-          <div className="chat-settings-copy">{t("ui.languageDescription")}</div>
+          <OriginalAudioSettingsControls t={t} className="chat-audio-settings" />
+          <div className="chat-settings-tabs">
+            <button type="button" className="active">
+              {t("ui.filter", [], "Filter")}
+            </button>
+            <button type="button" onClick={onToggleTransparent} data-chat-transparent={transparent}>
+              {transparent ? t("ui.on", [], "On") : t("ui.off", [], "Off")}
+            </button>
+          </div>
+          <div className="chat-settings-grid">
+            <button
+              type="button"
+              className="chat-settings-option"
+              data-chat-option-filter="all"
+              data-chat-option-hidden={hiddenFilters.length === CHAT_OPTION_FILTER_BUTTONS.length}
+              onClick={onToggleAllHiddenFilters}
+            >
+              {t("client.Chat_All", [], "All")}
+            </button>
+            {CHAT_OPTION_FILTER_BUTTONS.map(({ key, labelKey, fallback }) => (
+              <button
+                key={key}
+                type="button"
+                className="chat-settings-option"
+                data-chat-option-filter={key}
+                data-chat-option-hidden={hiddenFilterSet.has(key)}
+                onClick={() => onToggleHiddenFilter(key)}
+              >
+                {t(labelKey, [], fallback)}
+              </button>
+            ))}
+          </div>
           <div className="chat-settings-copy">{`${t("ui.size")}: ${expanded ? t("ui.down") : t("ui.up")}`}</div>
           <button type="button" className="chat-settings-close" onClick={onCloseSettings}>
             {t("ui.close")}
@@ -164,6 +260,7 @@ export function ChatFrame({
       <input
         className="chat-textbox"
         value={chatMessage}
+        data-chat-prefix={activePrefix}
         aria-label={t("ui.worldChatPlaceholder")}
         onChange={(event) => onChatMessageChange(event.target.value)}
         onKeyDown={(event) => {
@@ -182,7 +279,7 @@ export type ChatFilterBarProps = {
   chatExpanded: boolean;
   showSettings: boolean;
   onSelectFilter: (filter: ChatFilterKey) => void;
-  onSelectTrade: () => void;
+  onRequestTrade: () => void;
   onToggleExpanded: () => void;
   onToggleSettings: () => void;
   onToggleReport: () => void;
@@ -194,7 +291,7 @@ export function ChatFilterBar({
   chatExpanded,
   showSettings,
   onSelectFilter,
-  onSelectTrade,
+  onRequestTrade,
   onToggleExpanded,
   onToggleSettings,
   onToggleReport,
@@ -214,16 +311,17 @@ export function ChatFilterBar({
             sprite={ORIGINAL_UI.game.chatFilterButtons[key]}
             label={t(labelKey, [], labelKey)}
             onClick={() => onSelectFilter(key)}
+            onPointerActivate={() => onSelectFilter(key)}
             active={activeFilter === key}
           />
         </div>
       ))}
-      <div className="chat-filter-button trade" data-chat-filter-key="trade" data-chat-filter-active={activeFilter === "trade"}>
+      <div className="chat-filter-button trade" data-chat-filter-key="trade" data-chat-filter-active="false">
         <SpriteButton
           sprite={ORIGINAL_UI.game.chatFilterButtons.trade}
           label={t("ui.trade")}
-          onClick={onSelectTrade}
-          active={activeFilter === "trade"}
+          onClick={onRequestTrade}
+          onPointerActivate={onRequestTrade}
         />
       </div>
       <div className="chat-filter-button size">
@@ -231,6 +329,7 @@ export function ChatFilterBar({
           sprite={ORIGINAL_UI.game.chatFilterButtons.size}
           label={t("ui.size")}
           onClick={onToggleExpanded}
+          onPointerActivate={onToggleExpanded}
           active={!chatExpanded}
         />
       </div>
@@ -239,6 +338,7 @@ export function ChatFilterBar({
           sprite={ORIGINAL_UI.game.chatFilterButtons.settings}
           label={t("ui.settings")}
           onClick={onToggleSettings}
+          onPointerActivate={onToggleSettings}
           active={showSettings}
         />
       </div>
@@ -247,6 +347,7 @@ export function ChatFilterBar({
           sprite={ORIGINAL_UI.game.chatFilterButtons.report}
           label={t("ui.report")}
           onClick={onToggleReport}
+          onPointerActivate={onToggleReport}
         />
       </div>
     </section>
@@ -320,7 +421,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
               <button
                 type="button"
                 className={`belt-item ${vertical ? "vertical" : "horizontal"}`}
-                title={item.name}
+                aria-label={item.name}
                 onMouseDown={(event) => {
                   if (event.button !== 0) return;
                   event.preventDefault();
@@ -338,6 +439,15 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
                   draggable={false}
                 />
                 {item.quantity > 1 ? <span className="item-stack-count belt-item-count">{item.quantity}</span> : null}
+                <OriginalItemTooltip
+                  t={t}
+                  name={item.name}
+                  description={item.description}
+                  quantity={item.quantity}
+                  durabilityCurrent={item.durabilityCurrent}
+                  durabilityMax={item.durabilityMax}
+                  align={vertical ? "right" : "top"}
+                />
               </button>
             ) : null}
           </div>
@@ -418,10 +528,10 @@ export function DuraPanel({ t, visible, equipmentItems, onToggle }: DuraPanelPro
   );
 }
 
-function playerFacingChatLines(logs: DisplayLogLineLike[], activeFilter: ChatFilterKey) {
+function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOptionFilterKey[]) {
   const lines = logs
     .filter((line) => line.tone !== "network")
-    .filter((line) => matchesChatFilter(line, activeFilter))
+    .filter((line) => matchesChatVisibility(line, hiddenFilters))
     .map((line) => ({
       text: trimLogTimestamp(line.text),
       tone: line.tone === "chat" ? ("chat" as const) : ("system" as const),
@@ -443,23 +553,28 @@ function trimLogTimestamp(text: string) {
   return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
 }
 
-function matchesChatFilter(line: DisplayLogLineLike, activeFilter: ChatFilterKey) {
-  switch (activeFilter) {
-    case "all":
-      return true;
+function matchesChatVisibility(line: DisplayLogLineLike, hiddenFilters: ChatOptionFilterKey[]) {
+  const hidden = new Set(hiddenFilters);
+  switch (line.channel) {
+    case "normal":
+      return !hidden.has("normal");
     case "shout":
-      return line.channel === "shout" || line.channel === "announcement";
-    case "trade":
-      return line.channel === "trade";
+    case "announcement":
+      return !hidden.has("shout");
     case "whisper":
-      return line.channel === "whisper";
+      return !hidden.has("whisper");
     case "group":
-      return line.channel === "group";
+      return !hidden.has("group");
     case "guild":
-      return line.channel === "guild";
-    case "lover":
+      return !hidden.has("guild");
+    case "relationship":
+      return !hidden.has("lover");
     case "mentor":
-      return line.channel === "system" || line.channel === "hint";
+      return !hidden.has("mentor");
+    case "system":
+    case "hint":
+    case "server":
+      return !hidden.has("system");
     default:
       return true;
   }

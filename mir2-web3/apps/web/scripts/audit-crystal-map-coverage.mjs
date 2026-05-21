@@ -72,8 +72,9 @@ const mapsWithoutMiniMap = maps
 const sourceMapMissing = mapResults.filter((map) => !map.source.mapFileExists);
 const unsupportedTypes = mapResults.filter((map) => map.source.mapFileExists && !map.source.supportedType);
 const parseErrors = mapResults.filter((map) => map.source.parseError);
-const sampleMissingSourceAssets = mapResults.filter(
-  (map) => map.sampleCoverage.missingLibraries.length > 0 || map.sampleCoverage.outOfRangeFrames.length > 0,
+const sampleMissingSourceAssets = mapResults.filter((map) => map.sampleCoverage.missingLibraries.length > 0);
+const sampleCrystalIgnoredFrames = mapResults.filter(
+  (map) => map.sampleCoverage.emptyFrames.length > 0 || map.sampleCoverage.outOfRangeFrames.length > 0,
 );
 const sampleNoSpriteMaps = mapResults.filter(
   (map) => map.source.mapFileExists && map.source.supportedType && map.sampleCoverage.requiredFrameCount === 0,
@@ -84,7 +85,6 @@ const visualFallbackRiskMaps = mapResults.filter(
     !map.source.supportedType ||
     Boolean(map.source.parseError) ||
     map.sampleCoverage.missingLibraries.length > 0 ||
-    map.sampleCoverage.outOfRangeFrames.length > 0 ||
     map.sampleCoverage.requiredFrameCount === 0,
 );
 
@@ -127,6 +127,10 @@ const summary = {
     sourcePresentFrameCount: sum(mapResults, (map) => map.sampleCoverage.presentSourceFrameCount),
     sourceEmptyFrameCount: sum(mapResults, (map) => map.sampleCoverage.emptySourceFrameCount),
     sourceOutOfRangeFrameCount: sum(mapResults, (map) => map.sampleCoverage.outOfRangeFrameCount),
+    crystalIgnoredFrameCount: sum(
+      mapResults,
+      (map) => map.sampleCoverage.emptySourceFrameCount + map.sampleCoverage.outOfRangeFrameCount,
+    ),
     alreadyExportedFrameCount: sum(mapResults, (map) => map.sampleCoverage.alreadyExportedFrameCount),
     mapsWithMissingSourceAssets: sampleMissingSourceAssets.length,
     uniqueMissingLibraryCount: aggregateMissingLibraries.size,
@@ -139,7 +143,12 @@ const summary = {
     mapsWithMissingSourceAssets: sampleMissingSourceAssets.map((map) => ({
       ...map.identity,
       missingLibraries: map.sampleCoverage.missingLibraries,
+    })),
+    mapsWithCrystalIgnoredFrames: sampleCrystalIgnoredFrames.map((map) => ({
+      ...map.identity,
+      emptyFrames: map.sampleCoverage.emptyFrames,
       outOfRangeFrames: map.sampleCoverage.outOfRangeFrames,
+      note: "Crystal MLibrary.GetSize/Draw treats empty or out-of-range frame indices as Size.Empty/no draw; these are tracked but not fallback risk.",
     })),
   },
   miniMapCoverage: {
@@ -941,7 +950,6 @@ function fallbackReasons(map) {
   if (map.source.parseError) reasons.push(`parse error: ${map.source.parseError}`);
   if (map.sampleCoverage.requiredFrameCount === 0) reasons.push("sample viewport has no real source sprites");
   if (map.sampleCoverage.missingLibraries.length > 0) reasons.push("sample viewport references missing map libraries");
-  if (map.sampleCoverage.outOfRangeFrames.length > 0) reasons.push("sample viewport references out-of-range library frames");
   return reasons;
 }
 
@@ -957,8 +965,10 @@ function summaryBrief(summary) {
       sourcePresentFrameCount: summary.sampledSpriteCoverage.sourcePresentFrameCount,
       sourceEmptyFrameCount: summary.sampledSpriteCoverage.sourceEmptyFrameCount,
       sourceOutOfRangeFrameCount: summary.sampledSpriteCoverage.sourceOutOfRangeFrameCount,
+      crystalIgnoredFrameCount: summary.sampledSpriteCoverage.crystalIgnoredFrameCount,
       alreadyExportedFrameCount: summary.sampledSpriteCoverage.alreadyExportedFrameCount,
       mapsWithMissingSourceAssets: summary.sampledSpriteCoverage.mapsWithMissingSourceAssets.length,
+      mapsWithCrystalIgnoredFrames: summary.sampledSpriteCoverage.mapsWithCrystalIgnoredFrames.length,
       uniqueMissingLibraryCount: summary.sampledSpriteCoverage.uniqueMissingLibraryCount,
       uniqueOutOfRangeFrameCount: summary.sampledSpriteCoverage.uniqueOutOfRangeFrameCount,
       uniqueEmptyFrameCount: summary.sampledSpriteCoverage.uniqueEmptyFrameCount,

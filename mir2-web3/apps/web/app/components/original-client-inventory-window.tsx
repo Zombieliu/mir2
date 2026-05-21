@@ -14,6 +14,7 @@ import {
   formatBinaryDateTimeLabel,
   originalItemIconPath,
 } from "./original-client-inventory-utils";
+import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 import { StoragePasswordPanel, type StoragePasswordPanelMode } from "./original-client-storage-password-panel";
 import type {
@@ -612,7 +613,7 @@ export function InventoryWindow({
               type="button"
               className="inventory-item-card"
               style={{ left: slot.x, top: slot.y }}
-              title={item.name}
+              aria-label={item.name}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
                 event.preventDefault();
@@ -654,6 +655,15 @@ export function InventoryWindow({
                 draggable={false}
               />
               {item.quantity > 1 ? <span className="item-stack-count inventory-item-count">{item.quantity}</span> : null}
+              <OriginalItemTooltip
+                t={t}
+                name={item.name}
+                description={item.description}
+                quantity={item.quantity}
+                durabilityCurrent={item.durabilityCurrent}
+                durabilityMax={item.durabilityMax}
+                align={slot.x > 210 ? "left" : "right"}
+              />
             </button>
           );
         })}
@@ -915,7 +925,7 @@ export function InventoryWindow({
                       : ""
                   }`}
                   style={{ left: slot.x, top: slot.y }}
-                  title={item.name}
+                  aria-label={item.name}
 	                  onClick={() => {
 	                    if (storageLocked || storagePageLocked) {
 	                      return;
@@ -965,6 +975,15 @@ export function InventoryWindow({
                   {item.quantity > 1 ? (
                     <span className="item-stack-count storage-item-count">{item.quantity}</span>
                   ) : null}
+                  <OriginalItemTooltip
+                    t={t}
+                    name={item.name}
+                    description={item.description}
+                    quantity={item.quantity}
+                    durabilityCurrent={item.durabilityCurrent}
+                    durabilityMax={item.durabilityMax}
+                    align={slot.x > 270 ? "left" : "right"}
+                  />
                 </button>
               );
             })}
