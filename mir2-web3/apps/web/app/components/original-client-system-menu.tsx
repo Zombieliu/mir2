@@ -26,6 +26,25 @@ type DisplayWorld = {
   gold: number;
   entities: Array<{ kind: string; level?: number }>;
   activeBuffs: Array<{ name: string; remainingTicks: number }>;
+  rankings?: Record<
+    string,
+    {
+      rankType: number;
+      rankIndex: number;
+      onlineOnly: boolean;
+      myRank: number;
+      count: number;
+      entries: Array<{
+        rank: number;
+        playerId: number;
+        name: string;
+        level: number;
+        classKey: "warrior" | "wizard" | "taoist" | "assassin" | "archer";
+      }>;
+      updatedAt: number;
+    }
+  >;
+  rankingCurrentKey?: string | null;
   stage5Systems?: {
     group?: { members?: string[]; lootMode?: string };
     guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };

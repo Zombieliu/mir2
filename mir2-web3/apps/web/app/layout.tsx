@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { AssetCacheRegistrar } from "./components/asset-cache-registrar";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "mir2-web3 client",
   description: "Next.js + Bevy WASM client for mir2-web3",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -13,7 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AssetCacheRegistrar />
+        {children}
+      </body>
     </html>
   );
 }

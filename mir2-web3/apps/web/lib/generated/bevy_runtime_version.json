@@ -1,0 +1,13 @@
+{
+  "version": "bevy-44768732d7a22abb",
+  "files": [
+    {
+      "path": "public/bevy-runtime/pkg/mir2_bevy_runtime.js",
+      "sha256": "87d100bc53bec3c7c7fbe6330c208963cf4f0b017758a342a9793564310cb70b"
+    },
+    {
+      "path": "public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm",
+      "sha256": "52e4ddd5de40d7aa444c2960b5b0d6d21b9f4ca0cc8120147c857aab12013f44"
+    }
+  ]
+}

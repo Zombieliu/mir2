@@ -1,9 +1,13 @@
+import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
-const PUBLIC_DIR = path.join(WORKSPACE_ROOT, "public", "original-ui");
+const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
+const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
+const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
+const DEFAULT_PUBLIC_DIR = path.join(WORKSPACE_ROOT, "public", "original-ui");
 const MANIFEST_PATH = path.join(WORKSPACE_ROOT, "scripts", "crystal-ui-export-manifest.json");
 const RESPAWN_MANIFEST_PATH = path.join(
   WORKSPACE_ROOT,
@@ -25,11 +29,22 @@ main().catch((error) => {
 });
 
 async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const publicDir = path.resolve(args.outputDir ?? process.env.MIR2_CRYSTAL_UI_OUTPUT_DIR ?? DEFAULT_PUBLIC_DIR);
+  const onlyLibraries = parseLibraryFilter(args.libraries ?? process.env.MIR2_CRYSTAL_UI_LIBRARIES);
+  const fullLibraries = parseLibraryFilter(args.fullLibraries ?? process.env.MIR2_CRYSTAL_UI_FULL_LIBRARIES);
   const manifestText = await readFile(MANIFEST_PATH, "utf8");
   const manifest = JSON.parse(manifestText);
-  const dataDir = process.argv[2] ?? manifest.dataDir ?? DEFAULT_DATA_DIR;
+  const dataDir =
+    args.dataDir ??
+    args._[0] ??
+    process.env.CRYSTAL_CLIENT_DATA_DIR ??
+    dataDirFromClientRoot(process.env.CRYSTAL_CLIENT_ROOT) ??
+    (existsSync(LOCAL_CRYSTAL_CLIENT_ROOT) ? path.join(LOCAL_CRYSTAL_CLIENT_ROOT, "Data") : null) ??
+    manifest.dataDir ??
+    DEFAULT_DATA_DIR;
 
-  await mkdir(PUBLIC_DIR, { recursive: true });
+  await mkdir(publicDir, { recursive: true });
 
   const summary = {
     dataDir,
@@ -40,13 +55,19 @@ async function main() {
 
   for (const [libraryName, config] of Object.entries(manifest.libraries)) {
     const normalizedLibraryName = normalizeLibraryName(libraryName);
+    if (onlyLibraries && !onlyLibraries.has(normalizedLibraryName)) {
+      continue;
+    }
+
     const inputPath = path.join(dataDir, ...normalizedLibraryName.split("/")) + ".Lib";
     const library = await parseLibrary(inputPath);
-    const exportDir = path.join(PUBLIC_DIR, ...normalizedLibraryName.split("/"));
-    const indices = expandIndices(
-      config,
-      normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
-    );
+    const exportDir = path.join(publicDir, ...normalizedLibraryName.split("/"));
+    const indices = fullLibraries?.has(normalizedLibraryName)
+      ? allPresentFrameIndices(library)
+      : expandIndices(
+          config,
+          normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
+        );
 
     await mkdir(exportDir, { recursive: true });
 
@@ -54,6 +75,10 @@ async function main() {
     for (const index of indices) {
       const frame = library.frames[index];
       if (!frame) {
+        const existingPngFrame = await loadExistingPngFrame(exportDir, normalizedLibraryName, index);
+        if (existingPngFrame) {
+          frames.push(existingPngFrame);
+        }
         continue;
       }
 
@@ -86,7 +111,10 @@ async function main() {
 
     const libraryMeta = {
       version: library.version,
-      count: library.count,
+      count: Math.max(
+        library.count,
+        frames.reduce((maxIndex, frame) => Math.max(maxIndex, Number(frame.index)), -1) + 1,
+      ),
       frames,
     };
 
@@ -100,12 +128,55 @@ async function main() {
   }
 
   await writeFile(
-    path.join(PUBLIC_DIR, "manifest.generated.json"),
+    path.join(publicDir, "manifest.generated.json"),
     `${JSON.stringify(summary, null, 2)}\n`,
     "utf8",
   );
 
-  console.log(`Exported UI assets to ${PUBLIC_DIR}`);
+  console.log(`Exported UI assets to ${publicDir}`);
+}
+
+function parseArgs(argv) {
+  const parsed = { _: [] };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (!arg.startsWith("--")) {
+      parsed._.push(arg);
+      continue;
+    }
+
+    const equals = arg.indexOf("=");
+    if (equals !== -1) {
+      parsed[arg.slice(2, equals)] = arg.slice(equals + 1);
+      continue;
+    }
+
+    const key = arg.slice(2);
+    const next = argv[index + 1];
+    if (next && !next.startsWith("--")) {
+      parsed[key] = next;
+      index += 1;
+    } else {
+      parsed[key] = "true";
+    }
+  }
+  return parsed;
+}
+
+function parseLibraryFilter(value) {
+  const libraries = String(value ?? "")
+    .split(",")
+    .map((library) => normalizeLibraryName(library))
+    .filter(Boolean);
+  return libraries.length ? new Set(libraries) : null;
+}
+
+function dataDirFromClientRoot(clientRoot) {
+  if (!clientRoot) {
+    return null;
+  }
+  const root = path.resolve(clientRoot);
+  return path.basename(root).toLowerCase() === "data" ? root : path.join(root, "Data");
 }
 
 function normalizeLibraryName(libraryName) {
@@ -142,6 +213,42 @@ function expandIndices(config, extraIndices = []) {
   }
 
   return [...indices].sort((left, right) => left - right);
+}
+
+function allPresentFrameIndices(library) {
+  return library.frames
+    .map((frame, index) => (frame ? index : null))
+    .filter((index) => index !== null);
+}
+
+async function loadExistingPngFrame(exportDir, normalizedLibraryName, index) {
+  try {
+    const pngPath = path.join(exportDir, `${index}.png`);
+    const png = await readFile(pngPath);
+    if (!png.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
+      return null;
+    }
+
+    return {
+      index,
+      width: png.readUInt32BE(16),
+      height: png.readUInt32BE(20),
+      x: 0,
+      y: 0,
+      shadowX: 0,
+      shadowY: 0,
+      hasMask: false,
+      maskWidth: null,
+      maskHeight: null,
+      path: `/original-ui/${normalizedLibraryName}/${index}.png`,
+      maskPath: null,
+    };
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
 }
 
 async function loadCrystalMiniMapIndices() {

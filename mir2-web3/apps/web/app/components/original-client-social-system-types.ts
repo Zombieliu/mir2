@@ -4,12 +4,32 @@ export type TranslateFn = (
   fallback?: string,
 ) => string;
 
+export type SocialRankingEntry = {
+  rank: number;
+  playerId: number;
+  name: string;
+  level: number;
+  classKey: "warrior" | "wizard" | "taoist" | "assassin" | "archer";
+};
+
+export type SocialRankingState = {
+  rankType: number;
+  rankIndex: number;
+  onlineOnly: boolean;
+  myRank: number;
+  count: number;
+  entries: SocialRankingEntry[];
+  updatedAt: number;
+};
+
 export type SocialDisplayWorld = {
   mapTitle: string | null;
   inSafeZone: boolean;
   gold: number;
   entities: Array<{ kind: string; level?: number }>;
   activeBuffs: Array<{ name: string; remainingTicks: number }>;
+  rankings?: Record<string, SocialRankingState>;
+  rankingCurrentKey?: string | null;
   stage5Systems?: {
     group?: { members?: string[]; lootMode?: string };
     guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };

@@ -4,6 +4,11 @@ export type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
 export type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
 export type EntityClassKey = "warrior" | "wizard" | "taoist" | "assassin" | "archer";
 export type EntityGenderKey = "male" | "female";
+export type CreateCharacterDraft = {
+  name: string;
+  classKey: EntityClassKey;
+  gender: EntityGenderKey;
+};
 export type EquipmentSlot =
   | "weapon"
   | "armour"
@@ -111,6 +116,24 @@ export type DisplayProjectile = {
   expiresAt: number;
 };
 
+export type DisplayRankingEntry = {
+  rank: number;
+  playerId: number;
+  name: string;
+  level: number;
+  classKey: EntityClassKey;
+};
+
+export type DisplayRankingState = {
+  rankType: number;
+  rankIndex: number;
+  onlineOnly: boolean;
+  myRank: number;
+  count: number;
+  entries: DisplayRankingEntry[];
+  updatedAt: number;
+};
+
 export type DisplayItem = {
   key: string;
   name: string;
@@ -195,6 +218,8 @@ export type DisplayLogLine = {
     | "whisper"
     | "group"
     | "guild"
+    | "mentor"
+    | "relationship"
     | "system"
     | "hint"
     | "server"
@@ -266,6 +291,8 @@ export type DisplayWorld = {
   activeNpcDialog: DisplayNpcDialog | null;
   knownSkills: DisplayKnownSkill[];
   activeBuffs: DisplayActiveBuff[];
+  rankings: Record<string, DisplayRankingState>;
+  rankingCurrentKey?: string | null;
   stage5Systems?: {
     group?: { members?: string[]; lootMode?: string };
     guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };

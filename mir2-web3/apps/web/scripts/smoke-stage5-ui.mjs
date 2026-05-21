@@ -355,14 +355,84 @@ async function main() {
       15_000,
     );
     const beforeBootstrapTick = await client.evaluate("window.__mir2Stage5?.state?.worldTick ?? 0");
+    const beforeBootstrapSnapshotVersion = await client.evaluate("window.__mir2Stage5?.state?.worldSnapshotVersion ?? 0");
     await sendGatewayCommand(client, { type: "tick" });
     await waitForStage5State(
       client,
-      (state) => Number(state?.worldTick ?? 0) > beforeBootstrapTick,
+      (state) =>
+        Number(state?.worldTick ?? 0) > beforeBootstrapTick ||
+        Number(state?.worldSnapshotVersion ?? 0) > beforeBootstrapSnapshotVersion ||
+        state?.lastCommand?.type === "tick",
       "post-start gateway tick",
       30_000,
     );
     screenshots.push(await screenshot(client, "stage5-game.png"));
+
+    if (process.env.MIR2_STAGE5_SMOKE_MINIMAP_ONLY === "1") {
+      await runMiniMapSmoke(client, {
+        minimapFlow,
+        mailFlow,
+        screenshots,
+      });
+
+      if (client.consoleErrors.length > 0) {
+        throw new Error(
+          `Browser critical console errors:\n${client.consoleErrors
+            .map((entry) => `- ${entry.source}: ${entry.text}`)
+            .join("\n")}`,
+        );
+      }
+
+      const manifest = {
+        baseUrl: BASE_URL,
+        generatedAt: new Date().toISOString(),
+        mode: "minimap-only",
+        screenshotCount: screenshots.length,
+        screenshots,
+        minimapFlow,
+        mailFlow,
+        criticalConsoleErrors: client.consoleErrors,
+      };
+      const manifestPath = path.join(OUTPUT_DIR, "stage5-minimap-smoke-manifest.json");
+      await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      console.log(`Stage 5 minimap smoke captured ${screenshots.length} screenshots.`);
+      console.log(`Wrote ${manifestPath}`);
+      return;
+    }
+
+    if (process.env.MIR2_STAGE5_SMOKE_CHAT_ONLY === "1") {
+      await runChatControlsSmoke(client, {
+        chatFlow,
+        chatChannelFlow,
+        reportFlow,
+        screenshots,
+      });
+
+      if (client.consoleErrors.length > 0) {
+        throw new Error(
+          `Browser critical console errors:\n${client.consoleErrors
+            .map((entry) => `- ${entry.source}: ${entry.text}`)
+            .join("\n")}`,
+        );
+      }
+
+      const manifest = {
+        baseUrl: BASE_URL,
+        generatedAt: new Date().toISOString(),
+        mode: "chat-controls-only",
+        screenshotCount: screenshots.length,
+        screenshots,
+        chatFlow,
+        chatChannelFlow,
+        reportFlow,
+        criticalConsoleErrors: client.consoleErrors,
+      };
+      const manifestPath = path.join(OUTPUT_DIR, "stage5-chat-controls-smoke-manifest.json");
+      await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      console.log(`Stage 5 chat controls smoke captured ${screenshots.length} screenshots.`);
+      console.log(`Wrote ${manifestPath}`);
+      return;
+    }
 
     if (process.env.MIR2_STAGE5_SMOKE_FAST_MENU === "1") {
       await clickSelector(client, ".hud-button.menu button");
@@ -1835,21 +1905,34 @@ async function main() {
 
     chatFlow.push(await readChatState(client, "allInitial"));
     await clickSelector(client, '.chat-filter-button[data-chat-filter-key="shout"] button');
-    await waitForChatState(client, (state) => state.visibleLineTexts.every((text) => text === ""), "shout filter", 5_000);
-    chatFlow.push(await readChatState(client, "shoutFilter"));
-    screenshots.push(await screenshot(client, "stage5-chat-shout-filter.png"));
+    await waitForChatState(
+      client,
+      (state) => state.activeFilter === "shout" && state.chatText === "!" && state.chatPrefix === "!",
+      "shout chat prefix",
+      5_000,
+    );
+    chatFlow.push(await readChatState(client, "shoutPrefix"));
+    screenshots.push(await screenshot(client, "stage5-chat-shout-prefix.png"));
 
     await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
-    await waitForChatState(client, (state) => state.visibleLineTexts.some((text) => text !== ""), "all filter restored", 5_000);
+    await waitForChatState(
+      client,
+      (state) => state.activeFilter === "all" && state.chatText === "",
+      "all prefix restored",
+      5_000,
+    );
     chatFlow.push(await readChatState(client, "allRestored"));
 
+    await client.evaluate("window.__mir2CommandHistory = []");
     await clickSelector(client, '.chat-filter-button[data-chat-filter-key="trade"] button');
-    await waitForChatState(client, (state) => state.activeFilter === "trade", "trade filter", 5_000);
-    chatChannelFlow.push(await readChatState(client, "tradeFilter"));
-    screenshots.push(await screenshot(client, "stage5-chat-trade-filter.png"));
-
-    await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
-    await waitForChatState(client, (state) => state.activeFilter === "all", "all restored after trade", 5_000);
+    await waitForChatState(
+      client,
+      (state) => state.lastCommand?.type === "tradeRequest",
+      "trade request command",
+      5_000,
+    );
+    chatChannelFlow.push(await readChatState(client, "tradeRequest"));
+    screenshots.push(await screenshot(client, "stage5-chat-trade-request.png"));
 
     await sendGatewayCommand(client, { type: "stage5Command", action: "guild.chat", args: ["Guild", "filter", "check"] });
     await waitForStage5State(
@@ -1862,25 +1945,51 @@ async function main() {
     await waitForChatState(
       client,
       (state) =>
+        state.activeFilter === "guild" &&
+        state.chatText === "!~" &&
         state.visibleLineTexts.some((text) => text.includes("Guild filter check")) &&
-        state.visibleLineClasses.every((className) => className.includes("channel-guild")),
-      "guild filter",
+        state.visibleLineClasses.some((className) => className.includes("channel-guild")),
+      "guild prefix",
       5_000,
     );
-    chatChannelFlow.push(await readChatState(client, "guildFilter"));
-    screenshots.push(await screenshot(client, "stage5-chat-guild-filter.png"));
+    chatChannelFlow.push(await readChatState(client, "guildPrefix"));
+    screenshots.push(await screenshot(client, "stage5-chat-guild-prefix.png"));
 
     await clickSelector(client, '.chat-filter-button[data-chat-filter-key="group"] button');
-    await waitForChatState(client, (state) => state.visibleLineTexts.every((text) => text === ""), "group filter empty", 5_000);
-    chatChannelFlow.push(await readChatState(client, "groupFilterEmpty"));
-    screenshots.push(await screenshot(client, "stage5-chat-group-filter-empty.png"));
+    await waitForChatState(
+      client,
+      (state) => state.activeFilter === "group" && state.chatText === "!!",
+      "group prefix",
+      5_000,
+    );
+    chatChannelFlow.push(await readChatState(client, "groupPrefix"));
+    screenshots.push(await screenshot(client, "stage5-chat-group-prefix.png"));
 
     await clickSelector(client, '.chat-filter-button[data-chat-filter-key="all"] button');
-    await waitForChatState(client, (state) => state.visibleLineTexts.some((text) => text !== ""), "all restored after channels", 5_000);
+    await waitForChatState(
+      client,
+      (state) => state.activeFilter === "all" && state.chatText === "",
+      "all prefix restored after channels",
+      5_000,
+    );
     chatChannelFlow.push(await readChatState(client, "allRestoredAfterChannels"));
 
     await clickSelector(client, ".chat-filter-button.settings button");
     await waitForChatState(client, (state) => state.settingsOpen === true, "settings open", 5_000);
+    await clickSelector(client, '.chat-settings-option[data-chat-option-filter="normal"]');
+    await waitForChatState(
+      client,
+      (state) => state.hiddenFilters.includes("normal"),
+      "settings normal hidden",
+      5_000,
+    );
+    await clickSelector(client, '.chat-settings-option[data-chat-option-filter="normal"]');
+    await waitForChatState(
+      client,
+      (state) => !state.hiddenFilters.includes("normal"),
+      "settings normal restored",
+      5_000,
+    );
     chatFlow.push(await readChatState(client, "settingsOpen"));
     screenshots.push(await screenshot(client, "stage5-chat-settings.png"));
     await clickOptional(client, ".chat-settings-close");
@@ -4100,18 +4209,27 @@ async function readChatState(client, label) {
       const frame = document.querySelector(".chat-frame");
       const feed = document.querySelector(".chat-feed");
       const knob = document.querySelector(".chat-position-knob");
+      const input = document.querySelector(".chat-textbox");
       const rect = frame?.getBoundingClientRect();
       const lines = Array.from(document.querySelectorAll(".chat-feed-line"));
+      const hiddenFilters = Array.from(document.querySelectorAll(".chat-settings-option[data-chat-option-hidden='true']"))
+        .map((button) => button.getAttribute("data-chat-option-filter"))
+        .filter((key) => key && key !== "all");
       return {
         label: ${JSON.stringify(label)},
         frameVisible: Boolean(frame),
         collapsed: frame?.classList.contains("collapsed") ?? null,
         feedHidden: feed?.classList.contains("hidden") ?? null,
+        transparent: frame?.classList.contains("transparent") ?? null,
         settingsOpen: Boolean(document.querySelector(".chat-settings-panel")),
         reportOpen: Boolean(document.querySelector(".report-panel")),
         activeFilter:
           document.querySelector('.chat-filter-button[data-chat-filter-active="true"]')?.getAttribute("data-chat-filter-key") ??
           null,
+        chatText: input instanceof HTMLInputElement ? input.value : null,
+        chatPrefix: input instanceof HTMLElement ? input.getAttribute("data-chat-prefix") : null,
+        hiddenFilters,
+        lastCommand: window.__mir2LastCommand ?? null,
         visibleLineTexts: lines.map((line) => line.textContent?.trim() ?? ""),
         visibleLineClasses: lines.map((line) => line.className),
         nonEmptyLineCount: lines.filter((line) => (line.textContent?.trim() ?? "") !== "").length,
@@ -4140,6 +4258,210 @@ async function waitForChatState(client, predicate, label, timeoutMs) {
     await delay(100);
   }
   throw new Error(`Timed out waiting for chat ${label}; current state: ${JSON.stringify(state)}`);
+}
+
+async function runChatControlsSmoke(client, { chatFlow, chatChannelFlow, reportFlow, screenshots }) {
+  await waitForSelector(client, ".chat-filter-bar", 5_000);
+  const hitTest = await readChatHitTestState(client, "initialHitTest");
+  const blockedButtons = hitTest.buttons.filter((button) => !button.topMatches);
+  if (blockedButtons.length > 0) {
+    throw new Error(`Chat control buttons are covered: ${JSON.stringify(blockedButtons)}`);
+  }
+  chatFlow.push(hitTest);
+  chatFlow.push(await readChatState(client, "allInitial"));
+
+  await clickChatControlButton(client, '.chat-filter-button[data-chat-filter-key="shout"] button', "shout");
+  await waitForChatState(
+    client,
+    (state) => state.activeFilter === "shout" && state.chatText === "!" && state.chatPrefix === "!",
+    "shout prefix selected",
+    5_000,
+  );
+  chatChannelFlow.push(await readChatState(client, "shoutPrefix"));
+  await focusSelector(client, ".chat-textbox");
+  await setInputValue(client, ".chat-textbox", "!Codex shout smoke");
+  await pressKey(client, "Enter", "Enter", 13);
+  await waitForChatState(
+    client,
+    (state) =>
+      state.lastCommand?.type === "chat" &&
+      state.lastCommand?.message === "!Codex shout smoke" &&
+      state.chatText === "!",
+    "shout send command",
+    5_000,
+  );
+  chatChannelFlow.push(await readChatState(client, "shoutSendCommand"));
+  screenshots.push(await screenshot(client, "stage5-chat-controls-shout.png"));
+
+  const channelButtons = [
+    { key: "all", prefix: "" },
+    { key: "whisper", prefix: "/" },
+    { key: "lover", prefix: ":)" },
+    { key: "mentor", prefix: "!#" },
+    { key: "group", prefix: "!!" },
+    { key: "guild", prefix: "!~" },
+  ];
+  for (const { key, prefix } of channelButtons) {
+    await clickChatControlButton(client, `.chat-filter-button[data-chat-filter-key="${key}"] button`, key);
+    await waitForChatState(
+      client,
+      (state) => state.activeFilter === key && state.chatText === prefix && state.chatPrefix === prefix,
+      `${key} prefix selected`,
+      5_000,
+    );
+    chatChannelFlow.push(await readChatState(client, `${key}Prefix`));
+  }
+  screenshots.push(await screenshot(client, "stage5-chat-controls-prefixes.png"));
+
+  await client.evaluate("window.__mir2CommandHistory = []");
+  await clickChatControlButton(client, '.chat-filter-button[data-chat-filter-key="trade"] button', "trade");
+  await waitForChatState(
+    client,
+    (state) => state.lastCommand?.type === "tradeRequest" && state.activeFilter === "guild",
+    "trade request command",
+    5_000,
+  );
+  chatChannelFlow.push(await readChatState(client, "tradeRequest"));
+  screenshots.push(await screenshot(client, "stage5-chat-controls-trade.png"));
+
+  await clickChatControlButton(client, ".chat-filter-button.settings button", "settings");
+  await waitForChatState(client, (state) => state.settingsOpen === true, "settings open", 5_000);
+  await clickChatControlButton(client, '.chat-settings-option[data-chat-option-filter="normal"]', "normal filter off");
+  await waitForChatState(
+    client,
+    (state) => state.hiddenFilters.includes("normal"),
+    "settings normal hidden",
+    5_000,
+  );
+  await clickChatControlButton(client, '.chat-settings-option[data-chat-option-filter="normal"]', "normal filter on");
+  await waitForChatState(
+    client,
+    (state) => !state.hiddenFilters.includes("normal"),
+    "settings normal restored",
+    5_000,
+  );
+  await clickChatControlButton(client, ".chat-settings-tabs button[data-chat-transparent]", "transparent toggle on");
+  await waitForChatState(client, (state) => state.transparent === true, "chat transparent on", 5_000);
+  await clickChatControlButton(client, ".chat-settings-tabs button[data-chat-transparent]", "transparent toggle off");
+  await waitForChatState(client, (state) => state.transparent === false, "chat transparent off", 5_000);
+  chatFlow.push(await readChatState(client, "settingsToggles"));
+  screenshots.push(await screenshot(client, "stage5-chat-controls-settings.png"));
+  await clickOptional(client, ".chat-settings-close");
+  await waitForChatState(client, (state) => state.settingsOpen === false, "settings closed", 5_000);
+
+  await clickChatControlButton(client, ".chat-filter-button.size button", "size collapse");
+  await waitForChatState(client, (state) => state.collapsed === true && state.feedHidden === true, "chat collapsed", 5_000);
+  chatFlow.push(await readChatState(client, "collapsed"));
+  await clickChatControlButton(client, ".chat-filter-button.size button", "size expand");
+  await waitForChatState(client, (state) => state.collapsed === false && state.feedHidden === false, "chat expanded", 5_000);
+  chatFlow.push(await readChatState(client, "expanded"));
+
+  await clickChatControlButton(client, ".chat-filter-button.report button", "report");
+  await waitForChatState(client, (state) => state.reportOpen === true, "report open", 5_000);
+  chatFlow.push(await readChatState(client, "reportOpen"));
+  reportFlow.push(await readReportState(client, "reportOpen"));
+  screenshots.push(await screenshot(client, "stage5-chat-controls-report.png"));
+  await clickOptional(client, ".report-panel .overlay-panel-head button");
+  await waitForChatState(client, (state) => state.reportOpen === false, "report closed", 5_000);
+  reportFlow.push(await readReportState(client, "reportClosed"));
+}
+
+async function runMiniMapSmoke(client, { minimapFlow, mailFlow, screenshots }) {
+  await clickAllOptional(client, ".storage-close button, .inventory-close button, .character-close button");
+  await delay(300);
+  await transferMapAndWait(client, "crystal:0:334:289", "minimap Bichon smoke", {
+    attempts: 2,
+    timeoutMs: 12_000,
+  });
+  await waitForMiniMapState(
+    client,
+    (state) =>
+      state.panelVisible === true &&
+      state.sceneHidden === false &&
+      state.nameText === "BichonProvince" &&
+      state.sceneHasRaster === true,
+    "expanded Crystal raster",
+    5_000,
+  );
+  const expanded = await readMiniMapState(client, "expanded");
+  assertMiniMapButtonHitTargets(expanded);
+  if (expanded.titleCount !== 1 || expanded.nameText !== "BichonProvince") {
+    throw new Error(`MiniMap title is not Crystal-aligned: ${JSON.stringify(expanded)}`);
+  }
+  if (!expanded.sceneHasRaster || expanded.sceneHasFallback || expanded.sceneHidden) {
+    throw new Error(`MiniMap scene did not render the Crystal raster: ${JSON.stringify(expanded)}`);
+  }
+  minimapFlow.push(expanded);
+  screenshots.push(await screenshot(client, "stage5-minimap-only-expanded.png"));
+
+  await clickSelector(client, ".mini-map-button.toggle button");
+  await waitForMiniMapState(
+    client,
+    (state) =>
+      state.panelVisible === true &&
+      state.sceneHidden === true &&
+      state.titleCount === 0 &&
+      state.smallMode === true,
+    "collapsed Crystal frame",
+    5_000,
+  );
+  const collapsed = await readMiniMapState(client, "collapsed");
+  assertMiniMapButtonHitTargets(collapsed);
+  minimapFlow.push(collapsed);
+  screenshots.push(await screenshot(client, "stage5-minimap-only-collapsed.png"));
+
+  await clickSelector(client, ".mini-map-button.bigmap button");
+  await waitForMiniMapState(client, (state) => state.bigMapOpen === true, "big map dialog open", 5_000);
+  minimapFlow.push(await readMiniMapState(client, "bigMapOpen"));
+  screenshots.push(await screenshot(client, "stage5-minimap-only-bigmap.png"));
+
+  await clickSelector(client, ".mini-map-button.mail button");
+  await waitForSelector(client, ".mail-panel", 5_000);
+  minimapFlow.push(await readMiniMapState(client, "mailOpen"));
+  mailFlow.push(await readMailState(client, "mailOpen"));
+  screenshots.push(await screenshot(client, "stage5-minimap-only-mail.png"));
+
+  await clickOptional(client, ".mail-panel .mail-close button");
+  await waitForMiniMapState(client, (state) => state.mailOpen === false, "mail closed", 5_000);
+  mailFlow.push(await readMailState(client, "mailClosed"));
+}
+
+function assertMiniMapButtonHitTargets(state) {
+  const coveredButtons = (state.buttons ?? []).filter((button) => !button.topMatches);
+  if (coveredButtons.length > 0) {
+    throw new Error(`MiniMap buttons are covered: ${JSON.stringify(coveredButtons)}`);
+  }
+}
+
+async function clickChatControlButton(client, selector, label) {
+  await mouseClickElementByExpression(
+    client,
+    `document.querySelector(${JSON.stringify(selector)})`,
+    `chat control ${label}`,
+  );
+  await delay(100);
+}
+
+async function readChatHitTestState(client, label) {
+  return client.evaluate(`
+    (() => {
+      const buttons = Array.from(document.querySelectorAll(".chat-filter-button button")).map((button) => {
+        const container = button.closest(".chat-filter-button");
+        const rect = button.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const topElement = document.elementFromPoint(x, y);
+        const topButton = topElement?.closest?.("button") ?? null;
+        return {
+          key: container?.getAttribute("data-chat-filter-key") ?? container?.className ?? "",
+          topMatches: topButton === button,
+          topClassName: topElement?.className ?? "",
+          rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+        };
+      });
+      return { label: ${JSON.stringify(label)}, buttons };
+    })()
+  `);
 }
 
 async function readStage5SystemsState(client, label) {
@@ -4901,16 +5223,64 @@ async function readMiniMapState(client, label) {
       const mail = document.querySelector(".mail-panel");
       const bigMap = document.querySelector(".big-map-dialog");
       const name = document.querySelector(".mini-map-name");
+      const titles = Array.from(document.querySelectorAll(".mini-map-name"));
       const coords = document.querySelector(".mini-map-coords");
       const rect = panel?.getBoundingClientRect();
+      const sceneRect = scene?.getBoundingClientRect();
+      const raster = document.querySelector(".mini-map-raster");
+      const fallback = document.querySelector(".mini-map-patch-fallback");
+      const buttons = Array.from(document.querySelectorAll(".mini-map-button")).map((container) => {
+        const button = container.querySelector("button");
+        const buttonRect = button?.getBoundingClientRect();
+        if (!buttonRect) {
+          return {
+            className: container.className,
+            visible: false,
+            topMatches: false,
+          };
+        }
+        const x = buttonRect.left + buttonRect.width / 2;
+        const y = buttonRect.top + buttonRect.height / 2;
+        const topElement = document.elementFromPoint(x, y);
+        return {
+          className: container.className,
+          visible: buttonRect.width > 0 && buttonRect.height > 0,
+          topMatches: Boolean(topElement && container.contains(topElement)),
+          topElement: topElement?.className?.toString?.() ?? topElement?.tagName ?? null,
+          rect: {
+            left: buttonRect.left,
+            top: buttonRect.top,
+            right: buttonRect.right,
+            bottom: buttonRect.bottom,
+            width: buttonRect.width,
+            height: buttonRect.height,
+          },
+        };
+      });
       return {
         label: ${JSON.stringify(label)},
         panelVisible: Boolean(panel),
+        smallMode: panel?.classList.contains("small") ?? null,
         sceneHidden: scene?.classList.contains("hidden") ?? null,
+        sceneHasRaster: Boolean(raster),
+        sceneHasFallback: Boolean(fallback),
         mailOpen: Boolean(mail),
         bigMapOpen: Boolean(bigMap),
         nameText: name?.textContent?.trim() ?? "",
+        titleCount: titles.length,
+        titleTexts: titles.map((title) => title.textContent?.trim() ?? ""),
         coordsText: coords?.textContent?.trim() ?? "",
+        buttons,
+        sceneRect: sceneRect
+          ? {
+              left: sceneRect.left,
+              top: sceneRect.top,
+              right: sceneRect.right,
+              bottom: sceneRect.bottom,
+              width: sceneRect.width,
+              height: sceneRect.height,
+            }
+          : null,
         panelRect: rect
           ? {
               left: rect.left,

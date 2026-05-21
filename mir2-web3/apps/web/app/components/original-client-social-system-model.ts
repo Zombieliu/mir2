@@ -1,6 +1,7 @@
 import { SYSTEM_MENU_SOCIAL_PANEL_DEFINITIONS } from "./original-client-social-system-definitions";
 import type {
   SocialDisplayWorld,
+  SocialRankingState,
   SystemMenuSocialPanel,
   SystemMenuSocialPanelDefinition,
   SystemMenuSocialPanelMetric,
@@ -57,7 +58,6 @@ export function systemMenuSocialPanelDefinition(
 ): SystemMenuSocialPanelDefinition {
   const systems = world.stage5Systems ?? {};
   const player = playerName ?? "{player}";
-  const selfEntity = world.entities.find((entity) => entity.kind === "selfPlayer");
   const emptyRow = (name: string, meta = "Empty") =>
     systemMenuRow(name, meta, "No live data is currently available for this slot.", [
       { label: "State", value: "None" },
@@ -67,29 +67,7 @@ export function systemMenuSocialPanelDefinition(
 
   switch (panel) {
     case "ranking":
-      return {
-        subtitle: "Current leaderboard context for {player}",
-        footer: "Rows are derived from the current session instead of fixed sample names.",
-        tabs: [
-          {
-            key: "overall",
-            label: "Overall",
-            rows: [
-              systemMenuRow(player, "Current character", "Live character state from the active world snapshot.", [
-                { label: "Level", value: String(selfEntity?.level ?? 1) },
-                { label: "Gold", value: String(world.gold) },
-                { label: "Map", value: world.mapTitle ?? "-" },
-              ]),
-              systemMenuRow("Visible monsters", "Current map", "Local combat density around the player.", [
-                { label: "Count", value: String(world.entities.filter((entity) => entity.kind === "monster").length) },
-                { label: "Safe", value: world.inSafeZone ? "Yes" : "No" },
-                { label: "Buffs", value: String(world.activeBuffs.length) },
-              ]),
-            ],
-            actions: ["Inspect", "Refresh"],
-          },
-        ],
-      };
+      return rankingPanelDefinition(player, world);
     case "friend": {
       const friends = systems.social?.friends ?? [];
       const blocked = systems.social?.blocked ?? [];
@@ -362,6 +340,98 @@ function socialMetrics(state: string, note: string): SystemMenuSocialPanelMetric
   ];
 }
 
+const RANKING_TABS = [
+  { key: "overall", label: "Overall", rankType: 0, onlineOnly: false },
+  { key: "warrior", label: "Warrior", rankType: 1, onlineOnly: false },
+  { key: "wizard", label: "Wizard", rankType: 2, onlineOnly: false },
+  { key: "taoist", label: "Taoist", rankType: 3, onlineOnly: false },
+  { key: "assassin", label: "Assassin", rankType: 4, onlineOnly: false },
+  { key: "archer", label: "Archer", rankType: 5, onlineOnly: false },
+  { key: "online", label: "Online", rankType: 0, onlineOnly: true },
+] as const;
+
+export function rankingRequestForSocialTab(tab: string): Record<string, unknown> {
+  const definition = RANKING_TABS.find((entry) => entry.key === tab) ?? RANKING_TABS[0];
+  return {
+    type: "getRanking",
+    rankType: definition.rankType,
+    rankIndex: 0,
+    onlineOnly: definition.onlineOnly,
+  };
+}
+
+function rankingPanelDefinition(player: string, world: SocialDisplayWorld): SystemMenuSocialPanelDefinition {
+  const pages = world.rankings ?? {};
+  const current = world.rankingCurrentKey ? pages[world.rankingCurrentKey] : undefined;
+  return {
+    subtitle: "Crystal ranking for {player}",
+    footer: current
+      ? `My rank: ${current.myRank > 0 ? current.myRank : "Not listed"} / ${current.count}`
+      : "Ranking data pending",
+    tabs: RANKING_TABS.map((tab) => {
+      const page = pages[rankingKey(tab.rankType, tab.onlineOnly)];
+      return {
+        key: tab.key,
+        label: tab.label,
+        rows: rankingRows(page, player),
+        actions: ["Refresh"],
+      };
+    }),
+  };
+}
+
+function rankingRows(
+  page: SocialRankingState | undefined,
+  player: string,
+): SystemMenuSocialPanelRow[] {
+  if (!page) {
+    return [
+      systemMenuRow("No ranking data", "Pending", "Open this ranking tab to load current rows.", [
+        { label: "Player", value: player },
+        { label: "Rank", value: "-" },
+        { label: "Count", value: "0" },
+      ]),
+    ];
+  }
+  if (!page.entries.length) {
+    return [
+      systemMenuRow("No ranked characters", page.onlineOnly ? "Online" : "Empty", "No characters are listed for this ranking.", [
+        { label: "My Rank", value: page.myRank > 0 ? String(page.myRank) : "-" },
+        { label: "Count", value: String(page.count) },
+        { label: "Rank Type", value: String(page.rankType) },
+      ]),
+    ];
+  }
+  return page.entries.map((entry) =>
+    systemMenuRow(entry.name, `#${entry.rank}`, `Level ${entry.level} ${rankingClassLabel(entry.classKey)}`, [
+      { label: "Rank", value: String(entry.rank) },
+      { label: "Level", value: String(entry.level) },
+      { label: "Class", value: rankingClassLabel(entry.classKey) },
+      { label: "PlayerId", value: String(entry.playerId) },
+    ]),
+  );
+}
+
+function rankingKey(rankType: number, onlineOnly: boolean) {
+  return `${rankType}:${onlineOnly ? "online" : "all"}`;
+}
+
+function rankingClassLabel(classKey: SocialRankingState["entries"][number]["classKey"]) {
+  switch (classKey) {
+    case "wizard":
+      return "Wizard";
+    case "taoist":
+      return "Taoist";
+    case "assassin":
+      return "Assassin";
+    case "archer":
+      return "Archer";
+    case "warrior":
+    default:
+      return "Warrior";
+  }
+}
+
 function stringRecordValue(record: Record<string, unknown> | null | undefined, keys: string[]) {
   if (!record) return null;
   for (const key of keys) {
@@ -466,6 +536,9 @@ export function clientCommandForSocialAction(
   }
   if (panel === "market" && normalized === "refresh") {
     return { type: "marketRefresh" };
+  }
+  if (panel === "ranking" && normalized === "refresh") {
+    return rankingRequestForSocialTab(tab);
   }
   void tab;
   return null;

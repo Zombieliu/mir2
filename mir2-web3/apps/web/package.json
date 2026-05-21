@@ -4,21 +4,39 @@
   "private": true,
   "scripts": {
     "export:crystal-ui": "node ./scripts/export-crystal-ui.mjs",
+    "export:crystal-sounds": "node ./scripts/export-crystal-sounds.mjs",
+    "generate:crystal-asset-index": "node ./scripts/generate-crystal-asset-index.mjs",
+    "assets:prepare": "npm run generate:crystal-asset-index && npm run export:crystal-sounds && npm run export:crystal-ui",
+    "assets:verify": "npm run generate:crystal-asset-index && npm run smoke:crystal-minimap-assets && npm run audit:crystal-map-coverage && npm run audit:crystal-map-gameplay",
     "export:crystal-map": "node ./scripts/export-crystal-starter-map.mjs",
     "generate:crystal-map-blend": "node ./scripts/generate-crystal-map-blend-assets.mjs",
     "audit:crystal-map-coverage": "node ./scripts/audit-crystal-map-coverage.mjs",
+    "audit:crystal-map-gameplay": "node ./scripts/audit-crystal-map-gameplay.mjs",
+    "smoke:crystal-assets": "node ./scripts/smoke-crystal-assets.mjs",
     "smoke:crystal-map-api": "node ./scripts/smoke-crystal-map-api.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
+    "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",
+    "smoke:cache-maintenance": "node ./scripts/smoke-cache-metrics.mjs --exerciseMaintenance true",
+    "smoke:playable-metrics": "node ./scripts/smoke-cache-metrics.mjs --mode playable",
+    "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
+    "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
+    "assets:r2:upload": "node ./scripts/upload-r2-assets.mjs",
+    "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
+    "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
+    "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
-    "runtime:build:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 dev",
-    "runtime:build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 release",
+    "runtime:build:dev": "node ./scripts/build-bevy-runtime.mjs dev",
+    "runtime:build:release": "node ./scripts/build-bevy-runtime.mjs release",
     "dev": "npm run runtime:build:dev && next dev",
     "build": "npm run runtime:build:release && next build",
     "start": "next start"
   },
   "dependencies": {
+    "@mysten/sui": "^2.16.2",
+    "@mysten/wallet-standard": "^0.20.3",
     "next": "16.2.1",
+    "nipplejs": "^1.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
@@ -29,6 +47,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

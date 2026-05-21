@@ -5,6 +5,7 @@ import type {
   DisplayEntity,
   DisplayLogLine,
   DisplayWorld,
+  CreateCharacterDraft,
   EntityKind,
   EquipmentActionRef,
   EquipmentSlot,
@@ -15,19 +16,41 @@ import type {
   SelectCharacterEntry,
 } from "./original-client-types";
 
+export type GatewayReconnectStatus = {
+  mode: "idle" | "scheduled" | "connecting" | "resuming" | "failed";
+  attempt: number;
+  nextAttemptAt: number | null;
+};
+
+export type SceneAssetReadiness = {
+  key: string;
+  ready: boolean;
+  status: "idle" | "loading" | "ready" | "timeout";
+  total: number;
+  loaded: number;
+  failed: number;
+  pending: number;
+  durationMs: number;
+  failedUrls: string[];
+};
+
 export type OriginalClientShellProps = {
   language: Mir2Language;
   screen: ClientScreen;
   runtimePhase: string;
   runtimeMessage: string;
   wsState: string;
+  reconnectStatus: GatewayReconnectStatus;
   world: DisplayWorld;
   player: DisplayEntity | null;
   predictedPlayerPosition: PredictedPlayerMotion | null;
+  getLivePlayerRenderPosition?: () => PredictedPlayerMotion | null;
   selectedEntity: DisplayEntity | null;
   sortedEntities: DisplayEntity[];
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
   viewportTiles: Array<{ x: number; y: number; dx: number; dy: number }>;
+  sceneInteractionReady: boolean;
+  onSceneAssetReadinessChange: (readiness: SceneAssetReadiness) => void;
   logs: DisplayLogLine[];
   accountId: string;
   password: string;
@@ -47,13 +70,16 @@ export type OriginalClientShellProps = {
   onChatMessageChange: (value: string) => void;
   onCreateAccount: () => void;
   onSubmitLogin: () => void;
+  onPasskeyLogin: () => void;
+  onWalletLogin: () => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
   onExitSelect: () => void;
-  onSendChat: () => void;
+  onSendChat: (message: string) => void;
+  onRequestTrade: () => void;
   onRentExpandedStorage: () => void;
   onLogout: () => void;
-  onCreateCharacter: () => void;
+  onCreateCharacter: (draft: CreateCharacterDraft) => void;
   onDeleteCharacter: () => void;
   onUseItem: (item: ItemActionRef) => void;
   onDropItem: (item: ItemActionRef) => void;
@@ -90,6 +116,7 @@ export type OriginalClientShellProps = {
   onViewportTileStepClick: (x: number, y: number) => void;
   onViewportTileStepSecondaryAction: (x: number, y: number) => void;
   onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run") => void;
+  onViewportDirectionIntent: (direction: string, mode: "walk" | "run") => void;
   onPickGroundDrop: (objectId: string) => void;
   onSelectEntity: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;

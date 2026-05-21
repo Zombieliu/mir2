@@ -1,5 +1,8 @@
 "use client";
 
+import type { SyntheticEvent } from "react";
+
+import { ORIGINAL_UI } from "../../lib/original-ui";
 import type { OriginalMapRegion, OriginalMapSpriteFrame } from "../../lib/scene-types";
 import type { DisplayEntity, DisplayWorld } from "./original-client-types";
 import {
@@ -29,38 +32,13 @@ export function GameSceneBackdrop({
   floorSprites: ViewportMapSprite[];
   cameraOffset: ViewportOffset;
 }) {
-  if (floorSprites.length) {
-    return (
-      <div className="game-scene-backdrop">
-        {floorSprites.map((sprite) => (
-          <img
-            key={sprite.key}
-            className="scene-backdrop-sprite"
-            data-map-sprite-key={sprite.key}
-            src={sprite.path}
-            alt=""
-            draggable={false}
-            style={{
-              left: sprite.left + cameraOffset.x,
-              top: sprite.top + cameraOffset.y,
-              width: sprite.width,
-              height: sprite.height,
-            }}
-          />
-        ))}
-      </div>
-    );
-  }
+  const tiles = world.originalMapRegion ? buildSceneBackdropTiles(world, player) : [];
 
-  if (!world.originalMapRegion) {
+  if (!tiles.length && !floorSprites.length) {
     return null;
   }
 
-  const tiles = buildSceneBackdropTiles(world, player);
-
-  if (!tiles.length) {
-    return null;
-  }
+  const renderOffset = floorSprites.length ? cameraOffset : EMPTY_VIEWPORT_OFFSET;
 
   return (
     <div className="game-scene-backdrop">
@@ -70,17 +48,34 @@ export function GameSceneBackdrop({
           className="scene-backdrop-tile"
           data-map-sprite-key={tile.key}
           style={{
-            left: tile.left + cameraOffset.x,
-            top: tile.top + cameraOffset.y,
+            left: tile.left + renderOffset.x,
+            top: tile.top + renderOffset.y,
             backgroundImage: `linear-gradient(${tile.tint}, ${tile.tint}), url("${tile.texture}")`,
+          }}
+        />
+      ))}
+      {floorSprites.map((sprite) => (
+        <img
+          key={sprite.key}
+          className="scene-backdrop-sprite"
+          data-map-sprite-key={sprite.key}
+          data-mir2-original-src={sprite.path}
+          src={sprite.path}
+          alt=""
+          draggable={false}
+          onError={handleSceneAssetImageError}
+          onLoad={handleSceneAssetImageLoad}
+          style={{
+            left: sprite.left + cameraOffset.x,
+            top: sprite.top + cameraOffset.y,
+            width: sprite.width,
+            height: sprite.height,
           }}
         />
       ))}
     </div>
   );
 }
-
-
 
 export function buildViewportMapSprites(
   world: DisplayWorld,
@@ -202,21 +197,38 @@ function appendViewportMapSprite(
   const cellTop = VIEWPORT_TILE_TOP_ORIGIN + (cell.y - player.y) * VIEWPORT_CELL_HEIGHT;
   const crystalOffset = crystalMapFrameOffset(frame);
   const useCrystalOffset = sprite.drawMode === "object" && crystalMapFrameUsesOffset(frame);
+  const left = cellLeft + (useCrystalOffset ? crystalOffset.x : 0);
+  const top =
+    sprite.drawMode === "object"
+      ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height + (useCrystalOffset ? crystalOffset.y : 0)
+      : cellTop;
+
+  if (sprite.drawMode === "object" && !mapSpriteIntersectsViewport(left, top, frame.width, frame.height)) {
+    return;
+  }
 
   target.push({
     key: `${spriteId}:${cell.x}:${cell.y}:${animationFrameIndex % sprite.frames.length}`,
     path: frame.path,
     cellX: cell.x,
     cellY: cell.y,
-    left: cellLeft + (useCrystalOffset ? crystalOffset.x : 0),
-    top:
-      sprite.drawMode === "object"
-        ? cellTop + VIEWPORT_CELL_HEIGHT - frame.height + (useCrystalOffset ? crystalOffset.y : 0)
-        : cellTop,
+    left,
+    top,
     width: frame.width,
     height: frame.height,
     zIndex: viewportDepthForCell(cell.x, cell.y, player, sprite.drawMode === "object" ? 1 : 0),
   });
+}
+
+function mapSpriteIntersectsViewport(left: number, top: number, width: number, height: number) {
+  const marginX = VIEWPORT_CELL_WIDTH * 2;
+  const marginY = VIEWPORT_CELL_HEIGHT * 4;
+  return (
+    left + width >= -marginX &&
+    left <= ORIGINAL_UI.game.sceneWidth + marginX &&
+    top + height >= -marginY &&
+    top <= ORIGINAL_UI.game.sceneHeight + marginY
+  );
 }
 
 function crystalMapFrameUsesOffset(frame: OriginalMapSpriteFrame) {
@@ -338,7 +350,122 @@ export function mapSpriteRenderPath(path: string) {
   return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
 }
 
+export function sceneAssetCandidateUrls(url: string): string[] {
+  const candidates: string[] = [];
+  const add = (candidate: string | null) => {
+    if (candidate && !candidates.includes(candidate)) {
+      candidates.push(candidate);
+    }
+  };
+
+  add(url);
+  add(cacheBustedSceneAssetUrl(url));
+  const remoteUrl = remoteSceneAssetUrl(url);
+  add(remoteUrl);
+  if (remoteUrl) {
+    add(cacheBustedSceneAssetUrl(remoteUrl));
+  }
+
+  return candidates;
+}
+
+export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElement>) {
+  const image = event.currentTarget;
+  const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
+  if (!originalSrc) {
+    image.style.visibility = "hidden";
+    return;
+  }
+
+  image.dataset.mir2OriginalSrc = originalSrc;
+  const candidates = sceneAssetCandidateUrls(originalSrc);
+  const currentIndex =
+    image.dataset.mir2RetryOriginalSrc === originalSrc
+      ? Number.parseInt(image.dataset.mir2RetryIndex ?? "0", 10)
+      : 0;
+  const nextIndex = Number.isFinite(currentIndex) ? currentIndex + 1 : 1;
+  const nextSrc = candidates[nextIndex];
+
+  if (!nextSrc) {
+    image.dataset.mir2LoadFailed = "true";
+    image.style.visibility = "hidden";
+    return;
+  }
+
+  image.dataset.mir2RetryOriginalSrc = originalSrc;
+  image.dataset.mir2RetryIndex = String(nextIndex);
+  image.style.visibility = "";
+  image.src = nextSrc;
+}
+
+export function handleSceneAssetImageLoad(event: SyntheticEvent<HTMLImageElement>) {
+  const image = event.currentTarget;
+  image.style.visibility = "";
+  delete image.dataset.mir2LoadFailed;
+  delete image.dataset.mir2RetryIndex;
+  delete image.dataset.mir2RetryOriginalSrc;
+}
+
 function bichonTorchLightFrame(path: string) {
   const match = path.match(/\/original-map\/WemadeMir2\/Objects\/(27(?:2[3-9]|3[0-2]))\.png$/i);
   return match?.[1] ?? null;
+}
+
+type SceneAssetCacheWindow = Window & {
+  __mir2AssetCache?: {
+    remoteAssetBaseUrl?: string | null;
+  };
+};
+
+function cacheBustedSceneAssetUrl(url: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url, window.location.href);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    parsed.searchParams.set("mir2ImgRetry", "1");
+    return parsed.origin === window.location.origin
+      ? `${parsed.pathname}${parsed.search}${parsed.hash}`
+      : parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function remoteSceneAssetUrl(url: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const remoteAssetBaseUrl = (window as SceneAssetCacheWindow).__mir2AssetCache?.remoteAssetBaseUrl;
+  if (!remoteAssetBaseUrl) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url, window.location.href);
+    const normalizedBase = remoteAssetBaseUrl.replace(/\/+$/, "");
+    if (parsed.href.startsWith(`${normalizedBase}/`)) {
+      return null;
+    }
+    if (!isRemoteBackedSceneAssetPath(parsed.pathname)) {
+      return null;
+    }
+    return `${normalizedBase}/${parsed.pathname.replace(/^\/+/, "")}`;
+  } catch {
+    return null;
+  }
+}
+
+function isRemoteBackedSceneAssetPath(path: string) {
+  return (
+    path.startsWith("/original-ui/") ||
+    path.startsWith("/original-map/") ||
+    path.startsWith("/generated/original-map-blend/") ||
+    path.startsWith("/bevy-runtime/")
+  );
 }

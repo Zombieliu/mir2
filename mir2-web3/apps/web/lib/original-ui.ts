@@ -37,6 +37,8 @@ export const ORIGINAL_UI = {
       deleteCharacter: sprite("/original-ui/Title/346.png", "/original-ui/Title/347.png", "/original-ui/Title/348.png"),
       credits: sprite("/original-ui/Title/349.png", "/original-ui/Title/350.png", "/original-ui/Title/351.png"),
       exit: sprite("/original-ui/Title/352.png", "/original-ui/Title/353.png", "/original-ui/Title/354.png"),
+      createCharacter: sprite("/original-ui/Title/360.png", "/original-ui/Title/361.png", "/original-ui/Title/362.png"),
+      cancel: sprite("/original-ui/Title/329.png", "/original-ui/Title/330.png", "/original-ui/Title/331.png"),
     },
     classCards: {
       warrior: { base: "/original-ui/Title/660.png", active: "/original-ui/Title/665.png" },

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   clientCommandForSocialAction,
   featureTitleForSocialPanel,
   resolveSystemMenuShellText,
+  rankingRequestForSocialTab,
   stage5CommandForSocialAction,
   systemMenuSocialPanelDefinition,
   type SocialDisplayWorld,
@@ -40,15 +41,29 @@ export function SocialSystemPanel({
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedRowIndex, setSelectedRowIndex] = useState(0);
   const [statusLine, setStatusLine] = useState(() => definition.footer);
+  const sendClientCommandRef = useRef(onSendClientCommand);
 
   const activeTab = definition.tabs[activeTabIndex] ?? definition.tabs[0];
   const selectedRow = activeTab.rows[selectedRowIndex] ?? activeTab.rows[0];
 
   useEffect(() => {
+    sendClientCommandRef.current = onSendClientCommand;
+  }, [onSendClientCommand]);
+
+  useEffect(() => {
     setActiveTabIndex(0);
     setSelectedRowIndex(0);
     setStatusLine(definition.footer);
-  }, [definition.footer, panel]);
+  }, [panel]);
+
+  useEffect(() => {
+    setStatusLine(definition.footer);
+  }, [definition.footer]);
+
+  useEffect(() => {
+    if (panel !== "ranking" || !activeTab) return;
+    sendClientCommandRef.current(rankingRequestForSocialTab(activeTab.key));
+  }, [panel, activeTab?.key]);
 
   if (!activeTab || !selectedRow) {
     return null;

@@ -27,6 +27,8 @@ import {
   entityQuestIconLeftOffset,
   entityQuestIconTopOffset,
   entitySpriteHitBounds,
+  handleSceneAssetImageError,
+  handleSceneAssetImageLoad,
   isEntityAttacking,
   isEntityReviving,
   isEntityStruck,
@@ -130,8 +132,11 @@ export function OriginalClientSceneVisualLayers({
             draggable={false}
             data-map-sprite-path={sprite.path}
             data-map-render-path={mapSpriteRenderPath(sprite.path)}
+            data-mir2-original-src={mapSpriteRenderPath(sprite.path)}
             data-map-cell-x={sprite.cellX}
             data-map-cell-y={sprite.cellY}
+            onError={handleSceneAssetImageError}
+            onLoad={handleSceneAssetImageLoad}
             style={{
               left: sprite.left + playerCameraMotionOffset.x,
               top: sprite.top + playerCameraMotionOffset.y,
@@ -210,6 +215,9 @@ export function OriginalClientSceneVisualLayers({
                   src={weapon.path}
                   alt=""
                   draggable={false}
+                  data-mir2-original-src={weapon.path}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
                   style={{
                     left: weapon.x,
                     top: weapon.y,
@@ -224,6 +232,9 @@ export function OriginalClientSceneVisualLayers({
                   src={sprite.body.path}
                   alt=""
                   draggable={false}
+                  data-mir2-original-src={sprite.body.path}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
                   style={{
                     left: sprite.body.x,
                     top: sprite.body.y,
@@ -238,6 +249,9 @@ export function OriginalClientSceneVisualLayers({
                   src={sprite.hair.path}
                   alt=""
                   draggable={false}
+                  data-mir2-original-src={sprite.hair.path}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
                   style={{
                     left: sprite.hair.x,
                     top: sprite.hair.y,
@@ -253,6 +267,9 @@ export function OriginalClientSceneVisualLayers({
                   src={weapon.path}
                   alt=""
                   draggable={false}
+                  data-mir2-original-src={weapon.path}
+                  onError={handleSceneAssetImageError}
+                  onLoad={handleSceneAssetImageLoad}
                   style={{
                     left: weapon.x,
                     top: weapon.y,
@@ -270,6 +287,9 @@ export function OriginalClientSceneVisualLayers({
                       src={questIcon}
                       alt=""
                       draggable={false}
+                      data-mir2-original-src={questIcon}
+                      onError={handleSceneAssetImageError}
+                      onLoad={handleSceneAssetImageLoad}
                       style={{
                         left: entityQuestIconLeftOffset(entity, sprite),
                         top: entityQuestIconTopOffset(sprite),
