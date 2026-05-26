@@ -5,6 +5,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
+import { normalizeCrystalMiniMapFileName } from "./crystal-minimap-transform";
+import { CRYSTAL_MINI_MAP_TRANSFORMS } from "./generated/crystal-minimap-transforms";
 import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
@@ -210,7 +212,7 @@ export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {
   return {
     mapTitle: mapInfo?.map_title ?? null,
     miniMapIndex: miniMapIndexForMapFileName(mapFileName, mapInfo),
-    bigMapIndex: bigMapIndexForMapFileName(mapInfo),
+    bigMapIndex: bigMapIndexForMapFileName(mapFileName, mapInfo),
     sceneView,
     terrainPatches: terrainPatchesForMap(mapFileName, parsedMap, mapInfo),
     decorObjects: [],
@@ -1169,14 +1171,40 @@ function miniMapIndexForMapFileName(mapFileName: string, mapInfo: CrystalMapMani
     return mapInfo.mini_map;
   }
 
+  const transformIndex = miniMapTransformIndexForMapFileName(mapFileName, "mini");
+  if (typeof transformIndex === "number" && transformIndex > 0) {
+    return transformIndex;
+  }
+
   const normalized = normalizeMapFileName(mapFileName);
-  if (normalized === "0") return null;
   const numeric = Number.parseInt(normalized, 10);
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-function bigMapIndexForMapFileName(mapInfo: CrystalMapManifestEntry | null) {
-  return typeof mapInfo?.big_map === "number" && mapInfo.big_map > 0 ? mapInfo.big_map : null;
+function bigMapIndexForMapFileName(mapFileName: string, mapInfo: CrystalMapManifestEntry | null) {
+  if (typeof mapInfo?.big_map === "number" && mapInfo.big_map > 0) {
+    return mapInfo.big_map;
+  }
+
+  const transformIndex = miniMapTransformIndexForMapFileName(mapFileName, "big");
+  return typeof transformIndex === "number" && transformIndex > 0 ? transformIndex : null;
+}
+
+function miniMapTransformIndexForMapFileName(mapFileName: string, kind: "mini" | "big") {
+  const normalized = normalizeCrystalMiniMapFileName(mapFileName);
+  const transform = CRYSTAL_MINI_MAP_TRANSFORMS.find(
+    (entry) => normalizeCrystalMiniMapFileName(entry.mapFileName) === normalized,
+  );
+  if (!transform) return null;
+  return kind === "mini" ? transform.miniMapIndex : transform.bigMapIndex ?? transform.miniMapIndex;
+}
+
+export function crystalMapMiniMapIndexForTests(mapFileName: string) {
+  return miniMapIndexForMapFileName(mapFileName, null);
+}
+
+export function crystalMapBigMapIndexForTests(mapFileName: string) {
+  return bigMapIndexForMapFileName(mapFileName, null);
 }
 
 function exportBoundsForScene(

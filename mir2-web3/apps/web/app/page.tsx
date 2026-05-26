@@ -2984,7 +2984,7 @@ export default function HomePage() {
           ...current,
           mapTitle: blueprint.mapTitle ?? current.mapTitle,
           mapFileName: current.mapFileName ?? normalizedMapFileName,
-          miniMapIndex: blueprint.miniMapIndex,
+          miniMapIndex: blueprint.miniMapIndex ?? current.miniMapIndex,
           bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
           sceneView: blueprint.sceneView,
           terrainPatches: blueprint.terrainPatches,
