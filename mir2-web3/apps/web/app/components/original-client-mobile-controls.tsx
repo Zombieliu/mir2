@@ -52,6 +52,7 @@ type OriginalClientMobileControlsProps = {
   player: DisplayEntity | null;
   selectedEntity: DisplayEntity | null;
   onDirectionIntent: (direction: string, mode: Mir2MobileMoveMode) => void;
+  onDirectionStop: () => void;
   onPrimaryTargetAction: () => void;
   onApproachTarget: () => void;
   onPickGroundDrop: (objectId: string) => void;
@@ -69,6 +70,7 @@ export function OriginalClientMobileControls({
   player,
   selectedEntity,
   onDirectionIntent,
+  onDirectionStop,
   onPrimaryTargetAction,
   onApproachTarget,
   onPickGroundDrop,
@@ -85,6 +87,7 @@ export function OriginalClientMobileControls({
   const runLockedRef = useRef(runLocked);
   const enabledRef = useRef(enabled);
   const onDirectionIntentRef = useRef(onDirectionIntent);
+  const onDirectionStopRef = useRef(onDirectionStop);
 
   const nearestDrop = useMemo(() => nearestGroundDrop(world, player), [world, player]);
   const quickBeltItems = useMemo(() => mobileBeltItems(world.beltItems), [world.beltItems]);
@@ -105,6 +108,10 @@ export function OriginalClientMobileControls({
   useEffect(() => {
     onDirectionIntentRef.current = onDirectionIntent;
   }, [onDirectionIntent]);
+
+  useEffect(() => {
+    onDirectionStopRef.current = onDirectionStop;
+  }, [onDirectionStop]);
 
   const publishDebugState = useCallback((nextIntent: Mir2MobileMoveIntent | null = activeIntentRef.current) => {
     const debugWindow = window as typeof window & { __mir2MobileControls?: MobileControlsDebug };
@@ -172,15 +179,24 @@ export function OriginalClientMobileControls({
     if (!enabled) {
       activeIntentRef.current = null;
       setActiveIntent(null);
+      onDirectionStopRef.current();
       return;
     }
 
     const timer = window.setInterval(() => dispatchLatestIntent(false), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      activeIntentRef.current = null;
+      setActiveIntent(null);
+      onDirectionStopRef.current();
+    };
   }, [dispatchLatestIntent, enabled]);
 
   useEffect(() => {
     if (!enabled || !joystickZoneRef.current) {
+      activeIntentRef.current = null;
+      setActiveIntent(null);
+      onDirectionStopRef.current();
       return;
     }
 
@@ -233,6 +249,7 @@ export function OriginalClientMobileControls({
         const handleEnd = () => {
           activeIntentRef.current = null;
           setActiveIntent(null);
+          onDirectionStopRef.current();
           publishDebugState(null);
         };
 
@@ -249,6 +266,7 @@ export function OriginalClientMobileControls({
       manager?.destroy();
       activeIntentRef.current = null;
       setActiveIntent(null);
+      onDirectionStopRef.current();
     };
   }, [dispatchLatestIntent, enabled, publishDebugState]);
 

@@ -327,6 +327,7 @@ export function OriginalClientShell({
   onViewportTileStepSecondaryAction,
   onViewportDirectionStep,
   onViewportDirectionIntent,
+  onViewportDirectionStop,
   onPickGroundDrop,
   onSelectEntity,
   onActivateEntity,
@@ -623,6 +624,7 @@ export function OriginalClientShell({
 
   useEffect(() => {
     if (screen !== "game") {
+      onViewportDirectionStop();
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
       return;
@@ -662,6 +664,10 @@ export function OriginalClientShell({
     function handleKeyboardMoveUp(event: KeyboardEvent) {
       if (event.key === "Shift") {
         heldKeyboardRunModeRef.current = false;
+        if (heldKeyboardMoveKeysRef.current.size === 0) {
+          onViewportDirectionStop();
+          return;
+        }
         dispatchKeyboardMoveInput("held");
         return;
       }
@@ -671,6 +677,10 @@ export function OriginalClientShell({
         event.preventDefault();
         heldKeyboardMoveKeysRef.current.delete(direction);
         heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+        if (heldKeyboardMoveKeysRef.current.size === 0) {
+          onViewportDirectionStop();
+          return;
+        }
         dispatchKeyboardMoveInput("edge");
       }
     }
@@ -679,6 +689,7 @@ export function OriginalClientShell({
     const stop = () => {
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
+      onViewportDirectionStop();
     };
 
     window.addEventListener("keydown", handleKeyboardMoveDown);
@@ -691,7 +702,7 @@ export function OriginalClientShell({
       window.removeEventListener("keyup", handleKeyboardMoveUp);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionIntent]);
+  }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
 
   useEffect(() => {
     if (screen !== "game") {
@@ -1360,6 +1371,7 @@ export function OriginalClientShell({
 
     const stop = () => {
       heldScenePointerRef.current = null;
+      onViewportDirectionStop();
     };
     window.addEventListener("mouseup", stop);
     window.addEventListener("blur", stop);
@@ -1369,7 +1381,7 @@ export function OriginalClientShell({
       window.removeEventListener("mouseup", stop);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionStep]);
+  }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
 
   return (
     <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
@@ -1635,6 +1647,7 @@ export function OriginalClientShell({
         player={player}
         selectedEntity={selectedEntity}
         onDirectionIntent={onViewportDirectionIntent}
+        onDirectionStop={onViewportDirectionStop}
         onPrimaryTargetAction={onPrimaryTargetAction}
         onApproachTarget={onApproachTarget}
         onPickGroundDrop={onPickGroundDrop}

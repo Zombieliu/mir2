@@ -781,13 +781,20 @@ impl ZoneRuntime {
         session_id: SessionId,
         action: ZoneMovementAction,
     ) -> Vec<ZoneOutbound> {
-        let mut outbounds = if self.player_movement_action_ready(&session_id, action.received_at_ms)
+        let replaces_pending_step =
+            self.incoming_replaces_pending_movement_step(&session_id, &action);
+        let mut outbounds = if !replaces_pending_step
+            && self.player_movement_action_ready(&session_id, action.received_at_ms)
         {
             self.tick_player_movement(&session_id, action.received_at_ms)
-        } else if let Some(consume_at_ms) =
-            self.buffered_movement_consume_at(&session_id, action.received_at_ms)
-        {
-            self.tick_player_movement(&session_id, consume_at_ms)
+        } else if !replaces_pending_step {
+            if let Some(consume_at_ms) =
+                self.buffered_movement_consume_at(&session_id, action.received_at_ms)
+            {
+                self.tick_player_movement(&session_id, consume_at_ms)
+            } else {
+                Vec::new()
+            }
         } else {
             Vec::new()
         };
@@ -800,6 +807,14 @@ impl ZoneRuntime {
             }
             player.last_seen_move_seq = seq;
         }
+        if matches!(
+            action.kind,
+            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
+        ) {
+            player
+                .movement_actions
+                .retain(|pending| matches!(pending.kind, ZoneMovementActionKind::Turn));
+        }
         while player.movement_actions.len() >= 2 {
             player.movement_actions.pop_back();
         }
@@ -810,6 +825,39 @@ impl ZoneRuntime {
             outbounds.extend(self.tick_player_movement(&session_id, consume_at_ms));
         }
         outbounds
+    }
+
+    fn incoming_replaces_pending_movement_step(
+        &self,
+        session_id: &SessionId,
+        action: &ZoneMovementAction,
+    ) -> bool {
+        if !matches!(
+            action.kind,
+            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
+        ) {
+            return false;
+        }
+        let Some(incoming_seq) = action.seq else {
+            return false;
+        };
+        let Some(player) = self.players.get(session_id) else {
+            return false;
+        };
+        let Some(pending) = player.movement_actions.front() else {
+            return false;
+        };
+        let Some(pending_seq) = pending.seq else {
+            return false;
+        };
+        matches!(
+            pending.kind,
+            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
+        ) && incoming_seq > pending_seq
+            && action.received_at_ms
+                <= pending
+                    .received_at_ms
+                    .saturating_add(ZONE_MOVEMENT_INPUT_BUFFER_MS)
     }
 
     fn buffered_movement_consume_at(

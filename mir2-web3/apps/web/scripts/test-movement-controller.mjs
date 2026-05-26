@@ -25,6 +25,8 @@ const {
   canSendMovement,
   createPendingSelfMove,
   effectiveCrystalMovementMode,
+  movementTileMatches,
+  movementTransformMatches,
   reconcileMovementAck,
   reconcileMovementSnapshot,
 } = module.exports;
@@ -123,6 +125,38 @@ const initialState = () => ({
 }
 
 {
+  assert.equal(
+    movementTileMatches({ x: 10, y: 10, direction: "Left" }, { x: 10, y: 10, direction: "Right" }),
+    true,
+  );
+  assert.equal(
+    movementTransformMatches({ x: 10, y: 10, direction: "Left" }, { x: 10, y: 10, direction: "Right" }),
+    false,
+  );
+}
+
+{
+  const pending = createPendingSelfMove({
+    from: { x: 40, y: 40, direction: "Right" },
+    direction: "Right",
+    requestedMode: "walk",
+    now: 5_400,
+    runPrimedUntil: 0,
+  });
+  const result = reconcileMovementAck({
+    state: {
+      ...initialState(),
+      pending,
+      prediction: pending.to,
+    },
+    ack: { x: 41, y: 40, direction: "Left" },
+    packetName: "UserLocation",
+    now: 5_500,
+  });
+  assert.equal(result.outcome, "confirmed", "movement ACK confirms by tile, not render direction");
+}
+
+{
   const pending = createPendingSelfMove({
     from: { x: 30, y: 30, direction: "Down" },
     direction: "Down",
@@ -147,12 +181,38 @@ const initialState = () => ({
 }
 
 {
+  const result = reconcileMovementSnapshot({
+    state: {
+      ...initialState(),
+      pending: null,
+      prediction: { x: 50, y: 50, direction: "Right" },
+      runPrimedUntil: 5_900,
+    },
+    snapshot: { x: 50, y: 50, direction: "Left" },
+    now: 5_800,
+  });
+  assert.equal(result.corrected, true, "snapshot direction mismatch must correct same-tile prediction");
+  assert.equal(result.state.prediction, null);
+  assert.equal(result.state.runPrimedUntil, 0);
+}
+
+{
   const pageSource = readFileSync(pagePath, "utf8");
   assert.equal(
     /send\(\{\s*type:\s*["']moveTo["']/.test(pageSource),
     false,
     "normal UI movement must not send debug moveTo packets",
   );
+  for (const functionName of ["consumeQueuedDirectionStep", "tickMovementPlan"]) {
+    const functionBody = pageSource.match(new RegExp(`function ${functionName}\\\\(\\\\) \\\\{([\\\\s\\\\S]*?)\\\\n  \\\\}`))?.[1] ??
+      pageSource.match(new RegExp(`const ${functionName} = \\\\(\\\\) => \\\\{([\\\\s\\\\S]*?)\\\\n    \\\\};`))?.[1] ??
+      "";
+    assert.equal(
+      /send\(\{\s*type:\s*["'](?:walk|run|turn)["']/.test(functionBody),
+      false,
+      `${functionName} must not send self movement packets`,
+    );
+  }
 }
 
 console.log("movement controller tests passed");

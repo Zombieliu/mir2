@@ -24,17 +24,17 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: |
-            apps/admin-web/package-lock.json
-            apps/web/package-lock.json
+            mir2-web3/apps/admin-web/package-lock.json
+            mir2-web3/apps/web/package-lock.json
 
       - name: Install Admin Web dependencies
-        run: npm ci --prefix apps/admin-web
+        run: npm ci --prefix mir2-web3/apps/admin-web
 
       - name: Install Player Web dependencies
-        run: npm ci --prefix apps/web
+        run: npm ci --prefix mir2-web3/apps/web
 
       - name: Run local Candidate gate
-        run: MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh
+        run: cd mir2-web3 && MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh
