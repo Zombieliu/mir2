@@ -1,0 +1,144 @@
+{
+  "type": "websocket",
+  "wsUrl": "wss://165.154.65.136.sslip.io/ws",
+  "runId": "mpmv9959-76146",
+  "host": "HenrydeMacBook-Pro-2.local",
+  "clients": 1,
+  "pool": 1,
+  "actionsPerClient": 3,
+  "thinkMs": 20,
+  "holdOpenMs": 250,
+  "prePlaySettleMs": 0,
+  "chatEvery": 10,
+  "expectedReady": 1,
+  "expectedCapacityRejected": 0,
+  "expectedKeepAliveAckRatio": null,
+  "expectedKeepAliveP95MaxMs": null,
+  "sendKeepAlive": true,
+  "sendMovement": true,
+  "sendChat": false,
+  "stage5CommandsEnabled": false,
+  "reuseExistingAccounts": false,
+  "accountPrefix": null,
+  "characterIndex": 0,
+  "startedAt": "2026-05-26T16:45:24.237Z",
+  "finishedAt": "2026-05-26T16:45:28.568Z",
+  "durationMs": 4325,
+  "opened": 1,
+  "ready": 1,
+  "loginSuccess": 1,
+  "charactersCreated": 1,
+  "startedGames": 1,
+  "closed": 1,
+  "errors": 0,
+  "capacityRejected": 0,
+  "messages": 623,
+  "commandsSent": 11,
+  "keepAliveCommandsSent": 3,
+  "movementCommandsSent": 3,
+  "chatCommandsSent": 0,
+  "stage5CommandsSent": 0,
+  "keepAliveLatenciesMs": [],
+  "clientFailures": [],
+  "capacityRejections": [],
+  "network": {
+    "clientBytesSent": 720,
+    "clientBytesReceived": 662241,
+    "bootstrapClientBytesSent": 450,
+    "bootstrapClientBytesReceived": 150916,
+    "playClientBytesSent": 270,
+    "playClientBytesReceived": 511325,
+    "playDurationMs": 313,
+    "avgPlayBytesPerSecondPerReadyClient": 1633626.2,
+    "avgPlayBitsPerSecondPerReadyClient": 13069009.6
+  },
+  "rssSamples": [
+    {
+      "atUnixMs": 1779813924280,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813924818,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813925346,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813925897,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813926430,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813926962,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813927495,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813928033,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    },
+    {
+      "atUnixMs": 1779813928568,
+      "pid": 65055,
+      "workingSetBytes": 1081344,
+      "cpuPercent": 0
+    }
+  ],
+  "rss": {
+    "count": 9,
+    "min": 1081344,
+    "max": 1081344,
+    "avg": 1081344,
+    "p95": 1081344
+  },
+  "cpuPercent": {
+    "count": 9,
+    "min": 0,
+    "max": 0,
+    "avg": 0,
+    "p95": 0
+  },
+  "assertions": {
+    "readyMatchesExpectation": true,
+    "capacityRejectedMatchesExpectation": true,
+    "noUnexpectedErrors": true,
+    "noUnexpectedClientFailures": true,
+    "gameplayCommandsSentWhenReady": true,
+    "keepAliveAckRatioMatchesExpectation": true,
+    "keepAliveP95MatchesExpectation": true
+  },
+  "ok": true,
+  "keepAlive": {
+    "count": 0,
+    "min": null,
+    "max": null,
+    "avg": null,
+    "p95": null
+  },
+  "keepAliveAckRatio": 0,
+  "pendingKeepAliveCount": 3
+}

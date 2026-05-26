@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Crystal movement authority roadmap sync: 2026-05-27 deploys the
+> server-authority Web movement convergence to production. UCloud Gateway
+> release `20260527T0020CST-crystal-movement-authority` and Web deployment
+> `dpl_5rwcVtQcNBnZy5XiXvaS4axpPJSD` are live. Production headed Chrome WebGL2
+> evidence
+> `docs/generated/player-qa/movement-jitter/prod-crystal-movement-authority-walk-run-reverse-webgl2-skiptransfer3-20260527.json`
+> passed the current walk-run-reverse repro with UI sends
+> `walk Right -> run Right -> run Right -> walk Left -> run Left -> run Right`,
+> no `moveTo`, send intervals `724/718/722/742/736ms`, ACK latencies
+> `449/57/131/55/38/38ms`, raw WebGL2 atlas `renderedLayers=17`, final player
+> `343,270 Right`, no pending plan or prediction, no visual jumps, no logical
+> rollback, no stale prediction, no command queue warnings, no critical console
+> errors, and no non-favicon 404s. Roadmap next: continue broader manual feel
+> acceptance under long held/chorded keys, but the deployed authority model is
+> now the Crystal-style single-pending server-coordinate path.
+
 > Latest movement input-buffer roadmap sync: 2026-05-26 closes the current
 > "先走、再跑、再换方向" production rollback/drift repro. The fix is split across
 > the true failure boundaries: Player Web preserves discrete key-up/reverse
