@@ -150,7 +150,7 @@ export function refreshEntityMotionSnapshots(
       }
     }
 
-    const maxSmoothTileDistance = isRenderPlayer ? 8 : 3;
+    const maxSmoothTileDistance = isRenderPlayer ? 2 : 3;
     if (tileDistance > maxSmoothTileDistance) {
       nextSnapshots[entity.objectId] = {
         fromX: entity.x,

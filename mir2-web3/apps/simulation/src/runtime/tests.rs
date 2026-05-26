@@ -2,9 +2,9 @@ use super::super::resources::ObjectIdAllocatorResource;
 use super::{
     bomb_spider_template, bug_bat_template, build_crystal_current_map_spawn_table,
     build_spawn_table, can_occupy, combat_delay_ticks, crystal_dynamic_monster_template,
-    crystal_local_time_snapshot, crystal_npc_free_bag_slots, current_location,
-    current_player_object_id, entity_by_object_id, entity_facing, entity_object_id,
-    entity_position, equipment_slot_from_index, equipment_slot_index,
+    crystal_local_time_snapshot, crystal_npc_free_bag_slots, crystal_packet_move_delay_ticks,
+    current_location, current_player_object_id, entity_by_object_id, entity_facing,
+    entity_object_id, entity_position, equipment_slot_from_index, equipment_slot_index,
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
     initial_yimoogi_state, is_static_spawnable_point, offset_point, player_entity,
     point_in_data_range, respawn_tick_for_schedule, runtime_tick, set_crystal_npc_flag,
@@ -2786,19 +2786,16 @@ fn crystal_walk_primes_next_run_like_crystal_step_counter() {
         ServerPacket::UserLocation { location } if location.position == after_walk
     )));
 
-    let run_packets = session.handle_packet(ClientPacket::Run {
+    let mut run_packets = session.handle_packet(ClientPacket::Run {
         direction: MirDirection::Right,
     });
-    assert!(run_packets.is_empty());
 
     let expected = Point {
         x: start.x + 3,
         y: start.y,
     };
-    let mut retry_packets = Vec::new();
     for _ in 0..3 {
-        retry_packets.extend(session.tick());
-        if retry_packets.iter().any(|packet| {
+        if run_packets.iter().any(|packet| {
             matches!(
                 packet,
                 ServerPacket::UserLocation { location } if location.position == expected
@@ -2806,10 +2803,11 @@ fn crystal_walk_primes_next_run_like_crystal_step_counter() {
         }) {
             break;
         }
+        run_packets.extend(session.tick());
     }
 
     assert_eq!(player_position(&session), expected);
-    assert!(retry_packets.iter().any(|packet| matches!(
+    assert!(run_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UserLocation { location } if location.position == expected
     )));
@@ -2872,6 +2870,53 @@ fn run_does_not_skip_blocked_intermediate_tile() {
 
     assert_eq!(player_position(&session), Point { x: 326, y: 266 });
     assert!(matches!(packets[0], ServerPacket::UserLocation { .. }));
+}
+
+#[test]
+fn run_does_not_partially_advance_when_destination_tile_is_blocked() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+    let directions = [
+        MirDirection::Right,
+        MirDirection::DownRight,
+        MirDirection::Down,
+        MirDirection::DownLeft,
+        MirDirection::Left,
+        MirDirection::UpLeft,
+        MirDirection::Up,
+        MirDirection::UpRight,
+    ];
+    let (start, direction) = (250..320)
+        .flat_map(|y| (300..380).map(move |x| Point { x, y }))
+        .find_map(|origin| {
+            directions.iter().copied().find_map(|direction| {
+                let first = offset_point(&origin, direction, 1);
+                let second = offset_point(&origin, direction, 2);
+                (can_occupy(session.app.world(), origin.clone(), Some(player))
+                    && can_occupy(session.app.world(), first, Some(player))
+                    && !can_occupy(session.app.world(), second, Some(player)))
+                .then_some((origin.clone(), direction))
+            })
+        })
+        .expect("test should find clear first tile with blocked run destination");
+    set_player_position(&mut session, Point { x: 330, y: 270 });
+    let _ = session.move_player_by_direction(MirDirection::Right, false);
+    set_player_position(&mut session, start.clone());
+
+    let packets = session.move_player_by_direction(direction, true);
+
+    assert_eq!(player_position(&session), start);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location } if location.position == start
+    )));
+}
+
+#[test]
+fn crystal_walk_and_run_share_six_hundred_ms_move_delay() {
+    assert_eq!(crystal_packet_move_delay_ticks(false), 2);
+    assert_eq!(crystal_packet_move_delay_ticks(true), 2);
 }
 
 #[test]
