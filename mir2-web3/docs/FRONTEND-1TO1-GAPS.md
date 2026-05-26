@@ -13,6 +13,28 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-26 production walk-run-reverse input closeout: the live repro was
+  not just a slow ACK; production could intermittently omit or delay the Run
+  edge when the player walked, pressed run, then reversed direction quickly.
+  Player Web now preserves Shift/run key edges, keeps a one-action reverse
+  backlog instead of overwriting the current queued move, upgrades same-direction
+  queued Walk to Run, and lets the movement confirm tick drain that backlog
+  instead of leaving prediction state behind. The movement capture harness now
+  asserts that a declared keyboard sequence really sends the expected
+  `walk/run` WebSocket frames. Web deployment
+  `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW` is live behind
+  `https://mir2.obelisk.build`, paired with UCloud Gateway release
+  `20260526T1918CST-move-input-buffer`. Verification passed Web typecheck,
+  movement harness syntax, production `/health`, direct Gateway WSS smoke
+  `docs/generated/load/remote-move-input-buffer-wss-smoke-20260526.json`, and
+  headed Chrome WebGL2 evidence
+  `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-webgl2-20260526b.json`
+  plus faster 180ms stress
+  `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-fast-webgl2-20260526a.json`.
+  Both captures sent `walk Right -> run Right -> walk Left`, settled at
+  `332,270 Left`, had no visual/logical rollback, no stale prediction, no
+  residual pending plan/queue, raw WebGL2 `renderedLayers=20`, zero critical
+  console errors, and zero non-favicon 404s.
 - 2026-05-26 production asset-404 and movement-tick closeout: the live console
   spam for `original-map/WemadeMir2/Objects/2652..2661` and
   `Objects23/1418/1420/1423/1425/1429` was caused by incomplete remote asset

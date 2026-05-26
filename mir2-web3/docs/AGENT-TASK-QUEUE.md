@@ -1,5 +1,28 @@
 # Agent Task Queue
 
+> Latest movement input-buffer sync: 2026-05-26 closes the reproduced
+> `walk -> run -> reverse` rollback/drift path on production. Frontend
+> keyboard input now keeps a one-action reverse backlog, preserves Shift/run
+> edges, upgrades same-direction queued Walk to Run, and the movement QA
+> harness now asserts that declared keyboard sequences really emit the matching
+> WebSocket `walk/run` frames. Shared Zone movement now timestamps Walk/Run/Turn
+> intents, consumes a ready pending action before replacing it, keeps a bounded
+> current+follow-up queue, accepts Run if the intent arrived inside the Crystal
+> run grace even when the Zone tick consumes late, and buffers near-ready
+> follow-up input for Crystal cadence instead of dropping it. Gateway release
+> `20260526T1918CST-move-input-buffer` is installed on UCloud; Web deployment
+> `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW` is live. Verification passed Web
+> typecheck, movement harness syntax, Rust fmt, focused shared-Zone run tests
+> (7/7), Gateway runtime-tick and Zone-movement regressions, public health,
+> WSS smoke `docs/generated/load/remote-move-input-buffer-wss-smoke-20260526.json`,
+> and headed/production WebGL2 movement evidence
+> `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-webgl2-20260526b.json`
+> plus the faster 180ms turn stress
+> `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-fast-webgl2-20260526a.json`.
+> Both production captures sent ordered `walk Right -> run Right -> walk Left`,
+> settled at `332,270 Left`, had no rollback/pending queues, rendered raw
+> WebGL2 atlas layers, and had zero critical console errors/non-favicon 404s.
+
 > Latest production movement/asset sync: 2026-05-26 closes the live WebGL2
 > movement-delay repro after separating two issues. Current-scene original-map
 > asset 404s for `Objects/2652..2661` and

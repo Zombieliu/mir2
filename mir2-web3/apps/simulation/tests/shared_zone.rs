@@ -273,6 +273,7 @@ fn player_a_walks_player_b_receives_object_walk() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -300,12 +301,14 @@ fn player_a_runs_player_b_receives_object_run() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     zone.tick(0);
     zone.handle(ZoneCommand::Run {
         session_id: first,
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let outbounds = zone.tick(600);
 
@@ -331,6 +334,7 @@ fn run_from_standstill_starts_as_run() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -359,12 +363,14 @@ fn run_step_expires_after_crystal_celltime_grace() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     zone.tick(0);
     zone.handle(ZoneCommand::Run {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 1_500,
     });
     let outbounds = zone.tick(1_500);
 
@@ -386,6 +392,166 @@ fn run_step_expires_after_crystal_celltime_grace() {
 }
 
 #[test]
+fn run_received_inside_grace_survives_late_zone_tick() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 336, 270)));
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    zone.handle(ZoneCommand::Run {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 600,
+    });
+    let outbounds = zone.tick(1_500);
+
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(has_packet(&outbounds, &first, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 333, y: 270 })
+    )));
+    assert!(
+        has_packet(&outbounds, &second, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRun { movement }
+                if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
+        )),
+        "run input accepted during Crystal grace should not be downgraded by late tick consumption: {outbounds:?}"
+    );
+}
+
+#[test]
+fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 336, 270)));
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+    let run_outbounds = zone.handle(ZoneCommand::Run {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 400,
+    });
+    assert!(
+        has_packet(&run_outbounds, &second, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRun { movement }
+                if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
+        )),
+        "buffered run should be consumed as soon as it arrives near the ready edge: {run_outbounds:?}"
+    );
+
+    let reverse_outbounds = zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Left,
+        seq: 3,
+        now_ms: 700,
+    });
+
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(
+        has_packet(&reverse_outbounds, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 332, y: 270 })
+                    && location.direction == MirDirection::Left
+        )),
+        "follow-up reverse walk should also be acknowledged from the same buffered chain: {reverse_outbounds:?}"
+    );
+
+    let left_outbounds = zone.tick(1_000);
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(
+        !has_packet(&left_outbounds, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { .. }
+        )),
+        "buffered chain should not leave a delayed correction packet behind: {left_outbounds:?}"
+    );
+}
+
+#[test]
+fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 336, 270)));
+
+    zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 0,
+    });
+    zone.tick(0);
+
+    let run_outbounds = zone.handle(ZoneCommand::Run {
+        session_id: first.clone(),
+        direction: MirDirection::Right,
+        seq: 2,
+        now_ms: 400,
+    });
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(
+        has_packet(&run_outbounds, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 333, y: 270 })
+        )),
+        "buffered run should acknowledge immediately instead of waiting for a socket tick: {run_outbounds:?}"
+    );
+    assert!(has_packet(&run_outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRun { movement }
+            if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
+    )));
+
+    let reverse_outbounds = zone.handle(ZoneCommand::Walk {
+        session_id: first.clone(),
+        direction: MirDirection::Left,
+        seq: 3,
+        now_ms: 700,
+    });
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(
+        has_packet(&reverse_outbounds, &first, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 332, y: 270 })
+                    && location.direction == MirDirection::Left
+        )),
+        "buffered reverse walk should acknowledge immediately after a run: {reverse_outbounds:?}"
+    );
+    assert!(has_packet(&reverse_outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 101
+                && movement.position == (Point { x: 332, y: 270 })
+                && movement.direction == MirDirection::Left
+    )));
+}
+
+#[test]
 fn continuous_run_extends_run_grace_after_successful_run() {
     let mut zone = zone();
     let first = session("first");
@@ -397,6 +563,7 @@ fn continuous_run_extends_run_grace_after_successful_run() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let first_outbounds = zone.tick(0);
     assert!(has_packet(&first_outbounds, &first, |packet| matches!(
@@ -409,6 +576,7 @@ fn continuous_run_extends_run_grace_after_successful_run() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let second_outbounds = zone.tick(600);
     assert!(has_packet(&second_outbounds, &second, |packet| matches!(
@@ -421,6 +589,7 @@ fn continuous_run_extends_run_grace_after_successful_run() {
         session_id: first,
         direction: MirDirection::Right,
         seq: 3,
+        now_ms: 0,
     });
     let third_outbounds = zone.tick(1_200);
 
@@ -445,6 +614,7 @@ fn player_a_turns_player_b_receives_object_turn() {
     zone.handle(ZoneCommand::Turn {
         session_id: first,
         direction: MirDirection::Left,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -1727,6 +1897,7 @@ fn retained_zone_object_health_updates_when_entering_object_aoi() {
         session_id: second.clone(),
         direction: MirDirection::Left,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -2437,6 +2608,7 @@ fn player_movement_diffs_retained_zone_object_visibility() {
         session_id: second.clone(),
         direction: MirDirection::Left,
         seq: 1,
+        now_ms: 0,
     });
     let enter_outbounds = zone.tick(0);
     assert!(has_packet(&enter_outbounds, &second, |packet| matches!(
@@ -2448,6 +2620,7 @@ fn player_movement_diffs_retained_zone_object_visibility() {
         session_id: second.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let leave_outbounds = zone.tick(600);
     assert!(has_packet(&leave_outbounds, &second, |packet| matches!(
@@ -2891,6 +3064,7 @@ fn two_players_cannot_occupy_same_tile() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -2923,6 +3097,7 @@ fn retained_zone_npc_blocks_player_walk() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -2964,6 +3139,7 @@ fn retained_dead_monster_does_not_block_player_walk() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -2998,6 +3174,7 @@ fn retained_object_remove_clears_blocking_occupancy() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -6820,6 +6997,7 @@ fn zone_native_monster_paralysis_blocks_movement_until_status_expires() {
         session_id: first.clone(),
         direction: MirDirection::Left,
         seq: 1,
+        now_ms: 0,
     });
     let blocked = zone.tick(700);
     assert_eq!(zone.player_position(&first), Some(Point { x: 330, y: 270 }));
@@ -6851,6 +7029,7 @@ fn zone_native_monster_paralysis_blocks_movement_until_status_expires() {
         session_id: first.clone(),
         direction: MirDirection::Left,
         seq: 2,
+        now_ms: 0,
     });
     let moved = zone.tick(5_800);
     assert_eq!(zone.player_position(&first), Some(Point { x: 329, y: 270 }));
@@ -6891,6 +7070,7 @@ fn zone_native_monster_green_poison_does_not_block_movement() {
         session_id: first.clone(),
         direction: MirDirection::Left,
         seq: 1,
+        now_ms: 0,
     });
     let moved = zone.tick(700);
     assert_eq!(zone.player_position(&first), Some(Point { x: 329, y: 270 }));
@@ -7167,12 +7347,14 @@ fn run_checks_intermediate_tile() {
         session_id: first.clone(),
         direction: MirDirection::Up,
         seq: 1,
+        now_ms: 0,
     });
     zone.tick(0);
     zone.handle(ZoneCommand::Run {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let outbounds = zone.tick(600);
 
@@ -7198,11 +7380,13 @@ fn high_frequency_input_keeps_latest_crystal_movement_intent() {
         session_id: first.clone(),
         direction: MirDirection::Up,
         seq: 1,
+        now_ms: 0,
     });
     zone.handle(ZoneCommand::Walk {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
     let replay = zone.tick(600);
@@ -7226,11 +7410,13 @@ fn stale_movement_intent_is_not_replayed() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     zone.handle(ZoneCommand::Walk {
         session_id: first.clone(),
         direction: MirDirection::Left,
         seq: 1,
+        now_ms: 0,
     });
     zone.tick(0);
     let replay = zone.tick(600);
@@ -7249,6 +7435,7 @@ fn zone_movement_emits_save_transform() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
 
@@ -7650,6 +7837,7 @@ fn zone_movement_writes_back_authoritative_transform_to_session() {
         session_id: session_id.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let outbounds = zone.tick(0);
     let (position, direction) = outbounds

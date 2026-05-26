@@ -5,7 +5,39 @@ small internal test server.
 
 ## Current UCloud Gateway Release
 
-Latest verified movement-tick release:
+Latest verified movement input-buffer release:
+
+```text
+tag: 20260526T1918CST-move-input-buffer
+installed: /opt/mir2/gateway/releases/20260526T1918CST-move-input-buffer
+current: /opt/mir2/gateway/current -> /opt/mir2/gateway/releases/20260526T1918CST-move-input-buffer
+archive: /home/ubuntu/mir2-web3-20260526T1918CST-move-input-buffer/dist/gateway-releases/mir2-gateway-linux-x64-20260526T1918CST-move-input-buffer.tar.gz
+archive sha256: 197ea1ed7f647be0f228aa1c25777eea90d47c7ebf19ba4811033b6376dcb179
+binary sha256: c2abc267222577de7716e56d7b99f1171da22e77224286c93565011043f93df4
+```
+
+Verification performed on 2026-05-26:
+
+```text
+http://127.0.0.1:7110/health: OK
+https://165.154.65.136.sslip.io/health: OK
+https://mir2.obelisk.build/health: OK
+WSS smoke: docs/generated/load/remote-move-input-buffer-wss-smoke-20260526.json
+headed WebGL2 movement: docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-webgl2-20260526b.json
+fast WebGL2 movement: docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-fast-webgl2-20260526a.json
+walk/run/reverse ACK latencies: 251ms, 51ms, 50ms
+180ms stress ACK latencies: 73ms, 54ms, 55ms
+non-favicon 404s: 0
+critical console errors: 0
+```
+
+This release preserves timestamped movement intents through the shared Zone,
+buffers near-ready follow-up input for Crystal movement cadence, and keeps a
+timely Run authoritative even when the Zone tick consumes it late. It also gives
+active movement packets a small runtime-tick input grace so personal-session
+background work does not delay movement ACKs.
+
+Previous verified movement-tick release:
 
 ```text
 tag: 20260526T1435CST-move-tick-grace0

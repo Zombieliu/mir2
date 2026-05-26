@@ -1,5 +1,25 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest movement input-buffer roadmap sync: 2026-05-26 closes the current
+> "先走、再跑、再换方向" production rollback/drift repro. The fix is split across
+> the true failure boundaries: Player Web preserves discrete key-up/reverse
+> edges and one queued reverse backlog, the movement harness now fails if an
+> expected keyboard sequence does not actually send its `walk/run` frames,
+> Gateway gives movement packets a small input-grace window over background
+> runtime ticks, and shared Zone consumes ready pending movement before
+> accepting follow-up intent while preserving late-consumed Run commands whose
+> packet arrived during Crystal run grace. UCloud Gateway release
+> `20260526T1918CST-move-input-buffer` and Web deployment
+> `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW` are live. Production WebGL2 evidence
+> `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-webgl2-20260526b.json`
+> passed with ordered ACK latencies `251/51/50ms`; the faster 180ms stress
+> `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-fast-webgl2-20260526a.json`
+> passed at `73/54/55ms`. Both settled cleanly at `332,270 Left`, with no
+> rollback, no pending movement queue, raw WebGL2 atlas rendering, no critical
+> console errors, and no non-favicon 404s. Roadmap next: continue broader
+> Crystal movement feel sampling under held/chorded keys and the remaining
+> Shared MMO authority gaps.
+
 > Latest production movement/asset roadmap sync: 2026-05-26 closes the current
 > live "走路发送指令处理有延迟" repro. The resource console storm was not a
 > renderer bug: the active immutable remote asset prefix missed several

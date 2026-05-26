@@ -164,15 +164,18 @@ pub enum ZoneCommand {
         session_id: SessionId,
         direction: MirDirection,
         seq: u64,
+        now_ms: u64,
     },
     Run {
         session_id: SessionId,
         direction: MirDirection,
         seq: u64,
+        now_ms: u64,
     },
     Turn {
         session_id: SessionId,
         direction: MirDirection,
+        now_ms: u64,
     },
     UpdateChatProfile {
         session_id: SessionId,

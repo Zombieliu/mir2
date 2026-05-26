@@ -47,10 +47,7 @@ const keyboardKey = args.key ?? "w";
 const keyboardRun = booleanArg(args.run ?? args.shift, false);
 const mobileJoystickDirection = args.mobileDirection ?? args.direction ?? "Right";
 const mobileJoystickMode = args.mobileMode ?? args.mode ?? "run";
-const keyboardSequence = String(args.keys ?? args.sequence ?? "d,a,d,a")
-  .split(",")
-  .map((entry) => entry.trim())
-  .filter(Boolean);
+const keyboardSequence = parseKeyboardMoveSequence(args.keys ?? args.sequence ?? "d,a,d,a", keyboardRun);
 const keyIntervalMs = numberArg(args.keyIntervalMs ?? args.keyInterval ?? args.clickIntervalMs, 90);
 const preHoldMs = numberArg(args.preHoldMs, 900);
 const clickCount = numberArg(args.clickCount, 8);
@@ -335,8 +332,10 @@ async function main() {
       samples.push(...(await samplePromise));
     } else if (interaction === "keyboardSequence") {
       const step = {
-        label: `keyboard-sequence-${keyboardRun ? "run" : "walk"}-${keyboardSequence.join("-")}`,
-        mode: keyboardRun ? "run" : "walk",
+        label: `keyboard-sequence-${keyboardSequence
+          .map((entry) => `${entry.run ? "run" : "walk"}-${entry.key}`)
+          .join("-")}`,
+        mode: keyboardSequence.some((entry) => entry.run) ? "mixed" : keyboardRun ? "run" : "walk",
         x: start.player.x,
         y: start.player.y,
         durationMs: Math.max(holdMs + 900, clickCount * keyIntervalMs + 2200),
@@ -664,6 +663,17 @@ async function main() {
       client.movementWebSocketFramesReceived,
       movementAckLatencyMs,
     );
+    const expectedKeyboardSequenceMovementFrames =
+      interaction === "keyboardSequence"
+        ? expectedMovementFramesForKeyboardSequence(keyboardSequence, clickCount)
+        : [];
+    const keyboardSequenceMovementFrameWarnings =
+      interaction === "keyboardSequence"
+        ? detectMissingKeyboardSequenceMovementFrames(
+            client.movementWebSocketFramesSent,
+            expectedKeyboardSequenceMovementFrames,
+          )
+        : [];
     const criticalConsoleErrors = client.consoleErrors.filter(isCriticalConsoleError);
     const assertions = buildAssertions({
       interaction,
@@ -678,6 +688,7 @@ async function main() {
       stalePredictionWarnings,
       commandQueueWarnings,
       movementAckLatencyWarnings,
+      keyboardSequenceMovementFrameWarnings,
       cameraOffsetStairStepWarnings,
       sceneBlackoutWarnings,
       pendingPlanAtEnd,
@@ -725,6 +736,8 @@ async function main() {
       stalePredictionWarnings,
       commandQueueWarnings,
       movementAckLatencyWarnings,
+      expectedKeyboardSequenceMovementFrames,
+      keyboardSequenceMovementFrameWarnings,
       cameraOffsetStairStepWarnings,
       sceneBlackoutWarnings,
       feelMetrics: {
@@ -812,6 +825,7 @@ async function holdKeyboardMoveKey(client, key, durationMs, run) {
           type: "keydown",
           key: event.key,
           code: event.code,
+          at: Date.now(),
           target: event.target?.tagName ?? null,
           defaultPrevented: event.defaultPrevented,
         });
@@ -821,6 +835,7 @@ async function holdKeyboardMoveKey(client, key, durationMs, run) {
           type: "keyup",
           key: event.key,
           code: event.code,
+          at: Date.now(),
           target: event.target?.tagName ?? null,
           defaultPrevented: event.defaultPrevented,
         });
@@ -874,9 +889,14 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
   if (!keys.length) {
     throw new Error("keyboardSequence requires at least one key.");
   }
-  const descriptors = keys.map((key) => keyboardDescriptor(key));
+  const sequence = keys.map((entry) =>
+    typeof entry === "string" ? { key: entry, run } : { key: entry.key, run: Boolean(entry.run) },
+  );
+  const descriptors = sequence.map((entry) => ({
+    ...keyboardDescriptor(entry.key),
+    run: entry.run,
+  }));
   const shiftDescriptor = { key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 };
-  const modifiers = run ? 8 : 0;
   const activeBefore = await client.evaluate(`
     (() => {
       window.__mir2KeyboardProbe = [];
@@ -885,6 +905,7 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
           type: "keydown",
           key: event.key,
           code: event.code,
+          at: Date.now(),
           target: event.target?.tagName ?? null,
           defaultPrevented: event.defaultPrevented,
         });
@@ -894,6 +915,7 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
           type: "keyup",
           key: event.key,
           code: event.code,
+          at: Date.now(),
           target: event.target?.tagName ?? null,
           defaultPrevented: event.defaultPrevented,
         });
@@ -907,19 +929,20 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
       };
     })()
   `);
-  if (run) {
-    await client.send("Input.dispatchKeyEvent", {
-      ...shiftDescriptor,
-      type: "keyDown",
-      modifiers,
-    });
-  }
 
   const presses = [];
   const downMs = Math.max(24, Math.min(intervalMs - 8, Math.floor(intervalMs * 0.65)));
   const upMs = Math.max(0, intervalMs - downMs);
   for (let index = 0; index < count; index += 1) {
     const descriptor = descriptors[index % descriptors.length];
+    const modifiers = descriptor.run ? 8 : 0;
+    if (descriptor.run) {
+      await client.send("Input.dispatchKeyEvent", {
+        ...shiftDescriptor,
+        type: "keyDown",
+        modifiers,
+      });
+    }
     await client.send("Input.dispatchKeyEvent", {
       ...descriptor,
       type: "keyDown",
@@ -931,19 +954,19 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
       type: "keyUp",
       modifiers,
     });
-    presses.push({ key: descriptor.key, code: descriptor.code, index });
+    if (descriptor.run) {
+      await client.send("Input.dispatchKeyEvent", {
+        ...shiftDescriptor,
+        type: "keyUp",
+        modifiers: 0,
+      });
+    }
+    presses.push({ key: descriptor.key, code: descriptor.code, run: descriptor.run, index });
     if (upMs > 0) {
       await delay(upMs);
     }
   }
 
-  if (run) {
-    await client.send("Input.dispatchKeyEvent", {
-      ...shiftDescriptor,
-      type: "keyUp",
-      modifiers: 0,
-    });
-  }
   const activeAfter = await client.evaluate(`
     (() => ({
       activeTag: document.activeElement?.tagName ?? null,
@@ -955,9 +978,10 @@ async function dispatchKeyboardMoveSequence(client, keys, { count, intervalMs, r
   return {
     type: "keyboard-sequence",
     keys: descriptors.map((descriptor) => descriptor.key),
+    sequence: descriptors.map((descriptor) => ({ key: descriptor.key, run: descriptor.run })),
     count,
     intervalMs,
-    run,
+    run: descriptors.every((descriptor) => descriptor.run),
     presses,
     activeBefore,
     activeAfter,
@@ -1013,6 +1037,25 @@ async function dispatchMobileJoystickSequence(client, { direction, mode, count, 
     activeBefore,
     activeAfter,
   };
+}
+
+function parseKeyboardMoveSequence(raw, defaultRun) {
+  return String(raw)
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const [maybeMode, maybeKey] = entry.includes(":") ? entry.split(":", 2) : [null, entry];
+      if (!maybeMode) {
+        const key = maybeKey.startsWith("+") ? maybeKey.slice(1) : maybeKey;
+        return { key, run: maybeKey.startsWith("+") ? true : defaultRun };
+      }
+      const mode = maybeMode.trim().toLowerCase();
+      if (!["walk", "run"].includes(mode)) {
+        throw new Error(`Unsupported keyboard sequence mode: ${maybeMode}`);
+      }
+      return { key: maybeKey.trim(), run: mode === "run" };
+    });
 }
 
 function keyboardDescriptor(key) {
@@ -1688,6 +1731,72 @@ function parseFramePayload(frame) {
   }
 }
 
+function expectedMovementFramesForKeyboardSequence(sequence, count) {
+  const expected = [];
+  for (let index = 0; index < count; index += 1) {
+    const entry = sequence[index % sequence.length];
+    expected.push({
+      type: entry.run ? "run" : "walk",
+      direction: keyboardKeyToMirDirection(entry.key),
+      index,
+    });
+  }
+  return expected;
+}
+
+function detectMissingKeyboardSequenceMovementFrames(sentFrames, expectedFrames) {
+  if (!expectedFrames.length) {
+    return [];
+  }
+  const actual = sentFrames
+    .map(parseFramePayload)
+    .filter((payload) => payload?.type === "walk" || payload?.type === "run")
+    .map((payload) => ({ type: payload.type, direction: payload.direction ?? null }));
+  let cursor = 0;
+  const matched = [];
+  for (const expected of expectedFrames) {
+    let foundAt = -1;
+    for (let index = cursor; index < actual.length; index += 1) {
+      if (actual[index].type === expected.type && actual[index].direction === expected.direction) {
+        foundAt = index;
+        break;
+      }
+    }
+    if (foundAt === -1) {
+      return [
+        {
+          expected: expectedFrames,
+          actual,
+          missing: expected,
+          matched,
+        },
+      ];
+    }
+    matched.push({ ...expected, actualIndex: foundAt });
+    cursor = foundAt + 1;
+  }
+  return [];
+}
+
+function keyboardKeyToMirDirection(key) {
+  const normalized = String(key).toLowerCase();
+  const directions = {
+    w: "Up",
+    arrowup: "Up",
+    d: "Right",
+    arrowright: "Right",
+    s: "Down",
+    arrowdown: "Down",
+    a: "Left",
+    arrowleft: "Left",
+  };
+  const direction = directions[normalized];
+  if (!direction) {
+    throw new Error(`Unsupported keyboard movement key: ${key}`);
+  }
+  return direction;
+}
+
 function buildAssertions({
   interaction,
   strictMovementChecks,
@@ -1701,6 +1810,7 @@ function buildAssertions({
   stalePredictionWarnings,
   commandQueueWarnings,
   movementAckLatencyWarnings,
+  keyboardSequenceMovementFrameWarnings,
   cameraOffsetStairStepWarnings,
   sceneBlackoutWarnings,
   pendingPlanAtEnd,
@@ -1752,6 +1862,16 @@ function buildAssertions({
       maxLatencyMs: movementAckLatencyMs,
       strict: strictMovementChecks,
       warnings: movementAckLatencyWarnings,
+    },
+    {
+      name: "keyboardSequenceMovementFramesSent",
+      pass:
+        interaction !== "keyboardSequence" ||
+        !strictMovementChecks ||
+        keyboardSequenceMovementFrameWarnings.length === 0,
+      count: keyboardSequenceMovementFrameWarnings.length,
+      strict: strictMovementChecks,
+      warnings: keyboardSequenceMovementFrameWarnings,
     },
     {
       name: "cameraOffsetMovesContinuously",

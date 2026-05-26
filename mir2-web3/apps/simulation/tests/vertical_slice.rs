@@ -1786,6 +1786,7 @@ fn shared_multiplayer_presence_movement_chat_and_drop_ownership_are_stable() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 1,
+        now_ms: 0,
     });
     let walk = zone.tick(0);
     assert!(packets_for(&walk, &first)
@@ -1803,6 +1804,7 @@ fn shared_multiplayer_presence_movement_chat_and_drop_ownership_are_stable() {
         session_id: first.clone(),
         direction: MirDirection::Right,
         seq: 2,
+        now_ms: 0,
     });
     let run = zone.tick(600);
     assert!(packets_for(&run, &second).iter().any(|packet| {
@@ -1816,6 +1818,7 @@ fn shared_multiplayer_presence_movement_chat_and_drop_ownership_are_stable() {
     zone.handle(ZoneCommand::Turn {
         session_id: first.clone(),
         direction: MirDirection::Left,
+        now_ms: 0,
     });
     let turn = zone.tick(1_200);
     assert!(packets_for(&turn, &second).iter().any(|packet| {

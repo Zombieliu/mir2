@@ -4690,6 +4690,7 @@ impl SharedInProcessZoneSessionRuntime {
                             session_id: session_id.clone(),
                             direction: *direction,
                             seq: self.zone_move_seq,
+                            now_ms,
                         },
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);
@@ -4705,6 +4706,7 @@ impl SharedInProcessZoneSessionRuntime {
                             session_id: session_id.clone(),
                             direction: *direction,
                             seq: self.zone_move_seq,
+                            now_ms,
                         },
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);
@@ -4718,6 +4720,7 @@ impl SharedInProcessZoneSessionRuntime {
                         ZoneCommand::Turn {
                             session_id: session_id.clone(),
                             direction: *direction,
+                            now_ms,
                         },
                         ZoneCommand::TickPlayerMovement { session_id, now_ms },
                     ]);

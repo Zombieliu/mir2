@@ -708,7 +708,8 @@ const MOVEMENT_PREDICTED_CORRECTION_HOLD_MS = CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 2;
 const MOVEMENT_ACTION_PREDICTION_BLOCK_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const PACKET_RUNTIME_SNAPSHOT_TOMBSTONE_MS = 10_000;
-const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS = 360;
+const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS =
+  MOVEMENT_PENDING_ACTION_RECOVERY_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
 const MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES = MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
 const MOVEMENT_DIRECTION_PENDING_MAX = 1;
@@ -1065,6 +1066,7 @@ export default function HomePage() {
   const movementInputBlockedUntilRef = useRef(0);
   const crystalRunPrimedUntilRef = useRef(0);
   const queuedDirectionStepRef = useRef<DirectionStepRequest | null>(null);
+  const queuedDirectionStepBacklogRef = useRef<DirectionStepRequest[]>([]);
   const directionStepPendingRef = useRef<DirectionStepPending | null>(null);
   const directionStepPendingQueueRef = useRef<DirectionStepPending[]>([]);
   const crystalSelfActionFeedRef = useRef<CrystalSelfActionFeedEntry[]>([]);
@@ -3414,7 +3416,8 @@ export default function HomePage() {
       crystalSelfActionFeedRef.current.length > 0 ||
       directionStepPendingQueueRef.current.length > 0 ||
       Boolean(directionStepPendingRef.current) ||
-      Boolean(queuedDirectionStepRef.current)
+      Boolean(queuedDirectionStepRef.current) ||
+      queuedDirectionStepBacklogRef.current.length > 0
     );
   }
 
@@ -4603,7 +4606,28 @@ export default function HomePage() {
       : sameQueuedDirection
         ? currentRepeat
         : 1;
-    queuedDirectionStepRef.current = { direction, mode, requestedAt: now, repeatCount };
+    const nextQueued = { direction, mode, requestedAt: now, repeatCount };
+    if (
+      current &&
+      current.direction &&
+      current.x === undefined &&
+      current.y === undefined &&
+      now - current.requestedAt <= queuedDirectionStepMaxAgeMs(current)
+    ) {
+      if (current.direction === direction) {
+        queuedDirectionStepRef.current = {
+          ...current,
+          mode: current.mode === "run" || mode === "run" ? "run" : "walk",
+          requestedAt: now,
+          repeatCount,
+        };
+      } else {
+        queuedDirectionStepBacklogRef.current = [nextQueued];
+        scheduleMovementConfirmTick();
+      }
+    } else {
+      queuedDirectionStepRef.current = nextQueued;
+    }
     consumeQueuedDirectionStep();
   }
 
@@ -4613,11 +4637,19 @@ export default function HomePage() {
     const now = Date.now();
     pruneLocallySettledDirectionStepPending(now);
     if (now - queued.requestedAt > queuedDirectionStepMaxAgeMs(queued)) {
-      queuedDirectionStepRef.current = null;
+      if (!promoteQueuedDirectionStepBacklog(now)) {
+        queuedDirectionStepRef.current = null;
+      }
       return false;
     }
-    if (now < movementInputBlockedUntilRef.current) return false;
-    if (now < directionStepNextAtRef.current) return false;
+    if (now < movementInputBlockedUntilRef.current) {
+      scheduleMovementConfirmTick();
+      return false;
+    }
+    if (now < directionStepNextAtRef.current) {
+      scheduleMovementConfirmTick();
+      return false;
+    }
 
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? self;
@@ -4665,7 +4697,8 @@ export default function HomePage() {
       queued.direction &&
       hasOpposingOutstandingSelfMovement(serverSelf, queued.direction, now)
     ) {
-      queuedDirectionStepRef.current = null;
+      // Crystal keeps the next direction intent while the current self action settles.
+      queuedDirectionStepRef.current = queued;
       scheduleMovementConfirmTick();
       return false;
     }
@@ -4734,7 +4767,18 @@ export default function HomePage() {
     const direction = nextAction.direction;
     const nextPoint = nextAction.point;
     const nextLead = Math.max(Math.abs(nextPoint.x - serverSelf.x), Math.abs(nextPoint.y - serverSelf.y));
-    if (nextLead > MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES) {
+    const chainedRunLeadLimit =
+      nextAction.mode === "run" &&
+      queued.direction &&
+      directionStepPendingQueueRef.current.some(
+        (pending) =>
+          pending.mode === "walk" &&
+          pending.direction === queued.direction &&
+          directionStepReachedOrPassed(pending, actionSelf.x, actionSelf.y),
+      )
+        ? MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES + 1
+        : MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
+    if (nextLead > chainedRunLeadLimit) {
       queuedDirectionStepRef.current = queued;
       return false;
     }
@@ -4791,8 +4835,22 @@ export default function HomePage() {
     if (repeatAfterSend) {
       queuedDirectionStepRef.current = repeatAfterSend;
       scheduleMovementConfirmTick();
+    } else if (promoteQueuedDirectionStepBacklog(now)) {
+      scheduleMovementConfirmTick();
     }
     return true;
+  }
+
+  function promoteQueuedDirectionStepBacklog(now = Date.now()) {
+    while (queuedDirectionStepBacklogRef.current.length > 0) {
+      const next = queuedDirectionStepBacklogRef.current.shift() ?? null;
+      if (!next) continue;
+      if (now - next.requestedAt <= queuedDirectionStepMaxAgeMs(next)) {
+        queuedDirectionStepRef.current = next;
+        return true;
+      }
+    }
+    return false;
   }
 
   function queuedDirectionStepMaxAgeMs(queued: DirectionStepRequest) {
