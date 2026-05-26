@@ -29,6 +29,7 @@ const DEFAULT_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const CELL_WIDTH = 48;
 const CELL_HEIGHT = 32;
+const args = parseArgs(process.argv.slice(2));
 
 main().catch((error) => {
   console.error(error);
@@ -36,7 +37,12 @@ main().catch((error) => {
 });
 
 async function main() {
-  const clientRoot = process.argv[2] ?? DEFAULT_CLIENT_ROOT;
+  const clientRoot = args.clientRoot ?? args._[0] ?? DEFAULT_CLIENT_ROOT;
+  if (args.frames.length > 0) {
+    await exportExplicitFrames(clientRoot, args.frames);
+    return;
+  }
+
   const starterScene = JSON.parse(await readFile(STARTER_SCENE_PATH, "utf8"));
   const mapFileName = String(starterScene.map?.file_name ?? "0");
   const mapPath = path.join(clientRoot, "Map", `${mapFileName}.map`);
@@ -174,6 +180,49 @@ async function main() {
       offsetY: frame.y,
     };
   }
+}
+
+async function exportExplicitFrames(clientRoot, specs) {
+  const dataDir = path.join(clientRoot, "Data");
+  const grouped = new Map();
+  for (const spec of specs) {
+    const parsed = parseFrameSpec(spec);
+    if (!parsed) {
+      throw new Error(`Invalid frame spec: ${spec}. Expected Library/Key:1,2,3`);
+    }
+    const frames = grouped.get(parsed.libraryKey) ?? new Set();
+    for (const frame of parsed.frames) frames.add(frame);
+    grouped.set(parsed.libraryKey, frames);
+  }
+
+  const exported = [];
+  for (const [libraryKey, frames] of grouped) {
+    const libraryPath = path.join(dataDir, "Map", ...libraryKey.split("/")) + ".Lib";
+    const library = parseLibrary(libraryPath);
+    for (const frameIndex of [...frames].sort((a, b) => a - b)) {
+      const frame = library.frames[frameIndex];
+      if (!frame || frame.width <= 0 || frame.height <= 0) {
+        throw new Error(`Missing or empty frame ${libraryKey}:${frameIndex}`);
+      }
+      const normalizedKey = normalizeLibraryName(libraryKey);
+      const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
+      const pngPath = path.join(exportDir, `${frameIndex}.png`);
+      const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+      await mkdir(exportDir, { recursive: true });
+      await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
+      exported.push({
+        libraryKey: normalizedKey,
+        frameIndex,
+        path: `/original-map/${normalizedKey}/${frameIndex}.png`,
+        width: frame.width,
+        height: frame.height,
+        offsetX: frame.x,
+        offsetY: frame.y,
+      });
+    }
+  }
+
+  console.log(JSON.stringify({ ok: true, clientRoot, exported }, null, 2));
 }
 
 function exportBoundsForScene(sceneView) {
@@ -354,6 +403,53 @@ function normalizeLibraryName(libraryName) {
     .split("/")
     .filter(Boolean)
     .join("/");
+}
+
+function parseFrameSpec(spec) {
+  const [libraryKey, rawFrames] = String(spec).split(":");
+  if (!libraryKey || !rawFrames) return null;
+  const frames = rawFrames
+    .split(",")
+    .map((value) => Number.parseInt(value.trim(), 10))
+    .filter((value) => Number.isInteger(value) && value >= 0);
+  if (frames.length === 0) return null;
+  return { libraryKey: normalizeLibraryName(libraryKey), frames };
+}
+
+function parseArgs(values) {
+  const parsed = { _: [], frames: [] };
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+    if (value === "--clientRoot") {
+      parsed.clientRoot = requireValue(values, index, value);
+      index += 1;
+      continue;
+    }
+    if (value === "--frame") {
+      parsed.frames.push(requireValue(values, index, value));
+      index += 1;
+      continue;
+    }
+    if (value === "--frames") {
+      parsed.frames.push(...requireValue(values, index, value).split(";").filter(Boolean));
+      index += 1;
+      continue;
+    }
+    if (!value.startsWith("--")) {
+      parsed._.push(value);
+      continue;
+    }
+    throw new Error(`Unknown argument: ${value}`);
+  }
+  return parsed;
+}
+
+function requireValue(values, index, flag) {
+  const next = values[index + 1];
+  if (!next || next.startsWith("--")) {
+    throw new Error(`${flag} requires a value`);
+  }
+  return next;
 }
 
 function postProcessFrameRgba(libraryName, frameIndex, rgba) {

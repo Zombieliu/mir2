@@ -60,6 +60,10 @@ const publicAssetRoots = parseListArg(
   args.publicAssetRoots ?? process.env.MIR2_REMOTE_ASSET_PUBLIC_ROOTS,
   DEFAULT_PUBLIC_ASSET_ROOTS,
 );
+const stageConcurrency = positiveIntegerArg(
+  args.stageConcurrency ?? process.env.MIR2_REMOTE_ASSET_STAGE_CONCURRENCY,
+  32,
+);
 
 async function main() {
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
@@ -94,6 +98,7 @@ async function main() {
     stageDir,
     objectPrefix,
     allowMissing,
+    concurrency: stageConcurrency,
   });
 
   const release = {
@@ -119,6 +124,7 @@ async function main() {
       fileCount: staged.files.length,
       missingCount: staged.missing.length,
       totalBytes: staged.files.reduce((sum, file) => sum + file.size, 0),
+      stageConcurrency,
     },
     packs: collected.packs,
     scenes: collected.scenes,
@@ -243,45 +249,65 @@ function addStaticUrl(staticUrls, value, source) {
   return true;
 }
 
-async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing }) {
+async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing, concurrency }) {
+  await fs.mkdir(stageDir, { recursive: true });
+  const entries = [...staticUrls.values()].sort((a, b) => a.path.localeCompare(b.path));
+  const results = await mapWithConcurrency(entries, concurrency, (entry) =>
+    stageOneStaticFile({ entry, stageDir, objectPrefix }),
+  );
+
   const files = [];
   const missing = [];
-  await fs.mkdir(stageDir, { recursive: true });
+  for (const result of results) {
+    if (result.file) files.push(result.file);
+    if (result.missing) missing.push(result.missing);
+  }
 
-  for (const entry of [...staticUrls.values()].sort((a, b) => a.path.localeCompare(b.path))) {
-    const relativePath = decodeAssetRelativePath(entry.path.replace(/^\/+/, ""));
-    const localPath = path.join(WEB_ROOT, "public", relativePath);
-    const stagePath = path.join(stageDir, relativePath);
+  if (missing.length > 0 && !allowMissing) {
+    console.error(JSON.stringify({ missing: missing.slice(0, 20), missingCount: missing.length }, null, 2));
+  }
 
-    let stats;
-    try {
-      stats = await fs.stat(localPath);
-    } catch (error) {
-      if (error?.code !== "ENOENT") throw error;
-      missing.push({
+  return { files, missing };
+}
+
+async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
+  const relativePath = decodeAssetRelativePath(entry.path.replace(/^\/+/, ""));
+  const localPath = path.join(WEB_ROOT, "public", relativePath);
+  const stagePath = path.join(stageDir, relativePath);
+
+  let stats;
+  try {
+    stats = await fs.stat(localPath);
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    return {
+      missing: {
         path: entry.path,
         localPath,
         objectKey: joinObjectKey(objectPrefix, relativePath),
         sources: [...entry.sources].sort(),
-      });
-      continue;
-    }
+      },
+    };
+  }
 
-    if (!stats.isFile()) {
-      missing.push({
+  if (!stats.isFile()) {
+    return {
+      missing: {
         path: entry.path,
         localPath,
         objectKey: joinObjectKey(objectPrefix, relativePath),
         sources: [...entry.sources].sort(),
         reason: "not-a-file",
-      });
-      continue;
-    }
+      },
+    };
+  }
 
-    await fs.mkdir(path.dirname(stagePath), { recursive: true });
-    await fs.copyFile(localPath, stagePath);
-    const contents = await fs.readFile(localPath);
-    files.push({
+  const contents = await fs.readFile(localPath);
+  await fs.mkdir(path.dirname(stagePath), { recursive: true });
+  await fs.writeFile(stagePath, contents);
+
+  return {
+    file: {
       path: entry.path,
       relativePath,
       localPath,
@@ -292,14 +318,26 @@ async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissi
       contentType: contentTypeForPath(relativePath),
       cacheControl: DEFAULT_CACHE_CONTROL,
       sources: [...entry.sources].sort(),
-    });
-  }
+    },
+  };
+}
 
-  if (missing.length > 0 && !allowMissing) {
-    console.error(JSON.stringify({ missing: missing.slice(0, 20), missingCount: missing.length }, null, 2));
-  }
+async function mapWithConcurrency(items, concurrency, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(Math.max(1, concurrency), items.length || 1);
 
-  return { files, missing };
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (nextIndex < items.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        results[index] = await worker(items[index], index);
+      }
+    }),
+  );
+
+  return results;
 }
 
 function extractSceneFrameUrls(blueprint, limit) {
@@ -538,6 +576,12 @@ function booleanArg(value, fallback) {
   if (value == null) return fallback;
   if (typeof value === "boolean") return value;
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function positiveIntegerArg(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.floor(parsed);
 }
 
 function parseListArg(value, fallback) {

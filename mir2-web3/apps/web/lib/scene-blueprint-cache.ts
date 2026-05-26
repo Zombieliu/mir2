@@ -20,7 +20,7 @@ type CachedCrystalSceneBlueprint = {
 };
 
 const MAX_MEMORY_BLUEPRINTS = 128;
-const SCENE_CACHE_SCHEMA_VERSION = "2026-05-18-v1";
+const SCENE_CACHE_SCHEMA_VERSION = "2026-05-21-v2";
 const webRoot = process.cwd();
 const cacheDir = path.join(webRoot, ".next/cache/mir2-scene-blueprints");
 const memoryBlueprints = new Map<string, Promise<SceneBlueprint>>();

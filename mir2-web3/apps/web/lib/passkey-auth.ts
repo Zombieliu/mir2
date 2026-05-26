@@ -4,11 +4,20 @@ import {
   getWallets,
   isWalletWithRequiredFeatureSet,
   SuiSignPersonalMessage,
+  type Wallet,
   type SuiSignPersonalMessageFeature,
 } from "@mysten/wallet-standard";
 
 const PASSKEY_STORAGE_KEY = "mir2.suiPasskey";
 const SUI_LOGIN_PURPOSE = "mir2-sui-login";
+export const DUBHE_WALLET_URL = "https://dubhe.obelisk.build/en/wallet";
+
+export type SuiWalletSummary = {
+  id: string;
+  name: string;
+  icon?: string;
+  isDubhe: boolean;
+};
 
 type StoredPasskey = {
   publicKey: string;
@@ -58,9 +67,9 @@ export async function requestPasskeyLoginToken(): Promise<SuiLoginToken> {
   return requestSuiLoginToken(address, message, signature);
 }
 
-export async function requestWalletLoginToken(): Promise<SuiLoginToken> {
-  const wallets = await discoverSuiWallets();
-  const wallet = wallets[0];
+export async function requestWalletLoginToken(walletId?: string): Promise<SuiLoginToken> {
+  const wallets = discoverSuiWallets();
+  const wallet = selectSuiWallet(wallets, walletId);
   if (!wallet) {
     throw new Error("No Sui wallet found");
   }
@@ -83,6 +92,30 @@ export async function requestWalletLoginToken(): Promise<SuiLoginToken> {
   });
 
   return requestSuiLoginToken(account.address, message, signature);
+}
+
+export function getSuiWalletSummaries(): SuiWalletSummary[] {
+  return discoverSuiWallets()
+    .map((wallet) => ({
+      id: walletIdentifier(wallet),
+      name: wallet.name,
+      icon: wallet.icon,
+      isDubhe: isDubheWallet(wallet),
+    }))
+    .sort((left, right) => {
+      if (left.isDubhe !== right.isDubhe) return left.isDubhe ? -1 : 1;
+      return left.name.localeCompare(right.name);
+    });
+}
+
+export function subscribeToSuiWalletChanges(listener: () => void) {
+  const wallets = getWallets();
+  const offRegister = wallets.on("register", listener);
+  const offUnregister = wallets.on("unregister", listener);
+  return () => {
+    offRegister();
+    offUnregister();
+  };
 }
 
 function buildSuiLoginMessage(address: string) {
@@ -111,7 +144,7 @@ async function requestSuiLoginToken(address: string, message: string, signature:
   return body;
 }
 
-async function discoverSuiWallets() {
+function discoverSuiWallets() {
   return getWallets()
     .get()
     .filter((wallet) =>
@@ -119,6 +152,19 @@ async function discoverSuiWallets() {
         SuiSignPersonalMessage,
       ]),
     );
+}
+
+function selectSuiWallet(wallets: ReturnType<typeof discoverSuiWallets>, walletId?: string) {
+  if (!walletId) return wallets[0];
+  return wallets.find((wallet) => walletIdentifier(wallet) === walletId || wallet.name === walletId) ?? null;
+}
+
+function walletIdentifier(wallet: Wallet) {
+  return wallet.id ?? wallet.name;
+}
+
+function isDubheWallet(wallet: Wallet) {
+  return /dubhe/iu.test(`${wallet.id ?? ""} ${wallet.name}`);
 }
 
 function readStoredPasskey(): StoredPasskey | null {

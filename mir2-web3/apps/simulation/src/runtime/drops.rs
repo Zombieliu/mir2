@@ -30,7 +30,10 @@ use super::map::{
 use super::monsters::{deterministic_roll, initial_harvest_monster_state};
 use super::movement::{has_blocking_entity, is_blocked_tile, offset_point, point_in_bounds};
 use super::packets::object_movement;
-use super::quests::{guide_quest_template, quest_template_by_id};
+use super::quests::{
+    advance_crystal_quest_item_task, advance_crystal_quest_kill, crystal_quest_item_task_drop,
+    crystal_quest_update_packet, guide_quest_template, quest_template_by_id,
+};
 use super::resources::{
     GroupResource, InventoryResource, MapRuntimeResource, ObjectIdAllocatorResource,
     PlayerRuntimeResource, QuestResource, RuntimeConfigResource,
@@ -222,6 +225,14 @@ pub(super) fn resolved_monster_drop_templates(
     monster_name: &str,
 ) -> Vec<ResolvedDropTemplate> {
     let current_tick = runtime_tick(world);
+    resolved_monster_drop_templates_at_tick(monster_object_id, monster_name, current_tick)
+}
+
+pub(super) fn resolved_monster_drop_templates_at_tick(
+    monster_object_id: u32,
+    monster_name: &str,
+    current_tick: u64,
+) -> Vec<ResolvedDropTemplate> {
     let crystal_drops =
         crystal_monster_drop_templates(monster_name, monster_object_id, current_tick);
     if !crystal_drops.is_empty() {
@@ -972,6 +983,44 @@ pub(super) fn try_gain_crystal_quest_drop(
                 world,
                 "server.CannotCarryMoreQuestItems",
             ));
+            return false;
+        }
+        if let Some(task_drop) = crystal_quest_item_task_drop(world, key, name, quantity) {
+            let gained_item = add_or_increment_item_with_durability(
+                world,
+                ItemContainer::Quest,
+                &task_drop.item_key,
+                &task_drop.item_name,
+                &task_drop.description,
+                0,
+                quantity,
+                task_drop.weight,
+                durability_current,
+                durability_max,
+            );
+            packets.push(ServerPacket::GainedItem {
+                item: user_item_from_item_state(&gained_item),
+            });
+            packets.push(system_message_key_args(
+                world,
+                "server.YouFound",
+                [localized_item_name(
+                    current_language(world),
+                    &task_drop.item_key,
+                    &task_drop.item_name,
+                )],
+            ));
+            if advance_crystal_quest_item_task(
+                world,
+                task_drop.quest_id,
+                &task_drop.task_key,
+                quantity.min(task_drop.required).max(1),
+            ) {
+                if let Some(packet) = crystal_quest_update_packet(world, task_drop.quest_id) {
+                    packets.push(packet);
+                }
+            }
+            return true;
         }
         return false;
     };
@@ -1118,6 +1167,116 @@ pub(super) fn spawn_configured_monster_drops(
     }
 }
 
+pub(super) fn zone_ground_drop_snapshots_for_monster(
+    world: &World,
+    monster_object_id: u32,
+    monster_name: &str,
+) -> Vec<GroundDropSnapshot> {
+    if current_map_disallows_monster_drop(world) {
+        return Vec::new();
+    }
+
+    resolved_monster_drop_templates(world, monster_object_id, monster_name)
+        .into_iter()
+        .filter_map(|drop| zone_ground_drop_snapshot_from_template(monster_name, drop))
+        .collect()
+}
+
+pub(super) fn zone_ground_drop_snapshots_for_monster_at_tick(
+    monster_object_id: u32,
+    monster_name: &str,
+    current_tick: u64,
+) -> Vec<GroundDropSnapshot> {
+    resolved_monster_drop_templates_at_tick(monster_object_id, monster_name, current_tick)
+        .into_iter()
+        .filter_map(|drop| zone_ground_drop_snapshot_from_template(monster_name, drop))
+        .collect()
+}
+
+fn zone_ground_drop_snapshot_from_template(
+    monster_name: &str,
+    drop: ResolvedDropTemplate,
+) -> Option<GroundDropSnapshot> {
+    match drop {
+        ResolvedDropTemplate::Gold {
+            name,
+            amount,
+            quantity,
+        } => Some(GroundDropSnapshot {
+            object_id: 0,
+            name,
+            name_colour_argb: -1,
+            x: 0,
+            y: 0,
+            quantity,
+            source_monster: monster_name.to_string(),
+            owner_object_id: None,
+            ownership_remaining_ticks: Some(CRYSTAL_DROP_OWNER_WINDOW_TICKS),
+            loot: GroundDropLootSnapshot::Gold { amount },
+        }),
+        ResolvedDropTemplate::Item {
+            key,
+            name,
+            description,
+            weight,
+            quantity,
+            durability_current,
+            durability_max,
+            added_attack,
+            added_defence,
+            added_stats,
+            cursed,
+            socket_slots,
+            show_group_pickup,
+            quest_required,
+            ..
+        } => {
+            if quest_required {
+                return None;
+            }
+            let colour_probe = DropLoot::InventoryItem {
+                key: key.clone(),
+                name: name.clone(),
+                description: description.clone(),
+                weight,
+                durability_current,
+                durability_max,
+                added_attack,
+                added_defence,
+                added_stats: added_stats.clone(),
+                cursed,
+                socket_slots,
+                show_group_pickup,
+            };
+            Some(GroundDropSnapshot {
+                object_id: 0,
+                name: name.clone(),
+                name_colour_argb: crystal_drop_name_colour_argb(&colour_probe),
+                x: 0,
+                y: 0,
+                quantity,
+                source_monster: monster_name.to_string(),
+                owner_object_id: None,
+                ownership_remaining_ticks: Some(CRYSTAL_DROP_OWNER_WINDOW_TICKS),
+                loot: GroundDropLootSnapshot::InventoryItem {
+                    key,
+                    name,
+                    description,
+                    weight,
+                    durability_current,
+                    durability_max,
+                    added_attack,
+                    added_defence,
+                    added_stats,
+                    cursed,
+                    socket_slots,
+                    show_group_pickup,
+                },
+            })
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(super) enum HarvestDropTransfer {
     NoDrops,
@@ -1256,26 +1415,29 @@ pub(super) fn can_accept_crystal_quest_drop(
     quantity: u32,
 ) -> bool {
     let quantity = quantity.max(1);
-    let resources = world.resource::<InventoryResource>();
-    world
-        .resource::<QuestResource>()
-        .quests
-        .iter()
-        .any(|state| {
-            if state.stage != QuestStage::InProgress || state.current >= state.required {
-                return false;
-            }
-            let Some(template) = quest_template_by_id(state.quest_id) else {
-                return false;
-            };
-            quest_template_matches_drop_item(&template, key, name)
-                && can_gain_item_quantity(
-                    resources,
-                    ItemContainer::Quest,
-                    &template.quest_item.key,
-                    quantity,
-                )
-        })
+    let starter_accepts = {
+        let resources = world.resource::<InventoryResource>();
+        world
+            .resource::<QuestResource>()
+            .quests
+            .iter()
+            .any(|state| {
+                if state.stage != QuestStage::InProgress || state.current >= state.required {
+                    return false;
+                }
+                let Some(template) = quest_template_by_id(state.quest_id) else {
+                    return false;
+                };
+                quest_template_matches_drop_item(&template, key, name)
+                    && can_gain_item_quantity(
+                        resources,
+                        ItemContainer::Quest,
+                        &template.quest_item.key,
+                        quantity,
+                    )
+            })
+    };
+    starter_accepts || crystal_quest_item_task_drop(world, key, name, quantity).is_some()
 }
 
 pub(super) fn transfer_harvest_drops_to_player(
@@ -2154,6 +2316,52 @@ pub(super) fn tick_ground_drop_expiry(world: &mut World, tick: u64) {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SharedAccountInventoryTransactionKind {
+    GroundDropPickup,
+    MonsterKillAward,
+    SkillItemConsumption,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SharedAccountInventoryTransactionReceipt {
+    pub kind: SharedAccountInventoryTransactionKind,
+    pub committed: bool,
+    pub packets: Vec<ServerPacket>,
+}
+
+impl SharedAccountInventoryTransactionReceipt {
+    fn ground_drop_pickup(committed: bool, packets: Vec<ServerPacket>) -> Self {
+        Self {
+            kind: SharedAccountInventoryTransactionKind::GroundDropPickup,
+            committed,
+            packets,
+        }
+    }
+
+    fn monster_kill_award(committed: bool, packets: Vec<ServerPacket>) -> Self {
+        Self {
+            kind: SharedAccountInventoryTransactionKind::MonsterKillAward,
+            committed,
+            packets,
+        }
+    }
+
+    pub(crate) fn skill_item_consumption(committed: bool, packets: Vec<ServerPacket>) -> Self {
+        Self {
+            kind: SharedAccountInventoryTransactionKind::SkillItemConsumption,
+            committed,
+            packets,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SharedGroundDropPickupCommit {
+    pub committed: bool,
+    pub packets: Vec<ServerPacket>,
+}
+
 impl SimulationSession {
     pub fn pick_up(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.pick_up_impl(object_id);
@@ -2164,8 +2372,105 @@ impl SimulationSession {
         &mut self,
         drop: &GroundDropSnapshot,
     ) -> Vec<ServerPacket> {
-        let packets = self.apply_shared_ground_drop_pickup_impl(drop);
-        self.finalize_packets(packets)
+        self.apply_shared_ground_drop_pickup_commit(drop).packets
+    }
+
+    pub fn apply_shared_ground_drop_pickup_commit(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> SharedGroundDropPickupCommit {
+        let receipt = self.commit_shared_ground_drop_pickup_transaction(drop);
+        SharedGroundDropPickupCommit {
+            committed: receipt.committed,
+            packets: receipt.packets,
+        }
+    }
+
+    pub fn apply_shared_monster_kill_award(
+        &mut self,
+        monster_object_id: u32,
+        monster_name: &str,
+        experience: u32,
+    ) -> Vec<ServerPacket> {
+        self.commit_shared_monster_kill_award_transaction(
+            monster_object_id,
+            monster_name,
+            experience,
+        )
+        .packets
+    }
+
+    pub fn commit_shared_ground_drop_pickup_transaction(
+        &mut self,
+        drop: &GroundDropSnapshot,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let receipt = self.commit_shared_ground_drop_pickup_transaction_impl(drop);
+        SharedAccountInventoryTransactionReceipt {
+            kind: receipt.kind,
+            committed: receipt.committed,
+            packets: self.finalize_packets(receipt.packets),
+        }
+    }
+
+    pub fn commit_shared_monster_kill_award_transaction(
+        &mut self,
+        monster_object_id: u32,
+        monster_name: &str,
+        experience: u32,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let receipt = self.commit_shared_monster_kill_award_transaction_impl(
+            monster_object_id,
+            monster_name,
+            experience,
+        );
+        SharedAccountInventoryTransactionReceipt {
+            kind: receipt.kind,
+            committed: receipt.committed,
+            packets: self.finalize_packets(receipt.packets),
+        }
+    }
+
+    fn commit_shared_monster_kill_award_transaction_impl(
+        &mut self,
+        monster_object_id: u32,
+        monster_name: &str,
+        experience: u32,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        let world = self.app.world_mut();
+        if !is_in_world(world) {
+            return SharedAccountInventoryTransactionReceipt::monster_kill_award(false, Vec::new());
+        }
+
+        let mut packets = advance_crystal_quest_kill(world, monster_name);
+        if monster_object_id == FIELD_WASP_ID && !current_map_disallows_monster_drop(world) {
+            let quest = guide_quest_template();
+            let _ = try_gain_crystal_quest_drop(
+                world,
+                &quest.quest_item.key,
+                &quest.quest_item.name,
+                quest.quest_item.quantity,
+                None,
+                None,
+                &mut packets,
+            );
+        }
+        if experience > 0 {
+            let gained_experience = {
+                let mut player = world.resource_mut::<PlayerRuntimeResource>();
+                let before = player.experience;
+                player.experience = player.experience.saturating_add(i64::from(experience));
+                if player.experience > player.max_experience {
+                    player.experience = player.max_experience;
+                }
+                player.experience.saturating_sub(before).max(0) as u32
+            };
+            if gained_experience > 0 {
+                packets.push(ServerPacket::GainExperience {
+                    amount: gained_experience,
+                });
+            }
+        }
+        SharedAccountInventoryTransactionReceipt::monster_kill_award(true, packets)
     }
 
     pub(super) fn pick_up_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
@@ -2176,22 +2481,28 @@ impl SimulationSession {
         pick_up_ground_drop(self.app.world_mut(), object_id)
     }
 
-    pub(super) fn apply_shared_ground_drop_pickup_impl(
+    fn commit_shared_ground_drop_pickup_transaction_impl(
         &mut self,
         drop: &GroundDropSnapshot,
-    ) -> Vec<ServerPacket> {
+    ) -> SharedAccountInventoryTransactionReceipt {
         let world = self.app.world_mut();
         if !is_in_world(world) {
-            return Vec::new();
+            return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(false, Vec::new());
         }
 
         match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount) {
-                    return Vec::new();
+                    return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                        false,
+                        Vec::new(),
+                    );
                 }
                 world.resource_mut::<PlayerRuntimeResource>().gold += *amount;
-                vec![ServerPacket::GainedGold { gold: *amount }]
+                SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                    true,
+                    vec![ServerPacket::GainedGold { gold: *amount }],
+                )
             }
             GroundDropLootSnapshot::InventoryItem {
                 key,
@@ -2210,7 +2521,10 @@ impl SimulationSession {
                 {
                     let resources = world.resource::<InventoryResource>();
                     if !can_gain_item_quantity(resources, ItemContainer::Bag1, key, drop.quantity) {
-                        return vec![system_message_key(world, "server.YouCannotCarryAnymore")];
+                        return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(
+                            false,
+                            vec![system_message_key(world, "server.YouCannotCarryAnymore")],
+                        );
                     }
                 }
 
@@ -2256,7 +2570,7 @@ impl SimulationSession {
                         chat_type: ChatType::System,
                     });
                 }
-                packets
+                SharedAccountInventoryTransactionReceipt::ground_drop_pickup(true, packets)
             }
         }
     }

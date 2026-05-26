@@ -99,6 +99,13 @@ pub enum ChatType {
     WhisperOut = 7,
     Guild = 8,
     Trainer = 9,
+    LevelUp = 10,
+    System2 = 11,
+    Relationship = 12,
+    Mentor = 13,
+    Shout2 = 14,
+    Shout3 = 15,
+    LineMessage = 16,
 }
 
 impl TryFrom<u8> for ChatType {
@@ -116,11 +123,47 @@ impl TryFrom<u8> for ChatType {
             7 => Ok(Self::WhisperOut),
             8 => Ok(Self::Guild),
             9 => Ok(Self::Trainer),
+            10 => Ok(Self::LevelUp),
+            11 => Ok(Self::System2),
+            12 => Ok(Self::Relationship),
+            13 => Ok(Self::Mentor),
+            14 => Ok(Self::Shout2),
+            15 => Ok(Self::Shout3),
+            16 => Ok(Self::LineMessage),
             other => Err(PacketCodecError::InvalidEnumValue {
                 type_name: "ChatType",
                 value: other,
             }),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ChatItem {
+    pub unique_id: u64,
+    pub title: String,
+    pub grid: MirGridType,
+}
+
+impl ChatItem {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        Ok(Self {
+            unique_id: reader.read_u64()?,
+            title: reader.read_string()?,
+            grid: MirGridType::try_from(reader.read_u8()?)?,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_u64(self.unique_id);
+        writer.write_string(&self.title)?;
+        writer.write_u8(self.grid as u8);
+        Ok(())
+    }
+
+    pub fn internal_name(&self) -> String {
+        format!("<{}/{}>", self.title, self.unique_id)
     }
 }
 

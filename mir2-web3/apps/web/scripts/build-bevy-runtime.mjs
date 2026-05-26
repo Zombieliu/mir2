@@ -19,14 +19,27 @@ if (!profiles[profile]) {
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const runtimeDir = path.resolve(webRoot, "..", "game-client", "runtime");
-const pkgDir = path.resolve(webRoot, "public", "bevy-runtime", "pkg");
-const pkgParentDir = path.dirname(pkgDir);
-const tmpPkgDir = path.join(pkgParentDir, `.pkg-${process.pid}-${Date.now()}`);
-const runtimeVersionPath = path.resolve(webRoot, "lib", "generated", "bevy_runtime_version.json");
-const prebuiltRuntimeFiles = [
-  path.join(pkgDir, "mir2_bevy_runtime.js"),
-  path.join(pkgDir, "mir2_bevy_runtime_bg.wasm"),
+const pkgParentDir = path.resolve(webRoot, "public", "bevy-runtime");
+const legacyPkgDir = path.join(pkgParentDir, "pkg");
+const runtimePackages = [
+  {
+    backend: "webgpu",
+    packageDirName: "pkg-webgpu",
+    cargoFeatureFlags: ["--no-default-features", "--features", "webgpu"],
+  },
+  {
+    backend: "webgl2",
+    packageDirName: "pkg-webgl2",
+    cargoFeatureFlags: ["--no-default-features", "--features", "webgl2"],
+  },
 ];
+const runtimePackageFiles = runtimePackages.flatMap((runtimePackage) =>
+  runtimeOutputFiles(path.join(pkgParentDir, runtimePackage.packageDirName)),
+);
+const legacyRuntimeFiles = runtimeOutputFiles(legacyPkgDir);
+const prebuiltRuntimeFiles = runtimePackageFiles;
+const runtimeVersionPath = path.resolve(webRoot, "lib", "generated", "bevy_runtime_version.json");
+const buildNonce = `${process.pid}-${Date.now()}`;
 const wasmFile = path.resolve(
   runtimeDir,
   "target",
@@ -42,7 +55,7 @@ const wasmBindgenBin = process.env.WASM_BINDGEN_BIN || "wasm-bindgen";
 if (process.env.MIR2_USE_PREBUILT_BEVY_RUNTIME === "1") {
   ensurePrebuiltRuntime();
   writeRuntimeVersionManifest();
-  console.log(`[bevy-runtime] using prebuilt package at ${pkgDir}`);
+  console.log(`[bevy-runtime] using prebuilt packages at ${pkgParentDir}`);
   process.exit(0);
 }
 
@@ -51,7 +64,7 @@ const expectedWasmBindgenVersion = readExpectedWasmBindgenVersion(runtimeDir);
 try {
   console.log(`[bevy-runtime] profile=${profile}`);
   console.log(`[bevy-runtime] runtime=${runtimeDir}`);
-  console.log(`[bevy-runtime] output=${pkgDir}`);
+  console.log(`[bevy-runtime] output=${pkgParentDir}`);
 
   ensureCommand(cargoBin, ["--version"], "cargo", [
     "Install Rust from https://rustup.rs/ or set CARGO_BIN to a cargo executable.",
@@ -65,12 +78,45 @@ try {
   ensureWasmBindgenVersion(wasmBindgenBin, expectedWasmBindgenVersion);
   ensureWasmTarget();
 
+  fs.mkdirSync(pkgParentDir, { recursive: true });
+  for (const runtimePackage of runtimePackages) {
+    buildRuntimePackage(runtimePackage);
+  }
+  mirrorLegacyWebGl2Package();
+  writeRuntimeVersionManifest();
+  console.log(`[bevy-runtime] wrote ${pkgParentDir}`);
+} catch (error) {
+  cleanupTempPackages();
+  if (error instanceof Error) {
+    fail(error.message);
+  }
+  fail(String(error));
+}
+
+function runtimeOutputFiles(packageDir) {
+  return [
+    path.join(packageDir, "mir2_bevy_runtime.js"),
+    path.join(packageDir, "mir2_bevy_runtime_bg.wasm"),
+  ];
+}
+
+function buildRuntimePackage(runtimePackage) {
+  const packageDir = path.join(pkgParentDir, runtimePackage.packageDirName);
+  const tmpPackageDir = tempPackageDir(runtimePackage.backend);
+  console.log(`[bevy-runtime] backend=${runtimePackage.backend}`);
+
   runChecked(
     cargoBin,
-    ["build", "--target", "wasm32-unknown-unknown", ...profiles[profile].cargoFlags],
+    [
+      "build",
+      "--target",
+      "wasm32-unknown-unknown",
+      ...profiles[profile].cargoFlags,
+      ...runtimePackage.cargoFeatureFlags,
+    ],
     {
       cwd: runtimeDir,
-      label: "cargo build",
+      label: `cargo build (${runtimePackage.backend})`,
     },
   );
 
@@ -78,9 +124,8 @@ try {
     fail(`Cargo build finished but the expected WASM file was not found: ${wasmFile}`);
   }
 
-  fs.mkdirSync(pkgParentDir, { recursive: true });
-  fs.rmSync(tmpPkgDir, { recursive: true, force: true });
-  fs.mkdirSync(tmpPkgDir, { recursive: true });
+  fs.rmSync(tmpPackageDir, { recursive: true, force: true });
+  fs.mkdirSync(tmpPackageDir, { recursive: true });
 
   runChecked(
     wasmBindgenBin,
@@ -88,27 +133,35 @@ try {
       "--target",
       "web",
       "--out-dir",
-      tmpPkgDir,
+      tmpPackageDir,
       "--out-name",
       "mir2_bevy_runtime",
       wasmFile,
     ],
     {
       cwd: runtimeDir,
-      label: "wasm-bindgen",
+      label: `wasm-bindgen (${runtimePackage.backend})`,
     },
   );
 
-  fs.rmSync(pkgDir, { recursive: true, force: true });
-  fs.renameSync(tmpPkgDir, pkgDir);
-  writeRuntimeVersionManifest();
-  console.log(`[bevy-runtime] wrote ${pkgDir}`);
-} catch (error) {
-  fs.rmSync(tmpPkgDir, { recursive: true, force: true });
-  if (error instanceof Error) {
-    fail(error.message);
+  fs.rmSync(packageDir, { recursive: true, force: true });
+  fs.renameSync(tmpPackageDir, packageDir);
+}
+
+function mirrorLegacyWebGl2Package() {
+  const webgl2Package = path.join(pkgParentDir, "pkg-webgl2");
+  fs.rmSync(legacyPkgDir, { recursive: true, force: true });
+  fs.cpSync(webgl2Package, legacyPkgDir, { recursive: true });
+}
+
+function cleanupTempPackages() {
+  for (const runtimePackage of runtimePackages) {
+    fs.rmSync(tempPackageDir(runtimePackage.backend), { recursive: true, force: true });
   }
-  fail(String(error));
+}
+
+function tempPackageDir(backend) {
+  return path.join(pkgParentDir, `.pkg-${backend}-${buildNonce}`);
 }
 
 function ensureCommand(command, args, label, hints) {
@@ -198,7 +251,7 @@ function ensurePrebuiltRuntime() {
 }
 
 function writeRuntimeVersionManifest() {
-  const files = prebuiltRuntimeFiles.map((filePath) => {
+  const files = [...runtimePackageFiles, ...legacyRuntimeFiles].map((filePath) => {
     const bytes = fs.readFileSync(filePath);
     return {
       path: path.relative(webRoot, filePath).split(path.sep).join("/"),

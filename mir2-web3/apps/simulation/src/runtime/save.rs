@@ -9,8 +9,9 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket, S
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    crystal_base_vitals, AccountBanStatus, AccountRecord, CharacterRecord, CharacterSaveRecord,
-    SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    apply_crystal_map_metadata, crystal_base_vitals, AccountBanStatus, AccountRecord,
+    CharacterRecord, CharacterSaveRecord, MonsterSpawnSource, SimulationConfig, Stage5MailMessage,
+    Stage5SystemsState,
 };
 
 use super::components::{
@@ -250,7 +251,7 @@ pub(super) fn persist_character_save(world: &World, account_id: &str, save: Char
     let account = store
         .accounts
         .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+        .or_insert_with(AccountRecord::empty);
 
     if let Some(character) = account
         .characters
@@ -265,7 +266,7 @@ pub(super) fn persist_character_save(world: &World, account_id: &str, save: Char
 
     account.saves.insert(save.character.index, save);
     drop(store);
-    if let Err(error) = config.save_account_store() {
+    if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
 }
@@ -282,7 +283,7 @@ pub(super) fn account_characters(
         .accounts
         .get(account_id)
         .map(|account| account.characters.clone())
-        .unwrap_or_else(|| vec![config.default_character.clone()])
+        .unwrap_or_default()
 }
 
 pub(super) fn create_account_with_password(
@@ -301,7 +302,7 @@ pub(super) fn create_account_with_password(
     account.password = password.to_string();
     store.accounts.insert(account_id.to_string(), account);
     drop(store);
-    if let Err(error) = config.save_account_store() {
+    if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
     8
@@ -318,14 +319,13 @@ pub(super) fn login_account(
     account_id: &str,
     password: &str,
 ) -> AccountLoginResult {
-    let mut store = config
+    let store = config
         .account_store
         .lock()
         .expect("account store mutex should not be poisoned");
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+    let Some(account) = store.accounts.get(account_id) else {
+        return AccountLoginResult::InvalidCredentials;
+    };
     let now_ms = unix_now_ms();
     if let Some(ban) = account.active_ban(now_ms) {
         return AccountLoginResult::Banned(ban);
@@ -335,6 +335,33 @@ pub(super) fn login_account(
     } else {
         AccountLoginResult::InvalidCredentials
     }
+}
+
+pub(super) fn login_passkey_account(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> AccountLoginResult {
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    let created = !store.accounts.contains_key(account_id);
+    let account = store
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(AccountRecord::empty);
+    let now_ms = unix_now_ms();
+    if let Some(ban) = account.active_ban(now_ms) {
+        return AccountLoginResult::Banned(ban);
+    }
+    let characters = account.characters.clone();
+    drop(store);
+    if created {
+        if let Err(error) = config.save_account_store_account(account_id) {
+            eprintln!("failed to persist passkey account store: {error}");
+        }
+    }
+    AccountLoginResult::Success(characters)
 }
 
 pub(super) fn active_account_ban(
@@ -387,7 +414,7 @@ pub(super) fn change_account_password(
 
     account.password = new_password.to_string();
     drop(store);
-    if let Err(error) = config.save_account_store() {
+    if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
     6
@@ -406,14 +433,14 @@ pub(super) fn add_character_to_account(
     let account = store
         .accounts
         .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+        .or_insert_with(AccountRecord::empty);
     account.saves.insert(
         character.index,
         crystal_new_character_save(character.clone()),
     );
     account.characters.push(character.clone());
     drop(store);
-    if let Err(error) = config.save_account_store() {
+    if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
     character
@@ -428,10 +455,9 @@ pub(super) fn delete_character_from_account(
         .account_store
         .lock()
         .expect("account store mutex should not be poisoned");
-    let account = store
-        .accounts
-        .entry(account_id.to_string())
-        .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
+    let Some(account) = store.accounts.get_mut(account_id) else {
+        return Err(format!("account {account_id} not found"));
+    };
 
     let Some(existing) = account
         .characters
@@ -448,7 +474,7 @@ pub(super) fn delete_character_from_account(
     account.saves.remove(&character_index);
 
     drop(store);
-    if let Err(error) = config.save_account_store() {
+    if let Err(error) = config.save_account_store_account(account_id) {
         eprintln!("failed to persist account store: {error}");
     }
     Ok(existing.name)
@@ -483,7 +509,7 @@ pub(super) fn character_save_for_start(
     let save = save.clone();
     drop(store);
     if changed {
-        if let Err(error) = config.save_account_store() {
+        if let Err(error) = config.save_account_store_account(account_id) {
             eprintln!("failed to persist normalized character save: {error}");
         }
     }
@@ -640,6 +666,9 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         if !save.map_title.is_empty() {
             map.current_map.title = save.map_title.clone();
         }
+        if config.monster_spawn_source == MonsterSpawnSource::CrystalStarterRegion {
+            apply_crystal_map_metadata(&mut map.current_map);
+        }
     }
     {
         let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
@@ -661,6 +690,8 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         player_runtime.pk_points = save.pk_points;
         player_runtime.chat_banned = save.chat_banned;
         player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;
+        player_runtime.chat_next_allowed_at_ms = 0;
+        player_runtime.chat_spam_tick = 0;
     }
     let mut resources = world.resource_mut::<InventoryResource>();
     resources.inventory_items = decode_state_vec(&save.inventory_items_json).unwrap_or_default();
@@ -713,6 +744,7 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         queue.pending_combat_actions = Vec::new();
         queue.pending_monster_spawns = Vec::new();
         queue.pending_ground_spell_actions = Vec::new();
+        queue.pending_movement_command = None;
     }
     world.resource_mut::<QuestResource>().quests =
         decode_state_vec(&save.quest_states_json).unwrap_or_default();

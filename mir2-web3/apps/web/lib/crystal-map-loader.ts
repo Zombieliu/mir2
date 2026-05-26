@@ -8,16 +8,25 @@ import { deflateSync, gunzipSync } from "node:zlib";
 import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
+const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
+const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
 const PUBLIC_ORIGINAL_MAP_DIR = path.join(WORKSPACE_ROOT, "public", "original-map");
 const GENERATED_DATA_DIR = path.join(WORKSPACE_ROOT, "lib", "generated");
+const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
 const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
-const CRYSTAL_CLIENT_ROOT = process.env.CRYSTAL_CLIENT_ROOT ?? DEFAULT_CRYSTAL_CLIENT_ROOT;
+const CRYSTAL_CLIENT_ROOT = process.env.CRYSTAL_CLIENT_ROOT
+  ? path.resolve(process.env.CRYSTAL_CLIENT_ROOT)
+  : existsSync(LOCAL_CRYSTAL_CLIENT_ROOT)
+    ? LOCAL_CRYSTAL_CLIENT_ROOT
+    : DEFAULT_CRYSTAL_CLIENT_ROOT;
 const MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Map");
 const DATA_MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Data", "Map");
 const RESPAWN_MANIFEST_PATH = path.join(
   GENERATED_DATA_DIR,
   "crystal_respawn_manifest.json",
 );
+const PACKAGED_MAP_DIR = path.join(GENERATED_DATA_DIR, "crystal-map-pack");
+const PACKAGED_MAP_LIBRARY_META_DIR = path.join(GENERATED_DATA_DIR, "crystal-map-library-meta");
 const PACKAGED_STARTER_MAP_REGION_PATH = path.join(
   GENERATED_DATA_DIR,
   "crystal_starter_map_region.json",
@@ -96,7 +105,7 @@ type ParsedFrame = {
   height: number;
   x: number;
   y: number;
-  rgba: Buffer;
+  rgba?: Buffer;
 };
 
 type ExportRegionOptions = {
@@ -141,6 +150,11 @@ function loadParsedMap(mapFileName: string): ParsedMap {
 
   const mapPath = path.join(MAP_DIR, `${normalized}.map`);
   if (!existsSync(mapPath)) {
+    const packaged = loadPackagedMap(normalized);
+    if (packaged) {
+      mapCache.set(normalized, packaged);
+      return packaged;
+    }
     const parsed = normalized === "0" ? loadPackagedFallbackMap("0") : loadMissingMapFallback(normalized);
     mapCache.set(normalized, parsed);
     return parsed;
@@ -623,7 +637,7 @@ function exportFrame(
   const frameKey = `${normalizedKey}:${frameIndex}`;
   const exportDir = path.join(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_MAP_DIR, ...normalizedKey.split("/"));
   const pngPath = path.join(/* turbopackIgnore: true */ exportDir, `${frameIndex}.png`);
-  if (!exportedFrames.has(frameKey) && !existsSync(/* turbopackIgnore: true */ pngPath)) {
+  if (frame.rgba && !exportedFrames.has(frameKey) && !existsSync(/* turbopackIgnore: true */ pngPath)) {
     exportedFrames.add(frameKey);
     const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
     pendingWrites.push(
@@ -817,13 +831,57 @@ function ensureLibrary(libraryKey: string) {
   const alternatePath = path.join(DATA_MAP_DIR, ...libraryKey.split("/")) + ".lib";
   const filePath = existsSync(libraryPath) ? libraryPath : alternatePath;
   if (!existsSync(filePath)) {
-    libraryCache.set(libraryKey, null);
-    return null;
+    const packaged = loadPackagedMapLibraryMeta(libraryKey);
+    libraryCache.set(libraryKey, packaged);
+    return packaged;
   }
 
   const parsed = parseLibrary(filePath);
   libraryCache.set(libraryKey, parsed);
   return parsed;
+}
+
+function loadPackagedMap(mapFileName: string): ParsedMap | null {
+  const packagedPath = path.join(PACKAGED_MAP_DIR, `${packagedMapFileStem(mapFileName)}.map.gz`);
+  if (!existsSync(packagedPath)) {
+    return null;
+  }
+
+  const bytes = gunzipSync(readFileSync(packagedPath));
+  return parseMapBytes(`${mapFileName}.map`, bytes);
+}
+
+function loadPackagedMapLibraryMeta(libraryKey: string): ParsedLibrary | null {
+  const normalizedKey = normalizeLibraryName(libraryKey);
+  const packagedPath = path.join(PACKAGED_MAP_LIBRARY_META_DIR, ...normalizedKey.split("/")) + ".json.gz";
+  if (!existsSync(packagedPath)) {
+    return null;
+  }
+
+  const source = JSON.parse(gunzipSync(readFileSync(packagedPath)).toString("utf8")) as {
+    version?: number;
+    count?: number;
+    frames?: Array<[number, number, number, number] | null>;
+  };
+  const count = Math.max(0, Math.trunc(source.count ?? source.frames?.length ?? 0));
+  const frames = new Array<ParsedFrame | null>(count).fill(null);
+  for (let index = 0; index < Math.min(count, source.frames?.length ?? 0); index += 1) {
+    const frame = source.frames?.[index];
+    if (!frame) continue;
+    frames[index] = {
+      index,
+      width: frame[0],
+      height: frame[1],
+      x: frame[2],
+      y: frame[3],
+    };
+  }
+
+  return {
+    version: Math.trunc(source.version ?? 0),
+    count,
+    frames,
+  };
 }
 
 function parseLibrary(filePath: string): ParsedLibrary {
@@ -1086,6 +1144,10 @@ function normalizeLibraryName(libraryName: string) {
 function normalizeMapFileName(mapFileName: string) {
   const normalized = String(mapFileName || "0").trim().replaceAll("\\", "/").split("/").pop() ?? "0";
   return normalized.replace(/\.map$/i, "") || "0";
+}
+
+function packagedMapFileStem(mapFileName: string) {
+  return encodeURIComponent(normalizeMapFileName(mapFileName).toLowerCase());
 }
 
 function postProcessFrameRgba(libraryName: string, frameIndex: number, rgba: Buffer) {

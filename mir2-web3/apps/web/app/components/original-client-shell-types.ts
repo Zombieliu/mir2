@@ -1,5 +1,6 @@
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
+import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { SystemMenuTransferOption } from "./original-client-system-menu";
 import type {
   DisplayEntity,
@@ -34,6 +35,47 @@ export type SceneAssetReadiness = {
   failedUrls: string[];
 };
 
+export type BevyEntityRenderState = {
+  enabled: boolean;
+  stageWidth: number;
+  stageHeight: number;
+  atlases?: Array<{
+    key: string;
+    width: number;
+    height: number;
+    imageUrl?: string;
+    rects: Array<{
+      key: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }>;
+  }>;
+  atlasImages?: Array<{
+    key: string;
+    width: number;
+    height: number;
+    pixels?: Uint8Array;
+  }>;
+  entities: Array<{
+    objectId: string;
+    dead: boolean;
+    layers: Array<{
+      key: string;
+      path: string;
+      atlasKey?: string;
+      atlasRectKey?: string;
+      left: number;
+      top: number;
+      width: number;
+      height: number;
+      z: number;
+      opacity?: number;
+    }>;
+  }>;
+};
+
 export type OriginalClientShellProps = {
   language: Mir2Language;
   screen: ClientScreen;
@@ -50,13 +92,19 @@ export type OriginalClientShellProps = {
   viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>;
   viewportTiles: Array<{ x: number; y: number; dx: number; dy: number }>;
   sceneInteractionReady: boolean;
+  bevyEntityRendererReady: boolean;
+  bevyRuntimeBackend: "webgpu" | "webgl2" | null;
   onSceneAssetReadinessChange: (readiness: SceneAssetReadiness) => void;
+  onBevyEntityRenderStateChange: (state: BevyEntityRenderState) => void;
   logs: DisplayLogLine[];
   accountId: string;
   password: string;
   chatMessage: string;
   loginBusy: boolean;
   loginError: string | null;
+  suiWallets: SuiWalletSummary[];
+  walletPickerOpen: boolean;
+  dubheWalletUrl: string;
   characters: SelectCharacterEntry[];
   selectedCharacterIndex: number;
   showInventory: boolean;
@@ -71,7 +119,8 @@ export type OriginalClientShellProps = {
   onCreateAccount: () => void;
   onSubmitLogin: () => void;
   onPasskeyLogin: () => void;
-  onWalletLogin: () => void;
+  onWalletPickerToggle: () => void;
+  onWalletLogin: (walletId: string) => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
   onExitSelect: () => void;
@@ -116,7 +165,11 @@ export type OriginalClientShellProps = {
   onViewportTileStepClick: (x: number, y: number) => void;
   onViewportTileStepSecondaryAction: (x: number, y: number) => void;
   onViewportDirectionStep: (x: number, y: number, mode: "walk" | "run") => void;
-  onViewportDirectionIntent: (direction: string, mode: "walk" | "run") => void;
+  onViewportDirectionIntent: (
+    direction: string,
+    mode: "walk" | "run",
+    options?: { discrete?: boolean },
+  ) => void;
   onPickGroundDrop: (objectId: string) => void;
   onSelectEntity: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;

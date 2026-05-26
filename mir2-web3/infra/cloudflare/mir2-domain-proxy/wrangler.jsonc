@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "mir2-web3-domain-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-18",
+  "account_id": "85bf64d86ea9221e172d26feba9fd47e",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "mir2.obelisk.build/*",
+      "zone_name": "obelisk.build"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ASSET_ORIGIN_URL": "https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c",
+    "GATEWAY_ORIGIN_URL": "https://165.154.65.136.sslip.io",
+    "ORIGIN_URL": "https://mir2-web3-web.vercel.app"
+  }
+}

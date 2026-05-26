@@ -1,0 +1,128 @@
+name: Mir2 Web Assets R2 Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Optional generated release id
+        required: false
+        type: string
+      asset_base_url:
+        description: Public R2/CDN base URL, may include {version}
+        required: false
+        type: string
+      object_prefix:
+        description: R2 object prefix, may include {version}
+        required: false
+        default: mir2/v/{version}
+        type: string
+      publish_r2:
+        description: Upload staged assets to Cloudflare R2
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build-web-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install Rust 1.89
+        run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Install wasm target
+        run: rustup target add wasm32-unknown-unknown --toolchain 1.89.0
+
+      - name: Install Web dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Build Web
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_MIR2_ASSET_BASE_URL: ${{ inputs.asset_base_url || secrets.MIR2_PUBLIC_R2_ASSET_BASE_URL }}
+          MIR2_ASSET_OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: npm run build
+
+      - name: Stage remote asset release
+        working-directory: apps/web
+        env:
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+          NEXT_PUBLIC_MIR2_ASSET_BASE_URL: ${{ inputs.asset_base_url || secrets.MIR2_PUBLIC_R2_ASSET_BASE_URL }}
+          MIR2_ASSET_OBJECT_PREFIX: ${{ inputs.object_prefix }}
+        run: |
+          set -euo pipefail
+          run_id="$INPUT_RUN_ID"
+          if [ -z "$run_id" ]; then
+            run_id="${GITHUB_SHA::12}"
+          fi
+
+          npm run start -- --hostname 127.0.0.1 --port 13020 > /tmp/mir2-web-assets-next.log 2>&1 &
+          server_pid="$!"
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
+
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null; then
+              break
+            fi
+            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
+              cat /tmp/mir2-web-assets-next.log >&2
+              exit 1
+            fi
+            sleep 2
+          done
+
+          curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null
+          args=(
+            --baseUrl http://127.0.0.1:13020
+            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX"
+            --runId "$run_id"
+          )
+          if [ -n "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
+            args+=(--assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL")
+          fi
+          npm run assets:remote:build -- "${args[@]}"
+
+      - name: Dry run R2 upload plan
+        working-directory: apps/web
+        run: npm run assets:r2:dry-run
+
+      - name: Publish Web assets to R2
+        if: ${{ inputs.publish_r2 }}
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
+          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+        run: |
+          set -euo pipefail
+          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || [ -z "$bucket" ]; then
+            echo "R2 publish requested but CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, or MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET is missing." >&2
+            exit 1
+          fi
+          MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
+
+      - name: Upload remote asset release manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: mir2-web-remote-assets
+          path: |
+            docs/generated/remote-assets/latest-remote-asset-release.json
+            docs/generated/remote-assets/**/remote-asset-release.json
+          if-no-files-found: error

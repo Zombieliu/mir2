@@ -21,6 +21,10 @@ import {
   type ViewportOffset,
 } from "./original-client-scene-layout";
 
+type OriginalMapCell = OriginalMapRegion["cells"][number];
+
+const mapRegionCellIndexCache = new WeakMap<OriginalMapRegion, Map<string, OriginalMapCell>>();
+
 export function GameSceneBackdrop({
   world,
   player,
@@ -32,7 +36,7 @@ export function GameSceneBackdrop({
   floorSprites: ViewportMapSprite[];
   cameraOffset: ViewportOffset;
 }) {
-  const tiles = world.originalMapRegion ? buildSceneBackdropTiles(world, player) : [];
+  const tiles = world.originalMapRegion ? [] : buildSceneBackdropTiles(world, player);
 
   if (!tiles.length && !floorSprites.length) {
     return null;
@@ -61,6 +65,7 @@ export function GameSceneBackdrop({
           data-map-sprite-key={sprite.key}
           data-mir2-original-src={sprite.path}
           src={sprite.path}
+          crossOrigin="anonymous"
           alt=""
           draggable={false}
           onError={handleSceneAssetImageError}
@@ -82,7 +87,8 @@ export function buildViewportMapSprites(
   player: DisplayEntity,
   animationFrameIndex: number,
 ): ViewportMapSprites {
-  if (!world.originalMapRegion) {
+  const region = world.originalMapRegion;
+  if (!region) {
     return EMPTY_VIEWPORT_MAP_SPRITES;
   }
 
@@ -97,55 +103,53 @@ export function buildViewportMapSprites(
   const floor: ViewportMapSprite[] = [];
   const objects: ViewportMapSprite[] = [];
 
-  for (const cell of world.originalMapRegion.cells) {
+  for (const cell of viewportMapCells(region, objectMinX, objectMaxX, objectMinY, objectMaxY)) {
     const inFloorBounds =
       cell.x >= floorMinX && cell.x <= floorMaxX && cell.y >= floorMinY && cell.y <= floorMaxY;
-    const inObjectBounds =
-      cell.x >= objectMinX && cell.x <= objectMaxX && cell.y >= objectMinY && cell.y <= objectMaxY;
 
     appendViewportMapSprite(
       floor,
       objects,
-      world.originalMapRegion,
+      region,
       cell.back,
       cell,
       player,
       animationFrameIndex,
       inFloorBounds,
-      inObjectBounds,
+      true,
     );
     appendViewportMapSprite(
       floor,
       objects,
-      world.originalMapRegion,
+      region,
       cell.middle,
       cell,
       player,
       animationFrameIndex,
       inFloorBounds,
-      inObjectBounds,
+      true,
     );
     appendViewportMapSprite(
       floor,
       objects,
-      world.originalMapRegion,
+      region,
       cell.front,
       cell,
       player,
       animationFrameIndex,
       inFloorBounds,
-      inObjectBounds,
+      true,
     );
     appendViewportMapSprite(
       floor,
       objects,
-      world.originalMapRegion,
+      region,
       cell.tileAnimation,
       cell,
       player,
       animationFrameIndex,
       false,
-      inObjectBounds,
+      true,
     );
   }
 
@@ -153,6 +157,50 @@ export function buildViewportMapSprites(
     floor,
     objects,
   };
+}
+
+function viewportMapCells(
+  region: OriginalMapRegion,
+  minX: number,
+  maxX: number,
+  minY: number,
+  maxY: number,
+) {
+  const index = mapRegionCellIndex(region);
+  const cells: OriginalMapCell[] = [];
+  const clampedMinX = Math.max(region.regionBounds.minX, minX);
+  const clampedMaxX = Math.min(region.regionBounds.maxX, maxX);
+  const clampedMinY = Math.max(region.regionBounds.minY, minY);
+  const clampedMaxY = Math.min(region.regionBounds.maxY, maxY);
+
+  for (let x = clampedMinX; x <= clampedMaxX; x += 1) {
+    for (let y = clampedMinY; y <= clampedMaxY; y += 1) {
+      const cell = index.get(mapCellKey(x, y));
+      if (cell) {
+        cells.push(cell);
+      }
+    }
+  }
+
+  return cells;
+}
+
+function mapRegionCellIndex(region: OriginalMapRegion) {
+  const cached = mapRegionCellIndexCache.get(region);
+  if (cached) {
+    return cached;
+  }
+
+  const index = new Map<string, OriginalMapCell>();
+  for (const cell of region.cells) {
+    index.set(mapCellKey(cell.x, cell.y), cell);
+  }
+  mapRegionCellIndexCache.set(region, index);
+  return index;
+}
+
+function mapCellKey(x: number, y: number) {
+  return `${x}:${y}`;
 }
 
 function appendViewportMapSprite(
@@ -190,6 +238,9 @@ function appendViewportMapSprite(
 
   const frame = sprite.frames[animationFrameIndex % sprite.frames.length] ?? sprite.frames[0];
   if (!frame) {
+    return;
+  }
+  if (staticSceneAssetRecentlyFailed(frame.path)) {
     return;
   }
 
@@ -350,7 +401,15 @@ export function mapSpriteRenderPath(path: string) {
   return frame ? `/generated/original-map-blend/WemadeMir2/Objects/${frame}.png` : path;
 }
 
-export function sceneAssetCandidateUrls(url: string): string[] {
+const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
+const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
+const MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS = 18;
+const MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS = 72;
+const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 10 * 60 * 1000;
+const alphaKeyedSceneAssetUrls = new Map<string, Promise<string | null>>();
+const failedStaticSceneAssetUrls = new Map<string, number>();
+
+export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[] {
   const candidates: string[] = [];
   const add = (candidate: string | null) => {
     if (candidate && !candidates.includes(candidate)) {
@@ -359,11 +418,14 @@ export function sceneAssetCandidateUrls(url: string): string[] {
   };
 
   add(url);
-  add(cacheBustedSceneAssetUrl(url));
   const remoteUrl = remoteSceneAssetUrl(url);
   add(remoteUrl);
-  if (remoteUrl) {
-    add(cacheBustedSceneAssetUrl(remoteUrl));
+
+  if (!isImmutableSceneAssetUrl(url)) {
+    add(cacheBustedSceneAssetUrl(url, retryAttempt));
+    if (remoteUrl) {
+      add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
+    }
   }
 
   return candidates;
@@ -378,6 +440,11 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   }
 
   image.dataset.mir2OriginalSrc = originalSrc;
+  if (image.dataset.mir2RetryOriginalSrc !== originalSrc) {
+    delete image.dataset.mir2DelayedRetryCount;
+    delete image.dataset.mir2IncompleteSince;
+    delete image.dataset.mir2StalledRetryCount;
+  }
   const candidates = sceneAssetCandidateUrls(originalSrc);
   const currentIndex =
     image.dataset.mir2RetryOriginalSrc === originalSrc
@@ -387,8 +454,11 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   const nextSrc = candidates[nextIndex];
 
   if (!nextSrc) {
-    image.dataset.mir2LoadFailed = "true";
-    image.style.visibility = "hidden";
+    if (isImmutableSceneAssetUrl(originalSrc)) {
+      markStaticSceneAssetFailed(image, originalSrc);
+      return;
+    }
+    scheduleSceneAssetImageDelayedRetry(image, originalSrc);
     return;
   }
 
@@ -400,10 +470,295 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
 
 export function handleSceneAssetImageLoad(event: SyntheticEvent<HTMLImageElement>) {
   const image = event.currentTarget;
+  clearSceneAssetRetryState(image);
+  void applyMapObjectAlphaKey(image);
+}
+
+export function rescueStalledSceneAssetImages(root: ParentNode = document) {
+  if (typeof window === "undefined") {
+    return { checked: 0, retried: 0 };
+  }
+
+  const now = Date.now();
+  let checked = 0;
+  let retried = 0;
+  const images = Array.from(root.querySelectorAll<HTMLImageElement>("img[data-mir2-original-src]"));
+
+  for (const image of images) {
+    checked += 1;
+    if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+      clearSceneAssetRetryState(image);
+      continue;
+    }
+    if (image.dataset.mir2LoadFailed === "retrying") {
+      continue;
+    }
+
+    const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
+    if (!originalSrc) {
+      continue;
+    }
+    if (staticSceneAssetRecentlyFailed(originalSrc)) {
+      image.dataset.mir2LoadFailed = "true";
+      image.style.visibility = "hidden";
+      continue;
+    }
+
+    const firstIncompleteAt = Number.parseInt(image.dataset.mir2IncompleteSince ?? "0", 10);
+    if (!Number.isFinite(firstIncompleteAt) || firstIncompleteAt <= 0) {
+      image.dataset.mir2IncompleteSince = String(now);
+      continue;
+    }
+
+    const stalledRetryCount = Number.parseInt(image.dataset.mir2StalledRetryCount ?? "0", 10);
+    const retryCount = Number.isFinite(stalledRetryCount) ? stalledRetryCount : 0;
+    const delay =
+      SCENE_ASSET_STALLED_RETRY_DELAYS_MS[
+        Math.min(retryCount, SCENE_ASSET_STALLED_RETRY_DELAYS_MS.length - 1)
+      ];
+    if (now - firstIncompleteAt < delay) {
+      continue;
+    }
+
+    const retrySrc = sceneAssetDelayedRetryUrl(originalSrc, retryCount + 10);
+    if (!retrySrc) {
+      if (isImmutableSceneAssetUrl(originalSrc)) {
+        markStaticSceneAssetFailed(image, originalSrc);
+      }
+      continue;
+    }
+
+    image.dataset.mir2IncompleteSince = String(now);
+    image.dataset.mir2StalledRetryCount = String(retryCount + 1);
+    image.dataset.mir2RetryOriginalSrc = originalSrc;
+    image.dataset.mir2RetryIndex = String(sceneAssetCandidateUrls(originalSrc).length + retryCount);
+    image.style.visibility = "";
+    image.src = retrySrc;
+    retried += 1;
+  }
+
+  return { checked, retried };
+}
+
+function clearSceneAssetRetryState(image: HTMLImageElement) {
   image.style.visibility = "";
   delete image.dataset.mir2LoadFailed;
+  delete image.dataset.mir2DelayedRetryCount;
+  delete image.dataset.mir2IncompleteSince;
+  delete image.dataset.mir2StalledRetryCount;
   delete image.dataset.mir2RetryIndex;
   delete image.dataset.mir2RetryOriginalSrc;
+}
+
+async function applyMapObjectAlphaKey(image: HTMLImageElement) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  if (image.dataset.mir2AlphaKeyed === "true" || image.dataset.mir2AlphaKeyProcessing === "true") {
+    return;
+  }
+
+  const originalSrc = image.dataset.mir2OriginalSrc ?? image.getAttribute("src") ?? "";
+  if (!isBlackKeyedMapObjectPath(originalSrc)) {
+    return;
+  }
+
+  const cacheKey = normalizedSceneAssetPath(originalSrc);
+  if (!cacheKey || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+    return;
+  }
+
+  image.dataset.mir2AlphaKeyProcessing = "true";
+  image.style.visibility = "hidden";
+  const keyedUrl = await alphaKeyedSceneAssetUrl(cacheKey, image).catch(() => null);
+  delete image.dataset.mir2AlphaKeyProcessing;
+  if (!keyedUrl) {
+    image.style.visibility = "";
+    return;
+  }
+  if (!image.isConnected || image.dataset.mir2OriginalSrc !== originalSrc) {
+    return;
+  }
+
+  image.dataset.mir2AlphaKeyed = "true";
+  image.src = keyedUrl;
+}
+
+function alphaKeyedSceneAssetUrl(cacheKey: string, image: HTMLImageElement) {
+  const cached = alphaKeyedSceneAssetUrls.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = createAlphaKeyedSceneAssetUrl(image);
+  alphaKeyedSceneAssetUrls.set(cacheKey, promise);
+  return promise;
+}
+
+async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement) {
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  if (width <= 0 || height <= 0) {
+    return null;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) {
+    return null;
+  }
+
+  context.drawImage(image, 0, 0, width, height);
+  const imageData = context.getImageData(0, 0, width, height);
+  const pixels = imageData.data;
+  const queued = new Uint8Array(width * height);
+  const stack: number[] = [];
+  let changed = 0;
+
+  const enqueue = (x: number, y: number) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) {
+      return;
+    }
+    const pixelIndex = y * width + x;
+    if (queued[pixelIndex]) {
+      return;
+    }
+    const offset = pixelIndex * 4;
+    if (pixels[offset + 3] === 0 || pixelBrightness(pixels, offset) > MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS) {
+      return;
+    }
+    queued[pixelIndex] = 1;
+    stack.push(pixelIndex);
+  };
+
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x, 0);
+    enqueue(x, height - 1);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    enqueue(0, y);
+    enqueue(width - 1, y);
+  }
+
+  while (stack.length) {
+    const pixelIndex = stack.pop()!;
+    const offset = pixelIndex * 4;
+    const brightness = pixelBrightness(pixels, offset);
+    const alpha = pixels[offset + 3];
+    const nextAlpha =
+      brightness <= MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS
+        ? 0
+        : Math.round(
+            alpha *
+              ((brightness - MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS) /
+                (MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS - MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS)),
+          );
+    if (nextAlpha < alpha) {
+      pixels[offset + 3] = Math.max(0, Math.min(alpha, nextAlpha));
+      changed += 1;
+    }
+
+    const x = pixelIndex % width;
+    const y = Math.floor(pixelIndex / width);
+    enqueue(x + 1, y);
+    enqueue(x - 1, y);
+    enqueue(x, y + 1);
+    enqueue(x, y - 1);
+  }
+
+  if (!changed) {
+    return null;
+  }
+
+  context.putImageData(imageData, 0, 0);
+  return new Promise<string | null>((resolve) => {
+    canvas.toBlob((blob) => {
+      resolve(blob ? URL.createObjectURL(blob) : null);
+    }, "image/png");
+  });
+}
+
+function pixelBrightness(pixels: Uint8ClampedArray, offset: number) {
+  return Math.max(pixels[offset], pixels[offset + 1], pixels[offset + 2]);
+}
+
+function isBlackKeyedMapObjectPath(path: string) {
+  const normalized = normalizedSceneAssetPath(path);
+  return (
+    normalized !== null &&
+    normalized.startsWith("/original-map/") &&
+    /\/(?:objects|objects2|smobjects|furnitures|walls|animations)/i.test(normalized)
+  );
+}
+
+function normalizedSceneAssetPath(path: string) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return new URL(path, window.location.href).pathname;
+  } catch {
+    return null;
+  }
+}
+
+function scheduleSceneAssetImageDelayedRetry(image: HTMLImageElement, originalSrc: string) {
+  if (typeof window === "undefined") {
+    image.dataset.mir2LoadFailed = "true";
+    image.style.visibility = "hidden";
+    return;
+  }
+  if (isImmutableSceneAssetUrl(originalSrc)) {
+    markStaticSceneAssetFailed(image, originalSrc);
+    return;
+  }
+
+  const retryCount = Number.parseInt(image.dataset.mir2DelayedRetryCount ?? "0", 10);
+  const nextRetryCount = Number.isFinite(retryCount) ? retryCount + 1 : 1;
+  const delay = SCENE_ASSET_DELAYED_RETRY_DELAYS_MS[nextRetryCount - 1];
+
+  if (delay === undefined) {
+    image.dataset.mir2LoadFailed = "true";
+    image.style.visibility = "hidden";
+    return;
+  }
+
+  image.dataset.mir2LoadFailed = "retrying";
+  image.dataset.mir2DelayedRetryCount = String(nextRetryCount);
+  image.style.visibility = "hidden";
+
+  window.setTimeout(() => {
+    if (!image.isConnected || image.dataset.mir2OriginalSrc !== originalSrc) {
+      return;
+    }
+    const retrySrc = sceneAssetDelayedRetryUrl(originalSrc, nextRetryCount);
+    if (!retrySrc) {
+      image.dataset.mir2LoadFailed = "true";
+      image.style.visibility = "hidden";
+      return;
+    }
+    image.dataset.mir2RetryOriginalSrc = originalSrc;
+    image.dataset.mir2RetryIndex = String(sceneAssetCandidateUrls(originalSrc).length);
+    image.style.visibility = "";
+    image.src = retrySrc;
+  }, delay);
+}
+
+function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
+  if (isImmutableSceneAssetUrl(originalSrc)) {
+    return null;
+  }
+
+  const retryCandidates = sceneAssetCandidateUrls(originalSrc, retryCount + 1).filter(
+    (candidate) => candidate !== originalSrc,
+  );
+  if (!retryCandidates.length) {
+    return cacheBustedSceneAssetUrl(originalSrc, retryCount + 1);
+  }
+  return retryCandidates[(retryCount - 1) % retryCandidates.length] ?? retryCandidates[0] ?? null;
 }
 
 function bichonTorchLightFrame(path: string) {
@@ -417,7 +772,7 @@ type SceneAssetCacheWindow = Window & {
   };
 };
 
-function cacheBustedSceneAssetUrl(url: string) {
+function cacheBustedSceneAssetUrl(url: string, retryAttempt = 1) {
   if (typeof window === "undefined") {
     return null;
   }
@@ -427,7 +782,8 @@ function cacheBustedSceneAssetUrl(url: string) {
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
       return null;
     }
-    parsed.searchParams.set("mir2ImgRetry", "1");
+    parsed.searchParams.set("mir2ImgRetry", String(Math.max(1, retryAttempt)));
+    parsed.searchParams.set("mir2ImgRetryTs", Date.now().toString(36));
     return parsed.origin === window.location.origin
       ? `${parsed.pathname}${parsed.search}${parsed.hash}`
       : parsed.toString();
@@ -468,4 +824,49 @@ function isRemoteBackedSceneAssetPath(path: string) {
     path.startsWith("/generated/original-map-blend/") ||
     path.startsWith("/bevy-runtime/")
   );
+}
+
+function isImmutableSceneAssetUrl(url: string) {
+  if (typeof window === "undefined") {
+    return isRemoteBackedSceneAssetPath(url);
+  }
+
+  try {
+    return isRemoteBackedSceneAssetPath(new URL(url, window.location.href).pathname);
+  } catch {
+    return false;
+  }
+}
+
+function staticSceneAssetFailureKey(url: string) {
+  if (typeof window === "undefined") {
+    return url;
+  }
+
+  try {
+    return new URL(url, window.location.href).pathname;
+  } catch {
+    return url;
+  }
+}
+
+function staticSceneAssetRecentlyFailed(url: string) {
+  const key = staticSceneAssetFailureKey(url);
+  const failedAt = failedStaticSceneAssetUrls.get(key);
+  if (!failedAt) {
+    return false;
+  }
+
+  if (Date.now() - failedAt <= STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS) {
+    return true;
+  }
+
+  failedStaticSceneAssetUrls.delete(key);
+  return false;
+}
+
+function markStaticSceneAssetFailed(image: HTMLImageElement, originalSrc: string) {
+  failedStaticSceneAssetUrls.set(staticSceneAssetFailureKey(originalSrc), Date.now());
+  image.dataset.mir2LoadFailed = "true";
+  image.style.visibility = "hidden";
 }

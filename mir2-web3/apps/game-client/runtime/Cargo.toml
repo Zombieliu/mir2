@@ -11,16 +11,21 @@ license = "MIT"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = ["webgl2"]
+webgl2 = ["bevy/webgl2"]
+webgpu = ["bevy/webgpu"]
+
 [dependencies]
 bevy = { version = "0.18.1", default-features = false, features = [
   "bevy_asset",
   "bevy_core_pipeline",
   "bevy_render",
   "bevy_sprite",
+  "bevy_sprite_render",
   "bevy_winit",
   "multi_threaded",
-  "png",
-  "webgl2"
+  "png"
 ] }
 console_error_panic_hook = "0.1.7"
 js-sys = "0.3.72"

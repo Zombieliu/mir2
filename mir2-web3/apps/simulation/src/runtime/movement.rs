@@ -8,11 +8,15 @@ use super::components::{
     Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, Position, RemotePlayer, SelfPlayer,
 };
 use super::crystal_compat::CAVE_MAGGOT_PARALYSIS_BUFF_KEY;
-use super::map::relocate_player_to_map;
+use super::map::{
+    apply_current_player_position_map_transfer, is_current_map_transfer_source,
+    relocate_player_to_map,
+};
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
 use super::resources::{
-    is_in_world, BuffResource, MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
+    crystal_player_can_run, is_in_world, mark_crystal_player_move, BuffResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
 };
 use super::session::SimulationSession;
 
@@ -164,7 +168,7 @@ pub(super) fn can_traverse_between(
     let mut current = source.clone();
     while current != *target {
         let next = step_point_toward(&current, target);
-        if next == current || !can_occupy(world, next.clone(), ignore_entity) {
+        if next == current || !can_player_movement_occupy(world, next.clone(), ignore_entity) {
             return false;
         }
         current = next;
@@ -174,6 +178,11 @@ pub(super) fn can_traverse_between(
 
 pub(super) fn can_occupy(world: &World, point: Point, ignore_entity: Option<Entity>) -> bool {
     !is_blocked_tile(world, &point) && !has_blocking_entity(world, &point, ignore_entity)
+}
+
+fn can_player_movement_occupy(world: &World, point: Point, ignore_entity: Option<Entity>) -> bool {
+    !is_player_movement_blocked_tile(world, &point)
+        && !has_blocking_entity(world, &point, ignore_entity)
 }
 
 pub(super) fn current_location(world: &World) -> UserLocation {
@@ -379,7 +388,7 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
             )
         };
         if let Some(destination) =
-            directional_destination(world, &position, direction, amount, Some(player))
+            player_directional_destination(world, &position, direction, amount, Some(player))
         {
             world.entity_mut(player).insert(Position(destination));
             return true;
@@ -387,6 +396,24 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
     }
 
     false
+}
+
+fn player_directional_destination(
+    world: &World,
+    source: &Point,
+    direction: MirDirection,
+    amount: i32,
+    ignore_entity: Option<Entity>,
+) -> Option<Point> {
+    let mut current = source.clone();
+    for _ in 0..amount.max(1) {
+        let next = offset_point(&current, direction, 1);
+        if !can_player_movement_occupy(world, next.clone(), ignore_entity) {
+            return None;
+        }
+        current = next;
+    }
+    Some(current)
 }
 
 pub(super) fn player_is_paralyzed(world: &World) -> bool {
@@ -441,6 +468,18 @@ pub(super) fn is_blocked_tile(world: &World, point: &Point) -> bool {
     });
 
     map_blocked || door_blocked || terrain_blocked || decor_blocked
+}
+
+fn is_player_movement_blocked_tile(world: &World, point: &Point) -> bool {
+    if !point_in_bounds(
+        &world.resource::<MapRuntimeResource>().map_region_bounds,
+        point,
+    ) {
+        return true;
+    }
+
+    let blocked = is_blocked_tile(world, point);
+    blocked && !is_current_map_transfer_source(world, point)
 }
 
 #[allow(deprecated)]
@@ -554,6 +593,9 @@ impl SimulationSession {
                             running,
                             &mut packets,
                         );
+                        packets.extend(apply_current_player_position_map_transfer(
+                            self.app.world_mut(),
+                        ));
                     }
                 }
             }
@@ -578,7 +620,18 @@ impl SimulationSession {
             .entity_mut(player)
             .insert(Facing(direction));
 
-        step_player(self.app.world_mut(), move_distance_for_mode(running));
+        if running && !crystal_player_can_run(self.app.world_mut()) {
+            let mut packets = vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+            packets.extend(advance_world(self.app.world_mut()));
+            return packets;
+        }
+
+        let moved = step_player(self.app.world_mut(), move_distance_for_mode(running));
+        if moved {
+            mark_crystal_player_move(self.app.world_mut(), running);
+        }
 
         let mut packets = vec![ServerPacket::UserLocation {
             location: current_location(self.app.world()),
@@ -592,6 +645,9 @@ impl SimulationSession {
                 running,
                 &mut packets,
             );
+            packets.extend(apply_current_player_position_map_transfer(
+                self.app.world_mut(),
+            ));
         }
 
         packets.extend(advance_world(self.app.world_mut()));

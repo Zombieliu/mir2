@@ -77,6 +77,9 @@ export async function GET() {
     apiPrefixes: ["/api/scene/crystal", "/api/original-ui-meta"],
     runtimeCaches: {
       staticAssetMaxEntries: 20000,
+      staticCriticalMaxEntries: 3000,
+      staticBackgroundMaxEntries: 6000,
+      staticRuntimeMaxEntries: 16000,
       sceneBlueprintMaxEntries: 512,
       apiMetadataMaxEntries: 512,
     },

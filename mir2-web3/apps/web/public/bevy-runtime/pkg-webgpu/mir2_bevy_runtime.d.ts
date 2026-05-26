@@ -1,0 +1,72 @@
+/* tslint:disable */
+/* eslint-disable */
+
+export function bootMir2Runtime(): void;
+
+export function clearMir2StatusSink(): void;
+
+export function getMir2RendererBackend(): string;
+
+export function setMir2EntityRenderAtlas(key: string, width: number, height: number, pixels: Uint8Array): void;
+
+export function setMir2EntityRenderState(snapshot_json: string): void;
+
+export function setMir2StatusSink(callback: Function): void;
+
+export function setMir2WorldState(snapshot_json: string): void;
+
+export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
+
+export interface InitOutput {
+    readonly memory: WebAssembly.Memory;
+    readonly getMir2RendererBackend: () => [number, number];
+    readonly setMir2WorldState: (a: number, b: number) => void;
+    readonly setMir2EntityRenderState: (a: number, b: number) => void;
+    readonly setMir2EntityRenderAtlas: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly bootMir2Runtime: () => void;
+    readonly setMir2StatusSink: (a: any) => void;
+    readonly clearMir2StatusSink: () => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h42bf88799d610114: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen__convert__closures_____invoke__h7c35d480f2728772: (a: number, b: number, c: any, d: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h117c94735bc82dec: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_4: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_5: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_6: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_7: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_8: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_9: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h005ef03d9646f7b4_10: (a: number, b: number, c: any) => void;
+    readonly wasm_bindgen__convert__closures_____invoke__h3553f315ba97b7c0: (a: number, b: number) => void;
+    readonly __wbindgen_malloc: (a: number, b: number) => number;
+    readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+    readonly __externref_table_alloc: () => number;
+    readonly __wbindgen_externrefs: WebAssembly.Table;
+    readonly __wbindgen_exn_store: (a: number) => void;
+    readonly __wbindgen_free: (a: number, b: number, c: number) => void;
+    readonly __wbindgen_destroy_closure: (a: number, b: number) => void;
+    readonly __externref_table_dealloc: (a: number) => void;
+    readonly __wbindgen_start: () => void;
+}
+
+export type SyncInitInput = BufferSource | WebAssembly.Module;
+
+/**
+ * Instantiates the given `module`, which can either be bytes or
+ * a precompiled `WebAssembly.Module`.
+ *
+ * @param {{ module: SyncInitInput }} module - Passing `SyncInitInput` directly is deprecated.
+ *
+ * @returns {InitOutput}
+ */
+export function initSync(module: { module: SyncInitInput } | SyncInitInput): InitOutput;
+
+/**
+ * If `module_or_path` is {RequestInfo} or {URL}, makes a request and
+ * for everything else, calls `WebAssembly.instantiate` directly.
+ *
+ * @param {{ module_or_path: InitInput | Promise<InitInput> }} module_or_path - Passing `InitInput` directly is deprecated.
+ *
+ * @returns {Promise<InitOutput>}
+ */
+export default function __wbg_init (module_or_path?: { module_or_path: InitInput | Promise<InitInput> } | InitInput | Promise<InitInput>): Promise<InitOutput>;

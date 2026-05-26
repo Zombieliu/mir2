@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
+  other: {
+    google: "notranslate",
+  },
 };
 
 export default function RootLayout({
@@ -16,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
+      <body translate="no" className="notranslate" suppressHydrationWarning>
         <AssetCacheRegistrar />
         {children}
       </body>

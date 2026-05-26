@@ -29,6 +29,7 @@ tools/procmon/
 **/.chrome-cdp-*/
 **/.edge-cdp-*/
 **/.tmp-*/
+.wrangler/
 **/.screens-*.png
 **/screenshots/
 **/playwright-report/

@@ -98,6 +98,25 @@ MIR2_GATEWAY_ZONE_HEARTBEAT_INTERVAL_SECONDS=2 \
 cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
 ```
 
+For a prod-like local Gateway cutover, run the same process with explicit
+fail-closed Postgres and Redis requirements:
+
+```bash
+MIR2_ENV=staging \
+MIR2_GATEWAY_WEB_ADDR=127.0.0.1:7110 \
+MIR2_GATEWAY_TCP_ADDR=127.0.0.1:7000 \
+MIR2_ACCOUNT_STORE_BACKEND=postgres \
+MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES=1 \
+MIR2_ACCOUNT_STORE_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
+MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
+MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1 \
+MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS=30 \
+MIR2_GATEWAY_ROUTE_LEASE_TTL_SECONDS=30 \
+MIR2_GAMEPLAY_EVENT_REDPANDA_URL=http://127.0.0.1:8082 \
+MIR2_GAMEPLAY_EVENT_TOPIC=gameplay.command.executed \
+cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
+```
+
 ```bash
 ADMIN_API_ADDR=127.0.0.1:7420 \
 ADMIN_DATABASE_URL=postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2 \
@@ -275,8 +294,8 @@ cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
 ```
 
 Gateway session caching currently has an in-memory implementation behind the
-`GatewaySessionCache` contract. To use Redis for the non-authoritative online
-session cache:
+`GatewaySessionCache` contract for local development only. To use Redis for the
+non-authoritative online session cache and StartGame route-admission leases:
 
 ```bash
 MIR2_GATEWAY_REDIS_CACHE_URL=redis://127.0.0.1:6379 \
@@ -286,14 +305,21 @@ MIR2_GAMEPLAY_EVENT_REDPANDA_URL=http://127.0.0.1:8082 \
 cargo +1.89.0 run --locked -p mir2-gateway --bin mir2-gateway
 ```
 
-If `MIR2_GATEWAY_REDIS_CACHE_URL` is unset, the gateway uses the in-memory cache.
-Both cache implementations support lookup/removal by account/character index and
-by character-name routing index for Admin `KickPlayer`; Redis stores the routing
-index with the same TTL as the session record. Gateway session records include
-`updatedAtMs`, and the routing helpers can reject or remove stale online routes.
-Gateway Web sessions also acquire a route lease keyed by account/character. A
-stale disconnect only removes the route when it still owns that lease, so a
-newer connection is not erased by an older socket closing late.
+If `MIR2_GATEWAY_REDIS_CACHE_URL` is unset in local development, the gateway uses
+the in-memory cache. Production/staging modes, `MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES=1`,
+or `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1` require Redis and fail startup instead
+of silently falling back to process-local routing. When Redis is required,
+startup also pings it so a bad URL or unavailable Redis is caught before the
+Gateway accepts players. Both cache implementations support lookup/removal by
+account/character index and by character-name routing index for Admin
+`KickPlayer`; Redis stores the routing index with the same TTL as the session
+record. Gateway session records include `updatedAtMs`, and the routing helpers
+can reject or remove stale online routes. Gateway Web sessions also acquire a
+route lease keyed by account/character. A stale disconnect only removes the
+route when it still owns that lease, so a newer connection is not erased by an
+older socket closing late. Authenticated Web `StartGame` also acquires that
+route lease before entering the world; a competing socket or Gateway that cannot
+obtain the fresh lease is rejected before it creates a duplicate online player.
 
 If `MIR2_GAMEPLAY_EVENT_REDPANDA_URL` is unset, gameplay event publishing is
 disabled. Set `MIR2_GAMEPLAY_EVENT_LOG=true` for local stderr-only event

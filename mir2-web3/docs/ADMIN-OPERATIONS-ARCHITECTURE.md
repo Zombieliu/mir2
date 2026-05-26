@@ -155,9 +155,10 @@ Current implementation:
 - `GET /admin/system-mail/outbox` merges in-memory receipts with Postgres `admin_system_mail_receipts` when `ADMIN_DATABASE_URL` is configured. This keeps live `gateway_live` or `account_store_fallback` delivery receipts visible after Admin API restart.
 - `/admin/read/*` provides the first real Admin Web read model boundary. Player,
   player-detail, economy totals/distribution, hot maps, and banned-account risk
-  cases derive from the configured account store: JSON by default, or Postgres
-  when `MIR2_ACCOUNT_STORE_BACKEND=postgres` is explicitly set. Gateway presence
-  comes from `GET /admin/sessions` and overlays online player status, runtime
+  cases derive from the configured account store: JSON by default for local
+  development, or Postgres when `MIR2_ACCOUNT_STORE_BACKEND=postgres` is set or
+  a production/staging runtime environment requires it. Gateway presence comes
+  from `GET /admin/sessions` and overlays online player status, runtime
   HP/gold/map, dashboard online totals, and server zones-online source from the
   same in-memory/Redis session cache used for kick routing. Service health is
   checked from real local/configured endpoints. Activity config, market price

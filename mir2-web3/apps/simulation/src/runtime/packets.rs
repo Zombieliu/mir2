@@ -10,13 +10,13 @@ use mir2_game_data::{
     localized_text_or_fallback, LanguageCode,
 };
 use mir2_protocol::{
-    decode_server_packet, encode_frame, ChatType, ClientBuff, ClientFriend, ClientGtMap,
+    decode_server_packet, encode_frame, ChatItem, ChatType, ClientBuff, ClientFriend, ClientGtMap,
     ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientPacket, GuildMember,
     GuildRank, GuildStorageItem, HeroUserInformation, MirClass, MirDirection, MirGender,
     MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
     ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo,
-    ObjectSpellInfo, ObjectStruckInfo, Point, ServerPacket, ServerPacketId, Spell, StruckInfo,
-    UserInformation, UserItem, UserItemStat,
+    ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId,
+    Spell, StruckInfo, UserInformation, UserItem, UserItemStat,
 };
 
 use crate::config::{
@@ -31,9 +31,10 @@ use crate::config::{
 use super::components::{
     current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
     entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
-    CharacterBody, DisplayName, Facing, GeneralMeowMeowState, GroundDrop, HarvestMonsterState,
-    Hero, Monster, MonsterAgent, MonsterAiState, MonsterPoisonState, MonsterVitals, Npc, NpcAgent,
-    ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SummonedMonster,
+    CharacterBody, DisplayName, DropOwnership, Facing, GeneralMeowMeowState, GroundDrop,
+    HarvestMonsterState, Hero, Monster, MonsterAgent, MonsterAiState, MonsterPoisonState,
+    MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
+    SummonedMonster,
 };
 use super::crystal_compat::{
     BASE_STORAGE_SLOTS, BUFF_GENERAL_MEOW_MEOW_SHIELD, CRYSTAL_BIND_DONT_STORE,
@@ -78,7 +79,11 @@ use super::npc::{
     buy_item_impl, crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog,
     sell_item_impl,
 };
-use super::quests::{complete_quest, ensure_runtime_quest, quest_template_by_id, set_quest_stage};
+use super::quests::{
+    begin_quest, can_accept_quest, complete_quest_with_selection, completed_quest_ids,
+    crystal_quest_task_list, ensure_runtime_quest, quest_definition_exists, quest_log_snapshots,
+    quest_template_by_id,
+};
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
     get_rented_items_impl, item_rental_fee_impl, item_rental_lock_fee_impl,
@@ -86,13 +91,14 @@ use super::rental::{
     retrieve_rental_item_impl,
 };
 use super::resources::{
-    advance_runtime_tick, crystal_packet_action_ready, crystal_packet_attack_delay_ticks,
+    crystal_packet_action_ready, crystal_packet_attack_delay_ticks,
     crystal_packet_move_delay_ticks, crystal_packet_spell_delay_ticks,
-    intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action, BuffResource,
-    HeroInventoryResource, InventoryResource, ItemRentalResource, MapRuntimeResource,
-    NpcStateResource, PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource,
-    PotionRecoveryResource, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, SkillResource, Stage5SystemsResource,
+    intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
+    queue_crystal_movement_retry, BuffResource, HeroInventoryResource, InventoryResource,
+    ItemRentalResource, MapRuntimeResource, NpcStateResource, PlayerActionKind,
+    PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource, QuestResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::save::*;
 use super::session::SimulationSession;
@@ -2717,6 +2723,9 @@ const CRYSTAL_QUEST_STATE_UPDATE: u8 = 1;
 const CRYSTAL_QUEST_STATE_REMOVE: u8 = 2;
 
 fn stage5_quest_task_list(world: &World, quest_id: i32) -> Vec<String> {
+    if let Some(tasks) = crystal_quest_task_list(world, quest_id) {
+        return tasks;
+    }
     let language = world.resource::<SessionResource>().language;
     let Some(snapshot) = world
         .resource::<QuestResource>()
@@ -2747,16 +2756,6 @@ fn stage5_quest_stage(world: &World, quest_id: i32) -> Option<QuestStage> {
         .iter()
         .find(|quest| quest.quest_id == quest_id)
         .map(|quest| quest.stage)
-}
-
-fn stage5_completed_quest_ids(world: &World) -> Vec<i32> {
-    world
-        .resource::<QuestResource>()
-        .quests
-        .iter()
-        .filter(|quest| quest.stage == QuestStage::Completed)
-        .map(|quest| quest.quest_id)
-        .collect()
 }
 
 fn stage5_quest_change_packet(
@@ -2794,12 +2793,20 @@ fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPac
     if !is_in_world(world) {
         return Vec::new();
     }
-    if quest_template_by_id(quest_id).is_none() {
+    if !quest_definition_exists(quest_id) {
+        return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
+    }
+    if !can_accept_quest(world, quest_id)
+        && !matches!(
+            stage5_quest_stage(world, quest_id),
+            Some(QuestStage::InProgress | QuestStage::ReadyToTurnIn | QuestStage::Completed)
+        )
+    {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     match ensure_runtime_quest(world, quest_id) {
         QuestStage::Available => {
-            set_quest_stage(world, quest_id, QuestStage::InProgress);
+            begin_quest(world, quest_id);
             vec![stage5_quest_change_packet(
                 world,
                 quest_id,
@@ -2819,21 +2826,25 @@ fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPac
     }
 }
 
-fn stage5_finish_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
+fn stage5_finish_quest_packet(
+    world: &mut World,
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
     if ensure_runtime_quest(world, quest_id) != QuestStage::ReadyToTurnIn {
         return Vec::new();
     }
-    complete_quest(world, quest_id);
+    complete_quest_with_selection(world, quest_id, selected_item_index);
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
     vec![
         stage5_quest_remove_packet(quest_id, true),
         ServerPacket::CompleteQuest {
-            completed_quests: stage5_completed_quest_ids(world),
+            completed_quests: completed_quest_ids(world),
         },
     ]
 }
@@ -2874,7 +2885,7 @@ fn stage5_share_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPack
     if !is_in_world(world) {
         return Vec::new();
     }
-    if quest_template_by_id(quest_id).is_none() {
+    if !quest_definition_exists(quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     let sharer_name = stage5_player_name(world);
@@ -3666,7 +3677,7 @@ fn stage5_allow_mentor_packet(world: &mut World) -> Vec<ServerPacket> {
         mentor.allow_mentor = !mentor.allow_mentor;
         mentor.allow_mentor
     };
-    vec![system_message_key(
+    vec![hint_chat_key(
         world,
         if allow {
             "server.AllowingMentorRequests"
@@ -3693,7 +3704,10 @@ fn stage5_cancel_mentor_packet(world: &mut World) -> Vec<ServerPacket> {
         had_mentor
     };
     if had_mentor {
-        vec![stage5_mentor_update_packet(world)]
+        vec![
+            system_message_key_args(world, "server.YouHaveMentorshipCooldown", ["7"]),
+            stage5_mentor_update_packet(world),
+        ]
     } else {
         vec![system_message_key(world, "server.NoMentorship")]
     }
@@ -4307,18 +4321,67 @@ pub(super) fn localized_npc_name_key(object_id: u32) -> Option<&'static str> {
     }
 }
 
-pub(super) fn handle_chat_packet(world: &mut World, message: String) -> Vec<ServerPacket> {
+const CRYSTAL_CHAT_INTERVAL_MS: u64 = 2_000;
+const CRYSTAL_CHAT_SPAM_TICKS_BEFORE_BAN: u8 = 5;
+const CRYSTAL_CHAT_SPAM_BAN_MS: u64 = 5 * 60 * 1_000;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PreparedChatPacket {
+    pub message: String,
+    pub linked_items: Vec<ChatItem>,
+    pub linked_user_items: Vec<UserItem>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ChatPacketPreparation {
+    Dispatch(PreparedChatPacket),
+    Immediate(Vec<ServerPacket>),
+}
+
+pub(super) fn prepare_chat_packet(
+    world: &mut World,
+    message: String,
+    linked_items: Vec<ChatItem>,
+) -> ChatPacketPreparation {
     if !super::session::is_in_world(world) {
-        return Vec::new();
+        return ChatPacketPreparation::Immediate(Vec::new());
     }
 
     if let Some(remaining_seconds) = active_chat_ban_remaining_seconds(world) {
-        return vec![chat_ban_remaining_message(world, remaining_seconds)];
+        return ChatPacketPreparation::Immediate(vec![chat_ban_remaining_message(
+            world,
+            remaining_seconds,
+        )]);
+    }
+
+    if message.is_empty() {
+        return ChatPacketPreparation::Immediate(Vec::new());
+    }
+
+    if let Some(packet) = apply_crystal_chat_spam_guard(world) {
+        return ChatPacketPreparation::Immediate(vec![packet]);
     }
 
     if message.trim().eq_ignore_ascii_case("@ADDSTORAGE") {
-        return expand_storage_rental_impl(world);
+        return ChatPacketPreparation::Immediate(expand_storage_rental_impl(world));
     }
+
+    ChatPacketPreparation::Dispatch(PreparedChatPacket {
+        linked_user_items: chat_linked_user_items(world, &linked_items),
+        message,
+        linked_items,
+    })
+}
+
+pub(super) fn handle_chat_packet(
+    world: &mut World,
+    message: String,
+    linked_items: Vec<ChatItem>,
+) -> Vec<ServerPacket> {
+    let prepared = match prepare_chat_packet(world, message, linked_items) {
+        ChatPacketPreparation::Dispatch(prepared) => prepared,
+        ChatPacketPreparation::Immediate(packets) => return packets,
+    };
 
     let player_name = world
         .resource::<SessionResource>()
@@ -4326,12 +4389,93 @@ pub(super) fn handle_chat_packet(world: &mut World, message: String) -> Vec<Serv
         .as_ref()
         .map(|character| character.name.clone())
         .unwrap_or_else(|| "?????".to_string());
+    let message = chat_text_with_linked_items(&prepared.message, &prepared.linked_items);
 
     vec![ServerPacket::ObjectChat {
         object_id: current_player_object_id(world).unwrap_or(0),
         text: format!("{player_name}: {message}"),
         chat_type: mir2_protocol::ChatType::Normal,
     }]
+}
+
+fn apply_crystal_chat_spam_guard(world: &mut World) -> Option<ServerPacket> {
+    let now = unix_now_ms();
+    let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
+    if now < player_runtime.chat_next_allowed_at_ms {
+        player_runtime.chat_spam_tick = player_runtime.chat_spam_tick.saturating_add(1);
+        if player_runtime.chat_spam_tick >= CRYSTAL_CHAT_SPAM_TICKS_BEFORE_BAN {
+            player_runtime.chat_banned = true;
+            player_runtime.chat_ban_until_ms = Some(now.saturating_add(CRYSTAL_CHAT_SPAM_BAN_MS));
+            player_runtime.chat_spam_tick = 0;
+            player_runtime.chat_next_allowed_at_ms = 0;
+            drop(player_runtime);
+            return Some(system_message_key(world, "server.ChatBanDuration5Minutes"));
+        }
+    } else {
+        player_runtime.chat_spam_tick = 0;
+    }
+    player_runtime.chat_next_allowed_at_ms = now.saturating_add(CRYSTAL_CHAT_INTERVAL_MS);
+    None
+}
+
+pub(super) fn chat_text_with_linked_items(message: &str, linked_items: &[ChatItem]) -> String {
+    let mut text = message.to_string();
+    for item in linked_items {
+        let needle = format!("<{}>", item.title);
+        if let Some((start, end)) = find_chat_link(&text, &needle) {
+            text.replace_range(start..end, &item.internal_name());
+        }
+    }
+    text
+}
+
+fn find_chat_link(text: &str, needle: &str) -> Option<(usize, usize)> {
+    for (start, _) in text.char_indices() {
+        let end = start.saturating_add(needle.len());
+        if end <= text.len()
+            && text.is_char_boundary(end)
+            && text[start..end].eq_ignore_ascii_case(needle)
+        {
+            return Some((start, end));
+        }
+    }
+    None
+}
+
+fn chat_linked_user_items(world: &World, linked_items: &[ChatItem]) -> Vec<UserItem> {
+    if linked_items.is_empty() {
+        return Vec::new();
+    }
+    let inventory = world.resource::<InventoryResource>();
+    let hero_inventory = world.resource::<HeroInventoryResource>();
+    let mut items = Vec::new();
+    for linked_item in linked_items {
+        let item = match linked_item.grid {
+            MirGridType::Equipment => inventory
+                .equipment_items
+                .iter()
+                .filter_map(user_item_from_equipment_state)
+                .find(|item| item.unique_id == linked_item.unique_id),
+            MirGridType::HeroInventory => hero_inventory
+                .items
+                .iter()
+                .find(|item| item_unique_id(item) == linked_item.unique_id)
+                .map(user_item_from_item_state),
+            _ => inventory
+                .inventory_items
+                .iter()
+                .chain(inventory.belt_items.iter())
+                .chain(inventory.storage_items.iter())
+                .find(|item| {
+                    item_matches_client_reference(item, linked_item.grid, linked_item.unique_id)
+                })
+                .map(user_item_from_item_state),
+        };
+        if let Some(item) = item {
+            items.push(item);
+        }
+    }
+    items
 }
 
 fn active_chat_ban_remaining_seconds(world: &mut World) -> Option<u64> {
@@ -4413,7 +4557,6 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
     let session = world.resource::<SessionResource>();
-    let quests = world.resource::<QuestResource>();
     let skills = world.resource::<SkillResource>();
     let buffs = world.resource::<BuffResource>();
     let npc_state = world.resource::<NpcStateResource>();
@@ -4502,11 +4645,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .iter()
             .map(|item| item.snapshot(language))
             .collect(),
-        quest_log: quests
-            .quests
-            .iter()
-            .map(|quest| quest.snapshot(language))
-            .collect(),
+        quest_log: quest_log_snapshots(world, language),
         active_npc_dialog: npc_state
             .active_npc_dialog
             .as_ref()
@@ -5429,6 +5568,7 @@ pub(super) fn collect_ground_drops(
     language: LanguageCode,
 ) -> Vec<GroundDropSnapshot> {
     let mut drops = Vec::new();
+    let tick = super::session::runtime_tick(world);
 
     for entity in world.iter_entities() {
         if entity.get::<GroundDrop>().is_none() {
@@ -5445,6 +5585,14 @@ pub(super) fn collect_ground_drops(
         if !point_visible(scene_view, &position) {
             continue;
         }
+        let ownership = entity.get::<DropOwnership>().and_then(|ownership| {
+            (tick <= ownership.expires_at_tick).then(|| {
+                (
+                    ownership.owner_object_id,
+                    ownership.expires_at_tick.saturating_sub(tick),
+                )
+            })
+        });
 
         drops.push(GroundDropSnapshot {
             object_id,
@@ -5457,6 +5605,8 @@ pub(super) fn collect_ground_drops(
                 Some(key) => localized_text_or_fallback(language, key, &payload.source_monster),
                 None => payload.source_monster.clone(),
             },
+            owner_object_id: ownership.map(|(owner_object_id, _)| owner_object_id),
+            ownership_remaining_ticks: ownership.map(|(_, remaining_ticks)| remaining_ticks),
             loot: ground_drop_loot_snapshot(&payload.loot),
         });
     }
@@ -5800,6 +5950,180 @@ pub(super) fn use_item_ack(
     })
 }
 
+#[derive(Debug, Clone)]
+struct RankingCandidate {
+    account_id: String,
+    character_index: i32,
+    player_id: i64,
+    name: String,
+    level: i32,
+    class: MirClass,
+    experience: i64,
+    online: bool,
+}
+
+fn ranking_class_filter(rank_type: u8) -> Option<Option<MirClass>> {
+    match rank_type {
+        0 => Some(None),
+        1 => Some(Some(MirClass::Warrior)),
+        2 => Some(Some(MirClass::Wizard)),
+        3 => Some(Some(MirClass::Taoist)),
+        4 => Some(Some(MirClass::Assassin)),
+        5 => Some(Some(MirClass::Archer)),
+        _ => None,
+    }
+}
+
+fn ranking_candidate_from_character(
+    account_id: &str,
+    character: &CharacterRecord,
+    save: Option<&CharacterSaveRecord>,
+    online: bool,
+) -> RankingCandidate {
+    let character = save.map(|save| &save.character).unwrap_or(character);
+    RankingCandidate {
+        account_id: account_id.to_string(),
+        character_index: character.index,
+        player_id: i64::from(character.index),
+        name: character.name.clone(),
+        level: i32::from(character.level),
+        class: character.class,
+        experience: save.map(|save| save.experience).unwrap_or_default(),
+        online,
+    }
+}
+
+fn stage5_get_ranking_packet(
+    world: &World,
+    rank_type: u8,
+    rank_index: i32,
+    online_only: bool,
+) -> Vec<ServerPacket> {
+    let Some(class_filter) = ranking_class_filter(rank_type) else {
+        return Vec::new();
+    };
+    if rank_index < 0 {
+        return Vec::new();
+    }
+
+    let session = world.resource::<SessionResource>();
+    let Some(session_account_id) = session.account_id.clone() else {
+        return Vec::new();
+    };
+    let active_character_index = session
+        .selected_character
+        .as_ref()
+        .map(|character| character.index);
+    let active_key = active_character_index.map(|index| (session_account_id.clone(), index));
+    let active_save = snapshot_active_character_save(world);
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+
+    let mut candidates = Vec::new();
+    let mut active_seen = false;
+    {
+        let Ok(store) = config.account_store.lock() else {
+            return Vec::new();
+        };
+        for (account_id, account) in &store.accounts {
+            for character in &account.characters {
+                let online = active_key
+                    .as_ref()
+                    .is_some_and(|(active_account, active_index)| {
+                        active_account == account_id && *active_index == character.index
+                    });
+                let save = if online {
+                    active_seen = true;
+                    active_save
+                        .as_ref()
+                        .or_else(|| account.saves.get(&character.index))
+                } else {
+                    account.saves.get(&character.index)
+                };
+                candidates.push(ranking_candidate_from_character(
+                    account_id, character, save, online,
+                ));
+            }
+        }
+    }
+
+    if !active_seen {
+        if let (Some((account_id, character_index)), Some(save)) =
+            (active_key.as_ref(), active_save.as_ref())
+        {
+            candidates.push(RankingCandidate {
+                account_id: account_id.clone(),
+                character_index: *character_index,
+                player_id: i64::from(*character_index),
+                name: save.character.name.clone(),
+                level: i32::from(save.character.level),
+                class: save.character.class,
+                experience: save.experience,
+                online: true,
+            });
+        }
+    }
+
+    candidates.retain(|candidate| {
+        class_filter
+            .map(|class| candidate.class == class)
+            .unwrap_or(true)
+    });
+    candidates.sort_by(|left, right| {
+        right
+            .level
+            .cmp(&left.level)
+            .then_with(|| right.experience.cmp(&left.experience))
+            .then_with(|| left.name.cmp(&right.name))
+            .then_with(|| left.player_id.cmp(&right.player_id))
+    });
+
+    let my_rank = active_key
+        .as_ref()
+        .and_then(|(account_id, character_index)| {
+            candidates
+                .iter()
+                .position(|candidate| {
+                    &candidate.account_id == account_id
+                        && candidate.character_index == *character_index
+                })
+                .map(|index| index as i32 + 1)
+        })
+        .unwrap_or_default();
+
+    let visible_candidates: Vec<&RankingCandidate> = candidates
+        .iter()
+        .filter(|candidate| !online_only || candidate.online)
+        .collect();
+    let count = visible_candidates.len() as i32;
+    let start = rank_index as usize;
+    if start >= visible_candidates.len() && !visible_candidates.is_empty() {
+        return Vec::new();
+    }
+    let page: Vec<&RankingCandidate> = visible_candidates
+        .into_iter()
+        .skip(start)
+        .take(20)
+        .collect();
+    let listing_details = page
+        .iter()
+        .map(|candidate| RankCharacterInfo {
+            player_id: candidate.player_id,
+            name: candidate.name.clone(),
+            level: candidate.level,
+            class: candidate.class,
+        })
+        .collect();
+    let listings = page.iter().map(|candidate| candidate.player_id).collect();
+
+    vec![ServerPacket::Rankings {
+        rank_type,
+        my_rank,
+        listing_details,
+        listings,
+        count,
+    }]
+}
+
 impl SimulationSession {
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
         if let ClientPacket::StartGame { character_index } = packet {
@@ -5931,7 +6255,6 @@ impl SimulationSession {
             | ClientPacket::ChangeAMode { .. }
             | ClientPacket::ChangePMode { .. }
             | ClientPacket::ChangeTrade { .. }
-            | ClientPacket::CallNpc { .. }
             | ClientPacket::BuyItemBack { .. }
             | ClientPacket::TownRevive
             | ClientPacket::RequestUserName { .. }
@@ -5948,8 +6271,12 @@ impl SimulationSession {
             | ClientPacket::GuildBuffUpdate { .. }
             | ClientPacket::NpcConfirmInput { .. }
             | ClientPacket::GameShopBuy { .. }
-            | ClientPacket::ReportIssue { .. }
-            | ClientPacket::GetRanking { .. } => Vec::new(),
+            | ClientPacket::ReportIssue { .. } => Vec::new(),
+            ClientPacket::GetRanking {
+                rank_type,
+                rank_index,
+                online_only,
+            } => stage5_get_ranking_packet(self.app.world(), rank_type, rank_index, online_only),
             ClientPacket::GuildWarReturn { name } => {
                 stage5_guild_war_return_packet(self.app.world_mut(), name)
             }
@@ -6080,9 +6407,14 @@ impl SimulationSession {
             ClientPacket::AcceptQuest { quest_index, .. } => {
                 stage5_accept_quest_packet(self.app.world_mut(), quest_index)
             }
-            ClientPacket::FinishQuest { quest_index, .. } => {
-                stage5_finish_quest_packet(self.app.world_mut(), quest_index)
-            }
+            ClientPacket::FinishQuest {
+                quest_index,
+                selected_item_index,
+            } => stage5_finish_quest_packet(
+                self.app.world_mut(),
+                quest_index,
+                (selected_item_index >= 0).then_some(selected_item_index),
+            ),
             ClientPacket::AbandonQuest { quest_index } => {
                 stage5_abandon_quest_packet(self.app.world_mut(), quest_index)
             }
@@ -6329,10 +6661,8 @@ impl SimulationSession {
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Move)
                 {
-                    advance_runtime_tick(self.app.world_mut());
-                    return vec![ServerPacket::UserLocation {
-                        location: current_location(self.app.world()),
-                    }];
+                    queue_crystal_movement_retry(self.app.world_mut(), direction, false);
+                    return Vec::new();
                 }
                 if is_in_world(self.app.world()) {
                     mark_crystal_packet_action(
@@ -6348,10 +6678,8 @@ impl SimulationSession {
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Move)
                 {
-                    advance_runtime_tick(self.app.world_mut());
-                    return vec![ServerPacket::UserLocation {
-                        location: current_location(self.app.world()),
-                    }];
+                    queue_crystal_movement_retry(self.app.world_mut(), direction, true);
+                    return Vec::new();
                 }
                 if is_in_world(self.app.world()) {
                     mark_crystal_packet_action(
@@ -6362,7 +6690,10 @@ impl SimulationSession {
                 }
                 self.move_player_by_direction(direction, true)
             }
-            ClientPacket::Chat { message } => handle_chat_packet(self.app.world_mut(), message),
+            ClientPacket::Chat {
+                message,
+                linked_items,
+            } => handle_chat_packet(self.app.world_mut(), message, linked_items),
             ClientPacket::MoveItem { grid, from, to } => {
                 move_item_impl(self.app.world_mut(), grid, from, to)
             }
@@ -6475,6 +6806,7 @@ impl SimulationSession {
                 self.range_attack_impl(direction, target_id, target_location)
             }
             ClientPacket::Harvest { direction } => self.harvest_impl(direction),
+            ClientPacket::CallNpc { object_id, key } => self.call_npc_impl(object_id, &key),
             ClientPacket::BuyItem {
                 item_index,
                 count,

@@ -17,6 +17,7 @@ export {
   handleSceneAssetImageLoad,
   mapSpriteBlendMode,
   mapSpriteRenderPath,
+  rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
 } from "./original-client-scene-map-rendering";
 export {
@@ -99,6 +100,8 @@ export type ViewportEntitySprite = {
   body: ViewportSpriteLayer | null;
   hair: ViewportSpriteLayer | null;
   frontWeapons: ViewportSpriteLayer[];
+  preloadFrames: ViewportSpriteLayer[];
+  preloadPaths: string[];
   nameplateTop: number;
 };
 
@@ -118,6 +121,16 @@ type QuestIconKey =
 
 const SCENE_SPRITE_FRAME_INTERVAL_MS = 120;
 const CRYSTAL_QUEST_ICON_FRAME_INTERVAL_MS = 500;
+const PLAYER_ATLAS_PRELOAD_DIRECTIONS = [
+  "Up",
+  "UpRight",
+  "Right",
+  "DownRight",
+  "Down",
+  "DownLeft",
+  "Left",
+  "UpLeft",
+];
 
 type ViewportSpriteAnimationMeta = {
   frameBaseOffset: number;
@@ -207,12 +220,26 @@ export function buildViewportEntitySprite(
       : weaponPlacement === "front"
         ? [primaryWeaponLayer, secondaryWeaponLayer].filter((layer): layer is ViewportSpriteLayer => Boolean(layer))
         : [];
+  const preloadAnimations = atlasPreloadAnimationsForEntity(entity, sprite, animationState, animation);
+  const preloadFrames = animationPreloadFramesForEntity({
+    libraries,
+    animations: preloadAnimations,
+    directions: atlasPreloadDirectionsForEntity(entity),
+    bodyLibraryKey,
+    hairLibraryKey,
+    weaponLibraryKey,
+    secondaryWeaponLibraryKey,
+    fallbackFrameIndex,
+    fallbackWeaponFrameIndex,
+  });
 
   return {
     rearWeapons,
     body: viewportSpriteLayer(bodyFrame),
     hair: viewportSpriteLayer(hairFrame),
     frontWeapons,
+    preloadFrames,
+    preloadPaths: [...new Set(preloadFrames.map((frame) => frame.path))],
     nameplateTop: computeNameplateTop(bodyFrame, hairFrame, primaryWeaponFrame ?? secondaryWeaponFrame),
   };
 }
@@ -425,6 +452,141 @@ function frameMetaForIndexWithFallback(
   );
 }
 
+function animationPreloadFramesForEntity({
+  libraries,
+  animations,
+  directions,
+  bodyLibraryKey,
+  hairLibraryKey,
+  weaponLibraryKey,
+  secondaryWeaponLibraryKey,
+  fallbackFrameIndex,
+  fallbackWeaponFrameIndex,
+}: {
+  libraries: Record<string, OriginalSceneSpriteLibraryMeta>;
+  animations: ViewportSpriteAnimationMeta[];
+  directions: Array<string | undefined>;
+  bodyLibraryKey: string;
+  hairLibraryKey: string | null;
+  weaponLibraryKey: string | null;
+  secondaryWeaponLibraryKey: string | null;
+  fallbackFrameIndex: number | null;
+  fallbackWeaponFrameIndex: number | null;
+}) {
+  const frames: ViewportSpriteLayer[] = [];
+  for (const animation of animations) {
+    for (const preloadDirection of directions) {
+      const bodyFrameIndices = animationFrameIndices(
+        animation.frameBaseOffset,
+        preloadDirection,
+        animation.directionStride,
+        animation.frameCount,
+      );
+      const weaponFrameIndices =
+        animation.weaponFrameOffset === null
+          ? []
+          : animationFrameIndices(
+              animation.weaponFrameOffset,
+              preloadDirection,
+              animation.directionStride,
+              animation.frameCount,
+            );
+      frames.push(
+        ...frameLayersForIndices(libraries[bodyLibraryKey], bodyFrameIndices, fallbackFrameIndex),
+        ...(hairLibraryKey
+          ? frameLayersForIndices(libraries[hairLibraryKey], bodyFrameIndices, fallbackFrameIndex)
+          : []),
+        ...(weaponLibraryKey
+          ? frameLayersForIndices(libraries[weaponLibraryKey], weaponFrameIndices, fallbackWeaponFrameIndex)
+          : []),
+        ...(secondaryWeaponLibraryKey
+          ? frameLayersForIndices(libraries[secondaryWeaponLibraryKey], weaponFrameIndices, fallbackWeaponFrameIndex)
+          : []),
+      );
+    }
+  }
+  const uniqueFrames = new Map<string, ViewportSpriteLayer>();
+  for (const frame of frames) {
+    uniqueFrames.set(`${frame.path}|${frame.width}x${frame.height}`, frame);
+  }
+  return [...uniqueFrames.values()];
+}
+
+function atlasPreloadAnimationsForEntity(
+  entity: DisplayEntity,
+  sprite: EntitySprite,
+  animationState: EntitySpriteAnimationState,
+  currentAnimation: ViewportSpriteAnimationMeta,
+) {
+  const states: EntitySpriteAnimationState[] =
+    entity.kind === "npc"
+      ? [animationState]
+      : entity.kind === "monster"
+        ? ["standing", "walking", animationState]
+        : ["standing", "walking", "running", animationState];
+  const animations = new Map<string, ViewportSpriteAnimationMeta>();
+  const addAnimation = (animation: ViewportSpriteAnimationMeta | null) => {
+    if (!animation) {
+      return;
+    }
+    animations.set(
+      [
+        animation.frameBaseOffset,
+        animation.weaponFrameOffset ?? "none",
+        animation.frameCount,
+        animation.directionStride,
+        animation.reverse ? "reverse" : "forward",
+      ].join(":"),
+      animation,
+    );
+  };
+
+  for (const state of states) {
+    addAnimation(spriteAnimationMetaForEntity(entity, sprite, state));
+  }
+  addAnimation(currentAnimation);
+  return [...animations.values()];
+}
+
+function atlasPreloadDirectionsForEntity(entity: DisplayEntity) {
+  if (entity.kind === "selfPlayer" || entity.kind === "player") {
+    return PLAYER_ATLAS_PRELOAD_DIRECTIONS;
+  }
+  return [entity.direction];
+}
+
+function animationFrameIndices(
+  frameBaseOffset: number,
+  direction: string | undefined,
+  directionStride: number,
+  frameCount: number,
+) {
+  const stride = Math.max(directionStride, 1);
+  const count = Math.max(frameCount, 1);
+  const base = frameBaseOffset + directionIndex(direction) * stride;
+
+  return Array.from({ length: count }, (_, frameOffset) => base + frameOffset);
+}
+
+function frameLayersForIndices(
+  library: OriginalSceneSpriteLibraryMeta | null | undefined,
+  frameIndices: number[],
+  fallbackFrameIndex: number | null,
+) {
+  if (!library) {
+    return [];
+  }
+
+  const frames = frameIndices
+    .map((frameIndex) => viewportSpriteLayer(frameMetaForIndexWithFallback(library, frameIndex, fallbackFrameIndex)))
+    .filter((frame): frame is ViewportSpriteLayer => Boolean(frame));
+  const uniqueFrames = new Map<string, ViewportSpriteLayer>();
+  for (const frame of frames) {
+    uniqueFrames.set(`${frame.path}|${frame.width}x${frame.height}`, frame);
+  }
+  return [...uniqueFrames.values()];
+}
+
 function spriteFrameCycleForEntity(
   entity: DisplayEntity,
   sceneFrameIndex: number,
@@ -464,9 +626,9 @@ function spriteFrameCycleForEntity(
       break;
     case "walking":
     case "running":
-      cycle = transientFrameCycle(
+      cycle = loopingFrameCycle(
         now,
-        motionSnapshot?.startedAt ?? entity.movementStartedAt,
+        motionSnapshot?.startedAt ?? entity.movementStartedAt ?? now,
         frameIntervalMs,
         frameCount,
       );

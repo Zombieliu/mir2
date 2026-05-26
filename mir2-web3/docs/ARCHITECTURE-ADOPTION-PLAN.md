@@ -1,6 +1,6 @@
 # Architecture Adoption Plan
 
-Last updated: 2026-05-05
+Last updated: 2026-05-11
 
 Purpose: define what parts of the target MMORPG architecture should be added now, what should be introduced behind interfaces, and what should remain documented until scale or product need justifies it.
 
@@ -101,15 +101,17 @@ Gateway / Account / World / Mail service boundaries
    schema in `infra/postgres/migrations/0001_core.sql`.
 5. Implement Postgres repositories behind existing local interfaces. Done for
    Admin command/audit records and the admin outbox. Gameplay account state
-   still defaults to JSON, but now has both an import bridge and an optional
-   Postgres mirror through `MIR2_ACCOUNT_STORE_DATABASE_URL`; it also has an
-   explicit opt-in source-of-truth mode through
-   `MIR2_ACCOUNT_STORE_BACKEND=postgres`, with row locks and version increments.
-6. Add Redis session/online-state cache with tests proving cache miss/hit equivalence. Started with a gateway `GatewaySessionCache` contract, deterministic in-memory online-session records, and an optional Redis adapter with TTL tests. Redis now stores `zoneId` and `updatedAtMs`, exposes `route_character`, can derive a `SessionRouteRequest` for cached online-character reconnect/routing, rejects stale routes through `fresh_route_request_for_character`, and can remove stale routes outside Redis TTL behavior. Redis also stores a character-name routing index for Admin kick-player removal. Web Gateway now refreshes routes through per-character route leases and removes only owned routes on disconnect, preventing stale sockets from erasing newer online routes. Gateway can publish zone heartbeat records to the Admin API; cross-zone route-transfer semantics remain next.
+   still defaults to JSON for local development, but now has both an import
+   bridge and an optional Postgres mirror through
+   `MIR2_ACCOUNT_STORE_DATABASE_URL`; it also has a Postgres source-of-truth
+   mode through `MIR2_ACCOUNT_STORE_BACKEND=postgres`, production/staging
+   runtime policy, row locks, and version increments.
+6. Add Redis session/online-state cache with tests proving cache miss/hit equivalence. Started with a gateway `GatewaySessionCache` contract, deterministic in-memory online-session records, and a Redis adapter with TTL tests. Redis now stores `zoneId` and `updatedAtMs`, exposes `route_character`, can derive a `SessionRouteRequest` for cached online-character reconnect/routing, rejects stale routes through `fresh_route_request_for_character`, and can remove stale routes outside Redis TTL behavior. Redis also stores a character-name routing index for Admin kick-player removal. Web Gateway now refreshes routes through per-character route leases and removes only owned routes on disconnect, preventing stale sockets from erasing newer online routes. Production/staging Gateway startup now requires `MIR2_GATEWAY_REDIS_CACHE_URL` instead of silently falling back to in-memory routing; local development can still use in-memory cache, and `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1` forces Redis outside production/staging. Gateway can publish zone heartbeat records to the Admin API; cross-zone route-transfer semantics remain next.
 7. Add NATS command bus dispatcher for admin command dispatch, while keeping command/audit state in Postgres. `dispatch-admin-outbox` now supports core NATS and JetStream publish-ack modes, plus retry/dead-letter lifecycle events.
 8. Define event envelope schemas before wiring app-level Redpanda producers into runtime paths. Local Redpanda and ClickHouse now exist in Compose; Admin outbox events now use a stable envelope, publish to Redpanda through Pandaproxy when configured, track NATS/Redpanda delivery state independently, and project terminal command outcomes, approval lifecycle, and outbox lifecycle events into ClickHouse `admin_events` plus `admin_command_events`. Gameplay runtime now has a `GatewayGameplayEvent` envelope, optional `GameplayEventSink` boundary for command outcomes, Gateway startup wiring for Redpanda/Pandaproxy, `/health` sink metrics, a ClickHouse `gameplay_events` projection, Admin API `/admin/gameplay-events` read access, `/admin/gameplay-events/summary` lag/volume readiness with `maxLagSeconds` / `minEvents` alert thresholds, an Admin Web dashboard panel for that summary, and `infra/check-architecture-gates.sh` coverage that locks Gateway event JSON fields to the ClickHouse Kafka/materialized-view columns. Gameplay events remain analytics-only; they do not participate in authoritative transaction commit.
-9. Move account storage behind repositories before normalizing gameplay tables. `mir2-simulation` now has `AccountStoreRepository`, `FileAccountStoreRepository`, and `PostgresAccountStoreRepository`; `SimulationConfig` load/save paths use those adapters while preserving JSON, mirror, and Postgres source-of-truth modes.
-9. Add broader ClickHouse/Meilisearch projections only after real event/read-model data exists.
+9. Move account storage behind repositories before normalizing gameplay tables. `mir2-simulation` now has `AccountStoreRepository`, `FileAccountStoreRepository`, and `PostgresAccountStoreRepository`; `SimulationConfig` load/save paths use those adapters while preserving JSON, mirror, and Postgres source-of-truth modes. Gateway and Admin API now share `SimulationConfig::with_account_store_environment`, so production/staging runtimes fail closed unless `MIR2_ACCOUNT_STORE_DATABASE_URL` is configured for the Postgres source-of-truth path.
+10. Keep local quality gates explicit. `scripts/quality-gate.sh` now checks the current Rust/Web engineering boundary and can run a broader backend test pass with `MIR2_QUALITY_FULL=1`.
+11. Add broader ClickHouse/Meilisearch projections only after real event/read-model data exists.
 
 ## Current Stack Answer
 

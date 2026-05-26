@@ -51,6 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &mut stream,
         ClientPacket::Chat {
             message: "hello from smoke".to_string(),
+            linked_items: Vec::new(),
         },
     )?;
     let _ = read_and_print(&mut stream)?;

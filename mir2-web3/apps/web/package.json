@@ -6,6 +6,7 @@
     "export:crystal-ui": "node ./scripts/export-crystal-ui.mjs",
     "export:crystal-sounds": "node ./scripts/export-crystal-sounds.mjs",
     "generate:crystal-asset-index": "node ./scripts/generate-crystal-asset-index.mjs",
+    "generate:crystal-map-runtime": "node ./scripts/generate-crystal-map-runtime-data.mjs",
     "assets:prepare": "npm run generate:crystal-asset-index && npm run export:crystal-sounds && npm run export:crystal-ui",
     "assets:verify": "npm run generate:crystal-asset-index && npm run smoke:crystal-minimap-assets && npm run audit:crystal-map-coverage && npm run audit:crystal-map-gameplay",
     "export:crystal-map": "node ./scripts/export-crystal-starter-map.mjs",
@@ -14,13 +15,19 @@
     "audit:crystal-map-gameplay": "node ./scripts/audit-crystal-map-gameplay.mjs",
     "smoke:crystal-assets": "node ./scripts/smoke-crystal-assets.mjs",
     "smoke:crystal-map-api": "node ./scripts/smoke-crystal-map-api.mjs",
+    "qa:capture-map-monsters": "node ./scripts/capture-production-map-monsters.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",
+    "smoke:bevy-runtime-backends": "node ./scripts/smoke-bevy-runtime-backends.mjs",
     "smoke:cache-maintenance": "node ./scripts/smoke-cache-metrics.mjs --exerciseMaintenance true",
     "smoke:playable-metrics": "node ./scripts/smoke-cache-metrics.mjs --mode playable",
     "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
     "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
     "assets:r2:upload": "node ./scripts/upload-r2-assets.mjs",
+    "assets:bevy-entity-atlas:build": "node ./scripts/build-bevy-entity-atlas-pack.mjs",
+    "vercel:prune-output": "node ./scripts/prune-vercel-output-assets.mjs",
+    "vercel:build:prod": "npx vercel@latest build --prod --yes && npm run vercel:prune-output",
+    "vercel:deploy:prod": "npx vercel@latest deploy --prebuilt --prod --archive=tgz --yes",
     "smoke:reconnect-resume": "node ./scripts/smoke-reconnect-resume.mjs",
     "smoke:two-client-zone": "node ./scripts/smoke-two-client-zone.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
@@ -44,9 +51,11 @@
     "@types/node": "25.0.3",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "sharp": "0.34.5",
     "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }

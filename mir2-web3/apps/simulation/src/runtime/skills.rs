@@ -6319,6 +6319,33 @@ fn consume_equipped_crystal_poison(
     Some((ServerPacket::DeleteItem { unique_id, count }, poison_shape))
 }
 
+pub(super) fn consume_zone_magic_inventory_components(
+    world: &mut World,
+    spell: Spell,
+) -> Option<Vec<ServerPacket>> {
+    match spell {
+        Spell::PoisonCloud => {
+            if !has_equipped_crystal_amulet(world, 0)
+                || !has_equipped_crystal_poison(world, Some(1))
+            {
+                return None;
+            }
+            let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 5)?;
+            let (poison_delete_packet, _) = consume_equipped_crystal_poison(world, Some(1), 5)?;
+            Some(vec![amulet_delete_packet, poison_delete_packet])
+        }
+        Spell::SummonSkeleton | Spell::SummonShinsu => {
+            let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
+            Some(vec![amulet_delete_packet])
+        }
+        Spell::SummonHolyDeva => {
+            let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 2)?;
+            Some(vec![amulet_delete_packet])
+        }
+        _ => Some(Vec::new()),
+    }
+}
+
 pub(super) fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i32 {
     let level = i32::from(level) + 1;
     let defence_power = i32::from(magic.power_base) + i32::from(magic.power_bonus) / 2;

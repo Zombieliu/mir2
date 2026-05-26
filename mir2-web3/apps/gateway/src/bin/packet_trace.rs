@@ -1818,6 +1818,7 @@ fn movement_chat_keepalive_packets(fixture: &Fixture) -> Vec<ClientPacket> {
         },
         ClientPacket::Chat {
             message: "trace hello".to_string(),
+            linked_items: Vec::new(),
         },
         ClientPacket::KeepAlive {
             time: now_unix_ms() as i64,

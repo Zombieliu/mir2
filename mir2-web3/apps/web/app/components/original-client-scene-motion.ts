@@ -32,11 +32,11 @@ function animationStateForMovement(
   return tileDistance > 1 ? "running" : "walking";
 }
 
-function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, _tileDistance: number) {
+function animationStateLifetimeMs(animationState: EntitySpriteAnimationState, tileDistance: number) {
   switch (animationState) {
     case "running":
     case "walking":
-      return 600;
+      return tileDistance > 0 ? 600 : 0;
     default:
       return 0;
   }
@@ -150,7 +150,8 @@ export function refreshEntityMotionSnapshots(
       }
     }
 
-    if (tileDistance > 3) {
+    const maxSmoothTileDistance = isRenderPlayer ? 8 : 3;
+    if (tileDistance > maxSmoothTileDistance) {
       nextSnapshots[entity.objectId] = {
         fromX: entity.x,
         fromY: entity.y,

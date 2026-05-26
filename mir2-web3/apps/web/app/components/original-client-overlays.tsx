@@ -19,6 +19,7 @@ import {
   SUPPORTED_LANGUAGES,
   type Mir2Language,
 } from "../../lib/localization";
+import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import { playOriginalSoundId } from "../../lib/original-audio";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import {
@@ -124,13 +125,17 @@ export type LoginOverlayProps = {
   password: string;
   loginBusy: boolean;
   loginError: string | null;
+  suiWallets: SuiWalletSummary[];
+  walletPickerOpen: boolean;
+  dubheWalletUrl: string;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
   onCreateAccount: () => void;
   onSubmitLogin: () => void;
   onPasskeyLogin: () => void;
-  onWalletLogin: () => void;
+  onWalletPickerToggle: () => void;
+  onWalletLogin: (walletId: string) => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
 };
@@ -145,18 +150,23 @@ export function LoginOverlay({
   password,
   loginBusy,
   loginError,
+  suiWallets,
+  walletPickerOpen,
+  dubheWalletUrl,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
   onCreateAccount,
   onSubmitLogin,
   onPasskeyLogin,
+  onWalletPickerToggle,
   onWalletLogin,
   onQuickEnter,
   onResetClient,
 }: LoginOverlayProps) {
   const loginNotice = loginError ?? (loginBusy ? t("ui.loggingIn") : null);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
+  const dubheWalletDetected = suiWallets.some((wallet) => wallet.isDubhe);
 
   return (
     <section className="login-overlay">
@@ -225,10 +235,53 @@ export function LoginOverlay({
           <button type="button" onClick={onPasskeyLogin} disabled={loginBusy}>
             {t("ui.passkeyLogin", [], "Passkey")}
           </button>
-          <button type="button" onClick={onWalletLogin} disabled={loginBusy}>
+          <button
+            type="button"
+            onClick={onWalletPickerToggle}
+            disabled={loginBusy}
+            aria-expanded={walletPickerOpen}
+            aria-controls="login-wallet-picker"
+          >
             {t("ui.walletLogin", [], "Wallet")}
           </button>
         </div>
+        {walletPickerOpen ? (
+          <div id="login-wallet-picker" className="login-wallet-picker" role="dialog" aria-label="Sui wallet">
+            <div className="login-wallet-picker-title">Sui Wallet</div>
+            {suiWallets.length > 0 ? (
+              <div className="login-wallet-list">
+                {suiWallets.map((wallet) => (
+                  <button
+                    key={wallet.id}
+                    type="button"
+                    className={`login-wallet-option ${wallet.isDubhe ? "dubhe" : ""}`}
+                    onClick={() => onWalletLogin(wallet.id)}
+                    disabled={loginBusy}
+                  >
+                    {wallet.icon ? (
+                      <img src={wallet.icon} alt="" aria-hidden="true" />
+                    ) : (
+                      <span className="login-wallet-fallback-icon" aria-hidden="true">
+                        {wallet.name.slice(0, 1)}
+                      </span>
+                    )}
+                    <span>{wallet.name}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="login-wallet-empty">No Sui wallet found</div>
+            )}
+            {!dubheWalletDetected ? (
+              <a className="login-wallet-install" href={dubheWalletUrl} target="_blank" rel="noreferrer">
+                <span className="login-wallet-fallback-icon" aria-hidden="true">
+                  D
+                </span>
+                <span>Dubhe Wallet</span>
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {showAccountPanel ? (
         <div className="login-account-panel">
@@ -280,7 +333,7 @@ export function SelectOverlay({
   const [showCreditsPanel, setShowCreditsPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showCreatePanel, setShowCreatePanel] = useState(false);
-  const [createName, setCreateName] = useState(() => randomCharacterName());
+  const [createName, setCreateName] = useState("");
   const [createClassKey, setCreateClassKey] = useState<EntityClassKey>("warrior");
   const [createGender, setCreateGender] = useState<EntityGenderKey>("male");
   const [createError, setCreateError] = useState<string | null>(null);
@@ -324,7 +377,7 @@ export function SelectOverlay({
       classKey: createClassKey,
       gender: createGender,
     });
-    setCreateName(randomCharacterName());
+    setCreateName("");
     closeCreatePanel();
   }
 

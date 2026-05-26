@@ -11,6 +11,14 @@ type AssetManifest = {
     assetBaseUrl?: string | null;
     objectPrefix?: string | null;
   };
+  runtimeCaches?: {
+    staticAssetMaxEntries?: number;
+    staticCriticalMaxEntries?: number;
+    staticBackgroundMaxEntries?: number;
+    staticRuntimeMaxEntries?: number;
+    sceneBlueprintMaxEntries?: number;
+    apiMetadataMaxEntries?: number;
+  };
   resourcePacks?: AssetCachePack[];
 };
 
@@ -167,6 +175,7 @@ declare global {
         transferBytes: number;
       };
       remoteAssetBaseUrl?: string | null;
+      staticAssetTiers?: Record<string, number> | null;
     };
     __mir2AssetCacheReset?: (options?: AssetCacheResetOptions) => Promise<AssetCacheResetResult>;
     __mir2CacheMetrics?: CacheMetricsHandle;
@@ -188,10 +197,12 @@ const BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS = 20_000;
 type BackgroundPrewarmMode = "immediate" | "afterPlayable";
 
 export function AssetCacheRegistrar() {
+  const [mounted, setMounted] = useState(false);
   const [debugEnabled, setDebugEnabled] = useState(false);
   const [snapshot, setSnapshot] = useState<CacheMetricsSnapshot | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     const params = new URLSearchParams(window.location.search);
     const debug = params.get("cacheDebug") === "1";
     const consoleLog = debug || params.get("cacheLog") === "1";
@@ -235,7 +246,9 @@ export function AssetCacheRegistrar() {
             label: pack.label,
             urls: pack.urls.length,
             scenes: pack.scenes?.length ?? 0,
+            cacheTier: pack.cacheTier ?? (pack.phase === "background" ? "background" : "critical"),
           })),
+          runtimeCaches: manifest.runtimeCaches ?? null,
           remoteAssets: manifest.remoteAssets ?? null,
         });
 
@@ -265,6 +278,7 @@ export function AssetCacheRegistrar() {
             deletedCaches: Array.isArray(configured?.deletedCaches)
               ? configured.deletedCaches.length
               : null,
+            staticAssetTiers: configured?.staticAssetTiers ?? null,
           });
 
           window.__mir2AssetCache = {
@@ -272,6 +286,10 @@ export function AssetCacheRegistrar() {
             status: "registered",
             version: manifest.version,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
+            staticAssetTiers:
+              typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
+                ? (configured.staticAssetTiers as Record<string, number>)
+                : null,
           };
           logCacheEvent(metrics, "service-worker", {
             status: window.__mir2AssetCache.status,
@@ -353,7 +371,7 @@ export function AssetCacheRegistrar() {
     };
   }, []);
 
-  if (!snapshot) return null;
+  if (!mounted || !snapshot) return null;
 
   if (debugEnabled) return <CacheDebugPanel snapshot={snapshot} />;
 
@@ -455,6 +473,7 @@ function CacheDebugPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
       <div style={{ color: "#ffffff", fontWeight: 700, marginBottom: 6 }}>Mir2 Cache Debug</div>
       <div>SW: {assetCache?.status ?? "pending"} {assetCache?.version ? `(${assetCache.version})` : ""}</div>
       <div>CDN: {assetCache?.remoteAssetBaseUrl ? shortPath(assetCache.remoteAssetBaseUrl) : "off"}</div>
+      <div>Tiers: {formatStaticAssetTiers(assetCache?.staticAssetTiers)}</div>
       <div>Resources: {summary.gameResourceCount}/{summary.resourceCount}</div>
       <div>Transfer: {formatBytes(summary.transferBytes)} / encoded {formatBytes(summary.encodedBytes)}</div>
       <div>Cache-like: {summary.cachedLikeCount}</div>
@@ -758,6 +777,7 @@ async function prewarmPack(
   publishPrewarmProgress(metrics, "running");
 
   try {
+    await hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
     await prewarmUrls(pack.urls, packMetric, metrics, concurrency);
 
     for (const scene of pack.scenes ?? []) {
@@ -786,6 +806,7 @@ async function prewarmPack(
       const frameUrls = extractSceneFrameUrls(blueprint, scene.spriteFrameLimit);
       packMetric.requested += frameUrls.length;
       publishPrewarmProgress(metrics, "running");
+      await hintAssetCacheTier(frameUrls, cacheTierForPack(pack));
       await prewarmUrls(frameUrls, packMetric, metrics, concurrency);
     }
 
@@ -797,6 +818,26 @@ async function prewarmPack(
   } finally {
     packMetric.durationMs = performance.now() - startedAt;
     publishPrewarmProgress(metrics, packMetric.status === "error" ? "error" : "running");
+  }
+}
+
+function cacheTierForPack(pack: AssetCachePack) {
+  return pack.cacheTier ?? (pack.phase === "background" ? "background" : "critical");
+}
+
+async function hintAssetCacheTier(urls: string[], tier: "critical" | "background") {
+  if (!urls.length || !("serviceWorker" in navigator)) return;
+  if (window.__mir2AssetCache?.enabled !== true) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    const worker = navigator.serviceWorker.controller ?? registration.active;
+    worker?.postMessage({
+      type: "MIR2_ASSET_CACHE_HINT",
+      cacheTier: tier,
+      urls,
+    });
+  } catch {
+    // Cache hints are best-effort; fetch/prewarm should continue without them.
   }
 }
 
@@ -1370,6 +1411,11 @@ function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function formatStaticAssetTiers(tiers: Record<string, number> | null | undefined) {
+  if (!tiers) return "pending";
+  return `C${tiers.critical ?? 0} / B${tiers.background ?? 0} / R${tiers.runtime ?? 0}`;
 }
 
 function shortPath(path: string) {

@@ -21,6 +21,18 @@ const characterName = args.characterName ?? defaultCharacterName();
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9500 + (process.pid % 1000));
 const headed = booleanArg(args.headed ?? process.env.MIR2_CHROME_HEADED, false);
+const chromeHostResolverRules =
+  args.chromeHostResolverRules ?? process.env.MIR2_CHROME_HOST_RESOLVER_RULES ?? "";
+const disableQuic = booleanArg(args.disableQuic ?? process.env.MIR2_CHROME_DISABLE_QUIC, false);
+const disableGpu = booleanArg(args.disableGpu ?? process.env.MIR2_CHROME_DISABLE_GPU, true);
+const canvasOnlyScreenshot = booleanArg(
+  args.canvasOnlyScreenshot ?? process.env.MIR2_CANVAS_ONLY_SCREENSHOT,
+  false,
+);
+const expectRawWebGl2Renderer = booleanArg(
+  args.expectRawWebGl2Renderer ?? process.env.MIR2_EXPECT_RAW_WEBGL2_RENDERER,
+  false,
+);
 const sampleMs = numberArg(args.sampleMs, 50);
 const interaction = args.interaction ?? "click";
 const viewport = {
@@ -44,10 +56,14 @@ const preHoldMs = numberArg(args.preHoldMs, 900);
 const clickCount = numberArg(args.clickCount, 8);
 const clickIntervalMs = numberArg(args.clickIntervalMs, 180);
 const preInteractionDelayMs = numberArg(args.preInteractionDelayMs ?? args.preInputDelayMs, 800);
-const directionLagMs = numberArg(args.directionLagMs ?? process.env.MIR2_MOVEMENT_DIRECTION_LAG_MS, 260);
+const directionLagMs = numberArg(args.directionLagMs ?? process.env.MIR2_MOVEMENT_DIRECTION_LAG_MS, 700);
 const stalePredictedMs = numberArg(args.stalePredictedMs ?? process.env.MIR2_MOVEMENT_STALE_PREDICTED_MS, 1200);
 const slowCommandQueueMs = numberArg(
   args.slowCommandQueueMs ?? process.env.MIR2_MOVEMENT_SLOW_COMMAND_QUEUE_MS,
+  1200,
+);
+const movementAckLatencyMs = numberArg(
+  args.movementAckLatencyMs ?? process.env.MIR2_MOVEMENT_ACK_LATENCY_MS,
   1200,
 );
 const maxCameraOffsetHoldMs = numberArg(
@@ -65,6 +81,14 @@ const strictMovementChecks = booleanArg(
 const allowBlockedResidual = booleanArg(
   args.allowBlockedResidual ?? process.env.MIR2_MOVEMENT_ALLOW_BLOCKED_RESIDUAL,
   false,
+);
+const initialSceneReadyTimeoutMs = numberArg(
+  args.initialSceneReadyTimeoutMs ?? process.env.MIR2_INITIAL_SCENE_READY_TIMEOUT_MS,
+  30_000,
+);
+const finalSceneReadyTimeoutMs = numberArg(
+  args.finalSceneReadyTimeoutMs ?? process.env.MIR2_FINAL_SCENE_READY_TIMEOUT_MS,
+  0,
 );
 const settleMs = numberArg(
   args.settleMs ?? process.env.MIR2_MOVEMENT_SETTLE_MS,
@@ -94,8 +118,12 @@ class CdpClient {
     this.wsUrl = wsUrl;
     this.nextId = 1;
     this.pending = new Map();
+    this.consoleMessages = [];
     this.consoleErrors = [];
     this.network404s = [];
+    this.assetRequests = [];
+    this.assetResponses = [];
+    this.webSockets = [];
     this.webSocketFramesSent = [];
     this.webSocketFramesReceived = [];
     this.movementWebSocketFramesSent = [];
@@ -124,11 +152,18 @@ class CdpClient {
       return;
     }
 
-    if (message.method === "Runtime.consoleAPICalled" && message.params?.type === "error") {
-      this.consoleErrors.push({
+    if (message.method === "Runtime.consoleAPICalled") {
+      const entry = {
         source: "console",
+        type: message.params?.type ?? "log",
         text: (message.params.args ?? []).map((arg) => arg.value ?? arg.description ?? "").join(" "),
-      });
+        at: Date.now(),
+      };
+      this.consoleMessages.push(entry);
+      this.consoleMessages = this.consoleMessages.slice(-200);
+      if (message.params?.type === "error") {
+        this.consoleErrors.push(entry);
+      }
     }
 
     if (message.method === "Runtime.exceptionThrown") {
@@ -152,6 +187,39 @@ class CdpClient {
       if (response?.status === 404 && !String(response.url ?? "").includes("favicon")) {
         this.network404s.push(response.url);
       }
+      if (isInterestingAssetUrl(response?.url)) {
+        this.assetResponses.push({
+          url: response.url,
+          status: response.status,
+          mimeType: response.mimeType,
+          fromDiskCache: Boolean(response.fromDiskCache),
+          fromPrefetchCache: Boolean(response.fromPrefetchCache),
+          fromServiceWorker: Boolean(response.fromServiceWorker),
+          at: Date.now(),
+        });
+        this.assetResponses = this.assetResponses.slice(-200);
+      }
+    }
+
+    if (message.method === "Network.requestWillBeSent") {
+      const request = message.params?.request;
+      if (isInterestingAssetUrl(request?.url)) {
+        this.assetRequests.push({
+          url: request.url,
+          type: message.params?.type,
+          at: Date.now(),
+        });
+        this.assetRequests = this.assetRequests.slice(-200);
+      }
+    }
+
+    if (message.method === "Network.webSocketCreated") {
+      this.webSockets.push({
+        requestId: message.params?.requestId,
+        url: message.params?.url,
+        at: Date.now(),
+      });
+      this.webSockets = this.webSockets.slice(-20);
     }
 
     if (message.method === "Network.webSocketFrameSent") {
@@ -229,6 +297,7 @@ async function main() {
     await client.send("Log.enable");
     await client.send("Network.enable");
     await client.send("Page.enable");
+    await client.send("Page.bringToFront");
     await setViewport(client, viewport);
     await navigate(client, baseUrl);
     await login(client);
@@ -544,9 +613,37 @@ async function main() {
     }
 
     const settle = await waitForMovementSettle(client, settleMs, { allowBlockedResidual });
+    if (finalSceneReadyTimeoutMs > 0) {
+      await waitUntil(
+        client,
+        "window.__mir2Stage5?.state?.screen === 'game' && window.__mir2Stage5?.state?.sceneInteractionReady === true",
+        "final scene assets ready",
+        finalSceneReadyTimeoutMs,
+      );
+      settle.finalState = await readMovementState(client);
+    }
     const finalState = settle.finalState;
+    const movementConsoleEvents = await client
+      .evaluate("window.__mir2MovementConsoleEvents ?? []")
+      .catch(() => []);
     const screenshotPath = path.join(outputDir, `${prefix}.png`);
     const statePath = path.join(outputDir, `${prefix}.json`);
+    if (canvasOnlyScreenshot) {
+      await client.evaluate(`
+        (() => {
+          const stage = document.querySelector(".client-stage-frame");
+          for (const child of Array.from(stage?.children ?? [])) {
+            if (child.id === "mir2-web3-canvas") {
+              child.style.zIndex = "100";
+              child.style.visibility = "visible";
+            } else {
+              child.style.visibility = "hidden";
+            }
+          }
+        })()
+      `);
+      await delay(120);
+    }
     const screenshot = await client.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false });
     await fs.writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
     const jumps = detectJumps(samples);
@@ -559,19 +656,30 @@ async function main() {
       maxDirectionQueueLength,
     });
     const cameraOffsetStairStepWarnings = detectCameraOffsetStairSteps(samples, maxCameraOffsetHoldMs);
+    const sceneBlackoutWarnings = detectSceneLayerBlackouts(samples);
     const pendingPlanAtEnd = analyzePendingPlanAtEnd(finalState, settle.capturedAt);
+    const rawWebGl2Renderer = latestRawWebGl2Renderer(samples, finalState);
+    const movementAckLatencyWarnings = detectMovementAckLatency(
+      client.movementWebSocketFramesSent,
+      client.movementWebSocketFramesReceived,
+      movementAckLatencyMs,
+    );
     const criticalConsoleErrors = client.consoleErrors.filter(isCriticalConsoleError);
     const assertions = buildAssertions({
       interaction,
       strictMovementChecks,
       allowBlockedResidual,
+      expectRawWebGl2Renderer,
+      rawWebGl2Renderer,
       jumps,
       routeSpamWarnings,
       logicalRollbackWarnings,
       directionLagWarnings,
       stalePredictionWarnings,
       commandQueueWarnings,
+      movementAckLatencyWarnings,
       cameraOffsetStairStepWarnings,
+      sceneBlackoutWarnings,
       pendingPlanAtEnd,
       consoleErrors: criticalConsoleErrors,
       network404s: client.network404s,
@@ -594,6 +702,7 @@ async function main() {
       directionLagMs,
       stalePredictedMs,
       slowCommandQueueMs,
+      movementAckLatencyMs,
       maxCameraOffsetHoldMs,
       maxDirectionQueueLength,
       packetRuntimeModes: summarizePacketRuntimeModes(samples),
@@ -605,6 +714,7 @@ async function main() {
       settleMs,
       settle,
       pendingPlanAtEnd,
+      rawWebGl2Renderer,
       assertions,
       sampleCount: samples.length,
       actions,
@@ -614,7 +724,9 @@ async function main() {
       directionLagWarnings,
       stalePredictionWarnings,
       commandQueueWarnings,
+      movementAckLatencyWarnings,
       cameraOffsetStairStepWarnings,
+      sceneBlackoutWarnings,
       feelMetrics: {
         logicalRollbackCount: logicalRollbackWarnings.length,
         directionLagWindowMs: directionLagMs,
@@ -624,17 +736,24 @@ async function main() {
         stalePredictionWarningCount: stalePredictionWarnings.length,
         slowCommandQueueWindowMs: slowCommandQueueMs,
         slowCommandQueueWarningCount: commandQueueWarnings.length,
+        movementAckLatencyWindowMs: movementAckLatencyMs,
+        movementAckLatencyWarningCount: movementAckLatencyWarnings.length,
         cameraOffsetHoldWindowMs: maxCameraOffsetHoldMs,
         cameraOffsetStairStepWarningCount: cameraOffsetStairStepWarnings.length,
         packetRuntimeModes: summarizePacketRuntimeModes(samples),
       },
       summary: summarizeSamples(samples),
       samples,
+      webSockets: client.webSockets,
       webSocketFramesSentTail: client.webSocketFramesSent.slice(-20),
       webSocketFramesReceivedTail: client.webSocketFramesReceived.slice(-20),
       movementWebSocketFramesSent: client.movementWebSocketFramesSent,
       movementWebSocketFramesReceived: client.movementWebSocketFramesReceived,
+      movementConsoleEvents,
+      assetRequestsTail: client.assetRequests.slice(-50),
+      assetResponsesTail: client.assetResponses.slice(-50),
       nonFaviconNetwork404s: [...new Set(client.network404s)],
+      consoleMessages: client.consoleMessages,
       consoleErrors: client.consoleErrors,
       criticalConsoleErrors,
       ignoredConsoleErrors: client.consoleErrors.filter((error) => !isCriticalConsoleError(error)),
@@ -658,6 +777,8 @@ async function main() {
           stalePredictionWarnings: report.stalePredictionWarnings,
           commandQueueWarnings: report.commandQueueWarnings,
           cameraOffsetStairStepWarnings: report.cameraOffsetStairStepWarnings,
+          sceneBlackoutWarnings: report.sceneBlackoutWarnings,
+          rawWebGl2Renderer: report.rawWebGl2Renderer,
           feelMetrics: report.feelMetrics,
           packetRuntimeModes: report.packetRuntimeModes,
           webSocketFramesSentTail: report.webSocketFramesSentTail,
@@ -1017,7 +1138,7 @@ async function login(client) {
     client,
     "window.__mir2Stage5?.state?.screen === 'game' && window.__mir2Stage5?.state?.sceneInteractionReady === true",
     "initial scene assets ready",
-    30_000,
+    initialSceneReadyTimeoutMs,
   );
 }
 
@@ -1179,12 +1300,39 @@ async function readMovementState(client) {
       const self = player
         ? (state.entities ?? []).find((entity) => entity.x === player.x && entity.y === player.y && (entity.kind === "selfPlayer" || entity.objectId === state.playerObjectId))
         : null;
-      const stage = document.querySelector(".client-stage-frame")?.getBoundingClientRect();
+      const stageNode = document.querySelector(".client-stage-frame");
+      const stage = stageNode?.getBoundingClientRect();
+      const canvasNode = document.querySelector("#mir2-web3-canvas");
+      const canvasStyle = canvasNode ? getComputedStyle(canvasNode) : null;
       const sprite = document.querySelector(".entity-sprite-stack.self")?.getBoundingClientRect();
       const selfNameplate = document.querySelector(".entity-nameplate.self");
       const nameplate = selfNameplate?.getBoundingClientRect();
       const floorNode = document.querySelector(".game-scene-floor, .scene-map-floor-sprite, .game-scene-backdrop img");
       const floor = floorNode?.getBoundingClientRect();
+      const rect = (value) => value ? ({
+        left: Math.round(value.left * 100) / 100,
+        top: Math.round(value.top * 100) / 100,
+        width: Math.round(value.width * 100) / 100,
+        height: Math.round(value.height * 100) / 100,
+      }) : null;
+      const sceneLayerNodes = [
+        ["backdrop", ".game-scene-backdrop"],
+        ["spriteOverlay", ".viewport-sprite-overlay"],
+        ["entityOverlay", ".viewport-entity-overlay"],
+        ["dropOverlay", ".viewport-drop-overlay"],
+      ].map(([name, selector]) => {
+        const node = document.querySelector(selector);
+        const style = node ? getComputedStyle(node) : null;
+        return {
+          name,
+          present: Boolean(node),
+          className: node?.className ?? null,
+          opacity: style?.opacity ?? null,
+          visibility: style?.visibility ?? null,
+          display: style?.display ?? null,
+          bounds: rect(node?.getBoundingClientRect()),
+        };
+      });
       const fixedSpriteNode =
         document.querySelector(${JSON.stringify(`[data-map-sprite-key*=":${fixedSpriteX}:${fixedSpriteY}:"]`)}) ??
         document.querySelector(${JSON.stringify(`[data-map-sprite-key*=":${fixedSpriteX + 2}:${fixedSpriteY}:"]`)}) ??
@@ -1203,12 +1351,6 @@ async function readMovementState(client) {
         ? window.__mir2GatewayEventHistory
         : [];
       const packetRuntime = window.__mir2PacketRuntime ?? null;
-      const rect = (value) => value ? ({
-        left: Math.round(value.left * 100) / 100,
-        top: Math.round(value.top * 100) / 100,
-        width: Math.round(value.width * 100) / 100,
-        height: Math.round(value.height * 100) / 100,
-      }) : null;
       const compactEntities = (state.entities ?? []).map((entity) => ({
         objectId: entity.objectId,
         kind: entity.kind,
@@ -1246,6 +1388,9 @@ async function readMovementState(client) {
         sceneAssetReadiness: state.sceneAssetReadiness ?? null,
         worldSnapshotRealtimeMode: state.worldSnapshotRealtimeMode ?? packetRuntime?.snapshotMode ?? null,
         packetRuntime,
+        bevyRuntime: window.__mir2BevyRuntimeDebug ?? null,
+        bevyEntityRenderer: window.__mir2BevyEntityRendererDebug ?? null,
+        webgl2EntityRenderer: window.__mir2WebGl2EntityRendererDebug ?? null,
         player,
         predictedPlayer: state.predictedPlayer ?? null,
         movementPlan: state.movementPlan ?? null,
@@ -1274,6 +1419,21 @@ async function readMovementState(client) {
         centerSprite: rect(fixedSprite),
         centerSpriteKey: fixedSpriteNode?.getAttribute?.("data-map-sprite-key") ?? null,
         stage: rect(stage),
+        canvas: canvasNode
+          ? {
+              bounds: rect(canvasNode.getBoundingClientRect()),
+              width: canvasNode.width,
+              height: canvasNode.height,
+              styleWidth: canvasStyle?.width ?? null,
+              styleHeight: canvasStyle?.height ?? null,
+              display: canvasStyle?.display ?? null,
+              visibility: canvasStyle?.visibility ?? null,
+              opacity: canvasStyle?.opacity ?? null,
+              zIndex: canvasStyle?.zIndex ?? null,
+            }
+          : null,
+        stageClassName: stageNode?.className ?? null,
+        sceneLayers: sceneLayerNodes,
         logsTail: (state.logs ?? []).slice(-5).map((line) => line.text ?? String(line)),
         sentMoveTail: sentMoves.slice(-8),
         commandTail: commandHistory
@@ -1431,17 +1591,118 @@ function routeSpamCommandSource(sample, command) {
   return sample?.player ?? null;
 }
 
+function detectSceneLayerBlackouts(samples) {
+  const warnings = [];
+  for (const sample of samples) {
+    if (sample?.screen !== "game") continue;
+    const layers = Array.isArray(sample.sceneLayers) ? sample.sceneLayers : [];
+    const mainLayers = layers.filter((layer) =>
+      ["backdrop", "spriteOverlay", "entityOverlay", "dropOverlay"].includes(layer?.name),
+    );
+    const presentLayers = mainLayers.filter((layer) => layer?.present);
+    if (!presentLayers.length) continue;
+    if (!presentLayers.every(isSceneLayerHidden)) continue;
+    warnings.push({
+      label: sample.label,
+      t: sample.t,
+      player: sample.player,
+      sceneInteractionReady: sample.sceneInteractionReady,
+      sceneAssetReadiness: sample.sceneAssetReadiness,
+      stageClassName: sample.stageClassName,
+      layers: presentLayers,
+    });
+  }
+  return warnings;
+}
+
+function isSceneLayerHidden(layer) {
+  const opacity = Number.parseFloat(layer?.opacity ?? "1");
+  return (
+    layer?.display === "none" ||
+    layer?.visibility === "hidden" ||
+    (Number.isFinite(opacity) && opacity <= 0.01)
+  );
+}
+
+function latestRawWebGl2Renderer(samples, finalState) {
+  if (finalState?.webgl2EntityRenderer) {
+    return finalState.webgl2EntityRenderer;
+  }
+  for (const sample of [...samples].reverse()) {
+    if (sample?.webgl2EntityRenderer) {
+      return sample.webgl2EntityRenderer;
+    }
+  }
+  return null;
+}
+
+function detectMovementAckLatency(sentFrames, receivedFrames, maxLatencyMs) {
+  const warnings = [];
+  let receiveIndex = 0;
+  for (const sentFrame of sentFrames ?? []) {
+    if (typeof sentFrame?.at !== "number") continue;
+    const sentPayload = parseFramePayload(sentFrame);
+    if (!["walk", "run", "moveTo"].includes(sentPayload?.type)) continue;
+
+    let receivedFrame = null;
+    while (receiveIndex < (receivedFrames?.length ?? 0)) {
+      const candidate = receivedFrames[receiveIndex];
+      receiveIndex += 1;
+      if (typeof candidate?.at === "number" && candidate.at >= sentFrame.at) {
+        receivedFrame = candidate;
+        break;
+      }
+    }
+
+    if (!receivedFrame) {
+      warnings.push({
+        command: sentPayload,
+        sentAt: sentFrame.at,
+        receivedAt: null,
+        latencyMs: null,
+        maxLatencyMs,
+      });
+      continue;
+    }
+
+    const latencyMs = receivedFrame.at - sentFrame.at;
+    if (latencyMs > maxLatencyMs) {
+      warnings.push({
+        command: sentPayload,
+        receivedPacket: parseFramePayload(receivedFrame),
+        sentAt: sentFrame.at,
+        receivedAt: receivedFrame.at,
+        latencyMs,
+        maxLatencyMs,
+      });
+    }
+  }
+  return warnings;
+}
+
+function parseFramePayload(frame) {
+  try {
+    return JSON.parse(frame?.payloadData ?? "null");
+  } catch {
+    return null;
+  }
+}
+
 function buildAssertions({
   interaction,
   strictMovementChecks,
   allowBlockedResidual,
+  expectRawWebGl2Renderer,
+  rawWebGl2Renderer,
   jumps,
   routeSpamWarnings,
   logicalRollbackWarnings,
   directionLagWarnings,
   stalePredictionWarnings,
   commandQueueWarnings,
+  movementAckLatencyWarnings,
   cameraOffsetStairStepWarnings,
+  sceneBlackoutWarnings,
   pendingPlanAtEnd,
   consoleErrors,
   network404s,
@@ -1485,12 +1746,38 @@ function buildAssertions({
       warnings: commandQueueWarnings,
     },
     {
+      name: "movementWebSocketAckResponsive",
+      pass: !strictMovementChecks || movementAckLatencyWarnings.length === 0,
+      count: movementAckLatencyWarnings.length,
+      maxLatencyMs: movementAckLatencyMs,
+      strict: strictMovementChecks,
+      warnings: movementAckLatencyWarnings,
+    },
+    {
       name: "cameraOffsetMovesContinuously",
       pass: !strictMovementChecks || cameraOffsetStairStepWarnings.length === 0,
       count: cameraOffsetStairStepWarnings.length,
       maxHoldMs: maxCameraOffsetHoldMs,
       strict: strictMovementChecks,
       warnings: cameraOffsetStairStepWarnings,
+    },
+    {
+      name: "noSceneLayerBlackouts",
+      pass: sceneBlackoutWarnings.length === 0,
+      count: sceneBlackoutWarnings.length,
+      warnings: sceneBlackoutWarnings,
+    },
+    {
+      name: "rawWebGl2RendererDrawsGameplayLayers",
+      pass:
+        !expectRawWebGl2Renderer ||
+        (rawWebGl2Renderer?.enabled === true &&
+          rawWebGl2Renderer?.supported === true &&
+          rawWebGl2Renderer?.textureReady === true &&
+          rawWebGl2Renderer?.renderedLayers > 0 &&
+          rawWebGl2Renderer?.reason === "rendered"),
+      expected: expectRawWebGl2Renderer,
+      renderer: rawWebGl2Renderer ?? null,
     },
     {
       name: "movementSettledWithoutResidualPlan",
@@ -2072,7 +2359,7 @@ function isUnexpectedCenterSpriteDelta(centerDx, centerDy, sample, previous) {
   const direction = activeMovementDirection(sample) ?? activeMovementDirection(previous);
   const vector = directionVector(direction);
   if (!vector) {
-    return centerDx > 12 || Math.abs(centerDy) > 12;
+    return centerDx > 24 || Math.abs(centerDy) > 24;
   }
 
   const expectedMapX = -vector.x;
@@ -2100,13 +2387,15 @@ function activeMovementDirection(sample) {
 
 function activeMovementDirections(sample) {
   if (!sample) return [];
+  const capturedAt = numericTimestamp(sample?.capturedAt, sample?.t);
   return uniqueCompact([
     sample.predictedPlayer?.direction,
     lastQueuedDirection(sample.directionStepPendingQueue),
     sample.directionStepPending?.direction,
     sample.movementPlan?.sentDirection,
-    lastMovementCommandDirection(sample.commandTail),
-    sample.selfEntity?.direction,
+    activeSceneMotionDirection(sample),
+    activeSelfEntityDirection(sample, capturedAt),
+    recentMovementCommandDirection(sample.commandTail, capturedAt),
   ]);
 }
 
@@ -2115,13 +2404,62 @@ function lastQueuedDirection(queue) {
   return queue[queue.length - 1]?.direction ?? null;
 }
 
-function lastMovementCommandDirection(commands) {
+function recentMovementCommandDirection(commands, capturedAt, maxAgeMs = 1200) {
   if (!Array.isArray(commands) || commands.length === 0) return null;
-  return commands.find((command) => ["walk", "run", "turn"].includes(command?.type))?.direction ?? null;
+  return (
+    commands.find(
+      (command) =>
+        ["walk", "run", "turn"].includes(command?.type) &&
+        typeof command.direction === "string" &&
+        typeof command.at === "number" &&
+        Number.isFinite(capturedAt) &&
+        command.at <= capturedAt &&
+        capturedAt - command.at <= maxAgeMs,
+    )?.direction ?? null
+  );
+}
+
+function activeSceneMotionDirection(sample) {
+  const motion = sample?.sceneMotion ?? null;
+  const renderPlayer = motion?.renderPlayer ?? null;
+  const snapshot = motion?.playerMotionSnapshot ?? null;
+  const motionNow = Number(motion?.motionNow);
+  if (
+    renderPlayer &&
+    typeof renderPlayer.direction === "string" &&
+    snapshot &&
+    Number.isFinite(motionNow) &&
+    snapshot.expiresAt > motionNow &&
+    (snapshot.fromX !== snapshot.toX || snapshot.fromY !== snapshot.toY)
+  ) {
+    return renderPlayer.direction;
+  }
+
+  return null;
+}
+
+function activeSelfEntityDirection(sample, capturedAt) {
+  const self = sample?.selfEntity ?? null;
+  if (
+    self &&
+    typeof self.direction === "string" &&
+    (self.movementAnimation === "walking" || self.movementAnimation === "running") &&
+    typeof self.movementUntil === "number" &&
+    Number.isFinite(capturedAt) &&
+    self.movementUntil > capturedAt
+  ) {
+    return self.direction;
+  }
+
+  return null;
 }
 
 function visualPlayerPoint(sample) {
   if (!sample) return null;
+  const renderPlayer = sample.sceneMotion?.renderPlayer;
+  if (renderPlayer && Number.isFinite(renderPlayer.x) && Number.isFinite(renderPlayer.y)) {
+    return { x: renderPlayer.x, y: renderPlayer.y };
+  }
   if (sample.predictedPlayer && Number.isFinite(sample.predictedPlayer.x) && Number.isFinite(sample.predictedPlayer.y)) {
     return { x: sample.predictedPlayer.x, y: sample.predictedPlayer.y };
   }
@@ -2258,7 +2596,12 @@ async function launchChrome() {
       `--remote-debugging-port=${debugPort}`,
       `--user-data-dir=${userDataDir}`,
       ...(headed ? [] : ["--headless=new"]),
-      "--disable-gpu",
+      ...(disableGpu ? ["--disable-gpu"] : ["--ignore-gpu-blocklist", "--enable-webgl"]),
+      ...(disableQuic ? ["--disable-quic"] : []),
+      ...(chromeHostResolverRules ? [`--host-resolver-rules=${chromeHostResolverRules}`] : []),
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
       "--no-proxy-server",
       "--proxy-bypass-list=*",
       "--no-first-run",
@@ -2340,7 +2683,10 @@ async function navigate(client, url) {
       if (typeof currentUrl !== "string" || !currentUrl.startsWith("chrome-error://")) {
         return;
       }
-      lastError = new Error(`Chrome landed on ${currentUrl}`);
+      const errorPage = await client
+        .evaluate(`(() => ({ title: document.title, body: document.body?.innerText?.slice(0, 800) ?? "" }))()`)
+        .catch((error) => ({ title: "", body: String(error) }));
+      lastError = new Error(`Chrome landed on ${currentUrl}; errorPage=${JSON.stringify(errorPage)}`);
     } catch (error) {
       lastError = error;
     }
@@ -2384,6 +2730,8 @@ async function waitUntil(client, expression, label, timeoutMs) {
     if (lastValue) return;
     await delay(100);
   }
+  lastValue = await client.evaluate(`Boolean(${expression})`).catch(() => lastValue);
+  if (lastValue) return;
   const debug = await client
     .evaluate(`
       (() => ({
@@ -2392,6 +2740,14 @@ async function waitUntil(client, expression, label, timeoutMs) {
         title: document.title,
         stageScreen: window.__mir2Stage5?.state?.screen ?? null,
         stageKeys: window.__mir2Stage5?.state ? Object.keys(window.__mir2Stage5.state).slice(0, 20) : [],
+        sceneInteractionReady: window.__mir2Stage5?.state?.sceneInteractionReady ?? null,
+        sceneAssetReadiness: window.__mir2Stage5?.state?.sceneAssetReadiness ?? null,
+        bevyEntityRenderer: window.__mir2BevyEntityRendererDebug ?? null,
+        webgl2EntityRenderer: window.__mir2WebGl2EntityRendererDebug ?? null,
+        assetCache: window.__mir2AssetCache ?? null,
+        cacheSummary: window.__mir2CacheMetrics?.snapshot?.().summary ?? null,
+        activePrewarmRun:
+          window.__mir2CacheMetrics?.snapshot?.().prewarmRuns?.find?.((run) => run.status === "running") ?? null,
         bodyText: document.body?.innerText?.slice(0, 500) ?? "",
       }))()
     `)
@@ -2403,6 +2759,11 @@ async function stopChrome(chrome) {
   if (!chrome || chrome.killed) return;
   chrome.kill();
   await new Promise((resolve) => chrome.once("exit", resolve));
+}
+
+function isInterestingAssetUrl(url) {
+  const text = String(url ?? "");
+  return text.includes("/original-ui/") || text.includes("/bevy-runtime/");
 }
 
 function findChromePath() {

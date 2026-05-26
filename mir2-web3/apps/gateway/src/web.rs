@@ -1,28 +1,39 @@
 use std::collections::HashMap;
 use std::env;
 use std::io;
-use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::response::{Html, Response};
+use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
     packet_payload_hex, server_packet_display_name, server_packet_raw_display_name,
-    ClientIntelligentCreature, ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point,
-    ServerPacket, Spell,
+    ClientIntelligentCreature, ClientPacket, MirDirection, Point, ServerPacket,
 };
-use mir2_simulation::{deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind};
+use mir2_simulation::{
+    deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
+use tokio::time::MissedTickBehavior;
 
+use crate::auth::verify_passkey_gateway_token;
+use crate::browser_commands::{
+    default_drop_count, default_market_max_shape, parse_class, parse_direction, parse_gender,
+    parse_grid, parse_move_mode, parse_spell, parse_spell_name,
+};
 use crate::cache::{
-    default_gateway_session_cache_from_env, gateway_session_cache_status,
-    refresh_session_cache_with_route_lease, remove_owned_session_cache, GatewaySessionCacheRecord,
+    gateway_session_cache_from_env, gateway_session_cache_status,
+    refresh_session_cache_with_route_lease, remove_owned_session_cache, session_cache_key,
+    session_cache_record, GatewaySessionCacheKey, GatewaySessionCacheRecord,
     GatewaySessionCacheStatus, SharedGatewaySessionCache,
 };
 use crate::events::{
@@ -37,7 +48,531 @@ struct WebState {
     config: Arc<GatewayConfig>,
     zone_registry: Arc<ZoneRegistry>,
     session_cache: SharedGatewaySessionCache,
+    reconnect_sessions: Arc<ReconnectSessionStore>,
+    capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
+}
+
+#[derive(Debug)]
+struct GatewayCapacityState {
+    max_ws_connections: Option<usize>,
+    max_active_sessions: Option<usize>,
+    max_reconnect_leases: Option<usize>,
+    max_login_in_flight: Option<usize>,
+    max_new_character_in_flight: Option<usize>,
+    max_start_game_in_flight: Option<usize>,
+    current_ws_connections: AtomicUsize,
+    current_active_sessions: AtomicUsize,
+    current_reconnect_leases: AtomicUsize,
+    current_login_in_flight: AtomicUsize,
+    current_new_character_in_flight: AtomicUsize,
+    current_start_game_in_flight: AtomicUsize,
+}
+
+#[derive(Debug, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+struct GatewayCapacityStatus {
+    max_ws_connections: Option<usize>,
+    max_active_sessions: Option<usize>,
+    max_reconnect_leases: Option<usize>,
+    max_login_in_flight: Option<usize>,
+    max_new_character_in_flight: Option<usize>,
+    max_start_game_in_flight: Option<usize>,
+    current_ws_connections: usize,
+    current_active_sessions: usize,
+    current_reconnect_leases: usize,
+    current_login_in_flight: usize,
+    current_new_character_in_flight: usize,
+    current_start_game_in_flight: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum GatewayCapacityKind {
+    WebSocketConnection,
+    ActiveSession,
+    ReconnectLease,
+    Login,
+    NewCharacter,
+    StartGame,
+}
+
+#[derive(Debug)]
+struct GatewayCapacityPermit {
+    state: Arc<GatewayCapacityState>,
+    kind: GatewayCapacityKind,
+}
+
+impl GatewayCapacityState {
+    fn from_env() -> Self {
+        Self {
+            max_ws_connections: positive_usize_env("MIR2_GATEWAY_MAX_WS_CONNECTIONS"),
+            max_active_sessions: positive_usize_env("MIR2_GATEWAY_MAX_ACTIVE_SESSIONS"),
+            max_reconnect_leases: positive_usize_env("MIR2_GATEWAY_MAX_RECONNECT_LEASES"),
+            max_login_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT"),
+            max_new_character_in_flight: positive_usize_env(
+                "MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT",
+            ),
+            max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT"),
+            current_ws_connections: AtomicUsize::new(0),
+            current_active_sessions: AtomicUsize::new(0),
+            current_reconnect_leases: AtomicUsize::new(0),
+            current_login_in_flight: AtomicUsize::new(0),
+            current_new_character_in_flight: AtomicUsize::new(0),
+            current_start_game_in_flight: AtomicUsize::new(0),
+        }
+    }
+
+    #[cfg(test)]
+    fn unlimited() -> Self {
+        Self {
+            max_ws_connections: None,
+            max_active_sessions: None,
+            max_reconnect_leases: None,
+            max_login_in_flight: None,
+            max_new_character_in_flight: None,
+            max_start_game_in_flight: None,
+            current_ws_connections: AtomicUsize::new(0),
+            current_active_sessions: AtomicUsize::new(0),
+            current_reconnect_leases: AtomicUsize::new(0),
+            current_login_in_flight: AtomicUsize::new(0),
+            current_new_character_in_flight: AtomicUsize::new(0),
+            current_start_game_in_flight: AtomicUsize::new(0),
+        }
+    }
+
+    #[cfg(test)]
+    fn with_limits(
+        max_ws_connections: Option<usize>,
+        max_active_sessions: Option<usize>,
+        max_reconnect_leases: Option<usize>,
+    ) -> Self {
+        Self {
+            max_ws_connections,
+            max_active_sessions,
+            max_reconnect_leases,
+            max_login_in_flight: None,
+            max_new_character_in_flight: None,
+            max_start_game_in_flight: None,
+            current_ws_connections: AtomicUsize::new(0),
+            current_active_sessions: AtomicUsize::new(0),
+            current_reconnect_leases: AtomicUsize::new(0),
+            current_login_in_flight: AtomicUsize::new(0),
+            current_new_character_in_flight: AtomicUsize::new(0),
+            current_start_game_in_flight: AtomicUsize::new(0),
+        }
+    }
+
+    #[cfg(test)]
+    fn with_action_limits(
+        max_login_in_flight: Option<usize>,
+        max_new_character_in_flight: Option<usize>,
+        max_start_game_in_flight: Option<usize>,
+    ) -> Self {
+        Self {
+            max_ws_connections: None,
+            max_active_sessions: None,
+            max_reconnect_leases: None,
+            max_login_in_flight,
+            max_new_character_in_flight,
+            max_start_game_in_flight,
+            current_ws_connections: AtomicUsize::new(0),
+            current_active_sessions: AtomicUsize::new(0),
+            current_reconnect_leases: AtomicUsize::new(0),
+            current_login_in_flight: AtomicUsize::new(0),
+            current_new_character_in_flight: AtomicUsize::new(0),
+            current_start_game_in_flight: AtomicUsize::new(0),
+        }
+    }
+
+    fn status(&self) -> GatewayCapacityStatus {
+        GatewayCapacityStatus {
+            max_ws_connections: self.max_ws_connections,
+            max_active_sessions: self.max_active_sessions,
+            max_reconnect_leases: self.max_reconnect_leases,
+            max_login_in_flight: self.max_login_in_flight,
+            max_new_character_in_flight: self.max_new_character_in_flight,
+            max_start_game_in_flight: self.max_start_game_in_flight,
+            current_ws_connections: self.current_ws_connections.load(Ordering::Acquire),
+            current_active_sessions: self.current_active_sessions.load(Ordering::Acquire),
+            current_reconnect_leases: self.current_reconnect_leases.load(Ordering::Acquire),
+            current_login_in_flight: self.current_login_in_flight.load(Ordering::Acquire),
+            current_new_character_in_flight: self
+                .current_new_character_in_flight
+                .load(Ordering::Acquire),
+            current_start_game_in_flight: self.current_start_game_in_flight.load(Ordering::Acquire),
+        }
+    }
+
+    fn try_acquire_ws_connection(self: &Arc<Self>) -> Result<GatewayCapacityPermit, String> {
+        self.try_acquire(GatewayCapacityKind::WebSocketConnection)
+    }
+
+    fn try_acquire_active_session(self: &Arc<Self>) -> Result<GatewayCapacityPermit, String> {
+        self.try_acquire(GatewayCapacityKind::ActiveSession)
+    }
+
+    fn try_acquire_reconnect_lease(self: &Arc<Self>) -> Result<GatewayCapacityPermit, String> {
+        self.try_acquire(GatewayCapacityKind::ReconnectLease)
+    }
+
+    fn try_acquire_action(
+        self: &Arc<Self>,
+        kind: GatewayCapacityKind,
+    ) -> Result<GatewayCapacityPermit, String> {
+        debug_assert!(matches!(
+            kind,
+            GatewayCapacityKind::Login
+                | GatewayCapacityKind::NewCharacter
+                | GatewayCapacityKind::StartGame
+        ));
+        self.try_acquire(kind)
+    }
+
+    fn try_acquire(
+        self: &Arc<Self>,
+        kind: GatewayCapacityKind,
+    ) -> Result<GatewayCapacityPermit, String> {
+        let counter = self.counter(kind);
+        let previous = counter.fetch_add(1, Ordering::AcqRel);
+        if let Some(limit) = self.limit(kind) {
+            if previous >= limit {
+                counter.fetch_sub(1, Ordering::AcqRel);
+                return Err(format!(
+                    "gateway {} capacity reached (limit {limit})",
+                    kind.label()
+                ));
+            }
+        }
+        Ok(GatewayCapacityPermit {
+            state: Arc::clone(self),
+            kind,
+        })
+    }
+
+    fn counter(&self, kind: GatewayCapacityKind) -> &AtomicUsize {
+        match kind {
+            GatewayCapacityKind::WebSocketConnection => &self.current_ws_connections,
+            GatewayCapacityKind::ActiveSession => &self.current_active_sessions,
+            GatewayCapacityKind::ReconnectLease => &self.current_reconnect_leases,
+            GatewayCapacityKind::Login => &self.current_login_in_flight,
+            GatewayCapacityKind::NewCharacter => &self.current_new_character_in_flight,
+            GatewayCapacityKind::StartGame => &self.current_start_game_in_flight,
+        }
+    }
+
+    fn limit(&self, kind: GatewayCapacityKind) -> Option<usize> {
+        match kind {
+            GatewayCapacityKind::WebSocketConnection => self.max_ws_connections,
+            GatewayCapacityKind::ActiveSession => self.max_active_sessions,
+            GatewayCapacityKind::ReconnectLease => self.max_reconnect_leases,
+            GatewayCapacityKind::Login => self.max_login_in_flight,
+            GatewayCapacityKind::NewCharacter => self.max_new_character_in_flight,
+            GatewayCapacityKind::StartGame => self.max_start_game_in_flight,
+        }
+    }
+}
+
+impl GatewayCapacityKind {
+    fn label(self) -> &'static str {
+        match self {
+            GatewayCapacityKind::WebSocketConnection => "WebSocket connection",
+            GatewayCapacityKind::ActiveSession => "active session",
+            GatewayCapacityKind::ReconnectLease => "reconnect lease",
+            GatewayCapacityKind::Login => "login in-flight",
+            GatewayCapacityKind::NewCharacter => "new-character in-flight",
+            GatewayCapacityKind::StartGame => "StartGame in-flight",
+        }
+    }
+}
+
+impl Drop for GatewayCapacityPermit {
+    fn drop(&mut self) {
+        let previous = self.state.counter(self.kind).fetch_sub(1, Ordering::AcqRel);
+        debug_assert!(
+            previous > 0,
+            "gateway capacity permit dropped with no matching acquisition"
+        );
+    }
+}
+
+#[derive(Debug, Default)]
+struct ReconnectSessionStore {
+    sessions: Mutex<HashMap<GatewaySessionCacheKey, ReconnectSessionLease>>,
+}
+
+#[derive(Debug)]
+struct ReconnectSessionLease {
+    session: GatewaySession,
+    active_session_permit: Option<GatewayCapacityPermit>,
+    _reconnect_lease_permit: GatewayCapacityPermit,
+    expires_at: Instant,
+}
+
+#[derive(Debug)]
+struct ReconnectSessionRestore {
+    session: GatewaySession,
+    active_session_permit: Option<GatewayCapacityPermit>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct GatewaySaveQueueConfig {
+    debounce: Duration,
+    checkpoint: Duration,
+    queue_limit: usize,
+}
+
+#[derive(Debug)]
+struct WebSessionSaveQueue {
+    config: GatewaySaveQueueConfig,
+    dirty: bool,
+    queued_requests: usize,
+    last_saved_at: Instant,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct GatewayRouteRefreshConfig {
+    interval: Duration,
+}
+
+#[derive(Debug)]
+struct WebSessionRouteRefresh {
+    config: GatewayRouteRefreshConfig,
+    last_refreshed_at: Option<Instant>,
+}
+
+type SharedBackgroundRouteRefreshRecord = Arc<Mutex<Option<(GatewaySessionCacheRecord, String)>>>;
+
+struct BackgroundRouteRefreshTask {
+    handle: JoinHandle<()>,
+}
+
+impl GatewaySaveQueueConfig {
+    fn from_env() -> Self {
+        Self {
+            debounce: Duration::from_millis(
+                env::var("MIR2_GATEWAY_SAVE_DEBOUNCE_MS")
+                    .ok()
+                    .and_then(|value| value.trim().parse::<u64>().ok())
+                    .unwrap_or(1_500)
+                    .max(1),
+            ),
+            checkpoint: Duration::from_secs(
+                env::var("MIR2_GATEWAY_SAVE_CHECKPOINT_SECONDS")
+                    .ok()
+                    .and_then(|value| value.trim().parse::<u64>().ok())
+                    .unwrap_or(15)
+                    .max(1),
+            ),
+            queue_limit: positive_usize_env("MIR2_GATEWAY_SAVE_QUEUE_LIMIT").unwrap_or(64),
+        }
+    }
+
+    #[cfg(test)]
+    fn new(debounce: Duration, checkpoint: Duration, queue_limit: usize) -> Self {
+        Self {
+            debounce,
+            checkpoint,
+            queue_limit: queue_limit.max(1),
+        }
+    }
+}
+
+impl WebSessionSaveQueue {
+    fn new(config: GatewaySaveQueueConfig) -> Self {
+        Self {
+            config,
+            dirty: false,
+            queued_requests: 0,
+            last_saved_at: Instant::now(),
+        }
+    }
+
+    fn request_save(
+        &mut self,
+        now: Instant,
+        save: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        self.dirty = true;
+        self.queued_requests = self.queued_requests.saturating_add(1);
+        if self.queued_requests >= self.config.queue_limit
+            || now.duration_since(self.last_saved_at) >= self.config.debounce
+        {
+            return self.flush_now(now, save);
+        }
+        Ok(())
+    }
+
+    fn checkpoint(
+        &mut self,
+        now: Instant,
+        save: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        if self.dirty && now.duration_since(self.last_saved_at) >= self.config.checkpoint {
+            return self.flush_now(now, save);
+        }
+        Ok(())
+    }
+
+    fn flush_now(
+        &mut self,
+        now: Instant,
+        save: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        if !self.dirty {
+            return Ok(());
+        }
+        save()?;
+        self.dirty = false;
+        self.queued_requests = 0;
+        self.last_saved_at = now;
+        Ok(())
+    }
+
+    fn force_save_now(
+        &mut self,
+        now: Instant,
+        save: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        save()?;
+        self.dirty = false;
+        self.queued_requests = 0;
+        self.last_saved_at = now;
+        Ok(())
+    }
+
+    #[cfg(test)]
+    fn has_pending_save(&self) -> bool {
+        self.dirty
+    }
+}
+
+impl GatewayRouteRefreshConfig {
+    fn from_env() -> Self {
+        Self {
+            interval: Duration::from_millis(
+                env::var("MIR2_GATEWAY_ROUTE_REFRESH_INTERVAL_MS")
+                    .ok()
+                    .and_then(|value| value.trim().parse::<u64>().ok())
+                    .unwrap_or(5_000)
+                    .clamp(250, 30_000),
+            ),
+        }
+    }
+
+    #[cfg(test)]
+    fn new(interval: Duration) -> Self {
+        Self { interval }
+    }
+}
+
+impl WebSessionRouteRefresh {
+    fn new(config: GatewayRouteRefreshConfig) -> Self {
+        Self {
+            config,
+            last_refreshed_at: None,
+        }
+    }
+
+    fn claim_refresh_due(&mut self, session: &GatewaySession, now: Instant, force: bool) -> bool {
+        if session.active_identity().is_none() {
+            return false;
+        }
+        if !force
+            && self
+                .last_refreshed_at
+                .is_some_and(|last| now.duration_since(last) < self.config.interval)
+        {
+            return false;
+        }
+        self.last_refreshed_at = Some(now);
+        true
+    }
+
+    fn maybe_refresh(
+        &mut self,
+        session_cache: &dyn crate::cache::GatewaySessionCache,
+        session: &GatewaySession,
+        now: Instant,
+        force: bool,
+    ) -> Result<bool, String> {
+        if !self.claim_refresh_due(session, now, force) {
+            return Ok(false);
+        }
+        refresh_session_cache_with_route_lease(session_cache, session, route_lease_ttl_seconds())?;
+        Ok(true)
+    }
+}
+
+impl Drop for BackgroundRouteRefreshTask {
+    fn drop(&mut self) {
+        self.handle.abort();
+    }
+}
+
+impl ReconnectSessionStore {
+    fn store(
+        &self,
+        key: GatewaySessionCacheKey,
+        session: GatewaySession,
+        active_session_permit: Option<GatewayCapacityPermit>,
+        reconnect_lease_permit: GatewayCapacityPermit,
+        ttl: Duration,
+    ) {
+        let expires_at = Instant::now() + ttl.max(Duration::from_millis(1));
+        let mut sessions = self
+            .sessions
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut sessions);
+        sessions.insert(
+            key,
+            ReconnectSessionLease {
+                session,
+                active_session_permit,
+                _reconnect_lease_permit: reconnect_lease_permit,
+                expires_at,
+            },
+        );
+    }
+
+    fn take(&self, key: &GatewaySessionCacheKey) -> Option<ReconnectSessionRestore> {
+        let mut sessions = self
+            .sessions
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut sessions);
+        let lease = sessions.remove(key)?;
+        if lease.expires_at <= Instant::now() {
+            return None;
+        }
+        Some(ReconnectSessionRestore {
+            session: lease.session,
+            active_session_permit: lease.active_session_permit,
+        })
+    }
+
+    fn purge_expired(&self) {
+        let mut sessions = self
+            .sessions
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut sessions);
+    }
+
+    #[cfg(test)]
+    fn len(&self) -> usize {
+        let mut sessions = self
+            .sessions
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut sessions);
+        sessions.len()
+    }
+
+    fn purge_expired_locked(sessions: &mut HashMap<GatewaySessionCacheKey, ReconnectSessionLease>) {
+        let now = Instant::now();
+        sessions.retain(|_, lease| lease.expires_at > now);
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -49,6 +584,11 @@ enum BrowserCommand {
         #[serde(alias = "accountId")]
         account_id: String,
         password: String,
+    },
+    PasskeyLogin {
+        #[serde(alias = "accountId")]
+        account_id: String,
+        token: String,
     },
     NewAccount {
         #[serde(alias = "accountId")]
@@ -467,6 +1007,14 @@ enum BrowserCommand {
         character_index: i32,
         memo: String,
     },
+    GetRanking {
+        #[serde(alias = "rankType")]
+        rank_type: u8,
+        #[serde(alias = "rankIndex", default)]
+        rank_index: i32,
+        #[serde(alias = "onlineOnly", default)]
+        online_only: bool,
+    },
     GetRentedItems,
     ItemRentalRequest,
     ItemRentalFee {
@@ -508,6 +1056,7 @@ enum BrowserCommand {
 #[derive(Debug)]
 enum SessionAction {
     Packet(ClientPacket),
+    PasskeyLogin { account_id: String, token: String },
     MoveTo { x: i32, y: i32, running: bool },
     Attack { object_id: u32 },
     Interact { object_id: u32 },
@@ -530,6 +1079,7 @@ struct HealthResponse {
     ws: &'static str,
     tcp_stub: &'static str,
     session_cache: GatewaySessionCacheStatus,
+    capacity: GatewayCapacityStatus,
     gameplay_events: GameplayEventSinkStatus,
 }
 
@@ -597,7 +1147,10 @@ pub async fn run_web_gateway(addr: &str, config: GatewayConfig) -> io::Result<()
     let state = WebState {
         config: Arc::new(config),
         zone_registry: Arc::new(ZoneRegistry::in_process()),
-        session_cache: default_gateway_session_cache_from_env(),
+        session_cache: gateway_session_cache_from_env()
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
+        reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
+        capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
     };
 
@@ -624,12 +1177,28 @@ async fn manual_ui() -> Html<&'static str> {
 }
 
 async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
+    state.reconnect_sessions.purge_expired();
+    let session_cache = Arc::clone(&state.session_cache);
+    let session_cache_status =
+        tokio::task::spawn_blocking(move || gateway_session_cache_status(session_cache.as_ref()))
+            .await
+            .unwrap_or_else(|error| GatewaySessionCacheStatus {
+                configured: true,
+                backend: "unknown".to_string(),
+                ttl_seconds: None,
+                record_count: 0,
+                stale_record_count: 0,
+                route_lease_count: 0,
+                healthy: false,
+                last_error: Some(format!("session-cache health task failed: {error}")),
+            });
     Json(HealthResponse {
         ok: true,
         http: "ready",
         ws: "ready",
         tcp_stub: "ready",
-        session_cache: gateway_session_cache_status(state.session_cache.as_ref()),
+        session_cache: session_cache_status,
+        capacity: state.capacity.status(),
         gameplay_events: gameplay_event_sink_status(state.gameplay_event_sink.as_ref()),
     })
 }
@@ -761,23 +1330,102 @@ fn canonical_admin_control_action(action: &str) -> Result<String, String> {
 }
 
 async fn ws_upgrade(ws: WebSocketUpgrade, State(state): State<WebState>) -> Response {
-    ws.on_upgrade(move |socket| handle_socket(socket, state))
+    let ws_connection_permit = match state.capacity.try_acquire_ws_connection() {
+        Ok(permit) => permit,
+        Err(error) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(AdminErrorResponse { error }),
+            )
+                .into_response();
+        }
+    };
+    ws.on_upgrade(move |socket| handle_socket(socket, state, ws_connection_permit))
 }
 
-async fn handle_socket(socket: WebSocket, state: WebState) {
+async fn handle_socket(
+    socket: WebSocket,
+    state: WebState,
+    _ws_connection_permit: GatewayCapacityPermit,
+) {
     let mut session = new_gateway_session_for_web(&state);
-    handle_socket_inner(socket, &mut session, Arc::clone(&state.session_cache)).await;
-    let _ = catch_gateway_panic("web refresh_active_external_mail", || {
-        session.refresh_active_external_mail()
+    let mut active_session_permit: Option<GatewayCapacityPermit> = None;
+    let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
+    let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
+    handle_socket_inner(
+        socket,
+        &mut session,
+        Arc::clone(&state.session_cache),
+        Arc::clone(&state.reconnect_sessions),
+        Arc::clone(&state.capacity),
+        &mut active_session_permit,
+        &mut save_queue,
+        &mut route_refresh,
+    )
+    .await;
+    let _ = tokio::task::block_in_place(|| {
+        catch_gateway_panic("web refresh_active_external_mail", || {
+            session.refresh_active_external_mail()
+        })
     });
-    let _ = catch_gateway_panic("web save_active_character", || {
-        session.save_active_character()
+    let _ = save_queue.force_save_now(Instant::now(), || {
+        tokio::task::block_in_place(|| {
+            catch_gateway_panic("web save_active_character", || {
+                session.save_active_character()
+            })
+        })
     });
+    if let Some(key) = session_cache_key(&session) {
+        let grace_seconds = reconnect_grace_ttl_seconds();
+        if let Err(error) = refresh_session_cache_with_route_lease(
+            state.session_cache.as_ref(),
+            &session,
+            grace_seconds,
+        ) {
+            eprintln!("web reconnect route lease refresh skipped: {error}");
+        }
+        if active_session_permit.is_none() {
+            match state.capacity.try_acquire_active_session() {
+                Ok(permit) => active_session_permit = Some(permit),
+                Err(error) => {
+                    eprintln!("web reconnect grace skipped: {error}");
+                    let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+                    return;
+                }
+            }
+        }
+        state.reconnect_sessions.purge_expired();
+        let reconnect_lease_permit = match state.capacity.try_acquire_reconnect_lease() {
+            Ok(permit) => permit,
+            Err(error) => {
+                eprintln!("web reconnect grace skipped: {error}");
+                let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+                return;
+            }
+        };
+        let log_account_id = key.account_id.clone();
+        let log_character_index = key.character_index;
+        state.reconnect_sessions.store(
+            key,
+            session,
+            active_session_permit.take(),
+            reconnect_lease_permit,
+            Duration::from_secs(grace_seconds),
+        );
+        schedule_reconnect_session_purge(
+            Arc::clone(&state.reconnect_sessions),
+            Duration::from_secs(grace_seconds),
+        );
+        eprintln!(
+            "web reconnect grace retained session for {log_account_id}/{log_character_index} for {grace_seconds}s"
+        );
+        return;
+    }
     let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
 }
 
 fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
-    match &state.gameplay_event_sink {
+    let mut session = match &state.gameplay_event_sink {
         Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
             (*state.config).clone(),
             &state.zone_registry,
@@ -786,15 +1434,35 @@ fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
         None => {
             GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
         }
-    }
+    };
+    session.configure_zone_owner_heartbeat(gateway_zone_owner_heartbeat_interval_ms(), 0);
+    session
 }
 
 async fn handle_socket_inner(
     socket: WebSocket,
     session: &mut GatewaySession,
     session_cache: SharedGatewaySessionCache,
+    reconnect_sessions: Arc<ReconnectSessionStore>,
+    capacity: Arc<GatewayCapacityState>,
+    active_session_permit: &mut Option<GatewayCapacityPermit>,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
 ) {
     let (mut sender, mut receiver) = socket.split();
+    let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
+    runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut runtime_tick_deferred_until = Instant::now();
+    let enforce_player_command_safety = production_player_command_safety_enabled();
+    let mut authenticated = false;
+    let mut authenticated_account_id: Option<String> = None;
+    let background_route_refresh_record: SharedBackgroundRouteRefreshRecord =
+        Arc::new(Mutex::new(None));
+    let _background_route_refresh = spawn_background_route_lease_refresh(
+        Arc::clone(&session_cache),
+        route_refresh.config,
+        Arc::clone(&background_route_refresh_record),
+    );
 
     let connect_packets = match catch_gateway_panic("web on_connect", || session.on_connect()) {
         Ok(packets) => packets,
@@ -809,7 +1477,7 @@ async fn handle_socket_inner(
             return;
         }
     }
-    if let Err(error) = refresh_external_session_state(session) {
+    if let Err(error) = tokio::task::block_in_place(|| refresh_external_session_state(session)) {
         let _ = send_error_message(&mut sender, &error).await;
         return;
     }
@@ -817,78 +1485,367 @@ async fn handle_socket_inner(
         return;
     }
 
-    while let Some(message_result) = receiver.next().await {
-        let message = match message_result {
-            Ok(Message::Text(text)) => text,
-            Ok(Message::Close(_)) => return,
-            Ok(_) => continue,
-            Err(_) => return,
-        };
+    loop {
+        tokio::select! {
+            biased;
 
-        let command = match serde_json::from_str::<BrowserCommand>(&message) {
-            Ok(command) => command,
-            Err(error) => {
-                let _ = send_error_message(&mut sender, &format!("invalid command: {error}")).await;
-                continue;
-            }
-        };
+            message_result = receiver.next() => {
+                let message = match message_result {
+                    Some(Ok(Message::Text(text))) => text,
+                    Some(Ok(Message::Close(_))) | None => return,
+                    Some(Ok(_)) => continue,
+                    Some(Err(_)) => return,
+                };
 
-        let action = match browser_command_to_action(command) {
-            Ok(action) => action,
-            Err(error) => {
-                let _ = send_error_message(&mut sender, &error).await;
-                continue;
-            }
-        };
+                let command = match serde_json::from_str::<BrowserCommand>(&message) {
+                    Ok(command) => command,
+                    Err(error) => {
+                        let _ = send_error_message(&mut sender, &format!("invalid command: {error}")).await;
+                        continue;
+                    }
+                };
 
-        let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
-        let responses = match catch_gateway_panic("web session action", || {
-            execute_session_action(session, action)
-        }) {
-            Ok(Ok(responses)) => responses,
-            Ok(Err(error)) => {
-                let _ = send_error_message(&mut sender, &error).await;
-                continue;
-            }
-            Err(error) => {
-                let _ = send_error_message(&mut sender, &error).await;
-                return;
-            }
-        };
-        let external_state_changed = match refresh_external_session_state(session) {
-            Ok(changed) => changed,
-            Err(error) => {
-                let _ = send_error_message(&mut sender, &error).await;
-                return;
-            }
-        };
-        let should_send_snapshot = should_send_snapshot_by_action
-            || responses_require_world_snapshot(&responses)
-            || external_state_changed;
+                let action = match browser_command_to_action(command) {
+                    Ok(action) => action,
+                    Err(error) => {
+                        let _ = send_error_message(&mut sender, &error).await;
+                        continue;
+                    }
+                };
 
-        for response in responses {
-            if send_server_packet(&mut sender, &response).await.is_err() {
-                return;
-            }
-        }
+                let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
+                let low_latency_action = is_low_latency_action(&action);
+                let should_queue_save_by_action = should_queue_save_for_action(&action);
+                let runtime_tick_defer_duration = runtime_tick_defer_duration_for_action(&action);
+                let login_account_id = login_account_id_for_action(&action).map(str::to_string);
+                let keep_alive_time = keep_alive_time_for_action(&action);
+                if let Some(time) = keep_alive_time {
+                    if send_server_packet(&mut sender, &ServerPacket::KeepAlive { time })
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+                let start_game_character_index = start_game_character_index_for_action(&action);
+                if let (true, Some(account_id), Some(character_index)) = (
+                    authenticated,
+                    authenticated_account_id.as_deref(),
+                    start_game_character_index,
+                ) {
+                    let key = GatewaySessionCacheKey {
+                        account_id: account_id.to_string(),
+                        character_index,
+                    };
+                    if let Some(restored) = reconnect_sessions.take(&key) {
+                        let restored_session_id = restored.session.session_id().to_string();
+                        *session = restored.session;
+                        *active_session_permit = restored.active_session_permit;
+                        eprintln!(
+                            "web reconnect grace restored session {restored_session_id} for {}/{}",
+                            key.account_id, key.character_index
+                        );
+                    }
+                }
+                let pending_start_game_route_lease = match try_acquire_start_game_route_lease(
+                    session_cache.as_ref(),
+                    session,
+                    authenticated,
+                    authenticated_account_id.as_deref(),
+                    start_game_character_index,
+                ) {
+                    Ok(key) => key,
+                    Err(error) => {
+                        let _ = send_error_message(&mut sender, &error).await;
+                        continue;
+                    }
+                };
+                let action_capacity_permit = match inflight_capacity_kind_for_action(&action) {
+                    Some(kind) => match capacity.try_acquire_action(kind) {
+                        Ok(permit) => Some(permit),
+                        Err(error) => {
+                            release_pending_start_game_route_lease(
+                                session_cache.as_ref(),
+                                session,
+                                pending_start_game_route_lease.as_ref(),
+                            );
+                            let _ = send_error_message(&mut sender, &error).await;
+                            continue;
+                        }
+                    },
+                    None => None,
+                };
+                let mut pending_active_session_permit = None;
+                if start_game_character_index.is_some()
+                    && session.active_identity().is_none()
+                    && active_session_permit.is_none()
+                {
+                    match capacity.try_acquire_active_session() {
+                        Ok(permit) => pending_active_session_permit = Some(permit),
+                        Err(error) => {
+                            release_pending_start_game_route_lease(
+                                session_cache.as_ref(),
+                                session,
+                                pending_start_game_route_lease.as_ref(),
+                            );
+                            let _ = send_error_message(&mut sender, &error).await;
+                            continue;
+                        }
+                    }
+                }
+                let responses = match catch_gateway_panic("web session action", || {
+                    tokio::task::block_in_place(|| {
+                        execute_session_action(
+                            session,
+                            action,
+                            authenticated,
+                            enforce_player_command_safety,
+                        )
+                    })
+                }) {
+                    Ok(Ok(responses)) => responses,
+                    Ok(Err(error)) => {
+                        release_pending_start_game_route_lease(
+                            session_cache.as_ref(),
+                            session,
+                            pending_start_game_route_lease.as_ref(),
+                        );
+                        let _ = send_error_message(&mut sender, &error).await;
+                        continue;
+                    }
+                    Err(error) => {
+                        release_pending_start_game_route_lease(
+                            session_cache.as_ref(),
+                            session,
+                            pending_start_game_route_lease.as_ref(),
+                        );
+                        let _ = send_error_message(&mut sender, &error).await;
+                        return;
+                    }
+                };
+                drop(action_capacity_permit);
+                release_unclaimed_start_game_route_lease(
+                    session_cache.as_ref(),
+                    session,
+                    pending_start_game_route_lease.as_ref(),
+                );
+                if pending_active_session_permit.is_some() && session.active_identity().is_some() {
+                    *active_session_permit = pending_active_session_permit.take();
+                }
+                let force_route_refresh = start_game_character_index.is_some();
+                let next_authenticated = update_authenticated_state(authenticated, &responses);
+                if next_authenticated {
+                    if let Some(account_id) = login_account_id {
+                        authenticated_account_id = Some(account_id);
+                    }
+                } else if authenticated {
+                    authenticated_account_id = None;
+                }
+                authenticated = next_authenticated;
 
-        if should_send_snapshot && send_world_snapshot(&mut sender, &session).await.is_err() {
-            return;
-        }
-        if let Err(error) = catch_gateway_panic("web save_active_character", || {
-            session.save_active_character()
-        }) {
-            let _ = send_error_message(&mut sender, &error).await;
-            return;
-        }
-        if let Err(error) = refresh_session_cache_with_route_lease(
-            session_cache.as_ref(),
-            session,
-            route_lease_ttl_seconds(),
-        ) {
-            eprintln!("web session route lease refresh skipped: {error}");
+                if let Err(error) = flush_session_updates(
+                    &mut sender,
+                    session,
+                    session_cache.as_ref(),
+                    save_queue,
+                    route_refresh,
+                    responses,
+                    should_send_snapshot_by_action,
+                    low_latency_action,
+                    should_queue_save_by_action,
+                    force_route_refresh,
+                )
+                .await
+                {
+                    let _ = send_error_message(&mut sender, &error).await;
+                    return;
+                }
+                if force_route_refresh || !low_latency_action {
+                    update_background_route_refresh_record(
+                        &background_route_refresh_record,
+                        session,
+                    );
+                }
+                if let Some(duration) = runtime_tick_defer_duration {
+                    runtime_tick_deferred_until = Instant::now() + duration;
+                }
+            }
+            _ = runtime_tick.tick() => {
+                let now = Instant::now();
+                if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
+                    tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
+                }).and_then(|result| result.map(|_| ())) {
+                    let _ = send_error_message(&mut sender, &error).await;
+                    return;
+                }
+                if now < runtime_tick_deferred_until {
+                    continue;
+                }
+                let responses = match catch_gateway_panic("web session tick", || {
+                    tokio::task::block_in_place(|| session.tick())
+                }) {
+                    Ok(responses) => responses,
+                    Err(error) => {
+                        let _ = send_error_message(&mut sender, &error).await;
+                        return;
+                    }
+                };
+                if responses.is_empty() {
+                    if let Err(error) = save_queue.checkpoint(now, || {
+                        tokio::task::block_in_place(|| {
+                            catch_gateway_panic("web save_active_character", || {
+                                session.save_active_character()
+                            })
+                        })
+                    }) {
+                        let _ = send_error_message(&mut sender, &error).await;
+                        return;
+                    }
+                    continue;
+                }
+                if let Err(error) = flush_session_updates(
+                    &mut sender,
+                    session,
+                    session_cache.as_ref(),
+                    save_queue,
+                    route_refresh,
+                    responses,
+                    false,
+                    true,
+                    false,
+                    false,
+                )
+                .await
+                {
+                    let _ = send_error_message(&mut sender, &error).await;
+                    return;
+                }
+            }
         }
     }
+}
+
+fn spawn_background_route_lease_refresh(
+    session_cache: SharedGatewaySessionCache,
+    config: GatewayRouteRefreshConfig,
+    record: SharedBackgroundRouteRefreshRecord,
+) -> BackgroundRouteRefreshTask {
+    let handle = tokio::spawn(async move {
+        let mut tick = tokio::time::interval(config.interval);
+        tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+        loop {
+            tick.tick().await;
+            let Some((record, owner)) = record
+                .lock()
+                .expect("background route refresh record mutex should not be poisoned")
+                .clone()
+            else {
+                continue;
+            };
+            let session_cache = Arc::clone(&session_cache);
+            let result = tokio::task::spawn_blocking(move || {
+                session_cache.refresh_owned_route_lease_record(
+                    record,
+                    &owner,
+                    route_lease_ttl_seconds(),
+                )
+            })
+            .await;
+            match result {
+                Ok(Ok(true)) | Ok(Ok(false)) => {}
+                Ok(Err(error)) => eprintln!("web background route lease refresh skipped: {error}"),
+                Err(error) => eprintln!("web background route lease refresh task failed: {error}"),
+            }
+        }
+    });
+    BackgroundRouteRefreshTask { handle }
+}
+
+fn update_background_route_refresh_record(
+    record: &SharedBackgroundRouteRefreshRecord,
+    session: &GatewaySession,
+) {
+    let next =
+        session_cache_record(session).map(|record| (record, session.session_id().to_string()));
+    *record
+        .lock()
+        .expect("background route refresh record mutex should not be poisoned") = next;
+}
+
+fn schedule_reconnect_session_purge(
+    reconnect_sessions: Arc<ReconnectSessionStore>,
+    grace: Duration,
+) {
+    tokio::spawn(async move {
+        tokio::time::sleep(grace.max(Duration::from_millis(1)) + Duration::from_millis(50)).await;
+        reconnect_sessions.purge_expired();
+    });
+}
+
+const DEFAULT_GATEWAY_RUNTIME_TICK_MS: u64 = 300;
+const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 0;
+const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
+const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
+
+async fn flush_session_updates(
+    sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
+    session: &mut GatewaySession,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    responses: Vec<ServerPacket>,
+    should_send_snapshot_by_action: bool,
+    low_latency_action: bool,
+    should_queue_save_by_action: bool,
+    force_route_refresh: bool,
+) -> Result<(), String> {
+    let response_requires_snapshot = responses_require_world_snapshot(&responses);
+
+    for response in responses {
+        send_server_packet(sender, &response)
+            .await
+            .map_err(|error| error.to_string())?;
+    }
+
+    if low_latency_action {
+        return Ok(());
+    }
+
+    let external_state_changed =
+        tokio::task::block_in_place(|| refresh_external_session_state(session))?;
+    let should_send_snapshot =
+        should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
+
+    if should_send_snapshot {
+        send_world_snapshot(sender, session).await?;
+    }
+
+    if !low_latency_action && should_queue_save_by_action && session.active_identity().is_some() {
+        save_queue.request_save(Instant::now(), || {
+            tokio::task::block_in_place(|| {
+                catch_gateway_panic("web save_active_character", || {
+                    session.save_active_character()
+                })
+            })
+        })?;
+    } else {
+        save_queue.checkpoint(Instant::now(), || {
+            tokio::task::block_in_place(|| {
+                catch_gateway_panic("web save_active_character", || {
+                    session.save_active_character()
+                })
+            })
+        })?;
+    }
+
+    if let Err(error) =
+        route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
+    {
+        eprintln!("web session route lease refresh skipped: {error}");
+    }
+
+    Ok(())
 }
 
 fn route_lease_ttl_seconds() -> u64 {
@@ -904,22 +1861,224 @@ fn route_lease_ttl_seconds() -> u64 {
         .max(1)
 }
 
+fn reconnect_grace_ttl_seconds() -> u64 {
+    std::env::var("MIR2_GATEWAY_RECONNECT_GRACE_SECONDS")
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok())
+        .unwrap_or(15)
+        .clamp(1, 120)
+}
+
+fn gateway_runtime_tick_interval() -> Duration {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_RUNTIME_TICK_MS",
+        DEFAULT_GATEWAY_RUNTIME_TICK_MS,
+        100,
+        5_000,
+    )
+}
+
+fn gateway_runtime_tick_input_grace() -> Duration {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS",
+        DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS,
+        0,
+        5_000,
+    )
+}
+
+fn gateway_runtime_tick_bootstrap_grace() -> Duration {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS",
+        DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS,
+        0,
+        30_000,
+    )
+}
+
+fn gateway_zone_owner_heartbeat_interval_ms() -> u64 {
+    duration_from_millis_env(
+        "MIR2_GATEWAY_ZONE_OWNER_HEARTBEAT_MS",
+        DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS,
+        100,
+        60_000,
+    )
+    .as_millis()
+    .min(u128::from(u64::MAX)) as u64
+}
+
+fn duration_from_millis_env(name: &str, default_ms: u64, min_ms: u64, max_ms: u64) -> Duration {
+    Duration::from_millis(
+        std::env::var(name)
+            .ok()
+            .and_then(|value| value.trim().parse::<u64>().ok())
+            .unwrap_or(default_ms)
+            .clamp(min_ms, max_ms),
+    )
+}
+
+fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Duration> {
+    match action {
+        SessionAction::Packet(ClientPacket::StartGame { .. }) => {
+            Some(gateway_runtime_tick_bootstrap_grace())
+        }
+        SessionAction::MoveTo { .. }
+        | SessionAction::Packet(
+            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+        ) => Some(gateway_runtime_tick_input_grace()),
+        _ => None,
+    }
+}
+
+fn positive_usize_env(name: &str) -> Option<usize> {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|value| *value > 0)
+}
+
 fn refresh_external_session_state(session: &mut GatewaySession) -> Result<bool, String> {
     catch_gateway_panic("web refresh_active_external_mail", || {
         session.refresh_active_external_mail()
     })
 }
 
+fn login_account_id_for_action(action: &SessionAction) -> Option<&str> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { account_id, .. }) => Some(account_id),
+        SessionAction::PasskeyLogin { account_id, .. } => Some(account_id),
+        _ => None,
+    }
+}
+
+fn start_game_character_index_for_action(action: &SessionAction) -> Option<i32> {
+    match action {
+        SessionAction::Packet(ClientPacket::StartGame { character_index }) => {
+            Some(*character_index)
+        }
+        _ => None,
+    }
+}
+
+fn keep_alive_time_for_action(action: &SessionAction) -> Option<i64> {
+    match action {
+        SessionAction::Packet(ClientPacket::KeepAlive { time }) => Some(*time),
+        _ => None,
+    }
+}
+
+fn try_acquire_start_game_route_lease(
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    session: &GatewaySession,
+    authenticated: bool,
+    authenticated_account_id: Option<&str>,
+    character_index: Option<i32>,
+) -> Result<Option<GatewaySessionCacheKey>, String> {
+    let Some(character_index) = character_index else {
+        return Ok(None);
+    };
+    if !authenticated || session.active_identity().is_some() {
+        return Ok(None);
+    }
+    let account_id = authenticated_account_id
+        .ok_or_else(|| "authenticated account is required before StartGame".to_string())?;
+    let key = GatewaySessionCacheKey {
+        account_id: account_id.to_string(),
+        character_index,
+    };
+    match session_cache.acquire_route_lease(&key, session.session_id(), route_lease_ttl_seconds()) {
+        Ok(_) => Ok(Some(key)),
+        Err(error) => {
+            eprintln!(
+                "web StartGame route lease rejected for {}/{}: {error}",
+                key.account_id, key.character_index
+            );
+            Err("character is already online or route lease is unavailable".to_string())
+        }
+    }
+}
+
+fn release_pending_start_game_route_lease(
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    session: &GatewaySession,
+    key: Option<&GatewaySessionCacheKey>,
+) {
+    if let Some(key) = key {
+        if let Err(error) = session_cache.release_route_lease(key, session.session_id()) {
+            eprintln!(
+                "web StartGame route lease release skipped for {}/{}: {error}",
+                key.account_id, key.character_index
+            );
+        }
+    }
+}
+
+fn release_unclaimed_start_game_route_lease(
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    session: &GatewaySession,
+    key: Option<&GatewaySessionCacheKey>,
+) {
+    let Some(key) = key else {
+        return;
+    };
+    let claimed = session.active_identity().is_some_and(|identity| {
+        identity.account_id == key.account_id && identity.character_index == key.character_index
+    });
+    if !claimed {
+        release_pending_start_game_route_lease(session_cache, session, Some(key));
+    }
+}
+
+fn inflight_capacity_kind_for_action(action: &SessionAction) -> Option<GatewayCapacityKind> {
+    match action {
+        SessionAction::Packet(ClientPacket::Login { .. }) | SessionAction::PasskeyLogin { .. } => {
+            Some(GatewayCapacityKind::Login)
+        }
+        SessionAction::Packet(ClientPacket::NewCharacter { .. }) => {
+            Some(GatewayCapacityKind::NewCharacter)
+        }
+        SessionAction::Packet(ClientPacket::StartGame { .. }) => {
+            Some(GatewayCapacityKind::StartGame)
+        }
+        _ => None,
+    }
+}
+
+fn should_queue_save_for_action(action: &SessionAction) -> bool {
+    !matches!(
+        action,
+        SessionAction::Packet(
+            ClientPacket::ClientVersion { .. }
+                | ClientPacket::Login { .. }
+                | ClientPacket::KeepAlive { .. }
+                | ClientPacket::Turn { .. }
+                | ClientPacket::Walk { .. }
+                | ClientPacket::Run { .. }
+                | ClientPacket::Chat { .. }
+        ) | SessionAction::PasskeyLogin { .. }
+            | SessionAction::Tick
+    )
+}
+
 fn execute_session_action(
     session: &mut GatewaySession,
     action: SessionAction,
+    authenticated: bool,
+    enforce_player_command_safety: bool,
 ) -> Result<Vec<ServerPacket>, String> {
     let move_log = move_log_for_action(&action);
+    if enforce_player_command_safety {
+        return execute_production_session_action(session, action, authenticated, move_log);
+    }
     match action {
         SessionAction::Packet(packet) => {
             let responses = session.handle_packet(packet);
             log_move_action(move_log, &responses);
             Ok(responses)
+        }
+        SessionAction::PasskeyLogin { account_id, token } => {
+            verify_passkey_gateway_token(&account_id, &token)?;
+            Ok(session.passkey_login(&account_id))
         }
         SessionAction::MoveTo { x, y, running } => {
             let responses = session.move_to(x, y, running);
@@ -939,6 +2098,153 @@ fn execute_session_action(
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
+}
+
+fn execute_production_session_action(
+    session: &mut GatewaySession,
+    action: SessionAction,
+    authenticated: bool,
+    move_log: Option<String>,
+) -> Result<Vec<ServerPacket>, String> {
+    let zone_owner_lease = session.zone_owner_lease().clone();
+    let execution = match action {
+        SessionAction::Packet(packet) => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::ClientPacket(packet),
+            )?,
+        SessionAction::PasskeyLogin { account_id, token } => {
+            verify_passkey_gateway_token(&account_id, &token)?;
+            return Ok(session.passkey_login(&account_id));
+        }
+        SessionAction::MoveTo { x, y, running } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::MoveTo {
+                    position: Point { x, y },
+                    running,
+                },
+            )?,
+        SessionAction::Attack { object_id } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::Attack { object_id },
+            )?,
+        SessionAction::Interact { object_id } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::Interact { object_id },
+            )?,
+        SessionAction::SelectNpcDialog { target } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::SelectNpcDialog { target },
+            )?,
+        SessionAction::SubmitNpcInput { value } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::SubmitNpcInput { value },
+            )?,
+        SessionAction::PickUp { object_id } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::PickUp { object_id },
+            )?,
+        SessionAction::UseItem { key } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::UseItem { key },
+            )?,
+        SessionAction::DropItem { key } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::DropItem { key },
+            )?,
+        SessionAction::CastSkill { key } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::CastSkill { key },
+            )?,
+        SessionAction::TransferMap { key } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::TransferMap { key },
+            )?,
+        SessionAction::Stage5Command { action, args } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::Stage5Command { action, args },
+            )?,
+        SessionAction::SetLanguage { language } => session
+            .execute_production_player_command_with_zone_owner_lease(
+                &zone_owner_lease,
+                authenticated,
+                WorldCommand::SetLanguage { language },
+            )?,
+        SessionAction::Tick => session.execute_production_player_command_with_zone_owner_lease(
+            &zone_owner_lease,
+            authenticated,
+            WorldCommand::Tick,
+        )?,
+    };
+    log_move_action(move_log, &execution.packets);
+    Ok(execution.packets)
+}
+
+fn update_authenticated_state(current: bool, responses: &[ServerPacket]) -> bool {
+    if responses
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. }))
+    {
+        return true;
+    }
+    if responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::Login { .. }
+                | ServerPacket::LoginBanned { .. }
+                | ServerPacket::ReturnToLogin
+        )
+    }) {
+        return false;
+    }
+    current
+}
+
+fn production_player_command_safety_enabled() -> bool {
+    env_flag_enabled("MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY")
+        || ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
+            .into_iter()
+            .filter_map(|name| env::var(name).ok())
+            .any(|value| {
+                matches!(
+                    value.trim().to_ascii_lowercase().as_str(),
+                    "production" | "prod" | "staging"
+                )
+            })
+}
+
+fn env_flag_enabled(name: &str) -> bool {
+    env::var(name)
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
+        .unwrap_or(false)
 }
 
 fn move_log_for_action(action: &SessionAction) -> Option<String> {
@@ -965,14 +2271,7 @@ fn move_log_for_action(action: &SessionAction) -> Option<String> {
 }
 
 fn move_logging_enabled() -> bool {
-    env::var("MIR2_GATEWAY_MOVE_LOG")
-        .map(|value| {
-            matches!(
-                value.to_ascii_lowercase().as_str(),
-                "1" | "true" | "yes" | "on"
-            )
-        })
-        .unwrap_or(false)
+    env_flag_enabled("MIR2_GATEWAY_MOVE_LOG")
 }
 
 fn log_move_action(action: Option<String>, responses: &[ServerPacket]) {
@@ -1016,6 +2315,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             account_id,
             password,
         })),
+        BrowserCommand::PasskeyLogin { account_id, token } => {
+            Ok(SessionAction::PasskeyLogin { account_id, token })
+        }
         BrowserCommand::NewAccount {
             account_id,
             password,
@@ -1091,9 +2393,10 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::Run { direction } => Ok(SessionAction::Packet(ClientPacket::Run {
             direction: parse_direction(&direction)?,
         })),
-        BrowserCommand::Chat { message } => {
-            Ok(SessionAction::Packet(ClientPacket::Chat { message }))
-        }
+        BrowserCommand::Chat { message } => Ok(SessionAction::Packet(ClientPacket::Chat {
+            message,
+            linked_items: Vec::new(),
+        })),
         BrowserCommand::KeepAlive { time } => {
             Ok(SessionAction::Packet(ClientPacket::KeepAlive { time }))
         }
@@ -1537,6 +2840,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             character_index,
             memo,
         })),
+        BrowserCommand::GetRanking {
+            rank_type,
+            rank_index,
+            online_only,
+        } => Ok(SessionAction::Packet(ClientPacket::GetRanking {
+            rank_type,
+            rank_index,
+            online_only,
+        })),
         BrowserCommand::GetRentedItems => Ok(SessionAction::Packet(ClientPacket::GetRentedItems)),
         BrowserCommand::ItemRentalRequest => {
             Ok(SessionAction::Packet(ClientPacket::ItemRentalRequest))
@@ -1586,14 +2898,6 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
     }
 }
 
-fn parse_move_mode(mode: Option<&str>) -> Result<bool, String> {
-    match mode.unwrap_or("walk") {
-        "walk" => Ok(false),
-        "run" => Ok(true),
-        other => Err(format!("unsupported move mode: {other}")),
-    }
-}
-
 fn should_send_world_snapshot_for_action(action: &SessionAction) -> bool {
     !matches!(
         action,
@@ -1601,7 +2905,22 @@ fn should_send_world_snapshot_for_action(action: &SessionAction) -> bool {
             | SessionAction::Packet(ClientPacket::Turn { .. })
             | SessionAction::Packet(ClientPacket::Walk { .. })
             | SessionAction::Packet(ClientPacket::Run { .. })
+            | SessionAction::Packet(ClientPacket::Chat { .. })
             | SessionAction::Packet(ClientPacket::KeepAlive { .. })
+            | SessionAction::Tick
+    )
+}
+
+fn is_low_latency_action(action: &SessionAction) -> bool {
+    matches!(
+        action,
+        SessionAction::Packet(
+            ClientPacket::Turn { .. }
+                | ClientPacket::Walk { .. }
+                | ClientPacket::Run { .. }
+                | ClientPacket::Chat { .. }
+                | ClientPacket::KeepAlive { .. }
+        ) | SessionAction::Tick
     )
 }
 
@@ -1618,7 +2937,9 @@ async fn send_world_snapshot(
     sender: &mut futures_util::stream::SplitSink<WebSocket, Message>,
     session: &GatewaySession,
 ) -> Result<(), String> {
-    let snapshot = catch_gateway_panic("web world_snapshot", || session.world_snapshot())?;
+    let snapshot = catch_gateway_panic("web world_snapshot", || {
+        tokio::task::block_in_place(|| session.world_snapshot())
+    })?;
     sender
         .send(Message::Text(
             json!({
@@ -3953,79 +5274,6 @@ fn movement_json(
     ])
 }
 
-fn parse_gender(value: &str) -> Result<MirGender, String> {
-    match value.to_ascii_lowercase().as_str() {
-        "male" => Ok(MirGender::Male),
-        "female" => Ok(MirGender::Female),
-        _ => Err(format!("unsupported gender: {value}")),
-    }
-}
-
-fn parse_class(value: &str) -> Result<MirClass, String> {
-    match value.to_ascii_lowercase().as_str() {
-        "warrior" => Ok(MirClass::Warrior),
-        "wizard" => Ok(MirClass::Wizard),
-        "taoist" => Ok(MirClass::Taoist),
-        "assassin" => Ok(MirClass::Assassin),
-        "archer" => Ok(MirClass::Archer),
-        _ => Err(format!("unsupported class: {value}")),
-    }
-}
-
-fn parse_direction(value: &str) -> Result<MirDirection, String> {
-    match value.to_ascii_lowercase().as_str() {
-        "up" => Ok(MirDirection::Up),
-        "upright" => Ok(MirDirection::UpRight),
-        "right" => Ok(MirDirection::Right),
-        "downright" => Ok(MirDirection::DownRight),
-        "down" => Ok(MirDirection::Down),
-        "downleft" => Ok(MirDirection::DownLeft),
-        "left" => Ok(MirDirection::Left),
-        "upleft" => Ok(MirDirection::UpLeft),
-        _ => Err(format!("unsupported direction: {value}")),
-    }
-}
-
-fn parse_grid(value: &str) -> Result<MirGridType, String> {
-    match value.to_ascii_lowercase().as_str() {
-        "none" => Ok(MirGridType::None),
-        "inventory" | "bag" => Ok(MirGridType::Inventory),
-        "equipment" => Ok(MirGridType::Equipment),
-        "storage" => Ok(MirGridType::Storage),
-        "buyback" | "buy_back" => Ok(MirGridType::BuyBack),
-        "droppanel" | "drop_panel" => Ok(MirGridType::DropPanel),
-        "inspect" => Ok(MirGridType::Inspect),
-        "trade" => Ok(MirGridType::Trade),
-        "guildstorage" | "guild_storage" => Ok(MirGridType::GuildStorage),
-        "refine" => Ok(MirGridType::Refine),
-        "heroinventory" | "hero_inventory" => Ok(MirGridType::HeroInventory),
-        "heroequipment" | "hero_equipment" => Ok(MirGridType::HeroEquipment),
-        "questinventory" | "quest_inventory" => Ok(MirGridType::QuestInventory),
-        "belt" => Ok(MirGridType::Belt),
-        other => Err(format!("unsupported grid: {other}")),
-    }
-}
-
-fn parse_spell(value: u8) -> Result<Spell, String> {
-    Spell::try_from(value).map_err(|_| format!("unsupported spell: {value}"))
-}
-
-fn parse_spell_name(value: &str) -> Result<Spell, String> {
-    let trimmed = value.trim();
-    if let Ok(value) = trimmed.parse::<u8>() {
-        return parse_spell(value);
-    }
-    Spell::from_crystal_name(trimmed).ok_or_else(|| format!("unsupported spell: {value}"))
-}
-
-fn default_drop_count() -> u16 {
-    1
-}
-
-fn default_market_max_shape() -> i16 {
-    5_000
-}
-
 #[cfg(test)]
 mod tests {
     use super::{
@@ -4045,7 +5293,7 @@ mod tests {
     };
     use serde_json::json;
     use std::sync::Arc;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
         UserItem {
@@ -4120,6 +5368,22 @@ mod tests {
         }
     }
 
+    fn demo_game_session() -> crate::GatewaySession {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+        let login_packets = session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert!(login_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(start_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        session
+    }
+
     #[tokio::test]
     async fn admin_system_mail_endpoint_writes_live_account_store() {
         let path = std::env::temp_dir().join(format!(
@@ -4136,6 +5400,8 @@ mod tests {
             config: Arc::new(config),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
+            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
         };
 
@@ -4184,6 +5450,8 @@ mod tests {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
+            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
+            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
         };
 
@@ -4192,6 +5460,23 @@ mod tests {
         assert!(response.ok);
         assert_eq!(response.session_cache.backend, "in_memory");
         assert!(response.session_cache.healthy);
+        assert_eq!(
+            response.capacity,
+            super::GatewayCapacityStatus {
+                max_ws_connections: None,
+                max_active_sessions: None,
+                max_reconnect_leases: None,
+                max_login_in_flight: None,
+                max_new_character_in_flight: None,
+                max_start_game_in_flight: None,
+                current_ws_connections: 0,
+                current_active_sessions: 0,
+                current_reconnect_leases: 0,
+                current_login_in_flight: 0,
+                current_new_character_in_flight: 0,
+                current_start_game_in_flight: 0,
+            }
+        );
         assert!(response.gameplay_events.configured);
         assert_eq!(
             response.gameplay_events.topic.as_deref(),
@@ -4211,6 +5496,8 @@ mod tests {
                 },
                 character_name: "Scout".into(),
                 zone_id: Some("crystal".into()),
+                zone_owner_id: Some("owner-crystal".into()),
+                zone_owner_fencing_token: Some(1),
                 map_file_name: Some("0".into()),
                 player_object_id: Some(1001),
                 player_hp: Some(18),
@@ -4226,6 +5513,8 @@ mod tests {
             config: Arc::new(crate::GatewayConfig::default()),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             session_cache: cache,
+            reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
+            capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
         };
 
@@ -4305,6 +5594,21 @@ mod tests {
         assert!(!should_send_world_snapshot_for_action(
             &SessionAction::Packet(ClientPacket::KeepAlive { time: 12345 },)
         ));
+        assert!(!super::should_queue_save_for_action(
+            &SessionAction::Packet(ClientPacket::KeepAlive { time: 12345 },)
+        ));
+        assert!(
+            super::inflight_capacity_kind_for_action(&SessionAction::Packet(
+                ClientPacket::KeepAlive { time: 12345 },
+            ))
+            .is_none()
+        );
+        assert!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::KeepAlive { time: 12345 },
+            ))
+            .is_none()
+        );
     }
 
     #[test]
@@ -5603,6 +6907,19 @@ mod tests {
                 ref memo
             }) if memo == "party lead"
         ));
+
+        let ranking = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"getRanking","rankType":3,"rankIndex":20,"onlineOnly":true}"#,
+        )
+        .expect("get ranking command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(ranking).expect("ranking maps"),
+            SessionAction::Packet(ClientPacket::GetRanking {
+                rank_type: 3,
+                rank_index: 20,
+                online_only: true,
+            })
+        ));
     }
 
     #[test]
@@ -5794,7 +7111,7 @@ mod tests {
         let action = super::browser_command_to_action(command)
             .expect("stage5 damage equipment command should map to a session action");
 
-        let responses = super::execute_session_action(&mut session, action)
+        let responses = super::execute_session_action(&mut session, action, false, false)
             .expect("stage5 damage equipment command should execute");
         let damage_packet = responses
             .iter()
@@ -5805,6 +7122,541 @@ mod tests {
         assert_eq!(event["packet"], "DuraChanged");
         assert_eq!(event["payload"]["uniqueId"], 0);
         assert_eq!(event["payload"]["currentDura"], 0);
+    }
+
+    #[test]
+    fn production_web_path_rejects_unauthenticated_start_game() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+
+        let error = super::execute_session_action(
+            &mut session,
+            SessionAction::Packet(ClientPacket::StartGame { character_index: 0 }),
+            false,
+            true,
+        )
+        .expect_err("production web path should reject unauthenticated StartGame");
+
+        assert!(error.contains("authenticated account is required"));
+    }
+
+    #[test]
+    fn runtime_tick_defers_after_bootstrap_but_not_player_movement() {
+        assert!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::StartGame { character_index: 0 },
+            ))
+            .is_some()
+        );
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::Walk {
+                    direction: MirDirection::Right,
+                },
+            )),
+            Some(std::time::Duration::ZERO)
+        );
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::Run {
+                    direction: MirDirection::Right,
+                },
+            )),
+            Some(std::time::Duration::ZERO)
+        );
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::Turn {
+                    direction: MirDirection::Right,
+                },
+            )),
+            Some(std::time::Duration::ZERO)
+        );
+        assert!(
+            super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
+                ClientPacket::Chat {
+                    message: "hello".to_string(),
+                    linked_items: Vec::new(),
+                },
+            ))
+            .is_none()
+        );
+    }
+
+    #[test]
+    fn production_web_path_allows_start_game_after_login_success() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+
+        let login_packets = super::execute_session_action(
+            &mut session,
+            SessionAction::Packet(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }),
+            false,
+            true,
+        )
+        .expect("login should execute on production web path");
+        let authenticated = super::update_authenticated_state(false, &login_packets);
+        assert!(authenticated);
+
+        let start_packets = super::execute_session_action(
+            &mut session,
+            SessionAction::Packet(ClientPacket::StartGame { character_index: 0 }),
+            authenticated,
+            true,
+        )
+        .expect("authenticated StartGame should execute");
+
+        assert!(start_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+    }
+
+    #[test]
+    fn capacity_state_rejects_websocket_connections_over_limit() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_limits(
+            Some(1),
+            None,
+            None,
+        ));
+        let permit = capacity
+            .try_acquire_ws_connection()
+            .expect("first websocket should fit capacity");
+
+        let error = capacity
+            .try_acquire_ws_connection()
+            .expect_err("second websocket should be rejected");
+        assert!(error.contains("WebSocket connection capacity reached"));
+        assert_eq!(capacity.status().current_ws_connections, 1);
+
+        drop(permit);
+        assert_eq!(capacity.status().current_ws_connections, 0);
+    }
+
+    #[test]
+    fn capacity_state_tracks_active_sessions_and_reconnect_leases() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_limits(
+            None,
+            Some(1),
+            Some(1),
+        ));
+        let active = capacity
+            .try_acquire_active_session()
+            .expect("first active session should fit capacity");
+        let reconnect = capacity
+            .try_acquire_reconnect_lease()
+            .expect("first reconnect lease should fit capacity");
+
+        assert!(capacity.try_acquire_active_session().is_err());
+        assert!(capacity.try_acquire_reconnect_lease().is_err());
+        assert_eq!(capacity.status().current_active_sessions, 1);
+        assert_eq!(capacity.status().current_reconnect_leases, 1);
+
+        drop(active);
+        drop(reconnect);
+        assert_eq!(capacity.status().current_active_sessions, 0);
+        assert_eq!(capacity.status().current_reconnect_leases, 0);
+    }
+
+    #[test]
+    fn capacity_state_tracks_account_command_inflight_limits() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_action_limits(
+            Some(1),
+            Some(1),
+            Some(1),
+        ));
+        let login = capacity
+            .try_acquire_action(super::GatewayCapacityKind::Login)
+            .expect("first login should fit capacity");
+        let new_character = capacity
+            .try_acquire_action(super::GatewayCapacityKind::NewCharacter)
+            .expect("first new-character should fit capacity");
+        let start_game = capacity
+            .try_acquire_action(super::GatewayCapacityKind::StartGame)
+            .expect("first StartGame should fit capacity");
+
+        assert!(capacity
+            .try_acquire_action(super::GatewayCapacityKind::Login)
+            .expect_err("second login should be rejected")
+            .contains("login in-flight capacity reached"));
+        assert!(capacity
+            .try_acquire_action(super::GatewayCapacityKind::NewCharacter)
+            .expect_err("second new-character should be rejected")
+            .contains("new-character in-flight capacity reached"));
+        assert!(capacity
+            .try_acquire_action(super::GatewayCapacityKind::StartGame)
+            .expect_err("second StartGame should be rejected")
+            .contains("StartGame in-flight capacity reached"));
+        assert_eq!(capacity.status().current_login_in_flight, 1);
+        assert_eq!(capacity.status().current_new_character_in_flight, 1);
+        assert_eq!(capacity.status().current_start_game_in_flight, 1);
+
+        drop(login);
+        drop(new_character);
+        drop(start_game);
+        assert_eq!(capacity.status().current_login_in_flight, 0);
+        assert_eq!(capacity.status().current_new_character_in_flight, 0);
+        assert_eq!(capacity.status().current_start_game_in_flight, 0);
+    }
+
+    #[test]
+    fn web_session_save_queue_debounces_until_due_or_limit() {
+        let start = std::time::Instant::now();
+        let mut saves = 0;
+        let mut queue = super::WebSessionSaveQueue::new(super::GatewaySaveQueueConfig::new(
+            std::time::Duration::from_secs(10),
+            std::time::Duration::from_secs(30),
+            3,
+        ));
+
+        queue
+            .request_save(start, || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("first save request should queue");
+        queue
+            .request_save(start + std::time::Duration::from_secs(1), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("second save request should still debounce");
+        assert_eq!(saves, 0);
+        assert!(queue.has_pending_save());
+
+        queue
+            .request_save(start + std::time::Duration::from_secs(2), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("queue limit should flush");
+        assert_eq!(saves, 1);
+        assert!(!queue.has_pending_save());
+    }
+
+    #[test]
+    fn web_session_save_queue_flushes_on_checkpoint_and_close() {
+        let start = std::time::Instant::now();
+        let mut saves = 0;
+        let mut queue = super::WebSessionSaveQueue::new(super::GatewaySaveQueueConfig::new(
+            std::time::Duration::from_secs(10),
+            std::time::Duration::from_secs(20),
+            8,
+        ));
+
+        queue
+            .request_save(start, || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("save request should queue");
+        queue
+            .checkpoint(start + std::time::Duration::from_secs(10), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("early checkpoint should not flush");
+        assert_eq!(saves, 0);
+
+        queue
+            .checkpoint(start + std::time::Duration::from_secs(21), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("due checkpoint should flush");
+        assert_eq!(saves, 1);
+
+        queue
+            .request_save(start + std::time::Duration::from_secs(21), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("save request should queue again");
+        queue
+            .flush_now(start + std::time::Duration::from_secs(22), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("close flush should persist dirty state");
+        assert_eq!(saves, 2);
+        assert!(!queue.has_pending_save());
+
+        queue
+            .force_save_now(start + std::time::Duration::from_secs(23), || {
+                saves += 1;
+                Ok(())
+            })
+            .expect("forced close save should run even without dirty state");
+        assert_eq!(saves, 3);
+    }
+
+    #[test]
+    fn web_session_route_refresh_throttles_low_latency_updates() {
+        let start = Instant::now();
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        let session = demo_game_session();
+        let mut refresh = super::WebSessionRouteRefresh::new(
+            super::GatewayRouteRefreshConfig::new(Duration::from_secs(5)),
+        );
+
+        assert!(refresh
+            .maybe_refresh(&cache, &session, start, false)
+            .expect("initial active session refresh should succeed"));
+        assert_eq!(crate::GatewaySessionCache::route_lease_count(&cache), 1);
+        assert!(!refresh
+            .maybe_refresh(&cache, &session, start + Duration::from_secs(1), false)
+            .expect("early refresh should be skipped"));
+        assert!(refresh
+            .maybe_refresh(&cache, &session, start + Duration::from_secs(1), true)
+            .expect("forced refresh should bypass throttle"));
+        assert!(!refresh
+            .maybe_refresh(&cache, &session, start + Duration::from_secs(3), false)
+            .expect("throttle should use the latest forced refresh time"));
+        assert!(refresh
+            .maybe_refresh(&cache, &session, start + Duration::from_secs(7), false)
+            .expect("refresh should run again after the interval"));
+    }
+
+    #[test]
+    fn reconnect_session_store_restores_active_session_before_grace_expires() {
+        let store = super::ReconnectSessionStore::default();
+        let capacity = Arc::new(super::GatewayCapacityState::with_limits(
+            None,
+            Some(1),
+            Some(1),
+        ));
+        let session = demo_game_session();
+        let session_id = session.session_id().to_string();
+        let key = super::session_cache_key(&session)
+            .expect("active demo game session should have a cache key");
+        let active_session_permit = capacity
+            .try_acquire_active_session()
+            .expect("test active session should fit capacity");
+        let reconnect_lease_permit = capacity
+            .try_acquire_reconnect_lease()
+            .expect("test reconnect lease should fit capacity");
+
+        store.store(
+            key.clone(),
+            session,
+            Some(active_session_permit),
+            reconnect_lease_permit,
+            std::time::Duration::from_secs(30),
+        );
+        assert_eq!(store.len(), 1);
+        assert_eq!(capacity.status().current_active_sessions, 1);
+        assert_eq!(capacity.status().current_reconnect_leases, 1);
+
+        let restored = store
+            .take(&key)
+            .expect("stored reconnect session should be restored within grace");
+        assert_eq!(restored.session.session_id(), session_id);
+        assert_eq!(
+            restored
+                .session
+                .active_identity()
+                .expect("restored session should remain active")
+                .account_id,
+            "demo"
+        );
+        assert!(restored.active_session_permit.is_some());
+        assert_eq!(store.len(), 0);
+        assert_eq!(capacity.status().current_reconnect_leases, 0);
+
+        drop(restored);
+        assert_eq!(capacity.status().current_active_sessions, 0);
+    }
+
+    #[test]
+    fn reconnect_session_store_discards_expired_sessions() {
+        let store = super::ReconnectSessionStore::default();
+        let capacity = Arc::new(super::GatewayCapacityState::with_limits(
+            None,
+            Some(1),
+            Some(1),
+        ));
+        let session = demo_game_session();
+        let key = super::session_cache_key(&session)
+            .expect("active demo game session should have a cache key");
+        let active_session_permit = capacity
+            .try_acquire_active_session()
+            .expect("test active session should fit capacity");
+        let reconnect_lease_permit = capacity
+            .try_acquire_reconnect_lease()
+            .expect("test reconnect lease should fit capacity");
+        {
+            let mut sessions = store
+                .sessions
+                .lock()
+                .expect("test reconnect store mutex should not be poisoned");
+            sessions.insert(
+                key.clone(),
+                super::ReconnectSessionLease {
+                    session,
+                    active_session_permit: Some(active_session_permit),
+                    _reconnect_lease_permit: reconnect_lease_permit,
+                    expires_at: std::time::Instant::now() - std::time::Duration::from_secs(1),
+                },
+            );
+        }
+        assert_eq!(capacity.status().current_active_sessions, 1);
+        assert_eq!(capacity.status().current_reconnect_leases, 1);
+
+        assert!(store.take(&key).is_none());
+        assert_eq!(store.len(), 0);
+        assert_eq!(capacity.status().current_active_sessions, 0);
+        assert_eq!(capacity.status().current_reconnect_leases, 0);
+    }
+
+    #[tokio::test]
+    async fn reconnect_session_store_scheduled_purge_discards_expired_sessions() {
+        let store = Arc::new(super::ReconnectSessionStore::default());
+        let capacity = Arc::new(super::GatewayCapacityState::with_limits(
+            None,
+            Some(1),
+            Some(1),
+        ));
+        let session = demo_game_session();
+        let key = super::session_cache_key(&session)
+            .expect("active demo game session should have a cache key");
+        let active_session_permit = capacity
+            .try_acquire_active_session()
+            .expect("test active session should fit capacity");
+        let reconnect_lease_permit = capacity
+            .try_acquire_reconnect_lease()
+            .expect("test reconnect lease should fit capacity");
+
+        store.store(
+            key,
+            session,
+            Some(active_session_permit),
+            reconnect_lease_permit,
+            std::time::Duration::from_millis(10),
+        );
+        super::schedule_reconnect_session_purge(
+            Arc::clone(&store),
+            std::time::Duration::from_millis(10),
+        );
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
+        assert_eq!(store.len(), 0);
+        assert_eq!(capacity.status().current_active_sessions, 0);
+        assert_eq!(capacity.status().current_reconnect_leases, 0);
+    }
+
+    #[test]
+    fn reconnect_resume_key_helpers_match_login_and_start_game_actions() {
+        let login = SessionAction::Packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        assert_eq!(super::login_account_id_for_action(&login), Some("demo"));
+
+        let passkey = SessionAction::PasskeyLogin {
+            account_id: "wallet-demo".to_string(),
+            token: "token".to_string(),
+        };
+        assert_eq!(
+            super::login_account_id_for_action(&passkey),
+            Some("wallet-demo")
+        );
+
+        let start = SessionAction::Packet(ClientPacket::StartGame { character_index: 2 });
+        assert_eq!(
+            super::start_game_character_index_for_action(&start),
+            Some(2)
+        );
+    }
+
+    #[test]
+    fn start_game_route_lease_blocks_duplicate_online_character_before_world_entry() {
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        let first = crate::GatewaySession::new(SimulationConfig::default());
+        let second = crate::GatewaySession::new(SimulationConfig::default());
+
+        let first_key =
+            super::try_acquire_start_game_route_lease(&cache, &first, true, Some("demo"), Some(0))
+                .expect("first StartGame route lease should succeed")
+                .expect("StartGame should acquire a pending route lease");
+        let second_error =
+            super::try_acquire_start_game_route_lease(&cache, &second, true, Some("demo"), Some(0))
+                .expect_err("second StartGame route lease should be rejected");
+
+        assert!(second_error.contains("already online"));
+        assert_eq!(first_key.account_id, "demo");
+        assert_eq!(crate::GatewaySessionCache::route_lease_count(&cache), 1);
+
+        super::release_pending_start_game_route_lease(&cache, &first, Some(&first_key));
+        assert_eq!(crate::GatewaySessionCache::route_lease_count(&cache), 0);
+        assert!(super::try_acquire_start_game_route_lease(
+            &cache,
+            &second,
+            true,
+            Some("demo"),
+            Some(0),
+        )
+        .expect("second StartGame route lease should succeed after release")
+        .is_some());
+    }
+
+    #[test]
+    fn start_game_route_lease_releases_when_start_game_does_not_claim_identity() {
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        let session = crate::GatewaySession::new(SimulationConfig::default());
+        let key = super::try_acquire_start_game_route_lease(
+            &cache,
+            &session,
+            true,
+            Some("demo"),
+            Some(0),
+        )
+        .expect("pending route lease should succeed")
+        .expect("StartGame should acquire a pending route lease");
+
+        super::release_unclaimed_start_game_route_lease(&cache, &session, Some(&key));
+
+        assert_eq!(crate::GatewaySessionCache::route_lease_count(&cache), 0);
+    }
+
+    #[test]
+    fn production_web_path_rejects_debug_runtime_commands() {
+        let mut session = crate::GatewaySession::new(SimulationConfig::default());
+
+        let move_error = super::execute_session_action(
+            &mut session,
+            SessionAction::MoveTo {
+                x: 330,
+                y: 270,
+                running: false,
+            },
+            true,
+            true,
+        )
+        .expect_err("production web path should reject MoveTo");
+        assert!(move_error.contains("debug MoveTo"));
+
+        let stage5_error = super::execute_session_action(
+            &mut session,
+            SessionAction::Stage5Command {
+                action: "qa.giveItem".to_string(),
+                args: vec!["red-potion".to_string()],
+            },
+            true,
+            true,
+        )
+        .expect_err("production web path should reject Stage5Command");
+        assert!(stage5_error.contains("Stage5Command"));
+
+        let transfer_error = super::execute_session_action(
+            &mut session,
+            SessionAction::TransferMap {
+                key: "crystal:0:330:270".to_string(),
+            },
+            true,
+            true,
+        )
+        .expect_err("production web path should reject debug crystal transfer");
+        assert!(transfer_error.contains("debug crystal transfer"));
     }
 
     #[test]

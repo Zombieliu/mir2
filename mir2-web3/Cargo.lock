@@ -1142,11 +1142,15 @@ name = "mir2-gateway"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.9",
+ "base64",
  "futures-util",
+ "hmac",
+ "mir2-game-data",
  "mir2-protocol",
  "mir2-simulation",
  "serde",
  "serde_json",
+ "sha2",
  "tokio",
 ]
 

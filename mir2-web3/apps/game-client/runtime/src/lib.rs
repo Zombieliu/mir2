@@ -1,18 +1,43 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
+use bevy::asset::{AssetMetaCheck, AssetPlugin, RenderAssetUsages};
+use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
+use bevy::math::{URect, UVec2};
 use bevy::prelude::*;
-use bevy::window::WindowResolution;
+use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
 const TILE_SIZE: f32 = 32.0;
 const FLOOR_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
+#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+const COMPILED_RENDER_BACKEND: &str = "webgpu";
+#[cfg(all(target_arch = "wasm32", feature = "webgl2", not(feature = "webgpu")))]
+const COMPILED_RENDER_BACKEND: &str = "webgl2";
+#[cfg(not(any(
+    all(target_arch = "wasm32", feature = "webgpu"),
+    all(target_arch = "wasm32", feature = "webgl2", not(feature = "webgpu"))
+)))]
+const COMPILED_RENDER_BACKEND: &str = "native";
+
+#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::PreMultiplied;
+#[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
+const WINDOW_COMPOSITE_ALPHA_MODE: CompositeAlphaMode = CompositeAlphaMode::Auto;
+
+#[cfg(all(target_arch = "wasm32", feature = "webgpu"))]
+const WINDOW_TRANSPARENT: bool = true;
+#[cfg(not(all(target_arch = "wasm32", feature = "webgpu")))]
+const WINDOW_TRANSPARENT: bool = false;
 
 thread_local! {
     static STATUS_SINK: RefCell<Option<Function>> = const { RefCell::new(None) };
     static PENDING_WORLD_STATE: RefCell<Option<WorldSnapshot>> = const { RefCell::new(None) };
+    static PENDING_ENTITY_RENDER_STATE: RefCell<Option<EntityRenderState>> = const { RefCell::new(None) };
+    static PENDING_ENTITY_RENDER_ATLASES: RefCell<Vec<PendingEntityRenderAtlasImage>> = const { RefCell::new(Vec::new()) };
 }
 
 #[derive(Resource, Default, Clone)]
@@ -20,9 +45,21 @@ struct RuntimeWorldState {
     snapshot: Option<WorldSnapshot>,
 }
 
+#[derive(Resource, Default, Clone)]
+struct RuntimeEntityRenderState {
+    snapshot: Option<EntityRenderState>,
+}
+
+#[derive(Resource, Default, Clone)]
+struct RuntimeEntityRenderAtlases {
+    images: HashMap<String, Handle<Image>>,
+}
+
 #[derive(Resource, Default)]
 struct SceneRegistry {
     entities: HashMap<String, SceneEntityHandles>,
+    entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
+    entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     map: MapSceneCache,
 }
 
@@ -42,11 +79,37 @@ struct SceneEntityHandles {
     selection: Entity,
 }
 
+#[derive(Clone)]
+struct EntityRenderLayerHandle {
+    entity: Entity,
+    image_key: String,
+    atlas_key: Option<String>,
+    atlas_rect_key: Option<String>,
+}
+
+#[derive(Clone)]
+struct EntityRenderAtlasHandle {
+    layout: Handle<TextureAtlasLayout>,
+    rects: HashMap<String, usize>,
+    image_key: Option<String>,
+    image: Option<Handle<Image>>,
+}
+
+struct PendingEntityRenderAtlasImage {
+    key: String,
+    width: u32,
+    height: u32,
+    pixels: Vec<u8>,
+}
+
 #[derive(Component)]
 struct MainCamera;
 
 #[derive(Component)]
 struct MirObject;
+
+#[derive(Component)]
+struct MirEntityRenderLayer;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -134,6 +197,68 @@ struct WorldEntity {
     level: Option<u16>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityRenderState {
+    enabled: bool,
+    stage_width: f32,
+    stage_height: f32,
+    #[serde(default)]
+    atlases: Vec<EntityRenderAtlas>,
+    #[serde(default)]
+    entities: Vec<EntityRenderEntry>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityRenderAtlas {
+    key: String,
+    width: u32,
+    height: u32,
+    #[serde(default)]
+    image_url: Option<String>,
+    #[serde(default)]
+    rects: Vec<EntityRenderAtlasRect>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityRenderAtlasRect {
+    key: String,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityRenderEntry {
+    object_id: String,
+    #[serde(default)]
+    dead: bool,
+    #[serde(default)]
+    layers: Vec<EntityRenderLayer>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityRenderLayer {
+    key: String,
+    path: String,
+    #[serde(default)]
+    atlas_key: Option<String>,
+    #[serde(default)]
+    atlas_rect_key: Option<String>,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    #[serde(default)]
+    opacity: Option<f32>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 enum EntityKind {
@@ -165,6 +290,11 @@ pub fn clear_mir2_status_sink() {
     });
 }
 
+#[wasm_bindgen(js_name = getMir2RendererBackend)]
+pub fn get_mir2_renderer_backend() -> String {
+    COMPILED_RENDER_BACKEND.to_owned()
+}
+
 #[wasm_bindgen(js_name = setMir2WorldState)]
 pub fn set_mir2_world_state(snapshot_json: String) {
     match serde_json::from_str::<WorldSnapshot>(&snapshot_json) {
@@ -177,6 +307,47 @@ pub fn set_mir2_world_state(snapshot_json: String) {
     }
 }
 
+#[wasm_bindgen(js_name = setMir2EntityRenderState)]
+pub fn set_mir2_entity_render_state(snapshot_json: String) {
+    match serde_json::from_str::<EntityRenderState>(&snapshot_json) {
+        Ok(snapshot) => {
+            PENDING_ENTITY_RENDER_STATE.with(|pending| {
+                *pending.borrow_mut() = Some(snapshot);
+            });
+        }
+        Err(error) => publish_status("entity-render-decode-error", &error.to_string()),
+    }
+}
+
+#[wasm_bindgen(js_name = setMir2EntityRenderAtlas)]
+pub fn set_mir2_entity_render_atlas(key: String, width: u32, height: u32, pixels: Vec<u8>) {
+    if width == 0 || height == 0 {
+        publish_status("entity-render-atlas-error", "Ignoring empty entity atlas");
+        return;
+    }
+
+    let expected_len = width as usize * height as usize * 4;
+    if pixels.len() != expected_len {
+        publish_status(
+            "entity-render-atlas-error",
+            &format!(
+                "Ignoring entity atlas {key}: expected {expected_len} RGBA bytes, got {}",
+                pixels.len()
+            ),
+        );
+        return;
+    }
+
+    PENDING_ENTITY_RENDER_ATLASES.with(|pending| {
+        pending.borrow_mut().push(PendingEntityRenderAtlasImage {
+            key,
+            width,
+            height,
+            pixels,
+        });
+    });
+}
+
 #[wasm_bindgen(js_name = bootMir2Runtime)]
 pub fn boot_mir2_runtime() {
     console_error_panic_hook::set_once();
@@ -186,27 +357,44 @@ pub fn boot_mir2_runtime() {
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .insert_resource(RuntimeWorldState::default())
+        .insert_resource(RuntimeEntityRenderState::default())
+        .insert_resource(RuntimeEntityRenderAtlases::default())
         .insert_resource(SceneRegistry::default())
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                canvas: Some("#mir2-web3-canvas".to_owned()),
-                fit_canvas_to_parent: true,
-                prevent_default_event_handling: true,
-                resolution: WindowResolution::new(1280, 720),
-                title: "mir2-web3".to_owned(),
-                ..default()
-            }),
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .set(AssetPlugin {
+                    file_path: ".".to_owned(),
+                    meta_check: AssetMetaCheck::Never,
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        canvas: Some("#mir2-web3-canvas".to_owned()),
+                        composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
+                        fit_canvas_to_parent: true,
+                        prevent_default_event_handling: true,
+                        resolution: WindowResolution::new(1280, 720),
+                        title: "mir2-web3".to_owned(),
+                        transparent: WINDOW_TRANSPARENT,
+                        ..default()
+                    }),
+                    ..default()
+                }),
+        )
         .add_systems(Startup, setup_scene)
         .add_systems(
             Update,
             (
                 ingest_pending_world_state,
+                ingest_pending_entity_render_state,
+                ingest_pending_entity_render_atlases,
                 sync_map_scene,
                 sync_entities,
+                sync_entity_render_layers,
                 follow_player,
-            ),
+            )
+                .chain(),
         );
 
     publish_status("running", "Handing off to Bevy app loop");
@@ -222,6 +410,37 @@ fn ingest_pending_world_state(mut state: ResMut<RuntimeWorldState>) {
     PENDING_WORLD_STATE.with(|pending| {
         if let Some(snapshot) = pending.borrow_mut().take() {
             state.snapshot = Some(snapshot);
+        }
+    });
+}
+
+fn ingest_pending_entity_render_state(mut state: ResMut<RuntimeEntityRenderState>) {
+    PENDING_ENTITY_RENDER_STATE.with(|pending| {
+        if let Some(snapshot) = pending.borrow_mut().take() {
+            state.snapshot = Some(snapshot);
+        }
+    });
+}
+
+fn ingest_pending_entity_render_atlases(
+    mut atlas_resource: ResMut<RuntimeEntityRenderAtlases>,
+    mut images: ResMut<Assets<Image>>,
+) {
+    PENDING_ENTITY_RENDER_ATLASES.with(|pending| {
+        for atlas in pending.borrow_mut().drain(..) {
+            let image = Image::new(
+                Extent3d {
+                    width: atlas.width,
+                    height: atlas.height,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                atlas.pixels,
+                TextureFormat::Rgba8UnormSrgb,
+                RenderAssetUsages::default(),
+            );
+            let handle = images.add(image);
+            atlas_resource.images.insert(atlas.key, handle);
         }
     });
 }
@@ -250,16 +469,31 @@ fn sync_map_scene(
         .clone()
         .unwrap_or_else(|| "unknown".to_owned());
     registry.map.blueprint = Some(blueprint);
-    publish_status("scene-synced", &format!("Applied scene blueprint for {title}"));
+    publish_status(
+        "scene-synced",
+        &format!("Applied scene blueprint for {title}"),
+    );
 }
 
 fn sync_entities(
     mut commands: Commands,
     state: Res<RuntimeWorldState>,
+    entity_render_state: Res<RuntimeEntityRenderState>,
     mut registry: ResMut<SceneRegistry>,
     mut transform_query: Query<&mut Transform>,
     mut sprite_query: Query<&mut Sprite>,
 ) {
+    if entity_render_state
+        .snapshot
+        .as_ref()
+        .is_some_and(|snapshot| snapshot.enabled)
+    {
+        for (_, handles) in registry.entities.drain() {
+            commands.entity(handles.root).despawn();
+        }
+        return;
+    }
+
     let Some(snapshot) = &state.snapshot else {
         return;
     };
@@ -384,10 +618,277 @@ fn sync_entities(
     }
 }
 
+fn sync_entity_render_layers(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    atlas_assets: Res<RuntimeEntityRenderAtlases>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    entity_render_state: Res<RuntimeEntityRenderState>,
+    mut registry: ResMut<SceneRegistry>,
+    mut transform_query: Query<&mut Transform>,
+    mut sprite_query: Query<&mut Sprite>,
+) {
+    let Some(snapshot) = &entity_render_state.snapshot else {
+        clear_entity_render_layers(&mut commands, &mut registry);
+        return;
+    };
+
+    if !snapshot.enabled {
+        clear_entity_render_layers(&mut commands, &mut registry);
+        return;
+    }
+
+    let mut alive = HashSet::new();
+    sync_entity_render_atlas_layouts(
+        snapshot,
+        &asset_server,
+        &atlas_assets,
+        &mut texture_atlas_layouts,
+        &mut registry,
+    );
+
+    for entity in &snapshot.entities {
+        for layer in &entity.layers {
+            let layer_key = if layer.key.is_empty() {
+                format!("{}:{}", entity.object_id, layer.path)
+            } else {
+                layer.key.clone()
+            };
+            alive.insert(layer_key.clone());
+            let position = entity_render_layer_position(snapshot, layer);
+            let opacity = layer
+                .opacity
+                .unwrap_or(if entity.dead { 0.45 } else { 1.0 });
+            let image_binding =
+                entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
+
+            if let Some(handle) = registry.entity_render_layers.get_mut(&layer_key) {
+                if handle.image_key != image_binding.image_key
+                    || handle.atlas_key != image_binding.atlas_key
+                    || handle.atlas_rect_key != image_binding.atlas_rect_key
+                {
+                    if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                        sprite.image = image_binding.image.clone();
+                        sprite.texture_atlas = image_binding.texture_atlas.clone();
+                        sprite.rect = None;
+                    }
+                    handle.image_key = image_binding.image_key.clone();
+                    handle.atlas_key = image_binding.atlas_key.clone();
+                    handle.atlas_rect_key = image_binding.atlas_rect_key.clone();
+                }
+                if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
+                    sprite.custom_size =
+                        Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
+                    sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
+                    sprite.texture_atlas = image_binding.texture_atlas.clone();
+                    sprite.rect = None;
+                }
+                if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                    transform.translation = position;
+                }
+                continue;
+            }
+
+            let sprite_entity = commands
+                .spawn((
+                    MirEntityRenderLayer,
+                    Sprite {
+                        image: image_binding.image.clone(),
+                        texture_atlas: image_binding.texture_atlas.clone(),
+                        custom_size: Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0))),
+                        color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(position),
+                ))
+                .id();
+            registry.entity_render_layers.insert(
+                layer_key,
+                EntityRenderLayerHandle {
+                    entity: sprite_entity,
+                    image_key: image_binding.image_key,
+                    atlas_key: image_binding.atlas_key,
+                    atlas_rect_key: image_binding.atlas_rect_key,
+                },
+            );
+        }
+    }
+
+    let stale_keys: Vec<String> = registry
+        .entity_render_layers
+        .keys()
+        .filter(|key| !alive.contains(*key))
+        .cloned()
+        .collect();
+
+    for key in stale_keys {
+        if let Some(handle) = registry.entity_render_layers.remove(&key) {
+            commands.entity(handle.entity).despawn();
+        }
+    }
+}
+
+struct EntityRenderImageBinding {
+    image: Handle<Image>,
+    image_key: String,
+    atlas_key: Option<String>,
+    atlas_rect_key: Option<String>,
+    texture_atlas: Option<TextureAtlas>,
+}
+
+fn sync_entity_render_atlas_layouts(
+    snapshot: &EntityRenderState,
+    asset_server: &AssetServer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+    texture_atlas_layouts: &mut Assets<TextureAtlasLayout>,
+    registry: &mut SceneRegistry,
+) {
+    let mut alive = HashSet::new();
+
+    for atlas in &snapshot.atlases {
+        alive.insert(atlas.key.clone());
+        if registry.entity_render_atlases.contains_key(&atlas.key) {
+            continue;
+        }
+
+        let mut layout = TextureAtlasLayout::new_empty(UVec2::new(atlas.width, atlas.height));
+        let mut rects = HashMap::new();
+        for rect in &atlas.rects {
+            let index = layout.add_texture(URect {
+                min: UVec2::new(rect.x, rect.y),
+                max: UVec2::new(rect.x + rect.width, rect.y + rect.height),
+            });
+            rects.insert(rect.key.clone(), index);
+        }
+        let layout = texture_atlas_layouts.add(layout);
+        let uploaded_image = atlas_assets.images.get(&atlas.key).cloned();
+        let url_image = atlas.image_url.as_ref().map(|image_url| {
+            let asset_path = browser_asset_path(image_url);
+            (asset_path.clone(), asset_server.load(asset_path))
+        });
+        let (image_key, image) = if let Some((image_key, image)) = url_image {
+            (Some(image_key), Some(image))
+        } else if let Some(image) = uploaded_image {
+            (Some(format!("atlas:{}", atlas.key)), Some(image))
+        } else {
+            (None, None)
+        };
+        registry.entity_render_atlases.insert(
+            atlas.key.clone(),
+            EntityRenderAtlasHandle {
+                layout,
+                rects,
+                image_key,
+                image,
+            },
+        );
+    }
+
+    registry
+        .entity_render_atlases
+        .retain(|key, _| alive.contains(key));
+}
+
+fn entity_render_image_binding(
+    layer: &EntityRenderLayer,
+    asset_server: &AssetServer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+    registry: &SceneRegistry,
+) -> EntityRenderImageBinding {
+    if let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) {
+        if let Some(atlas) = registry.entity_render_atlases.get(atlas_key) {
+            if let Some(index) = atlas.rects.get(rect_key) {
+                if let (Some(image_key), Some(image)) = (&atlas.image_key, &atlas.image) {
+                    return EntityRenderImageBinding {
+                        image: image.clone(),
+                        image_key: image_key.clone(),
+                        atlas_key: Some(atlas_key.clone()),
+                        atlas_rect_key: Some(rect_key.clone()),
+                        texture_atlas: Some(TextureAtlas {
+                            layout: atlas.layout.clone(),
+                            index: *index,
+                        }),
+                    };
+                }
+
+                if let Some(image) = atlas_assets.images.get(atlas_key) {
+                    return EntityRenderImageBinding {
+                        image: image.clone(),
+                        image_key: format!("atlas:{atlas_key}"),
+                        atlas_key: Some(atlas_key.clone()),
+                        atlas_rect_key: Some(rect_key.clone()),
+                        texture_atlas: Some(TextureAtlas {
+                            layout: atlas.layout.clone(),
+                            index: *index,
+                        }),
+                    };
+                }
+            }
+        }
+    }
+
+    let asset_path = browser_asset_path(&layer.path);
+    EntityRenderImageBinding {
+        image: asset_server.load(asset_path.clone()),
+        image_key: asset_path,
+        atlas_key: None,
+        atlas_rect_key: None,
+        texture_atlas: None,
+    }
+}
+
+fn clear_entity_render_layers(commands: &mut Commands, registry: &mut SceneRegistry) {
+    for (_, handle) in registry.entity_render_layers.drain() {
+        commands.entity(handle.entity).despawn();
+    }
+    registry.entity_render_atlases.clear();
+}
+
+fn entity_render_layer_position(snapshot: &EntityRenderState, layer: &EntityRenderLayer) -> Vec3 {
+    let center_x = layer.left + layer.width * 0.5;
+    let center_y = layer.top + layer.height * 0.5;
+
+    Vec3::new(
+        center_x - snapshot.stage_width * 0.5,
+        snapshot.stage_height * 0.5 - center_y,
+        layer.z / 100_000.0,
+    )
+}
+
+fn browser_asset_path(path: &str) -> String {
+    path.trim_start_matches('/')
+        .split('?')
+        .next()
+        .unwrap_or(path)
+        .to_owned()
+}
+
 fn follow_player(
     state: Res<RuntimeWorldState>,
-    mut camera_query: Query<&mut Transform, (With<MainCamera>, Without<MirObject>)>,
+    entity_render_state: Res<RuntimeEntityRenderState>,
+    mut camera_query: Query<
+        &mut Transform,
+        (
+            With<MainCamera>,
+            Without<MirObject>,
+            Without<MirEntityRenderLayer>,
+        ),
+    >,
 ) {
+    if entity_render_state
+        .snapshot
+        .as_ref()
+        .is_some_and(|snapshot| snapshot.enabled)
+    {
+        let Ok(mut camera_transform) = camera_query.single_mut() else {
+            return;
+        };
+        camera_transform.translation.x = 0.0;
+        camera_transform.translation.y = 0.0;
+        camera_transform.translation.z = 0.0;
+        return;
+    }
+
     let Some(snapshot) = &state.snapshot else {
         return;
     };
@@ -446,7 +947,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
                 .spawn(Transform::from_translation(translation))
                 .with_children(|parent| {
                     parent.spawn((
-                        Sprite::from_color(terrain.base_color(variation), Vec2::splat(TILE_SIZE - 1.0)),
+                        Sprite::from_color(
+                            terrain.base_color(variation),
+                            Vec2::splat(TILE_SIZE - 1.0),
+                        ),
                         Transform::from_xyz(0.0, 0.0, 0.0),
                     ));
                     parent.spawn((
@@ -492,11 +996,17 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
                             Transform::from_xyz(0.0, 8.0, 0.05),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.95, 0.71, 0.28), Vec2::new(10.0, 10.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.95, 0.71, 0.28),
+                                Vec2::new(10.0, 10.0),
+                            ),
                             Transform::from_xyz(0.0, 18.0, 0.1),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgba(1.0, 0.82, 0.34, 0.24), Vec2::new(18.0, 18.0)),
+                            Sprite::from_color(
+                                Color::srgba(1.0, 0.82, 0.34, 0.24),
+                                Vec2::new(18.0, 18.0),
+                            ),
                             Transform::from_xyz(0.0, 18.0, 0.08),
                         ));
                     }
@@ -506,7 +1016,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
                             Transform::from_xyz(0.0, 8.0, 0.05),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.70, 0.21, 0.16), Vec2::new(15.0, 18.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.70, 0.21, 0.16),
+                                Vec2::new(15.0, 18.0),
+                            ),
                             Transform::from_xyz(8.0, 16.0, 0.1),
                         ));
                     }
@@ -516,13 +1029,19 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
                             Transform::from_xyz(0.0, 4.0, 0.05),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.18, 0.40, 0.15), Vec2::new(28.0, 22.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.18, 0.40, 0.15),
+                                Vec2::new(28.0, 22.0),
+                            ),
                             Transform::from_xyz(0.0, 20.0, 0.1),
                         ));
                     }
                     DecorKind::Rock => {
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.46, 0.43, 0.38), Vec2::new(22.0, 14.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.46, 0.43, 0.38),
+                                Vec2::new(22.0, 14.0),
+                            ),
                             Transform::from_xyz(0.0, 2.0, 0.08),
                         ));
                     }
@@ -532,17 +1051,26 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
                             Transform::from_xyz(0.0, -2.0, 0.05),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.96, 0.57, 0.19), Vec2::new(10.0, 14.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.96, 0.57, 0.19),
+                                Vec2::new(10.0, 14.0),
+                            ),
                             Transform::from_xyz(0.0, 8.0, 0.1),
                         ));
                         parent.spawn((
-                            Sprite::from_color(Color::srgba(1.0, 0.67, 0.24, 0.22), Vec2::new(26.0, 22.0)),
+                            Sprite::from_color(
+                                Color::srgba(1.0, 0.67, 0.24, 0.22),
+                                Vec2::new(26.0, 22.0),
+                            ),
                             Transform::from_xyz(0.0, 6.0, 0.08),
                         ));
                     }
                     DecorKind::Stump => {
                         parent.spawn((
-                            Sprite::from_color(Color::srgb(0.42, 0.29, 0.17), Vec2::new(14.0, 10.0)),
+                            Sprite::from_color(
+                                Color::srgb(0.42, 0.29, 0.17),
+                                Vec2::new(14.0, 10.0),
+                            ),
                             Transform::from_xyz(0.0, 0.0, 0.08),
                         ));
                     }

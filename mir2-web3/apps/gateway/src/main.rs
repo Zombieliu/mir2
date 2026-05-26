@@ -1,4 +1,5 @@
 use std::env;
+use std::io;
 use std::path::PathBuf;
 
 use mir2_gateway::tcp::run_tcp_gateway;
@@ -9,27 +10,26 @@ const DEFAULT_TCP_ADDR: &str = "127.0.0.1:7000";
 const DEFAULT_WEB_ADDR: &str = "127.0.0.1:7010";
 const DEFAULT_ACCOUNT_STORE_PATH: &str = ".mir2-data/accounts.json";
 
-#[tokio::main]
-async fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
+    let worker_threads = tokio_worker_threads_from_env();
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(worker_threads)
+        .build()?
+        .block_on(async_main())
+}
+
+async fn async_main() -> std::io::Result<()> {
     let tcp_addr =
         env::var("MIR2_GATEWAY_TCP_ADDR").unwrap_or_else(|_| DEFAULT_TCP_ADDR.to_string());
     let web_addr =
         env::var("MIR2_GATEWAY_WEB_ADDR").unwrap_or_else(|_| DEFAULT_WEB_ADDR.to_string());
-    let database_backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
-    let config = if database_backend.eq_ignore_ascii_case("postgres") {
-        let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
-            .expect("MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store");
-        GatewayConfig::default().with_postgres_account_store(database_url)
-    } else {
-        let account_store_path = env::var("MIR2_ACCOUNT_STORE_PATH")
-            .unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.into());
-        let mut config =
-            GatewayConfig::default().with_account_store_path(PathBuf::from(account_store_path));
-        if let Ok(database_url) = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL") {
-            config = config.with_account_store_database_url(database_url);
-        }
-        config
-    };
+    let account_store_path =
+        env::var("MIR2_ACCOUNT_STORE_PATH").unwrap_or_else(|_| DEFAULT_ACCOUNT_STORE_PATH.into());
+    let config = GatewayConfig::default()
+        .with_crystal_map_runtime()
+        .with_account_store_environment(PathBuf::from(account_store_path))
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
 
     tokio::try_join!(
         run_tcp_gateway(&tcp_addr, config.clone()),
@@ -37,4 +37,17 @@ async fn main() -> std::io::Result<()> {
     )?;
 
     Ok(())
+}
+
+fn tokio_worker_threads_from_env() -> usize {
+    env::var("MIR2_GATEWAY_TOKIO_WORKER_THREADS")
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or_else(|| {
+            std::thread::available_parallelism()
+                .map(usize::from)
+                .unwrap_or(4)
+        })
+        .clamp(1, 64)
 }
