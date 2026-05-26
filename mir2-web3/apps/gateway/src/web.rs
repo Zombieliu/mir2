@@ -1784,7 +1784,7 @@ fn schedule_reconnect_session_purge(
 }
 
 const DEFAULT_GATEWAY_RUNTIME_TICK_MS: u64 = 300;
-const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 0;
+const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_GRACE_MS: u64 = 900;
 const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
 const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
 
@@ -7153,7 +7153,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::ZERO)
+            Some(std::time::Duration::from_millis(900))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -7161,7 +7161,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::ZERO)
+            Some(std::time::Duration::from_millis(900))
         );
         assert_eq!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
@@ -7169,7 +7169,7 @@ mod tests {
                     direction: MirDirection::Right,
                 },
             )),
-            Some(std::time::Duration::ZERO)
+            Some(std::time::Duration::from_millis(900))
         );
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(

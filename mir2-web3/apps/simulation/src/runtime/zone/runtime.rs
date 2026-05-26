@@ -32,6 +32,7 @@ use super::types::{
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
 const ZONE_MOVEMENT_ACTION_QUEUE_LIMIT: usize = 8;
+const ZONE_MOVEMENT_INPUT_BUFFER_MS: u64 = 300;
 const ZONE_DROP_EXPIRE_MS: u64 = 30 * 60 * 300;
 const ZONE_NATIVE_MONSTER_THINK_MS: u64 = 600;
 const ZONE_NATIVE_MONSTER_ATTACK_MS: u64 = 1_200;
@@ -289,38 +290,41 @@ impl ZoneRuntime {
                 session_id,
                 direction,
                 seq,
+                now_ms,
             } => self.queue_movement_action(
                 session_id,
                 ZoneMovementAction {
                     kind: ZoneMovementActionKind::Walk,
                     direction,
                     seq: Some(seq),
-                    received_at_ms: 0,
+                    received_at_ms: now_ms,
                 },
             ),
             ZoneCommand::Run {
                 session_id,
                 direction,
                 seq,
+                now_ms,
             } => self.queue_movement_action(
                 session_id,
                 ZoneMovementAction {
                     kind: ZoneMovementActionKind::Run,
                     direction,
                     seq: Some(seq),
-                    received_at_ms: 0,
+                    received_at_ms: now_ms,
                 },
             ),
             ZoneCommand::Turn {
                 session_id,
                 direction,
+                now_ms,
             } => self.queue_movement_action(
                 session_id,
                 ZoneMovementAction {
                     kind: ZoneMovementActionKind::Turn,
                     direction,
                     seq: None,
-                    received_at_ms: 0,
+                    received_at_ms: now_ms,
                 },
             ),
             ZoneCommand::UpdateChatProfile {
@@ -777,18 +781,54 @@ impl ZoneRuntime {
         session_id: SessionId,
         action: ZoneMovementAction,
     ) -> Vec<ZoneOutbound> {
+        let mut outbounds = if self.player_movement_action_ready(&session_id, action.received_at_ms)
+        {
+            self.tick_player_movement(&session_id, action.received_at_ms)
+        } else if let Some(consume_at_ms) =
+            self.buffered_movement_consume_at(&session_id, action.received_at_ms)
+        {
+            self.tick_player_movement(&session_id, consume_at_ms)
+        } else {
+            Vec::new()
+        };
         let Some(player) = self.players.get_mut(&session_id) else {
-            return Vec::new();
+            return outbounds;
         };
         if let Some(seq) = action.seq {
             if seq <= player.last_seen_move_seq {
-                return Vec::new();
+                return outbounds;
             }
             player.last_seen_move_seq = seq;
         }
-        player.movement_actions.clear();
+        while player.movement_actions.len() >= 2 {
+            player.movement_actions.pop_back();
+        }
         player.movement_actions.push_back(action);
-        Vec::new()
+        if let Some(consume_at_ms) =
+            self.buffered_movement_consume_at(&session_id, action.received_at_ms)
+        {
+            outbounds.extend(self.tick_player_movement(&session_id, consume_at_ms));
+        }
+        outbounds
+    }
+
+    fn buffered_movement_consume_at(
+        &self,
+        session_id: &SessionId,
+        received_at_ms: u64,
+    ) -> Option<u64> {
+        let player = self.players.get(session_id)?;
+        let action = player.movement_actions.front()?;
+        if !matches!(
+            action.kind,
+            ZoneMovementActionKind::Walk | ZoneMovementActionKind::Run
+        ) {
+            return None;
+        }
+        let ready_at_ms = player.movement_ready_at_ms;
+        (ready_at_ms > received_at_ms
+            && received_at_ms.saturating_add(ZONE_MOVEMENT_INPUT_BUFFER_MS) >= ready_at_ms)
+            .then_some(ready_at_ms)
     }
 
     fn consume_movement_action(
@@ -828,7 +868,9 @@ impl ZoneRuntime {
                 player.position.clone(),
                 !player.dead && !zone_player_status_blocks_movement(player, now_ms),
                 !player.dead
-                    && (player.run_step_until_ms == 0 || player.run_step_until_ms >= now_ms),
+                    && (player.run_step_until_ms == 0
+                        || player.run_step_until_ms >= now_ms
+                        || player.run_step_until_ms >= action.received_at_ms),
             )
         };
         if !can_move {

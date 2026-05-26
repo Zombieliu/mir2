@@ -662,6 +662,7 @@ export function OriginalClientShell({
     function handleKeyboardMoveUp(event: KeyboardEvent) {
       if (event.key === "Shift") {
         heldKeyboardRunModeRef.current = false;
+        dispatchKeyboardMoveInput("held");
         return;
       }
 
@@ -670,6 +671,7 @@ export function OriginalClientShell({
         event.preventDefault();
         heldKeyboardMoveKeysRef.current.delete(direction);
         heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+        dispatchKeyboardMoveInput("edge");
       }
     }
 

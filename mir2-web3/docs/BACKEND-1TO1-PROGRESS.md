@@ -1,5 +1,24 @@
 # Backend 1:1 Progress
 
+> Latest shared-Zone movement input-buffer sync: 2026-05-26 closes the backend
+> half of the production `walk -> run -> reverse` drift repro. `ZoneCommand`
+> Walk/Run/Turn now carries the Gateway receive timestamp; `ZoneRuntime` keeps
+> only the current pending movement plus the newest follow-up, consumes any
+> ready pending movement before accepting replacement input, buffers near-ready
+> follow-up movement for the legal Crystal cadence, and evaluates Run grace
+> against packet arrival time so an unrelated late Zone tick cannot degrade a
+> timely Run into a rollback-producing Walk. Gateway runtime ticks now yield a
+> 900ms grace window around active Walk/Run/Turn packets so background personal
+> session ticks do not block movement ACKs. Verification passed Rust fmt,
+> shared-Zone run coverage (7/7), Gateway runtime-tick coverage, Gateway
+> Zone-movement regression, UCloud release
+> `20260526T1918CST-move-input-buffer`, public health, WSS smoke
+> `docs/generated/load/remote-move-input-buffer-wss-smoke-20260526.json`, and
+> production WebGL2 captures for normal and 180ms `walk/run/reverse`.
+> Remaining backend movement risk: broaden production human-feel sampling to
+> longer held/chorded key sessions and crowded AOI, while the larger Shared MMO
+> service/ZoneOwner authority gaps remain open.
+
 > Latest ZoneOwner runtime handoff/takeover sync: 2026-05-26 closes the next
 > thin slice after the RPC transport seam. The hosted owner now stores its
 > runtime as a one-shot handoff slot, exposes `take_runtime_for_handoff`, and

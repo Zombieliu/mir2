@@ -9,6 +9,28 @@ servers. This is an internal test deployment, not final human gameplay sign-off.
 
 Latest preview evidence:
 
+- 2026-05-26: Production deployment `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW`
+  is READY at `https://mir2-web3-n283i08jm-obelisk-labs.vercel.app`,
+  aliased to `https://mir2-web3-web.vercel.app`, and visible through
+  `https://mir2.obelisk.build`. This deployment ships the frontend half of the
+  `walk -> run -> reverse` movement closeout: Shift/run edges are preserved,
+  reverse-direction follow-up input is backlogged instead of overwriting the
+  current queued move, same-direction queued Walk can upgrade to Run, and the
+  movement QA harness now asserts the expected `walk/run` WebSocket frames were
+  actually sent. It is paired with UCloud Gateway release
+  `20260526T1918CST-move-input-buffer`. Verification passed Web typecheck,
+  movement harness syntax, Vercel prebuilt build/prune
+  (707MB / 80,640 files -> 125MB / 312 files), deploy, public Web `/health`,
+  public Gateway `/health`, direct Gateway WSS smoke
+  `docs/generated/load/remote-move-input-buffer-wss-smoke-20260526.json`, and
+  production headed Chrome WebGL2 captures
+  `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-webgl2-20260526b.json`
+  plus
+  `docs/generated/player-qa/movement-jitter/prod-move-input-buffer-walk-run-turn-fast-webgl2-20260526a.json`.
+  The captures sent ordered `walk Right -> run Right -> walk Left`, settled at
+  `332,270 Left`, had ACK latencies `251/51/50ms` and `73/54/55ms`, raw WebGL2
+  rendered gameplay layers, and reported zero critical console errors and zero
+  non-favicon 404s.
 - 2026-05-26: Production deployment `dpl_Q1k4QFSbGigw9gJ64cfBNcAehjEQ`
   is READY at `https://mir2-web3-itfgw1ms0-obelisk-labs.vercel.app`,
   aliased to `https://mir2-web3-web.vercel.app`, and visible through

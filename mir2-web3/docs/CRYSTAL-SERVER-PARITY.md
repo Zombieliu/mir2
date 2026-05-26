@@ -1,5 +1,23 @@
 # Crystal Server Parity
 
+> Latest production movement input-buffer parity sync: 2026-05-26 closes the
+> server-side piece of the live `walk -> run -> reverse` rollback/drift repro.
+> The shared Zone now treats movement packets as timestamped intents, preserves
+> the active pending action plus newest follow-up, consumes ready movement
+> before accepting replacement input, buffers near-ready follow-up actions for
+> Crystal cadence, and keeps Run authoritative when the packet arrived during
+> run grace even if a later tick consumes it. Gateway now grants active
+> movement packets a 900ms runtime-tick input grace so background personal
+> session ticks do not delay ACK processing. UCloud release
+> `20260526T1918CST-move-input-buffer` is active and passed public health plus
+> WSS smoke. Headed production evidence paired with Web deployment
+> `dpl_HttHWiP21hufr1d3mm6fMsHNwcmW` shows ordered
+> `walk Right -> run Right -> walk Left` ACKs at `251/51/50ms`, and the 180ms
+> stress pass at `73/54/55ms`, both settling at `332,270 Left` with no
+> rollback or residual movement queues. Remaining server parity risk: long
+> held/chorded movement under crowded AOI still needs human-feel acceptance
+> after this deterministic repro is closed.
+
 > Latest ZoneOwner handoff parity sync: 2026-05-26 adds tested hosted-owner
 > runtime takeover. `HostedZoneOwnerCommandClient` can now export its owned
 > runtime once for handoff, rejects old host reads after export, and allows a
