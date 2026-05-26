@@ -1927,6 +1927,28 @@ img {
   image-rendering: pixelated;
 }
 
+.big-map-debug-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.big-map-debug-readout {
+  position: absolute;
+  left: 16px;
+  top: 432px;
+  z-index: 2;
+  max-width: 360px;
+  padding: 4px 6px;
+  color: #dfffe0;
+  background: rgb(0 0 0 / 72%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.25;
+  text-shadow: none;
+  pointer-events: none;
+}
+
 .big-map-fallback {
   position: absolute;
   inset: 0;
@@ -3924,6 +3946,22 @@ button.character-spell-value:hover {
 }
 
 .mini-map-overlay {
+  pointer-events: none;
+}
+
+.mini-map-debug-readout {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  z-index: 2;
+  max-width: 118px;
+  padding: 2px 3px;
+  color: #dfffe0;
+  background: rgb(0 0 0 / 72%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 8px;
+  line-height: 1.15;
+  text-shadow: none;
   pointer-events: none;
 }
 

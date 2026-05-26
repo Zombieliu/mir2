@@ -2981,7 +2981,9 @@ export default function HomePage() {
         setWorld((current) => ({
           ...current,
           mapTitle: blueprint.mapTitle ?? current.mapTitle,
+          mapFileName: current.mapFileName ?? normalizedMapFileName,
           miniMapIndex: blueprint.miniMapIndex,
+          bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
           sceneView: blueprint.sceneView,
           terrainPatches: blueprint.terrainPatches,
           decorObjects: blueprint.decorObjects,

@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> Latest minimap raster transform sync: 2026-05-27 adds per-map Crystal MMap
+> world-to-image transforms for Player Web instead of assuming `asset/mapWidth`
+> linear scaling. Bichon map `0` now uses MMap `101` as a 1052x700 isometric
+> projection, MiniMap and BigMap both render entity/NPC/debug points through
+> the shared transform, `?mapDebug=1` reports map/asset/player image coords,
+> and BigMap no longer falls back from `bigMapIndex` to `miniMapIndex`.
+> Verification passed Web typecheck and `pnpm --dir apps/web run
+> test:minimap-transform`. Production/browser visual acceptance is the next step
+> before marking the map-panel parity slice deployed.
+
 > Latest Crystal movement authority deployment: 2026-05-27 puts the server-
 > authority Web movement convergence on production. UCloud Gateway release
 > `20260527T0020CST-crystal-movement-authority` is installed at

@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest minimap raster roadmap sync: 2026-05-27 moves MiniMap/BigMap position
+> rendering from naive world-size linear scaling to per-map Crystal MMap
+> transforms. Bichon map `0` / MMap `101` is locked as a 1052x700 isometric
+> projection, with shared world-to-image helpers, debug overlays via
+> `?mapDebug=1`, and a regression script covering Bichon `347,285`, mini/big
+> index separation, and linear fallback parity. Roadmap next: run headed
+> browser/production visual acceptance before declaring this map-panel slice
+> live.
+
 > Latest Crystal movement authority roadmap sync: 2026-05-27 deploys the
 > server-authority Web movement convergence to production. UCloud Gateway
 > release `20260527T0020CST-crystal-movement-authority` and Web deployment

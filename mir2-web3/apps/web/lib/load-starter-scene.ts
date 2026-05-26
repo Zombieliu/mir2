@@ -9,6 +9,7 @@ type StarterSceneFile = {
   map?: {
     title?: string;
     mini_map?: number;
+    big_map?: number;
   };
   scene_view?: {
     center?: {
@@ -43,6 +44,7 @@ export async function loadStarterSceneBlueprint(): Promise<SceneBlueprint> {
   return {
     mapTitle: typeof parsed.map?.title === "string" ? parsed.map.title : null,
     miniMapIndex: typeof parsed.map?.mini_map === "number" ? parsed.map.mini_map : null,
+    bigMapIndex: typeof parsed.map?.big_map === "number" ? parsed.map.big_map : null,
     sceneView: parsed.scene_view?.center
       ? {
           center: {
