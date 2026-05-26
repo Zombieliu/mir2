@@ -1,5 +1,24 @@
 # Agent Task Queue
 
+> Latest Crystal movement authority deployment: 2026-05-27 puts the server-
+> authority Web movement convergence on production. UCloud Gateway release
+> `20260527T0020CST-crystal-movement-authority` is installed at
+> `/opt/mir2/gateway/current`; Web deployment
+> `dpl_5rwcVtQcNBnZy5XiXvaS4axpPJSD` is live. Verification passed public
+> Gateway/Web health, WSS smoke
+> `docs/generated/load/remote-crystal-movement-authority-wss-smoke-20260527.json`,
+> and headed Chrome production WebGL2 movement evidence
+> `docs/generated/player-qa/movement-jitter/prod-crystal-movement-authority-walk-run-reverse-webgl2-skiptransfer3-20260527.json`.
+> The production capture sent only direction packets:
+> `walk Right -> run Right -> run Right -> walk Left -> run Left -> run Right`,
+> with no `moveTo`, send intervals `724/718/722/742/736ms`, ACK latencies
+> `449/57/131/55/38/38ms`, raw WebGL2 atlas `renderedLayers=17`, final player
+> `343,270 Right`, no pending plan/prediction, no visual jumps, no logical
+> rollback, no stale prediction warnings, no command-queue warnings, no
+> critical console errors, and no non-favicon 404s. The movement QA harness now
+> treats `sceneAssetReadiness.ready` as a valid ready signal when the legacy
+> `state.sceneInteractionReady` field is absent.
+
 > Latest movement input-buffer sync: 2026-05-26 closes the reproduced
 > `walk -> run -> reverse` rollback/drift path on production. Frontend
 > keyboard input now keeps a one-action reverse backlog, preserves Shift/run

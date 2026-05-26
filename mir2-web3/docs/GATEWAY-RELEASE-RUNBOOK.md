@@ -5,7 +5,41 @@ small internal test server.
 
 ## Current UCloud Gateway Release
 
-Latest verified movement input-buffer release:
+Latest verified Crystal movement-authority release:
+
+```text
+tag: 20260527T0020CST-crystal-movement-authority
+installed: /opt/mir2/gateway/releases/20260527T0020CST-crystal-movement-authority
+current: /opt/mir2/gateway/current -> /opt/mir2/gateway/releases/20260527T0020CST-crystal-movement-authority
+archive: /home/ubuntu/mir2-web3-20260527T0020CST-crystal-movement-authority/dist/gateway-releases/mir2-gateway-linux-x64-20260527T0020CST-crystal-movement-authority.tar.gz
+archive sha256: 675e0a085c3bc9c7415c692b0d2762b44ca25d77049488e770dad7dc7633ec18
+binary sha256: a2c6369f86145cde29394f61161584133847e6174e3ecaf30473af0fee99d084
+```
+
+Verification performed on 2026-05-27:
+
+```text
+http://127.0.0.1:7110/health: OK
+https://165.154.65.136.sslip.io/health: OK
+https://mir2.obelisk.build/health: OK
+Web deployment: dpl_5rwcVtQcNBnZy5XiXvaS4axpPJSD
+WSS smoke: docs/generated/load/remote-crystal-movement-authority-wss-smoke-20260527.json
+headed WebGL2 movement: docs/generated/player-qa/movement-jitter/prod-crystal-movement-authority-walk-run-reverse-webgl2-skiptransfer3-20260527.json
+walk/run/reverse sends: walk Right, run Right, run Right, walk Left, run Left, run Right
+send intervals: 724ms, 718ms, 722ms, 742ms, 736ms
+ACK latencies: 449ms, 57ms, 131ms, 55ms, 38ms, 38ms
+final player: 343,270 Right
+non-favicon 404s: 0
+critical console errors: 0
+```
+
+This release pairs the Crystal Movement Authority Convergence frontend with the
+existing shared-Zone movement input buffering. Production headed Chrome evidence
+confirms normal UI movement sends only direction packets, not `moveTo`, keeps
+raw WebGL2 atlas rendering active, settles without pending prediction, and has
+no rollback/drift warnings for the walk-run-reverse repro.
+
+Previous verified movement input-buffer release:
 
 ```text
 tag: 20260526T1918CST-move-input-buffer
