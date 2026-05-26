@@ -1,5 +1,21 @@
 # Backend 1:1 Progress
 
+> Latest NPC input and skill preflight parity sync: 2026-05-27 adds the first
+> gameplay-preflight slice for Crystal NPC labels and active skill casting.
+> `ClientPacket::NpcConfirmInput` now executes active input labels through the
+> NPC dialog runtime while rejecting stale/wrong NPC ids, NPC script
+> diagnostics are exposed in world snapshots for debug/admin inspection, and
+> the generated NPC command report now calls out implemented/simplified/missing
+> buckets explicitly. Skill snapshots now expose Crystal-style cast metadata
+> (`passive`, `toggle`, `self`, `target`, `ground`, `direction`, plus
+> offensive/spell names), passive skills are rejected as active casts, and
+> target/range/LOS/safe-zone/item/map preflight runs before MP, cooldown, or
+> spell action timing is committed. Verification covered input-label NPC tests,
+> reserved BUY/SELL/REPAIR/STORAGE service routing, walk-away service
+> rejection, dynamic visibility TODO coverage, skill preflight regressions,
+> and cast metadata snapshots. Remaining backend risk: many full skill effects
+> still need Zone-native authority and durable item/economy/NPC services.
+
 > Latest shared-Zone movement input-buffer sync: 2026-05-26 closes the backend
 > half of the production `walk -> run -> reverse` drift repro. `ZoneCommand`
 > Walk/Run/Turn now carries the Gateway receive timestamp; `ZoneRuntime` keeps

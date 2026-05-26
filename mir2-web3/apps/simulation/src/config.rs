@@ -2833,12 +2833,25 @@ pub struct SkillSnapshot {
     pub key: String,
     pub name: String,
     pub description: String,
+    pub spell: Option<String>,
+    pub cast_kind: String,
+    pub offensive: bool,
     pub level: u8,
     pub experience: u16,
     pub hotkey: u8,
     pub delay_ms: i64,
     pub cast_time_ms: i64,
     pub cooldown_remaining_ticks: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NpcScriptDiagnosticSnapshot {
+    pub script_key: String,
+    pub label: String,
+    pub line_number: usize,
+    pub command: String,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -3519,6 +3532,7 @@ pub struct WorldSnapshot {
     pub equipment_items: Vec<EquipmentItemSnapshot>,
     pub quest_log: Vec<QuestSnapshot>,
     pub active_npc_dialog: Option<NpcDialogSnapshot>,
+    pub npc_script_diagnostics: Vec<NpcScriptDiagnosticSnapshot>,
     pub known_skills: Vec<SkillSnapshot>,
     pub active_buffs: Vec<BuffSnapshot>,
     pub stage5_systems: Stage5SystemsState,

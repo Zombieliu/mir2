@@ -6,18 +6,19 @@ use super::{
     current_location, current_player_object_id, entity_by_object_id, entity_facing,
     entity_object_id, entity_position, equipment_slot_from_index, equipment_slot_index,
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
-    initial_yimoogi_state, is_static_spawnable_point, offset_point, player_entity,
-    point_in_data_range, respawn_tick_for_schedule, runtime_tick, set_crystal_npc_flag,
-    spawn_positions_for_rule, spawn_runtime_monster, start_game_visible_respawn_spawns,
-    tile_distance, BuffResource, BuffState, CrystalNpcActionControl, CrystalNpcExecutionState,
-    DisplayName, Facing, FishingResource, HarvestMonsterState, InventoryResource, ItemState,
-    Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterPoisonState,
-    MonsterRespawnSchedule, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals,
-    MountResource, NpcInteractionContext, NpcStateResource, ObjectId, PlayerPermissionResource,
-    PlayerRuntimeResource, PlayerVitals, Position, QuestResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SimulationSession, SkillResource, SpawnSlotRef,
-    Stage5SystemsResource, SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
-    BASE_STORAGE_SLOTS, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
+    initial_yimoogi_state, is_static_spawnable_point, mark_crystal_packet_action, offset_point,
+    player_entity, point_in_data_range, respawn_tick_for_schedule, runtime_tick,
+    set_crystal_npc_flag, spawn_positions_for_rule, spawn_runtime_monster,
+    start_game_visible_respawn_spawns, tile_distance, BuffResource, BuffState,
+    CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing, FishingResource,
+    HarvestMonsterState, InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState,
+    MonsterCombatStats, MonsterPoisonState, MonsterRespawnSchedule, MonsterSpawnRule,
+    MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, MountResource, NpcInteractionContext,
+    NpcStateResource, ObjectId, PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource,
+    PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource,
+    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState, BASE_STORAGE_SLOTS,
+    CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
 };
 use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
@@ -22124,6 +22125,34 @@ fn crystal_npc_goto_loop_stops_at_section_hop_limit() {
 }
 
 #[test]
+fn crystal_npc_dynamic_visibility_flags_remain_hidden_until_runtime_hooks_exist() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let character = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .expect("started character");
+    let manifest = crystal_npc_info_manifest();
+    let flagged = manifest
+        .npcs
+        .iter()
+        .find(|npc| npc.flag_needed != 0)
+        .expect("Crystal manifest should include flag-gated NPCs");
+    let timed = manifest
+        .npcs
+        .iter()
+        .find(|npc| npc.time_visible)
+        .expect("Crystal manifest should include time-gated NPCs");
+
+    assert!(!super::crystal_npc_visible_to_character(flagged, character));
+    assert!(!super::crystal_npc_visible_to_character(timed, character));
+    // TODO: wire dynamic flag_needed/time_visible evaluation against live NPC flags and Crystal local time.
+}
+
+#[test]
 fn crystal_npc_reserved_service_labels_map_to_crystal_packets() {
     let buy = super::crystal_npc_service_packets_for_label(None, "[@Buy]").expect("buy packets");
     assert!(matches!(
@@ -22175,6 +22204,11 @@ fn crystal_npc_reserved_service_labels_map_to_crystal_packets() {
         ]
     ));
 
+    assert!(matches!(
+        super::crystal_npc_service_packets_for_label(None, "@Sell").as_deref(),
+        Some([ServerPacket::NPCSell])
+    ));
+
     let craft =
         super::crystal_npc_service_packets_for_label(None, "@Craft").expect("craft packets");
     assert!(matches!(
@@ -22214,6 +22248,76 @@ fn crystal_npc_reserved_service_labels_map_to_crystal_packets() {
         Some([ServerPacket::NPCStorage])
     ));
     assert!(super::crystal_npc_service_packets_for_label(None, "@Main").is_none());
+}
+
+#[test]
+fn npc_confirm_input_packet_runs_input_label_with_submitted_value() {
+    let mut config = SimulationConfig::default();
+    config.visible_npcs.push(crate::VisibleNpcRecord {
+        object_id: 4987,
+        name: "Guild Territory Steward".to_string(),
+        image: 5,
+        colour_argb: -1,
+        position: Point { x: 331, y: 270 },
+        direction: MirDirection::Left,
+        quest_ids: Vec::new(),
+        script_key: Some("GuildTerritory/GA0/GTAdmin-GA10".to_string()),
+    });
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let _ = session.interact(4987);
+    let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@@summontest");
+    let input_dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .and_then(|dialog| dialog.input)
+        .expect("individual summon should request input");
+    assert!(input_dialog.target.eq_ignore_ascii_case("@@summontest"));
+
+    let packets = session.handle_packet(ClientPacket::NpcConfirmInput {
+        npc_id: 4987,
+        page_name: "@@summontest".to_string(),
+        value: "Mary".to_string(),
+    });
+
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
+    assert_eq!(
+        super::crystal_npc_variable_value(session.app.world(), "A1").as_deref(),
+        Some("Mary")
+    );
+}
+
+#[test]
+fn npc_confirm_input_packet_rejects_wrong_active_npc() {
+    let mut config = SimulationConfig::default();
+    config.visible_npcs.push(crate::VisibleNpcRecord {
+        object_id: 4987,
+        name: "Guild Territory Steward".to_string(),
+        image: 5,
+        colour_argb: -1,
+        position: Point { x: 331, y: 270 },
+        direction: MirDirection::Left,
+        quest_ids: Vec::new(),
+        script_key: Some("GuildTerritory/GA0/GTAdmin-GA10".to_string()),
+    });
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let _ = session.interact(4987);
+    let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@@summontest");
+    let packets = session.handle_packet(ClientPacket::NpcConfirmInput {
+        npc_id: 4988,
+        page_name: "@@summontest".to_string(),
+        value: "Mary".to_string(),
+    });
+
+    assert!(packets.is_empty());
+    assert!(super::crystal_npc_variable_value(session.app.world(), "A1").is_none());
 }
 
 #[test]
@@ -23090,6 +23194,101 @@ fn crystal_npc_buy_item_service_context_rejects_when_player_leaves_data_range() 
             .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
             .collect::<Vec<_>>(),
         state_before.1
+    );
+}
+
+#[test]
+fn crystal_npc_sell_and_repair_contexts_reject_when_player_leaves_data_range() {
+    let mut sell_session = SimulationSession::new(wicked_trader_config());
+    sell_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let state_before_sell = {
+        let inventory = sell_session.app.world().resource::<InventoryResource>();
+        let player = sell_session.app.world().resource::<PlayerRuntimeResource>();
+        (
+            player.gold,
+            inventory
+                .inventory_items
+                .iter()
+                .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+                .collect::<Vec<_>>(),
+        )
+    };
+    let _ = sell_session.interact(4990);
+    let _ = sell_session.select_npc_dialog_target("@BuySell");
+    set_player_position(&mut sell_session, Point { x: 348, y: 271 });
+    assert!(super::tile_distance(&player_position(&sell_session), &Point { x: 331, y: 271 }) > 16);
+    sync_visible_objects(&mut sell_session);
+
+    let sell_packets = sell_session.handle_packet(ClientPacket::SellItem {
+        unique_id: 4,
+        count: 1,
+    });
+
+    assert!(sell_packets.contains(&ServerPacket::SellItem {
+        unique_id: 4,
+        count: 1,
+        success: false,
+    }));
+    assert_eq!(
+        sell_session
+            .app
+            .world()
+            .resource::<PlayerRuntimeResource>()
+            .gold,
+        state_before_sell.0
+    );
+    assert_eq!(
+        sell_session
+            .app
+            .world()
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .map(|item| (item.key.clone(), item.slot, item.container, item.quantity))
+            .collect::<Vec<_>>(),
+        state_before_sell.1
+    );
+
+    let mut repair_session = SimulationSession::new(blacksmith_config());
+    repair_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let template =
+        super::crystal_item_template_for_item_key("wooden-sword").expect("wooden sword template");
+    let max_dura = template.durability;
+    add_repairable_inventory_item(
+        &mut repair_session,
+        "wooden-sword",
+        "Wooden Sword",
+        30,
+        max_dura / 2,
+        max_dura,
+    );
+    set_player_gold(&mut repair_session, 50_000);
+    let _ = repair_session.interact(4988);
+    let _ = repair_session.select_npc_dialog_target("@Repair");
+    set_player_position(&mut repair_session, Point { x: 348, y: 271 });
+    assert!(
+        super::tile_distance(&player_position(&repair_session), &Point { x: 331, y: 271 }) > 16
+    );
+    sync_visible_objects(&mut repair_session);
+
+    let repair_packets = repair_session.handle_packet(ClientPacket::RepairItem { unique_id: 30 });
+
+    assert_eq!(
+        repair_packets,
+        vec![ServerPacket::RepairItem { unique_id: 30 }]
+    );
+    assert_eq!(player_gold(&repair_session), 50_000);
+    let item = repair_session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.slot == 30)
+        .expect("repair item should remain");
+    assert_eq!(
+        (item.durability_current, item.durability_max),
+        (Some(max_dura / 2), Some(max_dura))
     );
 }
 
@@ -41250,6 +41449,363 @@ fn magic_packet_casts_manifest_skill_and_schedules_damage() {
         .find(|skill| skill.key == "fireball")
         .map(|skill| skill.cooldown_remaining_ticks > 0)
         .unwrap_or(false));
+}
+
+#[test]
+fn magic_preflight_fireball_without_target_does_not_commit_mp_cooldown_or_action() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
+    set_current_player_mp(&mut session, 500);
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    {
+        let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
+        skills
+            .skills
+            .push(super::crystal_skill_state("FireBall", 1).expect("fireball magic"));
+        skills
+            .skills
+            .push(super::crystal_skill_state("MagicShield", 1).expect("magic shield magic"));
+    }
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: origin.clone(),
+        spell_target_lock: false,
+    });
+    let after_failed_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    assert_eq!(after_failed_mp, starting_mp);
+    assert!(packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ObjectMana { .. })));
+    assert!(packets.iter().all(|packet| {
+        !matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::FireBall,
+                ..
+            } | ServerPacket::ObjectMagic {
+                spell: Spell::FireBall,
+                ..
+            }
+        )
+    }));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .find(|skill| skill.key == "fireball")
+            .map(|skill| skill.cooldown_ends_at),
+        Some(0)
+    );
+
+    let shield_packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::MagicShield,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: origin,
+        spell_target_lock: false,
+    });
+    assert!(
+        shield_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::AddBuff { .. })),
+        "failed fireball preflight should not lock the next valid spell"
+    );
+}
+
+#[test]
+fn magic_preflight_out_of_range_thunderbolt_preserves_mp() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
+    set_current_player_mp(&mut session, 500);
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let target = spawn_crystal_monster_for_test(
+        &mut session,
+        98_901,
+        "Yob",
+        Point {
+            x: origin.x + 20,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    session
+        .app
+        .world_mut()
+        .entity_mut(target)
+        .insert(MonsterVitals {
+            hp: 500,
+            max_hp: 500,
+        });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("ThunderBolt", 2).expect("ThunderBolt skill"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::ThunderBolt,
+        direction: MirDirection::Right,
+        target_id: 98_901,
+        location: Point {
+            x: origin.x + 20,
+            y: origin.y,
+        },
+        spell_target_lock: true,
+    });
+
+    assert_eq!(session.world_snapshot().player_mp, Some(starting_mp));
+    assert!(packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ObjectMana { .. })));
+    assert!(session
+        .app
+        .world()
+        .resource::<RuntimeQueueResource>()
+        .pending_combat_actions
+        .is_empty());
+}
+
+#[test]
+fn magic_preflight_self_buff_consumes_mp_and_applies_buff() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
+    set_current_player_mp(&mut session, 500);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("MagicShield", 2).expect("MagicShield skill"));
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::MagicShield,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: origin,
+        spell_target_lock: false,
+    });
+
+    assert!(session.world_snapshot().player_mp.expect("player mp") < starting_mp);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectMana { .. })));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::AddBuff { buff }
+            if buff.object_id == object_id && buff.buff_type == 24
+    )));
+}
+
+#[test]
+fn magic_preflight_passive_fencing_cannot_be_cast() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 10);
+    set_current_player_mp(&mut session, 500);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("Fencing", 2).expect("Fencing skill"));
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::Fencing,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: Point { x: 333, y: 267 },
+        spell_target_lock: false,
+    });
+
+    assert_eq!(session.world_snapshot().player_mp, Some(starting_mp));
+    assert!(packets.iter().all(|packet| {
+        !matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::Fencing,
+                ..
+            } | ServerPacket::ObjectMagic {
+                spell: Spell::Fencing,
+                ..
+            } | ServerPacket::ObjectMana { .. }
+        )
+    }));
+}
+
+#[test]
+fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 25);
+    set_current_player_mp(&mut session, 500);
+    let player = player_entity(session.app.world()).expect("player entity");
+    {
+        let current = session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .copied()
+            .expect("player vitals");
+        session
+            .app
+            .world_mut()
+            .entity_mut(player)
+            .insert(PlayerVitals {
+                hp: 20,
+                max_hp: 120,
+                ..current
+            });
+    }
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    {
+        let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
+        skills
+            .skills
+            .push(super::crystal_skill_state("Healing", 2).expect("Healing skill"));
+        skills
+            .skills
+            .push(super::crystal_skill_state("MagicShield", 1).expect("MagicShield skill"));
+    }
+    let object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    let shield_packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::MagicShield,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: origin.clone(),
+        spell_target_lock: false,
+    });
+    let after_shield_mp = session.world_snapshot().player_mp.expect("player mp");
+    assert!(shield_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::AddBuff { .. })));
+    mark_crystal_packet_action(session.app.world_mut(), PlayerActionKind::Spell, 10);
+
+    let blocked_healing = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::Healing,
+        direction: MirDirection::Right,
+        target_id: object_id,
+        location: origin.clone(),
+        spell_target_lock: true,
+    });
+    assert_eq!(session.world_snapshot().player_mp, Some(after_shield_mp));
+    assert!(blocked_healing
+        .iter()
+        .all(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+
+    for _ in 0..10 {
+        session.tick();
+    }
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .iter_mut()
+        .filter(|skill| skill.key == "minor-heal")
+        .for_each(|skill| skill.cooldown_ends_at = 0);
+
+    let healing_packets = session.handle_packet(ClientPacket::Magic {
+        object_id,
+        spell: Spell::Healing,
+        direction: MirDirection::Right,
+        target_id: object_id,
+        location: origin,
+        spell_target_lock: true,
+    });
+    for _ in 0..5 {
+        session.tick();
+    }
+
+    assert!(healing_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectEffect { info }
+            if info.object_id == object_id && info.effect == 3
+    )));
+    assert!(
+        session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .expect("player vitals")
+            .hp
+            > 20
+    );
+}
+
+#[test]
+fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
+        skills
+            .skills
+            .push(super::crystal_skill_state("Fencing", 2).expect("Fencing skill"));
+        skills
+            .skills
+            .push(super::crystal_skill_state("FireBall", 1).expect("FireBall skill"));
+        skills
+            .skills
+            .push(super::crystal_skill_state("MagicShield", 1).expect("MagicShield skill"));
+    }
+    let snapshot = session.world_snapshot();
+
+    let fencing = snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.spell.as_deref() == Some("Fencing"))
+        .expect("Fencing snapshot");
+    assert_eq!(fencing.cast_kind, "passive");
+    assert!(!fencing.offensive);
+    let fireball = snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.spell.as_deref() == Some("FireBall"))
+        .expect("FireBall snapshot");
+    assert_eq!(fireball.cast_kind, "target");
+    assert!(fireball.offensive);
+    let shield = snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.spell.as_deref() == Some("MagicShield"))
+        .expect("MagicShield snapshot");
+    assert_eq!(shield.cast_kind, "self");
+    assert!(!shield.offensive);
 }
 
 #[test]

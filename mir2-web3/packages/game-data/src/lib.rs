@@ -2009,6 +2009,28 @@ mod tests {
         assert_eq!(summary.unimplemented_occurrences, 0);
         assert!(summary.implemented_commands >= 45);
         assert!(summary.implemented_occurrences > summary.unimplemented_occurrences);
+        let simplified: Vec<_> = summary
+            .commands
+            .iter()
+            .filter(|entry| entry.runtime_status == "simplified")
+            .collect();
+        assert!(
+            simplified.is_empty(),
+            "unexpected simplified NPC command coverage entries: {:?}",
+            simplified
+        );
+        let missing: Vec<_> = summary
+            .commands
+            .iter()
+            .filter(|entry| {
+                entry.runtime_status == "missing" || entry.runtime_status == "unimplemented"
+            })
+            .collect();
+        assert!(
+            missing.is_empty(),
+            "unexpected missing NPC command coverage entries: {:?}",
+            missing
+        );
         assert!(summary.commands.iter().any(|entry| {
             entry.kind == "action"
                 && entry.command == "GOTO"
