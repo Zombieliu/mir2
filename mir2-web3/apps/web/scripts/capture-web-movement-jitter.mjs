@@ -615,7 +615,7 @@ async function main() {
     if (finalSceneReadyTimeoutMs > 0) {
       await waitUntil(
         client,
-        "window.__mir2Stage5?.state?.screen === 'game' && window.__mir2Stage5?.state?.sceneInteractionReady === true",
+        "window.__mir2Stage5?.state?.screen === 'game' && (window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true)",
         "final scene assets ready",
         finalSceneReadyTimeoutMs,
       );
@@ -1179,7 +1179,7 @@ async function login(client) {
   await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
   await waitUntil(
     client,
-    "window.__mir2Stage5?.state?.screen === 'game' && window.__mir2Stage5?.state?.sceneInteractionReady === true",
+    "window.__mir2Stage5?.state?.screen === 'game' && (window.__mir2Stage5?.state?.sceneInteractionReady === true || window.__mir2Stage5?.state?.sceneAssetReadiness?.ready === true)",
     "initial scene assets ready",
     initialSceneReadyTimeoutMs,
   );
