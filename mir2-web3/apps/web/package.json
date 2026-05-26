@@ -34,6 +34,7 @@
     "smoke:gateway-capacity": "node ./scripts/load-gateway-ws.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
     "test:movement-controller": "node ./scripts/test-movement-controller.mjs",
+    "test:minimap-transform": "node ./scripts/test-minimap-transform.mjs",
     "runtime:build:dev": "node ./scripts/build-bevy-runtime.mjs dev",
     "runtime:build:release": "node ./scripts/build-bevy-runtime.mjs release",
     "dev": "npm run runtime:build:dev && next dev",

@@ -50,6 +50,7 @@ type CrystalMapManifestEntry = {
   map_file_name?: string;
   map_title?: string;
   mini_map?: number;
+  big_map?: number;
   movements?: Array<{
     source?: { x?: number; y?: number };
     destination?: { x?: number; y?: number };
@@ -136,6 +137,7 @@ export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {
   return {
     mapTitle: mapInfo?.map_title ?? null,
     miniMapIndex: miniMapIndexForMapFileName(mapFileName, mapInfo),
+    bigMapIndex: bigMapIndexForMapFileName(mapInfo),
     sceneView,
     terrainPatches: terrainPatchesForMap(mapFileName, parsedMap, mapInfo),
     decorObjects: [],
@@ -1024,6 +1026,10 @@ function miniMapIndexForMapFileName(mapFileName: string, mapInfo: CrystalMapMani
   if (normalized === "0") return null;
   const numeric = Number.parseInt(normalized, 10);
   return Number.isFinite(numeric) ? numeric : null;
+}
+
+function bigMapIndexForMapFileName(mapInfo: CrystalMapManifestEntry | null) {
+  return typeof mapInfo?.big_map === "number" && mapInfo.big_map > 0 ? mapInfo.big_map : null;
 }
 
 function exportBoundsForScene(

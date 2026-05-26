@@ -84,6 +84,7 @@ export type OriginalMapRegion = {
 export type SceneBlueprint = {
   mapTitle: string | null;
   miniMapIndex: number | null;
+  bigMapIndex: number | null;
   sceneView: SceneView | null;
   terrainPatches: TerrainPatch[];
   decorObjects: DecorObject[];

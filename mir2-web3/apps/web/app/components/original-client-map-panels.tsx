@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+import {
+  createLinearMiniMapTransform,
+  findCrystalMiniMapTransform,
+  miniMapImagePointToViewportPoint,
+  worldToMiniMapImagePoint,
+  type CrystalMiniMapPoint,
+  type CrystalMiniMapTransform,
+} from "../../lib/crystal-minimap-transform";
+import { CRYSTAL_MINI_MAP_TRANSFORMS } from "../../lib/generated/crystal-minimap-transforms";
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { CRYSTAL_BIG_MAP_NPCS } from "../../lib/generated/crystal-npc-info-data";
 import miniMapMeta from "../../public/original-ui/MMap/meta.json";
@@ -32,6 +41,12 @@ const MINI_MAP_ASSETS = new Map(
     { src: frame.path, width: frame.width, height: frame.height },
   ]),
 );
+
+type MapRasterAsset = {
+  src: string;
+  width: number;
+  height: number;
+};
 
 type DisplayEntity = {
   objectId: string;
@@ -88,14 +103,17 @@ export function BigMapDialog({
   onClose: () => void;
 }) {
   const [showWorldMap, setShowWorldMap] = useState(false);
-  const bigMapAsset = originalBigMapAssetPath(world.bigMapIndex ?? world.miniMapIndex);
-  const mapWidth = Math.max(world.originalMapRegion?.mapWidth ?? player?.x ?? 1, 1);
-  const mapHeight = Math.max(world.originalMapRegion?.mapHeight ?? player?.y ?? 1, 1);
+  const mapDebug = useMapDebugEnabled();
+  const bigMapAsset = originalBigMapAssetPath(world.bigMapIndex);
   const viewport = bigMapViewport(bigMapAsset);
-  const scaleX = viewport.contentWidth / mapWidth;
-  const scaleY = viewport.contentHeight / mapHeight;
+  const transform = mapPanelTransformForWorld(world, bigMapAsset, "big");
+  const playerImagePoint = transform && player ? worldToMiniMapImagePoint(transform, player) : null;
+  const playerViewportPoint = playerImagePoint
+    ? bigMapImagePointToViewportPoint(playerImagePoint, viewport, bigMapAsset)
+    : null;
   const coordinateLabel = player ? `[ ${player.x}, ${player.y} ]` : "[ 0, 0 ]";
   const npcRows = bigMapNpcRowsForWorld(world).slice(0, 18);
+  const mapDebugNpcRows = mapDebug ? bigMapNpcRowsForWorld(world) : [];
 
   return (
     <section className="big-map-dialog" aria-label={t("client.BigMapKey", ["M"], t("ui.map"))}>
@@ -129,8 +147,13 @@ export function BigMapDialog({
           <div className="big-map-fallback" />
         )}
         {world.entities.map((entity) => {
-          const left = viewport.imageLeft + entity.x * scaleX - 1;
-          const top = viewport.imageTop + entity.y * scaleY - 1;
+          const point = bigMapImagePointToViewportPoint(
+            worldToMiniMapImagePoint(transform, entity),
+            viewport,
+            bigMapAsset,
+          );
+          const left = point.x - 1;
+          const top = point.y - 1;
           return <span key={`big-map-dot-${entity.objectId}`} className={`big-map-dot ${entity.kind}`} style={{ left, top }} />;
         })}
         {player ? (
@@ -142,10 +165,46 @@ export function BigMapDialog({
             data-mir2-original-src={ORIGINAL_UI.bigMap.radarDot}
             onError={handleSceneAssetImageError}
             onLoad={handleSceneAssetImageLoad}
-            style={{ left: viewport.imageLeft + player.x * scaleX - 6, top: viewport.imageTop + player.y * scaleY - 5 }}
+            style={{
+              left: (playerViewportPoint?.x ?? 0) - 6,
+              top: (playerViewportPoint?.y ?? 0) - 5,
+            }}
           />
         ) : null}
+        {mapDebug && transform ? (
+          <svg className="big-map-debug-overlay" viewBox={`0 0 ${viewport.width} ${viewport.height}`} preserveAspectRatio="none">
+            {mapDebugNpcRows.map((npc) => {
+              const point = bigMapImagePointToViewportPoint(
+                worldToMiniMapImagePoint(transform, npc),
+                viewport,
+                bigMapAsset,
+              );
+              return (
+                <circle
+                  key={`big-map-debug-npc-${npc.key}`}
+                  cx={point.x}
+                  cy={point.y}
+                  r={2.5}
+                  fill="none"
+                  stroke="#00ff32"
+                  strokeWidth={1}
+                />
+              );
+            })}
+          </svg>
+        ) : null}
       </div>
+      {mapDebug ? (
+        <MapDebugReadout
+          className="big-map-debug-readout"
+          world={world}
+          asset={bigMapAsset}
+          transform={transform}
+          player={player}
+          playerImagePoint={playerImagePoint}
+          mapKind="big"
+        />
+      ) : null}
       <div className="big-map-coordinate">{coordinateLabel}</div>
       <div className="big-map-npc-list">
         {npcRows.map((entity, index) => (
@@ -285,6 +344,7 @@ function MiniMapScene({
   world: DisplayWorld;
   player: DisplayEntity | null;
 }) {
+  const mapDebug = useMapDebugEnabled();
   const miniMapAssetPath = originalMiniMapAssetPath(world.miniMapIndex);
   const bounds = miniMapBounds(world, player, miniMapAssetPath);
 
@@ -292,10 +352,18 @@ function MiniMapScene({
     return null;
   }
 
-  const radarDot = {
-    width: (bounds.width / MINI_MAP_VIEW_WIDTH) * 2,
-    height: (bounds.height / MINI_MAP_VIEW_HEIGHT) * 2,
-  };
+  const rasterMode = Boolean(miniMapAssetPath && bounds.raster && bounds.imageViewport && bounds.transform);
+  const radarDot = rasterMode
+    ? { width: 2, height: 2 }
+    : {
+        width: (bounds.width / MINI_MAP_VIEW_WIDTH) * 2,
+        height: (bounds.height / MINI_MAP_VIEW_HEIGHT) * 2,
+      };
+  const overlayViewBox = rasterMode
+    ? `0 0 ${bounds.imageViewport?.width ?? MINI_MAP_VIEW_WIDTH} ${bounds.imageViewport?.height ?? MINI_MAP_VIEW_HEIGHT}`
+    : `0 0 ${bounds.width} ${bounds.height}`;
+  const playerImagePoint = bounds.transform && player ? worldToMiniMapImagePoint(bounds.transform, player) : null;
+  const mapDebugNpcRows = mapDebug ? bigMapNpcRowsForWorld(world) : [];
 
   return (
     <div className="mini-map-scene">
@@ -325,18 +393,49 @@ function MiniMapScene({
           ))}
         </svg>
       )}
-      <svg className="mini-map-overlay" viewBox={`0 0 ${bounds.width} ${bounds.height}`} preserveAspectRatio="none">
-        {world.entities.map((entity) => (
-          <rect
-            key={`mini-${entity.objectId}`}
-            x={entity.x - bounds.minX - radarDot.width / 2}
-            y={entity.y - bounds.minY - radarDot.height / 2}
-            width={radarDot.width}
-            height={radarDot.height}
-            fill={miniMapEntityColor(entity.kind)}
-          />
-        ))}
+      <svg className="mini-map-overlay" viewBox={overlayViewBox} preserveAspectRatio="none">
+        {world.entities.map((entity) => {
+          const point = miniMapViewportPointForWorldPoint(bounds, entity);
+          return (
+            <rect
+              key={`mini-${entity.objectId}`}
+              x={point.x - radarDot.width / 2}
+              y={point.y - radarDot.height / 2}
+              width={radarDot.width}
+              height={radarDot.height}
+              fill={miniMapEntityColor(entity.kind)}
+            />
+          );
+        })}
+        {mapDebug && bounds.transform && bounds.imageViewport ? mapDebugNpcRows.map((npc) => {
+          const point = miniMapImagePointToViewportPoint(
+            worldToMiniMapImagePoint(bounds.transform as CrystalMiniMapTransform, npc),
+            bounds.imageViewport,
+          );
+          return (
+            <circle
+              key={`mini-map-debug-npc-${npc.key}`}
+              cx={point.x}
+              cy={point.y}
+              r={2.5}
+              fill="none"
+              stroke="#00ff32"
+              strokeWidth={1}
+            />
+          );
+        }) : null}
       </svg>
+      {mapDebug ? (
+        <MapDebugReadout
+          className="mini-map-debug-readout"
+          world={world}
+          asset={miniMapAssetPath}
+          transform={bounds.transform ?? null}
+          player={player}
+          playerImagePoint={playerImagePoint}
+          mapKind="mini"
+        />
+      ) : null}
     </div>
   );
 }
@@ -426,24 +525,35 @@ function bigMapNpcDisplayName(name: string) {
 function miniMapBounds(
   world: DisplayWorld,
   player: DisplayEntity | null,
-  asset: { src: string; width: number; height: number } | null,
+  asset: MapRasterAsset | null,
 ) {
   if (asset && world.originalMapRegion) {
     const mapWidth = Math.max(world.originalMapRegion.mapWidth, 1);
     const mapHeight = Math.max(world.originalMapRegion.mapHeight, 1);
-    const scaleX = asset.width / mapWidth;
-    const scaleY = asset.height / mapHeight;
+    const transform = mapPanelTransformForWorld(world, asset, "mini");
     const viewWidth = Math.min(120, asset.width);
     const viewHeight = Math.min(108, asset.height);
-    const center = player ?? { x: mapWidth / 2, y: mapHeight / 2 };
-    const rasterLeft = clampNumber(Math.round(center.x * scaleX - viewWidth / 2), 0, Math.max(asset.width - viewWidth, 0));
-    const rasterTop = clampNumber(Math.round(center.y * scaleY - viewHeight / 2), 0, Math.max(asset.height - viewHeight, 0));
+    const center = player
+      ? worldToMiniMapImagePoint(transform, player)
+      : {
+          x: (transform.imageMinX + transform.imageMaxX) / 2,
+          y: (transform.imageMinY + transform.imageMaxY) / 2,
+        };
+    const rasterLeft = clampNumber(Math.round(center.x - viewWidth / 2), 0, Math.max(asset.width - viewWidth, 0));
+    const rasterTop = clampNumber(Math.round(center.y - viewHeight / 2), 0, Math.max(asset.height - viewHeight, 0));
 
     return {
-      minX: rasterLeft / scaleX,
-      minY: rasterTop / scaleY,
-      width: viewWidth / scaleX,
-      height: viewHeight / scaleY,
+      minX: player ? player.x - 12 : mapWidth / 2 - 12,
+      minY: player ? player.y - 12 : mapHeight / 2 - 12,
+      width: 24,
+      height: 24,
+      imageViewport: {
+        imageLeft: rasterLeft,
+        imageTop: rasterTop,
+        width: viewWidth,
+        height: viewHeight,
+      },
+      transform,
       raster: {
         left: -rasterLeft,
         top: -rasterTop,
@@ -454,7 +564,7 @@ function miniMapBounds(
   }
 
   if (!player) {
-    return { minX: 0, minY: 0, width: 48, height: 48, raster: null };
+    return { minX: 0, minY: 0, width: 48, height: 48, imageViewport: null, transform: null, raster: null };
   }
 
   return {
@@ -462,6 +572,8 @@ function miniMapBounds(
     minY: player.y - 12,
     width: 24,
     height: 24,
+    imageViewport: null,
+    transform: null,
     raster: null,
   };
 }
@@ -486,7 +598,7 @@ function originalBigMapAssetPath(bigMapIndex: number | null | undefined) {
   return MINI_MAP_ASSETS.get(bigMapIndex) ?? null;
 }
 
-function bigMapViewport(asset: { src: string; width: number; height: number } | null) {
+function bigMapViewport(asset: MapRasterAsset | null) {
   const contentWidth = asset ? Math.min(568, asset.width) : 568;
   const contentHeight = asset ? Math.min(380, asset.height) : 380;
   return {
@@ -499,6 +611,100 @@ function bigMapViewport(asset: { src: string; width: number; height: number } | 
     imageLeft: 0,
     imageTop: 0,
   };
+}
+
+function mapPanelTransformForWorld(
+  world: DisplayWorld,
+  asset: MapRasterAsset | null,
+  kind: "mini" | "big",
+) {
+  const mapWidth = Math.max(world.originalMapRegion?.mapWidth ?? 1, 1);
+  const mapHeight = Math.max(world.originalMapRegion?.mapHeight ?? 1, 1);
+  const assetWidth = Math.max(asset?.width ?? (kind === "big" ? 568 : MINI_MAP_VIEW_WIDTH), 1);
+  const assetHeight = Math.max(asset?.height ?? (kind === "big" ? 380 : MINI_MAP_VIEW_HEIGHT), 1);
+  const explicit = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
+    mapFileName: world.mapFileName,
+    miniMapIndex: world.miniMapIndex,
+    bigMapIndex: world.bigMapIndex,
+    kind,
+  });
+
+  return explicit ?? createLinearMiniMapTransform({
+    mapFileName: world.mapFileName,
+    miniMapIndex: world.miniMapIndex,
+    bigMapIndex: world.bigMapIndex,
+    worldWidth: mapWidth,
+    worldHeight: mapHeight,
+    imageWidth: assetWidth,
+    imageHeight: assetHeight,
+  });
+}
+
+function bigMapImagePointToViewportPoint(
+  imagePoint: CrystalMiniMapPoint,
+  viewport: ReturnType<typeof bigMapViewport>,
+  asset: MapRasterAsset | null,
+) {
+  const scaleX = asset ? viewport.contentWidth / Math.max(asset.width, 1) : 1;
+  const scaleY = asset ? viewport.contentHeight / Math.max(asset.height, 1) : 1;
+  return {
+    x: viewport.imageLeft + imagePoint.x * scaleX,
+    y: viewport.imageTop + imagePoint.y * scaleY,
+  };
+}
+
+function miniMapViewportPointForWorldPoint(
+  bounds: NonNullable<ReturnType<typeof miniMapBounds>>,
+  point: CrystalMiniMapPoint,
+) {
+  if (bounds.transform && bounds.imageViewport) {
+    return miniMapImagePointToViewportPoint(
+      worldToMiniMapImagePoint(bounds.transform, point),
+      bounds.imageViewport,
+    );
+  }
+  return {
+    x: point.x - bounds.minX,
+    y: point.y - bounds.minY,
+  };
+}
+
+function useMapDebugEnabled() {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    setEnabled(new URLSearchParams(window.location.search).get("mapDebug") === "1");
+  }, []);
+  return enabled;
+}
+
+function MapDebugReadout({
+  className,
+  world,
+  asset,
+  transform,
+  player,
+  playerImagePoint,
+  mapKind,
+}: {
+  className: string;
+  world: DisplayWorld;
+  asset: MapRasterAsset | null;
+  transform: CrystalMiniMapTransform | null;
+  player: DisplayEntity | null;
+  playerImagePoint: CrystalMiniMapPoint | null;
+  mapKind: "mini" | "big";
+}) {
+  return (
+    <div className={className}>
+      <div>{mapKind} map</div>
+      <div>map {world.mapFileName ?? "-"} mini {world.miniMapIndex ?? "-"} big {world.bigMapIndex ?? "-"}</div>
+      <div>world {world.originalMapRegion?.mapWidth ?? "-"}x{world.originalMapRegion?.mapHeight ?? "-"}</div>
+      <div>asset {asset?.width ?? "-"}x{asset?.height ?? "-"}</div>
+      <div>projection {transform?.projection ?? "linear"}</div>
+      <div>player {player ? `${player.x},${player.y}` : "-"}</div>
+      <div>image {playerImagePoint ? `${Math.round(playerImagePoint.x)},${Math.round(playerImagePoint.y)}` : "-"}</div>
+    </div>
+  );
 }
 
 function miniMapRasterStyle(raster: { left: number; top: number; width: number; height: number }) {
