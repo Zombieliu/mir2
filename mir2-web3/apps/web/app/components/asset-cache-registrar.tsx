@@ -54,6 +54,9 @@ type CacheApiMetric = {
   status: number;
   durationMs: number;
   sceneCache: string | null;
+  sceneCacheKey?: string | null;
+  originalMapSpriteCount?: number | null;
+  originalMapCellCount?: number | null;
   cacheControl: string | null;
   error?: string;
 };
@@ -103,6 +106,15 @@ type CacheMetricsSummary = {
   sceneRequests: number;
   sceneHits: number;
   sceneMisses: number;
+  latestSceneCacheKey: string | null;
+  latestOriginalMapSpriteCount: number | null;
+  latestOriginalMapCellCount: number | null;
+  loadedSpriteLibraryCount: number | null;
+  domImageCount: number;
+  bevyAtlasCount: number | null;
+  bevyAtlasPixelBytes: number | null;
+  alphaKeyedBlobCount: number | null;
+  alphaKeyedBlobBytes: number | null;
   prewarmRequested: number;
   prewarmOk: number;
   prewarmFailed: number;
@@ -596,6 +608,9 @@ function installFetchProbe() {
           status: response.status,
           durationMs: performance.now() - startedAt,
           sceneCache: response.headers.get("x-mir2-scene-cache"),
+          sceneCacheKey: response.headers.get("x-mir2-scene-cache-key"),
+          originalMapSpriteCount: numberHeader(response.headers.get("x-mir2-original-map-sprite-count")),
+          originalMapCellCount: numberHeader(response.headers.get("x-mir2-original-map-cell-count")),
           cacheControl: response.headers.get("cache-control"),
         });
       }
@@ -610,6 +625,9 @@ function installFetchProbe() {
           status: 0,
           durationMs: performance.now() - startedAt,
           sceneCache: null,
+          sceneCacheKey: null,
+          originalMapSpriteCount: null,
+          originalMapCellCount: null,
           cacheControl: null,
           error: error instanceof Error ? error.message : String(error),
         });
@@ -1176,6 +1194,8 @@ function summarizeMetrics(metrics: CacheMetricsHandle): CacheMetricsSummary {
   const sceneRequests = metrics.apiRequests.filter((entry) => entry.kind === "scene-api");
   const sceneHits = sceneRequests.filter((entry) => entry.sceneCache === "hit").length;
   const sceneMisses = sceneRequests.filter((entry) => entry.sceneCache === "miss").length;
+  const latestSceneRequest = sceneRequests.at(-1) ?? null;
+  const resourceRuntime = currentResourceRuntimeMetrics();
   const prewarmRequested = metrics.prewarmRuns.reduce((sum, run) => sum + run.requested, 0);
   const prewarmOk = metrics.prewarmRuns.reduce((sum, run) => sum + run.ok, 0);
   const prewarmFailed = metrics.prewarmRuns.reduce((sum, run) => sum + run.failed, 0);
@@ -1200,6 +1220,15 @@ function summarizeMetrics(metrics: CacheMetricsHandle): CacheMetricsSummary {
     sceneRequests: sceneRequests.length,
     sceneHits,
     sceneMisses,
+    latestSceneCacheKey: latestSceneRequest?.sceneCacheKey ?? null,
+    latestOriginalMapSpriteCount: latestSceneRequest?.originalMapSpriteCount ?? null,
+    latestOriginalMapCellCount: latestSceneRequest?.originalMapCellCount ?? null,
+    loadedSpriteLibraryCount: resourceRuntime.loadedSpriteLibraryCount,
+    domImageCount: resourceRuntime.domImageCount,
+    bevyAtlasCount: resourceRuntime.bevyAtlasCount,
+    bevyAtlasPixelBytes: resourceRuntime.bevyAtlasPixelBytes,
+    alphaKeyedBlobCount: resourceRuntime.alphaKeyedBlobCount,
+    alphaKeyedBlobBytes: resourceRuntime.alphaKeyedBlobBytes,
     prewarmRequested,
     prewarmOk,
     prewarmFailed,
@@ -1360,6 +1389,40 @@ function safeUrl(value: string) {
   } catch {
     return null;
   }
+}
+
+function numberHeader(value: string | null) {
+  if (value == null) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function currentResourceRuntimeMetrics() {
+  const debug = (window as typeof window & {
+    __mir2BevyEntityRendererDebug?: {
+      atlasCount?: number;
+      atlasPixelBytes?: number;
+      spriteLibraryCache?: { loadedLibraryCount?: number };
+      sceneAssetRuntime?: {
+        alphaKeyedBlobCount?: number;
+        alphaKeyedBlobBytes?: number;
+      };
+    };
+  }).__mir2BevyEntityRendererDebug;
+  return {
+    loadedSpriteLibraryCount: debug?.spriteLibraryCache?.loadedLibraryCount ?? null,
+    domImageCount: document.images.length,
+    bevyAtlasCount: typeof debug?.atlasCount === "number" ? debug.atlasCount : null,
+    bevyAtlasPixelBytes: typeof debug?.atlasPixelBytes === "number" ? debug.atlasPixelBytes : null,
+    alphaKeyedBlobCount:
+      typeof debug?.sceneAssetRuntime?.alphaKeyedBlobCount === "number"
+        ? debug.sceneAssetRuntime.alphaKeyedBlobCount
+        : null,
+    alphaKeyedBlobBytes:
+      typeof debug?.sceneAssetRuntime?.alphaKeyedBlobBytes === "number"
+        ? debug.sceneAssetRuntime.alphaKeyedBlobBytes
+        : null,
+  };
 }
 
 function scheduleIdle(callback: () => void) {

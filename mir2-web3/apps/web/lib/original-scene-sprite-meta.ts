@@ -27,7 +27,9 @@ export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload &
   frameMap: Map<number, OriginalSceneSpriteFrameMeta>;
 };
 
-const libraryCache = new Map<string, Promise<OriginalSceneSpriteLibraryMeta>>();
+const SCENE_SPRITE_LIBRARY_CACHE_MAX_BYTES = 8 * 1024 * 1024;
+const libraryCache = new Map<string, { promise: Promise<OriginalSceneSpriteLibraryMeta>; bytes: number }>();
+let libraryCacheBytes = 0;
 const availableSceneSpriteLibraries = new Set(
   Object.keys((originalSceneSpriteManifest as OriginalSceneSpriteManifestPayload).libraries ?? {}).map(
     normalizeSceneSpriteLibraryKey,
@@ -54,7 +56,9 @@ export function loadOriginalSceneSpriteLibrary(
   const normalizedKey = normalizeSceneSpriteLibraryKey(libraryKey);
   const cached = libraryCache.get(normalizedKey);
   if (cached) {
-    return cached;
+    libraryCache.delete(normalizedKey);
+    libraryCache.set(normalizedKey, cached);
+    return cached.promise;
   }
   if (!originalSceneSpriteLibraryExists(normalizedKey)) {
     return Promise.reject(new Error(`sprite meta ${normalizedKey} is not exported`));
@@ -67,17 +71,23 @@ export function loadOriginalSceneSpriteLibrary(
       }
 
       const payload = (await response.json()) as OriginalSceneSpriteLibraryPayload;
-      return {
+      const library = {
         ...payload,
         frameMap: new Map(payload.frames.map((frame) => [frame.index, frame])),
       };
+      updateOriginalSceneSpriteLibraryCacheBytes(normalizedKey, estimateOriginalSceneSpriteLibraryBytes(library));
+      return library;
     })
     .catch((error) => {
-      libraryCache.delete(normalizedKey);
+      const deleted = libraryCache.get(normalizedKey);
+      if (deleted) {
+        libraryCacheBytes -= deleted.bytes;
+        libraryCache.delete(normalizedKey);
+      }
       throw error;
     });
 
-  libraryCache.set(normalizedKey, pending);
+  libraryCache.set(normalizedKey, { promise: pending, bytes: 0 });
   return pending;
 }
 
@@ -97,4 +107,35 @@ export function frameMetaForIndex(
   frameIndex: number,
 ) {
   return library?.frameMap.get(frameIndex) ?? null;
+}
+
+export function originalSceneSpriteLibraryCacheStats() {
+  return {
+    loadedLibraryCount: Array.from(libraryCache.values()).filter((entry) => entry.bytes > 0).length,
+    cachedLibraryCount: libraryCache.size,
+    cachedLibraryBytes: libraryCacheBytes,
+  };
+}
+
+function updateOriginalSceneSpriteLibraryCacheBytes(normalizedKey: string, bytes: number) {
+  const entry = libraryCache.get(normalizedKey);
+  if (!entry) return;
+  libraryCacheBytes -= entry.bytes;
+  entry.bytes = bytes;
+  libraryCacheBytes += bytes;
+  trimOriginalSceneSpriteLibraryCache();
+}
+
+function trimOriginalSceneSpriteLibraryCache() {
+  while (libraryCacheBytes > SCENE_SPRITE_LIBRARY_CACHE_MAX_BYTES && libraryCache.size > 1) {
+    const oldestKey = libraryCache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    const oldest = libraryCache.get(oldestKey);
+    libraryCache.delete(oldestKey);
+    libraryCacheBytes -= oldest?.bytes ?? 0;
+  }
+}
+
+function estimateOriginalSceneSpriteLibraryBytes(library: OriginalSceneSpriteLibraryMeta) {
+  return 256 + library.frames.length * 220 + JSON.stringify(library.frames).length;
 }

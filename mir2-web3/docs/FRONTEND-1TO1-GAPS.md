@@ -1,6 +1,6 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 Purpose: track frontend/client visual, interaction, and human-feel gaps separately from backend/server parity.
 
@@ -13,6 +13,24 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-27 Crystal resource loading hardening: Player Web now treats Crystal
+  `.Lib` files like indexable MLibrary sources instead of decoding every frame
+  during parse. `crystal-map-loader` stores library frame offsets and lazily
+  decodes only requested frames behind decoded-frame/server map/server library
+  LRU byte caps. Production request paths are read-only by default:
+  `MIR2_DISABLE_REQUEST_FILE_WRITES=1` or production without the explicit dev
+  opt-in returns a visible `resource_missing` error when a required PNG/lib/map
+  is absent, and synthetic map fallback requires
+  `MIR2_ALLOW_SYNTHETIC_MAP_FALLBACK=1`. Scene blueprint cache keys are now
+  quantized by map/chunk/size bucket/schema version with disk TTL/size trim.
+  `sceneAssetReadiness` actually preloads visible center-priority URLs and
+  separates `interactionReady` from `visualReady`; runtime metrics now include
+  scene cache key, original-map sprite/cell counts, sprite library cache count,
+  DOM image count, Bevy atlas bytes, and alpha-keyed blob count/bytes. Evidence:
+  `MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh` passed,
+  including Web typecheck, `test:movement-controller`,
+  `test:resource-loading`, focused Rust gateway/simulation/admin checks, and
+  `git diff --check`. Production/browser visual acceptance remains open.
 - 2026-05-26 Crystal Movement Authority Convergence v1: Player Web movement
   now treats server `UserLocation`/movement packets and `worldSnapshot` as the
   only sources allowed to write self `world.entities` coordinates. Normal UI

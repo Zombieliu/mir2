@@ -1,6 +1,6 @@
 import "server-only";
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync, readSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
@@ -40,6 +40,14 @@ const CELL_WIDTH = 48;
 const CELL_HEIGHT = 32;
 const DEFAULT_SCENE_WIDTH = 24;
 const DEFAULT_SCENE_HEIGHT = 18;
+const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
+const REQUEST_FILE_WRITES_ENABLED =
+  process.env.MIR2_ENABLE_REQUEST_FILE_WRITES === "1" ||
+  (IS_DEVELOPMENT && process.env.MIR2_DISABLE_REQUEST_FILE_WRITES !== "1");
+const SYNTHETIC_MAP_FALLBACK_ENABLED = process.env.MIR2_ALLOW_SYNTHETIC_MAP_FALLBACK === "1";
+const SERVER_MAP_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_MAP_CACHE_MAX_BYTES, 64 * 1024 * 1024);
+const SERVER_LIBRARY_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_LIBRARY_CACHE_MAX_BYTES, 24 * 1024 * 1024);
+const DECODED_FRAME_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_DECODED_FRAME_CACHE_MAX_BYTES, 64 * 1024 * 1024);
 
 type CrystalMapManifest = {
   maps?: CrystalMapManifestEntry[];
@@ -97,6 +105,8 @@ type ParsedMapCell = {
 type ParsedLibrary = {
   version: number;
   count: number;
+  filePath?: string;
+  frameOffsets?: number[];
   frames: Array<ParsedFrame | null>;
 };
 
@@ -106,7 +116,8 @@ type ParsedFrame = {
   height: number;
   x: number;
   y: number;
-  rgba?: Buffer;
+  dataOffset?: number;
+  dataLength?: number;
 };
 
 type ExportRegionOptions = {
@@ -117,9 +128,71 @@ type ExportRegionOptions = {
   height?: number | null;
 };
 
-const mapCache = new Map<string, ParsedMap>();
-const libraryCache = new Map<string, ParsedLibrary | null>();
+type SizedCacheEntry<T> = {
+  value: T;
+  bytes: number;
+};
+
+type DecodedFrameCacheEntry = {
+  rgba: Buffer;
+  bytes: number;
+};
+
+const mapCache = new Map<string, SizedCacheEntry<ParsedMap>>();
+const libraryCache = new Map<string, SizedCacheEntry<ParsedLibrary | null>>();
+const decodedFrameCache = new Map<string, DecodedFrameCacheEntry>();
 const exportedFrames = new Set<string>();
+let mapCacheBytes = 0;
+let libraryCacheBytes = 0;
+let decodedFrameCacheBytes = 0;
+const resourceStats = {
+  libraryParseCount: 0,
+  frameHeaderReadCount: 0,
+  frameDecodeCount: 0,
+  decodedFrameCacheHits: 0,
+  decodedFrameCacheMisses: 0,
+};
+
+export class CrystalResourceMissingError extends Error {
+  readonly code = "resource_missing";
+  readonly resourceType: "map" | "library" | "frame" | "png";
+  readonly resourcePath: string;
+  readonly mapFileName?: string;
+  readonly libraryKey?: string;
+  readonly frameIndex?: number;
+
+  constructor({
+    message,
+    resourceType,
+    resourcePath,
+    mapFileName,
+    libraryKey,
+    frameIndex,
+  }: {
+    message: string;
+    resourceType: "map" | "library" | "frame" | "png";
+    resourcePath: string;
+    mapFileName?: string;
+    libraryKey?: string;
+    frameIndex?: number;
+  }) {
+    super(message);
+    this.name = "CrystalResourceMissingError";
+    this.resourceType = resourceType;
+    this.resourcePath = resourcePath;
+    this.mapFileName = mapFileName;
+    this.libraryKey = libraryKey;
+    this.frameIndex = frameIndex;
+  }
+}
+
+export function isCrystalResourceMissingError(error: unknown): error is CrystalResourceMissingError {
+  return error instanceof CrystalResourceMissingError || (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: unknown }).code === "resource_missing"
+  );
+}
 
 export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {}): Promise<SceneBlueprint> {
   const mapFileName = normalizeMapFileName(options.mapFileName ?? "0");
@@ -148,23 +221,34 @@ export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {
 function loadParsedMap(mapFileName: string): ParsedMap {
   const normalized = normalizeMapFileName(mapFileName);
   const cached = mapCache.get(normalized);
-  if (cached) return cached;
+  if (cached) {
+    touchSizedCacheEntry(mapCache, normalized, cached);
+    return cached.value;
+  }
 
   const mapPath = path.join(MAP_DIR, `${normalized}.map`);
   if (!existsSync(mapPath)) {
     const packaged = loadPackagedMap(normalized);
     if (packaged) {
-      mapCache.set(normalized, packaged);
+      rememberMap(normalized, packaged);
       return packaged;
     }
+    if (!SYNTHETIC_MAP_FALLBACK_ENABLED) {
+      throw new CrystalResourceMissingError({
+        message: `Crystal map ${normalized}.map is missing and synthetic fallback is disabled`,
+        resourceType: "map",
+        resourcePath: mapPath,
+        mapFileName: normalized,
+      });
+    }
     const parsed = normalized === "0" ? loadPackagedFallbackMap("0") : loadMissingMapFallback(normalized);
-    mapCache.set(normalized, parsed);
+    rememberMap(normalized, parsed);
     return parsed;
   }
 
   const bytes = readFileSync(mapPath);
   const parsed = parseMapBytes(`${normalized}.map`, bytes);
-  mapCache.set(normalized, parsed);
+  rememberMap(normalized, parsed);
   return parsed;
 }
 
@@ -632,16 +716,27 @@ function exportFrame(
   frameIndex: number,
   pendingWrites: Array<Promise<void>>,
 ): OriginalMapSpriteFrame | null {
-  const frame = library.frames[frameIndex];
+  const frame = readLibraryFrameMeta(library, frameIndex);
   if (!frame || frame.width <= 0 || frame.height <= 0) return null;
 
   const normalizedKey = normalizeLibraryName(libraryKey);
   const frameKey = `${normalizedKey}:${frameIndex}`;
   const exportDir = path.join(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_MAP_DIR, ...normalizedKey.split("/"));
   const pngPath = path.join(/* turbopackIgnore: true */ exportDir, `${frameIndex}.png`);
-  if (frame.rgba && !exportedFrames.has(frameKey) && !existsSync(/* turbopackIgnore: true */ pngPath)) {
+  if (!existsSync(/* turbopackIgnore: true */ pngPath) && !REQUEST_FILE_WRITES_ENABLED) {
+    throw new CrystalResourceMissingError({
+      message: `Pre-exported map frame PNG is missing: ${pngPath}`,
+      resourceType: "png",
+      resourcePath: pngPath,
+      libraryKey: normalizedKey,
+      frameIndex,
+    });
+  }
+  if (!exportedFrames.has(frameKey) && !existsSync(/* turbopackIgnore: true */ pngPath)) {
     exportedFrames.add(frameKey);
-    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+    const decoded = decodeLibraryFrameRgba(library, frameIndex);
+    if (!decoded) return null;
+    const rgba = postProcessFrameRgba(normalizedKey, frameIndex, decoded);
     pendingWrites.push(
       mkdir(exportDir, { recursive: true }).then(() => writeFile(pngPath, encodePng(frame.width, frame.height, rgba))),
     );
@@ -827,19 +922,30 @@ function tileAnimationLayerForCell(cell: ParsedMapCell) {
 
 function ensureLibrary(libraryKey: string) {
   const cached = libraryCache.get(libraryKey);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    touchSizedCacheEntry(libraryCache, libraryKey, cached);
+    return cached.value;
+  }
 
   const libraryPath = path.join(DATA_MAP_DIR, ...libraryKey.split("/")) + ".Lib";
   const alternatePath = path.join(DATA_MAP_DIR, ...libraryKey.split("/")) + ".lib";
   const filePath = existsSync(libraryPath) ? libraryPath : alternatePath;
   if (!existsSync(filePath)) {
     const packaged = loadPackagedMapLibraryMeta(libraryKey);
-    libraryCache.set(libraryKey, packaged);
+    if (!packaged) {
+      throw new CrystalResourceMissingError({
+        message: `Crystal map library is missing: ${libraryKey}`,
+        resourceType: "library",
+        resourcePath: filePath,
+        libraryKey,
+      });
+    }
+    rememberLibrary(libraryKey, packaged);
     return packaged;
   }
 
   const parsed = parseLibrary(filePath);
-  libraryCache.set(libraryKey, parsed);
+  rememberLibrary(libraryKey, parsed);
   return parsed;
 }
 
@@ -886,39 +992,80 @@ function loadPackagedMapLibraryMeta(libraryKey: string): ParsedLibrary | null {
   };
 }
 
-function parseLibrary(filePath: string): ParsedLibrary {
-  const buffer = readFileSync(filePath);
+export function parseLibrary(filePath: string): ParsedLibrary {
+  const header = readFileSlice(filePath, 0, 12);
   let offset = 0;
-  const version = buffer.readInt32LE(offset);
+  const version = header.readInt32LE(offset);
   offset += 4;
   if (version < 2) throw new Error(`Unsupported lib version ${version}: ${filePath}`);
-  const count = buffer.readInt32LE(offset);
+  const count = header.readInt32LE(offset);
   offset += 4;
   if (version >= 3) offset += 4;
 
+  const offsetTable = readFileSlice(filePath, offset, count * 4);
   const frameOffsets: number[] = [];
   for (let index = 0; index < count; index += 1) {
-    frameOffsets.push(buffer.readInt32LE(offset));
-    offset += 4;
+    const tableOffset = index * 4;
+    frameOffsets.push(tableOffset + 4 <= offsetTable.length ? offsetTable.readInt32LE(tableOffset) : 0);
   }
 
   const frames = new Array<ParsedFrame | null>(count).fill(null);
-  for (let index = 0; index < frameOffsets.length; index += 1) {
-    const frameOffset = frameOffsets[index];
-    if (frameOffset <= 0 || frameOffset >= buffer.length) continue;
-    frames[index] = parseFrame(buffer, frameOffset, index);
-  }
-  return { version, count, frames };
+  resourceStats.libraryParseCount += 1;
+  return { version, count, filePath, frameOffsets, frames };
 }
 
-function parseFrame(buffer: Buffer, offset: number, index: number): ParsedFrame {
-  const width = buffer.readInt16LE(offset);
-  const height = buffer.readInt16LE(offset + 2);
-  const x = buffer.readInt16LE(offset + 4);
-  const y = buffer.readInt16LE(offset + 6);
-  const length = buffer.readInt32LE(offset + 13);
-  const raw = buffer.subarray(offset + 17, offset + 17 + length);
-  return { index, width, height, x, y, rgba: decodeFrame(width, height, raw) };
+function readLibraryFrameMeta(library: ParsedLibrary, index: number): ParsedFrame | null {
+  const cached = library.frames[index];
+  if (cached !== undefined && cached !== null) return cached;
+
+  const frameOffset = library.frameOffsets?.[index];
+  if (!library.filePath || !frameOffset || frameOffset <= 0) return library.frames[index] = null;
+
+  const header = readFileSlice(library.filePath, frameOffset, 17);
+  if (header.length < 17) return library.frames[index] = null;
+  const frame = parseFrameHeader(header, frameOffset, index);
+  library.frames[index] = frame;
+  resourceStats.frameHeaderReadCount += 1;
+  return frame;
+}
+
+function parseFrameHeader(buffer: Buffer, absoluteOffset: number, index: number): ParsedFrame {
+  const width = buffer.readInt16LE(0);
+  const height = buffer.readInt16LE(2);
+  const x = buffer.readInt16LE(4);
+  const y = buffer.readInt16LE(6);
+  const length = buffer.readInt32LE(13);
+  return {
+    index,
+    width,
+    height,
+    x,
+    y,
+    dataOffset: absoluteOffset + 17,
+    dataLength: length,
+  };
+}
+
+export function decodeLibraryFrameRgba(library: ParsedLibrary, frameIndex: number): Buffer | null {
+  const frame = readLibraryFrameMeta(library, frameIndex);
+  if (!frame || !library.filePath || frame.dataOffset === undefined || frame.dataLength === undefined) {
+    return null;
+  }
+
+  const cacheKey = `${library.filePath}:${frameIndex}`;
+  const cached = decodedFrameCache.get(cacheKey);
+  if (cached) {
+    decodedFrameCache.delete(cacheKey);
+    decodedFrameCache.set(cacheKey, cached);
+    resourceStats.decodedFrameCacheHits += 1;
+    return cached.rgba;
+  }
+
+  resourceStats.decodedFrameCacheMisses += 1;
+  const raw = readFileSlice(library.filePath, frame.dataOffset, frame.dataLength);
+  const rgba = decodeFrame(frame.width, frame.height, raw);
+  rememberDecodedFrame(cacheKey, rgba);
+  return rgba;
 }
 
 function detectMapType(bytes: Buffer) {
@@ -1079,7 +1226,7 @@ function repeatedAnimationFrames(baseFrameIndex: number, animationCount: number,
 
 function resolveDrawMode(layer: { drawMode: "auto" | "floor" | "object"; frames: number[] }, library: ParsedLibrary) {
   if (layer.drawMode !== "auto") return layer.drawMode;
-  const frame = library.frames[layer.frames[0]];
+  const frame = readLibraryFrameMeta(library, layer.frames[0]);
   if (!frame) return "floor";
   const floorSized =
     (frame.width === CELL_WIDTH && frame.height === CELL_HEIGHT) ||
@@ -1143,6 +1290,124 @@ function mapMir3LibraryKey(index: number, baseIndex: 200 | 300, root: "WemadeMir
   return `${root}/${name}${suffixes[stateIndex] ?? ""}`;
 }
 
+function rememberMap(key: string, parsedMap: ParsedMap) {
+  const bytes = estimateParsedMapBytes(parsedMap);
+  const previous = mapCache.get(key);
+  if (previous) mapCacheBytes -= previous.bytes;
+  mapCache.set(key, { value: parsedMap, bytes });
+  mapCacheBytes += bytes;
+  trimSizedCache(mapCache, SERVER_MAP_CACHE_MAX_BYTES, () => {
+    mapCacheBytes = cacheByteTotal(mapCache);
+  });
+}
+
+function rememberLibrary(key: string, library: ParsedLibrary | null) {
+  const bytes = estimateParsedLibraryBytes(library);
+  const previous = libraryCache.get(key);
+  if (previous) libraryCacheBytes -= previous.bytes;
+  libraryCache.set(key, { value: library, bytes });
+  libraryCacheBytes += bytes;
+  trimSizedCache(libraryCache, SERVER_LIBRARY_CACHE_MAX_BYTES, () => {
+    libraryCacheBytes = cacheByteTotal(libraryCache);
+  });
+}
+
+function rememberDecodedFrame(key: string, rgba: Buffer) {
+  const previous = decodedFrameCache.get(key);
+  if (previous) decodedFrameCacheBytes -= previous.bytes;
+  const entry = { rgba, bytes: rgba.byteLength };
+  decodedFrameCache.set(key, entry);
+  decodedFrameCacheBytes += entry.bytes;
+  while (decodedFrameCacheBytes > DECODED_FRAME_CACHE_MAX_BYTES && decodedFrameCache.size > 0) {
+    const oldestKey = decodedFrameCache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    const oldest = decodedFrameCache.get(oldestKey);
+    decodedFrameCache.delete(oldestKey);
+    decodedFrameCacheBytes -= oldest?.bytes ?? 0;
+  }
+}
+
+function touchSizedCacheEntry<T>(cache: Map<string, SizedCacheEntry<T>>, key: string, entry: SizedCacheEntry<T>) {
+  cache.delete(key);
+  cache.set(key, entry);
+}
+
+function trimSizedCache<T>(
+  cache: Map<string, SizedCacheEntry<T>>,
+  maxBytes: number,
+  afterTrim: () => void,
+) {
+  if (maxBytes <= 0) {
+    cache.clear();
+    afterTrim();
+    return;
+  }
+  let total = cacheByteTotal(cache);
+  while (total > maxBytes && cache.size > 1) {
+    const oldestKey = cache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    const oldest = cache.get(oldestKey);
+    cache.delete(oldestKey);
+    total -= oldest?.bytes ?? 0;
+  }
+  afterTrim();
+}
+
+function cacheByteTotal<T>(cache: Map<string, SizedCacheEntry<T>>) {
+  let total = 0;
+  for (const entry of cache.values()) total += entry.bytes;
+  return total;
+}
+
+function estimateParsedMapBytes(parsedMap: ParsedMap) {
+  return 512 + (parsedMap.cells?.length ?? 0) * 80 + Object.keys(parsedMap.fallbackOriginalMapRegion?.sprites ?? {}).length * 160;
+}
+
+function estimateParsedLibraryBytes(library: ParsedLibrary | null) {
+  if (!library) return 64;
+  const decodedHeaders = library.frames.reduce((count, frame) => count + (frame ? 1 : 0), 0);
+  return 256 + library.count * 8 + decodedHeaders * 48;
+}
+
+function readFileSlice(filePath: string, offset: number, length: number) {
+  const output = Buffer.allocUnsafe(Math.max(0, length));
+  const fd = openSync(filePath, "r");
+  try {
+    const bytesRead = readSync(fd, output, 0, output.length, offset);
+    return bytesRead === output.length ? output : output.subarray(0, bytesRead);
+  } finally {
+    closeSync(fd);
+  }
+}
+
+function parseByteBudget(value: string | undefined, fallback: number) {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+export function getCrystalMapLoaderResourceStats() {
+  return {
+    mapCacheEntries: mapCache.size,
+    mapCacheBytes,
+    libraryCacheEntries: libraryCache.size,
+    libraryCacheBytes,
+    decodedFrameCacheEntries: decodedFrameCache.size,
+    decodedFrameCacheBytes,
+    ...resourceStats,
+  };
+}
+
+export function resetCrystalMapLoaderResourceStatsForTests() {
+  resourceStats.libraryParseCount = 0;
+  resourceStats.frameHeaderReadCount = 0;
+  resourceStats.frameDecodeCount = 0;
+  resourceStats.decodedFrameCacheHits = 0;
+  resourceStats.decodedFrameCacheMisses = 0;
+  decodedFrameCache.clear();
+  decodedFrameCacheBytes = 0;
+}
+
 function normalizeLibraryName(libraryName: string) {
   return String(libraryName).replaceAll("\\", "/").split("/").filter(Boolean).join("/");
 }
@@ -1173,6 +1438,7 @@ function postProcessFrameRgba(libraryName: string, frameIndex: number, rgba: Buf
 
 function decodeFrame(width: number, height: number, compressed: Buffer) {
   if (!width || !height) return Buffer.alloc(0);
+  resourceStats.frameDecodeCount += 1;
   const bgra = gunzipSync(compressed);
   const rgba = Buffer.allocUnsafe(width * height * 4);
   for (let source = 0; source < bgra.length; source += 4) {

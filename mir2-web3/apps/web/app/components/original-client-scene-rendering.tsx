@@ -19,6 +19,7 @@ export {
   mapSpriteRenderPath,
   rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
+  sceneAssetRuntimeStats,
 } from "./original-client-scene-map-rendering";
 export {
   cameraMotionOffsetForEntity,
