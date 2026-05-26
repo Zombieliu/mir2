@@ -1295,6 +1295,8 @@ export default function HomePage() {
         loaded: readiness.loaded,
         failed: readiness.failed,
         pending: readiness.pending,
+        interactionReady: readiness.interactionReady ?? readiness.ready,
+        visualReady: readiness.visualReady ?? readiness.ready,
         durationMs: readiness.durationMs,
         failedUrls: readiness.failedUrls.slice(0, 5),
       });
@@ -1305,7 +1307,7 @@ export default function HomePage() {
     }
 
     // Keep movement unlocked after the first playable scene; before that, later renderer readiness can still tighten the gate.
-    const nextSceneInteractionReady = readiness.ready;
+    const nextSceneInteractionReady = readiness.interactionReady ?? readiness.ready;
     if (initialSceneAssetsReadyRef.current !== nextSceneInteractionReady) {
       setInitialSceneAssetsReadyState(nextSceneInteractionReady);
     }
@@ -3423,6 +3425,12 @@ export default function HomePage() {
           } | null;
           sceneInteractionReady: boolean;
           sceneAssetReadiness: SceneAssetReadiness | null;
+          resourceMetrics: {
+            domImageCount: number;
+            originalMapRegionSpriteCount: number;
+            originalMapRegionCellCount: number;
+            bevyEntityRenderer: unknown;
+          };
           selectedObjectId: string | null;
           logs: UiLogLine[];
           entities: WorldEntity[];
@@ -3550,6 +3558,19 @@ export default function HomePage() {
         sceneInteractionReady: initialSceneAssetsReady,
         get sceneAssetReadiness() {
           return sceneAssetReadinessRef.current;
+        },
+        get resourceMetrics() {
+          const browserWindow = typeof window !== "undefined"
+            ? window as typeof window & { __mir2BevyEntityRendererDebug?: unknown }
+            : null;
+          return {
+            domImageCount: typeof document !== "undefined" ? document.images.length : 0,
+            originalMapRegionSpriteCount: world.originalMapRegion
+              ? Object.keys(world.originalMapRegion.sprites).length
+              : 0,
+            originalMapRegionCellCount: world.originalMapRegion?.cells.length ?? 0,
+            bevyEntityRenderer: browserWindow?.__mir2BevyEntityRendererDebug ?? null,
+          };
         },
         selectedObjectId: world.selectedObjectId,
         logs,

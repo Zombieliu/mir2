@@ -26,6 +26,8 @@ export type GatewayReconnectStatus = {
 export type SceneAssetReadiness = {
   key: string;
   ready: boolean;
+  interactionReady?: boolean;
+  visualReady?: boolean;
   status: "idle" | "loading" | "ready" | "timeout";
   total: number;
   loaded: number;

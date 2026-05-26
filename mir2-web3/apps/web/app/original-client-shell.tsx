@@ -12,6 +12,7 @@ import {
   loadOriginalSceneSpriteLibrary,
   normalizeSceneSpriteLibraryKey,
   originalSceneSpriteLibraryExists,
+  originalSceneSpriteLibraryCacheStats,
   type OriginalSceneSpriteLibraryMeta,
 } from "../lib/original-scene-sprite-meta";
 import {
@@ -89,6 +90,7 @@ import {
   refreshEntityMotionSnapshots,
   rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
+  sceneAssetRuntimeStats,
   viewportDepthForCell,
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
@@ -1064,6 +1066,10 @@ export function OriginalClientShell({
         : "single-image",
       atlasKey: entityRenderState.atlases?.[0]?.key ?? null,
       atlasCount: entityRenderState.atlases?.length ?? 0,
+      atlasPixelBytes: (entityRenderState.atlasImages ?? []).reduce(
+        (sum, atlas) => sum + (atlas.pixels?.byteLength ?? atlas.width * atlas.height * 4),
+        0,
+      ),
       atlasSourceCount: bevyEntityAtlasSources.length,
       atlasCacheSize: bevyEntityAtlasCache.size,
       atlasCurrentKey: bevyEntityAtlasKey,
@@ -1074,11 +1080,16 @@ export function OriginalClientShell({
       domEntityFallback: useBevyEntityRenderer && !hideDomEntitySpritesForBevy,
       canvasHidden: hideBevyCanvasForDomEntityFallback,
       atlasStats: { ...bevyEntityAtlasStats },
+      spriteLibraryCache: originalSceneSpriteLibraryCacheStats(),
+      sceneAssetRuntime: sceneAssetRuntimeStats(),
+      domImageCount: document.images.length,
     };
   }
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
   const sceneAssetUrlsRef = useRef<string[]>([]);
   sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites);
+  const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
+    useState<SceneAssetReadiness | null>(null);
   const sceneAssetReadinessKey =
     screen === "game" && renderPlayer && world.originalMapRegion
       ? [
@@ -1175,6 +1186,39 @@ export function OriginalClientShell({
   }, [bevyEntityRenderState, onBevyEntityRenderStateChange]);
 
   useEffect(() => {
+    if (screen !== "game" || !renderPlayer || !world.originalMapRegion || !sceneSpriteLibrariesReady) {
+      setSceneAssetPreloadReadiness(null);
+      return;
+    }
+
+    const urls = sceneAssetUrlsRef.current;
+    if (!urls.length) {
+      setSceneAssetPreloadReadiness(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0));
+      return;
+    }
+
+    let disposed = false;
+    setSceneAssetPreloadReadiness(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
+    void preloadSceneAssetUrls(urls, 5_000, { allowPartialReady: true }).then((readiness) => {
+      if (disposed) return;
+      const visualReady = readiness.failed === 0;
+      const interactionReady = readiness.ready;
+      setSceneAssetPreloadReadiness({
+        ...readiness,
+        key: sceneAssetReadinessKey,
+        ready: interactionReady,
+        interactionReady,
+        visualReady,
+        status: visualReady ? "ready" : readiness.status === "ready" ? "timeout" : readiness.status,
+      });
+    });
+
+    return () => {
+      disposed = true;
+    };
+  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady, renderPlayer?.x, renderPlayer?.y, world.originalMapRegion]);
+
+  useEffect(() => {
     const notify = (readiness: SceneAssetReadiness) => {
       sceneAssetReadinessCallbackRef.current(readiness);
     };
@@ -1208,6 +1252,8 @@ export function OriginalClientShell({
       );
       return;
     }
+    const preloadReadiness =
+      sceneAssetPreloadReadiness?.key === sceneAssetReadinessKey ? sceneAssetPreloadReadiness : null;
     if (!urls.length) {
       notify(
         createSceneAssetReadiness(
@@ -1220,15 +1266,29 @@ export function OriginalClientShell({
       return;
     }
 
-    if (entityAtlasPending) {
+    if (!preloadReadiness || preloadReadiness.status === "loading") {
       notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length + entityAtlasPendingCount));
       return;
     }
 
-    notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0));
+    if (entityAtlasPending) {
+      notify({
+        ...preloadReadiness,
+        ready: false,
+        interactionReady: false,
+        visualReady: preloadReadiness.visualReady ?? preloadReadiness.failed === 0,
+        status: "loading",
+        pending: preloadReadiness.pending + entityAtlasPendingCount,
+        total: preloadReadiness.total + entityAtlasPendingCount,
+      });
+      return;
+    }
+
+    notify(preloadReadiness);
   }, [
     screen,
     sceneAssetReadinessKey,
+    sceneAssetPreloadReadiness,
     sceneSpriteLibrariesReady,
     pendingSceneSpriteLibraryKeys.length,
     gpuEntityRendererRuntimePending,
@@ -2443,6 +2503,8 @@ function createSceneAssetReadiness(
   return {
     key,
     ready,
+    interactionReady: ready,
+    visualReady: ready,
     status,
     total,
     loaded: ready ? total : 0,
@@ -2475,6 +2537,8 @@ async function preloadSceneAssetUrls(
   return {
     key: "scene-assets",
     ready,
+    interactionReady: ready,
+    visualReady: failedUrls.length === 0,
     status: ready ? "ready" : timedOut ? "timeout" : "loading",
     total: urls.length,
     loaded,

@@ -406,8 +406,17 @@ const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
 const MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS = 18;
 const MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS = 72;
 const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 10 * 60 * 1000;
-const alphaKeyedSceneAssetUrls = new Map<string, Promise<string | null>>();
+const ALPHA_KEYED_SCENE_ASSET_MAX_BYTES = 32 * 1024 * 1024;
+const ALPHA_KEYED_SCENE_ASSET_MAX_ENTRIES = 256;
+const FAILED_STATIC_SCENE_ASSET_MAX_ENTRIES = 1024;
+type AlphaKeyedSceneAssetEntry = {
+  promise: Promise<string | null>;
+  url: string | null;
+  bytes: number;
+};
+const alphaKeyedSceneAssetUrls = new Map<string, AlphaKeyedSceneAssetEntry>();
 const failedStaticSceneAssetUrls = new Map<string, number>();
+let alphaKeyedSceneAssetBytes = 0;
 
 export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[] {
   const candidates: string[] = [];
@@ -587,15 +596,35 @@ async function applyMapObjectAlphaKey(image: HTMLImageElement) {
 function alphaKeyedSceneAssetUrl(cacheKey: string, image: HTMLImageElement) {
   const cached = alphaKeyedSceneAssetUrls.get(cacheKey);
   if (cached) {
-    return cached;
+    alphaKeyedSceneAssetUrls.delete(cacheKey);
+    alphaKeyedSceneAssetUrls.set(cacheKey, cached);
+    return cached.promise;
   }
 
-  const promise = createAlphaKeyedSceneAssetUrl(image);
-  alphaKeyedSceneAssetUrls.set(cacheKey, promise);
-  return promise;
+  const entry: AlphaKeyedSceneAssetEntry = {
+    promise: Promise.resolve(null),
+    url: null,
+    bytes: 0,
+  };
+  entry.promise = createAlphaKeyedSceneAssetUrl(image).then((result) => {
+    if (!result) {
+      alphaKeyedSceneAssetUrls.delete(cacheKey);
+      return null;
+    }
+    entry.url = result.url;
+    entry.bytes = result.bytes;
+    alphaKeyedSceneAssetBytes += result.bytes;
+    trimAlphaKeyedSceneAssetUrls();
+    return result.url;
+  }).catch((error) => {
+    alphaKeyedSceneAssetUrls.delete(cacheKey);
+    throw error;
+  });
+  alphaKeyedSceneAssetUrls.set(cacheKey, entry);
+  return entry.promise;
 }
 
-async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement) {
+async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement): Promise<{ url: string; bytes: number } | null> {
   const width = image.naturalWidth;
   const height = image.naturalHeight;
   if (width <= 0 || height <= 0) {
@@ -673,11 +702,35 @@ async function createAlphaKeyedSceneAssetUrl(image: HTMLImageElement) {
   }
 
   context.putImageData(imageData, 0, 0);
-  return new Promise<string | null>((resolve) => {
+  return new Promise<{ url: string; bytes: number } | null>((resolve) => {
     canvas.toBlob((blob) => {
-      resolve(blob ? URL.createObjectURL(blob) : null);
+      resolve(blob ? { url: URL.createObjectURL(blob), bytes: blob.size } : null);
     }, "image/png");
   });
+}
+
+function trimAlphaKeyedSceneAssetUrls() {
+  while (
+    (alphaKeyedSceneAssetUrls.size > ALPHA_KEYED_SCENE_ASSET_MAX_ENTRIES ||
+      alphaKeyedSceneAssetBytes > ALPHA_KEYED_SCENE_ASSET_MAX_BYTES) &&
+    alphaKeyedSceneAssetUrls.size > 1
+  ) {
+    const oldestKey = alphaKeyedSceneAssetUrls.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    const oldest = alphaKeyedSceneAssetUrls.get(oldestKey);
+    alphaKeyedSceneAssetUrls.delete(oldestKey);
+    alphaKeyedSceneAssetBytes -= oldest?.bytes ?? 0;
+    if (oldest?.url) URL.revokeObjectURL(oldest.url);
+  }
+}
+
+export function sceneAssetRuntimeStats() {
+  return {
+    alphaKeyedBlobCount: Array.from(alphaKeyedSceneAssetUrls.values()).filter((entry) => entry.url).length,
+    alphaKeyedPendingCount: Array.from(alphaKeyedSceneAssetUrls.values()).filter((entry) => !entry.url).length,
+    alphaKeyedBlobBytes: alphaKeyedSceneAssetBytes,
+    failedStaticSceneAssetCount: failedStaticSceneAssetUrls.size,
+  };
 }
 
 function pixelBrightness(pixels: Uint8ClampedArray, offset: number) {
@@ -867,6 +920,11 @@ function staticSceneAssetRecentlyFailed(url: string) {
 
 function markStaticSceneAssetFailed(image: HTMLImageElement, originalSrc: string) {
   failedStaticSceneAssetUrls.set(staticSceneAssetFailureKey(originalSrc), Date.now());
+  while (failedStaticSceneAssetUrls.size > FAILED_STATIC_SCENE_ASSET_MAX_ENTRIES) {
+    const oldestKey = failedStaticSceneAssetUrls.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    failedStaticSceneAssetUrls.delete(oldestKey);
+  }
   image.dataset.mir2LoadFailed = "true";
   image.style.visibility = "hidden";
 }

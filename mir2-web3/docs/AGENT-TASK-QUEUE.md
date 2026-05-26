@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> Latest Crystal resource loading hardening: 2026-05-27 aligns Player Web's
+> Crystal map/library path with Crystal MLibrary behavior. `.Lib` parsing is
+> now index-only, frame RGBA decode happens lazily per requested frame behind a
+> decoded-frame LRU byte budget, server map/library caches are capped, and
+> production request-time original-map writes/synthetic fallbacks are disabled
+> unless explicitly opted in. Scene blueprint cache keys are quantized by
+> map/chunk/size bucket/schema version with disk TTL/size trim, scene readiness
+> now preloads visible asset URLs and reports interaction-ready separately from
+> visual-ready, and cache metrics expose scene cache keys, sprite/cell counts,
+> DOM image counts, sprite library counts, Bevy atlas bytes, and alpha-keyed
+> blob counts. Verification passed `MIR2_CANDIDATE_SCOPE=local bash
+> infra/check-candidate-gate.sh`, including Web typecheck,
+> `test:movement-controller`, `test:resource-loading`, focused Rust gateway /
+> simulation / admin gates, and `git diff --check`. Production browser deploy
+> acceptance is still the next step.
+
 > Latest minimap raster transform sync: 2026-05-27 adds per-map Crystal MMap
 > world-to-image transforms for Player Web instead of assuming `asset/mapWidth`
 > linear scaling. Bichon map `0` now uses MMap `101` as a 1052x700 isometric
