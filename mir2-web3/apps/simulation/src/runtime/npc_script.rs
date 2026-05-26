@@ -3172,6 +3172,16 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    pub fn confirm_npc_input(
+        &mut self,
+        npc_id: u32,
+        page_name: &str,
+        value: &str,
+    ) -> Vec<ServerPacket> {
+        let packets = self.confirm_npc_input_impl(npc_id, page_name, value);
+        self.finalize_packets(packets)
+    }
+
     pub(super) fn interact_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
@@ -3503,5 +3513,41 @@ impl SimulationSession {
         };
 
         self.select_npc_dialog_target_with_input_impl(&input.target, Some(value.to_string()))
+    }
+
+    pub(super) fn confirm_npc_input_impl(
+        &mut self,
+        npc_id: u32,
+        page_name: &str,
+        value: &str,
+    ) -> Vec<ServerPacket> {
+        let Some(active_dialog) = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .clone()
+        else {
+            return Vec::new();
+        };
+        if active_dialog.npc_object_id != npc_id {
+            return Vec::new();
+        }
+
+        let target = if page_name.trim().is_empty() {
+            let Some(input) = active_dialog.input.as_ref() else {
+                return Vec::new();
+            };
+            input.target.clone()
+        } else {
+            let trimmed = page_name.trim();
+            if trimmed.starts_with('@') {
+                trimmed.to_string()
+            } else {
+                format!("@{trimmed}")
+            }
+        };
+
+        self.select_npc_dialog_target_with_input_impl(&target, Some(value.to_string()))
     }
 }

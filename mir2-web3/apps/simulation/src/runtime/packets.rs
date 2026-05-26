@@ -21,11 +21,11 @@ use mir2_protocol::{
 
 use crate::config::{
     CharacterRecord, CharacterSaveRecord, EquipmentSlot, GroundDropLootSnapshot,
-    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, QuestStage, SimulationConfig,
-    Stage5AuctionListing, Stage5HeroState, Stage5ItemRentalRecordSnapshot,
-    Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
-    WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
-    WorldSnapshot,
+    GroundDropSnapshot, ItemContainer, MapTransferSnapshot, NpcScriptDiagnosticSnapshot,
+    QuestStage, SimulationConfig, Stage5AuctionListing, Stage5HeroState,
+    Stage5ItemRentalRecordSnapshot, Stage5ItemRentalSnapshot, Stage5MailMessage,
+    Stage5SystemsState, Stage5TradeState, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
 
 use super::components::{
@@ -4650,6 +4650,17 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .active_npc_dialog
             .as_ref()
             .map(|dialog| dialog.snapshot(language)),
+        npc_script_diagnostics: npc_state
+            .npc_script_diagnostics
+            .iter()
+            .map(|diagnostic| NpcScriptDiagnosticSnapshot {
+                script_key: diagnostic.script_key.clone(),
+                label: diagnostic.label.clone(),
+                line_number: diagnostic.line_number,
+                command: diagnostic.command.clone(),
+                message: diagnostic.message.clone(),
+            })
+            .collect(),
         known_skills: skills
             .skills
             .iter()
@@ -6269,7 +6280,6 @@ impl SimulationSession {
             | ClientPacket::DowngradeAwakening { .. }
             | ClientPacket::ResetAddedItem { .. }
             | ClientPacket::GuildBuffUpdate { .. }
-            | ClientPacket::NpcConfirmInput { .. }
             | ClientPacket::GameShopBuy { .. }
             | ClientPacket::ReportIssue { .. } => Vec::new(),
             ClientPacket::GetRanking {
@@ -6807,6 +6817,11 @@ impl SimulationSession {
             }
             ClientPacket::Harvest { direction } => self.harvest_impl(direction),
             ClientPacket::CallNpc { object_id, key } => self.call_npc_impl(object_id, &key),
+            ClientPacket::NpcConfirmInput {
+                npc_id,
+                page_name,
+                value,
+            } => self.confirm_npc_input_impl(npc_id, &page_name, &value),
             ClientPacket::BuyItem {
                 item_index,
                 count,
@@ -6853,11 +6868,6 @@ impl SimulationSession {
                         location: current_location(self.app.world()),
                     }];
                 }
-                mark_crystal_packet_action(
-                    self.app.world_mut(),
-                    PlayerActionKind::Spell,
-                    crystal_packet_spell_delay_ticks(),
-                );
                 if let Some(player) = player_entity(self.app.world()) {
                     self.app
                         .world_mut()
@@ -6878,6 +6888,11 @@ impl SimulationSession {
                         location: current_location(self.app.world()),
                     }];
                 }
+                mark_crystal_packet_action(
+                    self.app.world_mut(),
+                    PlayerActionKind::Spell,
+                    crystal_packet_spell_delay_ticks(),
+                );
                 let mut response = vec![ServerPacket::UserLocation {
                     location: current_location(self.app.world()),
                 }];

@@ -13,6 +13,17 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-27 NPC input and skill preflight closeout: Player Web now preserves
+  server skill cast metadata (`spell`, `castKind`, `offensive`, hotkey/timing)
+  from the world snapshot and routes skill clicks by Crystal cast mode instead
+  of always sending an opaque `castSkill`. Passive skills are not actively
+  cast, target skills require a selected live monster target when offensive,
+  ground skills wait for a clicked tile, direction skills use the player's
+  facing, and self/toggle skills use the matching magic/toggle packet shape.
+  Debug world snapshots now also carry `npcScriptDiagnostics` so admin/debug
+  surfaces can inspect script parser/runtime diagnostics. Evidence: Web
+  typecheck plus the focused simulation NPC/skill preflight regressions in
+  this pass.
 - 2026-05-27 Crystal map/minimap/resource parity closeout: scene blueprint
   application now preserves existing `miniMapIndex`/`bigMapIndex` when a
   partial blueprint reports `null`; Bichon map `0` resolves mini and big map

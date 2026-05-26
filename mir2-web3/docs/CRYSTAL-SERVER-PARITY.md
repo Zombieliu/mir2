@@ -1,5 +1,20 @@
 # Crystal Server Parity
 
+> Latest NPC input and skill preflight parity sync: 2026-05-27 brings two
+> Crystal gameplay guardrails into the shared runtime baseline. NPC input
+> confirmation packets now route to active input labels with NPC id validation,
+> NPC script diagnostics are part of the debug world snapshot, and the command
+> coverage report explicitly separates implemented, simplified, and missing
+> command buckets. Skill casting now advertises cast kind/offensive metadata
+> and runs Crystal-style preflight before spending MP or committing cooldown
+> timing: missing/dead/out-of-range/non-hostile targets, LOS, safe-zone,
+> required items, map restrictions, and passive skills fail without resource
+> loss. Verification passed focused NPC packet/service-distance regressions,
+> dynamic visibility TODO coverage, and focused skill preflight regressions.
+> Remaining parity risk: this is still preflight/state safety; full Zone-native
+> skill damage/Buff/lifetime coverage and durable NPC/economy commits remain
+> broader work.
+
 > Latest production movement input-buffer parity sync: 2026-05-26 closes the
 > server-side piece of the live `walk -> run -> reverse` rollback/drift repro.
 > The shared Zone now treats movement packets as timestamped intents, preserves

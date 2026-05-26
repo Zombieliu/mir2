@@ -180,6 +180,12 @@ export type DisplayKnownSkill = {
   key: string;
   name: string;
   description: string;
+  spell?: string | null;
+  castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
+  offensive?: boolean;
+  hotkey?: number;
+  delayMs?: number;
+  castTimeMs?: number;
   cooldownRemainingTicks: number;
 };
 

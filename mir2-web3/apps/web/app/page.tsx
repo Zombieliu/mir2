@@ -230,6 +230,12 @@ type GatewayKnownSkill = {
   key: string;
   name: string;
   description: string;
+  spell?: string | null;
+  castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
+  offensive?: boolean;
+  hotkey?: number;
+  delayMs?: number;
+  castTimeMs?: number;
   cooldownRemainingTicks: number;
 };
 
@@ -295,6 +301,14 @@ type GatewayNpcDialog = {
   } | null;
 };
 
+type GatewayNpcScriptDiagnostic = {
+  scriptKey: string;
+  label: string;
+  lineNumber: number;
+  command: string;
+  message: string;
+};
+
 type QuickTransferOption = {
   key: string;
   label: string;
@@ -334,6 +348,7 @@ type GatewayWorldSnapshot = {
   equipmentItems: GatewayEquipmentItem[];
   questLog: GatewayQuestEntry[];
   activeNpcDialog?: GatewayNpcDialog | null;
+  npcScriptDiagnostics?: GatewayNpcScriptDiagnostic[];
   knownSkills: GatewayKnownSkill[];
   activeBuffs: GatewayActiveBuff[];
   stage5Systems?: Stage5SystemsState;
@@ -480,6 +495,12 @@ type KnownSkill = {
   key: string;
   name: string;
   description: string;
+  spell?: string | null;
+  castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
+  offensive?: boolean;
+  hotkey?: number;
+  delayMs?: number;
+  castTimeMs?: number;
   cooldownRemainingTicks: number;
 };
 
@@ -1100,6 +1121,7 @@ export default function HomePage() {
   const pendingSelfMoveRef = useRef<PendingSelfMove | null>(null);
   const pendingSelfTurnRef = useRef<PendingSelfTurn | null>(null);
   const queuedMoveIntentRef = useRef<QueuedMoveIntent | null>(null);
+  const pendingGroundSkillRef = useRef<KnownSkill | null>(null);
   const nextMoveSendAtRef = useRef(0);
   const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const predictedPlayerHoldUntilRef = useRef(0);
@@ -4381,8 +4403,71 @@ export default function HomePage() {
     });
   }
 
+  function spellNameForSkill(skill: KnownSkill) {
+    return skill.spell || skill.name || skill.key;
+  }
+
+  function sendMagicSkill(skill: KnownSkill, target: { x: number; y: number; objectId?: string } | null, direction?: string) {
+    const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    const castTarget = target ?? origin;
+    if (!origin || !castTarget) {
+      return false;
+    }
+    return send({
+      type: "magic",
+      spell: spellNameForSkill(skill),
+      direction: direction ?? origin.direction ?? "Down",
+      targetId: castTarget.objectId ? Number(castTarget.objectId) : 0,
+      x: castTarget.x,
+      y: castTarget.y,
+      spellTargetLock: Boolean(castTarget.objectId),
+    });
+  }
+
+  function castSkillAtTile(skill: KnownSkill, x: number, y: number) {
+    const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+    if (!origin) return;
+    sendMagicSkill(skill, { x, y }, directionFromPoint(origin, { x, y }, origin.direction ?? "Down"));
+  }
+
   function castSkill(skillKey: string) {
-    send({ type: "castSkill", key: skillKey });
+    const skill = world.knownSkills.find((entry) => entry.key === skillKey);
+    if (!skill) {
+      send({ type: "castSkill", key: skillKey });
+      return;
+    }
+    if (skill.castKind === "passive") {
+      appendLog(`${skill.name} is passive.`, "system");
+      return;
+    }
+    if (!skill.spell) {
+      send({ type: "castSkill", key: skillKey });
+      return;
+    }
+    if (skill.castKind === "ground") {
+      pendingGroundSkillRef.current = skill;
+      appendLog(`Select a ground tile for ${skill.name}.`, "system");
+      return;
+    }
+    if (skill.castKind === "toggle" && skill.spell) {
+      send({ type: "spellToggle", spell: skill.spell, toggleState: 1 });
+      return;
+    }
+    if (skill.castKind === "direction") {
+      const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
+      sendMagicSkill(skill, origin ? { x: origin.x, y: origin.y } : null, origin?.direction);
+      return;
+    }
+    if (skill.castKind === "target" || (!skill.castKind && skill.offensive)) {
+      const target = selectedEntity && !selectedEntity.dead ? selectedEntity : null;
+      if (!target || (skill.offensive && target.kind !== "monster")) {
+        appendLog(`Select a target for ${skill.name}.`, "system");
+        return;
+      }
+      sendMagicSkill(skill, target, directionToward(self, target));
+      return;
+    }
+    sendMagicSkill(skill, self ? { x: self.x, y: self.y, objectId: self.objectId } : null, self?.direction);
   }
 
   function transferMap(key: string) {
@@ -4481,6 +4566,12 @@ export default function HomePage() {
 
   function handleViewportTileAction(x: number, y: number, mode: "walk" | "run") {
     if (sceneInputDeferredForInitialAssets()) {
+      return;
+    }
+    const groundSkill = pendingGroundSkillRef.current;
+    if (groundSkill) {
+      pendingGroundSkillRef.current = null;
+      castSkillAtTile(groundSkill, x, y);
       return;
     }
     const occupant = world.entities.find(
@@ -6119,6 +6210,12 @@ export default function HomePage() {
       key: skill.key,
       name: skill.name,
       description: skill.description,
+      spell: skill.spell ?? null,
+      castKind: skill.castKind,
+      offensive: skill.offensive,
+      hotkey: skill.hotkey,
+      delayMs: skill.delayMs,
+      castTimeMs: skill.castTimeMs,
       cooldownRemainingTicks: skill.cooldownRemainingTicks,
     }));
     const activeBuffs = (snapshot.activeBuffs ?? []).map((buff) => ({
@@ -8050,6 +8147,13 @@ function summarizeDebugWorldSnapshot(snapshot: GatewayWorldSnapshot) {
       x: drop.x,
       y: drop.y,
       quantity: drop.quantity,
+    })),
+    npcScriptDiagnostics: (snapshot.npcScriptDiagnostics ?? []).map((diagnostic) => ({
+      scriptKey: diagnostic.scriptKey,
+      label: diagnostic.label,
+      lineNumber: diagnostic.lineNumber,
+      command: diagnostic.command,
+      message: diagnostic.message,
     })),
   };
 }

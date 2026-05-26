@@ -6,9 +6,19 @@ Source scripts: 634
 
 Runtime command coverage: 81/81 command names implemented, 7044/7044 command occurrences covered by the current Rust baseline.
 
-## Unimplemented Commands
+## Coverage Buckets
 
-No unimplemented command names found.
+- Implemented: 81 command names, 7044 command occurrences.
+- Simplified: 0 command names, 0 command occurrences.
+- Missing: 0 command names, 0 command occurrences.
+
+## Missing Commands
+
+No missing command names found.
+
+## Simplified Commands
+
+No simplified command names found.
 
 ## Implemented Commands
 

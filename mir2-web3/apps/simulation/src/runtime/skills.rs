@@ -44,7 +44,9 @@ use super::items::{
     crystal_item_template_for_dynamic_key, current_player_required_stat_total,
     merged_user_item_stats,
 };
-use super::map::{current_map_disallows_random_teleport, current_map_disallows_reincarnation};
+use super::map::{
+    current_map_disallows_random_teleport, current_map_disallows_reincarnation, is_safe_zone_point,
+};
 use super::monsters::{
     active_summoned_monster_count, allocate_runtime_monster_object_id,
     crystal_dynamic_monster_template, deterministic_roll, queue_pending_monster_spawn,
@@ -60,7 +62,8 @@ use super::packets::{
 };
 use super::resources::{
     is_in_world, BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
-    RuntimeQueueResource, SessionResource, SkillResource, Stage5SystemsResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 
@@ -84,10 +87,14 @@ pub(super) struct SkillState {
 
 impl SkillState {
     pub(super) fn snapshot(&self, tick: u64, language: LanguageCode) -> SkillSnapshot {
+        let metadata = skill_cast_metadata_for_skill_key(&self.key);
         SkillSnapshot {
             key: self.key.clone(),
             name: localized_skill_name(language, &self.key, &self.name),
             description: localized_skill_description(language, &self.key, &self.description),
+            spell: metadata.spell.map(str::to_string),
+            cast_kind: metadata.cast_kind.as_str().to_string(),
+            offensive: metadata.offensive,
             level: self.level,
             experience: self.experience,
             hotkey: self.hotkey,
@@ -103,6 +110,275 @@ pub(super) struct SkillCastContext {
     pub(super) direction: MirDirection,
     pub(super) target_id: u32,
     pub(super) target: Point,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum SkillCastKind {
+    Passive,
+    Toggle,
+    SelfOnly,
+    Target,
+    Ground,
+    Direction,
+}
+
+impl SkillCastKind {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Passive => "passive",
+            Self::Toggle => "toggle",
+            Self::SelfOnly => "self",
+            Self::Target => "target",
+            Self::Ground => "ground",
+            Self::Direction => "direction",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct SkillCastMetadata {
+    spell: Option<&'static str>,
+    cast_kind: SkillCastKind,
+    offensive: bool,
+}
+
+fn skill_cast_metadata_for_skill_key(key: &str) -> SkillCastMetadata {
+    let spell_name = skill_definition(key)
+        .and_then(|definition| definition.crystal_spell)
+        .or_else(|| crystal_magic_for_skill_key(key).map(|magic| magic.spell));
+    let Some(spell_name) = spell_name else {
+        return SkillCastMetadata {
+            spell: None,
+            cast_kind: SkillCastKind::SelfOnly,
+            offensive: false,
+        };
+    };
+    let spell = Spell::from_crystal_name(&spell_name);
+    let cast_kind = spell
+        .map(crystal_spell_cast_kind)
+        .unwrap_or(SkillCastKind::Target);
+    let offensive = spell.map(crystal_spell_is_offensive).unwrap_or(false);
+    SkillCastMetadata {
+        spell: canonical_spell_name(spell),
+        cast_kind,
+        offensive,
+    }
+}
+
+fn canonical_spell_name(spell: Option<Spell>) -> Option<&'static str> {
+    match spell? {
+        Spell::None => Some("None"),
+        Spell::Fencing => Some("Fencing"),
+        Spell::Slaying => Some("Slaying"),
+        Spell::Thrusting => Some("Thrusting"),
+        Spell::HalfMoon => Some("HalfMoon"),
+        Spell::ShoulderDash => Some("ShoulderDash"),
+        Spell::TwinDrakeBlade => Some("TwinDrakeBlade"),
+        Spell::Entrapment => Some("Entrapment"),
+        Spell::FlamingSword => Some("FlamingSword"),
+        Spell::LionRoar => Some("LionRoar"),
+        Spell::CrossHalfMoon => Some("CrossHalfMoon"),
+        Spell::BladeAvalanche => Some("BladeAvalanche"),
+        Spell::ProtectionField => Some("ProtectionField"),
+        Spell::Rage => Some("Rage"),
+        Spell::CounterAttack => Some("CounterAttack"),
+        Spell::SlashingBurst => Some("SlashingBurst"),
+        Spell::Fury => Some("Fury"),
+        Spell::ImmortalSkin => Some("ImmortalSkin"),
+        Spell::FireBall => Some("FireBall"),
+        Spell::Repulsion => Some("Repulsion"),
+        Spell::ElectricShock => Some("ElectricShock"),
+        Spell::GreatFireBall => Some("GreatFireBall"),
+        Spell::HellFire => Some("HellFire"),
+        Spell::ThunderBolt => Some("ThunderBolt"),
+        Spell::Teleport => Some("Teleport"),
+        Spell::FireBang => Some("FireBang"),
+        Spell::FireWall => Some("FireWall"),
+        Spell::Lightning => Some("Lightning"),
+        Spell::FrostCrunch => Some("FrostCrunch"),
+        Spell::ThunderStorm => Some("ThunderStorm"),
+        Spell::MagicShield => Some("MagicShield"),
+        Spell::TurnUndead => Some("TurnUndead"),
+        Spell::Vampirism => Some("Vampirism"),
+        Spell::IceStorm => Some("IceStorm"),
+        Spell::FlameDisruptor => Some("FlameDisruptor"),
+        Spell::Mirroring => Some("Mirroring"),
+        Spell::FlameField => Some("FlameField"),
+        Spell::Blizzard => Some("Blizzard"),
+        Spell::MagicBooster => Some("MagicBooster"),
+        Spell::MeteorStrike => Some("MeteorStrike"),
+        Spell::IceThrust => Some("IceThrust"),
+        Spell::FastMove => Some("FastMove"),
+        Spell::StormEscape => Some("StormEscape"),
+        Spell::Healing => Some("Healing"),
+        Spell::SpiritSword => Some("SpiritSword"),
+        Spell::Poisoning => Some("Poisoning"),
+        Spell::SoulFireBall => Some("SoulFireBall"),
+        Spell::SummonSkeleton => Some("SummonSkeleton"),
+        Spell::Hiding => Some("Hiding"),
+        Spell::MassHiding => Some("MassHiding"),
+        Spell::SoulShield => Some("SoulShield"),
+        Spell::Revelation => Some("Revelation"),
+        Spell::BlessedArmour => Some("BlessedArmour"),
+        Spell::EnergyRepulsor => Some("EnergyRepulsor"),
+        Spell::TrapHexagon => Some("TrapHexagon"),
+        Spell::Purification => Some("Purification"),
+        Spell::MassHealing => Some("MassHealing"),
+        Spell::Hallucination => Some("Hallucination"),
+        Spell::UltimateEnhancer => Some("UltimateEnhancer"),
+        Spell::SummonShinsu => Some("SummonShinsu"),
+        Spell::Reincarnation => Some("Reincarnation"),
+        Spell::SummonHolyDeva => Some("SummonHolyDeva"),
+        Spell::Curse => Some("Curse"),
+        Spell::Plague => Some("Plague"),
+        Spell::PoisonCloud => Some("PoisonCloud"),
+        Spell::EnergyShield => Some("EnergyShield"),
+        Spell::PetEnhancer => Some("PetEnhancer"),
+        Spell::HealingCircle => Some("HealingCircle"),
+        Spell::FatalSword => Some("FatalSword"),
+        Spell::DoubleSlash => Some("DoubleSlash"),
+        Spell::Haste => Some("Haste"),
+        Spell::FlashDash => Some("FlashDash"),
+        Spell::LightBody => Some("LightBody"),
+        Spell::HeavenlySword => Some("HeavenlySword"),
+        Spell::FireBurst => Some("FireBurst"),
+        Spell::Trap => Some("Trap"),
+        Spell::PoisonSword => Some("PoisonSword"),
+        Spell::MoonLight => Some("MoonLight"),
+        Spell::MPEater => Some("MPEater"),
+        Spell::SwiftFeet => Some("SwiftFeet"),
+        Spell::DarkBody => Some("DarkBody"),
+        Spell::Hemorrhage => Some("Hemorrhage"),
+        Spell::CrescentSlash => Some("CrescentSlash"),
+        Spell::MoonMist => Some("MoonMist"),
+        Spell::CatTongue => Some("CatTongue"),
+        Spell::Focus => Some("Focus"),
+        Spell::StraightShot => Some("StraightShot"),
+        Spell::DoubleShot => Some("DoubleShot"),
+        Spell::ExplosiveTrap => Some("ExplosiveTrap"),
+        Spell::DelayedExplosion => Some("DelayedExplosion"),
+        Spell::Meditation => Some("Meditation"),
+        Spell::BackStep => Some("BackStep"),
+        Spell::ElementalShot => Some("ElementalShot"),
+        Spell::Concentration => Some("Concentration"),
+        Spell::Stonetrap => Some("Stonetrap"),
+        Spell::ElementalBarrier => Some("ElementalBarrier"),
+        Spell::SummonVampire => Some("SummonVampire"),
+        Spell::VampireShot => Some("VampireShot"),
+        Spell::SummonToad => Some("SummonToad"),
+        Spell::PoisonShot => Some("PoisonShot"),
+        Spell::CrippleShot => Some("CrippleShot"),
+        Spell::SummonSnakes => Some("SummonSnakes"),
+        Spell::NapalmShot => Some("NapalmShot"),
+        Spell::OneWithNature => Some("OneWithNature"),
+        Spell::BindingShot => Some("BindingShot"),
+        Spell::MentalState => Some("MentalState"),
+        Spell::Blink => Some("Blink"),
+        Spell::Portal => Some("Portal"),
+        Spell::BattleCry => Some("BattleCry"),
+        Spell::FireBounce => Some("FireBounce"),
+        Spell::MeteorShower => Some("MeteorShower"),
+        _ => None,
+    }
+}
+
+fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
+    match spell {
+        Spell::Fencing
+        | Spell::SpiritSword
+        | Spell::Focus
+        | Spell::Meditation
+        | Spell::MentalState
+        | Spell::MPEater
+        | Spell::Hemorrhage => SkillCastKind::Passive,
+        Spell::Slaying
+        | Spell::Thrusting
+        | Spell::HalfMoon
+        | Spell::CrossHalfMoon
+        | Spell::DoubleSlash
+        | Spell::CounterAttack
+        | Spell::FatalSword
+        | Spell::FlamingSword
+        | Spell::PoisonSword => SkillCastKind::Toggle,
+        Spell::Fury
+        | Spell::Haste
+        | Spell::SwiftFeet
+        | Spell::ProtectionField
+        | Spell::Rage
+        | Spell::LightBody
+        | Spell::MoonLight
+        | Spell::DarkBody
+        | Spell::Hiding
+        | Spell::MassHiding
+        | Spell::ImmortalSkin
+        | Spell::MagicShield
+        | Spell::EnergyShield
+        | Spell::MagicBooster
+        | Spell::Concentration
+        | Spell::ElementalBarrier
+        | Spell::Mirroring
+        | Spell::OneWithNature
+        | Spell::Reincarnation
+        | Spell::SummonSkeleton
+        | Spell::SummonShinsu
+        | Spell::SummonHolyDeva
+        | Spell::SummonVampire
+        | Spell::SummonToad
+        | Spell::SummonSnakes
+        | Spell::PetEnhancer => SkillCastKind::SelfOnly,
+        Spell::FireWall
+        | Spell::FireBang
+        | Spell::IceStorm
+        | Spell::Blizzard
+        | Spell::MeteorStrike
+        | Spell::MeteorShower
+        | Spell::PoisonCloud
+        | Spell::Plague
+        | Spell::TrapHexagon
+        | Spell::Trap
+        | Spell::ExplosiveTrap
+        | Spell::DelayedExplosion
+        | Spell::Stonetrap
+        | Spell::Portal
+        | Spell::Blink
+        | Spell::Teleport
+        | Spell::MassHealing
+        | Spell::HealingCircle
+        | Spell::Curse => SkillCastKind::Ground,
+        Spell::HellFire
+        | Spell::Lightning
+        | Spell::Repulsion
+        | Spell::EnergyRepulsor
+        | Spell::FireBurst
+        | Spell::BackStep
+        | Spell::ShoulderDash
+        | Spell::FlashDash
+        | Spell::StormEscape
+        | Spell::BladeAvalanche
+        | Spell::SlashingBurst
+        | Spell::CrescentSlash
+        | Spell::LionRoar
+        | Spell::BattleCry => SkillCastKind::Direction,
+        _ => SkillCastKind::Target,
+    }
+}
+
+fn crystal_spell_is_offensive(spell: Spell) -> bool {
+    !matches!(
+        crystal_spell_cast_kind(spell),
+        SkillCastKind::Passive | SkillCastKind::SelfOnly
+    ) && !matches!(
+        spell,
+        Spell::Healing
+            | Spell::MassHealing
+            | Spell::HealingCircle
+            | Spell::Teleport
+            | Spell::Blink
+            | Spell::Portal
+            | Spell::BackStep
+            | Spell::FlashDash
+            | Spell::StormEscape
+    )
 }
 
 pub(super) fn localized_skill_base_key(key: &str) -> Option<&'static str> {
@@ -352,6 +628,221 @@ pub(super) fn cast_skill(world: &mut World, key: &str) -> Vec<ServerPacket> {
     cast_skill_with_context(world, key, None)
 }
 
+pub(super) fn skill_cast_preflight_for_key(
+    world: &World,
+    key: &str,
+    context: Option<&SkillCastContext>,
+) -> bool {
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    if entity_player_vitals(world, player).is_none_or(|vitals| vitals.hp <= 0) {
+        return false;
+    }
+    let metadata = skill_cast_metadata_for_skill_key(key);
+    if metadata.cast_kind == SkillCastKind::Passive {
+        return false;
+    }
+    let spell = metadata.spell.and_then(Spell::from_crystal_name);
+    let magic = crystal_magic_for_skill_key(key);
+    crystal_skill_context_preflight(world, player, spell, magic.as_ref(), metadata, context)
+}
+
+fn crystal_skill_context_preflight(
+    world: &World,
+    player: Entity,
+    spell: Option<Spell>,
+    magic: Option<&CrystalMagicTemplate>,
+    metadata: SkillCastMetadata,
+    context: Option<&SkillCastContext>,
+) -> bool {
+    if let Some(spell) = spell {
+        if !crystal_spell_map_restrictions_allow(world, spell) {
+            return false;
+        }
+        if !crystal_spell_required_items_available(world, spell) {
+            return false;
+        }
+    }
+
+    let Some(player_position) = entity_position(world, player) else {
+        return false;
+    };
+
+    if metadata.offensive && crystal_magic_point_in_safe_zone(world, &player_position) {
+        return false;
+    }
+
+    match metadata.cast_kind {
+        SkillCastKind::Passive => false,
+        SkillCastKind::SelfOnly | SkillCastKind::Toggle | SkillCastKind::Direction => true,
+        SkillCastKind::Ground => {
+            let Some(context) = context else {
+                return !metadata.offensive;
+            };
+            if !crystal_magic_range_allows(magic, &player_position, &context.target) {
+                return false;
+            }
+            if metadata.offensive && crystal_magic_point_in_safe_zone(world, &context.target) {
+                return false;
+            }
+            crystal_magic_line_of_sight_clear(world, &player_position, &context.target)
+        }
+        SkillCastKind::Target => {
+            if matches!(spell, Some(Spell::Healing)) {
+                return crystal_healing_preflight(world, player, context, magic);
+            }
+            let Some(context) = context else {
+                return false;
+            };
+            if context.target_id == 0 {
+                return false;
+            }
+            let Some(target_entity) = entity_by_object_id(world, context.target_id) else {
+                return false;
+            };
+            let Some(target_position) = entity_position(world, target_entity) else {
+                return false;
+            };
+            if !crystal_magic_target_alive(world, target_entity) {
+                return false;
+            }
+            if metadata.offensive && !crystal_magic_target_hostile(world, target_entity) {
+                return false;
+            }
+            if !crystal_magic_range_allows(magic, &player_position, &target_position) {
+                return false;
+            }
+            if metadata.offensive && crystal_magic_point_in_safe_zone(world, &target_position) {
+                return false;
+            }
+            crystal_magic_line_of_sight_clear(world, &player_position, &target_position)
+        }
+    }
+}
+
+fn crystal_healing_preflight(
+    world: &World,
+    player: Entity,
+    context: Option<&SkillCastContext>,
+    magic: Option<&CrystalMagicTemplate>,
+) -> bool {
+    let player_object_id = current_player_object_id(world).unwrap_or_default();
+    let target_entity = match context {
+        Some(context) if context.target_id != 0 && context.target_id != player_object_id => {
+            let Some(entity) = entity_by_object_id(world, context.target_id) else {
+                return false;
+            };
+            entity
+        }
+        _ => player,
+    };
+    if !crystal_magic_target_alive(world, target_entity) {
+        return false;
+    }
+    let Some(player_position) = entity_position(world, player) else {
+        return false;
+    };
+    let Some(target_position) = entity_position(world, target_entity) else {
+        return false;
+    };
+    crystal_magic_range_allows(magic, &player_position, &target_position)
+}
+
+fn crystal_magic_target_alive(world: &World, entity: Entity) -> bool {
+    if let Some(vitals) = world.entity(entity).get::<PlayerVitals>() {
+        return vitals.hp > 0;
+    }
+    if let Some(vitals) = world.entity(entity).get::<MonsterVitals>() {
+        return vitals.hp > 0
+            && world
+                .entity(entity)
+                .get::<MonsterAgent>()
+                .is_none_or(|agent| !agent.dead);
+    }
+    true
+}
+
+fn crystal_magic_target_hostile(world: &World, entity: Entity) -> bool {
+    world
+        .entity(entity)
+        .get::<MonsterAgent>()
+        .is_some_and(|agent| !agent.dead && agent.hostile_to_player)
+}
+
+fn crystal_magic_range_allows(
+    magic: Option<&CrystalMagicTemplate>,
+    origin: &Point,
+    target: &Point,
+) -> bool {
+    let Some(magic) = magic else {
+        return true;
+    };
+    magic.range == 0 || tile_distance(origin, target) <= i32::from(magic.range)
+}
+
+fn crystal_magic_point_in_safe_zone(world: &World, point: &Point) -> bool {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let map = world.resource::<super::resources::MapRuntimeResource>();
+    is_safe_zone_point(config, map, point)
+}
+
+fn crystal_spell_map_restrictions_allow(world: &World, spell: Spell) -> bool {
+    match spell {
+        Spell::Teleport | Spell::Blink => !current_map_disallows_random_teleport(world),
+        Spell::Reincarnation => !current_map_disallows_reincarnation(world),
+        _ => true,
+    }
+}
+
+fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
+    match spell {
+        Spell::SoulFireBall
+        | Spell::Curse
+        | Spell::TrapHexagon
+        | Spell::Plague
+        | Spell::BindingShot
+        | Spell::SummonSkeleton
+        | Spell::SummonShinsu
+        | Spell::SummonHolyDeva => has_equipped_crystal_amulet(world, 0),
+        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+            has_equipped_crystal_poison(world, None)
+        }
+        Spell::PoisonCloud => {
+            has_equipped_crystal_amulet(world, 0) && has_equipped_crystal_poison(world, Some(1))
+        }
+        Spell::Trap | Spell::DelayedExplosion | Spell::ExplosiveTrap => {
+            has_equipped_crystal_amulet(world, 0)
+        }
+        Spell::Reincarnation => has_equipped_crystal_amulet(world, 3),
+        _ => true,
+    }
+}
+
+fn crystal_magic_line_of_sight_clear(world: &World, origin: &Point, target: &Point) -> bool {
+    let dx = target.x - origin.x;
+    let dy = target.y - origin.y;
+    let step_count = dx.abs().max(dy.abs());
+    if step_count <= 1 {
+        return true;
+    }
+    let aligned = dx == 0 || dy == 0 || dx.abs() == dy.abs();
+    if !aligned {
+        return true;
+    }
+    let step_x = dx.signum();
+    let step_y = dy.signum();
+    let mut point = origin.clone();
+    for _ in 1..step_count {
+        point.x += step_x;
+        point.y += step_y;
+        if is_blocked_tile(world, &point) {
+            return false;
+        }
+    }
+    true
+}
+
 pub(super) fn cast_skill_with_context(
     world: &mut World,
     key: &str,
@@ -367,9 +858,6 @@ pub(super) fn cast_skill_with_context(
     };
 
     let skill = world.resource::<SkillResource>().skills[index].clone();
-    if skill.cooldown_ends_at > tick {
-        return Vec::new();
-    }
     let definition = skill_definition(skill.key.as_str());
     let crystal_magic = crystal_magic_for_skill_key(skill.key.as_str());
     let crystal_spell = definition
@@ -399,6 +887,12 @@ pub(super) fn cast_skill_with_context(
     let Some(player) = player_entity(world) else {
         return Vec::new();
     };
+    if !skill_cast_preflight_for_key(world, skill.key.as_str(), context.as_ref()) {
+        return Vec::new();
+    }
+    if skill.cooldown_ends_at > tick {
+        return Vec::new();
+    }
     let current_mp = entity_player_vitals(world, player)
         .map(|vitals| vitals.mp)
         .unwrap_or_default();
