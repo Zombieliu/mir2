@@ -13,6 +13,20 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-26 Crystal Movement Authority Convergence v1: Player Web movement
+  now treats server `UserLocation`/movement packets and `worldSnapshot` as the
+  only sources allowed to write self `world.entities` coordinates. Normal UI
+  movement no longer sends debug `moveTo`; tile, direction, keyboard, and
+  mouse movement are queued as Crystal `walk`/`run`/`turn` direction packets
+  behind one pending self move, 600ms walk/run cadence, render-only local
+  prediction, and Crystal run prewarm. ACK or snapshot disagreement clears the
+  pending move/prediction and keeps world state at the server coordinate.
+  Verification passed `pnpm --dir apps/web run test:movement-controller`,
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`, Rust fmt checks,
+  focused `mir2-simulation` Crystal movement tests, and focused
+  `mir2-gateway` movement/Zone route tests. Full `mir2-gateway` was attempted
+  but manually stopped after an unrelated two-sided trade rollback test ran for
+  several minutes without exiting; focused gateway movement coverage passed.
 - 2026-05-26 production walk-run-reverse input closeout: the live repro was
   not just a slow ACK; production could intermittently omit or delay the Run
   edge when the player walked, pressed run, then reversed direction quickly.

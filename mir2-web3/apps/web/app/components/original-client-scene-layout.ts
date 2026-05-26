@@ -18,7 +18,7 @@ export const VIEWPORT_MOUSE_TILE_CENTER_Y = VIEWPORT_ENTITY_TOP_ORIGIN + VIEWPOR
 export const CRYSTAL_MOVE_INPUT_INTERVAL_MS = 100;
 export const CRYSTAL_MOVE_FRAME_COUNT = 6;
 export const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
-export const MAX_PREDICTED_PLAYER_LEAD_TILES = 24;
+export const MAX_PREDICTED_PLAYER_LEAD_TILES = 2;
 
 export type SceneBackdropTile = {
   key: string;

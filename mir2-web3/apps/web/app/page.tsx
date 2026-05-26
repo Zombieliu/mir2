@@ -40,6 +40,21 @@ import {
   type CrystalMonsterSpriteEntry,
   type CrystalNpcSpriteEntry,
 } from "../lib/generated/crystal-actor-sprite-data";
+import {
+  CRYSTAL_CORRECTION_BLOCK_MS,
+  CRYSTAL_MOVE_DELAY_MS,
+  CRYSTAL_RUN_PRIME_MS,
+  MOVEMENT_PENDING_MAX_AGE_MS,
+  canSendMovement,
+  createPendingSelfMove,
+  effectiveCrystalMovementMode,
+  movementPointMatches,
+  reconcileMovementAck,
+  reconcileMovementSnapshot,
+  type MovementControllerState,
+  type PendingSelfMove,
+  type QueuedMoveIntent,
+} from "./components/original-client-movement-controller";
 import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
 
 type RuntimeStatus = {
@@ -690,22 +705,22 @@ const SCENE_REQUEST_WIDTH = VIEWPORT_RANGE_X * 2 + SCENE_PREFETCH_MARGIN_X * 2;
 const SCENE_REQUEST_HEIGHT = VIEWPORT_RANGE_Y * 2 + SCENE_PREFETCH_MARGIN_Y * 2;
 const SCENE_RELOAD_MARGIN_X = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_X / 2));
 const SCENE_RELOAD_MARGIN_Y = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_Y / 2));
-const WALK_STEP_INTERVAL_MS = 600;
-const RUN_STEP_INTERVAL_MS = 300;
+const WALK_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
+const RUN_STEP_INTERVAL_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_GAMEPLAY_TICK_MS = 1200;
 const CRYSTAL_KEEPALIVE_INTERVAL_MS = 15_000;
 const CRYSTAL_INPUT_CORRECTION_DELAY_MS = 400;
-const CRYSTAL_ENTITY_MOVE_ACTION_MS = 600;
+const CRYSTAL_ENTITY_MOVE_ACTION_MS = CRYSTAL_MOVE_DELAY_MS;
 const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
 const MOVEMENT_CONFIRM_TICK_DELAY_MS = 160;
 const MOVEMENT_TURN_VISUAL_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS;
 const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
-const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 3600;
-const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 12;
+const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 1000;
+const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = MOVEMENT_PENDING_MAX_AGE_MS;
 const MOVEMENT_OUTSTANDING_ACTION_SETTLE_GRACE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_PENDING_ACTION_RECOVERY_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_PREDICTED_CORRECTION_HOLD_MS = CRYSTAL_INPUT_CORRECTION_DELAY_MS;
-const MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 2;
+const MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS;
 const MOVEMENT_ACTION_PREDICTION_BLOCK_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const PACKET_RUNTIME_SNAPSHOT_TOMBSTONE_MS = 10_000;
 const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS =
@@ -916,6 +931,9 @@ type MovementDiagnosticSample = {
   } | null;
   queues: {
     movementPlan: MovementPlan | null;
+    pendingSelfMove: PendingSelfMove | null;
+    queuedMoveIntent: QueuedMoveIntent | null;
+    nextMoveWaitMs: number;
     queuedDirectionStep: DirectionStepRequest | null;
     directionStepPending: DirectionStepPending | null;
     directionStepPendingQueueLength: number;
@@ -1072,6 +1090,9 @@ export default function HomePage() {
   const crystalSelfActionFeedRef = useRef<CrystalSelfActionFeedEntry[]>([]);
   const outstandingSelfMovementActionsRef = useRef<CrystalSelfActionFeedEntry[]>([]);
   const recentSelfMovementActionHistoryRef = useRef<CrystalSelfActionFeedEntry[]>([]);
+  const pendingSelfMoveRef = useRef<PendingSelfMove | null>(null);
+  const queuedMoveIntentRef = useRef<QueuedMoveIntent | null>(null);
+  const nextMoveSendAtRef = useRef(0);
   const predictedPlayerPositionRef = useRef<PredictedPlayerMotion | null>(null);
   const predictedPlayerHoldUntilRef = useRef(0);
   const predictedPlayerUpdateSeqRef = useRef(0);
@@ -1185,21 +1206,11 @@ export default function HomePage() {
 
   const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
-  const activeCrystalSelfActionPosition = self ? activeCrystalSelfActionSource(selfPredictionAnchor) : null;
-  const activeOutstandingSelfActionPosition = self
-    ? activeOutstandingSelfActionSource(selfPredictionAnchor)
-    : null;
-  const activeLocalMovementAnchorPosition = self ? activeLocalMovementAnchor(selfPredictionAnchor) : null;
-  const activeDirectionStepVisualPosition = self ? activeDirectionStepVisualSource(selfPredictionAnchor) : null;
   const localSelfRenderPosition = preserveCrystalSelfRenderPosition(
     selfPredictionAnchor,
     chooseCrystalSelfRenderPosition(
       selfPredictionAnchor,
       renderableSelfPrediction(selfPredictionAnchor, predictedPlayerPosition),
-      activeCrystalSelfActionPosition,
-      activeOutstandingSelfActionPosition,
-      activeLocalMovementAnchorPosition,
-      activeDirectionStepVisualPosition,
     ),
   );
   const activePredictedPlayerPosition =
@@ -1488,6 +1499,9 @@ export default function HomePage() {
         ? { x: currentSelf.x, y: currentSelf.y, direction: currentSelf.direction }
         : null,
       predicted: predictedPlayerPositionRef.current,
+      pendingSelfMove: pendingSelfMoveRef.current,
+      queuedMoveIntent: queuedMoveIntentRef.current,
+      nextMoveWaitMs: Math.max(0, nextMoveSendAtRef.current - now),
       movementPlan: movementPlan
         ? {
             mode: movementPlan.mode,
@@ -1616,6 +1630,9 @@ export default function HomePage() {
         : null,
       queues: {
         movementPlan: movementPlanRef.current,
+        pendingSelfMove: pendingSelfMoveRef.current,
+        queuedMoveIntent: queuedMoveIntentRef.current,
+        nextMoveWaitMs: Math.max(0, nextMoveSendAtRef.current - now),
         queuedDirectionStep: queuedDirectionStepRef.current,
         directionStepPending: directionStepPendingRef.current,
         directionStepPendingQueueLength: directionStepPendingQueueRef.current.length,
@@ -1707,12 +1724,6 @@ export default function HomePage() {
 
     return {
       ...snapshotEntity,
-      x: currentEntity.x,
-      y: currentEntity.y,
-      direction: currentEntity.direction ?? snapshotEntity.direction,
-      hp: currentEntity.hp ?? snapshotEntity.hp,
-      maxHp: currentEntity.maxHp ?? snapshotEntity.maxHp,
-      dead: currentEntity.dead ?? snapshotEntity.dead,
       movementAnimation: movementActive ? currentEntity.movementAnimation : undefined,
       movementStartedAt: movementActive ? currentEntity.movementStartedAt : undefined,
       movementUntil: movementActive ? currentEntity.movementUntil : undefined,
@@ -1854,6 +1865,122 @@ export default function HomePage() {
     localMovementAnchorRef.current = null;
     lastCrystalSelfRenderPositionRef.current = null;
     setPredictedPlayerMotion(null);
+  }
+
+  function clearLegacySelfMovementCoordinateSources() {
+    movementPlanRef.current = null;
+    queuedDirectionStepRef.current = null;
+    queuedDirectionStepBacklogRef.current = [];
+    directionStepPendingRef.current = null;
+    clearDirectionStepPendingQueue();
+    clearCrystalSelfActionFeed();
+    clearOutstandingSelfMovementActions();
+    clearLocalMovementAnchor();
+    lastCrystalSelfRenderPositionRef.current = null;
+  }
+
+  function readSelfMovementControllerState(): MovementControllerState {
+    return {
+      pending: pendingSelfMoveRef.current,
+      prediction: predictedPlayerPositionRef.current,
+      nextMoveSendAt: nextMoveSendAtRef.current,
+      runPrimedUntil: crystalRunPrimedUntilRef.current,
+      inputBlockedUntil: movementInputBlockedUntilRef.current,
+    };
+  }
+
+  function applySelfMovementControllerState(state: MovementControllerState) {
+    pendingSelfMoveRef.current = state.pending;
+    nextMoveSendAtRef.current = state.nextMoveSendAt;
+    crystalRunPrimedUntilRef.current = state.runPrimedUntil;
+    movementInputBlockedUntilRef.current = state.inputBlockedUntil;
+    if (state.prediction) {
+      setPredictedPlayerMotion(state.prediction, state.pending?.visualUntil ?? Date.now() + CRYSTAL_ENTITY_MOVE_ACTION_MS);
+    } else {
+      clearLocalSelfPrediction();
+    }
+  }
+
+  function currentAuthoritativeSelf(currentWorld = worldRef.current) {
+    return currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+  }
+
+  function classifySelfMovementAckDisposition(
+    point: { x: number; y: number; direction?: string },
+    packetName: string,
+  ): CrystalSelfAckDisposition {
+    const pending = pendingSelfMoveRef.current;
+    if (!pending) {
+      return "none";
+    }
+    if (packetName === "UserDashFail") {
+      return "correction";
+    }
+    return movementPointMatches(point, pending.to) ? "confirmed" : "correction";
+  }
+
+  function reconcileSelfMovementAck(
+    point: { x: number; y: number; direction?: string },
+    packetName: string,
+    now: number,
+  ) {
+    const hadPending = pendingSelfMoveRef.current !== null;
+    const result = reconcileMovementAck({
+      state: readSelfMovementControllerState(),
+      ack: point,
+      packetName,
+      now,
+    });
+    applySelfMovementControllerState(result.state);
+    lastSelfMovementAckRef.current = { x: point.x, y: point.y, direction: point.direction, at: now };
+    if (result.outcome === "correction") {
+      queuedMoveIntentRef.current = null;
+      crystalRunPrimedUntilRef.current = 0;
+      movementPredictionBlockedUntilRef.current = Math.max(
+        movementPredictionBlockedUntilRef.current,
+        now + CRYSTAL_CORRECTION_BLOCK_MS,
+      );
+      clearLegacySelfMovementCoordinateSources();
+      clearLocalSelfPrediction();
+      recordMovementConsoleEvent("correction", {
+        packet: packetName,
+        point,
+        pending: hadPending,
+        state: captureMovementConsoleState(now),
+      });
+      return result.outcome;
+    }
+    if (result.outcome === "confirmed") {
+      crystalRunPrimedUntilRef.current = now + CRYSTAL_RUN_PRIME_MS;
+      clearLegacySelfMovementCoordinateSources();
+      clearLocalSelfPrediction();
+      scheduleMovementConfirmTick();
+      return result.outcome;
+    }
+    if (!hadPending) {
+      clearLegacySelfMovementCoordinateSources();
+      clearLocalSelfPrediction();
+    }
+    return result.outcome;
+  }
+
+  function reconcileSelfMovementSnapshot(
+    point: { x: number; y: number; direction?: string },
+    now: number,
+  ) {
+    const result = reconcileMovementSnapshot({
+      state: readSelfMovementControllerState(),
+      snapshot: point,
+      now,
+    });
+    if (!result.corrected) {
+      return false;
+    }
+    applySelfMovementControllerState(result.state);
+    queuedMoveIntentRef.current = null;
+    clearLegacySelfMovementCoordinateSources();
+    clearLocalSelfPrediction();
+    return true;
   }
 
   function rememberLocalMovementAnchor(position: PredictedPlayerMotion, now: number, holdUntil = 0) {
@@ -2021,6 +2148,7 @@ export default function HomePage() {
     pruneCrystalSelfActionFeed(now);
     const anchor = localMovementAnchorRef.current;
     return (
+      Boolean(pendingSelfMoveRef.current) ||
       Boolean(movementPlanRef.current) ||
       Boolean(directionStepPendingRef.current) ||
       directionStepPendingQueueRef.current.length > 0 ||
@@ -2034,6 +2162,7 @@ export default function HomePage() {
     const plan = movementPlanRef.current;
     return (
       Boolean(
+        pendingSelfMoveRef.current ||
         plan &&
           plan.pendingX !== undefined &&
           plan.pendingY !== undefined &&
@@ -2046,15 +2175,7 @@ export default function HomePage() {
   }
 
   function authoritativeSelfForPrediction(serverSelf: WorldEntity | null) {
-    const ack = lastSelfMovementAckRef.current;
-    if (!ack) {
-      return serverSelf;
-    }
-    return {
-      x: ack.x,
-      y: ack.y,
-      direction: ack.direction ?? serverSelf?.direction,
-    };
+    return serverSelf;
   }
 
   function authoritativeSelfForMovementSettlement(serverSelf: WorldEntity | null, now = Date.now()) {
@@ -2588,30 +2709,18 @@ export default function HomePage() {
       return candidate;
     }
 
-    const movementActive =
-      hasSelfMovementTransportEvidence();
-    const last = lastCrystalSelfRenderPositionRef.current;
     let next = candidate;
-    if (
-      movementActive &&
-      last &&
-      crystalMovementCandidateNotBehindServer(serverSelf, last, last.direction ?? serverSelf.direction)
-    ) {
-      const lead = Math.max(Math.abs(last.x - serverSelf.x), Math.abs(last.y - serverSelf.y));
-      const lastStillRenderable = lead <= MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES;
-      const lastAheadOfCandidate =
-        !next || predictedPlayerAheadOfServer(next, last, last.direction ?? next.direction ?? serverSelf.direction);
-      if (lastStillRenderable && lastAheadOfCandidate) {
-        next = last;
+    if (next) {
+      const lead = Math.max(Math.abs(next.x - serverSelf.x), Math.abs(next.y - serverSelf.y));
+      if (
+        lead > MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES ||
+        !crystalMovementCandidateNotBehindServer(serverSelf, next, next.direction ?? serverSelf.direction)
+      ) {
+        next = null;
       }
     }
 
-    if (
-      next &&
-      next.x === serverSelf.x &&
-      next.y === serverSelf.y &&
-      !movementActive
-    ) {
+    if (next && next.x === serverSelf.x && next.y === serverSelf.y) {
       lastCrystalSelfRenderPositionRef.current = null;
       return null;
     }
@@ -2620,8 +2729,8 @@ export default function HomePage() {
     return next;
   }
 
-  function crystalEffectiveMovementMode(requestedMode: "walk" | "run", _now: number): "walk" | "run" {
-    return requestedMode;
+  function crystalEffectiveMovementMode(requestedMode: "walk" | "run", now: number): "walk" | "run" {
+    return effectiveCrystalMovementMode(requestedMode, now, crystalRunPrimedUntilRef.current);
   }
 
   const viewportCenter = predictedSelf ?? self;
@@ -3032,6 +3141,9 @@ export default function HomePage() {
       movementPlanRef.current = null;
       movementBlockedStepsRef.current = [];
       queuedDirectionStepRef.current = null;
+      queuedMoveIntentRef.current = null;
+      pendingSelfMoveRef.current = null;
+      nextMoveSendAtRef.current = 0;
       movementInputBlockedUntilRef.current = 0;
       crystalRunPrimedUntilRef.current = 0;
       predictedPlayerHoldUntilRef.current = 0;
@@ -3270,11 +3382,7 @@ export default function HomePage() {
                 movementNow + Math.max(stepInterval, MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS),
               );
             }
-            if (plan.packetMode === "target") {
-              send({ type: "moveTo", x: nextPoint.x, y: nextPoint.y, mode: nextAction.mode });
-            } else {
-              send({ type: nextAction.mode === "run" ? "run" : "walk", direction: nextAction.direction });
-            }
+            send({ type: nextAction.mode === "run" ? "run" : "walk", direction: nextAction.direction });
           }
         }
       }
@@ -3412,6 +3520,8 @@ export default function HomePage() {
   function isMovementBusy() {
     pruneLocallySettledDirectionStepPending(Date.now());
     return (
+      Boolean(pendingSelfMoveRef.current) ||
+      Boolean(queuedMoveIntentRef.current) ||
       Boolean(movementPlanRef.current) ||
       crystalSelfActionFeedRef.current.length > 0 ||
       directionStepPendingQueueRef.current.length > 0 ||
@@ -3439,6 +3549,7 @@ export default function HomePage() {
         clearVisuallySettledDirectionStepPending(now);
         clearSettledPredictedPlayer(now);
       }
+      trySendQueuedCrystalMove(now);
       consumeQueuedDirectionStep();
       if (isMovementBusy() || predictedPlayerPositionRef.current) {
         scheduleMovementConfirmTick();
@@ -3571,12 +3682,8 @@ export default function HomePage() {
           const predicted = preserveCrystalSelfRenderPosition(
             currentSelf,
             chooseCrystalSelfRenderPosition(
-            currentSelf,
+              currentSelf,
               renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
-              activeCrystalSelfActionSource(currentSelf),
-              activeOutstandingSelfActionSource(currentSelf),
-              activeLocalMovementAnchor(currentSelf),
-              activeDirectionStepVisualSource(currentSelf),
             ),
           );
           if (currentSelf && predicted) {
@@ -3594,12 +3701,8 @@ export default function HomePage() {
           const predicted = preserveCrystalSelfRenderPosition(
             currentSelf,
             chooseCrystalSelfRenderPosition(
-            currentSelf,
+              currentSelf,
               renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
-              activeCrystalSelfActionSource(currentSelf),
-              activeOutstandingSelfActionSource(currentSelf),
-              activeLocalMovementAnchor(currentSelf),
-              activeDirectionStepVisualSource(currentSelf),
             ),
           );
           if (
@@ -4031,6 +4134,9 @@ export default function HomePage() {
     movementPlanRef.current = null;
     movementBlockedStepsRef.current = [];
     queuedDirectionStepRef.current = null;
+    queuedMoveIntentRef.current = null;
+    pendingSelfMoveRef.current = null;
+    nextMoveSendAtRef.current = 0;
     crystalRunPrimedUntilRef.current = 0;
     predictedPlayerHoldUntilRef.current = 0;
     lastSelfMovementAckRef.current = null;
@@ -4080,114 +4186,159 @@ export default function HomePage() {
       }));
   }
 
-  function moveToTile(x: number, y: number, mode: "walk" | "run", packetMode: "target" | "direction" = "direction") {
-    if (sceneInputDeferredForInitialAssets()) {
-      return;
-    }
-    const movementNow = Date.now();
-    if (movementNow < movementInputBlockedUntilRef.current) {
-      return;
-    }
-    const currentPlan = movementPlanRef.current;
-    const currentWorld = worldRef.current;
-    const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? self;
-    const planPending = movementPlanPendingStillAhead(currentPlan, serverSelf);
-    const directionPending = planPending ? null : pendingDirectionStepStillAhead(serverSelf);
-    const predictedPending = pendingPredictedPlayerStepStillAhead(serverSelf, mode, movementNow);
-    const actionSource = localMovementActionSource(serverSelf, currentPlan);
-    const lastAckReadyAt = lastSelfMovementReadyAt(serverSelf, mode);
-    const carriedPlanPending =
-      currentPlan?.pendingX !== undefined && currentPlan.pendingY !== undefined ? currentPlan : null;
-    const inheritedActionX =
-      carriedPlanPending?.actionX ?? directionPending?.x ?? predictedPending?.x ?? currentPlan?.actionX ?? actionSource?.x;
-    const inheritedActionY =
-      carriedPlanPending?.actionY ?? directionPending?.y ?? predictedPending?.y ?? currentPlan?.actionY ?? actionSource?.y;
-    const inheritedPendingX = carriedPlanPending?.pendingX ?? directionPending?.x ?? predictedPending?.x;
-    const inheritedPendingY = carriedPlanPending?.pendingY ?? directionPending?.y ?? predictedPending?.y;
-    const inheritedNextStepAt = Math.max(
-      currentPlan?.nextStepAt ?? 0,
-      actionSource || directionPending ? directionStepNextAtRef.current : 0,
-      directionPending ? directionPending.sentAt + movementCommandDelayMs(directionPending.mode) : 0,
-      predictedPending ? predictedPending.sentAt + movementCommandDelayMs(predictedPending.mode) : 0,
-      lastAckReadyAt,
-    );
-    const inheritedVisualUntil = Math.max(currentPlan?.visualUntil ?? 0, directionStepVisualUntilRef.current);
-    const inheritedBlockedSteps = recentMovementBlockedSteps(
-      currentPlan?.blockedSteps ?? movementBlockedStepsRef.current,
-      movementNow,
-    );
-    movementBlockedStepsRef.current = inheritedBlockedSteps;
+  function queueCrystalMoveIntent(intent: QueuedMoveIntent) {
+    queuedMoveIntentRef.current = intent;
+    movementPlanRef.current = null;
     queuedDirectionStepRef.current = null;
+    queuedDirectionStepBacklogRef.current = [];
     clearDirectionStepPendingQueue();
-    movementPlanRef.current = currentPlan
-      ? {
-          ...currentPlan,
-          targetX: x,
-          targetY: y,
-          mode,
-          packetMode,
-          actionX: inheritedActionX,
-          actionY: inheritedActionY,
-          pendingX: inheritedPendingX,
-          pendingY: inheritedPendingY,
-          pendingSentAt: carriedPlanPending?.pendingSentAt ?? directionPending?.sentAt ?? predictedPending?.sentAt,
-          nextStepAt: inheritedNextStepAt || movementNow,
-          visualUntil: inheritedVisualUntil || currentPlan.visualUntil,
-          sentFromX: carriedPlanPending?.sentFromX ?? directionPending?.sentFromX ?? predictedPending?.sentFromX,
-          sentFromY: carriedPlanPending?.sentFromY ?? directionPending?.sentFromY ?? predictedPending?.sentFromY,
-          sentDirection: carriedPlanPending?.sentDirection ?? directionPending?.direction ?? predictedPending?.direction,
-          sentMode: carriedPlanPending?.sentMode ?? directionPending?.mode ?? predictedPending?.mode,
-          blockedSteps: inheritedBlockedSteps,
-        }
-      : {
-          targetX: x,
-          targetY: y,
-          mode,
-          packetMode,
-          actionX: inheritedActionX,
-          actionY: inheritedActionY,
-          pendingX: inheritedPendingX,
-          pendingY: inheritedPendingY,
-          pendingSentAt: directionPending?.sentAt ?? predictedPending?.sentAt,
-          nextStepAt: inheritedNextStepAt,
-          visualUntil: inheritedVisualUntil || undefined,
-          sentFromX: directionPending?.sentFromX ?? predictedPending?.sentFromX,
-          sentFromY: directionPending?.sentFromY ?? predictedPending?.sentFromY,
-          sentDirection: directionPending?.direction ?? predictedPending?.direction,
-          sentMode: directionPending?.mode ?? predictedPending?.mode,
-          blockedSteps: inheritedBlockedSteps,
-        };
-    const predictedCandidate = predictedPlayerPositionRef.current;
-    const predictedLead =
-      predictedCandidate && serverSelf
-        ? Math.max(Math.abs(predictedCandidate.x - serverSelf.x), Math.abs(predictedCandidate.y - serverSelf.y))
-        : 0;
-    const preservedActionSource =
-      predictedCandidate &&
-      serverSelf &&
-      predictedLead <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES &&
-      crystalMovementCandidateNotBehindServer(
-        serverSelf,
-        predictedCandidate,
-        predictedCandidate.direction ?? serverSelf.direction,
-      )
-        ? predictedCandidate
-        : actionSource;
-    if (preservedActionSource && movementNow >= movementPredictionBlockedUntilRef.current) {
-      setPredictedPlayerMotion(
-        {
-          x: preservedActionSource.x,
-          y: preservedActionSource.y,
-          direction: preservedActionSource.direction ?? actionSource?.direction ?? serverSelf?.direction,
-        },
-        Math.max(inheritedVisualUntil, movementNow + CRYSTAL_ENTITY_MOVE_ACTION_MS),
-      );
+    void trySendQueuedCrystalMove();
+  }
+
+  function sendCrystalTurn(direction: string) {
+    const now = Date.now();
+    if (!canSendMovement(readSelfMovementControllerState(), now)) {
       scheduleMovementConfirmTick();
-    } else if (movementNow < movementPredictionBlockedUntilRef.current) {
-      predictedPlayerHoldUntilRef.current = 0;
-      setPredictedPlayerMotion(null);
-      scheduleMovementConfirmTick();
+      return false;
     }
+    const serverSelf = currentAuthoritativeSelf();
+    if (serverSelf) {
+      setPredictedPlayerMotion({ x: serverSelf.x, y: serverSelf.y, direction }, now + MOVEMENT_TURN_VISUAL_HOLD_MS);
+    }
+    nextMoveSendAtRef.current = now + movementCommandDelayMs("walk");
+    const sent = send({ type: "turn", direction });
+    if (!sent) {
+      nextMoveSendAtRef.current = now;
+      clearLocalSelfPrediction();
+      return false;
+    }
+    scheduleMovementConfirmTick();
+    return true;
+  }
+
+  function trySendQueuedCrystalMove(now = Date.now()) {
+    const queued = queuedMoveIntentRef.current;
+    if (!queued) {
+      return false;
+    }
+    if (sceneInputDeferredForInitialAssets()) {
+      return false;
+    }
+    const currentWorld = worldRef.current;
+    const serverSelf = currentAuthoritativeSelf(currentWorld);
+    if (!serverSelf) {
+      queuedMoveIntentRef.current = null;
+      return false;
+    }
+    const pending = pendingSelfMoveRef.current;
+    if (pending && now - pending.sentAt > MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
+      pendingSelfMoveRef.current = null;
+      queuedMoveIntentRef.current = null;
+      crystalRunPrimedUntilRef.current = 0;
+      movementInputBlockedUntilRef.current = Math.max(
+        movementInputBlockedUntilRef.current,
+        now + CRYSTAL_CORRECTION_BLOCK_MS,
+      );
+      clearLegacySelfMovementCoordinateSources();
+      clearLocalSelfPrediction();
+      return false;
+    }
+    if (!canSendMovement(readSelfMovementControllerState(), now)) {
+      scheduleMovementConfirmTick();
+      return false;
+    }
+
+    const intentAge = now - queued.requestedAt;
+    const maxIntentAge =
+      queued.kind === "target" ? MOVEMENT_PENDING_ACTION_MAX_AGE_MS * 4 : MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS;
+    if (intentAge > maxIntentAge) {
+      queuedMoveIntentRef.current = null;
+      return false;
+    }
+
+    const blockedSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
+    const requestedMode = queued.requestedMode;
+    const effectiveMode = crystalEffectiveMovementMode(requestedMode, now);
+    const nextAction =
+      queued.kind === "direction" && queued.direction
+        ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, blockedSteps, currentWorld)
+        : queued.kind === "target" &&
+            queued.targetX !== undefined &&
+            queued.targetY !== undefined &&
+            (serverSelf.x !== queued.targetX || serverSelf.y !== queued.targetY)
+          ? crystalMovementActionTowardWithRouteHints(
+              serverSelf,
+              { x: queued.targetX, y: queued.targetY },
+              effectiveMode,
+              blockedSteps,
+              currentWorld,
+            )
+          : null;
+
+    if (!nextAction) {
+      queuedMoveIntentRef.current = null;
+      return false;
+    }
+
+    const nextPoint = nextAction.point;
+    if (nextPoint.x === serverSelf.x && nextPoint.y === serverSelf.y) {
+      if (nextAction.direction && nextAction.direction !== serverSelf.direction) {
+        if (queued.consumeAfterSend || queued.kind === "target") {
+          queuedMoveIntentRef.current = null;
+        }
+        return sendCrystalTurn(nextAction.direction);
+      }
+      if (nextAction.direction) {
+        rememberBlockedDirectionAtSource(serverSelf.x, serverSelf.y, nextAction.direction, now);
+      }
+      queuedMoveIntentRef.current = null;
+      clearLocalSelfPrediction();
+      return false;
+    }
+
+    const pendingMove = createPendingSelfMove({
+      from: { x: serverSelf.x, y: serverSelf.y, direction: serverSelf.direction },
+      direction: nextAction.direction,
+      requestedMode: nextAction.mode,
+      now,
+      runPrimedUntil: crystalRunPrimedUntilRef.current,
+    });
+    const alignedPending: PendingSelfMove = {
+      ...pendingMove,
+      to: { x: nextPoint.x, y: nextPoint.y, direction: nextAction.direction },
+      mode: nextAction.mode,
+      visualUntil: now + movementStepIntervalMs(nextAction.mode),
+    };
+    pendingSelfMoveRef.current = alignedPending;
+    nextMoveSendAtRef.current = now + movementCommandDelayMs(alignedPending.mode);
+    directionStepNextAtRef.current = nextMoveSendAtRef.current;
+    directionStepVisualUntilRef.current = alignedPending.visualUntil;
+    clearLegacySelfMovementCoordinateSources();
+    setPredictedPlayerMotion(alignedPending.to, alignedPending.visualUntil);
+
+    if (queued.consumeAfterSend) {
+      queuedMoveIntentRef.current = null;
+    }
+    const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction });
+    if (!sent) {
+      pendingSelfMoveRef.current = null;
+      nextMoveSendAtRef.current = now;
+      clearLocalSelfPrediction();
+      return false;
+    }
+    scheduleMovementConfirmTick();
+    return true;
+  }
+
+  function moveToTile(x: number, y: number, mode: "walk" | "run", _packetMode: "target" | "direction" = "direction") {
+    queueCrystalMoveIntent({
+      kind: "target",
+      targetX: x,
+      targetY: y,
+      requestedMode: mode,
+      requestedAt: Date.now(),
+      consumeAfterSend: false,
+    });
   }
 
   function attackTarget(objectId: string) {
@@ -4576,12 +4727,14 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
-    if (movementPlanRef.current) {
-      moveToTile(x, y, mode, "direction");
-      return;
-    }
-    queuedDirectionStepRef.current = { x, y, mode, requestedAt: Date.now() };
-    consumeQueuedDirectionStep();
+    queueCrystalMoveIntent({
+      kind: "target",
+      targetX: x,
+      targetY: y,
+      requestedMode: mode,
+      requestedAt: Date.now(),
+      consumeAfterSend: true,
+    });
   }
 
   function handleViewportDirectionIntent(
@@ -4592,43 +4745,13 @@ export default function HomePage() {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
-    const now = Date.now();
-    const current = queuedDirectionStepRef.current;
-    const sameQueuedDirection =
-      current &&
-      current.direction === direction &&
-      current.mode === mode &&
-      current.x === undefined &&
-      current.y === undefined;
-    const currentRepeat = sameQueuedDirection ? current.repeatCount ?? 1 : 1;
-    const repeatCount = options?.discrete
-      ? Math.min(MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX, sameQueuedDirection ? currentRepeat + 1 : 1)
-      : sameQueuedDirection
-        ? currentRepeat
-        : 1;
-    const nextQueued = { direction, mode, requestedAt: now, repeatCount };
-    if (
-      current &&
-      current.direction &&
-      current.x === undefined &&
-      current.y === undefined &&
-      now - current.requestedAt <= queuedDirectionStepMaxAgeMs(current)
-    ) {
-      if (current.direction === direction) {
-        queuedDirectionStepRef.current = {
-          ...current,
-          mode: current.mode === "run" || mode === "run" ? "run" : "walk",
-          requestedAt: now,
-          repeatCount,
-        };
-      } else {
-        queuedDirectionStepBacklogRef.current = [nextQueued];
-        scheduleMovementConfirmTick();
-      }
-    } else {
-      queuedDirectionStepRef.current = nextQueued;
-    }
-    consumeQueuedDirectionStep();
+    queueCrystalMoveIntent({
+      kind: "direction",
+      direction,
+      requestedMode: mode,
+      requestedAt: Date.now(),
+      consumeAfterSend: options?.discrete === true,
+    });
   }
 
   function consumeQueuedDirectionStep() {
@@ -5346,127 +5469,32 @@ export default function HomePage() {
         const direction = stringOrNull(payload.direction) ?? undefined;
         const movementPacket = event.packet;
         const movementNow = Date.now();
-        const hardSelfCorrectionPacket =
-          event.packet === "UserLocation" || event.packet === "Pushed" || event.packet === "UserDashFail";
-        let selfPacketLocalOverride: PredictedPlayerMotion | null = null;
         let selfPacketAckDisposition: CrystalSelfAckDisposition | null = null;
+        let previousSelfForMovementDiagnostic: WorldEntity | null = null;
+        let selfMovementAdvanced = false;
         if (movementObjectId === worldRef.current.playerObjectId) {
-          const previousSelf = worldRef.current.entities.find(
+          previousSelfForMovementDiagnostic = worldRef.current.entities.find(
             (entity) => entity.objectId === worldRef.current.playerObjectId,
-          );
-          const selfMovementAdvanced =
-            !previousSelf ||
-            previousSelf.x !== x ||
-            previousSelf.y !== y ||
-            (!!direction && previousSelf.direction !== direction);
-          const selfPacketConfirmsLocalMovement = selfAckConfirmsLocalMovement({ x, y, direction });
-          const selfMovementConfirmed = selfMovementAdvanced || selfPacketConfirmsLocalMovement;
-          const hadSelfMovementAckInFlightBeforeAck = hasSelfMovementAckInFlight();
-          const noProgressAck = selfMovementConfirmed
-            ? null
-            : recordSelfNoProgressAck(x, y, direction, movementNow);
-          const noProgressDirection = noProgressAck
-            ? outstandingSelfMovementDirectionFromSource(x, y, direction)
-            : undefined;
-          const repeatedNoProgressDirection =
-            noProgressDirection &&
-            noProgressAck &&
-            noProgressAck.count >= 2
-              ? noProgressDirection
-              : undefined;
-          if (repeatedNoProgressDirection) {
-            rememberBlockedDirectionAtSource(x, y, repeatedNoProgressDirection, movementNow);
-            clearCrystalSelfActionFeed();
-            clearOutstandingSelfMovementActions();
-          }
-          let crystalAckDisposition: CrystalSelfAckDisposition = repeatedNoProgressDirection
-            ? "correction"
-            : reconcileCrystalSelfActionFeedWithServer(
-                x,
-                y,
-                direction,
-                movementPacket,
-                movementNow,
-              );
-          selfPacketAckDisposition = crystalAckDisposition;
-          const staleAckOverride =
-            previousSelf && selfMovementAdvanced && !repeatedNoProgressDirection
-              ? staleSelfAckOverrideFromRecentActions(x, y, direction, previousSelf, movementNow)
-              : null;
-          if (staleAckOverride) {
-            crystalAckDisposition = "staleEcho";
-            selfPacketAckDisposition = crystalAckDisposition;
-            selfPacketLocalOverride = staleAckOverride;
-          }
-          if (selfMovementConfirmed && !staleAckOverride) {
-            lastSelfNoProgressAckRef.current = null;
-            if (heldDirectionBlockedUntilRef.current?.x !== x || heldDirectionBlockedUntilRef.current?.y !== y) {
-              heldDirectionBlockedUntilRef.current = null;
-            }
-            lastSelfMovementAckRef.current = { x, y, direction, at: movementNow };
-            directionStepNextAtRef.current = Math.max(
-              directionStepNextAtRef.current,
-              movementNow,
-            );
-            if (selfPacketConfirmsLocalMovement) {
-              clearSettledSelfActionsAt(x, y, direction);
-            }
-            if (previousSelf && movementPacket !== "UserLocation" && (previousSelf.x !== x || previousSelf.y !== y)) {
-              if (hadSelfMovementAckInFlightBeforeAck) {
-              }
-              const predicted = predictedPlayerPositionRef.current;
-              const predictedAheadOfAck =
-                predicted &&
-                (predicted.x !== x || predicted.y !== y) &&
-                predictedPlayerAheadOfServer({ x, y }, predicted, direction);
-              if (!predictedAheadOfAck) {
-                rememberLocalMovementAnchor(
-                  { x, y, direction },
-                  movementNow,
-                  movementNow + MOVEMENT_CONFIRM_TICK_DELAY_MS,
-                );
-                setPredictedPlayerMotion({ x, y, direction }, movementNow + MOVEMENT_CONFIRM_TICK_DELAY_MS);
-              }
-            }
-          } else if (!lastSelfMovementAckRef.current) {
-            lastSelfMovementAckRef.current = { x, y, direction, at: movementNow };
-          }
-          if (staleAckOverride) {
-            // A later locally sent Crystal action is already rendered as the current state.
-            // Keep the ACK for diagnostics, but do not let an older server echo pull the player backward.
-          } else if (crystalAckDisposition === "correction" || crystalAckDisposition === "none") {
-            reconcileMovementPlanWithServer(x, y, direction, hardSelfCorrectionPacket, selfMovementAdvanced);
-            reconcileDirectionStepWithServer(x, y, direction, hardSelfCorrectionPacket);
-          } else {
-            reconcileMovementPlanWithServer(x, y, direction, false, selfMovementAdvanced);
-            reconcileDirectionStepWithServer(x, y, direction, false, false);
-          }
-          if (
-            predictedPlayerPositionRef.current?.x === x &&
-            predictedPlayerPositionRef.current?.y === y &&
-            !movementPlanRef.current &&
-            !directionStepPendingRef.current
-          ) {
-            clearPredictedPlayerAfterDirectionVisual(x, y, movementNow);
-          }
-          if (repeatedNoProgressDirection) {
-            lastCrystalSelfRenderPositionRef.current = { x, y, direction: direction ?? repeatedNoProgressDirection };
-          }
-          if (crystalAckDisposition === "confirmed" || crystalAckDisposition === "staleEcho") {
-            selfPacketLocalOverride = activeCrystalLocalCurrentLocation({ x, y, direction }, movementNow);
-          }
+          ) ?? null;
+          selfMovementAdvanced =
+            !previousSelfForMovementDiagnostic ||
+            previousSelfForMovementDiagnostic.x !== x ||
+            previousSelfForMovementDiagnostic.y !== y ||
+            (!!direction && previousSelfForMovementDiagnostic.direction !== direction);
+          selfPacketAckDisposition = classifySelfMovementAckDisposition({ x, y, direction }, movementPacket);
           recordMovementDiagnostic("apply:selfMovementPacket", {
             packet: movementPacket,
             packetPoint: { x, y, direction },
-            previousSelf: previousSelf
-              ? { x: previousSelf.x, y: previousSelf.y, direction: previousSelf.direction }
+            previousSelf: previousSelfForMovementDiagnostic
+              ? {
+                  x: previousSelfForMovementDiagnostic.x,
+                  y: previousSelfForMovementDiagnostic.y,
+                  direction: previousSelfForMovementDiagnostic.direction,
+                }
               : null,
             selfMovementAdvanced,
-            crystalAckDisposition,
-            localOverride: selfPacketLocalOverride,
-            noProgressAck,
-            repeatedNoProgressDirection: repeatedNoProgressDirection ?? null,
-            staleAckOverride,
+            crystalAckDisposition: selfPacketAckDisposition,
+            localOverride: null,
             sample: captureMovementDiagnosticSample(movementNow),
           });
           if (selfMovementPacket) {
@@ -5480,11 +5508,15 @@ export default function HomePage() {
                 disposition: selfPacketAckDisposition,
                 latencyMs: commandAt === undefined ? null : Math.max(0, movementNow - commandAt),
                 command: ackedCommand,
-                previousSelf: previousSelf
-                  ? { x: previousSelf.x, y: previousSelf.y, direction: previousSelf.direction }
+                previousSelf: previousSelfForMovementDiagnostic
+                  ? {
+                      x: previousSelfForMovementDiagnostic.x,
+                      y: previousSelfForMovementDiagnostic.y,
+                      direction: previousSelfForMovementDiagnostic.direction,
+                    }
                   : null,
                 selfMovementAdvanced,
-                localOverride: selfPacketLocalOverride,
+                localOverride: null,
                 state: captureMovementConsoleState(movementNow),
               },
             );
@@ -5496,35 +5528,41 @@ export default function HomePage() {
             entities: current.entities.map((entity) =>
               entity.objectId === movementObjectId
                 ? entity.objectId === current.playerObjectId && selfPacketAckDisposition
-                  ? withCrystalSelfPacketMovement(
-                      {
-                        ...entity,
-                        x: selfPacketLocalOverride?.x ?? x,
-                        y: selfPacketLocalOverride?.y ?? y,
-                        direction: selfPacketLocalOverride?.direction ?? direction,
-                      },
-                      entity,
-                      movementPacket,
+	                  ? withCrystalSelfPacketMovement(
+	                      {
+	                        ...entity,
+	                        x,
+	                        y,
+	                        direction,
+	                      },
+	                      entity,
+	                      movementPacket,
                       selfPacketAckDisposition,
                       movementNow,
                     )
-                  : withPacketMovementAnimation(
-                      {
-                        ...entity,
-                        x: selfPacketLocalOverride?.x ?? x,
-                        y: selfPacketLocalOverride?.y ?? y,
-                        direction: selfPacketLocalOverride?.direction ?? direction,
-                      },
-                      entity,
+	                  : withPacketMovementAnimation(
+	                      {
+	                        ...entity,
+	                        x,
+	                        y,
+	                        direction,
+	                      },
+	                      entity,
                       movementPacket,
                       movementNow,
                     )
                 : entity,
             ),
           };
-          worldRef.current = nextWorld;
-          return nextWorld;
-        });
+	          worldRef.current = nextWorld;
+	          return nextWorld;
+	        });
+        if (movementObjectId === worldRef.current.playerObjectId) {
+          const outcome = reconcileSelfMovementAck({ x, y, direction }, movementPacket, movementNow);
+          if (outcome === "confirmed") {
+            void trySendQueuedCrystalMove();
+          }
+        }
         break;
       }
       case "ObjectPlayer":
@@ -6589,24 +6627,15 @@ export default function HomePage() {
         currentEntityCount: current.entities.length,
         tombstoneCount: packetRuntimeObjectTombstonesRef.current.size,
       };
-      if (snapshotSelfEntity && !packetRuntimeRefresh) {
-        rememberSnapshotSelfAck(snapshotSelfEntity, currentTime, snapshotMapChanged);
-        reconcileMovementPlanWithServer(snapshotSelfEntity.x, snapshotSelfEntity.y, snapshotSelfEntity.direction);
-        reconcileDirectionStepWithServer(
-          snapshotSelfEntity.x,
-          snapshotSelfEntity.y,
-          snapshotSelfEntity.direction,
-          false,
-          false,
-        );
+      if (snapshotSelfEntity) {
+        if (!packetRuntimeRefresh) {
+          rememberSnapshotSelfAck(snapshotSelfEntity, currentTime, snapshotMapChanged);
+        }
+        reconcileSelfMovementSnapshot(snapshotSelfEntity, currentTime);
       }
       const hasCurrentSceneForSnapshot =
         current.originalMapRegion !== null &&
         normalizeMapFileName(current.originalMapRegion.mapFileName) === normalizeMapFileName(snapshotMapFileName);
-      const snapshotSelfLocalOverride =
-        !packetRuntimeRefresh && !snapshotMapChanged && snapshotSelfEntity
-          ? activeCrystalLocalCurrentLocation(snapshotSelfEntity, currentTime)
-          : null;
       if (snapshotSelfEntity) {
         recordMovementDiagnostic("apply:worldSnapshotSelf", {
           tick: snapshot.tick,
@@ -6617,27 +6646,15 @@ export default function HomePage() {
             y: snapshotSelfEntity.y,
             direction: snapshotSelfEntity.direction,
           },
-          localOverride: snapshotSelfLocalOverride,
+          localOverride: null,
           beforeSelf:
             current.entities.find((entity) => entity.objectId === playerObjectId) ??
             null,
         });
       }
-      const snapshotLocalEntities = snapshotSelfLocalOverride
-        ? mergedEntities.map((entity) =>
-            entity.objectId === playerObjectId
-              ? {
-                  ...entity,
-                  x: snapshotSelfLocalOverride.x,
-                  y: snapshotSelfLocalOverride.y,
-                  direction: snapshotSelfLocalOverride.direction ?? entity.direction,
-                }
-              : entity,
-          )
-        : mergedEntities;
       const mergedEntitiesForWorld = packetRuntimeRefresh
-        ? mergePacketFirstSnapshotEntities(current.entities, snapshotLocalEntities, currentTime)
-        : snapshotLocalEntities;
+        ? mergePacketFirstSnapshotEntities(current.entities, mergedEntities, currentTime)
+        : mergedEntities;
       const mergedGroundDropsForWorld = packetRuntimeRefresh
         ? mergePacketFirstSnapshotGroundDrops(current.groundDrops, groundDrops, currentTime)
         : groundDrops;
@@ -7097,6 +7114,9 @@ export default function HomePage() {
   ) {
     movementInputBlockedUntilRef.current = now + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
     crystalRunPrimedUntilRef.current = 0;
+    queuedMoveIntentRef.current = null;
+    pendingSelfMoveRef.current = null;
+    nextMoveSendAtRef.current = movementInputBlockedUntilRef.current;
     directionStepNextAtRef.current = movementInputBlockedUntilRef.current;
     directionStepVisualUntilRef.current = Math.min(directionStepVisualUntilRef.current, now);
     queuedDirectionStepRef.current = null;
@@ -7856,10 +7876,6 @@ export default function HomePage() {
             chooseCrystalSelfRenderPosition(
               currentSelf,
               renderableSelfPrediction(currentSelf, predictedPlayerPositionRef.current),
-              activeCrystalSelfActionSource(currentSelf),
-            activeOutstandingSelfActionSource(currentSelf),
-            activeLocalMovementAnchor(currentSelf),
-            activeDirectionStepVisualSource(currentSelf),
           ),
         );
         if (!currentSelf || !predicted) {
@@ -7954,7 +7970,7 @@ export default function HomePage() {
         if (!selectedEntity) return;
         if (selectedEntity.kind === "monster") return attackTarget(selectedEntity.objectId);
         if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
-        send({ type: "turn", direction: directionToward(self, selectedEntity) });
+        sendCrystalTurn(directionToward(self, selectedEntity));
       }}
       onSelectNpcDialogTarget={(target) => send({ type: "selectNpcDialog", target })}
       onSubmitNpcInput={(value) => send({ type: "submitNpcInput", value })}
