@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest player/monster state roadmap sync: 2026-05-27 closes the first
+> Crystal death/vitals authority slice. Player damage can now reach 0 HP and
+> emits authoritative health/death packets, snapshots expose self `dead=true`,
+> dead players are blocked from movement/combat/magic/normal consumables,
+> resurrection restores action, MP spend/healing syncs runtime vitals, player
+> poison/control statuses now affect gameplay, and monster death regressions
+> lock non-blocking/no-repeat/respawn behavior. Roadmap next: resolve the
+> already-exposed broader Skill preflight/effect failures before using full
+> `mir2-simulation` suite green as a candidate gate.
+
 > Latest minimap raster roadmap sync: 2026-05-27 moves MiniMap/BigMap position
 > rendering from naive world-size linear scaling to per-map Crystal MMap
 > transforms. Bichon map `0` / MMap `101` is locked as a 1052x700 isometric

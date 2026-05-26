@@ -5547,6 +5547,347 @@ fn cave_maggot_can_apply_paralysis_poison_and_block_player_walk() {
 }
 
 #[test]
+fn pending_monster_damage_can_kill_player_and_snapshot_dead_state_syncs() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    set_current_player_hp(&mut session, 10);
+    let attacker = spawn_crystal_monster_for_test(
+        &mut session,
+        98_881,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let attacker_id = entity_object_id(session.app.world(), attacker).expect("attacker id");
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+    let due_tick = runtime_tick(session.app.world());
+
+    super::schedule_damage_to_player(
+        session.app.world_mut(),
+        due_tick,
+        attacker_id,
+        "Yob".to_string(),
+        25,
+    );
+    let packets = session.tick();
+    let snapshot = session.world_snapshot();
+    let player = player_entity(session.app.world()).expect("player entity");
+    let entity_vitals = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .copied()
+        .expect("player vitals");
+    let runtime_vitals = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .player_vitals;
+    let self_entity = snapshot
+        .entities
+        .iter()
+        .find(|entity| entity.object_id == player_id)
+        .expect("self entity snapshot");
+
+    assert_eq!(entity_vitals.hp, 0);
+    assert_eq!(runtime_vitals.hp, 0);
+    assert_eq!(snapshot.player_hp, Some(0));
+    assert!(self_entity.dead);
+    assert_eq!(self_entity.hp, Some(0));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == player_id && info.percent == 0
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectDied { info } if info.object_id == player_id
+    )));
+}
+
+#[test]
+fn dead_player_cannot_move_attack_magic_or_use_normal_potion_until_revived() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    set_current_player_hp(&mut session, 0);
+    set_current_player_mp(&mut session, 500);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("FireBall", 1).expect("FireBall skill"));
+    spawn_crystal_monster_for_test(
+        &mut session,
+        98_882,
+        "Yob",
+        Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    let walk_packets = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Down,
+    });
+    assert_eq!(player_position(&session), origin);
+    assert!(walk_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+
+    let attack_packets = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(attack_packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ObjectAttack { .. })));
+
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+    let magic_packets = session.handle_packet(ClientPacket::Magic {
+        object_id: player_id,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target_id: 98_882,
+        location: Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+        spell_target_lock: true,
+    });
+    assert_eq!(session.world_snapshot().player_mp, Some(starting_mp));
+    assert!(magic_packets.iter().all(|packet| {
+        !matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::FireBall,
+                ..
+            } | ServerPacket::ObjectMana { .. }
+        )
+    }));
+
+    add_inventory_crystal_item(&mut session, "(HP)DrugSmall", 31);
+    let potion_packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+    assert_eq!(
+        potion_packets.first(),
+        Some(&ServerPacket::UseItem {
+            unique_id: 31,
+            success: false,
+            grid: MirGridType::Inventory,
+        })
+    );
+    assert!(session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.slot == 31));
+
+    add_inventory_crystal_item(&mut session, "ResurrectionScroll", 32);
+    let revive_packets = session.handle_packet(ClientPacket::UseItem {
+        unique_id: 32,
+        grid: MirGridType::Inventory,
+    });
+    assert!(revive_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == player_id
+    )));
+
+    let move_after_revive = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Down,
+    });
+    assert!(move_after_revive
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    assert_ne!(player_position(&session), origin);
+}
+
+#[test]
+fn player_status_effects_have_gameplay_effects() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 910, y: 910 };
+    set_player_position(&mut session, origin.clone());
+    set_current_player_hp(&mut session, 100);
+    set_current_player_mp(&mut session, 500);
+    let current_tick = runtime_tick(session.app.world());
+    super::apply_pending_player_status_effect(
+        session.app.world_mut(),
+        current_tick,
+        98_883,
+        super::PendingPlayerStatusEffect::SlowPoison {
+            chance_denominator: 1,
+            duration_ticks: 10,
+            salt: 1,
+        },
+    );
+    assert!(super::crystal_player_slowed_by_status(session.app.world()));
+
+    super::apply_pending_player_status_effect(
+        session.app.world_mut(),
+        current_tick,
+        98_883,
+        super::PendingPlayerStatusEffect::FrozenPoison {
+            chance_denominator: 1,
+            duration_ticks: 10,
+            salt: 2,
+        },
+    );
+    let blocked_packets = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Down,
+    });
+    assert_eq!(player_position(&session), origin);
+    assert!(blocked_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+
+    super::apply_pending_player_status_effect(
+        session.app.world_mut(),
+        current_tick,
+        98_883,
+        super::PendingPlayerStatusEffect::BlindnessPoison {
+            chance_denominator: 1,
+            duration_ticks: 10,
+            salt: 3,
+        },
+    );
+    let attack_packets = session.handle_packet(ClientPacket::Attack {
+        direction: MirDirection::Right,
+        spell: Spell::None,
+    });
+    assert!(attack_packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ObjectAttack { .. })));
+
+    super::apply_pending_player_status_effect(
+        session.app.world_mut(),
+        current_tick,
+        98_883,
+        super::PendingPlayerStatusEffect::GreenPoison {
+            chance_denominator: 1,
+            duration_ticks: 10,
+        },
+    );
+    super::apply_pending_player_status_effect(
+        session.app.world_mut(),
+        current_tick,
+        98_883,
+        super::PendingPlayerStatusEffect::BleedingPoison {
+            chance_denominator: 1,
+            duration_ticks: 10,
+            salt: 4,
+        },
+    );
+    let hp_before_tick = session.world_snapshot().player_hp.expect("player hp");
+    let mut saw_health = false;
+    for _ in 0..3 {
+        let tick_packets = session.tick();
+        saw_health |= tick_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. }));
+    }
+    assert!(saw_health);
+    assert!(session.world_snapshot().player_hp.expect("player hp") < hp_before_tick);
+}
+
+#[test]
+fn red_poison_increases_player_incoming_damage_and_syncs_runtime_vitals() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_current_player_hp(&mut session, 100);
+    let current_tick = runtime_tick(session.app.world());
+    super::apply_player_red_poison(session.app.world_mut(), current_tick, 10);
+    super::schedule_damage_to_player(
+        session.app.world_mut(),
+        current_tick,
+        98_884,
+        "Yob".to_string(),
+        20,
+    );
+
+    let packets = session.tick();
+    let snapshot_hp = session.world_snapshot().player_hp.expect("player hp");
+    let runtime_hp = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .player_vitals
+        .hp;
+
+    assert_eq!(snapshot_hp, 75);
+    assert_eq!(runtime_hp, 75);
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
+}
+
+#[test]
+fn magic_mp_spend_syncs_entity_runtime_resource_and_snapshot() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
+    set_current_player_mp(&mut session, 500);
+    let origin = Point { x: 900, y: 900 };
+    set_player_position(&mut session, origin.clone());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills
+        .push(super::crystal_skill_state("MagicShield", 2).expect("MagicShield skill"));
+    let player_id = current_player_object_id(session.app.world()).expect("player object id");
+    let starting_mp = session.world_snapshot().player_mp.expect("player mp");
+
+    let packets = session.handle_packet(ClientPacket::Magic {
+        object_id: player_id,
+        spell: Spell::MagicShield,
+        direction: MirDirection::Right,
+        target_id: 0,
+        location: origin,
+        spell_target_lock: false,
+    });
+    let player = player_entity(session.app.world()).expect("player entity");
+    let entity_mp = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .mp;
+    let runtime_mp = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .player_vitals
+        .mp;
+    let snapshot_mp = session.world_snapshot().player_mp.expect("snapshot mp");
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectMana { .. })));
+    assert!(snapshot_mp < starting_mp);
+    assert_eq!(entity_mp, runtime_mp);
+    assert_eq!(runtime_mp, snapshot_mp);
+}
+
+#[test]
 fn harvest_monster_skips_death_drops_and_harvests_corpse_like_crystal() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -21839,6 +22180,29 @@ fn defeating_visible_monster_emits_death_packets() {
         ServerPacket::ObjectHealth { info }
             if info.object_id == 3002 && info.percent == 0
     )));
+}
+
+#[test]
+fn dead_monster_does_not_block_attack_or_die_twice() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.move_to(Point { x: 333, y: 267 });
+    let monster = entity_by_object_id(session.app.world(), 3002).expect("monster entity");
+    let monster_position = entity_position(session.app.world(), monster).expect("monster position");
+
+    let death_packets = attack_until_monster_dies(&mut session, 3002, 5);
+    assert!(packet_has_object_died(&death_packets, 3002));
+    let entry = session.app.world().entity(monster);
+    assert!(entry.get::<MonsterAgent>().expect("monster agent").dead);
+    assert_eq!(entry.get::<MonsterVitals>().expect("monster vitals").hp, 0);
+    assert!(
+        can_occupy(session.app.world(), monster_position, None),
+        "dead monsters should release occupancy"
+    );
+
+    let repeat_packets = session.attack(3002);
+    assert!(!packet_has_object_died(&repeat_packets, 3002));
+    assert!(!packet_has_object_health(&repeat_packets, 3002));
 }
 
 #[test]
@@ -48533,7 +48897,7 @@ fn stage5_qa_damage_player_emits_health_for_smoke_setup() {
     let packets = session.stage5_command("qa.damagePlayer", vec!["15".to_string()]);
     let snapshot = session.world_snapshot();
 
-    assert_eq!(snapshot.player_hp, Some((before - 15).max(1)));
+    assert_eq!(snapshot.player_hp, Some((before - 15).max(0)));
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));

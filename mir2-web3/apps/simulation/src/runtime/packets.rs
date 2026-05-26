@@ -28,6 +28,10 @@ use crate::config::{
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldSnapshot,
 };
 
+use super::combat::{
+    crystal_player_attack_blocked_by_status, crystal_player_magic_blocked_by_status,
+    crystal_player_movement_blocked_by_status, crystal_player_slowed_by_status,
+};
 use super::components::{
     current_hero_object_id, current_player_is_dead, current_player_object_id, entity_facing,
     entity_object_id, entity_player_vitals, entity_position, hero_entity, player_entity,
@@ -5353,7 +5357,7 @@ pub(super) fn collect_world_entities(
             (
                 WorldEntityKind::SelfPlayer,
                 WorldEntityDisposition::Friendly,
-                false,
+                player_vitals.map(|v| v.hp <= 0).unwrap_or(false),
                 player_vitals.map(|v| v.hp),
                 player_vitals.map(|v| v.max_hp),
                 body.map(|v| v.level),
@@ -5362,7 +5366,7 @@ pub(super) fn collect_world_entities(
             (
                 WorldEntityKind::Player,
                 WorldEntityDisposition::Friendly,
-                false,
+                player_vitals.map(|v| v.hp <= 0).unwrap_or(false),
                 player_vitals.map(|v| v.hp),
                 player_vitals.map(|v| v.max_hp),
                 body.map(|v| v.level),
@@ -6668,6 +6672,19 @@ impl SimulationSession {
             }
             ClientPacket::Walk { direction } => {
                 dismiss_dialog(self.app.world_mut());
+                if current_player_is_dead(self.app.world())
+                    || crystal_player_movement_blocked_by_status(self.app.world())
+                {
+                    if is_in_world(self.app.world()) {
+                        self.app
+                            .world_mut()
+                            .resource_mut::<RuntimeQueueResource>()
+                            .pending_movement_command = None;
+                    }
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Move)
                 {
@@ -6675,16 +6692,35 @@ impl SimulationSession {
                     return Vec::new();
                 }
                 if is_in_world(self.app.world()) {
+                    let delay_ticks = crystal_packet_move_delay_ticks(false)
+                        + if crystal_player_slowed_by_status(self.app.world()) {
+                            1
+                        } else {
+                            0
+                        };
                     mark_crystal_packet_action(
                         self.app.world_mut(),
                         PlayerActionKind::Move,
-                        crystal_packet_move_delay_ticks(false),
+                        delay_ticks,
                     );
                 }
                 self.move_player_by_direction(direction, false)
             }
             ClientPacket::Run { direction } => {
                 dismiss_dialog(self.app.world_mut());
+                if current_player_is_dead(self.app.world())
+                    || crystal_player_movement_blocked_by_status(self.app.world())
+                {
+                    if is_in_world(self.app.world()) {
+                        self.app
+                            .world_mut()
+                            .resource_mut::<RuntimeQueueResource>()
+                            .pending_movement_command = None;
+                    }
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Move)
                 {
@@ -6692,10 +6728,16 @@ impl SimulationSession {
                     return Vec::new();
                 }
                 if is_in_world(self.app.world()) {
+                    let delay_ticks = crystal_packet_move_delay_ticks(true)
+                        + if crystal_player_slowed_by_status(self.app.world()) {
+                            1
+                        } else {
+                            0
+                        };
                     mark_crystal_packet_action(
                         self.app.world_mut(),
                         PlayerActionKind::Move,
-                        crystal_packet_move_delay_ticks(true),
+                        delay_ticks,
                     );
                 }
                 self.move_player_by_direction(direction, true)
@@ -6777,6 +6819,13 @@ impl SimulationSession {
             ClientPacket::PickUp => pick_up_current_cell_ground_drop(self.app.world_mut()),
             ClientPacket::RequestItemInfo { item_index } => request_item_info_impl(item_index),
             ClientPacket::Attack { direction, spell } => {
+                if current_player_is_dead(self.app.world())
+                    || crystal_player_attack_blocked_by_status(self.app.world())
+                {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Attack)
                 {
@@ -6785,10 +6834,16 @@ impl SimulationSession {
                     }];
                 }
                 if is_in_world(self.app.world()) {
+                    let delay_ticks = crystal_packet_attack_delay_ticks()
+                        + if crystal_player_slowed_by_status(self.app.world()) {
+                            1
+                        } else {
+                            0
+                        };
                     mark_crystal_packet_action(
                         self.app.world_mut(),
                         PlayerActionKind::Attack,
-                        crystal_packet_attack_delay_ticks(),
+                        delay_ticks,
                     );
                 }
                 self.attack_in_direction_with_spell(direction, spell)
@@ -6799,6 +6854,13 @@ impl SimulationSession {
                 target_location,
                 ..
             } => {
+                if current_player_is_dead(self.app.world())
+                    || crystal_player_attack_blocked_by_status(self.app.world())
+                {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                }
                 if is_in_world(self.app.world())
                     && !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Attack)
                 {
@@ -6807,10 +6869,16 @@ impl SimulationSession {
                     }];
                 }
                 if is_in_world(self.app.world()) {
+                    let delay_ticks = crystal_packet_attack_delay_ticks()
+                        + if crystal_player_slowed_by_status(self.app.world()) {
+                            1
+                        } else {
+                            0
+                        };
                     mark_crystal_packet_action(
                         self.app.world_mut(),
                         PlayerActionKind::Attack,
-                        crystal_packet_attack_delay_ticks(),
+                        delay_ticks,
                     );
                 }
                 self.range_attack_impl(direction, target_id, target_location)
@@ -6857,6 +6925,13 @@ impl SimulationSession {
             } => {
                 if !is_in_world(self.app.world()) {
                     return Vec::new();
+                }
+                if current_player_is_dead(self.app.world())
+                    || crystal_player_magic_blocked_by_status(self.app.world())
+                {
+                    return vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
                 }
                 let Some(skill_key) = skill_key_for_crystal_spell(spell) else {
                     return vec![ServerPacket::UserLocation {

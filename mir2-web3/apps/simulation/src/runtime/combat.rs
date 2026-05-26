@@ -9,10 +9,10 @@ use mir2_protocol::{ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo, S
 
 use super::buffs::{apply_or_refresh_buff, BuffState};
 use super::components::{
-    current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
-    entity_position, player_entity, Facing, GeneralMeowMeowState, Monster, MonsterAgent,
-    MonsterAiState, MonsterCombatStats, MonsterPoisonState, MonsterVitals, ObjectId, PlayerVitals,
-    Position, SpawnSlotRef, SummonedMonster, TrainerDamageState,
+    current_player_is_dead, current_player_object_id, entity_by_object_id, entity_facing,
+    entity_name, entity_object_id, entity_position, player_entity, Facing, GeneralMeowMeowState,
+    Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterPoisonState, MonsterVitals,
+    ObjectId, PlayerVitals, Position, SpawnSlotRef, SummonedMonster, TrainerDamageState,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -89,6 +89,10 @@ const CRYSTAL_SPELL_EFFECT_FATAL_SWORD: u8 = 1;
 const CRYSTAL_SPELL_EFFECT_MP_EATER: u8 = 17;
 const CRYSTAL_SPELL_EFFECT_HEMORRHAGE: u8 = 18;
 const CRYSTAL_POISON_BLEEDING: u16 = 128;
+const CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL: u64 = 2;
+const CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
+const CRYSTAL_PLAYER_BLEEDING_TICK_DAMAGE: i32 = 3;
+const CRYSTAL_RED_POISON_DAMAGE_BONUS_PERCENT: i32 = 25;
 
 fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
     let key = normalize_crystal_skill_key(spell_name);
@@ -125,6 +129,110 @@ fn set_skill_toggle_state(world: &mut World, spell: Spell, enabled: bool) {
         *existing = enabled;
     } else {
         skills.spell_toggles.push((spell, enabled));
+    }
+}
+
+pub(super) fn crystal_player_has_active_buff(world: &World, key: &str) -> bool {
+    let tick = runtime_tick(world);
+    world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == key && buff.expires_at_tick > tick)
+}
+
+pub(super) fn crystal_player_movement_blocked_by_status(world: &World) -> bool {
+    [
+        CAVE_MAGGOT_PARALYSIS_BUFF_KEY,
+        HELL_KEEPER_DAZED_BUFF_KEY,
+        MAN_TREE_STUN_BUFF_KEY,
+        ICE_GUARD_FROZEN_BUFF_KEY,
+    ]
+    .iter()
+    .any(|key| crystal_player_has_active_buff(world, key))
+}
+
+pub(super) fn crystal_player_attack_blocked_by_status(world: &World) -> bool {
+    crystal_player_movement_blocked_by_status(world)
+        || crystal_player_has_active_buff(world, RESTLESS_JAR_BLINDNESS_BUFF_KEY)
+}
+
+pub(super) fn crystal_player_magic_blocked_by_status(world: &World) -> bool {
+    crystal_player_attack_blocked_by_status(world)
+}
+
+pub(super) fn crystal_player_slowed_by_status(world: &World) -> bool {
+    crystal_player_has_active_buff(world, ICE_GUARD_SLOW_BUFF_KEY)
+}
+
+fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
+    if damage <= 0 || !crystal_player_has_active_buff(world, YIMOOGI_RED_POISON_BUFF_KEY) {
+        return damage;
+    }
+
+    damage.saturating_add(
+        damage
+            .saturating_mul(CRYSTAL_RED_POISON_DAMAGE_BONUS_PERCENT)
+            .div_euclid(100)
+            .max(1),
+    )
+}
+
+#[derive(Debug, Clone, Copy)]
+struct PlayerDamageOutcome {
+    applied: bool,
+    died: bool,
+}
+
+fn apply_damage_to_current_player(
+    world: &mut World,
+    damage: i32,
+    packets: &mut Vec<ServerPacket>,
+) -> PlayerDamageOutcome {
+    if damage <= 0 {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+        };
+    }
+
+    let Some(player) = player_entity(world) else {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+        };
+    };
+
+    let adjusted_damage = crystal_player_damage_after_status(world, damage);
+    let Some((updated_vitals, was_alive)) = ({
+        let mut entity = world.entity_mut(player);
+        entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+            let was_alive = vitals.hp > 0;
+            vitals.hp = vitals.hp.saturating_sub(adjusted_damage).max(0);
+            (*vitals, was_alive)
+        })
+    }) else {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+        };
+    };
+
+    world.resource_mut::<PlayerRuntimeResource>().player_vitals = updated_vitals;
+    if let Some(info) = object_health_info_for_entity(world, player, 0) {
+        packets.push(ServerPacket::ObjectHealth { info });
+    }
+
+    let died = was_alive && updated_vitals.hp <= 0;
+    if died {
+        if let Some(info) = object_died_info_for_entity(world, player, 0) {
+            packets.push(ServerPacket::ObjectDied { info });
+        }
+    }
+
+    PlayerDamageOutcome {
+        applied: was_alive,
+        died,
     }
 }
 
@@ -781,6 +889,28 @@ pub(super) fn tick_monster_poisons(
     }
 }
 
+pub(super) fn tick_player_status_effects(
+    world: &mut World,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if current_tick % CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL != 0 {
+        return;
+    }
+
+    let mut damage = 0;
+    if crystal_player_has_active_buff(world, TOXIC_GHOUL_GREEN_POISON_BUFF_KEY) {
+        damage += CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE;
+    }
+    if crystal_player_has_active_buff(world, FROST_TIGER_BLEEDING_BUFF_KEY) {
+        damage += CRYSTAL_PLAYER_BLEEDING_TICK_DAMAGE;
+    }
+
+    if damage > 0 {
+        let _ = apply_damage_to_current_player(world, damage, packets);
+    }
+}
+
 pub(super) fn combat_delay_ticks(delay_ms: u64) -> u64 {
     delay_ms.max(1).div_ceil(1_000)
 }
@@ -1223,12 +1353,19 @@ pub(super) fn resolve_pending_combat_actions(
                     continue;
                 };
                 if action.damage > 0 {
-                    if let Some(mut vitals) = world.entity_mut(player).get_mut::<PlayerVitals>() {
-                        vitals.hp = (vitals.hp - action.damage).max(1);
+                    let outcome = apply_damage_to_current_player(world, action.damage, packets);
+                    if outcome.applied {
+                        packets.push(player_struck_packet(action.attacker_id));
+                        packets.extend(damage_worn_durability(world, current_tick));
+                        if !outcome.died {
+                            queue_counter_attack_proc(
+                                world,
+                                current_tick,
+                                action.attacker_id,
+                                packets,
+                            );
+                        }
                     }
-                    packets.push(player_struck_packet(action.attacker_id));
-                    packets.extend(damage_worn_durability(world, current_tick));
-                    queue_counter_attack_proc(world, current_tick, action.attacker_id, packets);
                 } else if action.damage < 0 {
                     let restored = {
                         let mut entity = world.entity_mut(player);
@@ -2204,6 +2341,13 @@ impl SimulationSession {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
+        if current_player_is_dead(self.app.world())
+            || crystal_player_attack_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
 
         dismiss_dialog(self.app.world_mut());
         let Some(monster_entity) = entity_by_object_id(self.app.world(), object_id) else {
@@ -2503,6 +2647,13 @@ impl SimulationSession {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
+        if current_player_is_dead(self.app.world())
+            || crystal_player_attack_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
 
         if let Some(player) = player_entity(self.app.world()) {
             self.app
@@ -2538,6 +2689,13 @@ impl SimulationSession {
     ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
+        }
+        if current_player_is_dead(self.app.world())
+            || crystal_player_attack_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
         }
         dismiss_dialog(self.app.world_mut());
         let Some(target_entity) = entity_by_object_id(self.app.world(), target_id) else {
@@ -2650,6 +2808,11 @@ impl SimulationSession {
     pub(super) fn harvest_impl(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
+        }
+        if current_player_is_dead(self.app.world()) {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
         }
 
         dismiss_dialog(self.app.world_mut());

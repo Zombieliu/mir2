@@ -3,11 +3,12 @@ use bevy_ecs::prelude::{With, World};
 use mir2_game_data::{DecorKind, MapBounds, TerrainKind};
 use mir2_protocol::{MirDirection, ObjectMovement, Point, ServerPacket, UserLocation};
 
+use super::combat::crystal_player_movement_blocked_by_status;
 use super::components::{
-    current_player_object_id, entity_facing, entity_position, player_entity, Facing, GroundDrop,
-    Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, Position, RemotePlayer, SelfPlayer,
+    current_player_is_dead, current_player_object_id, entity_facing, entity_position,
+    player_entity, Facing, GroundDrop, Hero, MonsterAgent, MonsterAiState, Npc, ObjectId, Position,
+    RemotePlayer, SelfPlayer,
 };
-use super::crystal_compat::CAVE_MAGGOT_PARALYSIS_BUFF_KEY;
 use super::map::{
     apply_current_player_position_map_transfer, is_current_map_transfer_source,
     relocate_player_to_map,
@@ -15,8 +16,8 @@ use super::map::{
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
 use super::resources::{
-    crystal_player_can_run, is_in_world, mark_crystal_player_move, BuffResource,
-    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
+    crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
+    PlayerRuntimeResource, RuntimeConfigResource,
 };
 use super::session::SimulationSession;
 
@@ -417,12 +418,7 @@ fn player_directional_destination(
 }
 
 pub(super) fn player_is_paralyzed(world: &World) -> bool {
-    let tick = super::session::runtime_tick(world);
-    world
-        .resource::<BuffResource>()
-        .buffs
-        .iter()
-        .any(|buff| buff.key == CAVE_MAGGOT_PARALYSIS_BUFF_KEY && buff.expires_at_tick > tick)
+    crystal_player_movement_blocked_by_status(world)
 }
 
 #[allow(deprecated)]
@@ -532,6 +528,16 @@ impl SimulationSession {
             return Vec::new();
         }
 
+        if current_player_is_dead(self.app.world())
+            || crystal_player_movement_blocked_by_status(self.app.world())
+        {
+            let mut packets = vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+            packets.extend(advance_world(self.app.world_mut()));
+            return packets;
+        }
+
         dismiss_dialog(self.app.world_mut());
         let target = clamp_to_map_region(self.app.world(), destination);
         let player_entity = player_entity(self.app.world()).expect("player should exist");
@@ -609,6 +615,16 @@ impl SimulationSession {
         direction: MirDirection,
         running: bool,
     ) -> Vec<ServerPacket> {
+        if current_player_is_dead(self.app.world())
+            || crystal_player_movement_blocked_by_status(self.app.world())
+        {
+            let mut packets = vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+            packets.extend(advance_world(self.app.world_mut()));
+            return packets;
+        }
+
         let Some(player) = player_entity(self.app.world()) else {
             return Vec::new();
         };
