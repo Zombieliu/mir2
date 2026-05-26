@@ -94,9 +94,21 @@ export function createPendingSelfMove(input: {
   };
 }
 
-export function movementPointMatches(left: MovementPoint, right: MovementPoint) {
+export function movementTileMatches(left: MovementPoint, right: MovementPoint) {
   return left.x === right.x && left.y === right.y;
 }
+
+export function movementTransformMatches(left: MovementPoint, right: MovementPoint) {
+  if (!movementTileMatches(left, right)) {
+    return false;
+  }
+  if (left.direction && right.direction && left.direction !== right.direction) {
+    return false;
+  }
+  return true;
+}
+
+export const movementPointMatches = movementTileMatches;
 
 export function reconcileMovementAck(input: {
   state: MovementControllerState;
@@ -116,7 +128,7 @@ export function reconcileMovementAck(input: {
   }
 
   const hardFailure = input.packetName === "UserDashFail";
-  if (!hardFailure && movementPointMatches(input.ack, pending.to)) {
+  if (!hardFailure && movementTileMatches(input.ack, pending.to)) {
     return {
       outcome: "confirmed",
       state: {
@@ -149,8 +161,8 @@ export function reconcileMovementSnapshot(input: {
 }): { state: MovementControllerState; corrected: boolean } {
   const pending = input.state.pending;
   const prediction = input.state.prediction;
-  const snapshotDiffersFromPending = pending ? !movementPointMatches(input.snapshot, pending.to) : false;
-  const snapshotDiffersFromPrediction = prediction ? !movementPointMatches(input.snapshot, prediction) : false;
+  const snapshotDiffersFromPending = pending ? !movementTransformMatches(input.snapshot, pending.to) : false;
+  const snapshotDiffersFromPrediction = prediction ? !movementTransformMatches(input.snapshot, prediction) : false;
 
   if (!snapshotDiffersFromPending && !snapshotDiffersFromPrediction) {
     return { corrected: false, state: input.state };

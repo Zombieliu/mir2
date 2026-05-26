@@ -170,6 +170,7 @@ export type OriginalClientShellProps = {
     mode: "walk" | "run",
     options?: { discrete?: boolean },
   ) => void;
+  onViewportDirectionStop: () => void;
   onPickGroundDrop: (objectId: string) => void;
   onSelectEntity: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
