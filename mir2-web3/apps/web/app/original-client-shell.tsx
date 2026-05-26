@@ -1088,6 +1088,7 @@ export function OriginalClientShell({
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
   const sceneAssetUrlsRef = useRef<string[]>([]);
   sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites);
+  const sceneAssetUrlKey = stableSceneAssetUrlKey(sceneAssetUrlsRef.current);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
   const sceneAssetReadinessKey =
@@ -1098,8 +1099,7 @@ export function OriginalClientShell({
           world.originalMapRegion.regionBounds.minY,
           world.originalMapRegion.regionBounds.maxX,
           world.originalMapRegion.regionBounds.maxY,
-          renderPlayer.x,
-          renderPlayer.y,
+          sceneAssetUrlKey,
           desiredSceneSpriteLibraryKey,
           viewportEntities.length,
         ].join(":")
@@ -1216,7 +1216,7 @@ export function OriginalClientShell({
     return () => {
       disposed = true;
     };
-  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady, renderPlayer?.x, renderPlayer?.y, world.originalMapRegion]);
+  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady]);
 
   useEffect(() => {
     const notify = (readiness: SceneAssetReadiness) => {
@@ -1770,6 +1770,21 @@ function collectVisibleSceneAssetUrls(
         : [],
     ),
   ].filter((url, index, list): url is string => Boolean(url) && list.indexOf(url) === index);
+}
+
+function stableSceneAssetUrlKey(urls: string[]) {
+  if (!urls.length) return "empty";
+  let hash = 0x811c9dc5;
+  const uniqueSorted = Array.from(new Set(urls)).sort();
+  for (const url of uniqueSorted) {
+    for (let index = 0; index < url.length; index += 1) {
+      hash ^= url.charCodeAt(index);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    hash ^= 0xff;
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return `${uniqueSorted.length}:${hash.toString(16).padStart(8, "0")}`;
 }
 
 function shouldUseBevyEntityRenderer() {

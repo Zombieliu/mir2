@@ -75,8 +75,15 @@ function buildFakeLib(frameCount) {
   return Buffer.concat([header, ...chunks]);
 }
 
+const minimapHelperExports = loadTypeScriptModule(new URL("../lib/crystal-minimap-transform.ts", import.meta.url));
+const minimapTransformExports = loadTypeScriptModule(
+  new URL("../lib/generated/crystal-minimap-transforms.ts", import.meta.url),
+  { "../crystal-minimap-transform": minimapHelperExports },
+);
 const loaderExports = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
   "server-only": {},
+  "./crystal-minimap-transform": minimapHelperExports,
+  "./generated/crystal-minimap-transforms": minimapTransformExports,
 });
 const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-cache.ts", import.meta.url), {
   "./crystal-map-loader": { loadCrystalSceneBlueprint: async () => ({}) },
@@ -107,6 +114,12 @@ const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-c
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
   }
+}
+
+{
+  assert.equal(loaderExports.crystalMapMiniMapIndexForTests("0"), 101, "Bichon map 0 mini index comes from transform metadata");
+  assert.equal(loaderExports.crystalMapBigMapIndexForTests("0"), 101, "Bichon map 0 big map index comes from transform metadata");
+  assert.equal(loaderExports.crystalMapMiniMapIndexForTests("Map/0.MAP"), 101);
 }
 
 {

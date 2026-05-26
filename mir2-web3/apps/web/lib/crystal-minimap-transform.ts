@@ -21,8 +21,14 @@ export type CrystalMiniMapPoint = {
 };
 
 export function normalizeCrystalMiniMapFileName(mapFileName: string | null | undefined) {
-  const trimmed = String(mapFileName ?? "").trim();
-  return trimmed.toLocaleLowerCase().endsWith(".map") ? trimmed.slice(0, -4) : trimmed;
+  const fileName = String(mapFileName ?? "")
+    .trim()
+    .replace(/\\/g, "/")
+    .split("/")
+    .filter(Boolean)
+    .pop() ?? "";
+  const lower = fileName.toLocaleLowerCase();
+  return lower.endsWith(".map") ? lower.slice(0, -4) : lower;
 }
 
 export function createLinearMiniMapTransform({

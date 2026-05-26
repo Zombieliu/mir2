@@ -13,6 +13,20 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-27 Crystal map/minimap/resource parity closeout: scene blueprint
+  application now preserves existing `miniMapIndex`/`bigMapIndex` when a
+  partial blueprint reports `null`; Bichon map `0` resolves mini and big map
+  index `101` from `CRYSTAL_MINI_MAP_TRANSFORMS` rather than relying on the
+  respawn manifest; minimap transform map names normalize by basename,
+  lowercase, and `.map` stripping; and object-mode original-map frames now use
+  exported Crystal frame offsets for all frames with offset metadata. The old
+  Bichon torch offset remains only as a starter-JSON fallback for missing
+  metadata. Scene asset readiness keys now use a stable visible URL-set hash
+  instead of raw player coordinates, reducing per-step preload churn. Evidence:
+  `MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh` passed,
+  including Web typecheck, movement-controller, minimap-transform,
+  resource-loading, focused Rust gateway/simulation/admin checks, and
+  `git diff --check`.
 - 2026-05-27 Crystal resource loading hardening: Player Web now treats Crystal
   `.Lib` files like indexable MLibrary sources instead of decoding every frame
   during parse. `crystal-map-loader` stores library frame offsets and lazily

@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> Latest Crystal map/minimap/resource parity closeout: 2026-05-27 prevents
+> scene-blueprint reloads from clearing existing mini/big map indices when a
+> partial blueprint has `null`, resolves Bichon map `0` mini/big map index
+> `101` from Crystal minimap transform metadata instead of depending on the
+> respawn manifest, normalizes minimap map names by basename/lowercase/.map
+> stripping, and makes object drawMode map frames honor exported Crystal
+> offset metadata for every object frame. Legacy Bichon torch offset fallback
+> remains only for old starter JSON without offsets. Scene asset readiness keys
+> now use a stable visible-asset URL hash instead of raw player x/y, avoiding
+> per-step preload churn when the visible asset set is unchanged. Verification
+> passed `MIR2_CANDIDATE_SCOPE=local bash infra/check-candidate-gate.sh`,
+> including Web typecheck, movement-controller, minimap-transform,
+> resource-loading, focused Rust gateway/simulation/admin gates, and
+> `git diff --check`.
+
 > Latest Crystal resource loading hardening: 2026-05-27 aligns Player Web's
 > Crystal map/library path with Crystal MLibrary behavior. `.Lib` parsing is
 > now index-only, frame RGBA decode happens lazily per requested frame behind a

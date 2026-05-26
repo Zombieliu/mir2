@@ -33,6 +33,7 @@ const generatedExports = loadTypeScriptModule(
 const {
   createLinearMiniMapTransform,
   findCrystalMiniMapTransform,
+  normalizeCrystalMiniMapFileName,
   worldToMiniMapImagePoint,
 } = helperExports;
 const { CRYSTAL_MINI_MAP_TRANSFORMS } = generatedExports;
@@ -45,8 +46,13 @@ const closeTo = (actual, expected, tolerance, label) => {
 };
 
 {
+  assert.equal(normalizeCrystalMiniMapFileName("0"), "0");
+  assert.equal(normalizeCrystalMiniMapFileName("0.map"), "0");
+  assert.equal(normalizeCrystalMiniMapFileName("Map/0.MAP"), "0");
+  assert.equal(normalizeCrystalMiniMapFileName("WemadeMir2\\Map\\BICHON.MAP"), "bichon");
+
   const transform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
-    mapFileName: "0",
+    mapFileName: "WemadeMir2\\Map\\0.MAP",
     miniMapIndex: 101,
     bigMapIndex: 101,
     kind: "mini",

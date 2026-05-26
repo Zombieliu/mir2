@@ -283,14 +283,14 @@ function mapSpriteIntersectsViewport(left: number, top: number, width: number, h
 }
 
 function crystalMapFrameUsesOffset(frame: OriginalMapSpriteFrame) {
-  return crystalMapFrameHasCrystalOffsetMode(frame.path);
+  return (
+    typeof frame.offsetX === "number" ||
+    typeof frame.offsetY === "number" ||
+    crystalMapFrameHasLegacyOffsetFallback(frame.path)
+  );
 }
 
 function crystalMapFrameOffset(frame: OriginalMapSpriteFrame): ViewportOffset {
-  if (!crystalMapFrameHasCrystalOffsetMode(frame.path)) {
-    return EMPTY_VIEWPORT_OFFSET;
-  }
-
   if (typeof frame.offsetX === "number" || typeof frame.offsetY === "number") {
     return {
       x: frame.offsetX ?? 0,
@@ -301,14 +301,14 @@ function crystalMapFrameOffset(frame: OriginalMapSpriteFrame): ViewportOffset {
   // Crystal draws the Bichon torch/fire blend frames with the Lib frame offset enabled.
   // Older packaged starter-map JSON predates offset export; these 100x100 light frames
   // are anchored around the red torch head, not the tile floor or lamp base.
-  if (/\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(frame.path)) {
+  if (crystalMapFrameHasLegacyOffsetFallback(frame.path)) {
     return { x: -50, y: -100 };
   }
 
   return EMPTY_VIEWPORT_OFFSET;
 }
 
-function crystalMapFrameHasCrystalOffsetMode(path: string) {
+function crystalMapFrameHasLegacyOffsetFallback(path: string) {
   return /\/original-map\/WemadeMir2\/Objects\/27(2[3-9]|3[0-2])\.png$/i.test(path);
 }
 
