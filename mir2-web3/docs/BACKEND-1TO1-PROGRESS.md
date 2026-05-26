@@ -1,5 +1,27 @@
 # Backend 1:1 Progress
 
+> Latest player/monster state parity sync: 2026-05-27 removes the remaining
+> player-damage clamp that kept lethal hits at 1 HP. Pending monster/player
+> combat damage can now drive `PlayerVitals.hp` to 0, synchronizes
+> `PlayerRuntimeResource.player_vitals`, emits `ObjectHealth` percent 0 plus
+> `ObjectDied`, and world snapshots mark the self entity dead with `hp=0`.
+> Dead players are rejected from Walk/Run/Attack/RangeAttack/Magic/Harvest and
+> ordinary item use, while Resurrection Scroll revival restores authoritative
+> vitals and movement ability. Skill MP spend and generic skill healing now
+> synchronize entity vitals and runtime vitals. Crystal status buffs now have
+> gameplay effects beyond icons: paralysis/frozen/dazed/stun block movement,
+> attack, and magic; blindness blocks attack/magic targeting; slow extends
+> movement/attack cadence; green poison and bleeding tick player HP; red poison
+> increases incoming player damage. Monster death regressions now assert
+> `ObjectHealth` 0, `ObjectDied`, released occupancy, no repeat death, respawn
+> reset, and summoned-totem despawn coverage. Focused verification passed the
+> new player death/revive/status/runtime-vitals tests, potion and resurrection
+> regressions, monster death/respawn tests, frontend TypeScript, and gateway
+> check. The current full `cargo test -p mir2-simulation` run still fails on
+> unrelated broader skill-preflight/effect and account-store persistence tests;
+> one representative failing skill test (`FireWall`) also fails in isolation on
+> this branch, so that remains a separate Skill parity cleanup queue item.
+
 > Latest NPC input and skill preflight parity sync: 2026-05-27 adds the first
 > gameplay-preflight slice for Crystal NPC labels and active skill casting.
 > `ClientPacket::NpcConfirmInput` now executes active input labels through the

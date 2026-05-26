@@ -62,8 +62,8 @@ use super::packets::{
 };
 use super::resources::{
     is_in_world, BuffResource, ElementalResource, InventoryResource, PendingGroundSpellAction,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
-    Stage5SystemsResource,
+    PlayerRuntimeResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
+    SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
 
@@ -901,11 +901,13 @@ pub(super) fn cast_skill_with_context(
     }
 
     let mut packets = Vec::new();
-    {
+    let spent_vitals = {
         let mut entity = world.entity_mut(player);
         let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
         vitals.mp = (vitals.mp - mana_cost).max(0);
-    }
+        *vitals
+    };
+    world.resource_mut::<PlayerRuntimeResource>().player_vitals = spent_vitals;
     if let Some(info) = object_mana_info_for_entity(world, player) {
         packets.push(ServerPacket::ObjectMana { info });
     }
@@ -930,11 +932,13 @@ pub(super) fn cast_skill_with_context(
                         tick,
                     ));
                 } else {
-                    {
+                    let healed_vitals = {
                         let mut entity = world.entity_mut(player);
                         let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
                         vitals.hp = (vitals.hp + *hp).min(vitals.max_hp);
-                    }
+                        *vitals
+                    };
+                    world.resource_mut::<PlayerRuntimeResource>().player_vitals = healed_vitals;
                     if let Some(info) = object_health_info_for_entity(world, player, 0) {
                         packets.push(ServerPacket::ObjectHealth { info });
                     }

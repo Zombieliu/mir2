@@ -1,5 +1,21 @@
 # Crystal Server Parity
 
+> Latest player/monster state parity sync: 2026-05-27 makes lethal player
+> damage authoritative instead of clamping to 1 HP. Player damage now updates
+> ECS vitals and `PlayerRuntimeResource` together, emits health/death packets,
+> and exposes self death through world snapshots. Dead players can no longer
+> move, attack, cast, harvest, or use normal consumables; resurrection-scroll
+> revival restores vitals and movement. MP spend and generic skill healing now
+> keep runtime vitals aligned with entity vitals. Status-effect parity is now
+> gameplay-visible: paralysis/frozen/dazed/stun stop movement and actions,
+> blindness blocks attacks/magic, slow lengthens move/attack cadence, green
+> poison and bleeding tick HP, and red poison increases incoming damage.
+> Monster death coverage now locks ObjectHealth 0/ObjectDied, non-blocking dead
+> bodies, no repeat kill, respawn reset, and summoned-totem despawn behavior.
+> Focused tests and TypeScript/gateway checks passed; the wider simulation
+> suite still has unrelated Skill preflight/effect and account-store failures
+> to close before full-suite green.
+
 > Latest NPC input and skill preflight parity sync: 2026-05-27 brings two
 > Crystal gameplay guardrails into the shared runtime baseline. NPC input
 > confirmation packets now route to active input labels with NPC id validation,

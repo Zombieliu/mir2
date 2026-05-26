@@ -488,7 +488,7 @@ impl SimulationSession {
         let updated_vitals = {
             let mut entity = world.entity_mut(player);
             entity.get_mut::<PlayerVitals>().map(|mut vitals| {
-                vitals.hp = vitals.hp.saturating_sub(damage).max(1);
+                vitals.hp = vitals.hp.saturating_sub(damage).max(0);
                 *vitals
             })
         };

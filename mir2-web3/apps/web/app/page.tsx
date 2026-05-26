@@ -6012,28 +6012,57 @@ export default function HomePage() {
   function applyObjectHealthPacket(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const percent = numberOrUndefined(payload.percent);
+    const exactHp = numberOrUndefined(payload.hp);
+    const exactMaxHp = numberOrUndefined(payload.maxHp);
 
     if (typeof percent !== "number") return;
 
     setWorld((current) => {
+      const isSelf = current.playerObjectId === objectId;
+      const selfMaxHp = exactMaxHp ?? current.playerMaxHp;
       const nextPlayerHp =
-        current.playerObjectId === objectId && typeof current.playerMaxHp === "number"
-          ? Math.max(0, Math.round((current.playerMaxHp * percent) / 100))
-          : current.playerHp;
+        isSelf && typeof exactHp === "number"
+          ? Math.max(0, exactHp)
+          : isSelf && typeof selfMaxHp === "number"
+            ? Math.max(0, Math.round((selfMaxHp * percent) / 100))
+            : isSelf && percent <= 0
+              ? 0
+              : current.playerHp;
+      const now = Date.now();
 
       return {
         ...current,
         playerHp: nextPlayerHp,
+        playerMaxHp: isSelf && typeof exactMaxHp === "number" ? exactMaxHp : current.playerMaxHp,
         entities: patchEntityInList(current.entities, objectId, (entity) => {
-          const nextHp =
-            typeof entity.maxHp === "number" ? Math.max(0, Math.round((entity.maxHp * percent) / 100)) : entity.hp;
+          const entityMaxHp = exactMaxHp ?? entity.maxHp;
+          const nextHp = isSelf
+            ? (nextPlayerHp ?? entity.hp)
+            : typeof exactHp === "number"
+              ? Math.max(0, exactHp)
+              : typeof entityMaxHp === "number"
+                ? Math.max(0, Math.round((entityMaxHp * percent) / 100))
+                : percent <= 0
+                  ? 0
+                  : entity.hp;
+          const nextMaxHp =
+            typeof exactMaxHp === "number"
+              ? exactMaxHp
+              : typeof entity.maxHp === "number"
+                ? entity.maxHp
+                : undefined;
+          const died = percent <= 0;
+          const revived = percent > 0 && entity.dead;
 
           return {
             ...entity,
             hp: nextHp,
-            dead: percent <= 0,
-            reviveStartedAt: percent > 0 && entity.dead ? Date.now() : entity.reviveStartedAt,
-            reviveUntil: percent > 0 && entity.dead ? Date.now() + 420 : entity.reviveUntil,
+            maxHp: nextMaxHp,
+            dead: died,
+            dieStartedAt: died && !entity.dead ? now : entity.dieStartedAt,
+            dieUntil: died && !entity.dead ? now + crystalDeathActionDurationMs(entity) : entity.dieUntil,
+            reviveStartedAt: revived ? now : entity.reviveStartedAt,
+            reviveUntil: revived ? now + 420 : entity.reviveUntil,
           };
         }),
       };
@@ -6043,13 +6072,16 @@ export default function HomePage() {
   function applyObjectManaPacket(payload: Record<string, unknown>) {
     const objectId = stringifyId(payload.objectId);
     const percent = numberOrUndefined(payload.percent);
+    const exactMp = numberOrUndefined(payload.mp);
 
     if (typeof percent !== "number") return;
 
     setWorld((current) => ({
       ...current,
       playerMp:
-        current.playerObjectId === objectId ? Math.max(0, Math.min(100, Math.round(percent))) : current.playerMp,
+        current.playerObjectId === objectId
+          ? Math.max(0, Math.round(exactMp ?? percent))
+          : current.playerMp,
     }));
   }
 
