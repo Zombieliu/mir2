@@ -50,6 +50,7 @@ img {
 .mir-client-page {
   height: 100vh;
   background: #000;
+  --mir-stage-scale: 1;
 }
 
 .mir-stage {
@@ -66,7 +67,7 @@ img {
   width: 1024px;
   height: 768px;
   overflow: hidden;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 1));
   transform-origin: center center;
   background: #000;
   box-shadow: none;
@@ -94,6 +95,60 @@ img {
   background: transparent;
 }
 
+#mir2-web3-canvas.bevy-canvas-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.webgl2-entity-atlas-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.webgl2-entity-atlas-canvas.hidden {
+  display: none;
+}
+
+.webgl2-renderer-probe-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #111;
+  color: #f2dfb7;
+  font: 13px/1.35 Arial, Helvetica, sans-serif;
+}
+
+.webgl2-renderer-probe-stage {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border: 1px solid rgba(201, 165, 92, 0.7);
+  background:
+    linear-gradient(45deg, #202020 25%, transparent 25%),
+    linear-gradient(-45deg, #202020 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #202020 75%),
+    linear-gradient(-45deg, transparent 75%, #202020 75%),
+    #303030;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+  background-size: 16px 16px;
+}
+
+.webgl2-renderer-probe-page pre {
+  max-width: 760px;
+  margin-top: 16px;
+  white-space: pre-wrap;
+}
+
 .game-scene-underlay {
   position: absolute;
   inset: 0;
@@ -112,6 +167,11 @@ img {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  background:
+    url("/debug/map-samples/smtile-72.png") repeat,
+    url("/debug/map-samples/smtile-80.png") repeat;
+  background-size: 48px 32px, 48px 32px;
+  image-rendering: pixelated;
 }
 
 .scene-backdrop-tile {
@@ -239,13 +299,6 @@ img {
 .viewport-sprite-overlay {
   z-index: 5;
   pointer-events: none;
-}
-
-.client-stage-frame.scene-assets-pending .game-scene-backdrop,
-.client-stage-frame.scene-assets-pending .viewport-sprite-overlay,
-.client-stage-frame.scene-assets-pending .viewport-entity-overlay,
-.client-stage-frame.scene-assets-pending .viewport-drop-overlay {
-  opacity: 0;
 }
 
 .client-stage-frame.scene-assets-pending .viewport-grid-overlay {
@@ -452,6 +505,7 @@ img {
 .game-ui-scene .dura-status-panel,
 .game-ui-scene .npc-dialog-panel,
 .game-ui-scene .overlay-panel,
+.game-ui-scene .login-wallet-picker,
 .game-ui-scene .language-selector {
   pointer-events: auto;
 }
@@ -564,6 +618,104 @@ img {
 .login-web3-actions button:disabled {
   cursor: wait;
   opacity: 0.58;
+}
+
+.login-wallet-picker {
+  position: absolute;
+  left: 342px;
+  top: 124px;
+  z-index: 7;
+  width: 188px;
+  padding: 7px;
+  border: 1px solid rgba(176, 132, 68, 0.82);
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgba(41, 27, 16, 0.98), rgba(12, 9, 7, 0.98)),
+    rgba(16, 11, 8, 0.98);
+  box-shadow:
+    inset 0 0 0 1px rgba(229, 180, 91, 0.14),
+    0 8px 18px rgba(0, 0, 0, 0.56);
+  color: #e5d1aa;
+}
+
+.login-wallet-picker-title {
+  height: 16px;
+  margin-bottom: 5px;
+  color: #f0d58e;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.login-wallet-list {
+  display: grid;
+  gap: 4px;
+  max-height: 114px;
+  overflow-y: auto;
+}
+
+.login-wallet-option,
+.login-wallet-install {
+  width: 100%;
+  min-height: 24px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border: 1px solid rgba(133, 91, 43, 0.82);
+  border-radius: 2px;
+  background: rgba(30, 19, 11, 0.94);
+  color: #dcc398;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: left;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.login-wallet-option:hover:not(:disabled),
+.login-wallet-install:hover {
+  border-color: rgba(228, 183, 91, 0.9);
+  color: #fff1c1;
+  background: rgba(55, 34, 16, 0.96);
+}
+
+.login-wallet-option.dubhe,
+.login-wallet-install {
+  border-color: rgba(216, 166, 82, 0.9);
+}
+
+.login-wallet-option img,
+.login-wallet-fallback-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.login-wallet-fallback-icon {
+  display: inline-grid;
+  place-items: center;
+  background: rgba(103, 68, 31, 0.9);
+  color: #f7df9a;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.login-wallet-empty {
+  margin-bottom: 5px;
+  padding: 5px 6px;
+  border: 1px solid rgba(99, 75, 48, 0.8);
+  color: #bda982;
+  font-size: 11px;
+  line-height: 14px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.login-wallet-install {
+  margin-top: 5px;
 }
 
 .login-account-panel,
@@ -4339,7 +4491,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.78);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.78));
   }
 
   .mail-row-message,
@@ -4362,13 +4514,13 @@ button.character-spell-value:hover {
 
 @media (max-width: 799px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.72);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.72));
   }
 }
 
 @media (max-height: 575px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.7));
   }
 }
 
@@ -4383,13 +4535,13 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.54);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
   }
 }
 
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 420px) {
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.49);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.49));
   }
 
   .mir-mobile-stick-shell {
@@ -4473,7 +4625,7 @@ button.character-spell-value:hover {
   }
 
   .client-stage-frame {
-    transform: translate(-50%, -50%) scale(0.42);
+    transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.42));
     opacity: 0.58;
   }
 }
@@ -4483,7 +4635,7 @@ button.character-spell-value:hover {
 }
 
 .mir-client-page.force-mobile-controls .client-stage-frame {
-  transform: translate(-50%, -50%) scale(0.54);
+  transform: translate(-50%, -50%) scale(var(--mir-stage-scale, 0.54));
 }
 
 @media (orientation: portrait) and (max-width: 900px) {

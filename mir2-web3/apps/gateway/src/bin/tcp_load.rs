@@ -236,6 +236,7 @@ fn run_client(index: usize, run_id: &str, addr: &str, actions: usize) -> ClientR
         if action % 10 == 0 {
             let chat = ClientPacket::Chat {
                 message: format!("tcp load {index}:{action}"),
+                linked_items: Vec::new(),
             };
             if let Err(error) = send_packet(&mut stream, &chat) {
                 return result.with_error(error);

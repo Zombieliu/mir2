@@ -42,6 +42,7 @@ use super::packets::{
     object_struck_packet, player_struck_packet, system_message_key,
     visible_object_bundle_for_entity,
 };
+use super::quests::advance_crystal_quest_kill;
 use super::resources::{
     is_in_world, runtime_tick, BuffResource, ElementalResource, InventoryResource,
     PlayerRuntimeResource, RuntimeClockResource, RuntimeQueueResource, SessionResource,
@@ -140,6 +141,32 @@ fn crystal_player_melee_damage(world: &World) -> i32 {
     );
     let mut damage =
         18 + level_bonus + total_attack_bonus(&resources, world.resource::<BuffResource>());
+    if let Some(level) = crystal_skill_level(world, "Slaying") {
+        let bonuses = [5, 6, 7, 8];
+        let index = usize::from(level).min(bonuses.len() - 1);
+        damage = damage.saturating_add(bonuses[index]);
+    }
+    damage.max(1)
+}
+
+fn crystal_player_zone_base_melee_damage(world: &World) -> i32 {
+    let resources = world.resource::<InventoryResource>();
+    let session = world.resource::<SessionResource>();
+    let level_bonus = i32::from(
+        session
+            .selected_character
+            .as_ref()
+            .map(|c| c.level)
+            .unwrap_or(1)
+            / 2,
+    );
+    let equipment_attack = resources
+        .equipment_items
+        .iter()
+        .filter(|item| !item.is_broken())
+        .map(|item| item.total_attack())
+        .sum::<i32>();
+    let mut damage = 18 + level_bonus + equipment_attack;
     if let Some(level) = crystal_skill_level(world, "Slaying") {
         let bonuses = [5, 6, 7, 8];
         let index = usize::from(level).min(bonuses.len() - 1);
@@ -1547,6 +1574,9 @@ pub(super) fn damage_monster_entity(
         if let Some(info) = object_died_info_for_entity(world, monster_entity, 0) {
             packets.push(ServerPacket::ObjectDied { info });
         }
+        if let Some(monster_name) = name.as_deref() {
+            packets.extend(advance_crystal_quest_kill(world, monster_name));
+        }
     }
 
     if monster_dead && dead_ai == 60 {
@@ -2091,6 +2121,67 @@ pub(super) fn explode_charmed_snake(
 }
 
 impl SimulationSession {
+    pub fn zone_melee_attack_damage(&self) -> i32 {
+        if !is_in_world(self.app.world()) {
+            return 1;
+        }
+        crystal_player_zone_base_melee_damage(self.app.world())
+    }
+
+    pub fn zone_range_attack_profile(&self) -> (Spell, u8, i32) {
+        if !is_in_world(self.app.world()) {
+            return (Spell::None, 0, 1);
+        }
+
+        let world = self.app.world();
+        let current_tick = runtime_tick(world);
+        let player_object_id = current_player_object_id(world).unwrap_or_default();
+        let mut damage = crystal_player_zone_base_melee_damage(world).max(1);
+        let mut spell = Spell::None;
+        let mut spell_level = 0;
+        if let Some((magic, level)) = crystal_skill_magic(world, "Focus") {
+            if level >= 3
+                || deterministic_chance_roll(
+                    current_tick,
+                    player_object_id,
+                    Spell::Focus as u64,
+                    5_u64.saturating_sub(u64::from(level)).max(1),
+                )
+            {
+                spell = Spell::Focus;
+                spell_level = level;
+                damage = crystal_magic_damage_from_base(&magic, level, damage).max(1);
+            }
+        }
+        (spell, spell_level, damage)
+    }
+
+    pub fn zone_magic_attack_profile(&self, spell: Spell) -> Option<(u8, i32, i32, u64)> {
+        if !is_in_world(self.app.world()) {
+            return None;
+        }
+
+        let world = self.app.world();
+        let base_damage = crystal_player_zone_base_melee_damage(world).max(1);
+        let spell_name = format!("{spell:?}");
+        let Some((magic, level)) = crystal_skill_magic(world, &spell_name) else {
+            return None;
+        };
+        let mp_cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+        let cooldown_ms = u64::from(
+            magic
+                .delay_base
+                .saturating_sub(magic.delay_reduction.saturating_mul(u32::from(level)))
+                .max(1),
+        );
+        let damage = if matches!(spell, Spell::ElectricShock | Spell::Entrapment) {
+            0
+        } else {
+            crystal_magic_damage_from_base(&magic, level, base_damage).max(1)
+        };
+        Some((level, damage, mp_cost.max(0), cooldown_ms))
+    }
+
     pub fn attack(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.attack_impl(object_id);
         self.finalize_packets(packets)

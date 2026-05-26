@@ -5,18 +5,20 @@ TOOLCHAIN="${RUST_TOOLCHAIN_VERSION:-1.89.0}"
 export PATH="$HOME/.cargo/bin:$PATH"
 
 RUNTIME_LOCK="$(pwd)/../game-client/runtime/Cargo.lock"
-PREBUILT_RUNTIME_JS="$(pwd)/public/bevy-runtime/pkg/mir2_bevy_runtime.js"
-PREBUILT_RUNTIME_WASM="$(pwd)/public/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm"
+PREBUILT_RUNTIME_WEBGPU_JS="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js"
+PREBUILT_RUNTIME_WEBGPU_WASM="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+PREBUILT_RUNTIME_WEBGL2_JS="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js"
+PREBUILT_RUNTIME_WEBGL2_WASM="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
 
 if [ ! -f "$RUNTIME_LOCK" ]; then
-  if [ -s "$PREBUILT_RUNTIME_JS" ] && [ -s "$PREBUILT_RUNTIME_WASM" ]; then
-    echo "[vercel-build] Rust runtime source is not present in this deployment archive; using prebuilt public/bevy-runtime/pkg."
+  if [ -s "$PREBUILT_RUNTIME_WEBGPU_JS" ] && [ -s "$PREBUILT_RUNTIME_WEBGPU_WASM" ] && [ -s "$PREBUILT_RUNTIME_WEBGL2_JS" ] && [ -s "$PREBUILT_RUNTIME_WEBGL2_WASM" ]; then
+    echo "[vercel-build] Rust runtime source is not present in this deployment archive; using prebuilt WebGPU/WebGL2 packages."
     export MIR2_USE_PREBUILT_BEVY_RUNTIME=1
     npm run build
     exit 0
   fi
 
-  echo "[vercel-build] Missing $RUNTIME_LOCK and no prebuilt Bevy runtime package was found." >&2
+  echo "[vercel-build] Missing $RUNTIME_LOCK and no prebuilt Bevy runtime packages were found." >&2
   exit 1
 fi
 

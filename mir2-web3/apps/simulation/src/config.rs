@@ -1,23 +1,26 @@
 use std::collections::BTreeMap;
+use std::env;
 use std::ffi::OsStr;
+use std::fmt;
 use std::fs::{self, File};
 use std::io::{self, Write};
+use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, OnceLock};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::sync::{Arc, Condvar, Mutex, OnceLock};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 
 use mir2_game_data::{
-    starter_map_collision, starter_scene, DecorObjectTemplate, MapBounds, SceneBootstrap,
-    SceneView, StarterMapCollision, TerrainPatchTemplate,
+    crystal_map_respawns_by_file_name, starter_map_collision, starter_scene, DecorObjectTemplate,
+    MapBounds, SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Point,
     SelectInfo, Spell, UserItemStat,
 };
-use postgres::{Client, NoTls, Transaction};
+use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -179,6 +182,43 @@ impl AccountStore {
             .and_then(|versions| versions.get(&character_index))
             .copied()
     }
+
+    fn scoped_to_account(&self, account_id: &str) -> Self {
+        let mut accounts = BTreeMap::new();
+        if let Some(account) = self.accounts.get(account_id) {
+            accounts.insert(account_id.to_string(), account.clone());
+        }
+
+        let mut source_account_versions = BTreeMap::new();
+        if let Some(version) = self.source_account_versions.get(account_id) {
+            source_account_versions.insert(account_id.to_string(), *version);
+        }
+
+        let mut source_save_versions = BTreeMap::new();
+        if let Some(versions) = self.source_save_versions.get(account_id) {
+            source_save_versions.insert(account_id.to_string(), versions.clone());
+        }
+
+        Self {
+            schema_version: self.schema_version,
+            next_character_index: self.next_character_index,
+            accounts,
+            source_account_versions,
+            source_save_versions,
+        }
+    }
+
+    fn merge_source_versions(&mut self, versions: AccountStoreSourceVersions) {
+        for (account_id, version) in versions.accounts {
+            self.source_account_versions.insert(account_id, version);
+        }
+        for (account_id, saves) in versions.saves {
+            self.source_save_versions
+                .entry(account_id)
+                .or_default()
+                .extend(saves);
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -290,6 +330,271 @@ impl AccountStoreRepository for PostgresAccountStoreRepository {
             location: redact_database_url(&self.database_url),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct PostgresAccountStorePoolConfig {
+    max_size: usize,
+    wait_timeout: Duration,
+    connect_timeout: Duration,
+    test_on_checkout: bool,
+}
+
+impl PostgresAccountStorePoolConfig {
+    fn from_env() -> Self {
+        Self {
+            max_size: env_usize("MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE")
+                .unwrap_or(8)
+                .clamp(1, 64),
+            wait_timeout: env_millis("MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS")
+                .unwrap_or(Duration::from_secs(2))
+                .max(Duration::from_millis(1)),
+            connect_timeout: env_millis("MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS")
+                .unwrap_or(Duration::from_secs(3))
+                .max(Duration::from_millis(1)),
+            test_on_checkout: env_flag_enabled("MIR2_ACCOUNT_STORE_PG_POOL_TEST_ON_CHECKOUT"),
+        }
+    }
+
+    fn cache_key(self) -> String {
+        format!(
+            "{}:{}:{}:{}",
+            self.max_size,
+            self.wait_timeout.as_millis(),
+            self.connect_timeout.as_millis(),
+            self.test_on_checkout
+        )
+    }
+}
+
+struct PostgresAccountStoreConnectionPool {
+    database_url: String,
+    config: PostgresAccountStorePoolConfig,
+    state: Mutex<PostgresAccountStorePoolState>,
+    available: Condvar,
+    migration_completed: Mutex<bool>,
+}
+
+#[derive(Default)]
+struct PostgresAccountStorePoolState {
+    idle: Vec<Client>,
+    open: usize,
+}
+
+impl fmt::Debug for PostgresAccountStoreConnectionPool {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("PostgresAccountStoreConnectionPool")
+            .field("database_url", &redact_database_url(&self.database_url))
+            .field("config", &self.config)
+            .finish_non_exhaustive()
+    }
+}
+
+struct PostgresAccountStoreConnection {
+    pool: Arc<PostgresAccountStoreConnectionPool>,
+    client: Option<Client>,
+}
+
+static POSTGRES_ACCOUNT_STORE_POOLS: OnceLock<
+    Mutex<BTreeMap<String, Arc<PostgresAccountStoreConnectionPool>>>,
+> = OnceLock::new();
+
+fn postgres_account_store_pool(database_url: &str) -> Arc<PostgresAccountStoreConnectionPool> {
+    let config = PostgresAccountStorePoolConfig::from_env();
+    let key = format!("{database_url}|{}", config.cache_key());
+    let mut pools = POSTGRES_ACCOUNT_STORE_POOLS
+        .get_or_init(|| Mutex::new(BTreeMap::new()))
+        .lock()
+        .expect("postgres account-store pool registry should not be poisoned");
+    pools
+        .entry(key)
+        .or_insert_with(|| {
+            Arc::new(PostgresAccountStoreConnectionPool::new(
+                database_url.to_string(),
+                config,
+            ))
+        })
+        .clone()
+}
+
+impl PostgresAccountStoreConnectionPool {
+    fn new(database_url: String, config: PostgresAccountStorePoolConfig) -> Self {
+        Self {
+            database_url,
+            config,
+            state: Mutex::new(PostgresAccountStorePoolState::default()),
+            available: Condvar::new(),
+            migration_completed: Mutex::new(false),
+        }
+    }
+
+    fn connection(self: &Arc<Self>) -> Result<PostgresAccountStoreConnection, String> {
+        let deadline = Instant::now() + self.config.wait_timeout;
+        let mut state = self
+            .state
+            .lock()
+            .expect("postgres account-store pool mutex should not be poisoned");
+
+        loop {
+            if let Some(client) = state.idle.pop() {
+                drop(state);
+                let mut connection = PostgresAccountStoreConnection {
+                    pool: Arc::clone(self),
+                    client: Some(client),
+                };
+                if self.config.test_on_checkout {
+                    if connection
+                        .client
+                        .as_mut()
+                        .expect("pooled client should exist")
+                        .simple_query("SELECT 1")
+                        .is_err()
+                    {
+                        connection.discard();
+                        state = self
+                            .state
+                            .lock()
+                            .expect("postgres account-store pool mutex should not be poisoned");
+                        continue;
+                    }
+                }
+                return Ok(connection);
+            }
+
+            if state.open < self.config.max_size {
+                state.open += 1;
+                drop(state);
+                return match connect_postgres_account_store_client(
+                    &self.database_url,
+                    self.config.connect_timeout,
+                ) {
+                    Ok(client) => Ok(PostgresAccountStoreConnection {
+                        pool: Arc::clone(self),
+                        client: Some(client),
+                    }),
+                    Err(error) => {
+                        self.decrement_open_connection();
+                        Err(error)
+                    }
+                };
+            }
+
+            let Some(remaining) = deadline.checked_duration_since(Instant::now()) else {
+                return Err(self.timeout_error());
+            };
+            let (next_state, timeout) = self
+                .available
+                .wait_timeout(state, remaining)
+                .expect("postgres account-store pool condvar should not be poisoned");
+            if timeout.timed_out() {
+                return Err(self.timeout_error());
+            }
+            state = next_state;
+        }
+    }
+
+    fn ensure_migrated(&self, client: &mut Client) -> Result<(), String> {
+        let mut migrated = self
+            .migration_completed
+            .lock()
+            .expect("postgres account-store migration mutex should not be poisoned");
+        if *migrated {
+            return Ok(());
+        }
+        client
+            .batch_execute(include_str!(
+                "../../../infra/postgres/migrations/0001_core.sql"
+            ))
+            .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        *migrated = true;
+        Ok(())
+    }
+
+    fn decrement_open_connection(&self) {
+        let mut state = self
+            .state
+            .lock()
+            .expect("postgres account-store pool mutex should not be poisoned");
+        state.open = state.open.saturating_sub(1);
+        self.available.notify_one();
+    }
+
+    fn timeout_error(&self) -> String {
+        format!(
+            "postgres account-store pool exhausted for {} after {}ms (max_size={})",
+            redact_database_url(&self.database_url),
+            self.config.wait_timeout.as_millis(),
+            self.config.max_size
+        )
+    }
+}
+
+impl PostgresAccountStoreConnection {
+    fn discard(&mut self) {
+        if self.client.take().is_some() {
+            self.pool.decrement_open_connection();
+        }
+    }
+}
+
+impl Deref for PostgresAccountStoreConnection {
+    type Target = Client;
+
+    fn deref(&self) -> &Self::Target {
+        self.client
+            .as_ref()
+            .expect("postgres account-store connection should contain a client")
+    }
+}
+
+impl DerefMut for PostgresAccountStoreConnection {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.client
+            .as_mut()
+            .expect("postgres account-store connection should contain a client")
+    }
+}
+
+impl Drop for PostgresAccountStoreConnection {
+    fn drop(&mut self) {
+        let Some(client) = self.client.take() else {
+            return;
+        };
+        let mut state = self
+            .pool
+            .state
+            .lock()
+            .expect("postgres account-store pool mutex should not be poisoned");
+        state.idle.push(client);
+        self.pool.available.notify_one();
+    }
+}
+
+fn connect_postgres_account_store_client(
+    database_url: &str,
+    connect_timeout: Duration,
+) -> Result<Client, String> {
+    let mut config = database_url
+        .parse::<PostgresClientConfig>()
+        .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
+    config.connect_timeout(connect_timeout);
+    config
+        .connect(NoTls)
+        .map_err(|error| format!("postgres account-store connect failed: {error}"))
+}
+
+fn env_usize(name: &str) -> Option<usize> {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+}
+
+fn env_millis(name: &str) -> Option<Duration> {
+    env::var(name)
+        .ok()
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .map(Duration::from_millis)
 }
 
 const fn legacy_account_store_schema_version() -> u16 {
@@ -612,7 +917,10 @@ const fn default_max_experience() -> i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::{Mutex, OnceLock};
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
     fn default_character() -> CharacterRecord {
         CharacterRecord {
@@ -670,6 +978,27 @@ mod tests {
         )
     }
 
+    #[test]
+    fn crystal_map_runtime_drops_starter_demo_transfer() {
+        let default_config = SimulationConfig::default();
+        assert!(
+            default_config
+                .map_transfers
+                .iter()
+                .any(|transfer| transfer.key == "starter-east-field-gate"),
+            "the starter demo scenario should keep its explicit gate transfer"
+        );
+
+        let crystal_config = SimulationConfig::default().with_crystal_map_runtime();
+        assert!(
+            crystal_config
+                .map_transfers
+                .iter()
+                .all(|transfer| transfer.key != "starter-east-field-gate"),
+            "Crystal runtime should use generated Crystal movement records, not starter demo transfers"
+        );
+    }
+
     fn cleanup_postgres_account(database_url: &str, account_id: &str) {
         if let Ok(mut client) = Client::connect(database_url, NoTls) {
             let _ = client.execute(
@@ -682,6 +1011,48 @@ mod tests {
             );
             let _ = client.execute("DELETE FROM accounts WHERE account_id = $1", &[&account_id]);
         }
+    }
+
+    fn with_isolated_account_store_env<T>(
+        vars: &[(&str, Option<&str>)],
+        action: impl FnOnce() -> T,
+    ) -> T {
+        let _guard = ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("env lock should not be poisoned");
+        let names = [
+            "MIR2_ACCOUNT_STORE_BACKEND",
+            "MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES",
+            "MIR2_ACCOUNT_STORE_DATABASE_URL",
+            "MIR2_RUNTIME_ENV",
+            "MIR2_DEPLOYMENT_ENV",
+            "MIR2_ENV",
+            "MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE",
+            "MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS",
+            "MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS",
+            "MIR2_ACCOUNT_STORE_PG_POOL_TEST_ON_CHECKOUT",
+        ];
+        let previous = names.map(|name| (name, std::env::var(name).ok()));
+        for name in names {
+            std::env::remove_var(name);
+        }
+        for (name, value) in vars {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+
+        let result = action();
+
+        for (name, value) in previous {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+        result
     }
 
     #[test]
@@ -756,6 +1127,97 @@ mod tests {
     fn account_store_new_records_current_schema_version() {
         let store = AccountStore::new(default_character());
         assert_eq!(store.schema_version, ACCOUNT_STORE_SCHEMA_VERSION);
+    }
+
+    #[test]
+    fn account_store_runtime_backend_defaults_to_file_for_local_development() {
+        with_isolated_account_store_env(&[], || {
+            assert_eq!(
+                account_store_runtime_backend_from_env(),
+                Ok(AccountStoreRuntimeBackend::File)
+            );
+            assert!(!account_store_requires_postgres_source_from_env());
+        });
+    }
+
+    #[test]
+    fn postgres_account_store_pool_config_reads_env() {
+        with_isolated_account_store_env(
+            &[
+                ("MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE", Some("12")),
+                ("MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS", Some("750")),
+                ("MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS", Some("1250")),
+                ("MIR2_ACCOUNT_STORE_PG_POOL_TEST_ON_CHECKOUT", Some("true")),
+            ],
+            || {
+                let config = PostgresAccountStorePoolConfig::from_env();
+                assert_eq!(config.max_size, 12);
+                assert_eq!(config.wait_timeout, Duration::from_millis(750));
+                assert_eq!(config.connect_timeout, Duration::from_millis(1250));
+                assert!(config.test_on_checkout);
+            },
+        );
+    }
+
+    #[test]
+    fn simulation_config_clone_shares_account_store_persist_lock() {
+        let config = SimulationConfig::default();
+        let cloned = config.clone();
+
+        assert!(Arc::ptr_eq(
+            &config.account_store_persist_lock,
+            &cloned.account_store_persist_lock
+        ));
+    }
+
+    #[test]
+    fn account_store_runtime_backend_defaults_to_postgres_for_production() {
+        with_isolated_account_store_env(&[("MIR2_RUNTIME_ENV", Some("production"))], || {
+            assert_eq!(
+                account_store_runtime_backend_from_env(),
+                Ok(AccountStoreRuntimeBackend::Postgres)
+            );
+            assert!(account_store_requires_postgres_source_from_env());
+        });
+    }
+
+    #[test]
+    fn account_store_runtime_backend_rejects_file_backend_in_production() {
+        with_isolated_account_store_env(
+            &[
+                ("MIR2_RUNTIME_ENV", Some("staging")),
+                ("MIR2_ACCOUNT_STORE_BACKEND", Some("file")),
+            ],
+            || {
+                let error = account_store_runtime_backend_from_env()
+                    .expect_err("production-like file backend should be rejected");
+                assert!(error.contains("requires MIR2_ACCOUNT_STORE_BACKEND=postgres"));
+
+                let config_error = match SimulationConfig::default()
+                    .with_account_store_environment(".mir2-data/accounts.json")
+                {
+                    Ok(_) => panic!("production-like file backend should reject config"),
+                    Err(error) => error,
+                };
+                assert!(config_error.contains("requires MIR2_ACCOUNT_STORE_BACKEND=postgres"));
+            },
+        );
+    }
+
+    #[test]
+    fn account_store_environment_requires_database_url_for_postgres_source() {
+        with_isolated_account_store_env(
+            &[("MIR2_ACCOUNT_STORE_BACKEND", Some("postgres"))],
+            || {
+                let error = match SimulationConfig::default()
+                    .with_account_store_environment(".mir2-data/accounts.json")
+                {
+                    Ok(_) => panic!("postgres account store should require a database url"),
+                    Err(error) => error,
+                };
+                assert!(error.contains("MIR2_ACCOUNT_STORE_DATABASE_URL is required"));
+            },
+        );
     }
 
     #[test]
@@ -1178,6 +1640,67 @@ mod tests {
         assert_eq!(confirmed_gold, Some(250));
         cleanup_postgres_account(&database_url, &account_id);
     }
+
+    #[test]
+    fn postgres_source_mode_account_scoped_save_does_not_rewrite_other_accounts() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres scoped-save test because Postgres is unavailable");
+            return;
+        };
+        let (first_account_id, mut store) = unique_account_store("scoped-first");
+        let (second_account_id, second_store) = unique_account_store("scoped-second");
+        cleanup_postgres_account(&database_url, &first_account_id);
+        cleanup_postgres_account(&database_url, &second_account_id);
+        store.accounts.extend(second_store.accounts);
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+        let mut config = SimulationConfig::default();
+        config.account_store = Arc::new(Mutex::new(store.with_source_versions(versions)));
+        config.account_store_database_url = Some(database_url.clone());
+        config.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
+
+        {
+            let mut live_store = config
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            live_store
+                .accounts
+                .get_mut(&first_account_id)
+                .expect("first account should exist")
+                .password = "scoped-update".to_string();
+        }
+
+        config
+            .save_account_store_account(&first_account_id)
+            .expect("account-scoped source write should succeed");
+
+        let mut client = Client::connect(&database_url, NoTls).expect("postgres should connect");
+        let first_version: i64 = client
+            .query_one(
+                "SELECT store_version FROM accounts WHERE account_id = $1",
+                &[&first_account_id],
+            )
+            .expect("first account version should load")
+            .get("store_version");
+        let second_version: i64 = client
+            .query_one(
+                "SELECT store_version FROM accounts WHERE account_id = $1",
+                &[&second_account_id],
+            )
+            .expect("second account version should load")
+            .get("store_version");
+
+        assert_eq!(first_version, 2);
+        assert_eq!(second_version, 1);
+        cleanup_postgres_account(&database_url, &first_account_id);
+        cleanup_postgres_account(&database_url, &second_account_id);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1260,6 +1783,59 @@ pub enum AccountStoreDatabaseMode {
     SourceOfTruth,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AccountStoreRuntimeBackend {
+    File,
+    Postgres,
+}
+
+pub fn account_store_runtime_backend_from_env() -> Result<AccountStoreRuntimeBackend, String> {
+    let backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
+    let backend = backend.trim().to_ascii_lowercase();
+    let production_like = account_store_requires_postgres_source_from_env();
+
+    match backend.as_str() {
+        "postgres" | "source" | "source-of-truth" | "source_of_truth" => {
+            Ok(AccountStoreRuntimeBackend::Postgres)
+        }
+        "" if production_like => Ok(AccountStoreRuntimeBackend::Postgres),
+        "" | "json" | "file" | "mirror" => {
+            if production_like {
+                Err("MIR2_RUNTIME_ENV/MIR2_DEPLOYMENT_ENV requires MIR2_ACCOUNT_STORE_BACKEND=postgres".to_string())
+            } else {
+                Ok(AccountStoreRuntimeBackend::File)
+            }
+        }
+        other => Err(format!("unsupported MIR2_ACCOUNT_STORE_BACKEND: {other}")),
+    }
+}
+
+pub fn account_store_requires_postgres_source_from_env() -> bool {
+    if env_flag_enabled("MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES") {
+        return true;
+    }
+    ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
+        .into_iter()
+        .filter_map(|name| env::var(name).ok())
+        .any(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "production" | "prod" | "staging"
+            )
+        })
+}
+
+fn env_flag_enabled(name: &str) -> bool {
+    env::var(name)
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
+        .unwrap_or(false)
+}
+
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
     pub map: MapInformation,
@@ -1285,6 +1861,7 @@ pub struct SimulationConfig {
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
+    account_store_persist_lock: Arc<Mutex<()>>,
 }
 
 impl Default for SimulationConfig {
@@ -1371,6 +1948,7 @@ impl SimulationConfig {
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
+            account_store_persist_lock: Arc::new(Mutex::new(())),
         }
     }
 
@@ -1386,6 +1964,13 @@ impl SimulationConfig {
                 }),
         ));
         self.account_store_path = Some(path);
+        self
+    }
+
+    pub fn with_crystal_map_runtime(mut self) -> Self {
+        self.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
+        self.map_transfers.clear();
+        apply_crystal_map_metadata(&mut self.map);
         self
     }
 
@@ -1419,7 +2004,39 @@ impl SimulationConfig {
         self
     }
 
+    pub fn with_account_store_environment(
+        self,
+        account_store_path: impl Into<PathBuf>,
+    ) -> Result<Self, String> {
+        match account_store_runtime_backend_from_env()? {
+            AccountStoreRuntimeBackend::Postgres => {
+                let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL").map_err(|_| {
+                    "MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store"
+                        .to_string()
+                })?;
+                if database_url.trim().is_empty() {
+                    return Err(
+                        "MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store"
+                            .to_string(),
+                    );
+                }
+                Ok(self.with_postgres_account_store(database_url))
+            }
+            AccountStoreRuntimeBackend::File => {
+                let mut config = self.with_account_store_path(account_store_path);
+                if let Ok(database_url) = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL") {
+                    config = config.with_account_store_database_url(database_url);
+                }
+                Ok(config)
+            }
+        }
+    }
+
     pub fn save_account_store(&self) -> Result<(), String> {
+        let _persist_guard = self
+            .account_store_persist_lock
+            .lock()
+            .expect("account store persist mutex should not be poisoned");
         let store = {
             let store = self
                 .account_store
@@ -1442,6 +2059,43 @@ impl SimulationConfig {
                     .expect("account store mutex should not be poisoned");
                 store.source_account_versions = source_versions.accounts;
                 store.source_save_versions = source_versions.saves;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn save_account_store_account(&self, account_id: &str) -> Result<(), String> {
+        let _persist_guard = self
+            .account_store_persist_lock
+            .lock()
+            .expect("account store persist mutex should not be poisoned");
+        let store = {
+            let store = self
+                .account_store
+                .lock()
+                .expect("account store mutex should not be poisoned");
+            store.clone()
+        };
+        if let Some(path) = self.account_store_path.as_deref() {
+            FileAccountStoreRepository::new(path).save(&store)?;
+        }
+        if let Some(database_url) = self.account_store_database_url.as_deref() {
+            let postgres_store =
+                if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+                    store.scoped_to_account(account_id)
+                } else {
+                    store
+                };
+            let source_versions =
+                PostgresAccountStoreRepository::new(database_url, self.account_store_database_mode)
+                    .save(&postgres_store)?
+                    .into_source_versions();
+            if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+                let mut store = self
+                    .account_store
+                    .lock()
+                    .expect("account store mutex should not be poisoned");
+                store.merge_source_versions(source_versions);
             }
         }
         Ok(())
@@ -1513,6 +2167,18 @@ impl SimulationConfig {
     }
 }
 
+pub fn apply_crystal_map_metadata(map: &mut MapInformation) -> bool {
+    let Some(crystal_map) = crystal_map_respawns_by_file_name(&map.file_name) else {
+        return false;
+    };
+    map.map_index = crystal_map.map_index;
+    map.title = crystal_map.map_title;
+    map.mini_map = crystal_map.mini_map;
+    map.big_map = crystal_map.big_map;
+    map.lights = crystal_map.light;
+    true
+}
+
 static ACCOUNT_STORE_FILE_WRITE_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
 fn save_account_store_snapshot_to_path(store: &AccountStore, path: &Path) -> Result<(), String> {
@@ -1527,14 +2193,19 @@ fn load_account_store_from_postgres(
     database_url: String,
     default_character: CharacterRecord,
 ) -> Result<AccountStore, String> {
+    load_account_store_from_postgres_with_pool(
+        postgres_account_store_pool(&database_url),
+        default_character,
+    )
+}
+
+fn load_account_store_from_postgres_with_pool(
+    pool: Arc<PostgresAccountStoreConnectionPool>,
+    default_character: CharacterRecord,
+) -> Result<AccountStore, String> {
     std::thread::spawn(move || {
-        let mut client = Client::connect(&database_url, NoTls)
-            .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
-        client
-            .batch_execute(include_str!(
-                "../../../infra/postgres/migrations/0001_core.sql"
-            ))
-            .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
         let rows = client
             .query(
                 "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
@@ -1600,14 +2271,21 @@ fn save_account_store_to_postgres(
     store: AccountStore,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    save_account_store_to_postgres_with_pool(
+        postgres_account_store_pool(&database_url),
+        store,
+        mode,
+    )
+}
+
+fn save_account_store_to_postgres_with_pool(
+    pool: Arc<PostgresAccountStoreConnectionPool>,
+    store: AccountStore,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreSourceVersions, String> {
     std::thread::spawn(move || {
-        let mut client = Client::connect(&database_url, NoTls)
-            .map_err(|error| format!("postgres account-store connect failed: {error}"))?;
-        client
-            .batch_execute(include_str!(
-                "../../../infra/postgres/migrations/0001_core.sql"
-            ))
-            .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
+        let mut client = pool.connection()?;
+        pool.ensure_migrated(&mut client)?;
         upsert_account_store_to_postgres(&mut client, &store, mode)
     })
     .join()
@@ -2079,6 +2757,10 @@ pub struct GroundDropSnapshot {
     pub y: i32,
     pub quantity: u32,
     pub source_monster: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub owner_object_id: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ownership_remaining_ticks: Option<u64>,
     pub loot: GroundDropLootSnapshot,
 }
 
@@ -2560,7 +3242,7 @@ pub fn ban_account_in_store(
         account.banned_at_ms = Some(banned_at_ms);
     }
 
-    config.save_account_store()?;
+    config.save_account_store_account(account_id)?;
 
     Ok(AccountBanReceipt {
         account_id: account_id.to_string(),

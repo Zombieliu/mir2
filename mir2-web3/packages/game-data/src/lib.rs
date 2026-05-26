@@ -567,10 +567,60 @@ pub struct CrystalQuestPacketTemplate {
     pub name: String,
     pub group: String,
     pub file_name: String,
+    #[serde(default)]
+    pub required_min_level: i32,
+    #[serde(default)]
+    pub required_max_level: i32,
+    #[serde(default)]
+    pub required_quest: i32,
+    #[serde(default)]
+    pub required_class: u8,
+    #[serde(default)]
+    pub quest_type: u8,
+    #[serde(default)]
+    pub goto_message: String,
+    #[serde(default)]
+    pub kill_message: String,
+    #[serde(default)]
+    pub item_message: String,
+    #[serde(default)]
+    pub flag_message: String,
+    #[serde(default)]
+    pub time_limit_in_seconds: i32,
     pub npc_index: u32,
     pub finish_npc_index: u32,
+    #[serde(default)]
+    pub carry_items: Vec<CrystalQuestItemTaskTemplate>,
+    #[serde(default)]
+    pub kill_tasks: Vec<CrystalQuestKillTaskTemplate>,
+    #[serde(default)]
+    pub item_tasks: Vec<CrystalQuestItemTaskTemplate>,
+    #[serde(default)]
+    pub flag_tasks: Vec<CrystalQuestFlagTaskTemplate>,
     pub payload_len: usize,
     pub payload_hex: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalQuestKillTaskTemplate {
+    pub monster_index: i32,
+    pub monster_name: String,
+    pub count: u32,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalQuestItemTaskTemplate {
+    pub item_index: i32,
+    pub item_name: String,
+    pub count: u16,
+    pub message: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalQuestFlagTaskTemplate {
+    pub number: i32,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -11,6 +11,7 @@ export type AssetCachePack = {
   label: string;
   priority: number;
   phase?: "critical" | "background";
+  cacheTier?: "critical" | "background";
   urls: string[];
   scenes?: AssetCacheScenePrewarm[];
 };
@@ -20,6 +21,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "login",
     label: "Login shell",
     priority: 10,
+    cacheTier: "critical",
     urls: uniqueUrls([
       ...collectStaticAssetUrls(ORIGINAL_UI.login),
       "/original-ui/Sound/Login2.wav",
@@ -30,6 +32,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "character-select",
     label: "Character select",
     priority: 20,
+    cacheTier: "critical",
     urls: uniqueUrls([
       ...collectStaticAssetUrls(ORIGINAL_UI.select),
       "/original-ui/Sound/Select2.wav",
@@ -40,6 +43,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "hud-core",
     label: "Core HUD",
     priority: 30,
+    cacheTier: "critical",
     urls: uniqueUrls([
       ...collectStaticAssetUrls(ORIGINAL_UI.hud),
       ...collectStaticAssetUrls({
@@ -62,6 +66,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     label: "Bichon spawn scene",
     priority: 40,
     phase: "background",
+    cacheTier: "background",
     urls: ["/original-ui/MMap/0.png"],
     scenes: [
       {

@@ -1,6 +1,6 @@
 # Architecture Implementation Status
 
-Last updated: 2026-05-06
+Last updated: 2026-05-18
 
 Purpose: track production-architecture completion separately from Crystal
 observable parity. Crystal packet/UI/gameplay parity remains a compatibility
@@ -17,7 +17,7 @@ compatibility behavior. The follow-up slices add concrete map-based routing,
 per-zone shared-state isolation, Redis-backed online route lookup, typed
 command outcomes, a stable gameplay event envelope, a Redpanda producer path,
 a ClickHouse gameplay event projection, Redis route freshness/stale-cleanup
-helpers, route leases, gameplay-event read APIs plus summary/lag readiness and
+helpers, route leases, StartGame route-admission gating, gameplay-event read APIs plus summary/lag readiness and
 threshold alerts, an Admin Web gameplay-event readiness panel, account-store
 repository adapters, an architecture gate script that exercises the key
 runtime/routing/event/schema contracts, and `/health` visibility for
@@ -30,7 +30,7 @@ score, not a Crystal parity score or a production launch sign-off.
 | Game authority runtime | 20% | 92% | 8% | `WorldRuntime` / `WorldCommand` separates gateway from concrete `SimulationSession`; `WorldCommandOutcome` / `WorldCommandExecution` report typed command results; shared zone player presence plus shared NPC/monster/drop snapshot layers exist; removed drops plus non-player entities are tombstoned across sessions; and command outcomes now feed event/read-model boundaries. Full combat/AI/NPC mutation is still not a single authoritative zone process. |
 | Gateway/session/routing | 15% | 99% | 1% | Gateway constructs sessions through `ZoneRegistry`; `SessionRouter` has `MapZoneSessionRouter`; the shared in-process factory isolates state by `ZoneId`; default Web/TCP sessions can publish command outcomes through an env-configured event sink; Web online routes acquire per-character route leases; late stale disconnects cannot erase a newer route; `/health` reports routing-cache plus gameplay-event boundary status; and the architecture gate now repeats the shared registry and route-lease regressions. Distributed RPC handoff remains future work. |
 | Persistence | 15% | 88% | 12% | JSON remains supported, but account storage now has an `AccountStoreRepository` trait plus file and Postgres adapters. `SimulationConfig` load/save paths go through those adapters, Postgres source mode keeps stale-writer checks, repository statuses are inspectable, and the architecture gate covers the repository contract. Further normalization of inventory/mail/economy tables remains open. |
-| Redis/cache/online state | 8% | 96% | 4% | Session cache includes `zoneId`, `updatedAtMs`, character-name route index, `route_character`, `fresh_route_request_for_character`, stale-route cleanup, Redis TTL coverage, route leases, owned route removal, and health status. The architecture gate now covers in-memory hit/miss/freshness/cleanup plus Redis adapter and lease regressions when Redis is available. Cross-zone lease transfer protocol remains pending. |
+| Redis/cache/online state | 8% | 98% | 2% | Session cache includes `zoneId`, `updatedAtMs`, character-name route index, `route_character`, `fresh_route_request_for_character`, stale-route cleanup, Redis TTL coverage, route leases, owned route removal, health status, and StartGame route-admission gating so duplicate online entry is rejected before world bootstrap. Production/staging Gateway startup now requires Redis instead of falling back to process-local in-memory routing; local development remains in-memory by default, and `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1` forces Redis outside production/staging. The architecture gate now covers in-memory hit/miss/freshness/cleanup plus Redis adapter and lease regressions when Redis is available. Cross-zone owner handoff and true distributed kick remain pending. |
 | Service boundary/messaging | 10% | 98% | 2% | Admin outbox exists; gameplay commands produce typed outcomes and `GatewayGameplayEvent` envelopes; Gateway can publish those events to Redpanda/Pandaproxy through `MIR2_GAMEPLAY_EVENT_REDPANDA_URL`; ClickHouse has a `gameplay_events` projection; Admin API exposes `/admin/gameplay-events` plus `/admin/gameplay-events/summary` for command-volume, lag, and threshold-alert readiness; and the architecture gate locks the Gateway JSON envelope to the ClickHouse Kafka/materialized-view columns. Admin Web now consumes that summary on the dashboard. Gameplay event delivery remains non-authoritative and outside transaction commit semantics. |
 | Admin/control plane | 10% | 96% | 4% | Real command/audit paths, approvals, zone heartbeat, staging env, event-stream runbook coverage, admin event reads, timeline, gameplay-event reads, gameplay-event summary readiness alerts, a dashboard readiness panel, and repeatable Admin/API/Web gate coverage exist. Production IdP, policy thresholds beyond local event readiness, and incident automation remain incomplete. |
 | Client architecture | 10% | 84% | 16% | Web/Bevy direction exists, the player client remains playable through Gateway, and Admin Web now surfaces control-plane/event readiness from real Rust APIs. The remaining work is mostly runtime/UI responsibility cleanup, resource streaming packaging, and frontend deployment hardening rather than core architecture discovery. |
@@ -80,6 +80,13 @@ score, not a Crystal parity score or a production launch sign-off.
   online routes through `refresh_session_cache_with_route_lease`, Redis stores
   a lease key per account/character, and disconnect cleanup uses
   `remove_owned_session_cache` so a stale socket cannot delete a newer route.
+- Authenticated Web `StartGame` acquires the account/character route lease
+  before entering the world. A competing socket or Redis-backed Gateway that
+  cannot obtain that lease is rejected, and failed StartGame paths release the
+  pending lease instead of leaving a stale online lock.
+- Production/staging Gateway startup requires
+  `MIR2_GATEWAY_REDIS_CACHE_URL`, and `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1`
+  applies the same fail-closed policy outside production/staging.
 - `WorldCommandOutcome` and `WorldCommandExecution` expose command kind, packet
   count, snapshot tick, and active identity after execution.
 - `GatewayGameplayEvent` is a serializable command-event envelope with schema
@@ -120,6 +127,23 @@ score, not a Crystal parity score or a production launch sign-off.
   implementations. `SimulationConfig` uses those adapters for account-store
   load/save and reports configured repository status, while preserving existing
   JSON, mirror, and Postgres source-of-truth modes.
+- `SimulationConfig::with_account_store_environment` is now the shared account
+  runtime policy for Gateway and Admin API. Local development stays file-backed
+  by default, while production/staging environments require
+  `MIR2_ACCOUNT_STORE_DATABASE_URL` and reject file/json account-store source
+  modes.
+- Browser login now supports Sui Passkey and Sui wallet entry points. Both
+  flows verify Sui personal-message signatures through the Next route and then
+  enter Gateway through the same short-lived `passkeyLogin` token path.
+- Gateway browser auth and command parsing now live in `src/auth.rs` and
+  `src/browser_commands.rs`, keeping `src/web.rs` focused on WebSocket
+  orchestration and event projection.
+- Player Web login command sequencing now lives in
+  `apps/web/lib/client-login-runtime.ts`, keeping `app/page.tsx` focused on UI
+  state and connection lifecycle.
+- `scripts/quality-gate.sh` is the current lightweight engineering gate for
+  Rust formatting/checks, Player Web typecheck, optional Admin Web typecheck,
+  and whitespace diff checks.
 - The public `SimulationSession` API remains available for compatibility tests
   and direct simulation use.
 

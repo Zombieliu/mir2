@@ -1,6 +1,6 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-05-21
+Last updated: 2026-05-26
 
 Purpose: track frontend/client visual, interaction, and human-feel gaps separately from backend/server parity.
 
@@ -13,6 +13,677 @@ Status values:
 
 ## Current Automated Evidence
 
+- 2026-05-26 production asset-404 and movement-tick closeout: the live console
+  spam for `original-map/WemadeMir2/Objects/2652..2661` and
+  `Objects23/1418/1420/1423/1425/1429` was caused by incomplete remote asset
+  coverage for the active immutable asset prefix plus overly aggressive retry
+  behavior. The missing current-scene files were uploaded to R2 under
+  `mir2/v/37596e16d64fde7c`, and immutable original-map/original-ui failures
+  now negative-cache instead of appending repeated `mir2ImgRetry` cache busters.
+  Production web deployment `dpl_8s8BqYBXe5q5DN9jajRUFnFwFwkt` shipped that
+  retry hardening. Follow-up headed Chrome evidence first proved resource
+  errors were clean but exposed a second Walk ACK at about `1648ms`; that was
+  traced to Gateway deferring runtime ticks by the old 1200ms movement input
+  grace. Gateway release `20260526T1435CST-move-tick-grace0` is now installed
+  on UCloud with default movement input grace `0`. Verification passed
+  `cargo +1.89.0 fmt --check -p mir2-gateway`, focused Gateway tick coverage
+  locally and on UCloud, public health, WSS smoke
+  `docs/generated/load/remote-move-tick-wss-smoke-20260526.json`, and headed
+  Chrome production WebGL2 evidence
+  `docs/generated/player-qa/movement-jitter/prod-move-tick-grace0-webgl2-existing-20260526.json`
+  / `.png` with `ok=true`, direct WSS host
+  `wss://165.154.65.136.sslip.io/ws`, raw WebGL2 atlas `renderedLayers=21`,
+  two ordered Walk ACKs at `398ms` and `609ms`, clean settle, no critical
+  console errors, and no non-favicon 404s. `Objects/289.png` remains a separate
+  source-data or map-library mapping gap because that exact file is absent from
+  the local source tree too; the new immutable negative cache prevents it from
+  becoming a retry storm while the mapping gap is investigated.
+- 2026-05-26 raw WebGL2 atlas gameplay closeout: Player Web now has a
+  browser-native `WebGl2EntityAtlasLayer` that reuses the existing
+  `BevyEntityRenderState`/entity atlas schema and draws atlas-backed entity
+  layers into a transparent WebGL2 canvas. In gameplay wiring, WebGPU still
+  uses the Bevy entity renderer; forced WebGL2 keeps the Bevy canvas hidden
+  for opaque-surface safety and uses the raw WebGL2 atlas layer once an entity
+  atlas is active. The raw WebGL2 path now drives atlas warmup through the same
+  GPU renderer condition as WebGPU, and initial scene interaction waits for the
+  raw atlas to be ready so first movement does not overlap atlas warmup.
+  Headed Chrome local gameplay evidence
+  `docs/generated/player-qa/movement-jitter/local-webgl2-raw-atlas-gameplay-gated-20260526.json`
+  passed with `ok=true`, selected/compiled backend `webgl2`, `canvasHidden=true`,
+  `rawWebGl2Enabled=true`, packed prebuilt atlas `starter-bichon-base`,
+  `textureReady=true`, `renderedLayers=21`, `skippedLayers=0`, three Walk sends,
+  three ordered `UserLocation` ACKs, no camera-offset stair-step warnings, no
+  movement queue warnings, no critical console errors, and no non-favicon 404s.
+  The deterministic `/qa/webgl2-entity-renderer` probe remains covered by
+  `smoke:bevy-runtime-backends`; evidence
+  `docs/generated/player-qa/bevy-runtime-backends/local-webgl2-raw-atlas-probe-20260526.json`
+  passed with `rawWebGl2ProbeRendered=true`. Production deployment
+  `dpl_Q1k4QFSbGigw9gJ64cfBNcAehjEQ` then shipped the same gate plus hosted
+  default Gateway targeting to `wss://165.154.65.136.sslip.io/ws`, away from
+  the higher-jitter custom-domain `/ws` route. Bundle probing on
+  `https://mir2.obelisk.build` found the direct WSS host in the shipped JS and
+  no hard-coded `mir2.obelisk.build/ws`. Headed Chrome production evidence
+  `docs/generated/player-qa/movement-jitter/prod-webgl2-raw-atlas-gameplay-focused-direct-default3-20260526.json`
+  / `.png` passed with `ok=true`, actual WebSocket
+  `wss://165.154.65.136.sslip.io/ws`, selected/compiled backend `webgl2`, raw
+  WebGL2 `textureReady=true`, `renderedLayers=21`, prebuilt atlas
+  `starter-bichon-base`, three Walk ACKs at `93/51/46ms`, clean settle, no
+  camera-offset stair-step warnings after headed-window foregrounding, no
+  critical console errors, and no non-favicon 404s.
+- 2026-05-26 Bevy runtime backend smoke slice: added
+  `npm run smoke:bevy-runtime-backends` so WebGPU-first/WebGL2 fallback is no
+  longer checked only by ad-hoc page state. The smoke launches real Chrome,
+  exercises default backend selection, forced `?bevyBackend=webgl2`, and
+  forced `?bevyBackend=webgpu`, waits for post-boot runtime errors, records the
+  selected/compiled backend plus fetched runtime package URLs, and fails on
+  critical console errors. Local evidence
+  `docs/generated/player-qa/bevy-runtime-backends/local-webgpu-webgl2-runtime-20260526.json`
+  passed with default and forced WebGPU selecting/compiling `webgpu`, forced
+  WebGL2 selecting/compiling `webgl2`, all runtime JS/WASM package fetches
+  succeeding, and zero critical console errors. Important renderer constraint:
+  WebGL2 remains unsafe as a transparent Bevy/WGPU surface because the local
+  browser advertises opaque alpha only; the newer raw WebGL2 atlas probe above
+  is the transparent WebGL2 renderer path to harden instead.
+- 2026-05-25 production scene-input unlock closeout: the live "walking command
+  feels delayed" repro was caused by movement-triggered viewport asset preloads
+  toggling the page back into `scene-assets-pending` and making
+  `sceneInteractionReady=false` after the first playable scene. Player Web now
+  keeps movement interaction unlocked once the first playable scene has ever
+  become ready; later viewport preloads continue in the background without
+  gating keyboard, pointer, or mobile repeat input. Production deployment
+  `dpl_7iG3bPgA7HTxkvEzN4LxP2rmFmFC` is live behind
+  `https://mir2.obelisk.build`, and bundle probing confirmed the new logic is
+  present while the old `ready`-only gate is absent. Evidence:
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false` and
+  `pnpm --dir apps/web exec next build` passed locally before source deploy.
+  Headed Chrome production evidence
+  `docs/generated/player-qa/movement-jitter/prod-scene-input-unlocked2-webgpu-headed-keyboard-a-nosample-hold-20260525.json`
+  / `.png` passed with `ok=true`, WebGPU selected, compiled runtime
+  `bevy-b9389323fd0dbead`, packed prebuilt atlas active, no DOM entity
+  fallback, `sceneInteractionReady=true` while 699 scene assets were still
+  background-loading, five held `A` Walk sends at roughly Crystal cadence,
+  authoritative `UserLocation` ACKs `343,342,341,340,339`, no critical console
+  errors, and no non-favicon 404s.
+- 2026-05-25 production starter-transfer movement closeout: the earlier
+  `339 -> 330` rollback in live captures was a server/config issue rather than
+  a WebGPU, DOM, or atlas renderer issue. The production Gateway had inherited
+  the early demo `starter-east-field-gate` same-map transfer through
+  `with_crystal_map_runtime()`. Gateway release
+  `20260525T0334CST-starter-transfer-cleanup` is active on UCloud; health
+  checks and WSS smoke
+  `docs/generated/load/remote-starter-transfer-cleanup-wss-smoke-20260525.json`
+  passed. Production headed WebGPU packet-walk evidence crossed from
+  `0:338,270` through `0:343,270` with ACKs `339..343`, no map-change packet,
+  no rollback to `330,270`, WebGPU selected, packed prebuilt atlas active, no
+  critical console errors, and no non-favicon 404s. The packet-walk harness
+  still reported expected false route-spam/direction-animation warnings because
+  it intentionally sends several same-direction packets in one post-action
+  sample window; the authoritative packet evidence is clean.
+- 2026-05-25 Bevy entity-atlas direct-image slice: the prebuilt atlas path no
+  longer decodes `starter-bichon-base.png` into a 4096x4096 canvas and sends
+  64MiB of RGBA pixels to wasm. Prebuilt manifest hits now carry `imageUrl`
+  through `BevyEntityRenderState`; the Bevy runtime loads that PNG through
+  `AssetServer` and binds the resulting image handle to the atlas layout. The
+  existing `setMir2EntityRenderAtlas` pixel-upload API remains as the fallback
+  for live browser-packed or explicit pixel atlases. Evidence: `cargo +1.89.0
+  check --manifest-path apps/game-client/runtime/Cargo.toml --target
+  wasm32-unknown-unknown --no-default-features --features webgl2`, the same
+  check with `--features webgpu`, `pnpm --dir apps/web run
+  runtime:build:release` producing `bevy-b9389323fd0dbead`, `pnpm --dir
+  apps/web exec tsc --noEmit --pretty false`, `MIR2_USE_PREBUILT_BEVY_RUNTIME=1
+  pnpm --dir apps/web exec next build`, and headed Chrome local WebGPU play
+  against `http://localhost:3100/?bevyEntities=1&bevyBackend=webgpu...`.
+  Chrome page-asset inventory observed
+  `/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js`,
+  `/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm`, and
+  `/bevy-entity-atlases/starter-bichon-base.png`. Movement diagnostics
+  `docs/generated/player-qa/movement-diagnostics/manual-mplj7xmo-rpw2ln.jsonl`
+  recorded 4 keyboard Walk sends, 4 `UserLocation` ACKs, 367-443ms ACK latency
+  with 398ms average, final player `328:256`, and 0 anomalies. Remaining work:
+  deploy the rebuilt web bundle and rerun production headed Chrome WebGPU
+  acceptance on `https://mir2.obelisk.build`.
+- 2026-05-25 mobile/touch black-ground guard closeout: a user follow-up crop
+  still showed the remaining failure shape where entity sprites and lamps were
+  visible over a black ground plane. Source PNG/atlas alpha spot-checks showed
+  the sprite alpha channels were present, so the residual risk was still the
+  Bevy canvas surface covering the DOM original map on some browser/device
+  path. Player Web now treats mobile/touch and explicit
+  `?bevyCanvas=0` / `?bevyCanvasHidden=1` as a DOM-entity fallback path: the
+  Bevy canvas is hidden in-game and Bevy entity rendering is disabled. Desktop
+  WebGPU remains the default experimental Bevy sprite path, while
+  `?bevyCanvas=1` / `?bevyEntities=1` can force it back on. The movement QA
+  capture script also gained `--finalSceneReadyTimeoutMs` so screenshot evidence
+  waits for the post-movement scene asset key to settle before capture.
+  Deployment `dpl_8hgZxTUoDTUokZ1tkTkpVQeU2uwf` is live behind
+  `https://mir2.obelisk.build`; `/health`, the WebGPU/WebGL2 runtime JS files
+  for `bevy-6732ca9f6ab18f6d`, and `/bevy-entity-atlases/manifest.json` all
+  returned 200. Production mobile/touch evidence
+  `docs/generated/player-qa/movement-jitter/prod-mobile-dom-fallback-canvas-hidden-finalready-20260525.json`
+  / `.png` passed with selected/compiled backend `webgpu`,
+  Bevy entity renderer `enabled=false`, `canvasHidden=true`, one Walk send, one
+  UserLocation ACK, visible ground/entities, no critical console errors, and no
+  non-favicon 404s. Production desktop WebGPU evidence
+  `docs/generated/player-qa/movement-jitter/prod-desktop-webgpu-transparent-guard-finalready-20260525.json`
+  / `.png` passed with Bevy entity renderer `enabled=true`,
+  `canvasHidden=false`, `atlasMode="packed"`, `prebuiltHits=2`,
+  `lastSource="prebuilt"`, one Walk send, one UserLocation ACK, visible ground,
+  no critical console errors, and no non-favicon 404s. Production escape-hatch
+  evidence
+  `docs/generated/player-qa/movement-jitter/prod-bevy-canvas-off-dom-fallback-finalready-20260525.json`
+  / `.png` passed with `?bevyCanvas=0`, `enabled=false`, `canvasHidden=true`,
+  one Walk send, one UserLocation ACK, no critical console errors, and no
+  non-favicon 404s.
+- 2026-05-25 map black-screen transparent-canvas closeout: the black gameplay
+  map was not a missing map-resource or atlas decode failure. The DOM original
+  map/backdrop layer was rendering underneath the Bevy canvas, while the Bevy
+  web surface was composited as opaque black; higher z-index DOM object/entity
+  overlays still appeared, making the ground alone look missing. The WebGPU
+  runtime now creates a transparent primary window with premultiplied alpha so
+  the original map layer remains visible under Bevy entity sprites. Because
+  forced WebGL2 only advertised opaque surface support in the local browser,
+  WebGL2 fallback now hides the Bevy canvas for original-map gameplay and keeps
+  the DOM entity renderer active instead of panicking or covering the map.
+  Evidence: `pnpm --dir apps/web run runtime:build:release` produced runtime
+  `bevy-6732ca9f6ab18f6d`, `pnpm --dir apps/web exec tsc --noEmit --pretty
+  false` passed, local WebGPU capture
+  `apps/web/docs/generated/player-qa/movement-jitter/local-transparent-canvas-webgpu-release-20260525.json`
+  / `.png` passed with `ok=true`, selected/compiled backend `webgpu`,
+  `canvasHidden=false`, Bevy entity renderer enabled, prebuilt atlas hit, one
+  Walk send, one UserLocation ACK, no critical console errors, and no
+  non-favicon 404s. Local forced-WebGL2 capture
+  `apps/web/docs/generated/player-qa/movement-jitter/local-transparent-canvas-webgl2-release-20260525.json`
+  / `.png` passed with selected/compiled backend `webgl2`,
+  `canvasHidden=true`, Bevy entity renderer disabled for DOM fallback, one Walk
+  send, one UserLocation ACK, no critical console errors, and no non-favicon
+  404s. Production deployment `dpl_4i4fFrooS8Esuyjh1b1oSb1NCTMb` is live
+  behind `https://mir2.obelisk.build`; `/health` returned 200 and both
+  `/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js?v=bevy-6732ca9f6ab18f6d`
+  and
+  `/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js?v=bevy-6732ca9f6ab18f6d`
+  returned 200 with `x-mir2-asset-cache: bevy-runtime`. Production WebGPU
+  evidence
+  `docs/generated/player-qa/movement-jitter/prod-transparent-canvas-webgpu-readywait-20260525.json`
+  / `.png` passed with selected/compiled backend `webgpu`,
+  `canvasHidden=false`, Bevy entity renderer enabled, `atlasMode="packed"`,
+  `prebuiltHits=1`, one Walk send, one UserLocation ACK, no critical console
+  errors, and no non-favicon 404s. Production forced-WebGL2 evidence
+  `docs/generated/player-qa/movement-jitter/prod-transparent-canvas-webgl2-readywait-20260525.json`
+  / `.png` passed with selected/compiled backend `webgl2`,
+  `canvasHidden=true`, Bevy entity renderer disabled for DOM fallback, one Walk
+  send, one UserLocation ACK, no critical console errors, and no non-favicon
+  404s.
+- 2026-05-25 Bevy entity atlas prebuild/cache slice: Player Web now checks a
+  persistent IndexedDB atlas cache, then a prebuilt
+  `/bevy-entity-atlases/manifest.json` atlas pack, before falling back to live
+  browser packing. Prebuilt atlas pixels are reused within the page so viewport
+  changes do not repeatedly decode/read back the same pack. The starter Bichon
+  entity pack is generated by
+  `npm run assets:bevy-entity-atlas:build`, covers player/NPC plus common
+  Bichon monster roots, and emits
+  `public/bevy-entity-atlases/starter-bichon-base.png` with 2,631 source rects
+  in a 4096x4096 PNG. Local evidence:
+  `docs/generated/player-qa/movement-jitter/local-atlas-prebuilt-postcache-order-a-20260525.json`
+  passed on WebGPU with `ok=true`, `sceneInteractionReady=true`,
+  `atlasMode="packed"`, 700 active atlas sources, `builds=0`,
+  `prebuiltHits=2`, `lastSource="prebuilt"`, one Walk send, one UserLocation
+  ACK, no critical console errors, and no non-favicon 404s. Fallback evidence:
+  `docs/generated/player-qa/movement-jitter/local-atlas-prebuilt-webgl2-20260525.json`
+  passed with forced `bevyBackend=webgl2`, `builds=0`, `prebuiltHits=2`, and
+  `lastPrebuiltKey="starter-bichon-base"`. Production deployment
+  `dpl_C8sriwUxAeuCyzoY9rAnd24QTw6D` is live behind
+  `https://mir2.obelisk.build`; `/bevy-entity-atlases/manifest.json` reports
+  `sourceCount=2631`, `imageBytes=4272109`, and `rgbaBytes=67108864`, and the
+  PNG returns 200 with `content-length: 4272109`. Production movement evidence:
+  `docs/generated/player-qa/movement-jitter/prod-atlas-prebuilt-keyboard-final-20260525.json`
+  passed keyboard movement with `builds=0`, `prebuiltHits=1`,
+  `lastSource="prebuilt"`, one Walk send, one UserLocation ACK, no rollback,
+  no route spam, no critical console errors, and no non-favicon 404s. Mobile
+  hand-feel evidence:
+  `docs/generated/player-qa/movement-jitter/prod-atlas-prebuilt-mobile-pixelcache-20260525.json`
+  passed mobile joystick movement with `atlasMode="packed"`,
+  `atlasPendingKey=null`, `builds=0`, `prebuiltHits=1`,
+  `lastPrebuiltKey="starter-bichon-base"`, one Walk send, one UserLocation
+  ACK, and the same clean assertion set.
+- 2026-05-25 WebGPU-first Bevy runtime support: Player Web now builds and
+  publishes separate Bevy wasm runtime packages for WebGPU and WebGL2. The
+  loader prefers WebGPU on secure browsers with `navigator.gpu`, falls back to
+  WebGL2 when WebGPU is unavailable or init fails, and supports explicit
+  `bevyBackend=webgpu|webgl2` query/localStorage overrides for diagnostics.
+  Runtime debug state is exposed through `window.__mir2BevyRuntimeDebug` and
+  included in movement captures. Evidence: `cargo +1.89.0 check
+  --manifest-path apps/game-client/runtime/Cargo.toml
+  --target wasm32-unknown-unknown --no-default-features --features webgl2`,
+  the same check with `--features webgpu`, `pnpm --dir apps/web
+  runtime:build:release`, Web typecheck, and headed Chrome local verification
+  against `http://127.0.0.1:13014/`: default selected compiled WebGPU,
+  forced `bevyBackend=webgl2` selected compiled WebGL2, and a simulated
+  missing `navigator.gpu` browser fell back to WebGL2. Screenshot evidence is
+  `output/playwright/mir2-webgpu-runtime.png`. Production deployment
+  `dpl_HNZTKmg7jPkNju3GhJgAdzk3N9oV` is live behind
+  `https://mir2.obelisk.build`; direct runtime probes for
+  `/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js` and
+  `/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js` return 200 with
+  `x-mir2-asset-cache: bevy-runtime`. Headed Chrome production movement
+  evidence
+  `docs/generated/player-qa/movement-jitter/live-webgpu-keyboard-after-gateway-20260525.json`
+  passed with `ok=true`, selected/compiled backend `webgpu`, WebGPU and WebGL2
+  support visible in runtime debug, zero visual jumps, zero route-spam
+  warnings, zero logical rollback, zero direction-lag warnings, responsive
+  movement queue, clean settle, no critical console errors, and no
+  non-favicon 404s. After the follow-up Gateway release
+  `20260525T0630CST-zone-magic-mp-cooldown`, the same headed Chrome WebGPU
+  movement gate passed again at
+  `docs/generated/player-qa/movement-jitter/live-webgpu-keyboard-after-magic-mp-20260525.json`.
+  Screenshot evidence is the adjacent `.png`. Remaining frontend risk: the
+  first cold entity atlas can still warm in DOM fallback mode, so atlas
+  cache/offline pack hardening remains the next renderer optimization.
+- 2026-05-25 production Bevy WebGL2 entity-atlas hardening closeout: the
+  visible entity sprite renderer is now deployed behind
+  `https://mir2.obelisk.build` on Vercel deployment
+  `dpl_4PXPyp3VuAT7vHRQr4ueKBTikbtU`. The atlas source set is hardened against
+  common movement animation churn by preloading standing/walking/running frames
+  for the current action direction, plus all eight player directions, so
+  keyboard movement no longer switches from a standing atlas key to a walking
+  atlas key mid-action. While a cold atlas is still building, DOM entity sprites
+  remain visible as a fallback; once the packed atlas is active, DOM entity
+  sprites are hidden and Bevy owns the body/hair/weapon layers. Verification:
+  Web typecheck and scoped diff checks passed, public `/health` returned 200,
+  production capture
+  `docs/generated/player-qa/movement-jitter/prod-bevy-atlas-dir-20260525T043729.json`
+  passed with `ok=true`, `atlasMode="packed"`,
+  `atlasCurrentKey="entity-atlas-1iogxdg"`, `atlasPendingKey=null`,
+  `atlasCachedCurrent=true`, `atlasLatestCurrent=true`,
+  `domEntityFallback=false`, 584 atlas sources, two keyboard Walk sends, two
+  `UserLocation` ACKs, no non-favicon 404s, and no critical console errors.
+  Screenshot evidence is the adjacent `.png`. A headed Chrome production
+  hand-feel pass also entered the live game, moved `Scout` with keyboard input
+  to `312:249`, and saved
+  `docs/generated/player-qa/movement-jitter/headed-chrome-prod-bevy-atlas-final-20260525T0439.png`.
+  Remaining renderer optimization: the first cold production atlas build is
+  still expensive (`lastBuildMs=54672` for 584 sources), so a future slice
+  should move toward a prebuilt/offline entity atlas or narrower CDN-warmed
+  pack strategy.
+- 2026-05-25 Bevy WebGL2 packed entity-atlas renderer slice: Player Web now
+  has a local-verified path that renders visible entity body/hair/weapon sprite
+  layers through the Bevy canvas instead of DOM image stacks, while keeping the
+  React map, HUD, hit boxes, nameplates, health bars, and quest markers in the
+  existing UI layer. The frontend builds a packed RGBA atlas from the current
+  visible entity frames, uploads it to the wasm runtime through
+  `setMir2EntityRenderAtlas`, and sends layer state through
+  `setMir2EntityRenderState`; the Bevy runtime ingests atlas pixels into an
+  `Image` asset and renders sprite layers with `TextureAtlas` indices. Toggles:
+  `?bevyEntities=1` / `?bevyEntities=0`, `?bevyAtlas=1` / `?bevyAtlas=0`,
+  plus matching localStorage overrides. Evidence: `pnpm --dir apps/web
+  runtime:build:release`, `cargo +1.89.0 check --manifest-path
+  apps/game-client/runtime/Cargo.toml`, `pnpm --dir apps/web exec tsc --noEmit
+  --pretty false`, `node --check
+  apps/web/scripts/capture-web-movement-jitter.mjs`, and local capture
+  `docs/generated/player-qa/movement-jitter/local-bevy-atlas-chain-20260525.json`
+  / `.png` passed with `ok=true`, Bevy entity renderer
+  `{ready:true, enabled:true, entityCount:19, layerCount:21,
+  atlasMode:"packed", atlasCount:1}`, scene assets `185/185`, no critical
+  console errors, and no non-favicon 404s. This is not yet a production deploy
+  or full all-asset/offline atlas rollout; next slice is live Chrome feel and
+  broader atlas cache/perf tuning.
+- 2026-05-25 production asset-domain CORS closeout: the live browser CORS
+  error for
+  `assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c/original-map/WemadeMir2/Objects/2136.png`
+  was caused by a cached asset-domain response missing
+  `Access-Control-Allow-Origin`, not by a missing PNG. The R2 asset-cache
+  Worker now reapplies `access-control-allow-origin: *`,
+  `access-control-allow-methods`, `access-control-allow-headers`, exposed
+  headers, and `alt-svc: clear` to Cache API HIT responses as well as fresh R2
+  responses. Worker version `ea9ec199-d3e4-4627-a57a-c677ddd426be` is live on
+  `assets.mir2.obelisk.build/*`. Evidence:
+  `docs/generated/remote-assets/cors-asset-worker-20260525.json` passed GET,
+  cache-busted GET, HEAD, and OPTIONS probes from
+  `Origin: https://mir2.obelisk.build`; the normal GET remains an
+  `x-mir2-edge-cache=HIT` response and now includes
+  `access-control-allow-origin: *`.
+- 2026-05-25 map-object CORS/canvas hardening: scene map-object `<img>`
+  elements now set `crossOrigin="anonymous"` before the existing black
+  alpha-key canvas pass reads pixels. This complements the live asset-domain
+  CORS Worker fix and prevents cross-origin object sprites from tainting the
+  alpha-key canvas when assets are served from `assets.mir2.obelisk.build`.
+  Evidence: the reported `Objects/2136.png` URL currently returns 200 with
+  `access-control-allow-origin: *`, `access-control-allow-methods`, and exposed
+  headers, and `pnpm --dir apps/web exec tsc --noEmit --pretty false` passed.
+- 2026-05-24 production movement command-log and hydration closeout: the
+  frontend did send movement commands, but production console output did not
+  show them because movement diagnostics were only retained in internal debug
+  arrays. Player Web now emits `[mir2-move:send]`, `[mir2-move:ack]`, and
+  correction logs when `?movementLog=1`, `?moveLog=1`,
+  `?movementConsole=1`, `window.__mir2MovementLogEnabled`, or
+  `localStorage["mir2-movement-log"]="1"` is enabled, and the movement harness
+  captures those console events. The React #418 path was also mitigated by
+  marking the app document `notranslate`/`suppressHydrationWarning` and making
+  the original-client random overlay name deterministic across hydration.
+  Production deployment `dpl_BommXyKsMcAX3Lmw4TYcg82a7Rsw` is live behind
+  `https://mir2.obelisk.build` and now bakes
+  `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=wss://165.154.65.136.sslip.io/ws`. Evidence:
+  Web typecheck, `node --check apps/web/scripts/capture-web-movement-jitter.mjs`,
+  scoped diff checks, public `/health`, and production browser capture
+  `docs/generated/player-qa/movement-jitter/prod-normal-directws-keyboard-d-20260524T1513.json`
+  with `ok=true`, actual WebSocket `wss://165.154.65.136.sslip.io/ws`,
+  six `walk Right` sends, six `UserLocation` ACKs, ACK frame latencies
+  `555/522/516/523/517/517ms`, 12 movement console events, zero visual jumps,
+  zero logical rollback, zero scene blackouts, clean settle, no critical
+  console errors, and no non-favicon 404s. Screenshot evidence is the adjacent
+  `.png`.
+- 2026-05-24 production Chrome movement renderer closeout: a real Chrome tab
+  against `https://mir2.obelisk.build` reproduced the user-visible failure as
+  a browser renderer/main-thread runaway during held movement, not as a server
+  rollback: the stuck tab reached a 400%+ renderer and 100% Chrome main-process
+  CPU before restart. The frontend now caches the original-map region cell
+  lookup and only rebuilds viewport map sprites on tile/scene-frame/map-region
+  changes, so pixel-interpolated movement frames no longer rescan the full
+  original-map region every RAF. Production deployment
+  `dpl_FW2JQim28WxQTXsYahXjfFzv1Z7c` is live behind
+  `https://mir2.obelisk.build`; `/health` returns 200. Verification passed
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`,
+  `node --check apps/web/scripts/capture-web-movement-jitter.mjs`, production
+  Vercel build/deploy, real Chrome held-`D` movement from `323:264` to
+  `327:264` without another unresponsive-page dialog, and production movement
+  capture
+  `docs/generated/player-qa/movement-jitter/prod-after-map-sprite-cache-d-hold-20260524T1433.json`
+  with `ok=true`, zero visual jumps, zero route spam, zero logical rollback,
+  zero direction lag, zero stale prediction warnings, responsive command queue,
+  continuous camera offset, clean settle, no scene blackouts, no critical
+  console errors, and no non-favicon 404s. Screenshot evidence is the adjacent
+  `.png`.
+- 2026-05-24 production Web movement rollback correction: Web self prediction no longer
+  commits predicted coordinates into authoritative `world.entities`; prediction
+  remains a render-only ActionFeed/local-anchor layer until server
+  `UserLocation` confirms or corrects it. Prediction also waits for server ACK
+  when the original map region is not loaded, the next step is outside the
+  loaded region, or the loaded cell is blocked, so server-side collision
+  rejections do not first draw the player onto an invalid tile. Evidence:
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`, scoped
+  `git diff --check`, and local movement smoke
+  `docs/generated/player-qa/movement-jitter/local-left-walk-wait-map-20260523T233000.json`
+  passed with `ok=true`, zero visual jumps, zero logical rollback, zero
+  scene-layer blackouts, clean settle, no critical console errors, and no
+  non-favicon 404s. Production deployment
+  `dpl_3BwwKyjXY9UFZS3jSZk3vCsybCrW` is live through
+  `https://mir2.obelisk.build`; production smoke
+  `docs/generated/player-qa/movement-jitter/prod-left-walk-web-rollback-fix-20260524T0034.json`
+  passed with the same movement assertions. Caveat: the final production
+  sample had `sceneAssetReadiness.status=loading`, so this row is a movement
+  rollback gate; resource readiness remains tracked by the dedicated resource
+  smoke entries. After the matching Gateway release
+  `20260524T0310Z-rollbackfix` was installed, production Web smoke
+  `docs/generated/player-qa/movement-jitter/prod-left-walk-gateway-rollbackfix-20260524T0320.json`
+  also passed with `ok=true`, zero visual jumps, zero logical rollback, zero
+  scene blackouts, no critical console errors, and no non-favicon 404s.
+- 2026-05-23 production Crystal action-queue closeout: the movement pipeline is
+  now deployed on remote Gateway release `20260523T071900Z-actionqueue` and
+  Player Web action-queue verification deployment `dpl_HmHQ4CXfy7d895kHFMfiNLHWespN`, with custom-domain `https://mir2.obelisk.build/health` passing. Web self movement is driven by local
+  `QueuedAction`/ActionFeed state, treats self `UserLocation` as ACK/correction
+  instead of a new animation source, renders two-tile Run in one Crystal 600ms
+  action window, caps local ActionFeed lead to two tiles, and treats
+  non-matching `UserLocation` as correction instead of a stale echo.
+  Production walk evidence
+  `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-walk-fix2-20260523T1331.json`
+  and run evidence
+  `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-run-fix2-20260523T1332.json`
+  both report `ok=true`, zero visual jumps, zero logical tile rollback, zero
+  scene-layer blackouts, responsive movement queue, clean settle, no critical
+  console errors, and no non-favicon 404s. Screenshots are the adjacent `.png`
+  files.
+- 2026-05-23 Chrome manual movement/NPC-click follow-up: direct control of
+  the live Chrome game tab confirmed that the player now loads and cycles real
+  Crystal walk/run frames during manual movement. A clean right-click route
+  around Bichon advanced from `327:271 -> 328:270 -> 330:268` and used
+  `CArmour/00` walk frames `38-43` followed by run frames `86-91`; a left-click
+  walk to `331:268` used walk frames `44-49`. No scene-layer blackouts were
+  observed in the live tab. The sticky-feel issue reproduced around the Bichon
+  NPC cluster was a frontend Crystal mismatch: `handleViewportTileAction`
+  previously activated the nearest NPC when the target tile was merely near an
+  NPC and the player was within interaction range. Crystal only suppresses
+  movement when the actual clicked object is an NPC/player/special monster.
+  That radius-based `nearbyNpc` shortcut has been removed, so empty ground near
+  NPCs remains a movement target. Web typecheck passed after the fix:
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`. A production harness
+  run, `docs/generated/player-qa/movement-jitter/prod-manual-click-run-open-20260523-analysis.json`,
+  is clean for blackouts/404s/console errors but did not emit a player movement
+  command, so the manual Chrome sample is the movement evidence for this item.
+- 2026-05-23 production scene-blackout follow-up: the user-reported movement
+  flicker where the main scene went black while HUD/minimap/chat stayed visible
+  was caused by the `scene-assets-pending` CSS state hiding all primary scene
+  layers (`game-scene-backdrop`, sprite overlay, entity overlay, and drop
+  overlay) with `opacity: 0` while movement-triggered scene asset readiness was
+  loading. The fix keeps the previous scene visible during pending asset checks
+  and only disables the scene grid pointer target. The production deployment
+  is `dpl_5J4k5qF8mAbnjoj79gGYw2ypZTNv`, visible through
+  `https://mir2.obelisk.build`. Verification passed Web typecheck, movement
+  harness syntax, scoped diff check, production `/health`, direct production
+  probes for `NPC/83/1.png`, `Monster/010/3.png`, `Title/321.png`, and Bevy
+  wasm, plus the production keyboard movement capture
+  `docs/generated/player-qa/movement-jitter/prod-scene-blackout-normal-walk-20260523134030.json`.
+  That capture reports `ok=true`, `noSceneLayerBlackouts.count=0`,
+  no visual jumps, no route spam, no logical tile rollback, no direction lag,
+  stale prediction cleared, command queue responsive, clean settle, no critical
+  console errors, and no non-favicon 404s. Screenshot evidence is
+  `docs/generated/player-qa/movement-jitter/prod-scene-blackout-normal-walk-20260523134030.png`.
+- 2026-05-22 production movement/resource closeout: the live Gateway rollback
+  cause was a shared-zone snapshot merge overwriting the Zone-authoritative
+  player transform with the stale personal `SimulationSession` transform on the
+  same map. The remote Gateway was rolled forward to
+  `20260522T174413Z-zone-transform`, and Player Web was deployed through
+  Vercel production deployment `dpl_BHimAGw5LRUVHUTFaWSUZsGhf2AH`. Frontend
+  follow-up fixed self `UserInformation` class/gender sprite hydration, scaled
+  movement animation lifetime by tile distance, preloaded the whole current
+  entity action frame set, removed the stale scene-readiness ready/loading
+  loop, and made transient sprite metadata failures retry instead of silently
+  dropping CArmour/CHair body layers. Evidence: Web
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`, script syntax
+  checks, production `/health`, Gateway public `/health`, and direct production
+  probes for `CArmour/00`, `CHair/00`, `NPC/83/1.png`, and
+  `Monster/010/3.png` all passed. Final production keyboard movement capture
+  `docs/generated/player-qa/movement-jitter/prod-zone-transform-sprite-retry-2m-20260522.json`
+  reports `ok=true`, `noVisualJumps.count=0`, no route spam, no logical tile
+  rollback, no direction lag, stale prediction cleared, command queue
+  responsive, clean settle, no critical console errors, no non-favicon 404s,
+  and 186/186 scene assets loaded. Screenshot evidence is
+  `docs/generated/player-qa/movement-jitter/prod-zone-transform-sprite-retry-2m-20260522.png`;
+  the self player, NPC bodies, and monster bodies are visibly rendered.
+- 2026-05-22 production long-session movement/resource follow-up: the
+  user-reported Chrome resource errors and non-smooth movement were retested
+  against `https://mir2.obelisk.build` with real production login and keyboard
+  movement. Landed fixes split WebSocket keepalive from QA-only `autoTick`,
+  relaxed movement prediction waiting to exact occupied path tiles, held
+  turn visuals for a full Crystal action frame, suppressed repeated held
+  blocked-direction attempts, and deployed Cloudflare domain/R2 Workers with
+  asset proxy response cleanup. Vercel production deployment
+  `dpl_8NeUFDsKu2NKMTFuAf1yF9YEoxXV` is promoted current and `/health`
+  returns 200. Evidence:
+  `docs/generated/player-qa/movement-jitter/prod-movement-fix-15m-20260522.json`
+  ran for 15 minutes with `packetRuntimeModes={"packetRefresh":3513}` and no
+  reconnect samples, clean settle, no residual `predictedPlayer`,
+  `movementPlan`, `directionStepPendingQueue`, or
+  `outstandingSelfMovementActions`, 196/196 scene assets loaded, and no
+  non-favicon 404s. It improved but did not close all movement-feel checks:
+  visual jumps 156, logical tile rollback 41, route spam 5, direction lag 4,
+  and console errors 31. All console errors were
+  `net::ERR_QUIC_PROTOCOL_ERROR`; direct probes for affected URLs returned
+  200, and `NPC/83/1.png` returned 200 through the R2-backed player-domain
+  proxy. Cloudflare still injects `alt-svc: h3`; Worker/Next response headers
+  cannot override that edge setting, and the current Wrangler OAuth token can
+  deploy Workers but receives 403 for zone setting `http3`. Follow-up:
+  disable Cloudflare HTTP/3/QUIC for `obelisk.build` with a zone-settings token
+  or dashboard access, then rerun the production movement/resource capture.
+- 2026-05-22 production movement rollback/smoothness pass: rapid opposite
+  direction input no longer lets locally predicted `worldRef` position clear
+  direction-step pending state as though it were a server acknowledgement. The
+  settlement path now uses `lastSelfMovementAck` while packet-transport
+  movement evidence is active, so old local prediction cannot prematurely clear
+  pending movement or snap the self sprite across tiles. The production baseline
+  `docs/generated/player-qa/movement-jitter/prod-movement-baseline-fresh-20260522-173704.json`
+  reproduced the issue with `ok=false` and `noVisualJumps.count=1`. After the
+  fix, Web `pnpm --dir apps/web exec tsc --noEmit --pretty false` passed and
+  production deployment `dpl_xryqwBF4NVPh7KdNio2ppv6EFPYh` is visible through
+  `https://mir2.obelisk.build`. The production movement capture
+  `docs/generated/player-qa/movement-jitter/prod-movement-fix-keyseq-20260522-180533.json`
+  reports `ok=true`, `noVisualJumps.count=0`, no logical tile rollback, clean
+  movement settle, stale prediction cleared, responsive movement command queue,
+  running animation state present, no console errors, and no non-favicon 404s;
+  screenshot evidence is
+  `docs/generated/player-qa/movement-jitter/prod-movement-fix-keyseq-20260522-180533.png`.
+- 2026-05-21 production map-monster screenshot pass: a production-safe QA
+  screenshot surface now covers original map terrain plus Crystal respawn data
+  without exposing debug player teleport commands. `/api/qa/map-monster-scenes`
+  enumerates 807 representative scenes from the Crystal respawn manifest,
+  covering 463 source maps, 284 maps with positive respawns, and 6340 positive
+  respawn rows. `/qa/map-monsters` renders each scene through
+  `loadCrystalSceneBlueprint`, using the loader-clamped `sceneView.center` for
+  sprite placement and clamped labels for respawns whose source coordinates sit
+  outside the renderable map bounds. The capture tool now accepts exact
+  `--sceneIndexes` so production retakes can replace only failed scenes.
+  Production deployment `dpl_9L3LsRnN8mfJmDirFCpjnrBdeNJR` is READY at
+  `https://mir2-web3-7ov6lp1xs-obelisk-labs.vercel.app` and visible through
+  `https://mir2.obelisk.build`. Evidence:
+  `docs/generated/player-qa/production-map-monsters/production-full-map-monsters-qa807-resource-strict-20260521/summary.aggregate.json`
+  reports `ok=true`, 807/807 final captured scenes, failure count 0,
+  zero-map-sprite scenes 0, broken images 0, network 404s 0, network failures
+  0, and console errors 0. The aggregate combines the full run, 38 scene
+  retakes after the render-center fix, a focused GA1 retake, and 44 low
+  concurrency retakes that removed high-concurrency resource load noise. It is
+  the production resource-health gate rather than a guarantee that every
+  heavy-map high-concurrency screenshot reached `imagesComplete=true`; for
+  complete-pixel visual retakes the capture script now has QA-only
+  `--fulfillOriginalMapFromPublic`, which still opens the production QA URL
+  while fulfilling original-map requests from the restored local release. A
+  focused `hyunwol1` retake with that mode verified `imagesComplete=true`,
+  `pendingImageCount=0`, 588 rendered map images, and a nonblank terrain
+  screenshot. The only durable missing asset found in that process was GA1
+  `WemadeMir2/Objects10`
+  frames; 27 frames `5172..5234` were exported from the full Crystal
+  `Objects10.Lib`, uploaded to R2 prefix `mir2/v/37596e16d64fde7c` via
+  `docs/generated/remote-assets/prod-ga1-objects10-patch-20260521/remote-asset-release.json`,
+  direct CDN probes returned 200, and the GA1 retake finished with 99 map
+  images, 0 pending, 0 broken images, 0 404s, and 0 console/network failures.
+- 2026-05-21 production original-map runtime-data pass: representative live
+  maps were rendering as flat fallback terrain because `/api/scene/crystal`
+  could not read the full Crystal `Map/` and `Data/Map/*.Lib` source tree in
+  Vercel, so it fell back to the packaged starter Bichon fragment or empty
+  map regions. `crystal-map-loader.ts` now uses the local full-client root
+  when available, and production falls back to generated compressed runtime
+  map data under `lib/generated/crystal-map-pack` plus frame dimensions under
+  `lib/generated/crystal-map-library-meta`. The scene blueprint cache schema
+  was bumped so old fallback regions are not reused. Generated runtime data
+  covers 1624 Crystal map files and 138 map libraries / 1,327,368 frame
+  metadata entries, and the newly needed rendered PNG frames were uploaded to
+  the active R2 release. Production deployment
+  `dpl_CLp4KrpvspZaPHExjdjtazkRdFUs` is READY at
+  `https://mir2-web3-5kzhyxrns-obelisk-labs.vercel.app`, aliased to
+  `https://mir2-web3-web.vercel.app`, and visible through
+  `https://mir2.obelisk.build`. Evidence: `pnpm --dir apps/web exec tsc
+  --noEmit --pretty false`, `node --check
+  apps/web/scripts/generate-crystal-map-runtime-data.mjs`, and focused diff
+  whitespace checks passed. Direct production probes returned non-empty
+  regions for `0@271,259` (697 sprites / 4116 cells), `1@308,170`
+  (132 / 2503), `D011@206,206` (231 / 5581), `D401@106,106`
+  (397 / 5969), `D2042@156,56` (563 / 5169), and `D5063@39,15`
+  (96 / 5070); previously missing sample images such as
+  `/original-map/WemadeMir2/Tiles/1950.png` and
+  `/original-map/WemadeMir2/Objects23/1966.png` returned 200. Playable
+  Bichon screenshot evidence
+  `docs/generated/player-qa/live-map-monsters/prod-map0-bichon-runtime-wait20-20260521Tnow.png`
+  recorded `mapObjectSpriteCount=120` and `network404Count=0` where the prior
+  live capture at the same coordinate had 0 map object sprites; the capture
+  waits for the larger production map image set to settle. Production
+  cross-map screenshot automation is intentionally blocked by the production
+  player-command safety rule rejecting debug `crystal:<map>:<x>:<y>` transfer
+  keys, so cross-map visual proof is API-level until a non-debug map routing
+  or admin QA relocation path is available.
+- 2026-05-21 original-ui metadata/exporter split pass: `/api/original-ui-meta`
+  no longer imports `lib/original-ui-export-server.ts` in the production route.
+  The route now reads already deployed/static `meta.json` from the app/player
+  domain or configured R2/CDN base through
+  `lib/original-ui-meta-server.ts`, and missing metadata returns
+  `library_not_deployed` instead of doing request-time Crystal export. This
+  removes the production build trace that scanned `public/original-ui`.
+  Evidence: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`
+  passed; Vercel production build emitted no
+  `original-ui-export-server.ts` broad-pattern warning, leaving only the
+  separate `crystal-map-loader.ts` / `public/original-map` warning. Production
+  deployment `dpl_Fq8FkQb2JxjEmMAHwNXJCU4v7Xdi` is READY at
+  `https://mir2-web3-ezaeeogvv-obelisk-labs.vercel.app`, aliased to
+  `https://mir2-web3-web.vercel.app`, and visible through
+  `https://mir2.obelisk.build`. Direct probes returned 200 for
+  `/api/original-ui-meta?library=Items`, `/api/original-ui-meta?library=NPC/94`,
+  representative R2-backed asset paths, debug samples, and Bevy wasm; invalid
+  `Map/foo` returned `unsupported_library`. Production cache-maintenance smoke
+  `docs/generated/player-qa/cache-metrics/cache-metrics-meta-reader-split-prod-20260521.json`
+  passed with `ok=true`, 387/387 prewarm ok, warm transfer 0 bytes, and no
+  non-favicon 404s. Playable production smoke
+  `docs/generated/player-qa/cache-metrics/cache-metrics-meta-reader-split-playable-prod-20260521.json`
+  passed with `ok=true`, cold first playable 13745.3ms, warm first playable
+  14118.8ms, 387/387 prewarm ok, and no non-favicon 404s.
+- 2026-05-21 CDN-first Vercel output pass: Player Web production deployment
+  now keeps the Vercel artifact focused on the Next.js shell, route handlers,
+  retained debug samples, and same-origin Bevy runtime, while Crystal
+  `/original-ui`, `/original-map`, and `/generated/original-map-blend` media
+  are served from the verified R2/CDN release through the player domain.
+  `apps/web/scripts/prune-vercel-output-assets.mjs` prunes only those
+  R2-backed paths from `.vercel/output` after `vercel build`; the final report
+  `docs/generated/remote-assets/vercel-output-prune-resource-cdn-first-20260521.json`
+  reduced output size from 420,957,251 bytes / 18,650 files to 43,478,680 bytes
+  / 278 files. Production deployment `dpl_ieQqdaZMnnZYNe4wxksuoqsj7Sgg` is
+  READY at `https://mir2-web3-js3ofmmod-obelisk-labs.vercel.app`, aliased to
+  `https://mir2-web3-web.vercel.app`, and visible through
+  `https://mir2.obelisk.build`; upload size was 15.7MB. Direct probes returned
+  200 for R2-backed title/item/map/blend assets, retained
+  `/debug/map-samples/smtile-72.png` and `smtile-80.png`, and same-origin Bevy
+  wasm. Evidence: `node --check
+  apps/web/scripts/prune-vercel-output-assets.mjs`,
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`, production
+  cache-maintenance smoke
+  `docs/generated/player-qa/cache-metrics/cache-metrics-resource-cdn-first-final-prod-20260521.json`
+  with `ok=true`, 387/387 prewarm ok, warm transfer 900 bytes, no critical
+  console errors, and no non-favicon 404s, plus playable production smoke
+  `docs/generated/player-qa/cache-metrics/cache-metrics-resource-cdn-first-playable-final-prod-20260521.json`
+  with `ok=true`, cold first playable 14212.5ms, warm first playable 14163.9ms,
+  warm transfer 600 bytes, and no non-favicon 404s.
+- 2026-05-21 resource cache-tier production pass: Player Web resource
+  management now separates declared static asset packs into Service Worker
+  cache tiers instead of one bulk static cache. `/api/asset-manifest` exposes
+  per-tier budgets (`staticCriticalMaxEntries=3000`,
+  `staticBackgroundMaxEntries=6000`, `staticRuntimeMaxEntries=16000`);
+  `login`, `character-select`, and `hud-core` are tagged
+  `cacheTier=critical`; `bichon-spawn` is tagged `cacheTier=background`;
+  scene-frame prewarm sends best-effort tier hints so dynamic Bichon frames
+  populate `mir2-asset-cache-static-background-*` while login/select/HUD stay
+  in `mir2-asset-cache-static-critical-*`. Evidence: Web
+  `node --check apps/web/public/mir2-asset-worker.js`,
+  `node --check apps/web/scripts/smoke-cache-metrics.mjs`,
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false`, and
+  `pnpm --dir apps/web run build` passed. Local production Web
+  `127.0.0.1:13021` passed
+  `docs/generated/player-qa/cache-metrics/cache-metrics-resource-tier-local-20260521.json`
+  with `ok=true`, 387/387 prewarm ok, warm CacheStorage 3 caches / 383
+  entries / 63.9MB, no critical console errors, and no non-favicon 404s.
+  Production deployment `dpl_9qZP7jXVU1Q6BzUWZVyQKKkMgiaf` is READY at
+  `https://mir2-web3-aefb2e729-obelisk-labs.vercel.app`, aliased to
+  `https://mir2-web3-web.vercel.app`, and visible through
+  `https://mir2.obelisk.build`; production manifest version
+  `5d1ec8e93c1caa62` reports the new tier budgets and cache tags.
+  Production smoke
+  `docs/generated/player-qa/cache-metrics/cache-metrics-resource-tier-prod-20260521.json`
+  passed with `ok=true`, 387/387 prewarm ok, warm CacheStorage 3 caches / 383
+  entries / 51.1MB, after-cleanup caches
+  `static-critical`, `static-background`, `scene`, and `api`, reset deleted 4
+  caches/unregistered 1 scope, and all cache-budget, console, and network
+  assertions true.
+- 2026-05-21 production map-change entity cleanup: Player Web now treats
+  `MapInformation` with a different map file as a hard scene boundary and
+  clears old non-self entities, drops, projectiles, terrain/decor, selection,
+  and active NPC dialog before applying the new map's object packets. This
+  closes the live QA state where switching a production test account from
+  Bichon to `WoomyonWoods(S)` could show the correct forest map and original
+  forest monsters while stale Bichon `Royal_Guard` / `Royal_Archer` rows
+  remained in the packet-first entity table. Evidence: Web
+  `pnpm --dir apps/web exec tsc --noEmit --pretty false` passed.
 - 2026-05-21 scene backdrop edge/fallback pass: the Player Web main scene no
   longer disables its terrain fallback just because some original floor sprites
   are present. `GameSceneBackdrop` now always draws the synthetic terrain tile
@@ -93,6 +764,31 @@ Status values:
   to same-origin `/cdn-cgi/rum` with `204 no-store` once the player page is
   controlled by the SW so repeated DevTools sessions do not keep surfacing it as
   a missing game resource.
+- 2026-05-22 live Chrome resource-error retry follow-up: The user's connected
+  Chrome tab still showed preserved red `Img` rows after the production asset
+  repairs, but direct player-domain probes for the current broken DOM URLs all
+  returned `200 image/png`, including `generated/original-map-blend` torch
+  blends, `CArmour/00/8.png`, `CHair/00/8.png`, `CWeapon/00/8.png`,
+  `Monster/000/*`, `Monster/139/*`, `NPC/05/9.png`, `NPC/08/1.png`,
+  `NPC/16/1.png`, `NPC/27/1.png`, `NPC/45/1.png`, `NPC/83/1.png`,
+  `Prguse/983.png`, `Prguse/2044.png`, plus the user-reported
+  `ChrSel/12.png` and `Monster/010/3.png`. Root cause for the remaining bad
+  image state is transient first-load failure without a later retry, not durable
+  missing PNGs. Scene/UI image error handling now keeps the existing same-origin
+  and remote CDN fallback, schedules cache-busted delayed retries at
+  0.5s/1.5s/3.5s/7s/12s after `onError`, and runs a game-scene stalled-image
+  rescue pass every 1.5s so pending images that never fire `onError` are also
+  cache-busted and retried. Deployment `dpl_4Uw447PEm7Y656TYHXNnHeVvnzi5` is
+  READY at `https://mir2-web3-1ie43fh9n-obelisk-labs.vercel.app` and aliased
+  through `https://mir2-web3-web.vercel.app` / `https://mir2.obelisk.build`.
+  Verification: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`
+  passed; production build/prune reduced `.vercel/output` from
+  624,756,385 bytes / 80,196 files to 43,888,088 bytes / 283 files; production
+  URL probes returned 200 for all sampled current broken URLs; the live
+  `mir2.obelisk.build` bundle contains both `mir2DelayedRetryCount` and
+  `mir2StalledRetryCount` retry markers; and after refreshing the user's
+  connected Chrome game tab, the live DOM reported `brokenCount=0` for Mir2
+  `/original-ui` and `/generated/original-map-blend` images.
 - 2026-05-20 SoundList fallback closure: The Crystal source tree still does not
   contain exact upstream files for SoundList entries `10022 -> 22.wav`,
   `10109 -> 109.wav`, and `705 -> ZombieRevive.wav`, but the Web asset exporter
@@ -241,6 +937,25 @@ Status values:
   4296.3ms, warm first playable 4049.6ms, 517/517 prewarm ok, 0 prewarm
   failures, no critical console errors, and no non-favicon 404s. Report:
   `docs/generated/player-qa/cache-metrics/cache-metrics-codex-r2-actor-sprites-prod-smoke.json`.
+- 2026-05-21 Sui wallet picker / Dubhe Wallet login pass: Player Web no longer
+  auto-selects the first Sui wallet returned by Wallet Standard. The login
+  dialog's `Wallet` action now opens a compact Sui wallet picker, lists all
+  detected wallets that support `sui:signPersonalMessage`, prioritizes wallets
+  whose id/name match Dubhe, and passes the selected wallet id into the existing
+  Sui personal-message login token flow. If Dubhe Wallet is not registered in
+  the browser, the picker keeps a direct `Dubhe Wallet` entry to
+  `https://dubhe.obelisk.build/en/wallet`; when a Wallet Standard Dubhe wallet
+  is registered, the picker shows it as the selectable wallet and hides the
+  external entry. Evidence: `pnpm --dir apps/web exec tsc --noEmit --pretty false`
+  passed; local Chrome/CDP smoke on `http://127.0.0.1:13010` verified the picker
+  is visible, `aria-expanded=true`, the Dubhe link is present with no wallet
+  installed, no critical console errors, and no overlap with the original login
+  buttons. A second CDP smoke injected a standards-shaped `Dubhe Wallet` and
+  verified it appeared as a selectable Dubhe-prioritized wallet with the install
+  link hidden. Evidence files:
+  `docs/generated/player-qa/wallet-picker/dubhe-wallet-picker-login.json`,
+  `docs/generated/player-qa/wallet-picker/dubhe-wallet-picker-login.png`, and
+  `docs/generated/player-qa/wallet-picker/dubhe-wallet-picker-registered.json`.
 - 2026-05-18 production Vercel/Cloudflare playable smoke: `https://mir2.obelisk.build`
   now serves Player Web from Vercel project `obelisk-labs/mir2-web3-web` while
   routing `/ws` to the UCloud Gateway and `/original-map/*` to the R2 release
@@ -398,14 +1113,17 @@ Status values:
 | [~] | NPC/shop/storage | storage page 1, locked expanded page 2, expanded-storage rent/unlock, restored page 1, InnKeeper_Brittney `@Storage` service open through the real Crystal dialog path, service-backed Dagger store, service-backed Red Potion take-back, Blacksmith `@Repair` / `@SRepair` service-backed repairs, GameShop Gold buy with carry-slot delivery, NPC dialog markup sanitization, and dialog link rendering are smoke/build-verified; input, sell/craft/refine panels and GameShop preview still need Crystal comparison | route screenshots and packet trace |
 | [~] | Storage password | expanded storage confirmation, Set Storage Password panel entry, mismatch validation, and service-backed set/unlock/change/remove password flows are smoke-verified through InnKeeper_Brittney `@Storage`, including last-set timestamp exposure; exact Crystal dialog bitmap and invalid-password edge visual acceptance remain open | UI route and persistence check |
 | [~] | Quest/mail/report/menu | Mail open/close state, real Mail claim for seeded GameShop gold, nested-button-free Mail row DOM, Report open/close state, compact Mail/Report bounds, system menu QA Jump, transfer-list routing, trade chat filtering, dynamic social panels, Quest Diary title/stage/progress/reward rows, and repo-stable Stage 5 smoke screenshots are verified. R316 replaces the visible Web debug menu with Crystal `MenuDialog` frame `Title/567` and icon buttons, and Gameshop now opens the Crystal-framed dialog instead of Inventory/Quest. R317 replaces Gameshop placeholder cells with Crystal product manifest data, original cell/buttons, item icons, categories, pagination, prices, stock, and payment controls. Quest/mail/report exact dialog bitmaps and service-backed Gameshop preview behavior still need Crystal-like layout and interaction review | screenshot and human pass |
-| [~] | Scene interaction | tile buttons avoid scene pointer double-dispatch and now track the same camera motion offset as rendered map/entities; added-stat ground drops render with server-provided Crystal Cyan name colour; selected scene targets route keyboard approach/primary actions; Blue Potion and gold ground pickup plus combat target selection are smoke-verified; R321 can now control original Crystal and Web for movement comparison; R322 prevents prediction/server-correction movement loops by making prediction visual-only and stopping plans on server correction; R323 adds held-mouse 100ms input sampling with direct `Walk` / `Run` direction packets for Crystal-like queued movement; R325 fixes held-run visual background backtracking by synchronizing predicted render basis and motion snapshots; R326 keeps the latest held-direction request queued during the 600ms action window and consumes it like Crystal `QueuedAction`; the 2026-05-07 movement/animation pass anchors player/monster/NPC frame cycles to Crystal action timing; the 2026-05-08 movement pass ties displacement to Crystal six-frame/even-pixel `OffSetMove` cadence and caps held-direction prediction to one unconfirmed action; the 2026-05-09 direction/queue pass carries predicted facing with predicted coordinates, keeps target prediction until the server reaches the target, and avoids click-route rollback in headless captures. Remaining movement issue is final human feel acceptance plus deeper blocked-tile/collision edge parity | route replay and human pass |
-| [~] | Responsive/layout | R308 records exact 1024x768 stage bounds at original comparison size and keeps the 820x640 compact stage inside viewport bounds; R309 records minimap/core HUD bounds with no desktop or compact overflow; compact inventory/storage/character/system-menu/chat-settings/Mail/Report/social bounds are smoke-verified; the current compact matrix covers 900x640, 768x640, and 820x540. The 2026-05-19 mobile landscape pass adds nipplejs joystick controls, Mir2 direction/run semantic mapping, a right-bottom circular action wheel, a portrait rotate prompt, and strict mobile movement smoke evidence. Broader human mobile feel, especially sustained high-frequency run/turn behavior, remains open | screenshot checks |
+| [~] | Scene interaction | tile buttons avoid scene pointer double-dispatch and now track the same camera motion offset as rendered map/entities; added-stat ground drops render with server-provided Crystal Cyan name colour; selected scene targets route keyboard approach/primary actions; Blue Potion and gold ground pickup plus combat target selection are smoke-verified; R321 can now control original Crystal and Web for movement comparison; R322 prevents prediction/server-correction movement loops by making prediction visual-only and stopping plans on server correction; R323 adds held-mouse 100ms input sampling with direct `Walk` / `Run` direction packets for Crystal-like queued movement; R325 fixes held-run visual background backtracking by synchronizing predicted render basis and motion snapshots; R326 keeps the latest held-direction request queued during the 600ms action window and consumes it like Crystal `QueuedAction`; the 2026-05-07 movement/animation pass anchors player/monster/NPC frame cycles to Crystal action timing; the 2026-05-08 movement pass ties displacement to Crystal six-frame/even-pixel `OffSetMove` cadence and caps held-direction prediction to one unconfirmed action; the 2026-05-09 direction/queue pass carries predicted facing with predicted coordinates, keeps target prediction until the server reaches the target, and avoids click-route rollback in headless captures; the 2026-05-22 production pass clears confirmed ACK actions from the local movement feed and keeps the motion clock live under headless throttling; the 2026-05-23 production Crystal action-queue pass drives self Walk/Run/Turn through local `QueuedAction`/ActionFeed ACK/correction semantics with strict production walk/run evidence green. Remaining movement acceptance is final human feel plus broader blocked-tile/collision edge parity | route replay and human pass |
+| [~] | Responsive/layout | R308 records exact 1024x768 stage bounds at original comparison size and keeps the 820x640 compact stage inside viewport bounds; R309 records minimap/core HUD bounds with no desktop or compact overflow; compact inventory/storage/character/system-menu/chat-settings/Mail/Report/social bounds are smoke-verified; the current compact matrix covers 900x640, 768x640, and 820x540. The 2026-05-19 mobile landscape pass adds nipplejs joystick controls, Mir2 direction/run semantic mapping, a right-bottom circular action wheel, a portrait rotate prompt, and strict mobile movement smoke evidence. The 2026-05-22 production pass dynamically scales the 1024x768 stage to the actual viewport and verifies a 150x647 DevTools-width login/game path with stage bounds inside the viewport. Broader human mobile feel, especially sustained high-frequency run/turn behavior, remains open | screenshot checks |
 | [~] | Language/text | Compact visible core quest/HUD/minimap/belt/chat/entity/mail/storage/system/social text is smoke-checked with overflow-safe selectors and CSS; login/select language switches remain smoke-covered, while full language-by-panel visual acceptance remains open | screenshot and DOM checks |
 
 Candidate note: as of R301, all rows above have automated evidence for the available route. They intentionally remain `[~]` until direct Crystal screenshots/live comparisons or human visual/feel acceptance close them; automation should not flip them to `[x]` by itself.
 
 ## Recent Frontend Fixes
 
+- 2026-05-24: Production movement visual closeout deployed as Player Web `dpl_8wQigG43KBLpaZY5oPPWHwNhz3QK`. Rapid discrete keyboard taps now carry a bounded same-direction input debt across server ACK latency, so six quick D taps send six walk packets and receive six ordered `UserLocation` ACKs instead of collapsing to two steps. The original-map renderer now keeps a textured floor fallback under still-loading map tiles and alpha-keys black-background map Object images before showing them, preventing the black rectangle flash that made movement feel broken even after the packet path was correct. Evidence: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`; scoped diff check; Vercel prebuilt build/prune/deploy; custom-domain `/health`; production `docs/generated/player-qa/movement-jitter/prod-underlay-keyboard-d-20260524T112642.json`; and headed Chrome `docs/generated/player-qa/movement-jitter/prod-underlay-headed-keyboard-d-20260524T112744.json`, both `ok=true` with no visual jumps, no route spam, no logical rollback, no scene blackouts, no console errors, no non-favicon 404s, and screenshot evidence without black map holes.
+- 2026-05-23: Crystal action-queue movement pass landed across Web/Gateway/Simulation and was production-verified. Player Web now treats self `UserLocation` as an ordered ACK/correction surface for local `QueuedAction`/ActionFeed state, not as a fresh walk/run animation; correction snaps clear packet motion, same-tile confirmations preserve the active animation, and server `UserLocation` no longer re-seeds predicted motion when it is only confirming the local queue. Packet Walk/Run rendering now uses one Crystal 600ms action window even for two-tile Run, matching the original sprite cadence instead of stretching Run over two tiles. Backend Zone consumes bounded ordered Walk/Run/Turn actions on Crystal `ActionTime`; the later local rollback correction changes raw standstill Run from an origin correction into an effective one-tile Walk. The production follow-up capped local ActionFeed lead to two tiles and treats non-matching `UserLocation` as correction, closing the residual visual jump found after the first deploy. Evidence: Web `pnpm --dir apps/web exec tsc --noEmit --pretty false`; Web `pnpm --dir apps/web exec next build`; Simulation/Gateway fmt-check; Simulation `shared_zone` 78/78; focused Gateway Walk+Run/Turn regressions; local captures `docs/generated/player-qa/movement-jitter/crystal-action-queue-local-shiftd-20260523.json` and `docs/generated/player-qa/movement-jitter/crystal-action-queue-local-da2-20260523.json`; action-queue verification deployment `dpl_HmHQ4CXfy7d895kHFMfiNLHWespN`; and production captures `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-walk-fix2-20260523T1331.json` plus `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-run-fix2-20260523T1332.json`, both `ok=true` with no visual jumps, logical rollback, scene blackouts, critical console errors, or non-favicon 404s.
+- 2026-05-22: Production movement/layout hardening landed for the user-reported Chrome/DevTools failures. The original 1024x768 client stage now uses a viewport-driven CSS scale so very narrow DevTools layouts keep login/select/game controls inside the visible viewport; `/health` is a no-store Next route instead of a Vercel 404; hydration risk is reduced with deterministic initial motion state plus layout-level hydration suppression; and self movement ACKs now confirm local pending/fed actions even when the optimistic client state already matches the incoming `UserLocation`, pruning `outstandingSelfMovementActions` after visual settlement. A requestAnimationFrame plus 100ms fallback keeps `motionNow` live in headless/throttled Chrome. Production deployment `dpl_Gr9WgZX275rpfDfk9f4SdzAshogb` is live behind `https://mir2.obelisk.build/`; custom-domain `/health` returned 200, and `Monster/000/51.png` returned 200. Evidence: `pnpm --dir apps/web exec tsc --noEmit --pretty false`; `pnpm --dir apps/web exec next build`; `docs/generated/player-qa/movement-jitter/prod-final-narrow-stage-scale-20260522.json` (`ok=true`, 150x647 stage bounds `left=-0.01`, `width=150.02`, no console errors, no non-favicon 404s, no residual movement queues); and `docs/generated/player-qa/movement-jitter/prod-final-movement-ack-prune-skip-transfer-20260522.json` (`ok=true`, strict movement checks green, `directionStepPending=null`, `outstandingSelfMovementActions=[]`, no visual jumps, no route spam, no logical rollback, no camera-offset stair-step warnings). The failed `prod-final-movement-ack-prune-20260522` run is expected evidence that production correctly rejects debug `crystal:<map>:<x>:<y>` transfer commands for normal clients.
 - 2026-05-20: Production self-movement rendering now preserves local/packet movement animation state even when the authoritative player tile already equals the predicted tile, so the self player no longer drops back to a standing frame during walk/run confirmation. Camera/entity motion offsets now keep fractional pixels instead of truncating every frame to integer pixels, removing the stair-step feel during tile interpolation. The movement QA harness also records self movement animation fields and retries an explicit navigation when Chrome creates a target before hydration completes. Evidence: production Vercel deployment `dpl_ArWKGQbfwi5F3viVUsNsoumktTuD`; web `pnpm --dir apps/web exec tsc --noEmit --pretty false`; `node --check apps/web/scripts/capture-web-movement-jitter.mjs`; production headed capture `docs/generated/player-qa/movement-jitter/prod-movement-animation-fix-20260520-click-target.json` with `ok=true`, `noVisualJumps=true`, `cameraOffsetMovesContinuously=true`, `directionAnimationWithinCrystalWindow=true`, `noConsoleErrors=true`, `noNonFaviconNetwork404s=true`, `97` samples, `65` fractional-offset samples, and live `walk/run` packets through `packetRefresh`. A focused packet-run probe `prod-movement-animation-fix-20260520-packet-run-left-rerun.json` additionally captured `movementAnimation="running"` on self samples and running motion snapshots after real `UserLocation` packets; its overall `ok=false` is expected because the probe deliberately sends repeated packetRun commands and trips spam/direction-window assertions.
 - 2026-05-16: MiniMapDialog crop/title/collapse alignment now follows the Crystal source frame more closely. The 120x108 minimap viewport now crops the full minimap raster with Crystal-style negative source offsets instead of scaling a cropped image over a transparent frame, preventing the main scene from leaking into the top-right minimap. The large minimap title now renders one centered map-name line without appending Safe Zone, collapsed mode switches to the small `Prguse/2091` frame and hides title/scene content, mini-map button hit boxes remain stable in both expanded/collapsed modes, and radar colors match Crystal player/NPC/monster dots. A dedicated minimap-only Stage 5 smoke now covers expanded/collapsed/BigMap/Mail states without running the whole 100+ screenshot suite, and the movement prediction state update no longer emits React `flushSync` lifecycle warnings during smoke login/bootstrap. Evidence: Web `node --check scripts/smoke-stage5-ui.mjs`, `npx tsc --noEmit`, direct `npx next build`, and live `MIR2_STAGE5_SMOKE_MINIMAP_ONLY=1 MIR2_WEB_BASE_URL=http://127.0.0.1:13010/?gatewayWs=ws://127.0.0.1:7210/ws node scripts/smoke-stage5-ui.mjs`, which wrote `docs/stage5-screenshots/stage5-minimap-smoke-manifest.json` with `mode="minimap-only"`, 17 screenshots, `criticalConsoleErrors=[]`, expanded `nameText="BichonProvince"`, `titleCount=1`, `sceneHidden=false`, `sceneHasRaster=true`, `sceneHasFallback=false`, collapsed `titleCount=0`, `sceneHidden=true`, `smallMode=true`, BigMap/Mail open states, and all minimap button hit tests uncovered.
 - 2026-05-15: Closed the remaining high-frequency movement residual/rollback path by committing completed local self movement into the client-side CurrentLocation and shielding it from stale snapshot echoes. Verification evidence is `r-highfreq-keyseq-da-after-local-current-location-16ms.json`, `r-long-shiftd-after-local-current-location-16ms.json`, and `r-right-left-after-local-current-location-16ms.json`, all strict-green with no visual jumps, no logical rollback, no queue residue, and no browser errors.

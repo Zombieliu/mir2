@@ -9,9 +9,9 @@ use crate::config::{
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_item_by_index, crystal_item_by_name, crystal_npc_info_by_script_key,
-    crystal_npc_script_by_key, crystal_quest_packet_manifest, localized_text_or_fallback,
-    starter_server_data, CrystalItemTemplate, CrystalNpcInfoTemplate, CrystalNpcScript,
-    LanguageCode, NpcScriptTemplate,
+    crystal_npc_info_manifest, crystal_npc_script_by_key, crystal_quest_packet_manifest,
+    localized_text_or_fallback, starter_server_data, CrystalItemTemplate, CrystalNpcInfoTemplate,
+    CrystalNpcScript, LanguageCode, NpcScriptTemplate,
 };
 use mir2_protocol::{MirClass, ServerPacket, UserItem, UserItemStat};
 
@@ -190,6 +190,11 @@ pub(super) fn localized_npc_dialog_base_key(npc_object_id: u32) -> String {
 }
 
 pub(super) fn crystal_quest_ids_by_npc() -> BTreeMap<u32, BTreeSet<i32>> {
+    let npc_loaded_ids = crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .filter_map(|npc| Some((u32::try_from(npc.npc_index).ok()?, npc.loaded_object_id?)))
+        .collect::<BTreeMap<_, _>>();
     crystal_quest_packet_manifest().quests.into_iter().fold(
         BTreeMap::<u32, BTreeSet<i32>>::new(),
         |mut by_npc, quest| {
@@ -197,10 +202,22 @@ pub(super) fn crystal_quest_ids_by_npc() -> BTreeMap<u32, BTreeSet<i32>> {
                 .entry(quest.npc_index)
                 .or_default()
                 .insert(quest.index);
+            if let Some(loaded_object_id) = npc_loaded_ids.get(&quest.npc_index) {
+                by_npc
+                    .entry(*loaded_object_id)
+                    .or_default()
+                    .insert(quest.index);
+            }
             by_npc
                 .entry(quest.finish_npc_index)
                 .or_default()
                 .insert(quest.index);
+            if let Some(loaded_object_id) = npc_loaded_ids.get(&quest.finish_npc_index) {
+                by_npc
+                    .entry(*loaded_object_id)
+                    .or_default()
+                    .insert(quest.index);
+            }
             by_npc
         },
     )

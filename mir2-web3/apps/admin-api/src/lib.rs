@@ -14,9 +14,10 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use mir2_simulation::{
-    ban_account_in_store, deliver_stage5_system_mail, AccountRecord, AccountStore, CharacterRecord,
-    CharacterSaveRecord, SimulationConfig, Stage5MailDelivery, Stage5MailDeliveryReceipt,
-    Stage5MailMessage, Stage5MailTargetKind, Stage5SystemsState,
+    ban_account_in_store, deliver_stage5_system_mail, AccountRecord, AccountStore,
+    AccountStoreDatabaseMode, CharacterRecord, CharacterSaveRecord, SimulationConfig,
+    Stage5MailDelivery, Stage5MailDeliveryReceipt, Stage5MailMessage, Stage5MailTargetKind,
+    Stage5SystemsState,
 };
 use postgres::error::SqlState;
 use postgres::{Client, NoTls, Row};
@@ -2535,22 +2536,12 @@ impl AccountStoreSystemMailDomain {
             .unwrap_or_else(|_| "http://127.0.0.1:7110/admin/control".to_string());
         let name_list_root = name_list_root_from_env();
         let content_bundle_dir = content_bundle_dir_from_env();
-        let database_backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
-        let fallback_config = if database_backend.eq_ignore_ascii_case("postgres") {
-            let database_url = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
-                .expect("MIR2_ACCOUNT_STORE_DATABASE_URL is required for postgres account store");
-            SimulationConfig::default().with_postgres_account_store(database_url)
-        } else {
-            let account_store_path = env::var("ADMIN_ACCOUNT_STORE_PATH")
-                .or_else(|_| env::var("MIR2_ACCOUNT_STORE_PATH"))
-                .unwrap_or_else(|_| ".mir2-data/accounts.json".to_string());
-            let mut fallback_config = SimulationConfig::default()
-                .with_account_store_path(PathBuf::from(account_store_path));
-            if let Ok(database_url) = env::var("MIR2_ACCOUNT_STORE_DATABASE_URL") {
-                fallback_config = fallback_config.with_account_store_database_url(database_url);
-            }
-            fallback_config
-        };
+        let account_store_path = env::var("ADMIN_ACCOUNT_STORE_PATH")
+            .or_else(|_| env::var("MIR2_ACCOUNT_STORE_PATH"))
+            .unwrap_or_else(|_| ".mir2-data/accounts.json".to_string());
+        let fallback_config = SimulationConfig::default()
+            .with_account_store_environment(PathBuf::from(account_store_path))
+            .expect("account store environment should initialize");
         Self {
             gateway_mail_url,
             gateway_kick_url,
@@ -3495,6 +3486,9 @@ fn push_stage5_mail(
         body: body.to_string(),
         gold,
         items,
+        item_states_json: Vec::new(),
+        opened: false,
+        locked: false,
         claimed: false,
         deleted: false,
     });
@@ -4753,22 +4747,22 @@ struct GatewaySessionKey {
 
 impl AdminReadModelStore {
     fn from_config(config: &SimulationConfig) -> Self {
-        let backend = env::var("MIR2_ACCOUNT_STORE_BACKEND").unwrap_or_default();
-        let source = if backend.eq_ignore_ascii_case("postgres") {
-            env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
-                .ok()
-                .or_else(|| config.account_store_database_url.clone())
-                .filter(|value| !value.trim().is_empty())
-                .map(AdminReadModelSource::Postgres)
-        } else {
-            config
-                .account_store_path
-                .clone()
-                .or_else(|| env::var("ADMIN_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
-                .or_else(|| env::var("MIR2_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
-                .map(AdminReadModelSource::JsonPath)
-        }
-        .unwrap_or_else(|| AdminReadModelSource::Memory(config.account_store.clone()));
+        let source =
+            if config.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+                env::var("MIR2_ACCOUNT_STORE_DATABASE_URL")
+                    .ok()
+                    .or_else(|| config.account_store_database_url.clone())
+                    .filter(|value| !value.trim().is_empty())
+                    .map(AdminReadModelSource::Postgres)
+            } else {
+                config
+                    .account_store_path
+                    .clone()
+                    .or_else(|| env::var("ADMIN_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
+                    .or_else(|| env::var("MIR2_ACCOUNT_STORE_PATH").ok().map(PathBuf::from))
+                    .map(AdminReadModelSource::JsonPath)
+            }
+            .unwrap_or_else(|| AdminReadModelSource::Memory(config.account_store.clone()));
         Self {
             source,
             default_character: config.default_character.clone(),
@@ -9081,6 +9075,9 @@ mod tests {
             body: "Persisted read-model smoke".into(),
             gold: 10,
             items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
             claimed: false,
             deleted: false,
         });

@@ -28,12 +28,13 @@ use super::packets::{
     localized_monster_name_key, localized_npc_name_key, localized_visible_player_name_key,
 };
 use super::resources::{
-    current_language, is_in_world, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
-    RuntimeConfigResource, RuntimeQueueResource, SessionResource, Stage5SystemsResource,
+    current_language, is_in_world, reset_crystal_player_movement_timing, MapRuntimeResource,
+    NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource, RuntimeQueueResource,
+    SessionResource, Stage5SystemsResource,
 };
 use super::save::{active_character_runtime_state, ActiveCharacterRuntimeState};
 use super::session::{system_message, SimulationSession};
-use crate::config::{MapDropRuleRecord, SimulationConfig};
+use crate::config::{MapDropRuleRecord, MonsterSpawnSource, SimulationConfig};
 use crate::MapTransferRecord;
 
 #[derive(Debug, Clone)]
@@ -43,12 +44,32 @@ pub(super) struct RuntimeMapCollisionData {
     pub(super) closed_door_set: BTreeSet<(i32, i32)>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct ZoneMapCollisionData {
+    pub bounds: MapBounds,
+    pub blocked_cells: BTreeSet<(i32, i32)>,
+    pub transfer_source_cells: BTreeSet<(i32, i32)>,
+}
+
 pub(super) fn normalize_map_file_name(file_name: &str) -> String {
     file_name
         .trim()
         .trim_end_matches(".map")
         .trim_end_matches(".MAP")
         .to_ascii_lowercase()
+}
+
+pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapCollisionData> {
+    let collision = runtime_full_map_collision_data(map_file_name)
+        .or_else(|| runtime_map_collision_data(map_file_name))?;
+    let mut blocked_cells = collision.blocked_set;
+    blocked_cells.extend(collision.closed_door_set);
+    let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    Some(ZoneMapCollisionData {
+        bounds: collision.collision.region_bounds,
+        blocked_cells,
+        transfer_source_cells,
+    })
 }
 
 pub(super) fn is_safe_zone_point(
@@ -225,6 +246,47 @@ pub(super) fn transfer_for_key(
         })
 }
 
+pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapTransferRecord> {
+    let player = player_entity(world)?;
+    let position = entity_position(world, player)?;
+    let map = world.resource::<MapRuntimeResource>();
+    let current_map = normalize_map_file_name(&map.current_map.file_name);
+    let config = &world.resource::<RuntimeConfigResource>().config;
+
+    config
+        .map_transfers
+        .iter()
+        .filter(|transfer| normalize_map_file_name(&transfer.from_map_file_name) == current_map)
+        .cloned()
+        .chain(crystal_movement_transfer_records_for_map(
+            &map.current_map.file_name,
+        ))
+        .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
+}
+
+pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let current_map = normalize_map_file_name(&map.current_map.file_name);
+    let config = &world.resource::<RuntimeConfigResource>().config;
+
+    config
+        .map_transfers
+        .iter()
+        .filter(|transfer| normalize_map_file_name(&transfer.from_map_file_name) == current_map)
+        .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
+        || crystal_movement_transfer_records_for_map(&map.current_map.file_name)
+            .iter()
+            .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
+}
+
+pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
+    let Some(transfer) = transfer_for_current_player_position(world) else {
+        return Vec::new();
+    };
+
+    apply_map_transfer(world, &transfer.key)
+}
+
 pub(super) fn crystal_movement_transfer_records_for_map(
     map_file_name: &str,
 ) -> Vec<MapTransferRecord> {
@@ -235,7 +297,16 @@ pub(super) fn crystal_movement_transfer_records_for_map(
     map.movements
         .iter()
         .filter_map(|movement| {
+            if movement.need_hole || movement.need_move || movement.conquest_index > 0 {
+                return None;
+            }
             let target = crystal_map_respawns_by_index(movement.map_index)?;
+            if !crystal_manifest_movement_destination_is_valid(
+                &target.map_file_name,
+                &movement.destination,
+            ) {
+                return None;
+            }
             Some(MapTransferRecord {
                 key: crystal_movement_transfer_key(
                     &map.map_file_name,
@@ -259,6 +330,28 @@ pub(super) fn crystal_movement_transfer_records_for_map(
             })
         })
         .collect()
+}
+
+pub(crate) fn crystal_direct_movement_transfer_source_cells(
+    map_file_name: &str,
+) -> BTreeSet<(i32, i32)> {
+    crystal_movement_transfer_records_for_map(map_file_name)
+        .into_iter()
+        .flat_map(|transfer| {
+            (transfer.from_bounds.min_y..=transfer.from_bounds.max_y).flat_map(move |y| {
+                (transfer.from_bounds.min_x..=transfer.from_bounds.max_x).map(move |x| (x, y))
+            })
+        })
+        .collect()
+}
+
+fn crystal_manifest_movement_destination_is_valid(
+    map_file_name: &str,
+    destination: &Point,
+) -> bool {
+    runtime_full_map_collision_data(map_file_name)
+        .map(|collision| full_map_collision_walkable(&collision, destination))
+        .unwrap_or(true)
 }
 
 pub(super) fn crystal_movement_transfer_key(
@@ -450,6 +543,10 @@ pub(super) fn relocate_player_to_map(
         .resource_mut::<RuntimeQueueResource>()
         .pending_ground_spell_actions = Vec::new();
     world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_movement_command = None;
+    reset_crystal_player_movement_timing(world);
+    world
         .entity_mut(player)
         .insert((Position(position), Facing(direction)));
 
@@ -504,6 +601,11 @@ pub(super) fn clear_non_player_world_entities(world: &mut World) {
 pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
+    if config.monster_spawn_source == MonsterSpawnSource::CrystalStarterRegion
+        && crystal_map_respawns_by_file_name(&map.current_map.file_name).is_some()
+    {
+        return true;
+    }
     map.current_map.title != config.map.title
         || normalize_map_file_name(&map.current_map.file_name)
             != normalize_map_file_name(&config.map.file_name)
@@ -781,13 +883,28 @@ pub(super) fn runtime_map_collision_from_template(
 }
 
 pub(super) fn crystal_map_path(map_file_name: &str) -> Option<PathBuf> {
-    let client_root = std::env::var("CRYSTAL_CLIENT_ROOT")
-        .unwrap_or_else(|_| DEFAULT_CRYSTAL_CLIENT_ROOT.to_string());
     let normalized = normalize_map_file_name(map_file_name);
-    let candidate = PathBuf::from(client_root)
-        .join("Map")
-        .join(format!("{normalized}.map"));
-    candidate.exists().then_some(candidate)
+    crystal_client_root_candidates()
+        .into_iter()
+        .map(|client_root| client_root.join("Map").join(format!("{normalized}.map")))
+        .find(|candidate| candidate.exists())
+}
+
+fn crystal_client_root_candidates() -> Vec<PathBuf> {
+    let mut candidates = Vec::new();
+    if let Ok(client_root) = std::env::var("CRYSTAL_CLIENT_ROOT") {
+        candidates.push(PathBuf::from(client_root));
+    }
+    candidates.push(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("..")
+            .join("downloads")
+            .join("crystal-client-full"),
+    );
+    candidates.push(PathBuf::from(DEFAULT_CRYSTAL_CLIENT_ROOT));
+    candidates
 }
 
 pub(super) fn parse_runtime_map_collision(
@@ -1147,7 +1264,7 @@ pub(super) fn parse_runtime_map_collision_v1(
                     closed: true,
                 });
             }
-            offset += 6;
+            offset += 7;
         }
     }
 

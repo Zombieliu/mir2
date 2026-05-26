@@ -1,5 +1,880 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest production movement/asset roadmap sync: 2026-05-26 closes the current
+> live "走路发送指令处理有延迟" repro. The resource console storm was not a
+> renderer bug: the active immutable remote asset prefix missed several
+> current-scene original-map files, and the web retry loop kept cache-busting
+> immutable 404s. The current missing `Objects/2652..2661` and
+> `Objects23/1418/1420/1423/1425/1429` files are now present in R2, the web
+> bundle negative-caches immutable asset failures, and Gateway release
+> `20260526T1435CST-move-tick-grace0` removes the old 1200ms movement input
+> tick defer. Production headed Chrome WebGL2 evidence
+> `docs/generated/player-qa/movement-jitter/prod-move-tick-grace0-webgl2-existing-20260526.json`
+> passed with `ok=true`, raw WebGL2 atlas `renderedLayers=21`, two Walk ACKs at
+> `398ms` and `609ms`, no critical console errors, and no non-favicon 404s.
+> Roadmap next: investigate the remaining isolated `Objects/289.png` source or
+> map-library mapping gap, then continue Shared MMO ZoneOwner/service authority
+> gaps.
+
+> Latest raw WebGL2 atlas gameplay roadmap sync: 2026-05-26 moves the
+> browser-native WebGL2 entity-atlas path from synthetic probe to production
+> headed gameplay evidence. Player Web now builds the atlas for the raw WebGL2
+> path under the shared GPU renderer condition, keeps initial scene interaction
+> gated until the raw atlas is ready, and targets hosted custom-domain sessions
+> at `wss://165.154.65.136.sslip.io/ws` instead of the high-jitter
+> custom-domain `/ws` route. Production deployment
+> `dpl_Q1k4QFSbGigw9gJ64cfBNcAehjEQ` is live behind
+> `https://mir2.obelisk.build`; bundle probing found the direct WSS host in the
+> shipped JS. Headed Chrome forced-WebGL2 evidence
+> `docs/generated/player-qa/movement-jitter/prod-webgl2-raw-atlas-gameplay-focused-direct-default3-20260526.json`
+> passed with selected/compiled backend `webgl2`, hidden Bevy canvas, raw
+> WebGL2 enabled, prebuilt `starter-bichon-base` atlas packed,
+> `textureReady=true`, `renderedLayers=21`, three Walk ACKs at `93/51/46ms`,
+> clean settle, no camera-offset stair-step warnings after foregrounded headed
+> sampling, no critical console errors, and no non-favicon 404s. Roadmap next:
+> continue Shared MMO ZoneOwner/service authority gaps.
+
+> Latest WebGPU/WebGL2 runtime roadmap sync: 2026-05-26 adds a repeatable
+> Chrome smoke for Bevy runtime backend selection. Player Web now has
+> `smoke:bevy-runtime-backends`, covering default WebGPU-first selection,
+> forced WebGPU, forced WebGL2 package loading, runtime JS/WASM fetches, and
+> post-boot critical console errors. Local evidence selected/compiled WebGPU
+> for default and forced WebGPU, selected/compiled WebGL2 for forced WebGL2,
+> and passed with zero critical console errors. The newer raw WebGL2 atlas
+> renderer probe above starts closing the true WebGL2-renderer fallback target.
+
+> Latest ZoneOwner handoff roadmap sync: 2026-05-26 turns owner takeover from
+> fencing-only into a tested runtime-state move. A hosted owner can hand off
+> its owned `ZoneRuntimeHandle` once, the old host becomes unavailable, and a
+> replacement owner resumes active session state under the new fencing token.
+> Roadmap next: replace the in-process handle transfer with a durable Zone
+> state snapshot/log, wire it through real process/network RPC, and make
+> Account/Inventory plus NPC world-service commits participate in owner
+> takeover and rollback semantics.
+
+> Latest ZoneOwner RPC transport roadmap sync: 2026-05-26 turns the owner
+> command-client boundary into a transport-facing seam. `RpcZoneOwnerCommandClient`
+> now delegates command execution and owner views through `ZoneOwnerRpcTransport`,
+> and the hosted owner implements that transport as the current loopback host.
+> Roadmap next: swap the loopback transport for a real process/network
+> ZoneOwner service, persist/migrate Zone state during handoff, and bind
+> Account/Inventory plus NPC world-service commits to that owner fencing.
+
+> Latest SkillItemConsume request-id roadmap sync: 2026-05-26 closes the next
+> Account/Inventory service boundary prerequisite. Item-consuming Zone skill
+> casts now carry a stable per-session `request_id` in
+> `SkillItemConsume`, and the idempotency key includes account, character,
+> spell, and request id. Roadmap next: persist those committed receipts in an
+> external Account/Inventory actor, pass them through real ZoneOwner RPC, and
+> connect failure/rollback semantics to owner fencing.
+
+> Latest ZoneOwner hosted-runtime roadmap sync: 2026-05-26 moves owner command
+> execution from "Gateway passes a request through a replaceable client" to
+> "the owner host can own the runtime being mutated." The new hosted owner
+> command client executes fenced requests inside its own `ZoneRuntimeHandle`
+> and validates stale leases at the owner boundary after handoff.
+> `GatewaySession` now routes snapshot, identity, save, and mail-refresh reads
+> through that owner-client surface as well. The newer RPC transport seam above
+> lifts this from a direct hosted client into a replaceable transport surface.
+> Roadmap next: add durable state handoff/takeover for ZoneOwner migration and
+> replace the loopback transport with real process/network RPC.
+
+> Latest Account/Inventory idempotency roadmap sync: 2026-05-26 moves shared
+> reward commits closer to the durable economy actor target. Zone monster kill
+> awards and ground-drop pickups now have deterministic committed-receipt keys
+> in the default Account/Inventory service, preventing duplicate reward or
+> pickup mutation when a shared Zone command is retried. The newer
+> SkillItemConsume request-id sync above adds the missing cast-command identity.
+> Roadmap next: move the command store out of process and bind commits to
+> ZoneOwner fencing/RPC handoff.
+
+> Latest NPC world-service atomic outcome roadmap sync: 2026-05-26 moves the
+> NPC/quest side-effect track from separate bridge commits toward a single
+> authoritative world-service transaction. Shared NPC execution now packages
+> script saved values, shared random seed, and entity mutation packets into
+> `ApplyScriptOutcome`; Gateway merges or forwards those results only after a
+> committed world-service receipt validates the side-effect payload. Roadmap
+> next: replace the in-process world service with a durable process/RPC actor,
+> expand quest/economy/account side effects into the same command surface, and
+> continue ZoneOwner handoff plus long gameplay acceptance.
+
+> Latest Zone-native CharmedSnake roadmap sync: 2026-05-26 closes the
+> remaining Crystal `CharmedSnake` successful-hit status behavior in the
+> current Archer summon family. Shared Zone now applies the minion's
+> post-damage paralysis poison with deterministic Zone authority and the
+> Crystal PetLevel-based chance/duration shape. Roadmap next: continue through
+> broader monster AI/status families, then expand durable skill/Buff service
+> ownership and process-external NPC/economy/account authority toward true
+> distributed ZoneOwner operation.
+
+> Latest Zone self-Buff roadmap sync: 2026-05-26 advances the durable
+> skill-state track from "open risk" to a verified bridge. Gateway now applies
+> Zone-owned self `AddBuff` / `RemoveBuff` packet outcomes into the owning
+> personal runtime `BuffResource`, including pending Zone packets, so accepted
+> shared-Zone Buffs such as MagicShield are reflected in snapshots instead of
+> only in transient client packets. Roadmap next: convert more Buff families
+> from packet mirroring into Zone-owned lifetime/service state, then connect
+> that state to process-external services alongside NPC/economy/account
+> authority and ZoneOwner handoff.
+
+> Latest Zone-native SnakeTotem roadmap sync: 2026-05-26 completes the
+> remaining Archer summon-family follow-through for this shared-Zone pass.
+> `SnakeTotem` now keeps the Crystal `PetLevel + 1` swarm cap, refreshes
+> expired `CharmedSnake` minions, self-destructs on missing/far master, and
+> kills its owned minions when it dies. `CharmedSnake` now dies on lifetime
+> expiry or missing/far Totem and applies the Crystal 3x3 death explosion via
+> Zone-native monster-hit resolution. Roadmap next: durable skill-state,
+> process-external NPC/economy/account services, full monster AI coverage,
+> ZoneOwner handoff, and long production gameplay acceptance.
+
+> Latest Zone-native VampireSpider roadmap sync: 2026-05-26 moves the
+> `SummonVampire` tail behavior from "remaining summon polish" into verified
+> shared-Zone authority. `VampireSpider` attacks now emit Crystal Bleeding
+> `ObjectEffect` effect 18 and heal the Archer master through Zone-owned
+> health state. Zone expiry now models Crystal self-destruct for lifetime
+> expiry or a missing/far master, emits `ObjectDied`, and applies 3x3 explosion
+> damage to nearby hostile Zone monsters through the native hit resolver while
+> preserving owner heal/effect behavior and avoiding player damage. Roadmap
+> next: SnakeTotem swarm cap/expiry hardening, durable skill-state persistence,
+> process-external services, full NPC/economy authority, and ZoneOwner
+> handoff.
+
+> Latest Zone-native Archer summon roadmap sync: 2026-05-26 advances the
+> remaining summon authority track beyond Taoist/HolyDeva/PetEnhancer into the
+> first Archer family slice. Shared Zone now recognizes `SummonVampire`,
+> `SummonToad`, `SummonSnakes`, and `Stonetrap` as native summon spells with
+> Crystal-style target-point/projectile-delay validation, retained friendly
+> `ObjectMonster` state, `extra` visibility, master binding, summon caps, and
+> lifetime expiry; Gateway routes those spells to Zone without applying the
+> Taoist amulet item boundary. Verified behavior covers `VampireSpider`
+> target-point spawn plus recast recall, stationary `SpittingToad` ranged
+> attack, retained static `SnakeTotem` spawn plus owned `CharmedSnake` minion
+> attack, and static expiring `StoneTrap` decoy aggro that pulls hostile
+> monsters off the player. Roadmap next: finish SnakeTotem swarm cap/expiry
+> hardening, VampireSpider self-destruct/vampire-heal details, durable
+> skill-state persistence, and process-external service boundaries.
+
+> Latest Zone-native summon/PetEnhancer roadmap sync: 2026-05-25 advances the
+> shared-Zone summon ownership track from first spawn/recall to melee and
+> ranged summon-vs-monster combat plus pet Buff stats. `SummonSkeleton` /
+> `SummonShinsu` / `SummonHolyDeva` use the targetless Zone magic route and
+> Account/Inventory skill-item command boundary; the verified `SummonSkeleton`
+> path schedules a Crystal-delay
+> friendly `BoneFamiliar`, binds `master_object_id` to the Zone player, retains
+> `extra=true` for late AOI joins, recalls the existing owned summon on recast
+> without a second item commit or duplicate spawn, and now lets the
+> `BoneFamiliar` attack hostile native monsters without targeting players.
+> `SummonShinsu` now shares the one-amulet Zone item boundary, delayed retained
+> `Shinsu` spawn, master binding, and hostile-monster melee behavior.
+> `SummonHolyDeva` now covers the 1.5s delayed retained `HolyDeva` spawn and
+> six-tile ranged `ObjectRangeAttack` with delayed DC damage against hostile
+> monsters. `PetEnhancer` now applies and retains the visible Crystal pet Buff
+> type 22 on owned Zone summons and feeds its DC stats back into summon damage.
+> Roadmap next: HolyDeva kiting polish, archer summon families, and durable
+> skill-state persistence.
+
+> Latest Zone-native area-healing roadmap sync: 2026-05-25 expands the
+> self/friendly recovery track from single-target Healing to MassHealing and
+> HealingCircle. Zone now validates near-target casts, selects wounded Zone
+> players inside the recovery radius, owns each delayed HP restore, emits
+> `PlayerHealed` for Gateway personal-runtime synchronization, and emits
+> HealingCircle's delayed `ObjectSpell` from Zone state. Roadmap next: party /
+> group membership filtering, summon ownership, and durable skill-state
+> persistence.
+
+> Latest Zone-native Healing roadmap sync: 2026-05-25 adds the first
+> self/friendly recovery spell to Zone-native authority. Healing now accepts
+> self-target casts, validates HP/MP/cooldown/action state in Zone, publishes
+> owner/observer magic plus the Crystal healing effect, schedules the delayed
+> Zone-owned HP restore, and returns `PlayerHealed` for Gateway to synchronize
+> the personal runtime. Roadmap next: expand this pattern to MassHealing,
+> HealingCircle/friendly target validation, group recovery, and summons while
+> durable skill-state persistence is built out.
+
+> Latest Zone-native MagicShield roadmap sync: 2026-05-25 advances
+> skill/Buff authority from observer-synchronized Buff packets into native
+> self-target Zone magic. `MagicShield` casts with `target_id=0` now resolve in
+> `ZoneRuntime`: Zone validates the self target, action window, MP/cooldown,
+> and duplicate Buff state; emits `Magic`, `ObjectMagic`, visible `AddBuff`,
+> and the Crystal shield-up effect; stores the Buff for late AOI joins; and
+> applies damage-reduction-percent stats when native monsters hit the player.
+> Gateway preparation recognizes self-target Zone magic so learned MagicShield
+> can use this path. Roadmap next: extend the same Zone-owned Buff/stat pattern
+> to more self/friendly Buffs, healing, summons, and durable skill-state
+> persistence.
+
+> Latest production movement/input roadmap sync: 2026-05-25 closes the live
+> movement rollback and input-stall investigation. Gateway release
+> `20260525T0334CST-starter-transfer-cleanup` is installed at
+> `/opt/mir2/gateway/releases/20260525T0334CST-starter-transfer-cleanup` on
+> the UCloud host and health/WSS smoke passed. Production headed WebGPU
+> packet-walk crossed the old `339..341 -> 330,270` demo-gate area with ACKs
+> `339..343`, no map-change packet, and no rollback. Player Web deployment
+> `dpl_7iG3bPgA7HTxkvEzN4LxP2rmFmFC` then shipped the scene-input unlock:
+> after the first playable scene becomes ready, later viewport asset preloads
+> no longer block keyboard/pointer movement. Headed Chrome evidence
+> `docs/generated/player-qa/movement-jitter/prod-scene-input-unlocked2-webgpu-headed-keyboard-a-nosample-hold-20260525.json`
+> passed with WebGPU selected, packed prebuilt atlas active,
+> `sceneInteractionReady=true` during background asset loading, five held-Walk
+> commands, five authoritative ACKs, no critical console errors, and no
+> non-favicon 404s. Roadmap next: continue the remaining 100% Candidate shared
+> MMO gaps, especially durable ZoneOwner RPC/handoff, durable
+> Account/Inventory/NPC services, full Buff/skill state, full monster AI, and
+> 30-active long gameplay acceptance.
+
+> Latest Crystal runtime starter-transfer roadmap sync: 2026-05-25 removes
+> the starter-demo same-map gate from production Crystal runtime config.
+> `with_crystal_map_runtime()` now clears the hard-coded
+> `starter-east-field-gate`, leaving normal starter demo behavior intact while
+> production uses generated Crystal movement records only. Roadmap next:
+> continue the shared MMO 100% Candidate gaps after the deployed production
+> movement/input closeout above.
+
+> Latest PoisonCloud live item-route roadmap sync: 2026-05-25 turns the
+> PoisonCloud Account/Inventory boundary into a live Gateway route. Gateway now
+> treats PoisonCloud as a targetless ground spell, prechecks Zone acceptance
+> before consuming the required amulet and green poison, then dispatches the
+> Zone cast only after the item-cost commit succeeds. Roadmap next: make this
+> account/inventory command surface durable and RPC-fenced for multi-process
+> ZoneOwner deployment.
+
+> Latest Zone-native ExplosiveTrap roadmap sync: 2026-05-25 closes another
+> Trap-family shared-Zone authority gap. Native ExplosiveTrap now derives its
+> front-row trap cells from caster direction, emits the delayed Crystal-style
+> `ObjectSpell` trap row, applies contact damage from Zone-owned state, and
+> clears after detonation. Roadmap next: continue broader profession bespoke
+> controls, summons, and durable skill-state persistence.
+
+> Latest Zone-native TrapHexagon roadmap sync: 2026-05-25 closes the next
+> Trap-family shared-Zone slice. Native TrapHexagon now applies area root
+> control to hostile Zone monsters around the target and schedules the delayed
+> eight-point ring of `ObjectSpell` packets from Zone-owned ground-spell state.
+> Roadmap next: continue broader profession bespoke controls, summons, and
+> durable skill-state persistence.
+
+> Latest Skill item-consumption roadmap sync: 2026-05-25 starts moving
+> item-consuming spell costs behind the Account/Inventory command boundary.
+> `SkillItemConsume` now exists as an identity-bearing shared command, and the
+> in-process service can transact PoisonCloud amulet + green-poison consumption
+> into receipt packets. Roadmap next: replace the in-process implementation
+> with a durable actor/transaction service.
+
+> Latest targetless ground-magic roadmap sync: 2026-05-25 closes the first
+> object-target assumption in shared-Zone magic routing. Zone now accepts
+> `PlayerCastMagic` with `target_id=0` for ground-target spells such as
+> FireWall/Blizzard/MeteorStrike/PoisonCloud, and Gateway preparation can route
+> learned targetless ground Magic to Zone without fabricating a monster target;
+> PoisonCloud now uses the Account/Inventory item-cost route after Zone
+> precheck. Roadmap next: broaden live Gateway regressions and move the command
+> service out of process.
+
+> Latest Zone-native Trap roadmap sync: 2026-05-25 adds the first
+> Trap-family control spell to the shared-Zone authority track. Zone native
+> monsters now retain level from Crystal spawn data, and native Trap uses that
+> level to enforce Crystal's lower-level gate before rooting the hostile monster
+> and queuing the delayed Trap `ObjectSpell` with direction/param semantics.
+> Roadmap next: extend this to broader root/control skills and durable
+> skill-state persistence.
+
+> Latest Zone-native PoisonCloud roadmap sync: 2026-05-25 extends persistent
+> ground-spell authority to Taoist poison cloud monster effects. The Zone now
+> owns PoisonCloud's delayed visible cloud object, 3x3 occupied-cell damage,
+> and green monster poison projection. Gateway now also routes the required
+> amulet and poison item consumption through the Account/Inventory command
+> boundary after Zone precheck. Roadmap next: make that command boundary
+> durable and process-external.
+
+> Latest Zone-native chain/splash roadmap sync: 2026-05-25 expands routed
+> magic from direct/area/ground spells into chain and splash branches. Native
+> MeteorShower now owns secondary-target selection and half-damage commits in
+> Zone, and native FireBounce now owns chained projectile hops plus delayed
+> damage between Zone monsters. Roadmap next: close PoisonCloud item commits,
+> remaining Trap-family actions, profession bespoke skills, summons, and
+> durable skill-state persistence before retiring the
+> personal-session skill bridge.
+
+> Latest Zone-native ground-spell roadmap sync: 2026-05-25 advances persistent
+> spell ownership from routed casts into shared-Zone state. Native FireWall now
+> schedules the delayed cross-shaped `ObjectSpell` cells and recurring
+> same-cell damage from Zone state, while Blizzard/MeteorStrike schedule their
+> delayed 5x5 ground spell cells, center marker, and later recurring damage
+> tick inside Zone. Roadmap next: promote Trap-style ground actions and the
+> remaining profession-specific spell formulas into the same authority
+> boundary.
+
+> Latest Zone-native area magic roadmap sync: 2026-05-25 starts replacing
+> personal-session multi-target spell effects with Zone-owned target collection.
+> Native FireBang/IceStorm casts now include secondary target ids and commit
+> damage to nearby Zone monsters. Roadmap next: broaden the same mechanism to
+> persistent ground spells, chain projectiles, splash-specific formulas, and
+> late profession spell variants.
+
+> Latest Zone-native special arrow Buff roadmap sync: 2026-05-25 expands
+> native skill authority from PoisonShot poison ticking into player-held Buff
+> state. Zone now owns the visible PoisonShot arrow marker Buff, exposes it to
+> late AOI joins, and lets CrippleShot consume that Buff to spread green poison
+> to nearby native monsters. VampireShot healing now also resolves in Zone and
+> synchronizes back to Gateway/personal runtime through `PlayerHealed`;
+> CrippleShot can consume that VampireShot Buff for the same Zone-owned heal
+> follow-up. Roadmap next: finish full Buff stat families, summons, and
+> AoE/ground spells in Zone before removing the remaining personal-session
+> skill side-effect bridge.
+
+> Latest Gateway Magic route roadmap sync: 2026-05-25 closes the practical
+> command-routing proof for shared-Zone Magic launches. Gateway focused tests
+> now show both RangeAttack and Magic commands leave the personal session path,
+> execute through shared Zone authority, and reach observers through Zone
+> outbounds. Roadmap next: expand from routed seeded magic to complete
+> Zone-owned Crystal spell effects, Buff state, projectile/damage variants, and
+> durable skill-state persistence.
+
+> Latest Zone-native poison tick roadmap sync: 2026-05-25 moves the first
+> player-applied poison damage loop from personal-session behavior into shared
+> Zone. Native `PoisonShot` now attaches green poison state to
+> `ZoneNativeMonster`, broadcasts the poison bit, ticks 2-second poison damage
+> in Zone, and can complete death/drop/award through the Zone-native reward
+> path. Roadmap next: expand this pattern to CrippleShot, PoisonCloud, broader
+> poison variants, monster-applied poison damage, and Boss/status AI while the
+> remaining Account/Inventory, NPC world-service, and ZoneOwner process
+> adapters are replaced with durable authorities.
+
+> Latest ZoneOwner heartbeat roadmap sync: 2026-05-25 turns the optional TTL
+> lease slice into a scheduled Gateway-session heartbeat. Web sessions now
+> configure a ZoneOwner renewal interval, and the runtime tick renews the owner
+> lease before any deferred world tick work so high-frequency movement input
+> does not starve owner liveness. Roadmap next: swap the in-process
+> `ZoneOwnerCommandClient` for real Gateway -> ZoneOwner RPC, keep fencing at
+> the owner boundary, and implement handoff/takeover around the same lease
+> heartbeat contract.
+
+> Latest Zone-native player action-window roadmap sync: 2026-05-25 closes the
+> shared-Zone combat timing gap left after moving melee/range/magic authority
+> into Zone. Zone-owned players now track Crystal-style attack and spell action
+> readiness; native melee/range reject early launches, and native magic rejects
+> early casts across different spells before MP/cooldown/impact commits. Gateway
+> shared-runtime coverage now proves the practical RangeAttack route also stops
+> early relaunch at the Zone boundary. Roadmap next: expand native skill/Buff
+> side effects and monster status/poison/Boss AI,
+> then replace the remaining in-process Account/Inventory, NPC world-service,
+> and ZoneOwner command adapters with durable process boundaries.
+
+> Latest NPC world-service command-envelope roadmap sync: 2026-05-25 turns the
+> existing shared NPC saved-value/random-seed/entity-side-effect bridge into a
+> replaceable command surface. Gateway now sends
+> `SharedNpcWorldCommandEnvelope` values with active account/character identity
+> to `SharedNpcWorldService`, and only applies the returned committed command to
+> shared Zone NPC/map state. Roadmap next: promote `MONGEN`, `MONCLEAR`, event
+> flags, NPC service trades, quest rewards, and rollback-sensitive economy
+> changes from diff-derived packets onto first-class NPC/world-service commands.
+
+> Latest Account/Inventory command-envelope roadmap sync: 2026-05-25 makes
+> reward/economy commits actor-shaped. Gateway now submits a
+> `SharedAccountInventoryCommandEnvelope` carrying active account/character
+> identity plus the shared monster kill award or ground-drop pickup command,
+> while the default implementation adapts that envelope back to the current
+> session-backed commit functions after rejecting identity mismatches. Roadmap
+> next: replace the adapter with a durable Account/Inventory actor or
+> transactional store, then expand the same command surface to NPC trades, quest
+> rewards, and rollback-sensitive economy side effects.
+
+> Latest ZoneOwner command-client roadmap sync: 2026-05-25 adds a concrete
+> command client boundary after the existing owner-lease validation step.
+> Gateway sessions now pass `ZoneOwnerCommandRequest` envelopes through
+> `ZoneOwnerCommandClient`, with the default in-process client preserving
+> current runtime behavior and tests proving stale requests stop before that
+> boundary. The same slice adds a renewal hook that accepts the current lease
+> and rejects old owners after handoff; the in-process owner client also
+> validates fencing against the same authority at the owner boundary. The
+> in-memory authority now supports optional TTL renewal semantics, including
+> expired-renewal rejection and fencing-token advancement for takeover. Roadmap
+> next: turn this client into real Gateway -> ZoneOwner RPC with scheduled
+> heartbeat renewal, fencing-token enforcement at the owner process, handoff,
+> and takeover recovery.
+
+> Latest Zone-native monster status roadmap sync: 2026-05-25 closes the
+> first special AI player-status gap in the shared Zone path. Zone-native
+> delayed monster hits now evaluate Crystal-style paralysis for AI 7/22 and
+> green poison for AI 28/37, commit the Zone player's poison bitfield,
+> broadcast `ObjectPoisoned`, prevent movement while Zone-owned paralysis is
+> active, and clear the status after its Crystal-duration window. Roadmap
+> next: add poison damage ticks, expand the Boss/area/status AI matrix, and
+> keep moving remaining combat/drop/NPC/economy side effects behind Zone or
+> world-service authority.
+
+> Latest Account/Inventory service-boundary roadmap sync: 2026-05-25 turns
+> the previous reward receipt contract into a replaceable Gateway service.
+> Zone monster kill awards and shared ground-drop claim commits now go
+> through `SharedAccountInventoryService`; the default implementation keeps
+> current session-backed behavior, and injected services can act like a
+> future Account/Inventory actor. Roadmap next: implement the real actor or
+> transaction service behind that interface, then route NPC service trades,
+> quest rewards, gold/items/experience persistence, and rollback through the
+> same authority boundary.
+
+> Latest NPC entity side-effect roadmap sync: 2026-05-25 makes NPC script
+> monster world mutations visible to the shared Zone boundary. Gateway now
+> diffs monster entities around NPC command execution and converts new
+> monsters into Crystal-backed `ObjectMonster` packets, while cleared/dead
+> monsters produce `ObjectHealth(0)` plus `ObjectDied` and removed monsters
+> produce `ObjectRemove`. Shared observer routing now accepts those
+> health/death/remove packets as shared-object updates. Roadmap next: replace
+> this bridge diff with first-class Zone/world-service commands for NPC
+> map/event mutations, service trades, and rollback-sensitive quest/economy
+> commits.
+
+> Latest NPC random shared-state roadmap sync: 2026-05-25 closes another
+> NPC bridge divergence by moving Crystal NPC `RANDOM` seed progression onto
+> the shared Zone state path. `SimulationSession` now exposes read/apply hooks
+> for the NPC random seed, and Gateway applies the shared seed before NPC
+> commands then publishes the post-command seed back to the shared state. This
+> does not make quests global; per-character quest progress remains personal.
+> Roadmap next: turn NPC `MONGEN` / `MONCLEAR`, map event flags, service
+> trades, and rollback-sensitive quest/economy side effects into explicit
+> Zone/world-service submissions.
+
+> Latest Zone-owner command fencing roadmap sync: 2026-05-25 turns the
+> previous owner metadata into an executable guardrail. `GatewaySession`
+> wraps commands in `ZoneOwnerCommandRequest` envelopes that require a
+> matching `ZoneOwnerLease` before calling the underlying runtime, and the
+> production Web action path now uses that guard for normal authenticated
+> player commands. The new shared `ZoneOwnerLeaseAuthority` also lets a zone
+> handoff advance the current owner fencing token, so a pre-handoff session
+> can no longer execute commands with its saved lease. Focused tests cover
+> successful execution with the current in-process owner, rejection of a stale
+> fencing token before runtime mutation or gameplay-event publication,
+> rejection of a mismatched owner id before production command execution, and
+> rejection after shared-authority handoff. Roadmap next: move the command
+> receiver behind a real Gateway -> ZoneOwner RPC boundary, then add TTL
+> renewal, takeover recovery, and stale-owner rejection across processes.
+
+> Latest Zone-owner fencing metadata roadmap sync: 2026-05-25 adds the first
+> concrete owner/fencing contract to the Gateway routing layer. Routed
+> runtimes, live Gateway sessions, and session-cache routes now carry
+> `ZoneOwnerLease` metadata (`zoneOwnerId`, `fencingToken`) in addition to
+> `zoneId`, with the current in-process owner represented as
+> `in-process:<zoneId>` token `1`. Verification passed focused registry/cache
+> owner metadata regressions, admin session record coverage, fmt/diff checks,
+> and locked Simulation/Gateway check. Roadmap next: use these fields to build
+> the real Gateway -> ZoneOwner command path with fencing-token validation,
+> owner renewal, migration/handoff, and stale-command rejection.
+
+> Latest NPC saved-value shared-state roadmap sync: 2026-05-25 starts moving
+> NPC/quest side effects from personal-session bridge behavior toward a shared
+> world-service boundary. Crystal NPC `SAVEVALUE` / `LOADVALUE` data now uses
+> `SharedNpcSavedValue`, with Gateway shared Zone state applying values before
+> NPC commands and publishing updated values after them. Verification passed
+> the new cross-session saved-value regression, existing shared sparse-NPC and
+> guide-quest regressions, the Account/Inventory receipt regression, fmt/diff
+> checks, and locked Simulation/Gateway check. Roadmap next: expand this from
+> saved script values into quest progress/acceptance, NPC service/economy
+> commits, map/event flags, and rollback-capable world-service submissions.
+
+> Latest Account/Inventory transaction-boundary roadmap sync: 2026-05-25
+> turns the shared reward bridge into one explicit Account/Inventory receipt
+> contract. Shared ground-drop pickup and Zone-native monster kill awards both
+> now return `SharedAccountInventoryTransactionReceipt { kind, committed,
+> packets }`, and Gateway uses that receipt for reward packets plus Zone drop
+> claim commit/cancel decisions. Verification passed the new Gateway receipt
+> regression, adjacent shared kill-award and rollback tests, the Simulation
+> ground-drop receipt test, fmt/diff checks, and locked Simulation/Gateway
+> check. Roadmap next: replace the personal-session storage behind this
+> receipt with a real Account/Inventory actor or transaction service, then
+> route NPC/quest world side effects, special monster AI rewards, and
+> distributed Zone-owner handoff through the same authority boundary.
+
+> Latest 30-active movement/chat roadmap sync: 2026-05-25 moves production
+> gameplay feel from "30 sockets are reachable but active cap stays 15" to
+> accepted `60 ws / 30 active / 30 reconnect leases` on the current single
+> UCloud Gateway. Release `20260525T1348CST-route-refresh-background-task`
+> fixes the movement-delay root cause by decoupling route-lease refresh from
+> the socket hot loop, caching same-map transfer tiles, reducing Zone lock
+> churn, coalescing observer movement packets, and lazily generating retained
+> AOI visibility packets. Public proof passed 30-active movement-only and
+> move/chat pressure:
+> `docs/generated/load/public-route-refresh-background-task-30active-movementonly1m-settle30s-20260525.json`,
+> `docs/generated/load/public-route-refresh-background-task-30active-movechat1m-chat30-settle30s-20260525.json`,
+> and
+> `docs/generated/load/public-route-refresh-background-task-30active-movechat1m-chat10-settle30s-20260525.json`.
+> Roadmap next: keep 30-active as the current single-Gateway target, then
+> finish the still-open Shared MMO pieces: transactional Account/Inventory
+> rewards, NPC/quest side effects, special monster AI, and cross-Gateway Zone
+> owner fencing/handoff.
+
+> Latest shared ground-drop commit receipt roadmap sync: 2026-05-25 turns the
+> shared pickup bridge into a clearer transaction boundary. Shared
+> ground-drop pickup now returns an explicit `committed` receipt from the
+> character/economy side; Gateway uses that receipt to commit or cancel the
+> Zone claim instead of deriving success from `GainedGold` / `GainedItem`
+> packets. Verification passed focused Simulation/Gateway regressions, normal
+> shared pickup coverage, local and UCloud locked checks, and production
+> release `20260525T0843CST-grounddrop-commit-receipt` with WSS smoke plus
+> 30-client safe-cap evidence
+> `docs/generated/load/remote-grounddrop-commit-receipt-30active-timeout60-20260525.json`.
+> Roadmap next: move this receipt contract behind a real Account/Inventory
+> transaction service for gold/items/quest side effects, then continue
+> Zone-owner fencing/handoff and accepted 30-active gameplay feel.
+
+> Latest shared kill-award commit roadmap sync: 2026-05-25 tightens the
+> reward commit boundary after Zone-native monster death. Zone now owns the
+> kill/drop decision and emits `MonsterKillAward`, while the Gateway-side
+> character commit applies experience and emits `GainExperience` only after
+> state mutation. Verification passed focused Simulation/Gateway regressions,
+> shared routing/fallback drop tests, local and UCloud locked checks, and
+> production release `20260525T0827CST-zone-award-commit` with WSS smoke plus
+> 30-client safe-cap evidence
+> `docs/generated/load/remote-zone-award-commit-30active-timeout60-20260525.json`.
+> Roadmap next: generalize this from experience to a real transactional
+> reward service covering gold, inventory items, quest side effects, and
+> rollback, then continue Zone-owner fencing/handoff and accepted 30-active
+> gameplay feel.
+
+> Latest shared fallback drop-template roadmap sync: 2026-05-25 advances the
+> drop/economy track by removing a personal-session dependency from sparse
+> shared monster combat. Fallback `ZoneMonsterSpawn` creation from shared
+> entity snapshots now restores Crystal/starter drop templates, so a
+> Zone-native kill reached through that path can still spawn ground drops with
+> the normal owner window. Verification passed focused Gateway helper tests,
+> Simulation native kill/drop coverage, shared routing/rollback regressions,
+> local and UCloud locked checks, and production release
+> `20260525T0804CST-zone-fallback-drops` with WSS smoke plus 30-client
+> safe-cap evidence
+> `docs/generated/load/remote-zone-fallback-drops-30active-timeout60-20260525.json`.
+> Roadmap next: replace the remaining personal-session economy bridge with
+> Zone/world-service drop generation and transactional Account/Inventory
+> reward commit, then continue NPC/quest side effects, Zone owner
+> fencing/handoff, and accepted 30-active gameplay feel.
+
+> Latest shared drop/economy rollback roadmap sync: 2026-05-25 converts one
+> risky bridge assumption into covered behavior. Gateway now has a focused
+> regression proving that if a shared Zone ground-drop claim succeeds but the
+> personal economy commit rejects the pickup, the claim is canceled, the
+> shared/Zone drop is restored, and the client sees the ground gold remain
+> instead of a false `ObjectRemove`. Verification passed the new rollback
+> test, adjacent shared-drop pickup tests, locked Gateway check, and Gateway
+> fmt check. Roadmap next: keep this rollback guard while moving drop
+> generation and inventory/gold mutation out of personal sessions into a
+> Zone/world-service transaction, then continue Zone owner fencing/handoff and
+> accepted 30-active gameplay feel.
+
+> Latest Zone-native ranged monster AI roadmap sync: 2026-05-25 advances the
+> monster-AI authority track beyond melee. Native Zone monsters now retain
+> Crystal `ai`; ranged/magic-style AI no longer has to chase until adjacent
+> before attacking, and instead launches `ObjectRangeAttack` plus a delayed
+> Zone-owned player hit from its current non-adjacent tile. Verification passed
+> the focused ranged-monster regression, adjacent melee/Buff/Gateway routing
+> tests, local and UCloud locked checks, and production release
+> `20260525T0734CST-zone-monster-ranged` with WSS smoke plus 30-client
+> safe-cap evidence
+> `docs/generated/load/remote-zone-monster-ranged-30active-timeout60-20260525.json`.
+> Roadmap next: expand this first ranged branch into special ranged/magic/Boss
+> AI, then continue through AoE/ground spells, summon lifecycle, NPC/quest
+> side effects, economy transactions, Zone owner fencing/handoff, and accepted
+> 30-active gameplay feel.
+
+> Latest Zone-owned defensive Buff roadmap sync: 2026-05-25 closes the first
+> incoming-damage Buff stat slice. `ZoneRuntime` now applies retained player
+> `MAX_AC` Buff stats while resolving delayed native monster hits, so Zone
+> owns both outgoing attack-stat and incoming defence-stat participation in the
+> current native combat MVP. Verification passed focused and adjacent
+> Simulation regressions, Gateway shared routing coverage, local/UCloud locked
+> checks, and production release `20260525T0720CST-zone-buff-defence` with
+> WSS smoke and 30-client safe-cap baseline
+> `docs/generated/load/remote-zone-buff-defence-30active-timeout60-20260525.json`.
+> Roadmap next: expand from simple DC/AC stat effects into rate/status Buffs,
+> AoE/ground spell authority, summon lifecycle, monster ranged/magic/Boss AI,
+> NPC/quest side effects, economy transactions, and real Zone-owner
+> fencing/handoff.
+
+> Latest Zone-owned Buff stat roadmap sync: 2026-05-25 moves the first stat
+> Buff effect out of personal-session combat math and into shared Zone commit.
+> Zone-native attack profiles now start from unbuffed base damage, then
+> `ZoneRuntime` applies retained player Buff stat payloads when resolving
+> native monster hits; once the Zone-held Buff expires, the same attack returns
+> to base damage. Verification passed the focused Buff-stat authority test,
+> existing Zone object-Magic tests, Gateway shared routing coverage, local and
+> UCloud locked Simulation/Gateway checks, and production release
+> `20260525T0709CST-zone-buff-stats` with WSS smoke plus the 30-client
+> safe-cap baseline
+> `docs/generated/load/remote-zone-buff-stats-30active-timeout60-20260525.json`.
+> Roadmap next: extend Zone-owned Buff semantics beyond max-DC damage into
+> defense/rate/status stats, then tackle AoE/ground spells, summon lifecycle,
+> monster ranged/magic/Boss AI, NPC/quest side effects, economy transactions,
+> and Zone-owner fencing/handoff.
+
+> Latest Zone-native Magic control roadmap sync: 2026-05-25 closes the first
+> shared-Zone skill-control gap after object Magic MP/cooldown. Targeted
+> ElectricShock, Entrapment, and CatTongue now apply control state inside
+> `ZoneRuntime`; controlled native monsters stop moving/attacking until the
+> Zone-owned expiry, Entrapment/CatTongue publish retained Crystal control
+> packets, poison clears on expiry, and ElectricShock/Entrapment are treated as
+> zero-damage control profiles. Verification passed local and UCloud focused
+> Simulation tests, Gateway shared routing coverage, and locked
+> Simulation/Gateway check. Gateway release
+> `20260525T0651CST-zone-magic-control` is live; WSS smoke
+> `docs/generated/load/remote-zone-magic-control-wss-smoke-20260525.json`
+> passed, and the updated 30-client baseline
+> `docs/generated/load/remote-zone-magic-control-30active-timeout60-20260525.json`
+> confirms the production policy remains `15 active / 15 rejected` with no
+> client errors. Roadmap next: move stat Buff application and AoE/ground spell
+> resolution into Zone-owned skill state, then continue into richer monster
+> ranged/magic/Boss AI, NPC/quest side effects, transactional economy commit,
+> and real cross-Gateway Zone-owner fencing/handoff.
+
+> Latest Zone-native ranged combat roadmap sync: 2026-05-25 extends the shared
+> combat migration beyond melee. `ZoneCommand::PlayerRangeAttackObject` and
+> `ZoneCommand::PlayerCastMagic` now give the Zone authority over live monster
+> target validation, target-tile validation, launch packet AOI fanout, and
+> delayed tick-time damage/health/death/drop/experience commit for targeted
+> ranged and object magic attacks. Zone also now owns object-magic MP spend,
+> per-Spell cooldown rejection, and `ObjectMana` AOI fanout. Gateway routes
+> shared `RangeAttack` through Zone and has learned object-target Magic routing
+> wired from the same command path. Verification passed focused Zone
+> ranged/magic authority tests, MP/cooldown rejection, invalid target
+> rejection, a Gateway shared `RangeAttack` routing regression, the existing
+> delayed melee regression, and locked Gateway check. The matching UCloud
+> Gateway release `20260525T0630CST-zone-magic-mp-cooldown` is live, and
+> public health plus WSS smoke
+> `docs/generated/load/remote-zone-magic-mp-cooldown-wss-smoke-20260525.json`
+> passed with `ready=1/1`, `capacityRejected=0`, `errors=0`, `messages=623`,
+> and `ok=true`. A same-release 30-simultaneous baseline
+> `docs/generated/load/remote-zone-magic-mp-cooldown-30active-baseline-20260525.json`
+> confirms the current production policy still accepts 15 active and rejects
+> 15 (`ok=true`, keepalive p95 `22076ms`), so 30-active gameplay feel remains
+> open. Roadmap next: move Buff/stat/control/summon/AoE effects into
+> Zone-owned skill state, then expand monster AI from melee to
+> ranged/magic/Boss mechanisms, replace personal-session drop/economy mutation
+> with a Zone/world-service transaction, and lower the 30-active burst latency
+> before raising the live active cap.
+
+> Latest blocked-source map-transfer roadmap sync: 2026-05-25 turns the live
+> Chrome Library-door failure into a covered backend parity case. Manual
+> production testing moved `Scout` from `BichonProvince 322:248` onto the
+> Crystal direct movement source `322:247`, but the live Gateway stayed on map
+> `0` instead of entering `0104 Library`. The source fix distinguishes ordinary
+> blocked tiles from manifest-backed direct movement source cells: player
+> movement may step onto the transfer source so the authoritative walk-on
+> transfer can fire, while closed/static collision still blocks non-transfer
+> movement and object occupancy. Shared Zone map collision now also prefers full
+> original Crystal map collision data for map `0` instead of the starter
+> fragment. Verification passed focused Simulation and Gateway Library
+> regressions, existing direct walk-on transfer regressions, adjacent
+> `crystal_manifest_movements`, Simulation/Gateway fmt check, and locked
+> Simulation/Gateway check. Roadmap next: deploy a Gateway release with this
+> patch, then retest the same Chrome route through `BichonProvince 322:247` to
+> prove live transfer into `0104 Library`.
+
+> Latest movement latency roadmap sync: 2026-05-24 closes the current
+> user-reported "walk command delay / no frontend print" slice. The command was
+> being sent, but the web client did not expose console movement logs by
+> default, and the production Gateway still spent movement hot-path time
+> generating full outcome snapshots. Player Web now exposes movement send/ack
+> console logs behind `?movementLog=1`, mitigates the React #418 hydration
+> warning path, and is deployed as `dpl_BommXyKsMcAX3Lmw4TYcg82a7Rsw`.
+> Simulation/Gateway now skip outcome snapshots for low-latency movement/tick
+> commands, and the live Gateway is release `20260524Tmovelowlatency`. Normal
+> `https://mir2.obelisk.build` sessions now use
+> `wss://165.154.65.136.sslip.io/ws` rather than the high-jitter custom-domain
+> Worker WebSocket route. Verification passed focused Rust regressions, Gateway
+> check, Web typecheck, public health, WSS smoke, and production browser
+> movement capture
+> `docs/generated/player-qa/movement-jitter/prod-normal-directws-keyboard-d-20260524T1513.json`
+> with six walk ACKs at `555/522/516/523/517/517ms`, clean settle, and no
+> rollback/blackout/critical-console/404 failures. Roadmap next: keep this
+> direct Gateway WSS shape while broadening movement acceptance to multi-player
+> and higher-pressure map clusters.
+
+> Latest movement rollback roadmap sync: 2026-05-24 narrows the remaining
+> "walks then snaps back" symptom to legitimate server corrections and removes
+> two client/server mismatches that made those corrections look like rubber-band
+> movement. Shared Zone now degrades standstill Run into an effective one-tile
+> Walk in source, matching the current Crystal action goal, instead of
+> hard-correcting the player at origin. Player Web keeps local prediction out of
+> authoritative `world.entities` and waits for server ACK when map-region data
+> is missing, out-of-region, or known-blocked. Verification passed Web
+> typecheck, scoped diff check, local smoke
+> `docs/generated/player-qa/movement-jitter/local-left-walk-wait-map-20260523T233000.json`,
+> and production Web smoke
+> `docs/generated/player-qa/movement-jitter/prod-left-walk-web-rollback-fix-20260524T0034.json`
+> on deployment `dpl_3BwwKyjXY9UFZS3jSZk3vCsybCrW`, with zero visual jumps,
+> zero logical rollback, zero scene blackout, no critical console errors, and
+> no non-favicon 404s. The remote Gateway was then restarted to release
+> `20260524T0310Z-rollbackfix`; remote WSS smoke
+> `docs/generated/load/remote-rollbackfix-wss-smoke-20260524.json` passed, and
+> post-Gateway production Web movement smoke
+> `docs/generated/player-qa/movement-jitter/prod-left-walk-gateway-rollbackfix-20260524T0320.json`
+> passed with the same rollback/blackout/error assertions green. Roadmap next:
+> broaden production Chrome movement around NPC/monster clusters and region
+> edges as a longer soak, rather than treating normal occupied-tile correction
+> as a client rubber-band regression.
+
+> Latest map-transfer roadmap sync: 2026-05-22 closed the direct walk-on
+> movement trigger for Crystal map transfers. The previous 807-scene
+> production QA screenshot set remains the resource/render proof, but it is not
+> a traversal proof. `docs/generated/map/latest-crystal-map-reachability.json`
+> now records the live traversal graph from Bichon map `0`: 463 maps,
+> 1999 movement rows, 1906 direct rows, 93 special/ignored rows, 268 maps
+> reachable by direct movement, and 185/284 positive-respawn maps reachable by
+> that direct path. Runtime now transfers on Walk/Run arrival at a Crystal
+> movement tile in both the personal session and the production shared-Zone
+> Gateway route, while debug `crystal:<map>:<x>:<y>` remains blocked for normal
+> production clients. Remote UCloud Gateway release
+> `20260522T064157Z-walktransfer` is deployed and passed host/public health plus
+> 1-client WSS smoke
+> `docs/generated/load/remote-walktransfer-wss-smoke-20260522.json`. Roadmap next:
+> add live production browser screenshots for
+> representative direct-walk routes and separately classify the remaining
+> non-direct maps by NPC/script/event/item/special entry path.
+
+> Latest original-map spawn roadmap sync: 2026-05-21 closed the reported
+> non-original Bichon monster leak by moving production Gateway bootstrap to the
+> Crystal map runtime. Original map sessions now normalize map metadata from the
+> Crystal respawn manifest and spawn current-map original NPC/monster rows
+> instead of the starter scene's `Training Dummy` / `Field Wasp`. Saved
+> non-default starts now also surface representative monsters from broad
+> original respawn rectangles while the player is inside that data range, which
+> closes the live QA case where a forest/cave map could load with no local
+> roster visible. The all-map
+> gameplay audit also now auto-detects the local full Crystal client root and
+> passed strict mode with 463 maps, 6341 respawns, respawn failures 0, NPC
+> failures 0, movement failures 0, and static failures 0. Roadmap next: deploy
+> the Gateway/Web stack and run a live production smoke around Bichon plus a
+> few respawn-heavy maps to verify the browser receives only original spawn
+> surfaces.
+
+> Latest Gateway scheduling roadmap sync: 2026-05-19 moved the 30-player server question from "health endpoint starves under load" to "gameplay burst latency still needs tuning". Release `20260519T141920Z-fastka` adds per-socket Redis route-refresh throttling, idle route-lease keepalive, env-tunable runtime tick cadence, configurable Tokio worker threads, blocking isolation for synchronous simulation action/tick/snapshot/save work, and a fast Web KeepAlive ACK path. The UCloud 4H8G host passed a 30-client WSS 5-minute soak with `ready=30/30`, no capacity rejection, no client errors, and 30/30 successful 5s health probes while Redis record/lease counts reached 30. Roadmap next: keep live capacity at 15 active players for feel safety, then reduce StartGame/bootstrap and movement-burst latency before promoting 30 active to the normal internal-test target.
+
+> Latest Gateway health-soak roadmap sync: 2026-05-19 moved the 30-player question from "can 30 sockets enter" to "can the Gateway stay observable under 30-player entry pressure". Release `20260519T124942Z-healthfast` is now deployed and reduces Redis `/health` work to one key scan plus one `MGET`, with session-cache status on the blocking pool. Verification proved 30/30 clients for a 20-minute soak before the release and a 5-minute soak after it, but health probes still timed out during entry/runtime pressure and keepalive p95 remained high. Roadmap next: keep the live cap at 15 active players, then optimize Login/NewCharacter/StartGame scheduling or enforce small in-flight caps before retesting 30 active as the normal internal-test target.
+
+> Latest Gateway Postgres-pool roadmap sync: 2026-05-19 moved the internal-test Gateway persistence path from one-connection-per-save pressure toward a bounded pooled Postgres profile. Account-store Postgres now uses reusable connections, one migration pass per pool, serialized source writes in the process, and account-scoped writes for hot account/character saves. The UCloud 4H8G Gateway is running release `20260519T105412Z-nogit` with pool size 8, and the 30-client WSS concurrent handshake artifact passed with `ready=30/30 capacityRejected=0 errors=0 ok=true`. Roadmap next: keep the live cap at 15 active players, then run a longer 30-player soak that proves `/health` stays responsive before treating 30 active as the normal internal-test target.
+
+> Latest new-account roadmap sync: 2026-05-19 aligned first-login character selection with the expected Crystal account flow. New password accounts already had an empty select list; now missing password logins no longer auto-create the `Scout` Warrior template, and first-time Passkey/Wallet accounts also receive an empty character list before using the original select-screen `NEW` class/gender/name picker. Roadmap next: deploy this account-lifecycle fix to the live Gateway/Web stack and smoke a fresh Passkey account through NEW -> selected created character.
+
+> Latest original Bichon intro quest-chain roadmap sync: 2026-05-18 converted the first visible original new-player chain from "backend quest data exists" into a repeatable gameplay route. The vertical slice now starts on original Bichon map `0`, talks to Assistant Jane/CraftLady/Merchant John, handles q1 carry-item readiness, q2 Scarecrow `GingerTea` Q drops, q3 talk handoff, q4 passive Deer close-melee plus Harvest `DeerMeat`, q4 turn-in, and q5 availability. Verification passed focused original Bichon intro coverage, full Simulation `vertical_slice` 6/6, shared Zone 77/77, security lifecycle 9/9, and Simulation/Gateway locked check. Roadmap next: broaden this from q1-q4/q5 availability into representative q5+ and mid/late 1-45 live-client route acceptance, including dialog text, route hints, quest markers, and reward UI feel.
+
+> Latest Zone-native monster combat/drop roadmap sync: 2026-05-18 moved the first normal melee attack route into the shared-Zone producer while keeping Crystal launch/hit-frame timing, added the first native monster AI tick, and completed the monster-to-player damage write-back outbound. Gateway now seeds live map monsters into Zone, routes explicit shared monster `WorldCommand::Attack` to `PlayerAttackObject`, and Zone emits attack launch packets separately from tick-resolved strike/damage/health/death/drop/experience/kill-award packets. Zone-native monsters can walk toward nearby players, fire adjacent delayed melee-hit visuals, mutate Zone-held player HP, broadcast player `ObjectHealth`, and send `PlayerDamaged` so the Gateway applies the same HP loss to personal `SimulationSession` state for snapshots/save. Verification passed Simulation `shared_zone` 77/77, Gateway `shared_in_process` 40/40, Simulation `security_lifecycle` 9/9, focused delayed-hit/native-attack/AI-tick/HP-writeback regressions, and Simulation/Gateway locked check. Roadmap next: extend native routing to RangeAttack/Magic with real skill semantics, and expand from current seed drops into full Crystal drop-table exactness.
+
+> Latest Postgres+Redis roadmap sync: 2026-05-18 moved prod-like runtime policy from "can use Postgres/Redis" to "must use Postgres/Redis". Gateway still supports JSON/in-memory for local development, but production/staging envs and explicit require flags now reject missing Redis route/session cache, validate required Redis availability on startup, and pair that with the existing Postgres source-of-truth account-store requirement. Staging and systemd examples now advertise Postgres account persistence plus Redis session/routing leases as the default internal-test profile. Roadmap next: normalize deeper character subsystems into database tables and add cross-Gateway owner handoff/shared Zone process work after the current single-process Gateway policy is stable.
+
+> Latest ranking-system roadmap sync: 2026-05-18 promoted rankings from a placeholder/social-menu surface into a working Crystal packet/UI path. Source audit confirmed the original client/server ranking model uses `GetRanking { rankType, rankIndex, onlineOnly }` and `Rankings { myRank, listings, listingDetails, count }` across Overall plus Warrior/Wizard/Taoist/Assassin/Archer classes. The Rust runtime now builds those rankings from persisted characters with active-session overlay, Gateway exposes the Web `getRanking` command, and Player Web renders the ranking panel through the original System Menu social surface instead of static copy. Verification passed Rust fmt/check, Simulation ranking regression, Gateway command/event regressions, Web typecheck, and a live Browser smoke showing Overall and Online rankings for Scout with evidence at `docs/generated/player-qa/ranking-system/ranking-panel.png` and `ranking-smoke.json`. Roadmap next: extend ranking acceptance to real multi-account online/store scenarios after production persistence/shared roster work, then tune any original-client pagination and statue/NPC entry feel.
+
+> Latest shared Zone drop-claim roadmap sync: 2026-05-18 completed the next queued shared-native drop arbitration slice. Shared ground drops are now synchronized into Zone state, manual pickup and IntelligentCreature pickup acquire Zone claims before the personal session awards gold/items, successful commits remove the object for observers and late joiners, and failed personal award/filter/full-bag paths cancel the claim and restore visibility instead of leaving stale `ObjectRemove` packets. Zone also owns nearest eligible drop selection for auto pickup, while Gateway's map layer is reduced to a mirrored read model for drop visibility/removal. Verification passed Simulation `shared_zone` 74/74 and Gateway `shared_in_process` 38/38. Roadmap next: move the producer side of drops, monster AI/combat, and item/gold award mutation further into shared Zone or an actor-owned world service so personal sessions stop being the gameplay authority behind those outcomes.
+
+> Latest vertical-slice roadmap sync: 2026-05-18 promoted the current "playable slice" from a status description into a repeatable gate. The new Simulation vertical-slice suite covers the four requested main lines: all five classes can be created and enter game with correct class/gender/vitals and empty personal state, each class has a basic skill/combat loop, Bichon starter NPC/monster/quest/drop/reward flow completes, and shared multiplayer presence/movement/chat/drop ownership remains stable. Verification passed Simulation fmt, vertical slice 4/4, shared Zone 74/74, and security lifecycle 9/9. Roadmap next: use this gate as the regression floor while expanding from "one basic skill/task path per class/zone" to full Crystal skill trees, broader 1-45 live NPC walkthroughs, and native shared Zone monster AI/combat/drop ownership.
+
+> Latest Redis route-admission roadmap sync: 2026-05-18 made Redis/session-cache routing part of the actual Web `StartGame` admission path. The Gateway now acquires a per-account/character route lease before entering the world, rejects duplicate online entry while another fresh owner holds that lease, releases failed pending leases, and keeps successful sessions on the existing refresh/owned-remove lifecycle. Redis status now counts lease keys directly, making pending entry locks visible in `/health`. Verification passed new route-admission regressions, existing in-memory and Redis route-lease tests, production Web path safety, session-cache suite, and health boundary coverage. Roadmap next: add a real owner handoff channel for cross-Gateway reconnect/Admin kick, then move distributed WS/Login/StartGame counters from process-local capacity to Redis-backed leases when multiple Gateway processes are used.
+
+> Latest Gateway hot-path roadmap sync: 2026-05-18 split the next capacity optimization into two runtime controls. First, account lifecycle bursts are now independently limitable with `MIR2_GATEWAY_MAX_LOGIN_IN_FLIGHT`, `MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT`, and `MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT`, and `/health` exposes those in-flight counters so registration/login/start-game pressure can be sized separately from online Zone tick load. Second, active character persistence now uses a dirty save queue: Web actions mark sessions dirty, saves flush by debounce/checkpoint/queue-pressure policy, and disconnect still forces the final active-character save so the last authoritative movement transform survives reconnect/logout. Verification covered focused in-flight capacity and save-queue regressions, production Web path safety, reconnect retention, Web typecheck/script syntax, and a live 4-client hot-path smoke under `docs/generated/load/gateway-hotpath-codex-smoke.json` with `ready=4/4 capacityRejected=0 errors=0 ok=true`. Roadmap next: replace the JSON account store with production persistence or an actor-owned store, then repeat the 2H2G/2H4G/4H8G bandwidth matrix as a longer soak with CPU/RSS/network evidence.
+
+> Latest Gateway capacity roadmap sync: 2026-05-18 turned Gateway capacity from an implicit OS/resource outcome into explicit runtime policy. The web Gateway now has independent caps for WebSocket connections, active in-game sessions, and reconnect-grace leases via `MIR2_GATEWAY_MAX_WS_CONNECTIONS`, `MIR2_GATEWAY_MAX_ACTIVE_SESSIONS`, and `MIR2_GATEWAY_MAX_RECONNECT_LEASES`, with live `/health` capacity counters. The load harness now defaults to real production-safe player traffic instead of debug Stage5 commands and can assert expected capacity rejection counts. Verification covered unit capacity accounting, reconnect permit transfer/release, production command safety, Web typecheck/script syntax, and two live 4-client smokes: active-session cap `ready=2/4 capacityRejected=2 ok=true` and WebSocket handshake cap `ready=2/4 capacityRejected=2 ok=true` under `docs/generated/load/`. Roadmap next: choose production caps per deployment size and run longer soak/RSS/network evidence before checking the final accepted production-smoke concurrency gate.
+
+> Latest reconnect grace roadmap sync: 2026-05-18 moved the in-game disconnect experience from frontend-only replay into a backed, repeatable Gateway grace path. The Web client already snapshots auth/character and replays login/start after unexpected socket close; Gateway now retains the active `GatewaySession` for a short reconnect lease, refreshes the session-cache route lease for that same grace window, and restores the retained session on the next authenticated `StartGame` for the same account/character. A new `npm run smoke:reconnect-resume` harness proves the player stays in game, sees bounded reconnect status, returns to `wsState=open`/`reconnectStatus=idle`, and keeps the same map/player position. Verification passed Gateway reconnect/production-safety/route-lease tests, Web typecheck/script syntax, and live smoke evidence under `docs/generated/player-qa/reconnect/`. Roadmap next: decide whether production deployment needs cross-process durable session ownership or a shared Zone service for reconnects beyond a single Gateway process.
+
+> Latest original quest-chain roadmap sync: 2026-05-18 closed the current automated backend acceptance slice for normal Crystal quests from level 1 through 45. The roadmap state now includes generated Crystal quest packets plus parsed source quest-text tasks, runtime availability in the Quest Diary model, NPC quest links, accept/finish/share command handling, prerequisite-chain/level/class gates, kill/item/flag progress, carry and task-item lifecycle, reward option semantics, and backend regressions covering original quest availability/progress/rewards plus adjacent starter-quest behavior. Roadmap next: live human walkthrough for representative 1-45 NPC dialogs, translated wording, map-route hints, and any source-script branch nuance that only appears in the visual client.
+
+> Latest all-map resource/gameplay roadmap sync: 2026-05-16 closed the current automated map-source and map-semantic gate. Web map coverage now records 463/463 Crystal manifest maps present/parseable, missing minimap indices `[]`, missing sampled map libraries 0, and `visualFallbackRisk.mapCount=0`, with 453 empty/out-of-range frame references tracked as Crystal source no-draw behavior instead of frontend fallback. Added the all-map gameplay audit for movements, respawns, NPC scripts, safe zones, safe-zone spell flags, doors, cell lights, fishing cells, drop rules, light/feature flags, and static map semantics: movement failures 0, respawn failures 0, static failures 0, unimplemented NPC commands 0. Simulation now finds the local full Crystal client root, fixes type-1 map cell stride parsing, suppresses invalid/special Crystal movement rows from runtime direct transfers, and leaves no-candidate respawn rows inert like Crystal. Verification passed both map audits, Web `npx tsc --noEmit`, Simulation fmt check, focused `crystal_manifest_movements` 2/2, and focused `spread_slots` 2/2. Roadmap next: final human visual walk-through across representative maps, doors/mechanisms/weather/light feel, and any map-specific script branches that require live gameplay judgment.
+
+> Latest shared object-action roadmap sync: 2026-05-14 moved shared monster/generated-object action observer delivery onto Zone retained-object AOI. Gateway no longer directly queues those packets to every same-map observer; it seeds shared Monster/NPC objects into Zone and asks Zone to broadcast shared-object packets. Zone preserves object actor ids, rebases current-player local self result ids to authoritative Zone player ids, applies retained lifecycle guards, and filters delivery by object visibility. Verification passed focused Simulation shared-object regressions 3/3, Simulation `shared_zone` 69/69, Gateway `shared_in_process` 35/35, and Simulation/Gateway fmt/check. Roadmap next: Zone-owned shared drop claims/expiry and then deeper native monster combat/drop generation.
+
+> Latest retained object authority roadmap sync: 2026-05-14 advanced shared Zone retained-object parity from visibility toward authoritative lifecycle/occupancy. Full retained Buff payloads now replay for late joiners and object-AOI entrants, stale post-death movement/mana/positive-health packets are suppressed, retained health cannot rise from stale personal-runtime snapshots before revive, and retained NPC/live-monster tiles now block player movement while dead/removed/drop/deco objects stay passable. Verification passed Simulation `shared_zone` 66/66, Gateway `shared_in_process` 35/35, and Simulation/Gateway fmt/check. Roadmap next: move the actual monster AI/combat/drop/NPC side-effect source of truth from personal-session bridges into native shared Zone authority.
+
+> Latest retained object-vitals roadmap sync: 2026-05-14 added current health/mana as retained shared Zone object visibility state. Retained `ObjectHealth` packets now follow `ObjectMonster` for late joiners and players entering object AOI, update to the latest percent/expire payload, keep zero-health death ordering intact, and clear on revive. Retained `ObjectMana` now does the same for MP-bearing heroes/generated objects. Verification passed focused retained-object health/mana regressions 3/3, Simulation shared_zone 60/60, Gateway shared_in_process 35/35, and Simulation/Gateway fmt/check. Roadmap next: migrate the underlying damage/death/drop/mana resolution into native Zone authority.
+
+> Latest retained harvest-corpse roadmap sync: 2026-05-14 moved another corpse/drop consistency fact into the shared Zone retained-object lifecycle. Non-player `ObjectHarvested` packets now mark the retained object harvested/dead, duplicate harvest completion is suppressed, stale later live spawns cannot erase the harvested corpse state, late joiners see the harvested dead anchor/direction, and player harvest animation packets remain player-state-neutral. Verification passed focused harvested retained-object regressions 3/3, Simulation shared_zone 57/57, Gateway shared_in_process 35/35, and Simulation/Gateway fmt/check. Roadmap next: native Zone ownership for harvest reward transfer and drop generation.
+
+> Latest Crystal action-queue roadmap sync: 2026-05-23 moves shared movement
+> from "latest intent plus run grace" to Crystal's ordered action semantics in
+> both code and production evidence. Zone now owns a bounded ordered
+> Walk/Run/Turn action queue per player, consumes actions on Crystal
+> `ActionTime`, applies the 350ms Turn delay and 600ms Walk/Run windows,
+> now degrades raw standstill Run into an effective Walk per the latest movement
+> rollback correction above, and preserves
+> Crystal's different failed-Walk versus failed-Run direction behavior. Player
+> Web treats self `UserLocation` as confirmation/correction rather than a fresh
+> movement animation, renders packet Walk/Run as one Crystal 600ms action even
+> when Run spans two tiles, and caps local ActionFeed lead to the one-Run
+> two-tile window so real corrections are not masked as stale echoes.
+> Verification passed Simulation `shared_zone` 78/78, focused Gateway
+> Walk+Run/Turn routing regressions, Simulation/Gateway fmt-check, Web
+> typecheck, Web production build, remote Gateway release
+> `20260523T071900Z-actionqueue`, Player Web action-queue verification deployment
+> `dpl_HmHQ4CXfy7d895kHFMfiNLHWespN`, custom-domain production `/health`, and production
+> walk/run captures
+> `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-walk-fix2-20260523T1331.json`
+> plus
+> `docs/generated/player-qa/movement-jitter/prod-action-queue-keyboard-run-fix2-20260523T1332.json`,
+> both `ok=true` with zero visual jumps, logical rollback, scene blackouts,
+> critical console errors, and non-favicon 404s. Roadmap next: continue
+> shared-native combat/drop/NPC authority work and final human feel acceptance
+> for broader blocked-tile/collision edges.
+
+> Latest delayed combat status-result roadmap sync: 2026-05-14 broadened the delayed player combat bridge so status and buff result packets are not lost. Local-player-owned delayed strike bundles now carry matching `ObjectPoisoned`, `AddBuff`, `RemoveBuff`, and `PauseBuff` results for the struck target or actor, while unrelated tick combat from other attackers remains filtered. Verification passed the focused delayed-player-action filter regression. Roadmap next: use the retained Zone object state to move these combat-result facts out of personal-runtime mirroring.
+
+> Latest retained Zone object roadmap sync: 2026-05-14 advanced the shared Zone from player-only AOI plus transient packet fanout toward a retained online-world read model. `ZoneRuntime` now stores rebased monster/hero/NPC/item/gold/deco spawn surfaces from `BroadcastPackets`, keeps them updated through movement, death/revive, zero-health death, hidden/effect, poison, buff, name/colour, and NPC image packets, expires retained visible object Buffs on Zone tick, tombstones objects on explicit object remove or intelligent-creature pickup, sends spawn/remove packets when players join or move into/out of retained-object AOI, dispatches retained object spawn/update/remove by object AOI instead of actor AOI, cleans owner-generated retained objects on owner Leave, despawns retained item/gold drops from Zone tick, blocks stale retained spawns from reintroducing removed objects or overriding dead retained lifecycle facts, and preserves `ObjectRevived` ordering against stale dead spawns. Verification passed focused retained-object regressions 16/16, Simulation shared_zone 55/55, Gateway shared_in_process 35/35, and Simulation/Gateway fmt/check. Roadmap next: use the retained object state as the stepping stone for native Zone combat/drop/NPC authority rather than relying on personal-runtime/Gateway mirroring.
+
+> Latest shared entity-action observer roadmap sync: 2026-05-14 extended shared Gateway observer delivery for non-player action packets. Shared monster/generated-object `ObjectAttack`, `ObjectRangeAttack`, `ObjectMagic`, `ObjectProjectile`, and attacker-anchored `ObjectStruck` packets now reach same-map observers when their actor/source exists in the shared map, while player-origin combat remains on the existing Zone rebasing path; current-player local target ids are rewritten to the Zone object id for observer correctness, including same-batch local `ObjectHealth` / `DamageIndicator` / `ObjectDied` / `ObjectPoisoned` / `AddBuff` / `RemoveBuff` / `PauseBuff` results anchored by a shared-actor strike. Verification passed focused shared entity movement/action regressions 2/2 and Gateway shared_in_process 35/35. Roadmap next: make the resulting health/death/drop state native to shared Zone instead of mirrored from personal-runtime outcomes.
+
+> Latest shared entity-movement observer roadmap sync: 2026-05-14 moved another monster/generated-object visibility edge into the shared Gateway layer. `ObjectTurn`, `ObjectWalk`, and `ObjectRun` packets for objects already present in the shared map now reach same-map observers even when produced by a personal runtime Tick rather than by Zone player movement, and the bridge avoids expensive snapshot reads on non-movement packets so player Run timing stays stable. Verification passed focused entity movement and Run timing regressions, Gateway shared_in_process 34/34, Gateway shared_zone_state 36/36, and Simulation/Gateway fmt/check. Roadmap next: replace the remaining personal-runtime source of monster AI movement/combat/drop generation with native shared Zone authority.
+
+> Latest shared drop despawn-expiry roadmap sync: 2026-05-14 completed shared Gateway despawn deadlines for ground drops. Drops synced from personal snapshots, restored after blocked shared pickup, or committed from death packets now receive a Crystal-tick lifetime; Tick/KeepAlive removes expired shared drops, tombstones them, clears owner/despawn metadata, and broadcasts `ObjectRemove` to same-map clients. Verification passed focused shared expiry regressions 4/4, Gateway shared_zone_state 36/36, Gateway shared_in_process 33/33, and Simulation/Gateway fmt/check. Roadmap next: move the actual drop generation/award source of truth from personal runtime reconciliation into native shared Zone state.
+
+> Latest shared drop ownership-expiry roadmap sync: 2026-05-14 added shared Gateway deadlines for Crystal ground-drop owner windows. Shared drops merged from personal snapshots or committed from death drops now carry a local expiry derived from `ownership_remaining_ticks`, and both manual pickup and IntelligentCreature auto pickup clear expired ownership before enforcing owner/group rules. Verification passed focused manual/auto expiry regressions, Gateway shared_zone_state 35/35, Gateway shared_in_process 32/32, and Simulation/Gateway fmt/check. Roadmap next: native shared Zone ownership for drop generation plus full shared drop despawn/expiry.
+
+> Latest shared object-movement cache roadmap sync: 2026-05-14 tightened shared map-cache handling for ordinary Crystal object movement packets. `ObjectTurn`, `ObjectWalk`, and `ObjectRun` now refresh shared entity coordinates/direction through the same guarded transform path as push/backstep/dash packets, reducing stale shared coordinates for moved monsters or generated objects before native Zone-owned movement is complete. Verification passed a focused Gateway shared-zone-state movement regression. Roadmap next: native shared Zone ownership for monster AI movement, combat results, drops, and NPC side effects.
+
+> Latest shared owned-generated lifecycle roadmap sync: 2026-05-14 moved player-owned generated object cleanup into the shared Gateway lifecycle. Summoned monsters now retain owner identity from `master_object_id` even when the personal runtime emits the local self id, stale ownerless snapshot merges preserve that owner identity, and player leave or map change removes owner-linked shared generated rows from the old map, tombstones them, clears stale lifecycle/drop anchors, and queues observer `ObjectRemove` packets on the same map. Verification passed Gateway shared_zone_state 33/33, Gateway shared_in_process 32/32, plus focused runtime/state regressions for hero disconnect, local-master summon disconnect, owner-preserving snapshot merge, and owner map-change cleanup. Roadmap next: native shared Zone ownership for generated object behavior, combat results, drops, and NPC side effects.
+
+> Latest shared intelligent-creature pickup roadmap sync: 2026-05-14 closed the shared manual/auto pet pickup fallback that still depended on local personal-session ground drops. Gateway now performs shared-map target-location pickup for `IntelligentCreaturePickup`, and Tick-driven auto pickup scans shared drops by Crystal range/ownership/filter/grade/fullness rules. Successful shared pet pickup awards through the personal inventory/gold layer, removes the shared drop, and delivers `IntelligentCreaturePickup` to AOI observers even when unrelated pending packets are also waiting; filter-blocked items remain on the shared ground. Verification passed focused Gateway intelligent-creature coverage 6/6, Simulation shared_zone 38/38, Gateway shared_zone_state 29/29, Gateway shared_in_process 30/30, and fmt/check. Roadmap next: native shared Zone ownership for the remaining combat/drop/NPC side-effect generation.
+
+> Latest shared spawn/skill-target roadmap sync: 2026-05-14 moved more generated-object and skill-reference behavior into the shared multiplayer bridge. Zone AOI delivery now includes hero, summoned monster, NPC spawn/update, and intelligent-creature pickup packets, with owner-local ids rebased in summoned-monster masters and self-target skill/projectile/struck references. Gateway shared map state now removes pet-picked drops, records generated ObjectHero/ObjectMonster/ObjectNpc rows for late snapshots, preserves dead-marker authority over late ObjectMonster packets, and applies pushed/backstep-style object transforms to shared entities without moving dead objects. Verification passed focused Simulation and Gateway shared-zone regressions for these packet families. Roadmap next: replace the remaining personal-runtime packet reconciliation for combat/drop/NPC effects with native shared Zone state and resolution.
+
+> Latest shared dead-marker roadmap sync: 2026-05-13 removed snapshot-order dependencies from shared monster lifecycle state. Gateway now records `ObjectDied` / zero-health as an independent dead marker, rejects actions before the entity row exists, forces later live snapshots back to the dead packet location/direction, and can commit death drops from packet location alone. Out-of-order `ObjectRevived` and `ObjectHarvested` are covered so stale later snapshots cannot re-kill revived objects or reopen harvested corpses. Verification passed Gateway `shared_zone_state_` 23/23. Roadmap next: continue toward Zone-native combat/drop generation instead of relying on personal runtime result reconciliation.
+
+> Latest shared delayed-damage roadmap sync: 2026-05-13 advanced delayed combat visibility in the shared multiplayer path. Gateway now recognizes player-owned delayed Tick damage by `ObjectStruck.attacker_id`, forwards that bundle and matching target health/death/remove/drop surfaces through Zone AOI, and avoids treating unrelated monster AI Tick packets as player-origin action packets. Shared zero-health packets now mark dead state even without max HP, and the stable shared-runtime pair fixture proves delayed `ObjectStruck/ObjectHealth` reaches the observer after `Attack -> Tick -> observer drain`. Verification passed the focused delayed-damage filter, focused no-max-HP death regression, focused delayed combat regression, Gateway `shared_zone_state_` 19/19, and Gateway `shared_in_process` 26/26. Roadmap next: continue migrating damage/drop generation into shared Zone authority.
+
+> Latest shared transform-cache roadmap sync: 2026-05-13 removed another one-command lag between Zone authority and Gateway snapshots. `SaveTransform` now immediately refreshes shared player presence for both current and queued sessions, while `world_snapshot()` overlays `SelfPlayer` from Zone presence before returning the shared read model. Verification passed the focused transform-cache regression, Gateway `shared_zone_state_` 18/18, and Gateway `shared_in_process` 25/25. Roadmap next: keep pushing monster/combat/drop/NPC source-of-truth from personal-session bridges into shared Zone authority.
+
+> Latest shared viewport/transform roadmap sync: 2026-05-13 hardened shared-world map/lifecycle semantics. Gateway scene snapshots are no longer treated as complete map snapshots, so monsters and drops outside one player's viewport remain shared until explicit `ObjectRemove`, shared pickup, or duplicate death-drop tombstones remove them; death-drop anchors now persist independently of corpse entity rows. Zone also now supports `TransformUpdate` rebasing plus retained `ObjectPlayer.transform_type` for late observers. Verification passed Simulation shared Zone 35/35, Gateway `shared_zone_state_` 17/17, and Gateway `shared_in_process` 25/25. Roadmap next: continue replacing personal-runtime generation/reconciliation with native shared authority.
+
+> Latest shared revive-state roadmap sync: 2026-05-13 aligned revive packets with the shared death/harvest/drop lifecycle guards. Gateway now applies `ObjectRevived` to shared map state, clears dead/harvested/death-drop/remove tombstone markers for that object, restores HP when max HP is known, and prevents stale dead snapshots from undoing the revive. Verification passed focused Gateway revive/remove-tombstone coverage and Gateway `shared_zone_state_` 15/15. Roadmap next: keep moving monster respawn/lifecycle and corpse/drop authority out of personal runtime reconciliation.
+
+> Latest shared harvest-corpse roadmap sync: 2026-05-13 moved harvested-corpse state into the shared Gateway map layer. Shared `ObjectHarvested` packets now mark the corpse harvested, stale personal snapshots cannot clear that marker, and later `Harvest` commands targeting the same corpse are rejected before duplicate personal-session harvest rewards can be produced. Verification passed focused Gateway reharvest coverage and Gateway `shared_zone_state_` 13/13. Roadmap next: continue migrating harvest/drop generation itself into shared authority.
+
+> Latest shared death-drop roadmap sync: 2026-05-13 advanced shared monster death/drop handling from stale snapshot reconciliation toward explicit shared commit. Gateway now detects monster death through `ObjectDied` or zero-percent `ObjectHealth`, commits matching newly generated drops from the acting runtime into the shared map once, and tombstones duplicate stale drops from later personal-session syncs. Verification passed focused Gateway death-drop commit/spawn tests 3/3 and Gateway `shared_zone_state_` 12/12. Roadmap next: continue moving the actual damage/drop generation path into Zone/shared authority.
+
+> Latest shared late-join status roadmap sync: 2026-05-13 retained late-status player visuals in Zone. After live packets update name colour/display name/guild name, player update equipment/light/wing state, poison, mount/riding, fishing, and level effects, future `ObjectPlayer` packets for late joiners/new AOI observers now carry those values instead of defaulting them away. Verification passed focused Simulation late-join retention and full Simulation shared Zone 35/35. Roadmap next: move monster damage/death/drop source-of-truth into shared authority.
+
+> Latest shared late-status roadmap sync: 2026-05-13 expanded Zone observer delivery for Crystal player status and late-system visuals. `PlayerUpdate`, `DamageIndicator`, `ObjectColourChanged`, `ObjectGuildNameChanged`, `ObjectLeveled`, `ObjectName`, `MagicDelay`, `PauseBuff`, `MountUpdate`, `FishingUpdate`, `ObjectTeleportOut`, `ObjectTeleportIn`, and `ObjectDeco` now rebase to the authoritative Zone player id before AOI fanout. Verification passed focused Simulation late-status coverage and full Simulation shared Zone 34/34. Roadmap next: retain more late-status fields for late joiners and continue the larger monster damage/death/drop authority migration.
+
+> Latest shared teleport/poison roadmap sync: 2026-05-13 added Zone authority for player-origin `UserLocation` action results and rebased poison visuals. Teleport/Blink-style skill outputs now update the shared player transform and occupancy before observer effects are sent, and `ObjectPoisoned` now carries the authoritative Zone player id to observers. Verification passed focused Simulation transform/poison tests and full Simulation shared Zone 33/33. Roadmap next: apply the same source-of-truth migration to monster damage, death, and drop generation.
+
+> Latest shared skill-transform roadmap sync: 2026-05-13 advanced movement-skill outcomes from packet rebasing into shared Zone authority. The Zone bridge now extracts owner transforms from BackStep/Dash/DashAttack/AttackMove/Pushed-style packets, applies position/direction to `ZonePlayer`, updates occupancy, clears stale movement intent, emits `SaveTransform`, and rejects occupied/static destinations with an owner correction instead of observer fanout. Verification passed focused Simulation transform success/reject tests and full Simulation shared Zone 32/32. Roadmap next: repeat this authority migration for monster damage/death/drop outcomes instead of leaving them as personal-session reconciliation.
+
+> Latest shared skill-movement roadmap sync: 2026-05-13 expanded the shared Zone bridge for visible Crystal movement-skill and special-skill packets. `ObjectBackStep`, `ObjectDash`, `ObjectDashFail`, `ObjectDashAttack`, `ObjectSitDown`, `SetConcentration`, `SetElemental`, `SetBindingShot`, `RemoveDelayedExplosion`, `ObjectSneaking`, and `ObjectLevelEffects` are now rebased to the authoritative Zone player id before AOI fanout. Verification passed focused Simulation coverage for movement/special skill observer packets and full Simulation shared Zone 30/30. Roadmap next: move from rebased visual fanout toward Zone-owned skill transforms, damage, monster state, and drop authority.
+
+> Latest shared harvest roadmap sync: 2026-05-13 closed a narrow but player-visible harvest fanout gap in the shared Zone bridge. `ObjectHarvest` and `ObjectHarvested` are now rebased from the personal self object id to the authoritative Zone player object id before AOI delivery, and observer movement anchors come from Zone state. Verification passed focused Simulation harvest observer coverage plus full Simulation shared Zone 28/28. Roadmap next: continue replacing bridged personal-session harvest/combat outcomes with shared-native monster, harvest, and drop authority.
+
+> Latest shared NPC/task roadmap sync: 2026-05-13 closed another shared multiplayer edge around NPC, group task semantics, and stale monster health. Gateway now proves shared-snapshot Village Guide `CallNpc @Main` can mutate the sparse session quest log, relays `ShareQuest` packets to online group members, lets group members pick owner-window shared drops when the owner is an online Zone player, prevents stale personal-session `ObjectHealth` from raising shared monster HP, and pushes shared monster snapshots back into the acting personal runtime before target-based and direction-only combat/harvest resolution. Verification passed focused Gateway regressions, Gateway shared state 9/9, Gateway shared registry 25/25, focused Simulation shared-monster snapshot application, and focused Gateway current-map shared-monster application. Roadmap next: push the remaining monster damage/death/drop source of truth from personal sessions toward shared-native Zone authority.
+
+> Latest shared drop ownership roadmap sync: 2026-05-13 moved a concrete drop-authority edge into the shared layer. `GroundDropSnapshot` now preserves active ownership metadata, Gateway rebases personal owner object ids to Zone player object ids when syncing shared drops, shared pickup blocks non-owners during the owner window without tombstoning, and `ObjectItem` / `ObjectGold` spawn packets are included in Zone AOI fanout. Verification passed focused Simulation drop fanout and Gateway shared-zone-state 7/7. Roadmap next: continue toward shared-native monster damage/death/drop resolution and NPC/task side effects.
+
+> Latest shared player appearance roadmap sync: 2026-05-13 retained hidden/dead/effect player state in Zone for late AOI visibility. The shared observer bridge now updates `ZonePlayer` from rebased self `ObjectHidden`, `ObjectHide`, `ObjectShow`, `ObjectDied`, `ObjectRevived`, and `ObjectEffect`, and subsequent `ObjectPlayer` packets carry the current fields. Verification passed Simulation shared Zone 25/25. Roadmap next: move the underlying combat/death/effect causes, monster damage, drops, and NPC/task mutations into shared authority instead of mirroring personal-session outputs.
+
+> Latest shared Buff expiry roadmap sync: 2026-05-13 added a Zone-owned lifecycle step for retained visible player Buffs. `BroadcastPackets` now timestamps personal-runtime Buff packets, Zone converts Crystal relative `expire_time` into local expiry, `tick` sends `RemoveBuff` to AOI observers, and late joiners no longer receive expired Buff markers. Verification passed Simulation shared Zone 24/24. Roadmap next remains deeper shared authority for real skill effects, monster damage/drop ownership, and NPC/task state mutation.
+
+> Latest shared Buff state roadmap sync: 2026-05-13 persisted active visible player Buff state inside the shared Zone. The observer bridge now updates each `ZonePlayer` from rebased self `AddBuff` / `RemoveBuff`, includes active visible buff types in `ObjectPlayer`, and sends rebased `AddBuff` details when another player first sees that actor. Verification passed Simulation shared Zone 23/23. Roadmap next: replace the remaining personal-session skill/Buff timing and monster/NPC side effects with shared Zone-owned authority.
+
+> Latest shared skill/Buff roadmap sync: 2026-05-13 widened the shared Zone observer bridge for player-origin skill visuals. `BroadcastPackets` now rebases visible mana/Buff/effect/spell/push/revive/hide/show/toggle packets onto the shared Zone player object id, so other clients see more of the same Crystal skill/Buff packet surface that the acting client receives. Verification passed Simulation shared Zone 22/22. Roadmap next remains deeper authority migration: native Zone-owned skill effects, monster damage/drop ownership, and NPC/task state mutation.
+
+> Latest shared NPC roadmap sync: 2026-05-13 advanced the shared Zone migration into NPC/task entry points. Crystal `CallNpc` packet handling now opens the runtime NPC dialog/script path, and shared Gateway sessions can interact with NPCs that come from the shared map snapshot even when the personal session's sparse ECS did not spawn that NPC. This directly addresses the "NPC visible but click has no response" multiplayer failure mode without rewriting the full quest engine in this slice. Verification passed Simulation shared Zone 21/21 and Gateway shared registry 20/20. Roadmap next: migrate NPC/task mutations and monster damage/drop ownership from personal-session fallback/reconciliation toward native shared authority.
+
+> Latest shared-authority roadmap sync: 2026-05-13 advanced the Zone migration beyond movement/chat by adding AOI fanout for successful combat/skill packet surfaces and shared monster snapshot reconciliation. Gateway now forwards successful personal-session Attack/RangeAttack/Harvest/Magic action results to `ZoneRuntime`; Zone rewrites local self actor ids to the shared Zone player object id and sends `ObjectAttack`, `ObjectRangeAttack`, `ObjectMagic`, `ObjectProjectile`, `ObjectStruck`, `ObjectHealth`, `ObjectDied`, and `ObjectRemove` to nearby observers. The shared map layer now consumes health/death/remove packets so lower HP, dead state, and removed tombstones survive stale personal-session snapshot syncs, and stale attacks against shared dead/removed targets are rejected before local execution. This improves visible multiplayer consistency without rewriting the high-conflict combat/skills modules in this slice. Verification passed Simulation shared Zone 20/20, Gateway shared entity state 5/5, Gateway shared registry 20/20, and Simulation/Gateway fmt/check. Roadmap next: lift monster damage/drop ownership out of personal sessions and into native Zone/shared authority, then continue NPC/task and broader gameplay authority migration.
+
+> Latest chat roadmap sync: 2026-05-13 completed the current Crystal chat parity layer for shared online play. Protocol coverage now includes `C.Chat` linked item payloads and all observed Crystal `ChatType` values through LineMessage. Runtime coverage now splits personal Session responsibilities from shared Zone delivery: Session handles bans/spam gate/local commands/item resolution, and Zone handles live recipients for normal AOI chat, whisper, group, guild, mentor, relationship, GM announcement, local/map/server shout, `$pos`, shout cooldown, and shout-scroll consumption. Gateway now propagates server shout globally through `ZoneOutbound::ToAll`, and Web recognizes Mentor/Relationship chat channels. Verification passed the focused Protocol, Simulation, Gateway, Rust fmt/check, and Web typecheck commands listed in the backend progress log. Next roadmap work remains broader shared-authority gameplay migration plus human Crystal visual/feel acceptance.
+
+> Latest architecture roadmap sync: 2026-05-13 completed the Gateway routing, production WebSocket/player command-boundary, and live two-client browser-smoke phases of the shared multiplayer Zone MVP. Gateway shared sessions now join the simulation `ZoneManager`, route Walk/Run/Turn/Chat through the shared Zone, consume latest movement intents through Tick/KeepAlive, deliver Zone outbounds to other online sessions through pending queues, and apply Zone `SaveTransform` to the personal session before saves with a tick refresh for session-cache freshness. The WebSocket path can now switch into production-safe execution through production-like envs or `MIR2_GATEWAY_ENFORCE_PLAYER_COMMAND_SAFETY`, rejecting unauthenticated StartGame and blocking normal-client `MoveTo`, `Stage5Command`, and debug `crystal:<map>:<x>:<y>` transfers while preserving HMAC-verified passkey login. This turns the previous same-process multiplayer projection into a real shared online-world path for player presence and movement broadcasts while preserving existing shared drop, Trade, and ItemRental tests. Verification passed Gateway lib 121/121, Gateway shared registry 20/20, production WebSocket safety 3/3, Simulation shared Zone 12/12, security lifecycle 9/9, Simulation/Gateway fmt/check, Gateway health, two-client WebSocket smoke 2/2, ad hoc browser two-client Zone smoke, and the committed `npm run smoke:two-client-zone` harness with mutual player visibility, movement broadcast delivery, chat broadcast delivery, no console errors, and no non-favicon 404s. Next roadmap item: broaden human Crystal visual/feel acceptance and continue moving more non-movement gameplay authority into the shared Zone.
+
+> Latest architecture roadmap sync: 2026-05-12 began the shared multiplayer Zone MVP as a product-architecture correction beyond the previous single-session simulation boundary. Added root AGENTS guidance that locks the rule "Session is not world. Zone is world." The simulation crate now has a synchronous `ZoneRuntime` / `ZoneManager` foundation with Join/Leave, AOI visibility, occupancy, static collision, latest movement intent consumption, Run intermediate-tile validation, movement/turn/chat broadcasts, unique object ids, `SaveTransform`, and session authoritative transform write-back. Security lifecycle tests lock the production-player rejection boundary for unauthenticated character lifecycle commands plus `PasskeyLogin`, `MoveTo`, `Stage5Command`, and debug crystal teleports. Verification passed shared Zone 12/12, security lifecycle 9/9, Simulation fmt, and locked Simulation check. Remaining roadmap work is the Gateway integration that routes StartGame/Walk/Run/Turn/Chat through Zone in production.
+
 > Latest backend worker roadmap sync: 2026-05-11 closed a bounded Hero book/stat requirement exactness slice. Crystal source evidence from `HeroObject.UseItem` shows HeroInventory item use calls `CanUseItem` before the book branch, and `HumanObject.CanUseItem` rejects gender/class mismatches, all `RequiredType` stat gates (`MaxAC/MAC/DC/MC/SC`, `MinAC/MAC/DC/MC/SC`), level/max-level gates, and duplicate learned books before a Hero learns `UserMagic` and sends `NewMagic(hero=true)`. Rust Hero book learning now routes through a Hero CanUseItem-style requirement check that sums non-broken equippable HeroInventory stat totals before adding `heroLearnedMagics`, so stat-required books fail without consuming/learning. Verification passed focused Hero stat-book regression 1/1, focused `hero_inventory` 16/16 plus book/key integration 1/1, Hero AI integration 28/28, Simulation fmt check, and locked Simulation check.
 
 > Latest backend worker roadmap sync: 2026-05-11 closed a low-conflict Friend/blacklist Stage 5 command-state gap. Crystal source evidence from `PlayerObject.AddFriend` shows normal friends and blocked entries share the same `Info.Friends` table, so adding a target already present in either view returns `PlayerAlreadyAdded` and does not convert friend <-> blacklist state. Rust high-level `social.friend` / `social.block` now follow that single-entry rule for modeled social state, keep self-target rejection localized through `CannotAddYourself`, and persist the resulting list through save/reload. Verification passed focused social/economy integration 3/3, adjacent social/mail lib regressions, Simulation fmt check, and locked Simulation check.
@@ -97,7 +972,7 @@
 
 > Latest runtime/frontend comparison sync: 2026-04-30-R315 completed. The latest panel screenshots exposed Web demo seed state in the Crystal QA character: starter items/equipment/skills/quest/storage/gold were being injected where the original new character is empty. Runtime now makes real `NewCharacter` saves Crystal-empty for bag, belt, storage, equipment, quests, skills, and gold; empty save arrays load as explicit empty; old level-1 saves that exactly match the former Web seed set migrate to empty; and `demo/Scout` keeps its Stage 5 seed state for automation. Frontend no longer fills empty spell rows with Web hints/buffs and removed the web-only Character repair buttons. Evidence for `QA0429A / QA0429Hero` at `BichonProvince` map `0`, `287,618` records `gold=0`, all panel-state counts at 0 (`inventoryItemCount`, `beltItemCount`, `storageItemCount`, `equipmentItemCount`, `questCount`, `skillCount`), `playerHp=18`, `playerMaxHp=18`, `playerMp=14`, `hudHealthOnlyLabel="HP 18/18"`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Screenshot/state: `docs/generated/player-qa/r315-empty-new-character-panels/r315-empty-new-character-panels.png` and `docs/generated/player-qa/r315-empty-new-character-panels/r315-empty-new-character-panels-state.json`. Verification passed: focused `mir2-simulation start_game_` 16/16, `cargo +1.89.0 build --locked -p mir2-gateway`, web `tsc --noEmit`, R315 capture, `cargo +1.89.0 fmt --check`, and capture-script `node --check`. This closes the incorrect seeded content mismatch; exact Quest Diary/Storage dialog bitmaps and paperdoll base rendering remain open visual work.
 
-> Latest runtime/frontend comparison sync: 2026-04-30-R314 completed. The aligned Bichon Web HUD now follows the Crystal low-level Warrior HP-only path: Crystal `BaseStats` formulas drive default and migrated legacy save vitals, `QA0429Hero` level 1 records `playerHp=18`, `playerMaxHp=18`, `playerMp=14`, and the HUD label is `HP 18/18` using exported `Prguse` frame 6. R314 also keeps the R311 bitmap orb fill, applies the Crystal 4-line chat feed sizing/colors, and layers the belt bar from `Prguse` 1932 with the 0.5-opacity 1933 overlay. Evidence: `docs/generated/player-qa/r314-crystal-vitals-hud/r314-bichon-287-618-vitals-hud.png` and `docs/generated/player-qa/r314-crystal-vitals-hud/r314-bichon-287-618-vitals-hud-state.json`; the state records exact 1024x768 stage/HUD/minimap/chat bounds, `visibleChatLines` count 4, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Verification passed: focused `mir2-simulation start_game_` 15/15, `cargo +1.89.0 build --locked -p mir2-gateway`, web `tsc --noEmit`, R314 capture, `cargo +1.89.0 fmt --check`, and `git diff --check`. This closes the specific blood-bar/font/hotbar value mismatch raised in the latest screenshot pass; exact effects/lighting, dynamic placement, minimap 450/451, and human visual acceptance remain open.
+> Latest runtime/frontend comparison sync: 2026-04-30-R314 completed. The aligned Bichon Web HUD now follows the Crystal low-level Warrior HP-only path: Crystal `BaseStats` formulas drive default and migrated legacy save vitals, `QA0429Hero` level 1 records `playerHp=18`, `playerMaxHp=18`, `playerMp=14`, and the HUD label is `HP 18/18` using exported `Prguse` frame 6. R314 also keeps the R311 bitmap orb fill, applies the Crystal 4-line chat feed sizing/colors, and layers the belt bar from `Prguse` 1932 with the 0.5-opacity 1933 overlay. Evidence: `docs/generated/player-qa/r314-crystal-vitals-hud/r314-bichon-287-618-vitals-hud.png` and `docs/generated/player-qa/r314-crystal-vitals-hud/r314-bichon-287-618-vitals-hud-state.json`; the state records exact 1024x768 stage/HUD/minimap/chat bounds, `visibleChatLines` count 4, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Verification passed: focused `mir2-simulation start_game_` 15/15, `cargo +1.89.0 build --locked -p mir2-gateway`, web `tsc --noEmit`, R314 capture, `cargo +1.89.0 fmt --check`, and `git diff --check`. This closes the specific blood-bar/font/hotbar value mismatch raised in the latest screenshot pass; exact effects/lighting, dynamic placement, and human visual acceptance remain open.
 
 > Latest runtime/frontend comparison sync: 2026-04-30-R312 completed. The aligned Bichon Web projection now follows Crystal source anchors for the next visible parity pass: `MapControl.OffSetY` is restored to `Settings.ScreenHeight / 2 / CellHeight - 1`, floor/object map layers keep the source map-layer `drawX` offset path, and entity sprites/nameplates/health bars use Crystal `DrawLocation` / `DisplayRectangle` placement instead of tile-center/self-nameplate web offsets. Evidence for `QA0429A / QA0429Hero` at `BichonProvince` map `0`, `287,618` records self nameplate `top=275`, exact `1024x768` stage and `0,616,1024,768` HUD bounds, `questMarkerCount=0`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Screenshot/state: `docs/generated/player-qa/r312-entity-crystal-anchor/r312-bichon-287-618-entity-anchor.png` and `docs/generated/player-qa/r312-entity-crystal-anchor/r312-bichon-287-618-entity-anchor-state.json`. R311's Crystal bitmap HP/MP orb fill remains active; R312 supersedes the R311 playfield-centered camera experiment for projection math.
 
@@ -115,19 +990,19 @@
 
 > Latest runtime/frontend comparison sync: 2026-04-29-R305 completed. The Bichon same-scene snapshot now includes current-map visible Crystal respawns in ECS/worldSnapshot, not only `ObjectMonster` bootstrap packets. Evidence: `docs/generated/player-qa/r305-bichon-visible-world-snapshot.json` records `QA0429A / QA0429Hero` at `BichonProvince` map `0`, `284,607` with `entityCount=17`, `npcCount=8`, `monsterCount=8`, including `Deer`, `Scarecrow`, `Hen`, and two `Royal_Guard` entities; `docs/generated/player-qa/r305-bichon-visible-web-page.png` and `docs/generated/player-qa/r305-bichon-visible-web-page-state.json` record 8 NPC sprite elements plus 8 monster sprite elements in the browser. Verification passed: focused R305 simulation regression, existing visible-respawn density regression, `cargo +1.89.0 fmt --check`, `cargo +1.89.0 build --locked -p mir2-gateway`, live WS probe, browser state/screenshot capture, gateway health, and web HTTP 200. This closes the first Deer/Royal Guard screenshot gap but is still Candidate evidence, not final visual 1:1 acceptance.
 
-> Latest runtime/frontend comparison sync: 2026-04-29-R304 completed. The Bichon same-scene comparison exposed that saved web characters entering a real Crystal map were not repopulating the ECS world with current-map NPC-info manifest entries, leaving the web snapshot with only the player. `apps/simulation/src/runtime.rs` now rebuilds Crystal current-map world population on saved-character start and transfer, and live WS evidence at `docs/generated/player-qa/r304-bichon-npc-world-snapshot.json` confirms `QA0429A / QA0429Hero` at `BichonProvince` map `0`, `284,607` has `entityCount=9`, `npcCount=8`, including `Assistant_Jane` and `Merchant_Ruben`. Browser evidence at `docs/generated/player-qa/r304-bichon-npc-web-page.png` and `docs/generated/player-qa/r304-bichon-npc-web-page-state.json` records `npcSpriteElementCount=8` with expected visible nameplates. Verification passed: `cargo +1.89.0 fmt --check`, focused R304 NPC regression, adjacent `transfer_map`, `start_game_emits_visible_object_packets`, `world_snapshot_marks_safe_zone_after_start_game`, `cargo +1.89.0 build --locked -p mir2-gateway`, a live WS probe on `127.0.0.1:7110`, and browser state/screenshot capture on `http://127.0.0.1:3002`. This is Candidate/integration evidence, not full visual 1:1 acceptance; deer/guard/monster density, quest panel/HUD differences, NPC display-name normalization, minimap 450/451, and human screenshot acceptance remain open.
+> Latest runtime/frontend comparison sync: 2026-04-29-R304 completed. The Bichon same-scene comparison exposed that saved web characters entering a real Crystal map were not repopulating the ECS world with current-map NPC-info manifest entries, leaving the web snapshot with only the player. `apps/simulation/src/runtime.rs` now rebuilds Crystal current-map world population on saved-character start and transfer, and live WS evidence at `docs/generated/player-qa/r304-bichon-npc-world-snapshot.json` confirms `QA0429A / QA0429Hero` at `BichonProvince` map `0`, `284,607` has `entityCount=9`, `npcCount=8`, including `Assistant_Jane` and `Merchant_Ruben`. Browser evidence at `docs/generated/player-qa/r304-bichon-npc-web-page.png` and `docs/generated/player-qa/r304-bichon-npc-web-page-state.json` records `npcSpriteElementCount=8` with expected visible nameplates. Verification passed: `cargo +1.89.0 fmt --check`, focused R304 NPC regression, adjacent `transfer_map`, `start_game_emits_visible_object_packets`, `world_snapshot_marks_safe_zone_after_start_game`, `cargo +1.89.0 build --locked -p mir2-gateway`, a live WS probe on `127.0.0.1:7110`, and browser state/screenshot capture on `http://127.0.0.1:3002`. This is Candidate/integration evidence, not full visual 1:1 acceptance; deer/guard/monster density, quest panel/HUD differences, NPC display-name normalization, and human screenshot acceptance remain open.
 
-> Latest map-resource audit sync: 2026-04-29-R303 completed. The new `audit:crystal-map-coverage` evidence (`docs/generated/map/r303-crystal-map-coverage.json`) confirms the current Crystal client source has all 463 manifest map files available and parseable by the frontend map parser, with 0 unsupported map types and 0 parse errors. The sampled-resource audit still leaves frontend map acceptance open: 11 sampled maps have out-of-range frame-reference risk, minimap indices 450/451 are still missing for `DogYoArena2` / `DogYoHyun`, and the result is not a full-map visual 1:1 acceptance pass.
+> Historical map-resource audit sync: 2026-04-29-R303 completed. The first `audit:crystal-map-coverage` evidence (`docs/generated/map/r303-crystal-map-coverage.json`) confirmed the current Crystal client source had all 463 manifest map files available and parseable by the frontend map parser, with 0 unsupported map types and 0 parse errors. The 2026-05-16 all-map audit above supersedes R303's then-open source-frame/minimap warnings by classifying Crystal no-draw frames separately and adding gameplay semantic checks.
 
 > Latest original-client comparison sync: 2026-04-28-R302 completed. Windows launched original Crystal `Server.exe`/`Client.exe`, created retained character `R302HeroB`, and archived original select/game screenshots plus web Stage 5 comparison evidence at `docs/generated/player-qa/r302-original-client/summary.json`. R302 adds a packet-trace fixture helper (`MIR2_PACKET_TRACE_KEEP_LIFECYCLE_CHARACTER=1`) for retained live QA characters. The fresh current-live matrix in the R302 pack is diagnostic only (`stableDiffCleanCount=2/9`, `packetParityAccepted=false`) because local and Crystal fixture state was not aligned; it does not supersede R300/R298 accepted packet evidence. Whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance or explicit accepted differences close.
 
-> Latest frontend/player QA sync: 2026-04-28-R301 completed. Windows refreshed the final automated Candidate acceptance pack after R300 stable-diff packet acceptance. Evidence is archived at `docs/generated/player-qa/r301-summary.json`: packet-trace bin 15/15, web `tsc --noEmit`, web `npm.cmd run build`, map API smoke 18/18 with 0 failures, minimap smoke 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors and keepalive p95 637 ms, Stage 5 UI smoke 88 screenshots with 0 critical console errors and 32 compact text nodes checked without overflow, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. Temporary gateway/web services were stopped and ports 7000/7110/3002 verified closed. Automated parity evidence remains **100% Candidate**; backend/server tracked slice remains **100% Accepted under stable-diff packet acceptance**; whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
+> Latest frontend/player QA sync: 2026-04-28-R301 completed. Windows refreshed the final automated Candidate acceptance pack after R300 stable-diff packet acceptance. Evidence is archived at `docs/generated/player-qa/r301-summary.json`: packet-trace bin 15/15, web `tsc --noEmit`, web `npm.cmd run build`, map API smoke 18/18 with 0 failures, minimap smoke 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load 64/64 ready with 0 errors and keepalive p95 637 ms, Stage 5 UI smoke 88 screenshots with 0 critical console errors and 32 compact text nodes checked without overflow, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. Temporary gateway/web services were stopped and ports 7000/7110/3002 verified closed. Automated parity evidence remains **100% Candidate**; backend/server tracked slice remains **100% Accepted under stable-diff packet acceptance**; whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
 
 > Latest backend parity sync: 2026-04-28-R300 completed. The current tracked backend/server packet matrix is now **100% Accepted under explicit stable-diff packet acceptance**. R298 supplies the live Crystal stable matrix evidence under `docs/generated/packet-traces/r298-live-matrix/latest-matrix.json` with 9/9 local OK, 9/9 Crystal OK, `crystalMissingCount=0`, `stableDiffCleanCount=9`, and `acceptedStableLiveComparisonCount=9`; R299 identifies strict exact dirtiness as Crystal dynamic state; and R300 makes stable acceptance enforceable through `MIR2_PACKET_TRACE_ACCEPT_STABLE_DIFF=1` / `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1`. Strict exact diff remains diagnostic until a deterministic Crystal fixture controls volatile state. Automated parity evidence remains **100% Candidate**; backend/server tracked slice is **100% Accepted under stable-diff packet acceptance**; whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
 
 > Previous backend parity sync: 2026-04-28-R298 completed. Windows refreshed live Crystal stable packet matrix evidence under `docs/generated/packet-traces/r298-live-matrix/latest-matrix.json`: 9/9 local OK, 9/9 Crystal OK, `crystalMissingCount=0`, `stableDiffCleanCount=9`, and `acceptedStableLiveComparisonCount=9` using Crystal `127.0.0.1:7000`, local gateway `127.0.0.1:7310`, full client resources at `E:\mir2\Crystal\Build\Client\Debug`, and fixture character `Cdx0428030348` index `8`. Strict exact diff remained dirty (`diffDirtyCount=9`, `acceptedLiveComparisonCount=0`), which R300 now treats as diagnostic rather than blocking for the accepted stable-diff packet gate.
 
-> Latest frontend/player QA sync: 2026-04-28-R297 completed. Windows automated evidence now covers full client resources at `E:\mir2\Crystal\Build\Client\Debug`, web build/typecheck, map API smoke 18/18, minimap smoke 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors, and Stage 5 UI smoke 88 screenshots with `criticalConsoleErrorCount=0`. Missing original scene sprite libs used by the smoke were exported from Crystal `Data`, gateway `MapInformation` now carries minimap indices for transfer maps, and concurrent account-store file saves are hardened for Windows load. Rust validation passed `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, and `git diff --check`. Automated parity evidence remains **100% Candidate**; R300 later closes the backend/server packet gate under stable-diff acceptance; whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
+> Latest frontend/player QA sync: 2026-04-28-R297 completed. Windows automated evidence now covers full client resources at `E:\mir2\Crystal\Build\Client\Debug`, web build/typecheck, map API smoke 18/18, minimap smoke 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load 64/64 ready with 0 errors, and Stage 5 UI smoke 88 screenshots with `criticalConsoleErrorCount=0`. Missing original scene sprite libs used by the smoke were exported from Crystal `Data`, gateway `MapInformation` now carries minimap indices for transfer maps, and concurrent account-store file saves are hardened for Windows load. Rust validation passed `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, and `git diff --check`. Automated parity evidence remains **100% Candidate**; R300 later closes the backend/server packet gate under stable-diff acceptance; whole-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
 
 > Previous backend parity sync: 2026-04-28-R292 completed. Windows live Crystal stable packet matrix evidence was recorded under `docs/generated/packet-traces/r292-live-matrix/latest-matrix.json`: 9/9 local OK, 9/9 Crystal OK, `crystalMissingCount=0`, `stableDiffCleanCount=9`, and `acceptedStableLiveComparisonCount=9` using Crystal `127.0.0.1:7000`, local gateway `127.0.0.1:7310`, full client resources at `E:\mir2\Crystal\Build\Client\Debug`, and fixture character `Cdx0428030348` index `8`. Strict exact diff was still not clean (`diffDirtyCount=9`, `acceptedLiveComparisonCount=0`), and human player QA was still open, so automated parity evidence remained **100% Candidate**, backend/server tracked slice remained **99.70% Candidate**, and whole-project accepted Crystal 1:1 remained **roughly 90%**.
 
@@ -135,11 +1010,11 @@
 
 > Latest truth-audit sync: 2026-04-28. `docs/PARITY-TRUTH-AUDIT.md` is now the authoritative status split for Accepted vs Candidate vs Fallback vs Blocked. The project remains **100% Candidate** for automated evidence, backend/server tracked slice is **100% Accepted under explicit stable-diff packet acceptance**, and real full-project accepted Crystal 1:1 remains **roughly 90%** until human visual/feel acceptance closes.
 
-> Previous sync: R225 completed. Mac-local Candidate evidence was refreshed and green: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots with manifest summary counts), map API smoke 18/18, minimap asset smoke 0 failures with known 450/451 warning, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local packet trace matrix 9/9 local artifacts under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. At R225 time backend/server tracked slice was 99.70%; R300 later closed the packet gate under explicit stable-diff acceptance.
+> Previous sync: R225 completed. Mac-local Candidate evidence was refreshed and green: web `tsc --noEmit`, direct `next build`, Stage 5 UI smoke (88 screenshots with manifest summary counts), map API smoke 18/18, minimap asset smoke 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load 64/64, `mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664, require-local packet trace matrix 9/9 local artifacts under `docs/generated/packet-traces/r225-matrix`, `cargo +1.89.0 fmt --check`, and `git diff --check`. At R225 time backend/server tracked slice was 99.70%; R300 later closed the packet gate under explicit stable-diff acceptance.
 
 > Previous sync: R224 completed. The project remained **100% Candidate** (not 100% Accepted), and the local packet trace matrix blocker was closed. `apps/gateway/src/bin/packet_trace.rs` was restored; `--list-flows` worked; `mir2-gateway` passed 53/53 including packet trace bin tests 6/6; require-local `packet_trace --matrix` wrote 9/9 TCP-traceable artifacts with `localOk=true` under `docs/generated/packet-traces/r224-matrix`. Later Windows rounds closed the server-data import gate and accepted the stable-diff live packet gate.
 
-> Latest sync: R219-R222 completed. Frontend/global evidence advanced across login language/View Key/Enter submit, select language/Credits/Delete cancel/New Character/Delete confirmed/recreate/Start lifecycle, archived map API and minimap asset smoke JSON, refreshed WS load, compact inventory/storage/character/system-menu/chat-settings panel bounds, system-menu compact overflow fix, and NPC dialog link rendering support. Stage 5 UI smoke now captures 85 screenshots. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke (18/18 requests), minimap asset smoke (0 failures, known missing 450/451 warning), WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
+> Latest sync: R219-R222 completed. Frontend/global evidence advanced across login language/View Key/Enter submit, select language/Credits/Delete cancel/New Character/Delete confirmed/recreate/Start lifecycle, archived map API and minimap asset smoke JSON, refreshed WS load, compact inventory/storage/character/system-menu/chat-settings panel bounds, system-menu compact overflow fix, and NPC dialog link rendering support. Stage 5 UI smoke now captures 85 screenshots. Validation: web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke (85 screenshots), map API smoke (18/18 requests), minimap asset smoke (0 failures, a historical preview-index warning later closed by the 2026-05-16 map audit), WS load 64/64, `cargo +1.89.0 fmt --check`, and `git diff --check`. Active backend/global round is R223; backend/server parity estimate is 99.70%, whole-project 1:1 estimate is 90.0%.
 
 
 > Latest sync: R172 completed. Successful high-level NPC interaction no longer emits runtime-only `sim.talkingToNpc`; NPC `ObjectChat`/dialog packet surfaces and Crystal NPC script/service flows are preserved. Validation: focused `npc_interaction` 2/2, `crystal_npc_dialog` 1/1, `crystal_npc_service` 1/1, broad `crystal_npc` 52/52, `cargo +1.89.0 fmt --check`, and full `mir2-simulation` 648/648. Active backend round is R173; backend/server parity estimate is 99.70%.
@@ -206,23 +1081,23 @@ This roadmap uses four meanings of completion:
 Post-1:1 product evolution is tracked separately in `docs/POST-1TO1-EVOLUTION-PLAN.md`. Future database, cache, login UI, NPC script parser, and gameplay redesign work may intentionally diverge from Crystal. Such work should preserve this roadmap as the compatibility baseline instead of rewriting Candidate evidence as product acceptance.
 
 Current verified state as of 2026-04-29:
-- [x] 2026-04-29 `R309` Bichon minimap/HUD bounds cleanup: `.mini-map-panel` no longer uses `right=-2px`, closing the measured desktop minimap overflow from `right=1026` to `right=1024`. Evidence: `docs/generated/player-qa/r309-minimap-bounds-web-page-state.json`, `docs/generated/player-qa/r309-minimap-bounds-web-page.png`, and `docs/generated/player-qa/r309-minimap-bounds-compact-web-page.png` record `QA0429A / QA0429Hero` at `0:287,618`, desktop minimap `left=896`, `right=1024`, compact minimap inside `820x640`, `desktopOverflows=[]`, `compactOverflows=[]`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Exact dynamic animal density/placement, minimap 450/451, and human visual acceptance remain open.
-- [x] 2026-04-29 `R308` Bichon viewport/resource cleanup: original-size browser viewports no longer receive the previous 0.9 CSS stage downscale, the outer page/frame is plain black with no decorative shadow, compact scaling is limited to sub-1024x768 viewports, and missing Bichon visible-object sprite libraries (`NPC/00`, `NPC/01`, `NPC/03`, `NPC/11`, `NPC/15`, `Monster/003`, `Monster/004`, `Monster/005`) are exported from Crystal client data. Evidence: `docs/generated/player-qa/r308-stage-scale-web-page-state.json`, `docs/generated/player-qa/r308-stage-scale-web-page.png`, and `docs/generated/player-qa/r308-stage-scale-compact-web-page.png` record `QA0429A / QA0429Hero` at `0:287,618`, desktop stage bounds `0,0,1024,768`, compact stage `798.72x599.04` inside `820x640`, `hasGuard=true`, `hasArcherGuard=true`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Verification: web `tsc --noEmit`, JSON parse check, focused `mir2-simulation` R307 regression, `cargo fmt --check`, targeted `git diff --check`, gateway health, and web HTTP 200. Exact dynamic animal density/placement, minimap 450/451, and human visual acceptance remain open.
-- [x] 2026-04-29 `R307` Bichon ordinary Guard/ArcherGuard evidence: added a focused simulation regression for the `0:287,618` comparison point, requiring `Guard` at `291,620` and `ArcherGuard` at `295,624` through both bootstrap `ObjectMonster` packets and `worldSnapshot`. Browser evidence: `docs/generated/player-qa/r307-bichon-guard-archer-web-page.png` plus `docs/generated/player-qa/r307-bichon-guard-archer-web-page-state.json` records `hasGuard=true`, `hasArcherGuard=true`, `monsterCount=7`, `npcCount=5`, `hasUnderscoreNameplate=false`, and `questTrackerVisible=false`. Verification: focused `mir2-simulation` regression and CDP browser capture with zero console errors. Exact dynamic animal density/placement, HUD scale/letterboxing, minimap 450/451, and human visual acceptance remain open.
-- [x] 2026-04-29 `R306` Bichon same-scene display cleanup: the default web quest tracker overlay is no longer rendered over the Crystal playfield, and NPC/monster nameplates display Crystal-style spaces instead of raw underscores while runtime entity names remain unchanged. Evidence: `docs/generated/player-qa/r306-bichon-display-web-page.png` plus `docs/generated/player-qa/r306-bichon-display-web-page-state.json` records the same R305 population count at `0:284,607` (`entityCount=17`, `npcCount=8`, `monsterCount=8`) with `hasUnderscoreNameplate=false` and `questTrackerVisible=false`. Verification: web `tsc --noEmit`, CDP login/start/transfer/browser capture, and zero console errors. Exact placement/density, HUD scale/letterboxing, minimap 450/451, and human visual acceptance remain open.
+- [x] 2026-04-29 `R309` Bichon minimap/HUD bounds cleanup: `.mini-map-panel` no longer uses `right=-2px`, closing the measured desktop minimap overflow from `right=1026` to `right=1024`. Evidence: `docs/generated/player-qa/r309-minimap-bounds-web-page-state.json`, `docs/generated/player-qa/r309-minimap-bounds-web-page.png`, and `docs/generated/player-qa/r309-minimap-bounds-compact-web-page.png` record `QA0429A / QA0429Hero` at `0:287,618`, desktop minimap `left=896`, `right=1024`, compact minimap inside `820x640`, `desktopOverflows=[]`, `compactOverflows=[]`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Exact dynamic animal density/placement, and human visual acceptance remain open.
+- [x] 2026-04-29 `R308` Bichon viewport/resource cleanup: original-size browser viewports no longer receive the previous 0.9 CSS stage downscale, the outer page/frame is plain black with no decorative shadow, compact scaling is limited to sub-1024x768 viewports, and missing Bichon visible-object sprite libraries (`NPC/00`, `NPC/01`, `NPC/03`, `NPC/11`, `NPC/15`, `Monster/003`, `Monster/004`, `Monster/005`) are exported from Crystal client data. Evidence: `docs/generated/player-qa/r308-stage-scale-web-page-state.json`, `docs/generated/player-qa/r308-stage-scale-web-page.png`, and `docs/generated/player-qa/r308-stage-scale-compact-web-page.png` record `QA0429A / QA0429Hero` at `0:287,618`, desktop stage bounds `0,0,1024,768`, compact stage `798.72x599.04` inside `820x640`, `hasGuard=true`, `hasArcherGuard=true`, `nonFaviconNetwork404s=[]`, and `consoleErrors=[]`. Verification: web `tsc --noEmit`, JSON parse check, focused `mir2-simulation` R307 regression, `cargo fmt --check`, targeted `git diff --check`, gateway health, and web HTTP 200. Exact dynamic animal density/placement, and human visual acceptance remain open.
+- [x] 2026-04-29 `R307` Bichon ordinary Guard/ArcherGuard evidence: added a focused simulation regression for the `0:287,618` comparison point, requiring `Guard` at `291,620` and `ArcherGuard` at `295,624` through both bootstrap `ObjectMonster` packets and `worldSnapshot`. Browser evidence: `docs/generated/player-qa/r307-bichon-guard-archer-web-page.png` plus `docs/generated/player-qa/r307-bichon-guard-archer-web-page-state.json` records `hasGuard=true`, `hasArcherGuard=true`, `monsterCount=7`, `npcCount=5`, `hasUnderscoreNameplate=false`, and `questTrackerVisible=false`. Verification: focused `mir2-simulation` regression and CDP browser capture with zero console errors. Exact dynamic animal density/placement, HUD scale/letterboxing, and human visual acceptance remain open.
+- [x] 2026-04-29 `R306` Bichon same-scene display cleanup: the default web quest tracker overlay is no longer rendered over the Crystal playfield, and NPC/monster nameplates display Crystal-style spaces instead of raw underscores while runtime entity names remain unchanged. Evidence: `docs/generated/player-qa/r306-bichon-display-web-page.png` plus `docs/generated/player-qa/r306-bichon-display-web-page-state.json` records the same R305 population count at `0:284,607` (`entityCount=17`, `npcCount=8`, `monsterCount=8`) with `hasUnderscoreNameplate=false` and `questTrackerVisible=false`. Verification: web `tsc --noEmit`, CDP login/start/transfer/browser capture, and zero console errors. Exact placement/density, HUD scale/letterboxing, and human visual acceptance remain open.
 - [x] 2026-04-29 `R305` Bichon same-scene visible respawn runtime population: current-map visible Crystal respawns now populate ECS/worldSnapshot using the same visible-respawn helper as bootstrap object packets. Evidence: `docs/generated/player-qa/r305-bichon-visible-world-snapshot.json` records 8 NPCs and 8 monsters at `0:284,607`, including `Deer` and `Royal_Guard`; browser evidence at `docs/generated/player-qa/r305-bichon-visible-web-page.png` plus `docs/generated/player-qa/r305-bichon-visible-web-page-state.json` records 8 NPC sprite elements and 8 monster sprite elements. Verification: focused R305 regression, visible-respawn density regression, `fmt --check`, gateway build, live WS probe, browser capture, gateway health, and web HTTP 200. This closes the first visible Deer/Royal Guard gap only; final visual 1:1 remains open.
 - [x] 2026-04-29 `R304` Bichon same-scene current-map NPC runtime population: saved-character `StartGame` and Crystal transfers now populate the current Crystal map with NPC-info manifest entries before snapshots/visible-object packets. Evidence: `docs/generated/player-qa/r304-bichon-npc-world-snapshot.json` for `QA0429A / QA0429Hero` at map `0`, `284,607` records `npcCount=8` and visible `Assistant_Jane` / `Merchant_Ruben`; `docs/generated/player-qa/r304-bichon-npc-web-page.png` plus `docs/generated/player-qa/r304-bichon-npc-web-page-state.json` show the browser page also has 8 NPC sprite elements. Verification: `cargo +1.89.0 fmt --check`, focused NPC regression, adjacent `transfer_map`, `start_game_emits_visible_object_packets`, `world_snapshot_marks_safe_zone_after_start_game`, gateway build, live WS probe, and browser capture. This closes the "no NPCs in aligned Bichon snapshot" gap only; full visual 1:1 remains open.
-- [x] 2026-04-29 `R303` all-map frontend source-resource audit: `apps/web/scripts/audit-crystal-map-coverage.mjs` and `npm.cmd run audit:crystal-map-coverage --prefix apps\web` now produce full manifest coverage evidence at `docs/generated/map/latest-crystal-map-coverage.json` and `docs/generated/map/r303-crystal-map-coverage.json`. Results: 463/463 Crystal manifest maps have local map files, 0 unsupported map types, 0 parse errors, every sampled viewport references source frames, no missing map libraries, 11 sampled maps retain out-of-range frame-reference risk, and minimap 450/451 remain missing for `DogYoArena2` / `DogYoHyun`. This closes the previous ambiguity about whether all maps are even source-loadable, but it does not close full-map visual 1:1 acceptance.
+- [x] 2026-04-29 `R303` all-map frontend source-resource audit: `apps/web/scripts/audit-crystal-map-coverage.mjs` and `npm.cmd run audit:crystal-map-coverage --prefix apps\web` produced the first full manifest coverage evidence at `docs/generated/map/latest-crystal-map-coverage.json` and `docs/generated/map/r303-crystal-map-coverage.json`. Results: 463/463 Crystal manifest maps had local map files, 0 unsupported map types, 0 parse errors, every sampled viewport referenced source frames, and no map libraries were missing. The 2026-05-16 audit above supersedes the historical R303 warnings and adds gameplay semantic coverage; full visual 1:1 acceptance remains a human comparison gate.
 - [x] 2026-04-28 `R302` original Crystal client/server visual-reference pass: original `Server.exe` listened on `127.0.0.1:7000`, visible `Client.exe` reached select/game with retained character `R302HeroB`, and evidence was archived at `docs/generated/player-qa/r302-original-client/summary.json`. Web Stage 5 UI smoke captured 88 screenshots with 0 critical console errors. Packet-trace bin 16/16 passed after adding `MIR2_PACKET_TRACE_KEEP_LIFECYCLE_CHARACTER=1`. The fresh live matrix is diagnostic only (`stableDiffCleanCount=2/9`, `packetParityAccepted=false`) and does not change the accepted status wording.
-- [x] 2026-04-28 `R301` final automated Candidate acceptance-pack refresh: `docs/generated/player-qa/r301-summary.json` records packet-trace bin 15/15, web `tsc --noEmit`, web `npm.cmd run build`, map API smoke 18/18 with 0 failures, minimap smoke 0 failures with known 450/451 warning, WS load 64/64 ready with 0 errors and keepalive p95 637 ms, Stage 5 UI smoke 88 screenshots with 0 critical console errors and 32 compact text nodes checked without overflow, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. This refresh keeps automation at 100% Candidate and does not close human visual/feel acceptance for whole-project 100% Accepted.
+- [x] 2026-04-28 `R301` final automated Candidate acceptance-pack refresh: `docs/generated/player-qa/r301-summary.json` records packet-trace bin 15/15, web `tsc --noEmit`, web `npm.cmd run build`, map API smoke 18/18 with 0 failures, minimap smoke 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load 64/64 ready with 0 errors and keepalive p95 637 ms, Stage 5 UI smoke 88 screenshots with 0 critical console errors and 32 compact text nodes checked without overflow, `mir2-game-data` 27/27, `mir2-gateway` 55/55 plus packet-trace bin 15/15, `mir2-admin-api` 22/22, and `mir2-simulation` 674/674. This refresh keeps automation at 100% Candidate and does not close human visual/feel acceptance for whole-project 100% Accepted.
 - [x] 2026-04-28 `R300` stable-diff packet acceptance: `apps/gateway/src/bin/packet_trace.rs` now separates strict exact diagnostics from accepted packet parity and supports `MIR2_PACKET_TRACE_ACCEPT_STABLE_DIFF=1` / `MIR2_PACKET_TRACE_REQUIRE_CRYSTAL=1` for the current live Crystal matrix. The accepted gate uses R298's 9/9 stable-clean live matrix and R299's payload probe showing strict exact dirtiness is Crystal dynamic state, not semantic packet drift. Evidence is recorded in `docs/PACKET-PARITY-ACCEPTANCE.md` and `docs/generated/packet-traces/r300-stable-acceptance.json`. Verification passed: `cargo +1.89.0 test --locked -p mir2-gateway --bin packet_trace -- --test-threads=1` (15/15), `cargo +1.89.0 fmt --check`.
 - [x] 2026-04-28 `R298` Windows live Crystal stable packet-matrix refresh: `MIR2_CRYSTAL_TCP_ADDR=127.0.0.1:7000`, local gateway `127.0.0.1:7310`, `CRYSTAL_CLIENT_ROOT=E:\mir2\Crystal\Build\Client\Debug`, and fixture character `Cdx0428030348` index `8` produced 9/9 local and Crystal TCP artifacts under `docs/generated/packet-traces/r298-live-matrix` with `stableDiffCleanCount=9` and `acceptedStableLiveComparisonCount=9`. `TimeOfDay` is now treated as stable-comparator volatile, matching the live evidence model. This was stable deterministic evidence only at R298 time; strict exact remained dirty with `diffDirtyCount=9`, and R300 later made this matrix the accepted packet parity gate through explicit stable-diff acceptance. Verification passed: `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, `git diff --check`, and web `tsc --noEmit`.
-- [x] 2026-04-28 `R297` Windows frontend/player QA refresh: `CRYSTAL_CLIENT_ROOT=E:\mir2\Crystal\Build\Client\Debug` was used for web build and smokes; map API smoke served 18/18 representative requests, minimap smoke had 0 failures with known 450/451 missing-index warning, WS load reported 64/64 ready with 0 errors and keepalive p95 632 ms, and Stage 5 UI smoke captured 88 screenshots with 0 critical console errors. The round exported missing original scene `NPC/*` and `Monster/*` sprite libs, fixed map-transfer minimap state, and hardened concurrent account-store saves. Verification passed `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, `git diff --check`, and web `tsc --noEmit`. This is automated Candidate evidence only; human Crystal visual/feel acceptance remains open.
+- [x] 2026-04-28 `R297` Windows frontend/player QA refresh: `CRYSTAL_CLIENT_ROOT=E:\mir2\Crystal\Build\Client\Debug` was used for web build and smokes; map API smoke served 18/18 representative requests, minimap smoke had 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load reported 64/64 ready with 0 errors and keepalive p95 632 ms, and Stage 5 UI smoke captured 88 screenshots with 0 critical console errors. The round exported missing original scene `NPC/*` and `Monster/*` sprite libs, fixed map-transfer minimap state, and hardened concurrent account-store saves. Verification passed `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, `git diff --check`, and web `tsc --noEmit`. This is automated Candidate evidence only; human Crystal visual/feel acceptance remains open.
 - [x] 2026-04-28 `R292` Windows live Crystal stable packet-matrix evidence: `MIR2_CRYSTAL_TCP_ADDR=127.0.0.1:7000` and local gateway `127.0.0.1:7310` produced 9/9 local and Crystal TCP artifacts under `docs/generated/packet-traces/r292-live-matrix` with `stableDiffCleanCount=9` and `acceptedStableLiveComparisonCount=9`. This was stable deterministic evidence only at R292 time; strict exact diff remained dirty with `diffDirtyCount=9`, and R300 later made stable-diff the accepted packet gate. Verification passed: `mir2-simulation` 674/674, `mir2-gateway` 55/55 plus packet-trace bin 14/14, `mir2-admin-api` 22/22, `fmt --check`, `git diff --check`, and web `tsc --noEmit`.
 - [x] 2026-04-28 `R248` Windows Crystal server-data import closure: local `Server.MirDB` and matching `Build/Server/Debug/Envir/Routes` were available, `generate-crystal-respawn-manifest.mjs` regenerated the Crystal respawn/monster/item/NPC-info manifests, and map records now carry real `NoThrowItem`, `NoDropPlayer`, and `NoDropMonster` flags. Verification passed: `mir2-game-data` 22/22, focused `mir2-simulation no_drop_monster_map_rule` 2/2, full `mir2-simulation` 670/670, and `mir2-gateway` 55/55 plus packet-trace bin tests 7/7. R298/R300 later closed the tracked live packet gate under explicit stable-diff acceptance.
-- [x] 2026-04-26 `R225` Mac-local Candidate regression refresh: Stage 5 UI smoke captures 88 screenshots and now records summary counts for screenshot total, 8 compact panel bounds, 34 compact text nodes, 0 critical console errors, and major flow counts. Map API smoke writes 18/18 successful requests, minimap asset smoke writes 0 failures with the existing 450/451 missing-index warning, WS load reports 64/64 ready and 0 errors, and Rust package regressions are green (`mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664). Local require-mode `packet_trace --matrix` wrote 9 artifacts under `docs/generated/packet-traces/r225-matrix`; live Crystal comparison remains blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
+- [x] 2026-04-26 `R225` Mac-local Candidate regression refresh: Stage 5 UI smoke captures 88 screenshots and now records summary counts for screenshot total, 8 compact panel bounds, 34 compact text nodes, 0 critical console errors, and major flow counts. Map API smoke writes 18/18 successful requests, minimap asset smoke writes 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load reports 64/64 ready and 0 errors, and Rust package regressions are green (`mir2-game-data` 22/22, `mir2-gateway` 54/54, `mir2-simulation` 664/664). Local require-mode `packet_trace --matrix` wrote 9 artifacts under `docs/generated/packet-traces/r225-matrix`; live Crystal comparison remains blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
 - [x] 2026-04-26 `R224` packet trace matrix closure: restored `mir2-gateway` `packet_trace` with `--list-flows`, single-flow capture, matrix artifact writing, local/Crystal endpoint capture, diff summaries, fixture metadata, and require-mode enforcement. `mir2-gateway` passes 53/53 including packet trace bin tests 6/6. Local gateway require-mode matrix wrote 9 artifacts under `docs/generated/packet-traces/r224-matrix` with `localOk=true`; 17 matrix entries without TCP `traceFlow` were intentionally skipped. Live Crystal trace comparison is still blocked until `MIR2_CRYSTAL_TCP_ADDR` is provided.
-- [x] 2026-04-26 `R223` 100% Candidate automated evidence gate: Stage 5 UI smoke now captures 88 screenshots and records advanced systems state for trade item/cancel, shop gold purchase, auction buy/cancel, conquest end, hero behaviour, mining/craft, and mail delete state, plus compact Mail/Report panel bounds. Map API smoke writes 18/18 successful requests, minimap asset smoke writes 0 failures with the existing 450/451 missing-index warning, WS load reports 64/64 ready and 0 errors, and full Rust package regressions are green. Human Crystal visual/feel review is still required for 100% Accepted.
+- [x] 2026-04-26 `R223` 100% Candidate automated evidence gate: Stage 5 UI smoke now captures 88 screenshots and records advanced systems state for trade item/cancel, shop gold purchase, auction buy/cancel, conquest end, hero behaviour, mining/craft, and mail delete state, plus compact Mail/Report panel bounds. Map API smoke writes 18/18 successful requests, minimap asset smoke writes 0 failures with a historical preview-index warning later closed by the 2026-05-16 map audit, WS load reports 64/64 ready and 0 errors, and full Rust package regressions are green. Human Crystal visual/feel review is still required for 100% Accepted.
 - [x] 2026-04-26 `R219-R222` frontend/global evidence batch: Stage 5 UI smoke now captures 85 screenshots and records login/select lifecycle flows, compact multi-panel layout bounds, NPC dialog link-capable state, and existing broad Stage 5 gameplay/system flows. Map API smoke writes `docs/generated/map/latest-crystal-map-api.json` with 18/18 successful requests, minimap asset smoke writes `docs/generated/assets/latest-minimap-assets.json` with 0 failures and the existing 450/451 missing-index warning, and WS load refresh reports 64/64 ready with 0 errors. Verified by web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke, map/minimap smokes, WS load, `fmt --check`, and `diff --check`.
 - [x] 2026-04-26 `R210-R218` frontend/global evidence batch: Stage 5 UI smoke now captures 71 screenshots and records Mail/Report/NPC panel state, broad Stage 5 systems state, guild/group chat filters, Character repair/special-repair, ground item/gold pickup, combat target state, system-menu QA and transfer-list routing, Battle Focus spell casting, and compact inventory panel bounds. Verified by web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke with 71 screenshots, screenshot visual inspection, `fmt --check`, and `diff --check`.
 - [x] 2026-04-26 `R209` frontend/storage-password submit evidence: Stage 5 UI smoke fills Set Storage Password, verifies mismatched confirmation keeps submit disabled with the mismatch warning, submits matching `Safe123` without an active storage service, verifies `hasStoragePassword` remains false with no-service feedback, captures `stage5-storage-password-mismatch.png` and `stage5-storage-password-submit-no-service.png`, and records the extended `storagePasswordFlow`. Verified by web `tsc --noEmit`, direct `next build`, `node --check`, Stage 5 UI smoke with 60 screenshots, screenshot visual inspection, `fmt --check`, and `diff --check`.
@@ -670,7 +1545,7 @@ Progress gates:
 
 ### F. Maps, World Events, and AOI
 
-- [ ] Resolve missing or indirect map assets, including `mini_map` indices 450/451 and missing movement target `map_index=388`.
+- [x] Resolve missing or indirect map assets for the current automated gate: minimap indices are complete, Crystal no-draw source frames are tracked separately, and invalid/special movement targets are filtered from runtime direct transfers by the 2026-05-16 all-map audit.
 - [ ] Import map event script bindings and exact weather, light, lightning, fire, door, wall, gate, and object-state behavior.
 - [ ] Complete all map transfer, safe zone, revive point, random spawn, collision, blocking, and occupancy behavior against Crystal source.
 - [ ] Expand AOI enter/leave parity beyond current spawn/action/remove ordering, including object despawn, hidden state, projectile visibility, drops, NPCs, pets, heroes, and event objects.
@@ -1070,7 +1945,7 @@ Completion note:
 - Date: 2026-04-21
 - Commands: `cargo test --workspace`; `npm.cmd run build`; `npm.cmd run smoke:crystal-map-api`; `npm.cmd run smoke:crystal-minimap-assets`; gateway health and web/API checks.
 - Screenshots: archived under `docs/stage2-screenshots`.
-- Remaining risk: `MMap` 450/451 are missing from current source assets; exact human pixel comparison is deferred by request.
+- Remaining risk: exact human pixel comparison is deferred by request. The historical `MMap` preview-index gap was closed by the later full-client/minimap audit.
 
 ## Stage 3: Expand Current Playable Server Slice
 
@@ -1627,7 +2502,7 @@ Entries:
 - 2026-04-21, Stage 2.2 map switcher: added representative QA map jump buttons and direct `map/x/y` jump form in the system menu. Added a runtime regression for `crystal:HF1:200:200` debug transfers. `npm.cmd run build`, `cargo test -p mir2-simulation --lib -- --test-threads=1`, and representative map API smoke passed.
 - 2026-04-21, Stage 2.3 map API performance: optimized map-region export to index only requested cells, added `npm.cmd run smoke:crystal-map-api`, and verified representative first/warm passes. First pass stayed under 60 seconds, warm pass stayed under 2 seconds, and all maps returned non-empty cells/sprites.
 - 2026-04-21, Stage 2.4 mini-map asset pass: exported representative Crystal mini-map rasters from `MMap.Lib`, switched the client to `MMap/meta.json` dimensions, fixed stale mini-map state when moving to `mini_map=0` maps, and corrected scene API map title authority. `npm.cmd run smoke:crystal-minimap-assets` and `npm.cmd run build` passed. Manual 1:1 screenshot comparison remains open.
-- 2026-04-21, global verification after Stage 2.1-2.4 work: `cargo test --workspace` passed, `http://127.0.0.1:3002` returned 200, gateway health returned ready HTTP/WS/TCP stub, and `npm.cmd run smoke:crystal-minimap-assets` passed with warnings only for missing source frames 450/451.
+- 2026-04-21, global verification after Stage 2.1-2.4 work: `cargo test --workspace` passed, `http://127.0.0.1:3002` returned 200, gateway health returned ready HTTP/WS/TCP stub, and `npm.cmd run smoke:crystal-minimap-assets` passed with historical preview-index warnings later closed by the 2026-05-16 map audit.
 - 2026-04-21, Stage 3 complete: added `stage3_playable_pve_loop_persists_after_reconnect`, covering login/start, walk, NPC quest accept/turn-in, real Field Wasp kill, loot/potion flow, equipment reward, Crystal map transfer to `HF1`, save, reload, and reconnect persistence. `cargo test -p mir2-simulation stage3_playable_pve_loop_persists_after_reconnect`, `cargo test -p mir2-simulation --lib -- --test-threads=1`, `cargo test --workspace`, and `npm.cmd run build` passed.
 - 2026-04-21, Stage 4.1 map metadata: imported generated Crystal movement transfers and safe zones into runtime behavior, propagated Crystal mini-map/big-map/light metadata through `MapInformation`, and changed representative map spawn table placement to use target-map collision data with cached runtime map collision parsing. `cargo test -p mir2-simulation crystal_manifest_`, `cargo test -p mir2-simulation crystal_manifest_map_information_includes_minimap_bigmap_and_light`, `cargo test -p mir2-simulation crystal_current_map_spawn_table_uses_representative_map_rosters`, and `cargo test --workspace` passed.
 - 2026-04-21, Stage 4.2 monster AI classification: generated Crystal monster AI family summary from `MonsterObject.GetMonster`, `crystal_monster_manifest.json`, and all map respawns. `crystal_monster_ai_summary.json` now classifies 555 monster rows across 212 AI families and records current runtime coverage. `cargo test -p mir2-game-data crystal_monster_ai_summary_classifies_manifest_families` and `cargo test --workspace` passed.
@@ -1892,6 +2767,7 @@ Entries:
 - 2026-04-23, 100% closure D.1 bounded rental `DropItem` bind pass: Crystal source confirmed `PlayerObject.DropItem` rejects rental `RentalInformation.BindingFlags.DontDrop` the same way it rejects base `DontDrop`; runtime now reuses the shared Crystal-or-rental bind helper so current `DropItem` returns the failed ack, preserves inventory state, preserves rental metadata, and spawns no ground drop for rental `DontDrop` items. `cargo +1.89.0 fmt --check`, `cargo +1.89.0 test --locked -p mir2-simulation drop_item_packet -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation item -- --test-threads=1 --nocapture`, and `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` passed with 487 tests.
 - 2026-04-25, 100% closure D.1 current equipment metadata pass: current equipment/item runtime state now preserves Crystal `NeedIdentify` and `SoulBoundId` through `UserItem` round-trips, successful equip/use-equip identifies the item before the visible refresh, and equipping an item bound to another character now fails without mutation. `cargo +1.89.0 test --locked -p mir2-simulation equip_item_packet -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation use_item_packet_equipping_need_identify_item_emits_refresh_item -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation item -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation storage -- --test-threads=1 --nocapture`, and later `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` revalidation passed with 599 tests.
 - 2026-04-25, 100% closure D.1 dynamic current-data `UseItem` pass: manifest-backed `crystal-item-*` consumables now route through Crystal template stats instead of starter-only local tables, covering `SunPotion` HP/MP restore, same-key duration buff stacking for current consumables like `ImpactDrug`, multi-buff items like `Apple`, current-data `TownTeleport`, and current-data `BenedictionOil` / `RepairOil` / `WarGodOil`. The bounded `WarGodOil` path currently falls back on the template name because the generated manifest still reports `shape = 0`. `cargo +1.89.0 test --locked -p mir2-simulation use_item_packet_dynamic_crystal -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation use_item -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation item -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation equip_item_packet -- --test-threads=1 --nocapture`, `cargo +1.89.0 test --locked -p mir2-simulation storage -- --test-threads=1 --nocapture`, and `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1` passed with 599 tests.
+- 2026-05-21, production Crystal map respawn screenshot pass: current-map StartGame visible respawns now keep representative low-density Crystal map spawns while distributing them over nearby walkable cells instead of stacking all representatives at one origin. Production gateway release `20260521T0830Z-spreadrep` was deployed and verified with live screenshots/states for BichonProvince, WoomyonWoods(S), NaturalCave, DeadMineEntrance, InsectCave_2F, and ZumaMaze under `docs/generated/player-qa/live-map-monsters/`; the state captures report `network404=0`, Monster meta `503=0`, and Monster PNG failed count `0`. Verification passed: `cargo +1.89.0 fmt --check --package mir2-simulation --package mir2-gateway`, `cargo +1.89.0 check -p mir2-simulation`, `cargo +1.89.0 check -p mir2-gateway`, and `cargo +1.89.0 test -p mir2-simulation start_game_visible_respawns_spread_representative_crystal_map_spawns -- --nocapture`.
 
 ## Working Rules
 

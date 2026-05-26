@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::env;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::sync::{Arc, Mutex};
@@ -22,6 +23,10 @@ pub struct GatewaySessionCacheRecord {
     pub character_name: String,
     #[serde(default, rename = "zoneId")]
     pub zone_id: Option<String>,
+    #[serde(default, rename = "zoneOwnerId")]
+    pub zone_owner_id: Option<String>,
+    #[serde(default, rename = "zoneOwnerFencingToken")]
+    pub zone_owner_fencing_token: Option<u64>,
     pub map_file_name: Option<String>,
     pub player_object_id: Option<u32>,
     pub player_hp: Option<i32>,
@@ -43,6 +48,10 @@ pub struct GatewaySessionRoute {
     pub character_name: String,
     #[serde(default, rename = "zoneId")]
     pub zone_id: Option<String>,
+    #[serde(default, rename = "zoneOwnerId")]
+    pub zone_owner_id: Option<String>,
+    #[serde(default, rename = "zoneOwnerFencingToken")]
+    pub zone_owner_fencing_token: Option<u64>,
     pub map_file_name: Option<String>,
     pub tick: u64,
     #[serde(default, rename = "updatedAtMs")]
@@ -80,6 +89,8 @@ impl From<GatewaySessionCacheRecord> for GatewaySessionRoute {
             key: record.key,
             character_name: record.character_name,
             zone_id: record.zone_id,
+            zone_owner_id: record.zone_owner_id,
+            zone_owner_fencing_token: record.zone_owner_fencing_token,
             map_file_name: record.map_file_name,
             tick: record.tick,
             updated_at_ms: record.updated_at_ms,
@@ -120,6 +131,23 @@ pub trait GatewaySessionCache: Send + Sync {
         owner: &str,
         ttl_seconds: u64,
     ) -> Result<GatewayRouteLease, String>;
+    fn refresh_owned_route_lease_record(
+        &self,
+        mut record: GatewaySessionCacheRecord,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<bool, String> {
+        let current = match self.get(&record.key) {
+            Some(current) if current.route_lease_owner.as_deref() == Some(owner) => current,
+            Some(current) if current.route_lease_owner.is_none() => current,
+            Some(_) | None => return Ok(false),
+        };
+        let lease = self.renew_route_lease(&current.key, owner, ttl_seconds)?;
+        record.route_lease_owner = Some(lease.owner);
+        record.route_lease_expires_at_ms = Some(lease.expires_at_ms);
+        self.put(record);
+        Ok(true)
+    }
     fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String>;
     fn route_lease_count(&self) -> usize {
         0
@@ -146,6 +174,12 @@ pub trait GatewaySessionCache: Send + Sync {
 }
 
 pub type SharedGatewaySessionCache = Arc<dyn GatewaySessionCache>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GatewaySessionCacheRuntimeBackend {
+    InMemory,
+    Redis,
+}
 
 #[derive(Debug, Default)]
 pub struct InMemoryGatewaySessionCache {
@@ -265,6 +299,47 @@ impl GatewaySessionCache for InMemoryGatewaySessionCache {
         self.acquire_route_lease(key, owner, ttl_seconds)
     }
 
+    fn refresh_owned_route_lease_record(
+        &self,
+        mut record: GatewaySessionCacheRecord,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<bool, String> {
+        let mut records = self
+            .records
+            .lock()
+            .expect("gateway session cache mutex should not be poisoned");
+        if !records.contains_key(&record.key) {
+            return Ok(false);
+        }
+        let mut leases = self
+            .route_leases
+            .lock()
+            .expect("gateway route lease mutex should not be poisoned");
+        let now_ms = current_unix_ms();
+        let Some(existing) = leases.get_mut(&record.key) else {
+            return Ok(false);
+        };
+        if existing.owner != owner {
+            return Err(format!(
+                "route lease for {}/{} is held by {} until {}",
+                record.key.account_id,
+                record.key.character_index,
+                existing.owner,
+                existing.expires_at_ms
+            ));
+        }
+        if existing.expires_at_ms <= now_ms {
+            return Ok(false);
+        }
+        existing.expires_at_ms = now_ms.saturating_add(ttl_seconds.max(1).saturating_mul(1_000));
+        record.updated_at_ms = now_ms;
+        record.route_lease_owner = Some(existing.owner.clone());
+        record.route_lease_expires_at_ms = Some(existing.expires_at_ms);
+        records.insert(record.key.clone(), record);
+        Ok(true)
+    }
+
     fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String> {
         let mut leases = self
             .route_leases
@@ -345,6 +420,10 @@ impl RedisGatewaySessionCache {
         )
     }
 
+    fn character_index_key_prefix(&self) -> String {
+        format!("{}:character:", self.namespace)
+    }
+
     fn route_lease_key(&self, key: &GatewaySessionCacheKey) -> String {
         format!(
             "{}:lease:{}:{}",
@@ -352,6 +431,25 @@ impl RedisGatewaySessionCache {
             sanitize_cache_key_part(&key.account_id),
             key.character_index
         )
+    }
+
+    fn route_lease_key_prefix(&self) -> String {
+        format!("{}:lease:", self.namespace)
+    }
+
+    fn is_character_index_key(&self, key: &str) -> bool {
+        key.starts_with(&self.character_index_key_prefix())
+    }
+
+    fn is_route_lease_key(&self, key: &str) -> bool {
+        key.starts_with(&self.route_lease_key_prefix())
+    }
+
+    fn is_session_record_key(&self, key: &str) -> bool {
+        let namespace_prefix = format!("{}:", self.namespace);
+        key.starts_with(&namespace_prefix)
+            && !self.is_character_index_key(key)
+            && !self.is_route_lease_key(key)
     }
 
     fn execute(&self, args: &[String]) -> Result<RedisValue, String> {
@@ -408,20 +506,35 @@ impl RedisGatewaySessionCache {
         }
     }
 
-    fn get_record_by_redis_key(&self, redis_key: &str) -> Option<GatewaySessionCacheRecord> {
-        let value = match self.execute(&["GET".to_string(), redis_key.to_string()]) {
-            Ok(RedisValue::Bulk(Some(value))) => value,
-            Ok(RedisValue::Bulk(None)) => return None,
-            Ok(other) => {
-                eprintln!("unexpected redis session-cache list get response: {other:?}");
-                return None;
-            }
+    fn get_records_by_redis_keys(&self, keys: &[String]) -> Vec<GatewaySessionCacheRecord> {
+        if keys.is_empty() {
+            return Vec::new();
+        }
+        let mut args = Vec::with_capacity(keys.len() + 1);
+        args.push("MGET".to_string());
+        args.extend(keys.iter().cloned());
+        let response = match self.execute(&args) {
+            Ok(response) => response,
             Err(error) => {
-                eprintln!("redis session-cache list get failed: {error}");
-                return None;
+                eprintln!("redis session-cache MGET failed: {error}");
+                return Vec::new();
             }
         };
-        serde_json::from_str(&value).ok()
+        let RedisValue::Array(values) = response else {
+            eprintln!("unexpected redis session-cache MGET response: {response:?}");
+            return Vec::new();
+        };
+        values
+            .into_iter()
+            .filter_map(|value| match value {
+                RedisValue::Bulk(Some(value)) => serde_json::from_str(&value).ok(),
+                RedisValue::Bulk(None) => None,
+                other => {
+                    eprintln!("unexpected redis session-cache MGET item: {other:?}");
+                    None
+                }
+            })
+            .collect()
     }
 }
 
@@ -451,10 +564,11 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
                 return Vec::new();
             }
         };
-        let mut records = keys
-            .iter()
-            .filter_map(|key| self.get_record_by_redis_key(key))
+        let record_keys = keys
+            .into_iter()
+            .filter(|key| self.is_session_record_key(key))
             .collect::<Vec<_>>();
+        let mut records = self.get_records_by_redis_keys(&record_keys);
         records.sort_by(|left, right| {
             left.character_name
                 .cmp(&right.character_name)
@@ -637,6 +751,60 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
         }
     }
 
+    fn refresh_owned_route_lease_record(
+        &self,
+        mut record: GatewaySessionCacheRecord,
+        owner: &str,
+        ttl_seconds: u64,
+    ) -> Result<bool, String> {
+        let ttl_seconds = ttl_seconds.max(1);
+        let now_ms = current_unix_ms();
+        record.updated_at_ms = now_ms;
+        record.route_lease_owner = Some(owner.to_string());
+        record.route_lease_expires_at_ms =
+            Some(now_ms.saturating_add(ttl_seconds.saturating_mul(1_000)));
+        let redis_key = self.redis_key(&record.key);
+        let lease_key = self.route_lease_key(&record.key);
+        let character_index_key = self.character_index_key(&record.character_name);
+        let value = serde_json::to_string(&record)
+            .map_err(|error| format!("redis session-cache record serialization failed: {error}"))?;
+        let script = r#"
+local owner = redis.call("GET", KEYS[1])
+if owner == ARGV[1] then
+  redis.call("EXPIRE", KEYS[1], ARGV[2])
+  redis.call("SETEX", KEYS[2], ARGV[3], ARGV[4])
+  redis.call("SETEX", KEYS[3], ARGV[3], KEYS[2])
+  return 1
+end
+if owner == false then
+  return 0
+end
+return -1
+"#;
+        match self.execute(&[
+            "EVAL".to_string(),
+            script.to_string(),
+            "3".to_string(),
+            lease_key,
+            redis_key,
+            character_index_key,
+            owner.to_string(),
+            ttl_seconds.to_string(),
+            self.ttl_seconds.to_string(),
+            value,
+        ])? {
+            RedisValue::Integer(1) => Ok(true),
+            RedisValue::Integer(0) => Ok(false),
+            RedisValue::Integer(-1) => Err(format!(
+                "route lease for {}/{} is held by another owner",
+                record.key.account_id, record.key.character_index
+            )),
+            other => Err(format!(
+                "unexpected redis owned route lease refresh response: {other:?}"
+            )),
+        }
+    }
+
     fn release_route_lease(&self, key: &GatewaySessionCacheKey, owner: &str) -> Result<(), String> {
         let lease_key = self.route_lease_key(key);
         let current_owner = match self.execute(&["GET".to_string(), lease_key.clone()]) {
@@ -651,10 +819,47 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
         Ok(())
     }
 
+    fn route_lease_count(&self) -> usize {
+        let prefix = self.route_lease_key_prefix();
+        match self.list_keys() {
+            Ok(keys) => keys
+                .into_iter()
+                .filter(|key| key.starts_with(&prefix))
+                .count(),
+            Err(error) => {
+                eprintln!("redis route-lease count failed: {error}");
+                0
+            }
+        }
+    }
+
     fn status(&self) -> GatewaySessionCacheStatus {
         match self.ping() {
             Ok(()) => {
-                let records = self.list();
+                let keys = match self.list_keys() {
+                    Ok(keys) => keys,
+                    Err(error) => {
+                        return GatewaySessionCacheStatus {
+                            configured: true,
+                            backend: "redis".to_string(),
+                            ttl_seconds: Some(self.ttl_seconds),
+                            record_count: 0,
+                            stale_record_count: 0,
+                            route_lease_count: 0,
+                            healthy: false,
+                            last_error: Some(error),
+                        };
+                    }
+                };
+                let route_lease_count = keys
+                    .iter()
+                    .filter(|key| self.is_route_lease_key(key))
+                    .count();
+                let record_keys = keys
+                    .into_iter()
+                    .filter(|key| self.is_session_record_key(key))
+                    .collect::<Vec<_>>();
+                let records = self.get_records_by_redis_keys(&record_keys);
                 GatewaySessionCacheStatus {
                     configured: true,
                     backend: "redis".to_string(),
@@ -664,10 +869,7 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
                         &records,
                         self.ttl_seconds.saturating_mul(1_000),
                     ),
-                    route_lease_count: records
-                        .iter()
-                        .filter(|record| record.route_lease_owner.is_some())
-                        .count(),
+                    route_lease_count,
                     healthy: true,
                     last_error: None,
                 }
@@ -716,21 +918,66 @@ impl GatewaySessionCache for RedisGatewaySessionCache {
     }
 }
 
-pub fn default_gateway_session_cache_from_env() -> SharedGatewaySessionCache {
-    match std::env::var("MIR2_GATEWAY_REDIS_CACHE_URL") {
+pub fn gateway_session_cache_requires_redis_from_env() -> bool {
+    if env_flag_enabled("MIR2_GATEWAY_REQUIRE_REDIS_CACHE") {
+        return true;
+    }
+    mir2_simulation::account_store_requires_postgres_source_from_env()
+}
+
+pub fn gateway_session_cache_runtime_backend_from_env(
+) -> Result<GatewaySessionCacheRuntimeBackend, String> {
+    match env::var("MIR2_GATEWAY_REDIS_CACHE_URL") {
         Ok(redis_url) if !redis_url.trim().is_empty() => {
-            let ttl_seconds = std::env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
+            Ok(GatewaySessionCacheRuntimeBackend::Redis)
+        }
+        _ if gateway_session_cache_requires_redis_from_env() => Err(
+            "prod-like Gateway requires MIR2_GATEWAY_REDIS_CACHE_URL for Redis session/routing cache"
+                .to_string(),
+        ),
+        _ => Ok(GatewaySessionCacheRuntimeBackend::InMemory),
+    }
+}
+
+pub fn gateway_session_cache_from_env() -> Result<SharedGatewaySessionCache, String> {
+    match gateway_session_cache_runtime_backend_from_env()? {
+        GatewaySessionCacheRuntimeBackend::Redis => {
+            let redis_url = env::var("MIR2_GATEWAY_REDIS_CACHE_URL").map_err(|_| {
+                "MIR2_GATEWAY_REDIS_CACHE_URL is required for Redis session/routing cache"
+                    .to_string()
+            })?;
+            let ttl_seconds = env::var("MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS")
                 .ok()
                 .and_then(|value| value.parse::<u64>().ok())
                 .unwrap_or(30);
-            Arc::new(RedisGatewaySessionCache::new(
-                &redis_url,
-                "mir2:gateway:session",
-                ttl_seconds,
-            ))
+            let cache =
+                RedisGatewaySessionCache::new(&redis_url, "mir2:gateway:session", ttl_seconds);
+            if gateway_session_cache_requires_redis_from_env() {
+                cache.ping().map_err(|error| {
+                    format!("required Redis session/routing cache is unavailable: {error}")
+                })?;
+            }
+            Ok(Arc::new(cache))
         }
-        _ => Arc::new(InMemoryGatewaySessionCache::default()),
+        GatewaySessionCacheRuntimeBackend::InMemory => {
+            Ok(Arc::new(InMemoryGatewaySessionCache::default()))
+        }
     }
+}
+
+pub fn default_gateway_session_cache_from_env() -> SharedGatewaySessionCache {
+    gateway_session_cache_from_env().unwrap_or_else(|error| panic!("{error}"))
+}
+
+fn env_flag_enabled(name: &str) -> bool {
+    env::var(name)
+        .map(|value| {
+            matches!(
+                value.trim().to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
+        .unwrap_or(false)
 }
 
 fn redis_addr_from_url(redis_url: &str) -> String {
@@ -871,6 +1118,7 @@ pub fn session_cache_key(session: &GatewaySession) -> Option<GatewaySessionCache
 pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCacheRecord> {
     let identity = session.active_identity()?;
     let snapshot = session.world_snapshot();
+    let zone_owner_lease = session.zone_owner_lease();
     Some(GatewaySessionCacheRecord {
         key: GatewaySessionCacheKey {
             account_id: identity.account_id,
@@ -878,6 +1126,8 @@ pub fn session_cache_record(session: &GatewaySession) -> Option<GatewaySessionCa
         },
         character_name: identity.character_name,
         zone_id: Some(session.zone_id().as_str().to_string()),
+        zone_owner_id: Some(zone_owner_lease.owner_id().to_string()),
+        zone_owner_fencing_token: Some(zone_owner_lease.fencing_token()),
         map_file_name: snapshot.map_file_name,
         player_object_id: snapshot.player_object_id,
         player_hp: snapshot.player_hp,
@@ -1015,14 +1265,58 @@ mod tests {
     use super::{
         cached_session_record, refresh_session_cache, remove_session_cache,
         route_request_for_character, GatewaySessionCache, GatewaySessionCacheKey,
-        InMemoryGatewaySessionCache, RedisGatewaySessionCache,
+        GatewaySessionCacheRuntimeBackend, InMemoryGatewaySessionCache, RedisGatewaySessionCache,
     };
     use crate::{
         GatewayConfig, GatewaySession, MapZoneSessionRouter, SharedSessionRouter,
         SharedZoneRuntimeFactory, ZoneId, ZoneRegistry,
     };
     use mir2_protocol::{ClientPacket, MirDirection};
-    use std::{sync::Arc, time::Duration};
+    use std::{
+        sync::{Arc, Mutex, OnceLock},
+        time::Duration,
+    };
+
+    static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    fn with_isolated_session_cache_env<T>(
+        vars: &[(&str, Option<&str>)],
+        action: impl FnOnce() -> T,
+    ) -> T {
+        let _guard = ENV_LOCK
+            .get_or_init(|| Mutex::new(()))
+            .lock()
+            .expect("env lock should not be poisoned");
+        let names = [
+            "MIR2_GATEWAY_REDIS_CACHE_URL",
+            "MIR2_GATEWAY_REQUIRE_REDIS_CACHE",
+            "MIR2_GATEWAY_SESSION_CACHE_TTL_SECONDS",
+            "MIR2_RUNTIME_ENV",
+            "MIR2_DEPLOYMENT_ENV",
+            "MIR2_ENV",
+            "MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES",
+        ];
+        let previous = names.map(|name| (name, std::env::var(name).ok()));
+        for name in names {
+            std::env::remove_var(name);
+        }
+        for (name, value) in vars {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+
+        let result = action();
+
+        for (name, value) in previous {
+            match value {
+                Some(value) => std::env::set_var(name, value),
+                None => std::env::remove_var(name),
+            }
+        }
+        result
+    }
 
     fn login_and_start(session: &mut GatewaySession) {
         let _ = session.handle_packet(ClientPacket::Login {
@@ -1030,6 +1324,97 @@ mod tests {
             password: "demo".to_string(),
         });
         let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    }
+
+    #[test]
+    fn session_cache_environment_defaults_to_in_memory_for_local_dev() {
+        with_isolated_session_cache_env(&[], || {
+            assert!(!super::gateway_session_cache_requires_redis_from_env());
+            assert_eq!(
+                super::gateway_session_cache_runtime_backend_from_env(),
+                Ok(GatewaySessionCacheRuntimeBackend::InMemory)
+            );
+            let cache = super::gateway_session_cache_from_env()
+                .expect("local dev should use in-memory cache");
+            assert_eq!(cache.status().backend, "in_memory");
+        });
+    }
+
+    #[test]
+    fn session_cache_environment_uses_redis_when_url_is_configured() {
+        with_isolated_session_cache_env(
+            &[(
+                "MIR2_GATEWAY_REDIS_CACHE_URL",
+                Some("redis://127.0.0.1:6379"),
+            )],
+            || {
+                assert!(!super::gateway_session_cache_requires_redis_from_env());
+                assert_eq!(
+                    super::gateway_session_cache_runtime_backend_from_env(),
+                    Ok(GatewaySessionCacheRuntimeBackend::Redis)
+                );
+                let cache = super::gateway_session_cache_from_env()
+                    .expect("redis url should select redis cache without prod ping gate");
+                assert_eq!(cache.status().backend, "redis");
+            },
+        );
+    }
+
+    #[test]
+    fn session_cache_environment_requires_redis_for_production_like_gateway() {
+        with_isolated_session_cache_env(&[("MIR2_RUNTIME_ENV", Some("staging"))], || {
+            assert!(super::gateway_session_cache_requires_redis_from_env());
+            let error = super::gateway_session_cache_runtime_backend_from_env()
+                .expect_err("staging should reject missing Redis cache");
+            assert!(error.contains("MIR2_GATEWAY_REDIS_CACHE_URL"));
+            assert!(super::gateway_session_cache_from_env().is_err());
+        });
+    }
+
+    #[test]
+    fn session_cache_environment_explicit_flag_requires_redis() {
+        with_isolated_session_cache_env(
+            &[("MIR2_GATEWAY_REQUIRE_REDIS_CACHE", Some("true"))],
+            || {
+                assert!(super::gateway_session_cache_requires_redis_from_env());
+                let error = super::gateway_session_cache_runtime_backend_from_env()
+                    .expect_err("explicit flag should reject missing Redis cache");
+                assert!(error.contains("MIR2_GATEWAY_REDIS_CACHE_URL"));
+            },
+        );
+    }
+
+    #[test]
+    fn session_cache_environment_postgres_account_policy_requires_redis() {
+        with_isolated_session_cache_env(
+            &[("MIR2_ACCOUNT_STORE_REQUIRE_POSTGRES", Some("1"))],
+            || {
+                assert!(super::gateway_session_cache_requires_redis_from_env());
+                let error = super::gateway_session_cache_runtime_backend_from_env()
+                    .expect_err("Postgres account-source policy should require Redis routing");
+                assert!(error.contains("MIR2_GATEWAY_REDIS_CACHE_URL"));
+            },
+        );
+    }
+
+    #[test]
+    fn session_cache_environment_required_redis_must_be_reachable() {
+        with_isolated_session_cache_env(
+            &[
+                ("MIR2_GATEWAY_REQUIRE_REDIS_CACHE", Some("1")),
+                ("MIR2_GATEWAY_REDIS_CACHE_URL", Some("redis://127.0.0.1:0")),
+            ],
+            || {
+                assert_eq!(
+                    super::gateway_session_cache_runtime_backend_from_env(),
+                    Ok(GatewaySessionCacheRuntimeBackend::Redis)
+                );
+                let error = super::gateway_session_cache_from_env()
+                    .err()
+                    .expect("required Redis should be pinged before startup succeeds");
+                assert!(error.contains("required Redis session/routing cache is unavailable"));
+            },
+        );
     }
 
     #[test]
@@ -1059,6 +1444,8 @@ mod tests {
         assert_eq!(cached.key.character_index, 0);
         assert_eq!(cached.character_name, "Scout");
         assert_eq!(cached.zone_id.as_deref(), Some("primary"));
+        assert_eq!(cached.zone_owner_id.as_deref(), Some("in-process:primary"));
+        assert_eq!(cached.zone_owner_fencing_token, Some(1));
         assert_eq!(cached.map_file_name.as_deref(), Some("0"));
         assert_eq!(cached.gold, session.world_snapshot().gold);
     }
@@ -1125,6 +1512,8 @@ mod tests {
         assert_eq!(route.key, refreshed.key);
         assert_eq!(route.character_name, "Scout");
         assert_eq!(route.zone_id.as_deref(), Some("primary"));
+        assert_eq!(route.zone_owner_id.as_deref(), Some("in-process:primary"));
+        assert_eq!(route.zone_owner_fencing_token, Some(1));
         assert_eq!(route.map_file_name.as_deref(), Some("0"));
         assert_eq!(route.tick, refreshed.tick);
         assert!(cached_session_record(&cache, &session).is_some());
@@ -1213,6 +1602,26 @@ mod tests {
     }
 
     #[test]
+    fn redis_session_cache_key_filters_separate_records_from_indexes_and_leases() {
+        let cache = RedisGatewaySessionCache::new("redis://127.0.0.1:6379", "mir2:test-status", 30);
+        let record_key = cache.redis_key(&GatewaySessionCacheKey {
+            account_id: "acct".to_string(),
+            character_index: 3,
+        });
+        let character_key = cache.character_index_key("Scout");
+        let lease_key = cache.route_lease_key(&GatewaySessionCacheKey {
+            account_id: "acct".to_string(),
+            character_index: 3,
+        });
+
+        assert!(cache.is_session_record_key(&record_key));
+        assert!(!cache.is_session_record_key(&character_key));
+        assert!(!cache.is_session_record_key(&lease_key));
+        assert!(cache.is_character_index_key(&character_key));
+        assert!(cache.is_route_lease_key(&lease_key));
+    }
+
+    #[test]
     fn session_cache_route_lease_blocks_stale_owner_overwrite_and_owned_remove() {
         let mut first = GatewaySession::new(GatewayConfig::default());
         let mut second = GatewaySession::new(GatewayConfig::default());
@@ -1245,6 +1654,28 @@ mod tests {
     }
 
     #[test]
+    fn owned_route_refresh_does_not_resurrect_removed_session() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let cache = InMemoryGatewaySessionCache::default();
+        login_and_start(&mut session);
+        let record = super::refresh_session_cache_with_route_lease(&cache, &session, 30)
+            .expect("lease should refresh")
+            .expect("session should cache");
+
+        assert_eq!(
+            super::remove_owned_session_cache(&cache, &session),
+            Some(record.key.clone())
+        );
+        let refreshed = cache
+            .refresh_owned_route_lease_record(record, session.session_id(), 30)
+            .expect("missing owned lease should be skipped");
+
+        assert!(!refreshed);
+        assert!(cache.route_character("Scout").is_none());
+        assert_eq!(cache.route_lease_count(), 0);
+    }
+
+    #[test]
     fn redis_session_cache_roundtrips_removes_and_expires_records() {
         let redis_url = std::env::var("MIR2_TEST_REDIS_URL")
             .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
@@ -1273,6 +1704,8 @@ mod tests {
             .route_character("Scout")
             .expect("redis cache should route online character");
         assert_eq!(route.zone_id.as_deref(), Some("primary"));
+        assert_eq!(route.zone_owner_id.as_deref(), Some("in-process:primary"));
+        assert_eq!(route.zone_owner_fencing_token, Some(1));
         assert_eq!(route.map_file_name.as_deref(), Some("0"));
         assert!(route.updated_at_ms > 0);
         assert!(super::fresh_route_request_for_character(&cache, "Scout", 5_000).is_some());
@@ -1322,12 +1755,14 @@ mod tests {
             .expect("redis route should remain visible");
 
         assert!(second_error.contains("route lease"));
+        assert_eq!(cache.route_lease_count(), 1);
         assert_eq!(route.route_lease_owner.as_deref(), Some(first.session_id()));
         assert_eq!(
             super::remove_owned_session_cache(&cache, &first),
             Some(first_record.key)
         );
         assert!(cache.route_character("Scout").is_none());
+        assert_eq!(cache.route_lease_count(), 0);
     }
 
     #[test]

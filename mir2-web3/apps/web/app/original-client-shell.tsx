@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import {
   ORIGINAL_UI,
@@ -33,7 +33,11 @@ import {
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene } from "./components/original-client-game-ui-scene";
-import type { OriginalClientShellProps, SceneAssetReadiness } from "./components/original-client-shell-types";
+import type {
+  BevyEntityRenderState,
+  OriginalClientShellProps,
+  SceneAssetReadiness,
+} from "./components/original-client-shell-types";
 import {
   LOGIN_STATIC_BACKGROUND_FRAME,
   LOGIN_TRANSITION_FRAME_MS,
@@ -66,6 +70,8 @@ import {
   MAX_PREDICTED_PLAYER_LEAD_TILES,
   VIEWPORT_CELL_HEIGHT,
   VIEWPORT_CELL_WIDTH,
+  VIEWPORT_ENTITY_LEFT_ORIGIN,
+  VIEWPORT_ENTITY_TOP_ORIGIN,
   VIEWPORT_MOUSE_TILE_CENTER_X,
   VIEWPORT_MOUSE_TILE_CENTER_Y,
   VIEWPORT_OFFSET_X,
@@ -76,15 +82,19 @@ import {
   buildViewportMapSprites,
   cameraMotionOffsetForEntity,
   entityAnimationStateForEntity,
+  entityMotionOffsetForEntity,
   mapSpriteRenderPath,
   portraitFramesForCharacter,
   projectileProgress,
   refreshEntityMotionSnapshots,
+  rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
+  viewportDepthForCell,
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
+import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 
 type HeldScenePointer = {
   button: 0 | 2;
@@ -94,6 +104,89 @@ type HeldScenePointer = {
   dispatched: boolean;
   tileX?: number;
   tileY?: number;
+};
+
+type BevyEntityAtlasRect = {
+  key: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type BevyEntityAtlasSnapshot = {
+  key: string;
+  sourceKey?: string;
+  width: number;
+  height: number;
+  imageUrl?: string;
+  rects: Record<string, BevyEntityAtlasRect>;
+  rectList: BevyEntityAtlasRect[];
+  pixels?: Uint8Array;
+};
+
+type BevyEntityAtlasSource = {
+  key: string;
+  path: string;
+  width: number;
+  height: number;
+};
+
+const BEVY_ENTITY_ATLAS_PADDING = 1;
+const BEVY_ENTITY_ATLAS_INITIAL_WIDTH = 512;
+const BEVY_ENTITY_ATLAS_MAX_SIZE = 4096;
+const BEVY_ENTITY_ATLAS_CACHE_LIMIT = 24;
+const BEVY_ENTITY_ATLAS_MANIFEST_URL = "/bevy-entity-atlases/manifest.json";
+const BEVY_ENTITY_ATLAS_IDB_NAME = "mir2-bevy-entity-atlas-cache";
+const BEVY_ENTITY_ATLAS_IDB_STORE = "atlases";
+const BEVY_ENTITY_ATLAS_IDB_VERSION = 1;
+const BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT = 8;
+const BEVY_ENTITY_ATLAS_CACHE_NAMESPACE = "bevy-entity-atlas-v1";
+const bevyEntityAtlasCache = new Map<string, BevyEntityAtlasSnapshot>();
+const bevyEntityAtlasImageCache = new Map<string, Promise<HTMLImageElement>>();
+const bevyEntityAtlasPrebuiltPixelsCache = new Map<string, Promise<Uint8Array | null>>();
+let bevyEntityAtlasLatestSnapshot: BevyEntityAtlasSnapshot | null = null;
+let bevyEntityAtlasManifestPromise: Promise<BevyEntityAtlasManifest | null> | null = null;
+let bevyEntityAtlasDbPromise: Promise<IDBDatabase | null> | null = null;
+const bevyEntityAtlasStats = {
+  requests: 0,
+  builds: 0,
+  cacheHits: 0,
+  prebuiltHits: 0,
+  persistentHits: 0,
+  persistentWrites: 0,
+  failures: 0,
+  lastBuildMs: 0,
+  lastKey: null as string | null,
+  lastSource: null as "memory" | "prebuilt" | "persistent" | "live" | null,
+  lastPrebuiltKey: null as string | null,
+  lastSourceCount: 0,
+};
+
+type BevyEntityAtlasManifest = {
+  schemaVersion?: number;
+  generatedAt?: string;
+  atlases?: PrebuiltBevyEntityAtlasRecord[];
+};
+
+type PrebuiltBevyEntityAtlasRecord = {
+  key: string;
+  label?: string;
+  width: number;
+  height: number;
+  sourceCount?: number;
+  imageBytes?: number;
+  rgbaBytes?: number;
+  roots?: string[];
+  imageUrl?: string;
+  pixelsUrl?: string;
+  rects: BevyEntityAtlasRect[];
+};
+
+type BevyEntityAtlasResolveResult = {
+  atlas: BevyEntityAtlasSnapshot;
+  source: "prebuilt" | "persistent" | "live";
+  prebuiltKey?: string | null;
 };
 
 type KeyboardMoveDirection = "up" | "down" | "left" | "right";
@@ -160,13 +253,19 @@ export function OriginalClientShell({
   viewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  bevyEntityRendererReady,
+  bevyRuntimeBackend,
   onSceneAssetReadinessChange,
+  onBevyEntityRenderStateChange,
   logs,
   accountId,
   password,
   chatMessage,
   loginBusy,
   loginError,
+  suiWallets,
+  walletPickerOpen,
+  dubheWalletUrl,
   characters,
   selectedCharacterIndex,
   showInventory,
@@ -181,6 +280,7 @@ export function OriginalClientShell({
   onCreateAccount,
   onSubmitLogin,
   onPasskeyLogin,
+  onWalletPickerToggle,
   onWalletLogin,
   onQuickEnter,
   onResetClient,
@@ -246,10 +346,15 @@ export function OriginalClientShell({
   const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [selectPortraitFrameIndex, setSelectPortraitFrameIndex] = useState(0);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
-  const [motionNow, setMotionNow] = useState(() => Date.now());
+  const [motionNow, setMotionNow] = useState(0);
   const [sceneSpriteLibraries, setSceneSpriteLibraries] = useState<Record<string, OriginalSceneSpriteLibraryMeta>>({});
   const [forceMobileControls, setForceMobileControls] = useState(false);
+  const [touchPrimaryDevice, setTouchPrimaryDevice] = useState(false);
+  const [stageScale, setStageScale] = useState(1);
+  const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
+  const [webGl2EntityTextureReadyKey, setWebGl2EntityTextureReadyKey] = useState<string | null>(null);
   const previousScreenRef = useRef<ClientScreen>(screen);
+  const bevyEntityAtlasRequestRef = useRef<{ key: string; requestId: number } | null>(null);
   const reconnectSeconds =
     reconnectStatus.nextAttemptAt === null
       ? null
@@ -281,6 +386,10 @@ export function OriginalClientShell({
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
   });
+  const stageScaleStyle = useMemo(
+    () => ({ "--mir-stage-scale": stageScale }) as CSSProperties,
+    [stageScale],
+  );
   const sceneAssetReadinessCallbackRef = useRef(onSceneAssetReadinessChange);
   sceneAssetReadinessCallbackRef.current = onSceneAssetReadinessChange;
 
@@ -301,6 +410,8 @@ export function OriginalClientShell({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setForceMobileControls(params.get("mobileControls") === "1" || params.get("mobile") === "1");
+    setTouchPrimaryDevice(window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
+    setMotionNow(Date.now());
   }, []);
 
   useEffect(() => {
@@ -488,7 +599,7 @@ export function OriginalClientShell({
     return () => window.removeEventListener("keydown", handleShortcutKey);
   }, [screen, selectedEntity, world.beltItems, onApproachTarget, onPrimaryTargetAction, onUseItem]);
 
-  function dispatchKeyboardMoveInput() {
+  function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
     const latest = latestMoveInputRef.current;
     if (latest.screen !== "game") return;
     if (!sceneInteractionReady) return;
@@ -505,7 +616,9 @@ export function OriginalClientShell({
 
     const direction = crystalDirectionFromKeyboardVector(dx, dy);
     if (!direction) return;
-    onViewportDirectionIntent(direction, heldKeyboardRunModeRef.current ? "run" : "walk");
+    onViewportDirectionIntent(direction, heldKeyboardRunModeRef.current ? "run" : "walk", {
+      discrete: source === "edge",
+    });
   }
 
   useEffect(() => {
@@ -525,6 +638,7 @@ export function OriginalClientShell({
           return;
         }
         heldKeyboardRunModeRef.current = true;
+        dispatchKeyboardMoveInput("held");
         return;
       }
 
@@ -541,7 +655,7 @@ export function OriginalClientShell({
       const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
       heldKeyboardMoveKeysRef.current.add(direction);
       if (!alreadyHeld && !event.repeat) {
-        dispatchKeyboardMoveInput();
+        dispatchKeyboardMoveInput("edge");
       }
     }
 
@@ -559,7 +673,7 @@ export function OriginalClientShell({
       }
     }
 
-    const timer = window.setInterval(dispatchKeyboardMoveInput, CRYSTAL_MOVE_INPUT_INTERVAL_MS);
+    const timer = window.setInterval(() => dispatchKeyboardMoveInput("held"), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
     const stop = () => {
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
@@ -582,15 +696,39 @@ export function OriginalClientShell({
       return;
     }
 
+    setMotionNow(Date.now());
     let animationFrame = 0;
+    const fallbackTimer = window.setInterval(() => setMotionNow(Date.now()), 100);
     const updateMotionClock = () => {
       setMotionNow(Date.now());
       animationFrame = window.requestAnimationFrame(updateMotionClock);
     };
     animationFrame = window.requestAnimationFrame(updateMotionClock);
 
-    return () => window.cancelAnimationFrame(animationFrame);
+    return () => {
+      window.clearInterval(fallbackTimer);
+      window.cancelAnimationFrame(animationFrame);
+    };
   }, [screen]);
+
+  useEffect(() => {
+    const updateStageScale = () => {
+      const viewport = window.visualViewport;
+      const width = Math.max(1, Math.floor(viewport?.width ?? window.innerWidth));
+      const height = Math.max(1, Math.floor(viewport?.height ?? window.innerHeight));
+      const nextScale = Math.min(1, width / 1024, height / 768);
+      setStageScale(Number(nextScale.toFixed(4)));
+    };
+
+    updateStageScale();
+    window.addEventListener("resize", updateStageScale);
+    window.visualViewport?.addEventListener("resize", updateStageScale);
+
+    return () => {
+      window.removeEventListener("resize", updateStageScale);
+      window.visualViewport?.removeEventListener("resize", updateStageScale);
+    };
+  }, []);
 
   const livePlayerRenderPosition = getLivePlayerRenderPosition?.() ?? predictedPlayerPosition;
   const renderPlayer =
@@ -606,12 +744,12 @@ export function OriginalClientShell({
         }
       : player;
 
-  useEffect(() => {
+  const desiredSceneSpriteLibraryKeys = useMemo(() => {
+    const libraries = new Set<string>();
     if (screen !== "game") {
-      return;
+      return [];
     }
 
-    const libraries = new Set<string>();
     for (const entity of world.entities) {
       if (entity.sprite?.bodyLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.bodyLibrary));
@@ -653,7 +791,25 @@ export function OriginalClientShell({
       }
     }
 
-    const missingLibraries = [...libraries].filter((libraryKey) => !(libraryKey in sceneSpriteLibraries));
+    return [...libraries].sort();
+  }, [screen, world.entities]);
+  const desiredSceneSpriteLibraryKey = desiredSceneSpriteLibraryKeys.join("|");
+  const pendingSceneSpriteLibraryKeys = desiredSceneSpriteLibraryKeys.filter(
+    (libraryKey) =>
+      !(libraryKey in sceneSpriteLibraries) &&
+      originalSceneSpriteLibraryExists(libraryKey) &&
+      !missingSceneSpriteLibrariesRef.current.has(libraryKey),
+  );
+  const sceneSpriteLibrariesReady = pendingSceneSpriteLibraryKeys.length === 0;
+
+  useEffect(() => {
+    if (screen !== "game") {
+      return;
+    }
+
+    const missingLibraries = desiredSceneSpriteLibraryKeys.filter(
+      (libraryKey) => !(libraryKey in sceneSpriteLibraries),
+    );
     for (const libraryKey of missingLibraries) {
       if (!originalSceneSpriteLibraryExists(libraryKey)) {
         missingSceneSpriteLibrariesRef.current.add(libraryKey);
@@ -674,7 +830,6 @@ export function OriginalClientShell({
         try {
           return [libraryKey, await loadOriginalSceneSpriteLibrary(libraryKey)] as const;
         } catch {
-          missingSceneSpriteLibrariesRef.current.add(libraryKey);
           return null;
         }
       }),
@@ -701,7 +856,7 @@ export function OriginalClientShell({
     return () => {
       disposed = true;
     };
-  }, [sceneSpriteLibraries, screen, world.entities]);
+  }, [desiredSceneSpriteLibraryKey, desiredSceneSpriteLibraryKeys, sceneSpriteLibraries, screen]);
 
   const sceneNow = motionNow;
   entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
@@ -774,9 +929,13 @@ export function OriginalClientShell({
           dy: drop.y - (renderPlayer ?? player).y,
         }))
     : [];
-  const viewportMapSprites = renderPlayer
-    ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex)
-    : EMPTY_VIEWPORT_MAP_SPRITES;
+  const viewportMapSprites = useMemo(
+    () =>
+      renderPlayer
+        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex)
+        : EMPTY_VIEWPORT_MAP_SPRITES,
+    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion],
+  );
   const viewportProjectiles = renderPlayer
     ? world.projectiles
         .filter((projectile) => projectile.expiresAt > motionNow)
@@ -790,8 +949,121 @@ export function OriginalClientShell({
         }))
     : [];
   const viewportDepthPlayer = renderPlayer ?? player ?? { x: 0, y: 0 };
-  const showSyntheticScene =
-    screen === "game" && !viewportMapSprites.floor.length && Boolean(world.originalMapRegion);
+  const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
+  const hideBevyCanvasForDomEntityFallback =
+    screen === "game" && (bevyRuntimeBackend === "webgl2" || domEntityFallbackRequested);
+  const bevyEntityRendererSuppressed =
+    domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
+  const bevyEntityRendererWanted =
+    screen === "game" && !bevyEntityRendererSuppressed && shouldUseBevyEntityRenderer();
+  const gpuEntityRendererRuntimePending =
+    bevyEntityRendererWanted && (!bevyEntityRendererReady || !bevyRuntimeBackend);
+  const entityRendererRequested =
+    bevyEntityRendererWanted && bevyEntityRendererReady && Boolean(bevyRuntimeBackend);
+  const useBevyEntityRenderer =
+    entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
+  const useWebGl2EntityAtlasRenderer =
+    entityRendererRequested &&
+    bevyRuntimeBackend === "webgl2" &&
+    shouldUseBevyEntityAtlas() &&
+    shouldUseRawWebGl2EntityRenderer();
+  const useGpuEntityRenderer = useBevyEntityRenderer || useWebGl2EntityAtlasRenderer;
+  const useBevyEntityAtlas = useGpuEntityRenderer && shouldUseBevyEntityAtlas();
+  const bevyEntityAtlasSources =
+    useGpuEntityRenderer && useBevyEntityAtlas
+      ? collectBevyEntityAtlasSources(viewportEntitySprites)
+      : [];
+  const bevyEntityAtlasKey = bevyEntityAtlasSources.length
+    ? bevyEntityAtlasKeyForSources(bevyEntityAtlasSources)
+    : null;
+  const cachedBevyEntityAtlas =
+    bevyEntityAtlasKey ? bevyEntityAtlasCache.get(bevyEntityAtlasKey) ?? null : null;
+  const latestBevyEntityAtlas =
+    bevyEntityAtlasKey && bevyEntityAtlasLatestSnapshot?.key === bevyEntityAtlasKey
+      ? bevyEntityAtlasLatestSnapshot
+      : null;
+  const activeBevyEntityAtlas =
+    bevyEntityAtlasKey && bevyEntityAtlas?.key === bevyEntityAtlasKey
+      ? bevyEntityAtlas
+      : cachedBevyEntityAtlas ?? latestBevyEntityAtlas;
+  const webGl2EntityTextureReady =
+    !useWebGl2EntityAtlasRenderer ||
+    !activeBevyEntityAtlas ||
+    webGl2EntityTextureReadyKey === activeBevyEntityAtlas.key;
+  const handleWebGl2EntityAtlasDebug = useCallback((debug: WebGl2EntityAtlasDebug) => {
+    const atlasKey = typeof debug.atlasKey === "string" ? debug.atlasKey : null;
+    if (
+      atlasKey &&
+      debug.enabled === true &&
+      debug.supported === true &&
+      debug.textureReady === true &&
+      debug.reason === "rendered" &&
+      typeof debug.renderedLayers === "number" &&
+      debug.renderedLayers > 0
+    ) {
+      setWebGl2EntityTextureReadyKey(atlasKey);
+    }
+  }, []);
+  const hideDomEntitySpritesForBevy =
+    useGpuEntityRenderer &&
+    (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
+  const entityRenderState = buildBevyEntityRenderState({
+    enabled: useGpuEntityRenderer,
+    player,
+    viewportEntitySprites,
+    viewportDepthPlayer,
+    playerCameraMotionOffset,
+    entityMotionSnapshots: entityMotionSnapshotsRef.current,
+    motionNow,
+    atlas: useBevyEntityAtlas ? activeBevyEntityAtlas : null,
+  });
+  const bevyEntityRenderState = useBevyEntityRenderer
+    ? entityRenderState
+    : disabledEntityRenderState(entityRenderState);
+
+  useEffect(() => {
+    const activeKey = useWebGl2EntityAtlasRenderer ? activeBevyEntityAtlas?.key ?? null : null;
+    if (webGl2EntityTextureReadyKey !== activeKey) {
+      setWebGl2EntityTextureReadyKey(null);
+    }
+  }, [activeBevyEntityAtlas?.key, useWebGl2EntityAtlasRenderer, webGl2EntityTextureReadyKey]);
+  if (typeof window !== "undefined") {
+    (
+      window as typeof window & {
+        __mir2BevyEntityRendererDebug?: unknown;
+        __mir2BevyRuntimeDebug?: unknown;
+      }
+    ).__mir2BevyEntityRendererDebug = {
+      ready: bevyEntityRendererReady,
+      runtime: (window as typeof window & { __mir2BevyRuntimeDebug?: unknown }).__mir2BevyRuntimeDebug ?? null,
+      enabled: bevyEntityRenderState.enabled,
+      rawWebGl2Enabled: useWebGl2EntityAtlasRenderer && entityRenderState.enabled,
+      rawWebGl2TextureReady: webGl2EntityTextureReady,
+      rawWebGl2TextureReadyKey: webGl2EntityTextureReadyKey,
+      entityCount: entityRenderState.entities.length,
+      layerCount: entityRenderState.entities.reduce((count, entity) => count + entity.layers.length, 0),
+      atlasMode: useBevyEntityAtlas
+        ? activeBevyEntityAtlas
+          ? "packed"
+          : bevyEntityAtlasKey
+            ? "warming"
+            : "packing"
+        : "single-image",
+      atlasKey: entityRenderState.atlases?.[0]?.key ?? null,
+      atlasCount: entityRenderState.atlases?.length ?? 0,
+      atlasSourceCount: bevyEntityAtlasSources.length,
+      atlasCacheSize: bevyEntityAtlasCache.size,
+      atlasCurrentKey: bevyEntityAtlasKey,
+      atlasPendingKey: bevyEntityAtlasRequestRef.current?.key ?? null,
+      atlasCachedCurrent: Boolean(cachedBevyEntityAtlas),
+      atlasLatestKey: bevyEntityAtlasLatestSnapshot?.key ?? null,
+      atlasLatestCurrent: Boolean(latestBevyEntityAtlas),
+      domEntityFallback: useBevyEntityRenderer && !hideDomEntitySpritesForBevy,
+      canvasHidden: hideBevyCanvasForDomEntityFallback,
+      atlasStats: { ...bevyEntityAtlasStats },
+    };
+  }
+  const showSyntheticScene = screen === "game" && !world.originalMapRegion;
   const sceneAssetUrlsRef = useRef<string[]>([]);
   sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites);
   const sceneAssetReadinessKey =
@@ -804,23 +1076,105 @@ export function OriginalClientShell({
           world.originalMapRegion.regionBounds.maxY,
           renderPlayer.x,
           renderPlayer.y,
-          Object.keys(sceneSpriteLibraries).sort().join("|"),
+          desiredSceneSpriteLibraryKey,
           viewportEntities.length,
         ].join(":")
       : `idle:${screen}`;
 
   useEffect(() => {
-    const notify = (readiness: SceneAssetReadiness) => {
-      sceneAssetReadinessCallbackRef.current(readiness);
-    };
-
-    if (screen !== "game") {
-      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "idle", 0));
+    if (!useGpuEntityRenderer || !useBevyEntityAtlas || !entityRenderState.enabled) {
+      if (bevyEntityAtlas) {
+        setBevyEntityAtlas(null);
+      }
       return;
     }
 
-    if (sceneInteractionReady) {
-      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", sceneAssetUrlsRef.current.length));
+    if (!bevyEntityAtlasSources.length || !bevyEntityAtlasKey) {
+      if (bevyEntityAtlas) {
+        setBevyEntityAtlas(null);
+      }
+      return;
+    }
+
+    if (bevyEntityAtlas?.key === bevyEntityAtlasKey) {
+      return;
+    }
+
+    const cachedAtlas = getCachedBevyEntityAtlas(bevyEntityAtlasKey);
+    if (cachedAtlas) {
+      if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
+        bevyEntityAtlasRequestRef.current = null;
+      }
+      bevyEntityAtlasStats.cacheHits += 1;
+      bevyEntityAtlasStats.lastKey = bevyEntityAtlasKey;
+      bevyEntityAtlasStats.lastSource = "memory";
+      bevyEntityAtlasStats.lastPrebuiltKey = null;
+      bevyEntityAtlasStats.lastSourceCount = bevyEntityAtlasSources.length;
+      setBevyEntityAtlas(cachedAtlas);
+      return;
+    }
+
+    if (bevyEntityAtlasRequestRef.current?.key === bevyEntityAtlasKey) {
+      return;
+    }
+
+    const requestId = (bevyEntityAtlasRequestRef.current?.requestId ?? 0) + 1;
+    bevyEntityAtlasRequestRef.current = { key: bevyEntityAtlasKey, requestId };
+    bevyEntityAtlasStats.requests += 1;
+    bevyEntityAtlasStats.lastKey = bevyEntityAtlasKey;
+    bevyEntityAtlasStats.lastSourceCount = bevyEntityAtlasSources.length;
+    const buildStartedAt = performance.now();
+    let disposed = false;
+
+    resolveBevyEntityAtlasSnapshot(bevyEntityAtlasSources, bevyEntityAtlasKey)
+      .then(({ atlas, source, prebuiltKey }) => {
+        if (disposed || bevyEntityAtlasRequestRef.current?.requestId !== requestId) {
+          return;
+        }
+        if (source === "live") {
+          bevyEntityAtlasStats.builds += 1;
+        } else if (source === "prebuilt") {
+          bevyEntityAtlasStats.prebuiltHits += 1;
+        } else {
+          bevyEntityAtlasStats.persistentHits += 1;
+        }
+        bevyEntityAtlasStats.lastBuildMs = Math.round(performance.now() - buildStartedAt);
+        bevyEntityAtlasStats.lastSource = source;
+        bevyEntityAtlasStats.lastPrebuiltKey = prebuiltKey ?? null;
+        cacheBevyEntityAtlas(atlas);
+        bevyEntityAtlasRequestRef.current = null;
+        setBevyEntityAtlas(atlas);
+      })
+      .catch(() => {
+        bevyEntityAtlasStats.failures += 1;
+        if (bevyEntityAtlasRequestRef.current?.requestId === requestId) {
+          bevyEntityAtlasRequestRef.current = null;
+        }
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, [useGpuEntityRenderer, useBevyEntityAtlas, bevyEntityAtlasKey, bevyEntityAtlas?.key]);
+
+  useEffect(() => {
+    onBevyEntityRenderStateChange(bevyEntityRenderState);
+  }, [bevyEntityRenderState, onBevyEntityRenderStateChange]);
+
+  useEffect(() => {
+    const notify = (readiness: SceneAssetReadiness) => {
+      sceneAssetReadinessCallbackRef.current(readiness);
+    };
+    const entityAtlasPending =
+      gpuEntityRendererRuntimePending ||
+      (useGpuEntityRenderer &&
+        useBevyEntityAtlas &&
+        (Boolean(entityRenderState.enabled && !bevyEntityAtlasKey) ||
+          (Boolean(bevyEntityAtlasKey) && (!activeBevyEntityAtlas || !webGl2EntityTextureReady))));
+    const entityAtlasPendingCount = entityAtlasPending ? 1 : 0;
+
+    if (screen !== "game") {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "idle", 0));
       return;
     }
 
@@ -830,28 +1184,62 @@ export function OriginalClientShell({
     }
 
     const urls = sceneAssetUrlsRef.current;
+    if (!sceneSpriteLibrariesReady) {
+      notify(
+        createSceneAssetReadiness(
+          sceneAssetReadinessKey,
+          false,
+          "loading",
+          urls.length + pendingSceneSpriteLibraryKeys.length + entityAtlasPendingCount,
+        ),
+      );
+      return;
+    }
     if (!urls.length) {
-      notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0));
+      notify(
+        createSceneAssetReadiness(
+          sceneAssetReadinessKey,
+          !entityAtlasPending,
+          entityAtlasPending ? "loading" : "ready",
+          entityAtlasPendingCount,
+        ),
+      );
       return;
     }
 
-    let disposed = false;
-    notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length));
-    preloadSceneAssetUrls(urls, 7000).then((readiness) => {
-      if (disposed) {
-        return;
-      }
-      notify({
-        ...readiness,
-        key: sceneAssetReadinessKey,
-        ready: true,
-      });
-    });
+    if (entityAtlasPending) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", urls.length + entityAtlasPendingCount));
+      return;
+    }
+
+    notify(createSceneAssetReadiness(sceneAssetReadinessKey, true, "ready", 0));
+  }, [
+    screen,
+    sceneAssetReadinessKey,
+    sceneSpriteLibrariesReady,
+    pendingSceneSpriteLibraryKeys.length,
+    gpuEntityRendererRuntimePending,
+    useGpuEntityRenderer,
+    useBevyEntityAtlas,
+    bevyEntityAtlasKey,
+    activeBevyEntityAtlas?.key,
+    webGl2EntityTextureReady,
+  ]);
+
+  useEffect(() => {
+    if (screen !== "game") {
+      return;
+    }
+
+    rescueStalledSceneAssetImages();
+    const interval = window.setInterval(() => {
+      rescueStalledSceneAssetImages();
+    }, 1500);
 
     return () => {
-      disposed = true;
+      window.clearInterval(interval);
     };
-  }, [screen, sceneInteractionReady, sceneAssetReadinessKey]);
+  }, [screen, sceneAssetReadinessKey]);
 
   function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
@@ -982,7 +1370,7 @@ export function OriginalClientShell({
   }, [screen, sceneInteractionReady, onViewportDirectionStep]);
 
   return (
-    <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`}>
+    <main className={`mir-client-page ${forceMobileControls ? "force-mobile-controls" : ""}`} style={stageScaleStyle}>
       <section className="mir-stage">
         <div
           ref={stageFrameRef}
@@ -1031,7 +1419,15 @@ export function OriginalClientShell({
             </div>
           ) : null}
           {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
-          <canvas id="mir2-web3-canvas" />
+          <canvas
+            id="mir2-web3-canvas"
+            className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+          />
+          <WebGl2EntityAtlasLayer
+            enabled={useWebGl2EntityAtlasRenderer && Boolean(activeBevyEntityAtlas)}
+            state={entityRenderState}
+            onDebugChange={handleWebGl2EntityAtlasDebug}
+          />
           {screen === "game" ? (
             <GameSceneBackdrop
               world={world}
@@ -1116,6 +1512,7 @@ export function OriginalClientShell({
             entityMotionSnapshots={entityMotionSnapshotsRef.current}
             motionNow={motionNow}
             sceneSpriteFrameIndex={sceneSpriteFrameIndex}
+            useBevyEntityRenderer={hideDomEntitySpritesForBevy}
             entityKindClassName={entityKindClassName}
             onPickGroundDrop={onPickGroundDrop}
             onActivateEntity={onActivateEntity}
@@ -1131,12 +1528,16 @@ export function OriginalClientShell({
               password={password}
               loginBusy={loginBusy}
               loginError={loginError}
+              suiWallets={suiWallets}
+              walletPickerOpen={walletPickerOpen}
+              dubheWalletUrl={dubheWalletUrl}
               onLanguageChange={onLanguageChange}
               onAccountIdChange={onAccountIdChange}
               onPasswordChange={onPasswordChange}
               onCreateAccount={onCreateAccount}
               onSubmitLogin={onSubmitLogin}
               onPasskeyLogin={onPasskeyLogin}
+              onWalletPickerToggle={onWalletPickerToggle}
               onWalletLogin={onWalletLogin}
               onQuickEnter={onQuickEnter}
               onResetClient={onResetClient}
@@ -1244,10 +1645,13 @@ export function OriginalClientShell({
   );
 }
 
+const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 96;
+const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
+
 function collectVisibleSceneAssetUrls(
   viewportMapSprites: {
-    floor: Array<{ path: string }>;
-    objects: Array<{ path: string }>;
+    floor: Array<{ path: string; left: number; top: number; width: number; height: number }>;
+    objects: Array<{ path: string; left: number; top: number; width: number; height: number }>;
   },
   viewportEntitySprites: Array<{
     sprite: {
@@ -1255,12 +1659,31 @@ function collectVisibleSceneAssetUrls(
       hair: { path: string } | null;
       rearWeapons: Array<{ path: string }>;
       frontWeapons: Array<{ path: string }>;
+      preloadPaths?: string[];
     } | null;
   }>,
 ) {
+  const sceneCenterX = ORIGINAL_UI.game.sceneWidth / 2;
+  const sceneCenterY = ORIGINAL_UI.game.sceneHeight / 2;
+  const rankedMapUrls = [
+    ...viewportMapSprites.floor.map((sprite) => ({ ...sprite, path: sprite.path })),
+    ...viewportMapSprites.objects.map((sprite) => ({ ...sprite, path: mapSpriteRenderPath(sprite.path) })),
+  ]
+    .sort((a, b) => {
+      const aCenterX = a.left + a.width / 2;
+      const aCenterY = a.top + a.height / 2;
+      const bCenterX = b.left + b.width / 2;
+      const bCenterY = b.top + b.height / 2;
+      return (
+        Math.hypot(aCenterX - sceneCenterX, aCenterY - sceneCenterY) -
+        Math.hypot(bCenterX - sceneCenterX, bCenterY - sceneCenterY)
+      );
+    })
+    .slice(0, SCENE_INTERACTION_PRELOAD_URL_LIMIT)
+    .map((sprite) => sprite.path);
+
   return [
-    ...viewportMapSprites.floor.map((sprite) => sprite.path),
-    ...viewportMapSprites.objects.map((sprite) => mapSpriteRenderPath(sprite.path)),
+    ...rankedMapUrls,
     ...viewportEntitySprites.flatMap(({ sprite }) =>
       sprite
         ? [
@@ -1272,6 +1695,728 @@ function collectVisibleSceneAssetUrls(
         : [],
     ),
   ].filter((url, index, list): url is string => Boolean(url) && list.indexOf(url) === index);
+}
+
+function shouldUseBevyEntityRenderer() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (
+    params.get("bevyEntities") === "0" ||
+    params.get("domEntities") === "1" ||
+    params.get("bevyCanvas") === "0" ||
+    params.get("bevyCanvasHidden") === "1"
+  ) {
+    return false;
+  }
+  if (params.get("bevyEntities") === "1" || params.get("bevyCanvas") === "1") {
+    return true;
+  }
+
+  return window.localStorage.getItem("mir2-dom-entities") !== "1";
+}
+
+function shouldUseDomEntityFallback(isTouchOrMobile: boolean) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("bevyEntities") === "1" || params.get("bevyCanvas") === "1") {
+    return false;
+  }
+  if (
+    params.get("bevyEntities") === "0" ||
+    params.get("domEntities") === "1" ||
+    params.get("bevyCanvas") === "0" ||
+    params.get("bevyCanvasHidden") === "1"
+  ) {
+    return true;
+  }
+  if (
+    window.localStorage.getItem("mir2-dom-entities") === "1" ||
+    window.localStorage.getItem("mir2-bevy-canvas") === "0"
+  ) {
+    return true;
+  }
+
+  return isTouchOrMobile && params.get("bevyMobileEntities") !== "1";
+}
+
+function shouldUseBevyEntityAtlas() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("bevyAtlas") === "0" || window.localStorage.getItem("mir2-bevy-atlas") === "0") {
+    return false;
+  }
+  return true;
+}
+
+function shouldUseRawWebGl2EntityRenderer() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (
+    params.get("webgl2Entities") === "0" ||
+    params.get("webgl2Atlas") === "0" ||
+    window.localStorage.getItem("mir2-webgl2-entities") === "0"
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function disabledEntityRenderState(state: BevyEntityRenderState): BevyEntityRenderState {
+  return {
+    enabled: false,
+    stageWidth: state.stageWidth,
+    stageHeight: state.stageHeight,
+    atlases: [],
+    atlasImages: [],
+    entities: [],
+  };
+}
+
+function buildBevyEntityRenderState({
+  enabled,
+  player,
+  viewportEntitySprites,
+  viewportDepthPlayer,
+  playerCameraMotionOffset,
+  entityMotionSnapshots,
+  motionNow,
+  atlas,
+}: {
+  enabled: boolean;
+  player: DisplayEntity | null;
+  viewportEntitySprites: Array<{
+    entity: DisplayEntity & { dx: number; dy: number };
+    sprite: {
+      body: { path: string; x: number; y: number; width: number; height: number } | null;
+      hair: { path: string; x: number; y: number; width: number; height: number } | null;
+      rearWeapons: Array<{ path: string; x: number; y: number; width: number; height: number }>;
+      frontWeapons: Array<{ path: string; x: number; y: number; width: number; height: number }>;
+    } | null;
+  }>;
+  viewportDepthPlayer: Pick<DisplayEntity, "x" | "y">;
+  playerCameraMotionOffset: ViewportOffset;
+  entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
+  motionNow: number;
+  atlas: BevyEntityAtlasSnapshot | null;
+}): BevyEntityRenderState {
+  if (!enabled || !player) {
+    return {
+      enabled: false,
+      stageWidth: 1024,
+      stageHeight: 768,
+      atlases: [],
+      entities: [],
+    };
+  }
+
+  return {
+    enabled: true,
+    stageWidth: 1024,
+    stageHeight: 768,
+    atlases: atlas
+      ? [
+          {
+            key: atlas.key,
+            width: atlas.width,
+            height: atlas.height,
+            imageUrl: atlas.imageUrl,
+            rects: atlas.rectList,
+          },
+        ]
+      : [],
+    atlasImages: atlas?.pixels
+      ? [
+          {
+            key: atlas.key,
+            width: atlas.width,
+            height: atlas.height,
+            pixels: atlas.pixels,
+          },
+        ]
+      : [],
+    entities: viewportEntitySprites.map(({ entity, sprite }) => {
+      const isPlayer = player.objectId === entity.objectId;
+      const entityMotionOffset = isPlayer
+        ? EMPTY_VIEWPORT_OFFSET
+        : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+      const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+      const rootLeft =
+        VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
+      const rootTop =
+        VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y;
+      const depth = viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64);
+      const layers = sprite
+        ? [
+            ...sprite.rearWeapons.map((layer, index) => ({ layer, role: "rearWeapon", index })),
+            ...(sprite.body ? [{ layer: sprite.body, role: "body", index: 0 }] : []),
+            ...(sprite.hair ? [{ layer: sprite.hair, role: "hair", index: 0 }] : []),
+            ...sprite.frontWeapons.map((layer, index) => ({ layer, role: "frontWeapon", index })),
+          ].map(({ layer, role, index }, order) => {
+            const atlasRectKey = bevyEntityAtlasRectKey(layer.path, layer.width, layer.height);
+            const atlasRect = atlas?.rects[atlasRectKey];
+            return {
+              key: `${entity.objectId}:${role}:${index}`,
+              path: layer.path,
+              ...(atlasRect
+                ? {
+                    atlasKey: atlas.key,
+                    atlasRectKey,
+                  }
+                : {}),
+              left: rootLeft + layer.x,
+              top: rootTop + layer.y,
+              width: layer.width,
+              height: layer.height,
+              z: depth * 10 + order,
+              opacity: entity.dead ? 0.45 : 1,
+            };
+          })
+        : [];
+
+      return {
+        objectId: entity.objectId,
+        dead: Boolean(entity.dead),
+        layers,
+      };
+    }),
+  };
+}
+
+function collectBevyEntityAtlasSources(
+  viewportEntitySprites: Array<{
+    sprite: {
+      body: { path: string; width: number; height: number } | null;
+      hair: { path: string; width: number; height: number } | null;
+      rearWeapons: Array<{ path: string; width: number; height: number }>;
+      frontWeapons: Array<{ path: string; width: number; height: number }>;
+      preloadFrames?: Array<{ path: string; width: number; height: number }>;
+    } | null;
+  }>,
+): BevyEntityAtlasSource[] {
+  const sources = new Map<string, BevyEntityAtlasSource>();
+  const addLayer = (layer: { path: string; width: number; height: number } | null | undefined) => {
+    if (!layer?.path || layer.width <= 0 || layer.height <= 0) {
+      return;
+    }
+    const key = bevyEntityAtlasRectKey(layer.path, layer.width, layer.height);
+    if (!sources.has(key)) {
+      sources.set(key, {
+        key,
+        path: layer.path,
+        width: Math.max(1, Math.ceil(layer.width)),
+        height: Math.max(1, Math.ceil(layer.height)),
+      });
+    }
+  };
+
+  for (const { sprite } of viewportEntitySprites) {
+    if (!sprite) continue;
+    sprite.rearWeapons.forEach(addLayer);
+    addLayer(sprite.body);
+    addLayer(sprite.hair);
+    sprite.frontWeapons.forEach(addLayer);
+    sprite.preloadFrames?.forEach(addLayer);
+  }
+  return [...sources.values()].sort((a, b) => a.key.localeCompare(b.key));
+}
+
+function bevyEntityAtlasRectKey(path: string, width: number, height: number) {
+  return `${path}|${Math.max(1, Math.ceil(width))}x${Math.max(1, Math.ceil(height))}`;
+}
+
+function bevyEntityAtlasKeyForSources(sources: BevyEntityAtlasSource[]) {
+  const sourceKey = sources.map((source) => `${source.key}`).join("\n");
+  return `entity-atlas-${hashString(sourceKey)}`;
+}
+
+async function resolveBevyEntityAtlasSnapshot(
+  sources: BevyEntityAtlasSource[],
+  key: string,
+): Promise<BevyEntityAtlasResolveResult> {
+  const persistent = await loadPersistedBevyEntityAtlas(key);
+  if (persistent) {
+    return {
+      atlas: persistent,
+      source: "persistent",
+    };
+  }
+
+  const prebuilt = await loadPrebuiltBevyEntityAtlasSnapshot(sources, key);
+  if (prebuilt) {
+    void persistBevyEntityAtlas(prebuilt);
+    return {
+      atlas: prebuilt,
+      source: "prebuilt",
+      prebuiltKey: prebuilt.sourceKey ?? null,
+    };
+  }
+
+  const live = await buildBevyEntityAtlasSnapshot(sources, key);
+  void persistBevyEntityAtlas(live);
+  return {
+    atlas: live,
+    source: "live",
+  };
+}
+
+async function loadPrebuiltBevyEntityAtlasSnapshot(
+  sources: BevyEntityAtlasSource[],
+  key: string,
+): Promise<BevyEntityAtlasSnapshot | null> {
+  const manifest = await loadBevyEntityAtlasManifest();
+  if (!manifest?.atlases?.length) {
+    return null;
+  }
+
+  const sourceKeys = new Set(sources.map((source) => source.key));
+  for (const candidate of manifest.atlases) {
+    if (!prebuiltBevyEntityAtlasCoversSources(candidate, sourceKeys)) {
+      continue;
+    }
+
+    const rects = bevyEntityAtlasRectMap(candidate.rects);
+    if (candidate.imageUrl) {
+      return {
+        key,
+        sourceKey: candidate.key,
+        width: candidate.width,
+        height: candidate.height,
+        imageUrl: resolveBevyEntityAtlasAssetUrl(candidate.imageUrl),
+        rects,
+        rectList: candidate.rects,
+      };
+    }
+
+    const pixels = await loadPrebuiltBevyEntityAtlasCandidatePixels(candidate);
+    if (pixels) {
+      return {
+        key,
+        sourceKey: candidate.key,
+        width: candidate.width,
+        height: candidate.height,
+        rects,
+        rectList: candidate.rects,
+        pixels,
+      };
+    }
+  }
+
+  return null;
+}
+
+function loadPrebuiltBevyEntityAtlasCandidatePixels(candidate: PrebuiltBevyEntityAtlasRecord) {
+  const cacheKey = `${candidate.key}:${candidate.pixelsUrl ?? candidate.imageUrl ?? ""}:${candidate.width}x${candidate.height}`;
+  const cached = bevyEntityAtlasPrebuiltPixelsCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = (async () => {
+    try {
+      if (candidate.pixelsUrl) {
+        return await loadPrebuiltBevyEntityAtlasPixels(candidate.pixelsUrl, candidate.width, candidate.height);
+      }
+      if (candidate.imageUrl) {
+        return await loadPrebuiltBevyEntityAtlasImagePixels(candidate.imageUrl, candidate.width, candidate.height);
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  })();
+  bevyEntityAtlasPrebuiltPixelsCache.set(cacheKey, promise);
+  return promise;
+}
+
+function prebuiltBevyEntityAtlasCoversSources(candidate: PrebuiltBevyEntityAtlasRecord, sourceKeys: Set<string>) {
+  if (!candidate.key || candidate.width <= 0 || candidate.height <= 0 || !Array.isArray(candidate.rects)) {
+    return false;
+  }
+  if (!candidate.imageUrl && !candidate.pixelsUrl) {
+    return false;
+  }
+  const rectKeys = new Set(candidate.rects.map((rect) => rect.key));
+  for (const sourceKey of sourceKeys) {
+    if (!rectKeys.has(sourceKey)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+async function loadBevyEntityAtlasManifest() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (new URLSearchParams(window.location.search).get("bevyAtlasPrebuilt") === "0") {
+    return null;
+  }
+  if (!bevyEntityAtlasManifestPromise) {
+    bevyEntityAtlasManifestPromise = fetch(BEVY_ENTITY_ATLAS_MANIFEST_URL, {
+      cache: "force-cache",
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+        return (await response.json()) as BevyEntityAtlasManifest;
+      })
+      .catch(() => null);
+  }
+  return bevyEntityAtlasManifestPromise;
+}
+
+async function loadPrebuiltBevyEntityAtlasPixels(url: string, width: number, height: number) {
+  const response = await fetch(resolveBevyEntityAtlasAssetUrl(url), {
+    cache: "force-cache",
+  });
+  if (!response.ok) {
+    return null;
+  }
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  return bytes.byteLength === width * height * 4 ? bytes : null;
+}
+
+async function loadPrebuiltBevyEntityAtlasImagePixels(url: string, width: number, height: number) {
+  const image = await loadBevyEntityAtlasImage(resolveBevyEntityAtlasAssetUrl(url));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", {
+    alpha: true,
+    willReadFrequently: true,
+  });
+  if (!context) {
+    return null;
+  }
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, 0, 0, width, height);
+  const imageData = context.getImageData(0, 0, width, height);
+  return new Uint8Array(
+    imageData.data.buffer.slice(imageData.data.byteOffset, imageData.data.byteOffset + imageData.data.byteLength),
+  );
+}
+
+function resolveBevyEntityAtlasAssetUrl(url: string) {
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+    return url;
+  }
+  return new URL(url, new URL(BEVY_ENTITY_ATLAS_MANIFEST_URL, window.location.href)).toString();
+}
+
+function bevyEntityAtlasRectMap(rectList: BevyEntityAtlasRect[]) {
+  return Object.fromEntries(rectList.map((rect) => [rect.key, rect])) as Record<string, BevyEntityAtlasRect>;
+}
+
+async function buildBevyEntityAtlasSnapshot(
+  sources: BevyEntityAtlasSource[],
+  key: string,
+): Promise<BevyEntityAtlasSnapshot> {
+  const images = await Promise.all(
+    sources.map(async (source) => ({
+      ...source,
+      image: await loadBevyEntityAtlasImage(source.path),
+    })),
+  );
+  const packed = packBevyEntityAtlas(images);
+  const canvas = document.createElement("canvas");
+  canvas.width = packed.width;
+  canvas.height = packed.height;
+
+  const context = canvas.getContext("2d", {
+    alpha: true,
+    willReadFrequently: true,
+  });
+  if (!context) {
+    throw new Error("2d canvas unavailable for Bevy entity atlas");
+  }
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.imageSmoothingEnabled = false;
+
+  for (const source of images) {
+    const rect = packed.rects[source.key];
+    if (!rect) continue;
+    context.drawImage(source.image, rect.x, rect.y, rect.width, rect.height);
+  }
+
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = new Uint8Array(
+    imageData.data.buffer.slice(imageData.data.byteOffset, imageData.data.byteOffset + imageData.data.byteLength),
+  );
+  const rectList = Object.values(packed.rects).sort((a, b) => a.key.localeCompare(b.key));
+  return {
+    key,
+    width: canvas.width,
+    height: canvas.height,
+    rects: packed.rects,
+    rectList,
+    pixels,
+  };
+}
+
+function loadBevyEntityAtlasImage(path: string) {
+  const cached = bevyEntityAtlasImageCache.get(path);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.decoding = "async";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load entity atlas image: ${path}`));
+    image.src = path;
+  });
+  bevyEntityAtlasImageCache.set(path, promise);
+  return promise;
+}
+
+function packBevyEntityAtlas(
+  sources: Array<BevyEntityAtlasSource & { image: HTMLImageElement }>,
+): { width: number; height: number; rects: Record<string, BevyEntityAtlasRect> } {
+  const sortedSources = [...sources].sort((a, b) => b.height - a.height || b.width - a.width || a.key.localeCompare(b.key));
+  const widest = sortedSources.reduce((max, source) => Math.max(max, source.width + BEVY_ENTITY_ATLAS_PADDING * 2), 1);
+  let width = Math.max(BEVY_ENTITY_ATLAS_INITIAL_WIDTH, nextPowerOfTwo(widest));
+
+  while (width <= BEVY_ENTITY_ATLAS_MAX_SIZE) {
+    const rects: Record<string, BevyEntityAtlasRect> = {};
+    let cursorX = BEVY_ENTITY_ATLAS_PADDING;
+    let cursorY = BEVY_ENTITY_ATLAS_PADDING;
+    let rowHeight = 0;
+
+    for (const source of sortedSources) {
+      if (cursorX + source.width + BEVY_ENTITY_ATLAS_PADDING > width) {
+        cursorX = BEVY_ENTITY_ATLAS_PADDING;
+        cursorY += rowHeight + BEVY_ENTITY_ATLAS_PADDING;
+        rowHeight = 0;
+      }
+
+      rects[source.key] = {
+        key: source.key,
+        x: cursorX,
+        y: cursorY,
+        width: source.width,
+        height: source.height,
+      };
+      cursorX += source.width + BEVY_ENTITY_ATLAS_PADDING;
+      rowHeight = Math.max(rowHeight, source.height);
+    }
+
+    const height = nextPowerOfTwo(cursorY + rowHeight + BEVY_ENTITY_ATLAS_PADDING);
+    if (height <= BEVY_ENTITY_ATLAS_MAX_SIZE) {
+      return { width, height, rects };
+    }
+    width *= 2;
+  }
+
+  throw new Error("Visible entity sprites exceed Bevy atlas size budget");
+}
+
+function cacheBevyEntityAtlas(atlas: BevyEntityAtlasSnapshot) {
+  bevyEntityAtlasLatestSnapshot = atlas;
+  bevyEntityAtlasCache.set(atlas.key, atlas);
+  while (bevyEntityAtlasCache.size > BEVY_ENTITY_ATLAS_CACHE_LIMIT) {
+    const oldest = bevyEntityAtlasCache.keys().next().value;
+    if (!oldest) break;
+    bevyEntityAtlasCache.delete(oldest);
+  }
+}
+
+function getCachedBevyEntityAtlas(key: string) {
+  const cached = bevyEntityAtlasCache.get(key);
+  if (!cached) {
+    return null;
+  }
+  bevyEntityAtlasCache.delete(key);
+  bevyEntityAtlasCache.set(key, cached);
+  return cached;
+}
+
+async function loadPersistedBevyEntityAtlas(key: string): Promise<BevyEntityAtlasSnapshot | null> {
+  if (!shouldUsePersistentBevyEntityAtlasCache()) {
+    return null;
+  }
+  const db = await openBevyEntityAtlasDb();
+  if (!db) {
+    return null;
+  }
+
+  try {
+    const transaction = db.transaction(BEVY_ENTITY_ATLAS_IDB_STORE, "readwrite");
+    const store = transaction.objectStore(BEVY_ENTITY_ATLAS_IDB_STORE);
+    const record = (await idbRequest(store.get(key))) as PersistedBevyEntityAtlasRecord | undefined;
+    if (!record || record.namespace !== BEVY_ENTITY_ATLAS_CACHE_NAMESPACE) {
+      await idbTransactionDone(transaction);
+      return null;
+    }
+
+    const pixels = persistedBevyEntityAtlasPixels(record.pixels);
+    if (!pixels || pixels.byteLength !== record.width * record.height * 4) {
+      store.delete(key);
+      await idbTransactionDone(transaction);
+      return null;
+    }
+
+    record.lastUsedAt = Date.now();
+    store.put(record);
+    await idbTransactionDone(transaction);
+    return {
+      key: record.key,
+      sourceKey: record.sourceKey,
+      width: record.width,
+      height: record.height,
+      rects: bevyEntityAtlasRectMap(record.rectList),
+      rectList: record.rectList,
+      pixels,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function persistBevyEntityAtlas(atlas: BevyEntityAtlasSnapshot) {
+  if (!shouldUsePersistentBevyEntityAtlasCache()) {
+    return;
+  }
+  if (!atlas.pixels) {
+    return;
+  }
+  const db = await openBevyEntityAtlasDb();
+  if (!db) {
+    return;
+  }
+
+  try {
+    const now = Date.now();
+    const pixels = new Uint8Array(atlas.pixels.byteLength);
+    pixels.set(atlas.pixels);
+    const transaction = db.transaction(BEVY_ENTITY_ATLAS_IDB_STORE, "readwrite");
+    const store = transaction.objectStore(BEVY_ENTITY_ATLAS_IDB_STORE);
+    store.put({
+      namespace: BEVY_ENTITY_ATLAS_CACHE_NAMESPACE,
+      key: atlas.key,
+      sourceKey: atlas.sourceKey,
+      width: atlas.width,
+      height: atlas.height,
+      rectList: atlas.rectList,
+      pixels: pixels.buffer,
+      storedAt: now,
+      lastUsedAt: now,
+    } satisfies PersistedBevyEntityAtlasRecord);
+    await idbTransactionDone(transaction);
+    bevyEntityAtlasStats.persistentWrites += 1;
+    await trimPersistedBevyEntityAtlases(db);
+  } catch {
+    // Persistent atlas cache is an optimization; live atlas rendering remains the fallback.
+  }
+}
+
+function shouldUsePersistentBevyEntityAtlasCache() {
+  if (typeof window === "undefined" || !("indexedDB" in window)) {
+    return false;
+  }
+  return new URLSearchParams(window.location.search).get("bevyAtlasPersistent") !== "0";
+}
+
+function openBevyEntityAtlasDb() {
+  if (!bevyEntityAtlasDbPromise) {
+    bevyEntityAtlasDbPromise = new Promise<IDBDatabase | null>((resolve) => {
+      if (typeof window === "undefined" || !("indexedDB" in window)) {
+        resolve(null);
+        return;
+      }
+      const request = window.indexedDB.open(BEVY_ENTITY_ATLAS_IDB_NAME, BEVY_ENTITY_ATLAS_IDB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(BEVY_ENTITY_ATLAS_IDB_STORE)) {
+          const store = db.createObjectStore(BEVY_ENTITY_ATLAS_IDB_STORE, { keyPath: "key" });
+          store.createIndex("lastUsedAt", "lastUsedAt");
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(null);
+      request.onblocked = () => resolve(null);
+    });
+  }
+  return bevyEntityAtlasDbPromise;
+}
+
+async function trimPersistedBevyEntityAtlases(db: IDBDatabase) {
+  const transaction = db.transaction(BEVY_ENTITY_ATLAS_IDB_STORE, "readwrite");
+  const store = transaction.objectStore(BEVY_ENTITY_ATLAS_IDB_STORE);
+  const records = ((await idbRequest(store.getAll())) as PersistedBevyEntityAtlasRecord[])
+    .filter((record) => record.namespace === BEVY_ENTITY_ATLAS_CACHE_NAMESPACE)
+    .sort((a, b) => a.lastUsedAt - b.lastUsedAt);
+  while (records.length > BEVY_ENTITY_ATLAS_PERSISTENT_LIMIT) {
+    const record = records.shift();
+    if (!record) break;
+    store.delete(record.key);
+  }
+  await idbTransactionDone(transaction);
+}
+
+function persistedBevyEntityAtlasPixels(pixels: ArrayBuffer | Uint8Array | unknown) {
+  if (pixels instanceof Uint8Array) {
+    return pixels;
+  }
+  if (pixels instanceof ArrayBuffer) {
+    return new Uint8Array(pixels);
+  }
+  return null;
+}
+
+function idbRequest<T>(request: IDBRequest<T>) {
+  return new Promise<T>((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed"));
+  });
+}
+
+function idbTransactionDone(transaction: IDBTransaction) {
+  return new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () => reject(transaction.error ?? new Error("IndexedDB transaction aborted"));
+    transaction.onerror = () => reject(transaction.error ?? new Error("IndexedDB transaction failed"));
+  });
+}
+
+type PersistedBevyEntityAtlasRecord = {
+  namespace: string;
+  key: string;
+  sourceKey?: string;
+  width: number;
+  height: number;
+  rectList: BevyEntityAtlasRect[];
+  pixels: ArrayBuffer;
+  storedAt: number;
+  lastUsedAt: number;
+};
+
+function nextPowerOfTwo(value: number) {
+  return 2 ** Math.ceil(Math.log2(Math.max(1, value)));
+}
+
+function hashString(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
 }
 
 function createSceneAssetReadiness(
@@ -1293,17 +2438,29 @@ function createSceneAssetReadiness(
   };
 }
 
-async function preloadSceneAssetUrls(urls: string[], timeoutMs: number): Promise<SceneAssetReadiness> {
+type SceneAssetPreloadOptions = {
+  allowPartialReady?: boolean;
+  minLoaded?: number;
+};
+
+async function preloadSceneAssetUrls(
+  urls: string[],
+  timeoutMs: number,
+  options: SceneAssetPreloadOptions = {},
+): Promise<SceneAssetReadiness> {
   const startedAt = performance.now();
   const results = await Promise.all(urls.map((url) => preloadSceneImage(url, timeoutMs)));
   const loaded = results.filter((result) => result.loaded).length;
   const failedUrls = results.filter((result) => !result.loaded).map((result) => result.url);
+  const minimumLoaded = Math.min(urls.length, options.minLoaded ?? SCENE_INTERACTION_MIN_PRELOADED_URLS);
+  const partialReady = options.allowPartialReady === true && minimumLoaded > 0 && loaded >= minimumLoaded;
+  const ready = failedUrls.length === 0 || partialReady;
   const timedOut = performance.now() - startedAt >= timeoutMs - 16 && failedUrls.length > 0;
 
   return {
     key: "scene-assets",
-    ready: failedUrls.length === 0,
-    status: failedUrls.length === 0 ? "ready" : timedOut ? "timeout" : "ready",
+    ready,
+    status: ready ? "ready" : timedOut ? "timeout" : "loading",
     total: urls.length,
     loaded,
     failed: failedUrls.length,

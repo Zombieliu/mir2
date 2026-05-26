@@ -11,7 +11,10 @@ use mir2_simulation::{
 };
 
 use crate::events::{GatewayGameplayEvent, SharedGameplayEventSink};
-use crate::routing::{ZoneId, ZoneRegistry};
+use crate::routing::{
+    InProcessZoneOwnerCommandClient, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority,
+    ZoneId, ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneRegistry,
+};
 
 pub type GatewayConfig = SimulationConfig;
 
@@ -43,6 +46,11 @@ fn panic_payload_message(payload: &(dyn Any + Send)) -> String {
 pub struct GatewaySession {
     session_id: String,
     zone_id: ZoneId,
+    zone_owner_lease: ZoneOwnerLease,
+    zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+    zone_owner_command_client: SharedZoneOwnerCommandClient,
+    zone_owner_heartbeat_interval_ms: Option<u64>,
+    next_zone_owner_heartbeat_at_ms: u64,
     runtime: ZoneRuntimeHandle,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     gameplay_event_sequence: u64,
@@ -54,6 +62,9 @@ impl fmt::Debug for GatewaySession {
             .debug_struct("GatewaySession")
             .field("session_id", &self.session_id)
             .field("zone_id", &self.zone_id)
+            .field("zone_owner_lease", &self.zone_owner_lease)
+            .field("zone_owner_lease_authority", &"ZoneOwnerLeaseAuthority")
+            .field("zone_owner_command_client", &"ZoneOwnerCommandClient")
             .field("runtime", &"WorldRuntime")
             .finish()
     }
@@ -66,13 +77,48 @@ impl GatewaySession {
 
     pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
         let routed = registry.open_session(config);
-        Self::with_routed_world_runtime(routed.zone_id, routed.runtime)
+        Self::with_routed_world_runtime_and_owner_authority(
+            routed.zone_id,
+            routed.owner_lease,
+            Some(routed.owner_lease_authority),
+            routed.runtime,
+        )
     }
 
     pub fn with_routed_world_runtime(zone_id: ZoneId, runtime: ZoneRuntimeHandle) -> Self {
+        let zone_owner_lease = ZoneOwnerLease::in_process(&zone_id);
+        Self::with_routed_world_runtime_and_owner(zone_id, zone_owner_lease, runtime)
+    }
+
+    pub fn with_routed_world_runtime_and_owner(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        runtime: ZoneRuntimeHandle,
+    ) -> Self {
+        Self::with_routed_world_runtime_and_owner_authority(
+            zone_id,
+            zone_owner_lease,
+            None,
+            runtime,
+        )
+    }
+
+    pub fn with_routed_world_runtime_and_owner_authority(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+        runtime: ZoneRuntimeHandle,
+    ) -> Self {
+        let zone_owner_command_client =
+            default_zone_owner_command_client(zone_owner_lease_authority.as_ref());
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
+            zone_owner_lease,
+            zone_owner_lease_authority,
+            zone_owner_command_client,
+            zone_owner_heartbeat_interval_ms: None,
+            next_zone_owner_heartbeat_at_ms: 0,
             runtime,
             gameplay_event_sink: None,
             gameplay_event_sequence: 0,
@@ -84,9 +130,48 @@ impl GatewaySession {
         runtime: ZoneRuntimeHandle,
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
+        let zone_owner_lease = ZoneOwnerLease::in_process(&zone_id);
+        Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
+            zone_id,
+            zone_owner_lease,
+            None,
+            runtime,
+            gameplay_event_sink,
+        )
+    }
+
+    pub fn with_routed_world_runtime_and_owner_and_event_sink(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        runtime: ZoneRuntimeHandle,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Self {
+        Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
+            zone_id,
+            zone_owner_lease,
+            None,
+            runtime,
+            gameplay_event_sink,
+        )
+    }
+
+    pub fn with_routed_world_runtime_and_owner_authority_and_event_sink(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+        runtime: ZoneRuntimeHandle,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Self {
+        let zone_owner_command_client =
+            default_zone_owner_command_client(zone_owner_lease_authority.as_ref());
         Self {
             session_id: next_gateway_session_id(),
             zone_id,
+            zone_owner_lease,
+            zone_owner_lease_authority,
+            zone_owner_command_client,
+            zone_owner_heartbeat_interval_ms: None,
+            next_zone_owner_heartbeat_at_ms: 0,
             runtime,
             gameplay_event_sink: Some(gameplay_event_sink),
             gameplay_event_sequence: 0,
@@ -99,8 +184,10 @@ impl GatewaySession {
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
         let routed = registry.open_session(config);
-        Self::with_routed_world_runtime_and_event_sink(
+        Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
             routed.zone_id,
+            routed.owner_lease,
+            Some(routed.owner_lease_authority),
             routed.runtime,
             gameplay_event_sink,
         )
@@ -108,6 +195,45 @@ impl GatewaySession {
 
     pub fn zone_id(&self) -> &ZoneId {
         &self.zone_id
+    }
+
+    pub fn zone_owner_lease(&self) -> &ZoneOwnerLease {
+        &self.zone_owner_lease
+    }
+
+    pub fn renew_zone_owner_lease(&mut self) -> Result<&ZoneOwnerLease, String> {
+        self.renew_zone_owner_lease_at(gateway_now_ms())
+    }
+
+    pub fn renew_zone_owner_lease_at(&mut self, now_ms: u64) -> Result<&ZoneOwnerLease, String> {
+        if let Some(authority) = &self.zone_owner_lease_authority {
+            self.zone_owner_lease =
+                authority.renew_owner_lease_at(&self.zone_owner_lease, now_ms)?;
+        }
+        Ok(&self.zone_owner_lease)
+    }
+
+    pub fn configure_zone_owner_heartbeat(&mut self, interval_ms: u64, now_ms: u64) {
+        let interval_ms = interval_ms.max(1);
+        self.zone_owner_heartbeat_interval_ms = Some(interval_ms);
+        self.next_zone_owner_heartbeat_at_ms = now_ms.saturating_add(interval_ms);
+    }
+
+    pub fn renew_zone_owner_lease_if_due(&mut self) -> Result<bool, String> {
+        self.renew_zone_owner_lease_if_due_at(gateway_now_ms())
+    }
+
+    pub fn renew_zone_owner_lease_if_due_at(&mut self, now_ms: u64) -> Result<bool, String> {
+        let Some(interval_ms) = self.zone_owner_heartbeat_interval_ms else {
+            return Ok(false);
+        };
+        if now_ms < self.next_zone_owner_heartbeat_at_ms {
+            return Ok(false);
+        }
+
+        self.renew_zone_owner_lease_at(now_ms)?;
+        self.next_zone_owner_heartbeat_at_ms = now_ms.saturating_add(interval_ms);
+        Ok(true)
     }
 
     pub fn session_id(&self) -> &str {
@@ -122,11 +248,77 @@ impl GatewaySession {
         self.execute_infallible(WorldCommand::ClientPacket(packet))
     }
 
+    pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
+        self.execute_infallible(WorldCommand::PasskeyLogin {
+            account_id: account_id.to_string(),
+        })
+    }
+
     pub fn execute_with_outcome(
         &mut self,
         command: WorldCommand,
     ) -> Result<WorldCommandExecution, String> {
-        self.execute_world_command(command)
+        let owner_lease = self.zone_owner_lease.clone();
+        self.execute_zone_owner_command(ZoneOwnerCommandRequest::direct(owner_lease, command))
+    }
+
+    pub fn execute_with_zone_owner_lease(
+        &mut self,
+        zone_owner_lease: &ZoneOwnerLease,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        self.execute_zone_owner_command(ZoneOwnerCommandRequest::direct(
+            zone_owner_lease.clone(),
+            command,
+        ))
+    }
+
+    pub fn execute_production_player_command(
+        &mut self,
+        authenticated: bool,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        let owner_lease = self.zone_owner_lease.clone();
+        self.execute_zone_owner_command(ZoneOwnerCommandRequest::production_player(
+            owner_lease,
+            authenticated,
+            command,
+        ))
+    }
+
+    pub fn execute_production_player_command_with_zone_owner_lease(
+        &mut self,
+        zone_owner_lease: &ZoneOwnerLease,
+        authenticated: bool,
+        command: WorldCommand,
+    ) -> Result<WorldCommandExecution, String> {
+        self.execute_zone_owner_command(ZoneOwnerCommandRequest::production_player(
+            zone_owner_lease.clone(),
+            authenticated,
+            command,
+        ))
+    }
+
+    pub fn validate_zone_owner_lease(
+        &self,
+        zone_owner_lease: &ZoneOwnerLease,
+    ) -> Result<(), String> {
+        if zone_owner_lease == &self.zone_owner_lease {
+            if let Some(authority) = &self.zone_owner_lease_authority {
+                authority.validate_owner_lease(zone_owner_lease)?;
+            }
+            return Ok(());
+        }
+
+        Err(format!(
+            "stale zone owner lease for zone {}: expected owner {} fencing token {}, got zone {} owner {} fencing token {}; command rejected before ZoneRuntime",
+            self.zone_id,
+            self.zone_owner_lease.owner_id(),
+            self.zone_owner_lease.fencing_token(),
+            zone_owner_lease.zone_id(),
+            zone_owner_lease.owner_id(),
+            zone_owner_lease.fencing_token()
+        ))
     }
 
     pub fn move_to(&mut self, x: i32, y: i32, running: bool) -> Vec<ServerPacket> {
@@ -207,19 +399,27 @@ impl GatewaySession {
     }
 
     pub fn world_snapshot(&self) -> WorldSnapshot {
-        self.runtime.world_snapshot()
+        self.zone_owner_command_client
+            .world_snapshot(&self.runtime)
+            .expect("zone owner world snapshot should not fail")
     }
 
     pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
-        self.runtime.active_identity()
+        self.zone_owner_command_client
+            .active_identity(&self.runtime)
+            .expect("zone owner active identity should not fail")
     }
 
     pub fn save_active_character(&self) {
-        self.runtime.save_active_character();
+        self.zone_owner_command_client
+            .save_active_character(&self.runtime)
+            .expect("zone owner save should not fail");
     }
 
     pub fn refresh_active_external_mail(&mut self) -> bool {
-        self.runtime.refresh_active_external_mail()
+        self.zone_owner_command_client
+            .refresh_active_external_mail(&mut self.runtime)
+            .expect("zone owner mail refresh should not fail")
     }
 
     fn execute_infallible(&mut self, command: WorldCommand) -> Vec<ServerPacket> {
@@ -232,7 +432,23 @@ impl GatewaySession {
         &mut self,
         command: WorldCommand,
     ) -> Result<WorldCommandExecution, String> {
-        let execution = self.runtime.execute_with_outcome(command)?;
+        let owner_lease = self.zone_owner_lease.clone();
+        self.execute_zone_owner_command(ZoneOwnerCommandRequest::direct(owner_lease, command))
+    }
+
+    fn execute_zone_owner_command(
+        &mut self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<WorldCommandExecution, String> {
+        self.validate_zone_owner_lease(request.owner_lease())?;
+        let execution = self
+            .zone_owner_command_client
+            .execute(&mut self.runtime, request)?;
+        self.publish_gameplay_event(&execution);
+        Ok(execution)
+    }
+
+    fn publish_gameplay_event(&mut self, execution: &WorldCommandExecution) {
         if let Some(sink) = self.gameplay_event_sink.clone() {
             self.gameplay_event_sequence = self.gameplay_event_sequence.saturating_add(1);
             sink.publish(GatewayGameplayEvent::from_world_outcome(
@@ -241,28 +457,84 @@ impl GatewaySession {
                 &execution.outcome,
             ));
         }
-        Ok(execution)
     }
+}
+
+fn default_zone_owner_command_client(
+    zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
+) -> SharedZoneOwnerCommandClient {
+    let client = if let Some(authority) = zone_owner_lease_authority {
+        InProcessZoneOwnerCommandClient::with_owner_lease_authority(authority.clone())
+    } else {
+        InProcessZoneOwnerCommandClient::new()
+    };
+    std::sync::Arc::new(client)
 }
 
 static NEXT_GATEWAY_SESSION_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 
 fn next_gateway_session_id() -> String {
     let sequence = NEXT_GATEWAY_SESSION_SEQUENCE.fetch_add(1, Ordering::Relaxed);
-    let now_ms = SystemTime::now()
+    let now_ms = gateway_now_ms();
+    format!("gateway-{}-{now_ms}-{sequence}", std::process::id())
+}
+
+fn gateway_now_ms() -> u64 {
+    SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_millis() as u64)
-        .unwrap_or(0);
-    format!("gateway-{}-{now_ms}-{sequence}", std::process::id())
+        .unwrap_or(0)
 }
 
 #[cfg(test)]
 mod tests {
     use super::{GatewayConfig, GatewaySession};
-    use crate::{CharacterRecord, InMemoryGameplayEventSink, SharedGameplayEventSink};
+    use crate::{
+        CharacterRecord, HostedZoneOwnerCommandClient, InMemoryGameplayEventSink,
+        InMemoryZoneOwnerLeaseAuthority, InProcessZoneOwnerCommandClient,
+        InProcessZoneRuntimeFactory, RpcZoneOwnerCommandClient, SharedGameplayEventSink,
+        SharedSessionRouter, SharedZoneOwnerCommandClient, SharedZoneOwnerLeaseAuthority,
+        SharedZoneOwnerRpcTransport, SharedZoneRuntimeFactory, SingleZoneSessionRouter, ZoneId,
+        ZoneOwnerCommandClient, ZoneOwnerCommandMode, ZoneOwnerCommandRequest, ZoneOwnerLease,
+        ZoneOwnerLeaseAuthority, ZoneRegistry, ZoneRuntimeFactory,
+    };
     use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
-    use mir2_simulation::{WorldCommand, WorldCommandKind};
-    use std::sync::Arc;
+    use mir2_simulation::{
+        WorldCommand, WorldCommandExecution, WorldCommandKind, ZoneRuntimeHandle,
+    };
+    use std::sync::{Arc, Mutex};
+
+    #[derive(Debug, Default)]
+    struct RecordingZoneOwnerCommandClient {
+        calls: Mutex<Vec<(ZoneOwnerLease, ZoneOwnerCommandMode)>>,
+    }
+
+    impl RecordingZoneOwnerCommandClient {
+        fn calls(&self) -> Vec<(ZoneOwnerLease, ZoneOwnerCommandMode)> {
+            self.calls
+                .lock()
+                .expect("recording command client mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl ZoneOwnerCommandClient for RecordingZoneOwnerCommandClient {
+        fn execute(
+            &self,
+            runtime: &mut ZoneRuntimeHandle,
+            request: ZoneOwnerCommandRequest,
+        ) -> Result<WorldCommandExecution, String> {
+            self.calls
+                .lock()
+                .expect("recording command client mutex should not be poisoned")
+                .push((request.owner_lease().clone(), request.mode()));
+            ZoneOwnerCommandClient::execute(
+                &InProcessZoneOwnerCommandClient::new(),
+                runtime,
+                request,
+            )
+        }
+    }
 
     #[test]
     fn gateway_panic_boundary_returns_operation_error() {
@@ -299,6 +571,12 @@ mod tests {
             password: "demo".to_string(),
         });
 
+        session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("hosted owner runtime should execute login");
         let execution = session
             .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
                 character_index: 0,
@@ -321,6 +599,558 @@ mod tests {
     }
 
     #[test]
+    fn gateway_session_accepts_current_zone_owner_fenced_command() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let owner_lease = session.zone_owner_lease().clone();
+
+        let execution = session
+            .execute_with_zone_owner_lease(
+                &owner_lease,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+            )
+            .expect("current owner lease should execute");
+
+        assert!(execution
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        assert_eq!(
+            execution.outcome.command_kind,
+            WorldCommandKind::ClientPacket("StartGame")
+        );
+    }
+
+    #[test]
+    fn gateway_session_dispatches_valid_zone_owner_request_through_command_client() {
+        let client = Arc::new(RecordingZoneOwnerCommandClient::default());
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.zone_owner_command_client = client.clone() as SharedZoneOwnerCommandClient;
+        let owner_lease = session.zone_owner_lease().clone();
+
+        session
+            .execute_production_player_command(true, WorldCommand::Tick)
+            .expect("valid owner request should execute through command client");
+
+        assert_eq!(
+            client.calls(),
+            vec![(
+                owner_lease,
+                ZoneOwnerCommandMode::ProductionPlayer {
+                    authenticated: true
+                }
+            )]
+        );
+    }
+
+    #[test]
+    fn hosted_zone_owner_command_client_executes_on_owner_runtime_not_gateway_runtime() {
+        let zone_id = ZoneId::primary();
+        let owner_lease = ZoneOwnerLease::in_process(&zone_id);
+        let gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let owner_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let hosted_client = Arc::new(HostedZoneOwnerCommandClient::new(owner_runtime));
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner(
+            zone_id,
+            owner_lease,
+            gateway_runtime,
+        );
+        session.zone_owner_command_client = hosted_client.clone() as SharedZoneOwnerCommandClient;
+
+        session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("hosted owner runtime should execute login");
+        let execution = session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("hosted owner runtime should execute command");
+
+        assert!(execution
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        assert_eq!(
+            execution
+                .outcome
+                .active_identity
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert_eq!(
+            hosted_client
+                .active_identity()
+                .expect("hosted runtime identity should be readable")
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert_eq!(
+            hosted_client
+                .world_snapshot()
+                .expect("hosted runtime snapshot should be readable")
+                .map_file_name
+                .as_deref(),
+            Some("0")
+        );
+        assert_eq!(
+            session
+                .active_identity()
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0"));
+        assert!(
+            session.runtime.active_identity().is_none(),
+            "Gateway's local runtime must not be the command mutation target"
+        );
+    }
+
+    #[test]
+    fn rpc_zone_owner_command_client_executes_on_transport_owner_runtime() {
+        let zone_id = ZoneId::primary();
+        let owner_lease = ZoneOwnerLease::in_process(&zone_id);
+        let gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let owner_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let hosted_transport = Arc::new(HostedZoneOwnerCommandClient::new(owner_runtime));
+        let rpc_client = Arc::new(RpcZoneOwnerCommandClient::new(
+            hosted_transport.clone() as SharedZoneOwnerRpcTransport
+        ));
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner(
+            zone_id,
+            owner_lease,
+            gateway_runtime,
+        );
+        session.zone_owner_command_client = rpc_client as SharedZoneOwnerCommandClient;
+
+        session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("RPC transport owner runtime should execute login");
+        let execution = session
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("RPC transport owner runtime should execute command");
+
+        assert!(execution
+            .packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        assert_eq!(
+            hosted_transport
+                .active_identity()
+                .expect("transport owner runtime identity should be readable")
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert_eq!(
+            session
+                .active_identity()
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert!(
+            session.runtime.active_identity().is_none(),
+            "Gateway's local runtime must not be the RPC transport mutation target"
+        );
+    }
+
+    #[test]
+    fn hosted_zone_owner_command_client_rejects_stale_request_at_owner_boundary() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let zone_id = ZoneId::primary();
+        let owner_lease = authority.owner_lease(&zone_id);
+        let owner_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let hosted_client = HostedZoneOwnerCommandClient::with_owner_lease_authority(
+            owner_runtime,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        );
+        let mut gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+
+        authority.handoff_zone_owner(&zone_id, "zone-owner:next");
+        let error = ZoneOwnerCommandClient::execute(
+            &hosted_client,
+            &mut gateway_runtime,
+            ZoneOwnerCommandRequest::direct(owner_lease, WorldCommand::Tick),
+        )
+        .expect_err("hosted owner boundary should reject stale fenced request");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+        assert!(hosted_client
+            .active_identity()
+            .expect("hosted runtime identity should be readable")
+            .is_none());
+    }
+
+    #[test]
+    fn rpc_zone_owner_command_client_rejects_stale_request_at_transport_boundary() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let zone_id = ZoneId::primary();
+        let owner_lease = authority.owner_lease(&zone_id);
+        let owner_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let hosted_transport = Arc::new(HostedZoneOwnerCommandClient::with_owner_lease_authority(
+            owner_runtime,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        ));
+        let rpc_client =
+            RpcZoneOwnerCommandClient::new(hosted_transport.clone() as SharedZoneOwnerRpcTransport);
+        let mut gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+
+        authority.handoff_zone_owner(&zone_id, "zone-owner:next");
+        let error = ZoneOwnerCommandClient::execute(
+            &rpc_client,
+            &mut gateway_runtime,
+            ZoneOwnerCommandRequest::direct(owner_lease, WorldCommand::Tick),
+        )
+        .expect_err("RPC transport owner boundary should reject stale fenced request");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+        assert!(hosted_transport
+            .active_identity()
+            .expect("transport owner runtime identity should be readable")
+            .is_none());
+    }
+
+    #[test]
+    fn hosted_zone_owner_runtime_handoff_moves_state_to_next_owner_host() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let zone_id = ZoneId::primary();
+        let first_lease = authority.owner_lease(&zone_id);
+        let gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let first_owner_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let first_owner = Arc::new(HostedZoneOwnerCommandClient::with_owner_lease_authority(
+            first_owner_runtime,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        ));
+        let first_rpc = Arc::new(RpcZoneOwnerCommandClient::new(
+            first_owner.clone() as SharedZoneOwnerRpcTransport
+        ));
+        let mut first_gateway = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            zone_id.clone(),
+            first_lease.clone(),
+            Some(authority.clone() as SharedZoneOwnerLeaseAuthority),
+            gateway_runtime,
+        );
+        first_gateway.zone_owner_command_client = first_rpc as SharedZoneOwnerCommandClient;
+
+        first_gateway
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "demo".to_string(),
+                password: "demo".to_string(),
+            }))
+            .expect("first owner should execute login");
+        first_gateway
+            .execute_with_outcome(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: 0,
+            }))
+            .expect("first owner should enter game");
+        assert_eq!(
+            first_owner
+                .active_identity()
+                .expect("first owner identity should be readable before handoff")
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+
+        let handed_runtime = first_owner
+            .take_runtime_for_handoff()
+            .expect("first owner should export runtime for handoff");
+        assert!(first_owner
+            .active_identity()
+            .expect_err("first owner should be unavailable after handoff")
+            .contains("already handed off"));
+
+        let next_lease = authority.handoff_zone_owner(&zone_id, "zone-owner:next");
+        let next_owner = Arc::new(
+            HostedZoneOwnerCommandClient::from_handoff_with_owner_lease_authority(
+                handed_runtime,
+                authority.clone() as SharedZoneOwnerLeaseAuthority,
+            ),
+        );
+        let next_rpc = Arc::new(RpcZoneOwnerCommandClient::new(
+            next_owner.clone() as SharedZoneOwnerRpcTransport
+        ));
+        let next_gateway_runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let mut next_gateway = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            zone_id.clone(),
+            next_lease,
+            Some(authority.clone() as SharedZoneOwnerLeaseAuthority),
+            next_gateway_runtime,
+        );
+        next_gateway.zone_owner_command_client = next_rpc as SharedZoneOwnerCommandClient;
+
+        assert_eq!(
+            next_gateway
+                .active_identity()
+                .as_ref()
+                .map(|identity| identity.character_name.as_str()),
+            Some("Scout")
+        );
+        assert_eq!(
+            next_gateway.world_snapshot().map_file_name.as_deref(),
+            Some("0")
+        );
+        next_gateway
+            .execute_with_outcome(WorldCommand::Tick)
+            .expect("next owner should continue executing handed-off runtime");
+
+        let error = next_owner
+            .execute_request(ZoneOwnerCommandRequest::direct(
+                first_lease,
+                WorldCommand::Tick,
+            ))
+            .expect_err("next owner should reject stale pre-handoff lease");
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+    }
+
+    #[test]
+    fn gateway_session_rejects_stale_zone_owner_before_command_client() {
+        let client = Arc::new(RecordingZoneOwnerCommandClient::default());
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        session.zone_owner_command_client = client.clone() as SharedZoneOwnerCommandClient;
+        let expected = session.zone_owner_lease().clone();
+        let stale = ZoneOwnerLease::new(
+            expected.zone_id().clone(),
+            expected.owner_id().to_string(),
+            expected.fencing_token() + 1,
+        );
+
+        session
+            .execute_with_zone_owner_lease(&stale, WorldCommand::Tick)
+            .expect_err("stale owner request should be rejected before command client");
+
+        assert!(client.calls().is_empty());
+    }
+
+    #[test]
+    fn in_process_zone_owner_command_client_rejects_stale_request_at_owner_boundary() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let owner_lease = authority.owner_lease(&ZoneId::primary());
+        authority.handoff_zone_owner(&ZoneId::primary(), "zone-owner:next");
+        let client = InProcessZoneOwnerCommandClient::with_owner_lease_authority(
+            authority.clone() as SharedZoneOwnerLeaseAuthority
+        );
+        let mut runtime = InProcessZoneRuntimeFactory
+            .create_runtime(GatewayConfig::default(), &ZoneId::primary());
+
+        let error = ZoneOwnerCommandClient::execute(
+            &client,
+            &mut runtime,
+            ZoneOwnerCommandRequest::direct(owner_lease, WorldCommand::Tick),
+        )
+        .expect_err("owner boundary should reject stale fenced request");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+    }
+
+    #[test]
+    fn gateway_session_rejects_stale_zone_owner_fencing_token() {
+        let event_sink = Arc::new(InMemoryGameplayEventSink::default());
+        let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
+        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
+            GatewayConfig::default(),
+            &crate::ZoneRegistry::in_process(),
+            shared_event_sink,
+        );
+        let expected = session.zone_owner_lease().clone();
+        let stale = ZoneOwnerLease::new(
+            expected.zone_id().clone(),
+            expected.owner_id().to_string(),
+            expected.fencing_token() + 1,
+        );
+
+        let error = session
+            .execute_with_zone_owner_lease(
+                &stale,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+            )
+            .expect_err("stale owner lease should be rejected before runtime execution");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("expected owner in-process:primary fencing token 1"));
+        assert!(error.contains("got zone primary owner in-process:primary fencing token 2"));
+        assert!(event_sink.list().is_empty());
+        assert!(session.active_identity().is_none());
+    }
+
+    #[test]
+    fn gateway_session_rejects_wrong_zone_owner_before_production_command() {
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        let expected = session.zone_owner_lease().clone();
+        let stale_owner = ZoneOwnerLease::new(
+            expected.zone_id().clone(),
+            "in-process:old-owner",
+            expected.fencing_token(),
+        );
+
+        let error = session
+            .execute_production_player_command_with_zone_owner_lease(
+                &stale_owner,
+                true,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+            )
+            .expect_err("wrong owner should be rejected before production runtime execution");
+
+        assert!(error.contains("stale zone owner lease"));
+        assert!(error.contains("got zone primary owner in-process:old-owner fencing token 1"));
+        assert!(session.active_identity().is_none());
+    }
+
+    #[test]
+    fn gateway_session_rejects_superseded_zone_owner_after_handoff() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let registry = ZoneRegistry::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let old_owner_lease = session.zone_owner_lease().clone();
+
+        let next_owner = authority.handoff_zone_owner(&ZoneId::primary(), "zone-owner:next");
+
+        assert_eq!(
+            next_owner.fencing_token(),
+            old_owner_lease.fencing_token() + 1
+        );
+        let error = session
+            .execute_with_zone_owner_lease(
+                &old_owner_lease,
+                WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 }),
+            )
+            .expect_err("superseded owner lease should be rejected by shared authority");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+        assert!(error.contains("got owner in-process:primary fencing token 1"));
+        assert!(session.active_identity().is_none());
+    }
+
+    #[test]
+    fn gateway_session_renews_current_zone_owner_lease() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let registry = ZoneRegistry::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+        let owner_lease = session.zone_owner_lease().clone();
+
+        let renewed = session
+            .renew_zone_owner_lease()
+            .expect("current owner lease should renew")
+            .clone();
+
+        assert_eq!(renewed, owner_lease);
+    }
+
+    #[test]
+    fn gateway_session_rejects_zone_owner_renewal_after_handoff() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let registry = ZoneRegistry::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            authority.clone() as SharedZoneOwnerLeaseAuthority,
+        );
+        let mut session =
+            GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+
+        authority.handoff_zone_owner(&ZoneId::primary(), "zone-owner:next");
+
+        let error = session
+            .renew_zone_owner_lease()
+            .expect_err("old owner lease renewal should fail after handoff");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner zone-owner:next fencing token 2"));
+    }
+
+    #[test]
+    fn gateway_session_heartbeat_renews_zone_owner_before_ttl_expiry() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::with_lease_ttl_ms(100));
+        let zone_id = ZoneId::primary();
+        let owner_lease = authority.owner_lease_at(&zone_id, 1_000);
+        let runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            zone_id.clone(),
+            owner_lease.clone(),
+            Some(authority.clone() as SharedZoneOwnerLeaseAuthority),
+            runtime,
+        );
+
+        session.configure_zone_owner_heartbeat(40, 1_000);
+
+        assert!(!session
+            .renew_zone_owner_lease_if_due_at(1_039)
+            .expect("heartbeat should not renew before interval"));
+        assert!(session
+            .renew_zone_owner_lease_if_due_at(1_040)
+            .expect("heartbeat should renew before TTL expiry"));
+        assert_eq!(session.zone_owner_lease(), &owner_lease);
+        assert_eq!(authority.owner_lease_at(&zone_id, 1_139), owner_lease);
+        assert_eq!(
+            authority.owner_lease_at(&zone_id, 1_140).fencing_token(),
+            owner_lease.fencing_token() + 1
+        );
+    }
+
+    #[test]
+    fn gateway_session_heartbeat_rejects_expired_zone_owner() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::with_lease_ttl_ms(100));
+        let zone_id = ZoneId::primary();
+        let owner_lease = authority.owner_lease_at(&zone_id, 1_000);
+        let runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            zone_id,
+            owner_lease,
+            Some(authority as SharedZoneOwnerLeaseAuthority),
+            runtime,
+        );
+
+        session.configure_zone_owner_heartbeat(40, 1_000);
+
+        let error = session
+            .renew_zone_owner_lease_if_due_at(1_100)
+            .expect_err("missed heartbeat should fail after TTL expiry");
+
+        assert!(error.contains("stale zone owner lease for zone primary"));
+        assert!(error.contains("current owner in-process:primary fencing token 2"));
+    }
+
+    #[test]
     fn gateway_session_publishes_gameplay_event_from_world_outcome() {
         let event_sink = Arc::new(InMemoryGameplayEventSink::default());
         let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
@@ -340,7 +1170,10 @@ mod tests {
 
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].event_type, "gameplay.command.executed");
-        assert_eq!(events[0].event_id, "primary:0:2");
+        assert_eq!(
+            events[0].event_id,
+            format!("primary:{}:2", events[0].snapshot_tick)
+        );
         assert_eq!(events[0].schema_version, 1);
         assert_eq!(events[0].zone_id, "primary");
         assert_eq!(events[0].command_kind, "client.StartGame");
@@ -349,6 +1182,37 @@ mod tests {
         assert_eq!(events[0].character_name.as_deref(), Some("Scout"));
         assert_eq!(events[0].packet_count, packets.len());
         assert_eq!(events[0].snapshot_tick, session.world_snapshot().tick);
+    }
+
+    #[test]
+    fn gateway_session_movement_event_skips_snapshot_tick() {
+        let event_sink = Arc::new(InMemoryGameplayEventSink::default());
+        let shared_event_sink: SharedGameplayEventSink = event_sink.clone();
+        let mut session = GatewaySession::new_with_zone_registry_and_event_sink(
+            GatewayConfig::default(),
+            &crate::ZoneRegistry::in_process(),
+            shared_event_sink,
+        );
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        event_sink.drain();
+
+        let packets = session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        });
+        let events = event_sink.list();
+
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].command_kind, "client.Walk");
+        assert_eq!(events[0].packet_count, packets.len());
+        assert_eq!(events[0].snapshot_tick, 0);
+        assert_eq!(events[0].event_id, "primary:0:3");
     }
 
     #[test]
@@ -437,6 +1301,7 @@ mod tests {
         let mut session = GatewaySession::new(GatewayConfig::default());
         let packets = session.handle_packet(ClientPacket::Chat {
             message: "hi".to_string(),
+            linked_items: Vec::new(),
         });
 
         assert!(packets.is_empty());
@@ -449,6 +1314,7 @@ mod tests {
 
         let packets = session.handle_packet(ClientPacket::Chat {
             message: "hi".to_string(),
+            linked_items: Vec::new(),
         });
 
         assert_eq!(packets.len(), 1);

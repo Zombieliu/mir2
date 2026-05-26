@@ -111,7 +111,7 @@ function main() {
   const items = parseItems(reader);
   const monsterByIndex = parseMonsters(reader);
   const npcs = parseNpcs(reader, maps);
-  const quests = parseQuests(reader, version, items, npcs, maps, settings);
+  const quests = parseQuests(reader, version, items, monsterByIndex, npcs, maps, settings);
   const recipes = parseRecipes(items);
   const gameShopInfos = parseGameShopInfos(reader, version, items);
   const baseStatsPackets = parseBaseStatsPackets();
@@ -666,9 +666,10 @@ function parseNpcs(reader, maps) {
   });
 }
 
-function parseQuests(reader, version, items, npcs, maps, settings) {
+function parseQuests(reader, version, items, monsterByIndex, npcs, maps, settings) {
   const questCount = reader.readInt32();
   const itemByName = buildItemLookupByName(items);
+  const monsterByName = buildMonsterLookupByName(monsterByIndex);
   const npcObjectIdByIndex = assignNpcObjectIds(maps, npcs, settings);
   const questInfos = [];
   const questByIndex = new Map();
@@ -698,6 +699,10 @@ function parseQuests(reader, version, items, npcs, maps, settings) {
       completion_description: [],
       fixed_rewards: [],
       select_rewards: [],
+      carry_items: [],
+      kill_tasks: [],
+      item_tasks: [],
+      flag_tasks: [],
       reward_gold: 0,
       reward_exp: 0,
       reward_credit: 0,
@@ -705,7 +710,7 @@ function parseQuests(reader, version, items, npcs, maps, settings) {
     if (quest.required_max_level === 0) {
       quest.required_max_level = 65535;
     }
-    loadQuestText(quest, itemByName);
+    loadQuestText(quest, itemByName, monsterByName);
     questInfos.push(quest);
     questByIndex.set(index, quest);
   }
@@ -719,8 +724,22 @@ function parseQuests(reader, version, items, npcs, maps, settings) {
       name: quest.name,
       group: quest.group,
       file_name: quest.file_name,
+      required_min_level: quest.required_min_level,
+      required_max_level: quest.required_max_level,
+      required_quest: quest.required_quest,
+      required_class: quest.required_class,
+      quest_type: quest.type,
+      goto_message: quest.goto_message,
+      kill_message: quest.kill_message,
+      item_message: quest.item_message,
+      flag_message: quest.flag_message,
+      time_limit_in_seconds: quest.time_limit_in_seconds,
       npc_index: quest.npc_index,
       finish_npc_index: quest.finish_npc_index || quest.npc_index,
+      carry_items: quest.carry_items,
+      kill_tasks: quest.kill_tasks,
+      item_tasks: quest.item_tasks,
+      flag_tasks: quest.flag_tasks,
       payload_len: payload.length,
       payload_hex: payload.toString("hex"),
     };
@@ -781,6 +800,17 @@ function buildItemLookupByName(items) {
     }
   }
   return itemByName;
+}
+
+function buildMonsterLookupByName(monsterByIndex) {
+  const monsterByName = new Map();
+  for (const monster of monsterByIndex.values()) {
+    const key = normalizeItemLookupName(monster.name);
+    if (!monsterByName.has(key)) {
+      monsterByName.set(key, monster);
+    }
+  }
+  return monsterByName;
 }
 
 function buildItemLookupByIndex(items) {
@@ -1210,7 +1240,7 @@ function addRecipeIngredient(recipe, data, itemByName) {
   recipe.ingredients.push(ingredient);
 }
 
-function loadQuestText(quest, itemByName) {
+function loadQuestText(quest, itemByName, monsterByName) {
   const filePath = resolve(questsRoot, `${quest.file_name}.txt`);
   if (!existsSync(filePath)) {
     return;
@@ -1220,10 +1250,10 @@ function loadQuestText(quest, itemByName) {
     { key: "[@DESCRIPTION]", target: "description" },
     { key: "[@TASKDESCRIPTION]", target: "task_description" },
     { key: "[@COMPLETION]", target: "completion_description" },
-    { key: "[@CARRYITEMS]", target: null },
-    { key: "[@KILLTASKS]", target: null },
-    { key: "[@ITEMTASKS]", target: null },
-    { key: "[@FLAGTASKS]", target: null },
+    { key: "[@CARRYITEMS]", target: "carry_items" },
+    { key: "[@KILLTASKS]", target: "kill_tasks" },
+    { key: "[@ITEMTASKS]", target: "item_tasks" },
+    { key: "[@FLAGTASKS]", target: "flag_tasks" },
     { key: "[@FIXEDREWARDS]", target: "fixed_rewards" },
     { key: "[@SELECTREWARDS]", target: "select_rewards" },
     { key: "[@EXPREWARD]", target: "reward_exp" },
@@ -1251,6 +1281,18 @@ function loadQuestText(quest, itemByName) {
         case "return_description":
         case "completion_description":
           quest[section.target].push(line);
+          break;
+        case "carry_items":
+          parseQuestItemTask(quest.carry_items, line, itemByName);
+          break;
+        case "kill_tasks":
+          parseQuestKillTask(quest.kill_tasks, line, monsterByName);
+          break;
+        case "item_tasks":
+          parseQuestItemTask(quest.item_tasks, line, itemByName);
+          break;
+        case "flag_tasks":
+          parseQuestFlagTask(quest.flag_tasks, line);
           break;
         case "fixed_rewards":
         case "select_rewards":
@@ -1291,6 +1333,69 @@ function parseQuestReward(target, line, itemByName) {
   if (female) {
     target.push({ item: female, count });
   }
+}
+
+function parseQuestLineParts(line) {
+  const messageMatch = /"([^"]*)"/.exec(line);
+  const message = messageMatch?.[1] ?? "";
+  const withoutMessage = line.replace(/"[^"]*"/g, "").trim();
+  const split = withoutMessage.split(/\s+/).filter(Boolean);
+  return { split, message };
+}
+
+function parseQuestKillTask(target, line, monsterByName) {
+  if (line.length < 1) {
+    return;
+  }
+  const { split, message } = parseQuestLineParts(line);
+  if (split.length < 1) {
+    return;
+  }
+  const monster = monsterByName.get(normalizeItemLookupName(split[0]));
+  if (!monster) {
+    return;
+  }
+  target.push({
+    monster_index: monster.monster_index,
+    monster_name: monster.name,
+    count: split.length >= 2 ? parseUInt32(split[1]) || 1 : 1,
+    message,
+  });
+}
+
+function parseQuestItemTask(target, line, itemByName) {
+  if (line.length < 1) {
+    return;
+  }
+  const { split, message } = parseQuestLineParts(line);
+  if (split.length < 1) {
+    return;
+  }
+  const item = itemByName.get(normalizeItemLookupName(split[0]));
+  if (!item) {
+    return;
+  }
+  target.push({
+    item_index: item.item_index,
+    item_name: item.name,
+    count: split.length >= 2 ? parseUInt16(split[1]) || 1 : 1,
+    message,
+  });
+}
+
+function parseQuestFlagTask(target, line) {
+  if (line.length < 1) {
+    return;
+  }
+  const { split, message } = parseQuestLineParts(line);
+  if (split.length < 1) {
+    return;
+  }
+  const number = Number.parseInt(split[0], 10);
+  if (!Number.isFinite(number) || number < 0) {
+    return;
+  }
+  target.push({ number, message });
 }
 
 function assignNpcObjectIds(maps, npcs, settings) {

@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_npc_script_by_key, CrystalNpcScript,
-    CrystalNpcSection,
+    crystal_map_respawns_by_file_name, crystal_npc_info_manifest, crystal_npc_script_by_key,
+    CrystalNpcInfoTemplate, CrystalNpcScript, CrystalNpcSection,
 };
 use mir2_protocol::{
     ChatType, MapInformation, MirClass, MirDirection, MirGender, Point, ServerPacket,
@@ -16,7 +16,7 @@ use mir2_protocol::{
 use super::buffs::*;
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_position,
-    player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals,
+    player_entity, CharacterBody, DisplayName, Facing, Monster, MonsterAgent, MonsterVitals, Npc,
     NpcAgent, NpcPetState, ObjectId, Position, RemotePlayer, SummonedMonster, WorldObject,
 };
 use super::crystal_compat::*;
@@ -32,6 +32,7 @@ use super::resources::*;
 use super::session::SimulationSession;
 use super::skills::*;
 use super::stage5::*;
+use crate::config::{WorldEntityKind, WorldEntitySnapshot};
 
 #[cfg(windows)]
 #[repr(C)]
@@ -76,11 +77,11 @@ impl CrystalNpcRandomState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(super) struct CrystalNpcSavedValue {
-    pub(super) file_name: String,
-    pub(super) group: String,
-    pub(super) key: String,
-    pub(super) value: String,
+pub struct CrystalNpcSavedValue {
+    pub file_name: String,
+    pub group: String,
+    pub key: String,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -488,7 +489,16 @@ pub(super) fn handle_npc_interaction(
     if let Some(script_key) = context.script_key.as_deref() {
         if let Some(result) = run_crystal_npc_script(world, &context, script_key, "@Main") {
             packets.extend(result.packets);
-            if let Some(dialog) = result.dialog {
+            if let Some(mut dialog) = result.dialog {
+                append_crystal_quest_links(world, &context, &mut dialog);
+                let footer = dialog.footer.clone();
+                set_dialog(world, dialog);
+                packets.push(ServerPacket::ObjectChat {
+                    object_id: context.object_id,
+                    text: footer,
+                    chat_type: ChatType::Hint,
+                });
+            } else if let Some(dialog) = crystal_quest_link_dialog(world, &context) {
                 let footer = dialog.footer.clone();
                 set_dialog(world, dialog);
                 packets.push(ServerPacket::ObjectChat {
@@ -501,6 +511,17 @@ pub(super) fn handle_npc_interaction(
             }
             return packets;
         }
+    }
+
+    if let Some(dialog) = crystal_quest_link_dialog(world, &context) {
+        let footer = dialog.footer.clone();
+        set_dialog(world, dialog);
+        packets.push(ServerPacket::ObjectChat {
+            object_id: context.object_id,
+            text: footer,
+            chat_type: ChatType::Hint,
+        });
+        return packets;
     }
 
     if npc_script_for_object_id(context.object_id).is_none() {
@@ -534,6 +555,69 @@ pub(super) fn handle_npc_interaction(
         chat_type: ChatType::Hint,
     });
     packets
+}
+
+fn append_crystal_quest_links(
+    world: &World,
+    context: &NpcInteractionContext,
+    dialog: &mut ActiveNpcDialogState,
+) {
+    let mut quest_links = quest_dialog_links_for_npc(world, context.object_id, &context.quest_ids);
+    if quest_links.is_empty() {
+        return;
+    }
+    dialog.links.append(&mut quest_links);
+    dialog
+        .links
+        .sort_by(|left, right| left.text.cmp(&right.text));
+    dialog
+        .links
+        .dedup_by(|left, right| left.target == right.target);
+    if dialog.footer.is_empty() || dialog.footer == context.name {
+        dialog.footer = dialog
+            .links
+            .first()
+            .map(|link| link.text.clone())
+            .unwrap_or_else(|| context.name.clone());
+    }
+}
+
+fn crystal_quest_link_dialog(
+    world: &World,
+    context: &NpcInteractionContext,
+) -> Option<ActiveNpcDialogState> {
+    let mut links = quest_dialog_links_for_npc(world, context.object_id, &context.quest_ids);
+    if links.is_empty() {
+        return None;
+    }
+    links.push(NpcDialogLinkState {
+        text: "Exit".to_string(),
+        target: "@Exit".to_string(),
+    });
+    let footer = links
+        .first()
+        .map(|link| link.text.clone())
+        .unwrap_or_else(|| context.name.clone());
+    Some(ActiveNpcDialogState {
+        npc_object_id: context.object_id,
+        npc_name: context.name.clone(),
+        npc_name_key: context.name_key.clone(),
+        stage: None,
+        current: 0,
+        required: 1,
+        title: context.name.clone(),
+        body: vec!["How can I help you?".to_string()],
+        footer,
+        links,
+        input: None,
+    })
+}
+
+fn crystal_npc_info_for_loaded_object_id(object_id: u32) -> Option<CrystalNpcInfoTemplate> {
+    crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .find(|npc| npc.loaded_object_id == Some(object_id))
 }
 
 #[derive(Debug, Clone, Default)]
@@ -1888,7 +1972,12 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "SET" => {
-            crystal_npc_set_flag(world, &parts[1..]);
+            if let Some((flag_index, true)) = crystal_npc_set_flag(world, &parts[1..]) {
+                packets.extend(advance_crystal_quest_flag(
+                    world,
+                    i32::try_from(flag_index).unwrap_or(i32::MAX),
+                ));
+            }
             CrystalNpcActionControl::Continue
         }
         "MOV" => {
@@ -2266,19 +2355,20 @@ pub(super) fn gain_credit(world: &mut World, amount: u32) -> Option<ServerPacket
     Some(ServerPacket::GainedCredit { credit: gained })
 }
 
-pub(super) fn crystal_npc_set_flag(world: &mut World, parts: &[&str]) {
+pub(super) fn crystal_npc_set_flag(world: &mut World, parts: &[&str]) -> Option<(u32, bool)> {
     let [flag_token, value_token] = parts else {
-        return;
+        return None;
     };
     let Some(flag_index) = parse_crystal_flag_index(flag_token) else {
-        return;
+        return None;
     };
     let value = match *value_token {
         "0" => false,
         "1" => true,
-        _ => return,
+        _ => return None,
     };
     set_crystal_npc_flag(world, flag_index, value);
+    Some((flag_index, value))
 }
 
 pub(super) fn crystal_npc_set_variable(world: &mut World, parts: &[&str]) {
@@ -3010,8 +3100,65 @@ pub(super) fn crystal_npc_save_value(world: &mut World, line: &str) {
 }
 
 impl SimulationSession {
+    pub fn shared_npc_random_seed(&self) -> u64 {
+        self.app.world().resource::<CrystalNpcRandomState>().seed
+    }
+
+    pub fn apply_shared_npc_random_seed(&mut self, seed: u64) {
+        self.app
+            .world_mut()
+            .resource_mut::<CrystalNpcRandomState>()
+            .seed = seed;
+    }
+
+    pub fn shared_npc_saved_values(&self) -> Vec<CrystalNpcSavedValue> {
+        self.app
+            .world()
+            .resource::<NpcStateResource>()
+            .npc_saved_values
+            .clone()
+    }
+
+    pub fn apply_shared_npc_saved_values(&mut self, values: &[CrystalNpcSavedValue]) {
+        let resources = &mut self
+            .app
+            .world_mut()
+            .resource_mut::<NpcStateResource>()
+            .npc_saved_values;
+        for value in values {
+            if let Some(existing) = resources.iter_mut().find(|entry| {
+                entry.file_name.eq_ignore_ascii_case(&value.file_name)
+                    && entry.group.eq_ignore_ascii_case(&value.group)
+                    && entry.key.eq_ignore_ascii_case(&value.key)
+            }) {
+                existing.value = value.value.clone();
+            } else {
+                resources.push(value.clone());
+            }
+        }
+    }
+
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.interact_impl(object_id);
+        self.finalize_packets(packets)
+    }
+
+    pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
+        let packets = self.interact_shared_npc_snapshot_impl(npc);
+        self.finalize_packets(packets)
+    }
+
+    pub fn call_shared_npc_snapshot(
+        &mut self,
+        npc: &WorldEntitySnapshot,
+        key: &str,
+    ) -> Vec<ServerPacket> {
+        let packets = self.call_shared_npc_snapshot_impl(npc, key);
+        self.finalize_packets(packets)
+    }
+
+    pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
+        let packets = self.call_npc_impl(object_id, key);
         self.finalize_packets(packets)
     }
 
@@ -3087,6 +3234,102 @@ impl SimulationSession {
         handle_npc_interaction(self.app.world_mut(), context, packets)
     }
 
+    pub(super) fn interact_shared_npc_snapshot_impl(
+        &mut self,
+        npc: &WorldEntitySnapshot,
+    ) -> Vec<ServerPacket> {
+        if !self.ensure_shared_npc_snapshot_entity(npc) {
+            return Vec::new();
+        }
+
+        self.interact_impl(npc.object_id)
+    }
+
+    pub(super) fn call_shared_npc_snapshot_impl(
+        &mut self,
+        npc: &WorldEntitySnapshot,
+        key: &str,
+    ) -> Vec<ServerPacket> {
+        if !self.ensure_shared_npc_snapshot_entity(npc) {
+            return Vec::new();
+        }
+
+        self.call_npc_impl(npc.object_id, key)
+    }
+
+    fn ensure_shared_npc_snapshot_entity(&mut self, npc: &WorldEntitySnapshot) -> bool {
+        if npc.kind != WorldEntityKind::Npc || !is_in_world(self.app.world()) {
+            return false;
+        }
+
+        if let Some(entity) = entity_by_object_id(self.app.world(), npc.object_id) {
+            return self.app.world().entity(entity).contains::<Npc>();
+        }
+
+        let npc_info = crystal_npc_info_for_loaded_object_id(npc.object_id);
+        let quest_ids = if npc.quest_ids.is_empty() {
+            crystal_quest_ids_by_npc()
+                .get(&npc.object_id)
+                .map(|ids| ids.iter().copied().collect())
+                .unwrap_or_default()
+        } else {
+            npc.quest_ids.clone()
+        };
+        let script_key = npc_info.as_ref().map(|info| info.script_key.clone());
+        let image = npc_info.as_ref().map(|info| info.image).unwrap_or_default();
+
+        self.app.world_mut().spawn((
+            WorldObject,
+            Npc,
+            ObjectId(npc.object_id),
+            localized_npc_name_key(npc.object_id)
+                .map(|key| DisplayName::localized(key, npc.name.clone()))
+                .unwrap_or_else(|| DisplayName::literal(npc.name.clone())),
+            Position(Point { x: npc.x, y: npc.y }),
+            Facing(npc.direction),
+            NpcAgent {
+                image,
+                colour_argb: npc.name_colour_argb,
+                quest_ids,
+                script_key,
+            },
+        ));
+
+        true
+    }
+
+    pub(super) fn call_npc_impl(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
+        let normalized_key = key.trim();
+        let main_call = normalized_key.is_empty() || normalized_key.eq_ignore_ascii_case("@Main");
+        if main_call {
+            return self.interact_impl(object_id);
+        }
+
+        let active_npc_object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| dialog.npc_object_id);
+        if active_npc_object_id == Some(object_id) {
+            return self.select_npc_dialog_target_impl(normalized_key);
+        }
+
+        let mut packets = self.interact_impl(object_id);
+        let active_npc_object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| dialog.npc_object_id);
+        if active_npc_object_id == Some(object_id) {
+            packets.extend(self.select_npc_dialog_target_impl(normalized_key));
+        }
+        packets
+    }
+
     pub(super) fn select_npc_dialog_target_impl(&mut self, target: &str) -> Vec<ServerPacket> {
         self.select_npc_dialog_target_with_input_impl(target, None)
     }
@@ -3151,6 +3394,41 @@ impl SimulationSession {
                 .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
         {
             return Vec::new();
+        }
+
+        if normalized_target
+            .trim_start_matches('@')
+            .starts_with("quest:")
+        {
+            let Some((quest_dialog, mut packets)) = crystal_quest_dialog_for_target(
+                self.app.world_mut(),
+                active_dialog.npc_object_id,
+                &normalized_target,
+            ) else {
+                return Vec::new();
+            };
+            set_dialog(
+                self.app.world_mut(),
+                ActiveNpcDialogState {
+                    npc_object_id: active_dialog.npc_object_id,
+                    npc_name: active_dialog.npc_name.clone(),
+                    npc_name_key: active_dialog.npc_name_key.clone(),
+                    stage: Some(quest_dialog.stage),
+                    current: 0,
+                    required: 1,
+                    title: quest_dialog.title,
+                    body: quest_dialog.body,
+                    footer: quest_dialog.footer.clone(),
+                    links: quest_dialog.links,
+                    input: None,
+                },
+            );
+            packets.push(ServerPacket::ObjectChat {
+                object_id: active_dialog.npc_object_id,
+                text: quest_dialog.footer,
+                chat_type: ChatType::Hint,
+            });
+            return packets;
         }
 
         let Some(npc_entity) = entity_by_object_id(self.app.world(), active_dialog.npc_object_id)

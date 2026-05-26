@@ -13,13 +13,17 @@ import {
 } from "../lib/localization";
 import { playOriginalSoundId } from "../lib/original-audio";
 import {
+  DUBHE_WALLET_URL,
+  getSuiWalletSummaries,
   requestSuiLoginToken,
   sendBootstrapSequence as sendGatewayBootstrapSequence,
   sendNewAccountCommand as sendGatewayNewAccountCommand,
   sendPasswordLoginCommand,
   sendSuiLoginCommand,
+  subscribeToSuiWalletChanges,
   type SuiLoginKind,
   type SuiLoginToken,
+  type SuiWalletSummary,
 } from "../lib/client-login-runtime";
 import type {
   DecorObject,
@@ -36,7 +40,7 @@ import {
   type CrystalMonsterSpriteEntry,
   type CrystalNpcSpriteEntry,
 } from "../lib/generated/crystal-actor-sprite-data";
-import type { SceneAssetReadiness } from "./components/original-client-shell-types";
+import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
 
 type RuntimeStatus = {
   phase: string;
@@ -46,8 +50,28 @@ type RuntimeStatus = {
 type RuntimeModule = {
   default?: (input?: string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
+  getMir2RendererBackend?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
+  setMir2EntityRenderState?: (snapshotJson: string) => void;
+  setMir2EntityRenderAtlas?: (key: string, width: number, height: number, pixels: Uint8Array) => void;
   setMir2StatusSink?: (callback: (payload: RuntimeStatus) => void) => void;
+};
+
+type BevyRuntimeBackend = "webgpu" | "webgl2";
+
+type BevyRuntimeSupport = {
+  webgpu: boolean;
+  webgl2: boolean;
+};
+
+type BevyRuntimeDebug = {
+  requestedBackend: string | null;
+  selectedBackend: BevyRuntimeBackend;
+  compiledBackend: string | null;
+  fallbackFrom?: BevyRuntimeBackend;
+  webgpuSupported: boolean;
+  webgl2Supported: boolean;
+  runtimeVersion: string;
 };
 
 type UiLogTone = "chat" | "system" | "network";
@@ -667,32 +691,37 @@ const SCENE_REQUEST_HEIGHT = VIEWPORT_RANGE_Y * 2 + SCENE_PREFETCH_MARGIN_Y * 2;
 const SCENE_RELOAD_MARGIN_X = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_X / 2));
 const SCENE_RELOAD_MARGIN_Y = Math.max(4, Math.floor(SCENE_PREFETCH_MARGIN_Y / 2));
 const WALK_STEP_INTERVAL_MS = 600;
-const RUN_STEP_INTERVAL_MS = 600;
+const RUN_STEP_INTERVAL_MS = 300;
 const CRYSTAL_GAMEPLAY_TICK_MS = 1200;
-const CRYSTAL_KEEPALIVE_INTERVAL_MS = 30_000;
+const CRYSTAL_KEEPALIVE_INTERVAL_MS = 15_000;
 const CRYSTAL_INPUT_CORRECTION_DELAY_MS = 400;
 const CRYSTAL_ENTITY_MOVE_ACTION_MS = 600;
 const CRYSTAL_MOVE_FRAME_INTERVAL_MS = 100;
 const MOVEMENT_CONFIRM_TICK_DELAY_MS = 160;
+const MOVEMENT_TURN_VISUAL_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS;
 const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
 const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 3600;
 const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 12;
+const MOVEMENT_OUTSTANDING_ACTION_SETTLE_GRACE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_PENDING_ACTION_RECOVERY_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_PREDICTED_CORRECTION_HOLD_MS = CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const MOVEMENT_LOCAL_PREDICTION_MIN_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS * 2;
 const MOVEMENT_ACTION_PREDICTION_BLOCK_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
 const PACKET_RUNTIME_SNAPSHOT_TOMBSTONE_MS = 10_000;
 const MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS = 360;
-const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 4;
+const MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES = 2;
 const MOVEMENT_LOCAL_RENDER_MAX_LEAD_TILES = MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
 const MOVEMENT_DIRECTION_PENDING_MAX = 1;
 const MOVEMENT_ROUTE_REROUTE_AFTER_MS = 900;
 const MOVEMENT_ROUTE_RETRY_DELAY_MS = 120;
 const MOVEMENT_ROUTE_BLOCK_MEMORY_MS = 5600;
+const MOVEMENT_HELD_BLOCKED_DIRECTION_SUPPRESS_MS = 60_000;
+const MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX = 6;
+const MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX_AGE_MS =
+  CRYSTAL_ENTITY_MOVE_ACTION_MS * (MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX + 2);
 const MOVEMENT_ROUTE_MAX_BLOCKED_STEPS = 12;
 const MOVEMENT_ROUTE_SEARCH_MARGIN = 14;
 const MOVEMENT_ROUTE_SEARCH_MAX_NODES = 420;
-const CRYSTAL_RUN_PRIME_WINDOW_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + 600;
 const CRYSTAL_MOVEMENT_DIRECTIONS = [
   "Up",
   "UpRight",
@@ -705,6 +734,7 @@ const CRYSTAL_MOVEMENT_DIRECTIONS = [
 ];
 const CONFIGURED_GATEWAY_WS_URL = process.env.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL?.trim();
 const LOCAL_GATEWAY_WS_URL = "ws://127.0.0.1:7110/ws";
+const HOSTED_GATEWAY_WS_URL = "wss://165.154.65.136.sslip.io/ws";
 const BEVY_RUNTIME_VERSION =
   [bevyRuntimeVersion.version, process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA]
     .filter((value): value is string => Boolean(value))
@@ -725,19 +755,12 @@ function isLocalWebHost(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "[::1]";
 }
 
-function sameOriginGatewayWebSocketUrl(location: Location) {
-  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${location.host}/ws`;
-}
-
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
   const queryValue = new URLSearchParams(window.location.search).get("gatewayWs");
   if (queryValue && /^wss?:\/\//.test(queryValue)) return queryValue;
   if (CONFIGURED_GATEWAY_WS_URL) return CONFIGURED_GATEWAY_WS_URL;
-  return isLocalWebHost(window.location.hostname)
-    ? LOCAL_GATEWAY_WS_URL
-    : sameOriginGatewayWebSocketUrl(window.location);
+  return isLocalWebHost(window.location.hostname) ? LOCAL_GATEWAY_WS_URL : HOSTED_GATEWAY_WS_URL;
 }
 
 function markMir2CacheMilestone(name: string, detail?: Record<string, unknown>) {
@@ -829,6 +852,7 @@ type DirectionStepRequest = {
   direction?: string;
   mode: "walk" | "run";
   requestedAt: number;
+  repeatCount?: number;
 };
 
 type DirectionStepPending = {
@@ -921,6 +945,102 @@ type MovementDiagnosticState = {
   lastMovementCommand: Record<string, unknown> | null;
 };
 
+type MovementConsoleWindow = typeof window & {
+  __mir2MovementLogEnabled?: boolean;
+  __mir2MovementConsoleSeq?: number;
+  __mir2MovementConsoleEvents?: Array<Record<string, unknown>>;
+  __mir2PendingMovementConsoleCommands?: Array<Record<string, unknown>>;
+};
+
+const MOVEMENT_LOG_STORAGE_KEY = "mir2-movement-log";
+
+function isMovementLogFlagEnabled(value: string | null) {
+  return value === "1" || value === "true" || value === "yes" || value === "on";
+}
+
+function isMovementLogFlagDisabled(value: string | null) {
+  return value === "0" || value === "false" || value === "no" || value === "off";
+}
+
+function movementConsoleLogEnabled() {
+  if (typeof window === "undefined") return false;
+
+  const debugWindow = window as MovementConsoleWindow;
+  if (debugWindow.__mir2MovementLogEnabled === true) return true;
+  if (debugWindow.__mir2MovementLogEnabled === false) return false;
+
+  const params = new URLSearchParams(window.location.search);
+  const queryFlag =
+    params.get("movementLog") ??
+    params.get("moveLog") ??
+    params.get("movementConsole");
+  if (isMovementLogFlagEnabled(queryFlag)) return true;
+  if (isMovementLogFlagDisabled(queryFlag)) return false;
+
+  if (
+    params.get("movementDiag") === "1" ||
+    params.get("moveDiag") === "1" ||
+    params.get("movementDiagnostics") === "1"
+  ) {
+    return true;
+  }
+
+  try {
+    return isMovementLogFlagEnabled(window.localStorage.getItem(MOVEMENT_LOG_STORAGE_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function isMovementConsoleCommand(command: Record<string, unknown>) {
+  return command.type === "walk" || command.type === "run" || command.type === "moveTo" || command.type === "turn";
+}
+
+function assignMovementConsoleSequence(command: Record<string, unknown>) {
+  const debugWindow = window as MovementConsoleWindow;
+  const sequence = (debugWindow.__mir2MovementConsoleSeq ?? 0) + 1;
+  debugWindow.__mir2MovementConsoleSeq = sequence;
+  return { ...command, movementSeq: sequence };
+}
+
+function rememberMovementConsoleCommand(command: Record<string, unknown>) {
+  const debugWindow = window as MovementConsoleWindow;
+  debugWindow.__mir2PendingMovementConsoleCommands = [
+    ...(debugWindow.__mir2PendingMovementConsoleCommands ?? []),
+    command,
+  ].slice(-40);
+}
+
+function consumeMovementConsoleCommand() {
+  const debugWindow = window as MovementConsoleWindow;
+  const pending = debugWindow.__mir2PendingMovementConsoleCommands ?? [];
+  const command = pending.shift() ?? null;
+  debugWindow.__mir2PendingMovementConsoleCommands = pending.slice(-40);
+  return command;
+}
+
+function recordMovementConsoleEvent(kind: "send" | "ack" | "correction", payload: Record<string, unknown>) {
+  if (!movementConsoleLogEnabled()) return;
+
+  const event = {
+    kind,
+    at: Date.now(),
+    ...payload,
+  };
+  const debugWindow = window as MovementConsoleWindow;
+  debugWindow.__mir2MovementConsoleEvents = [
+    event,
+    ...(debugWindow.__mir2MovementConsoleEvents ?? []),
+  ].slice(0, 100);
+
+  const label = `[mir2-move:${kind}]`;
+  if (kind === "correction") {
+    console.warn(label, event);
+  } else {
+    console.info(label, event);
+  }
+}
+
 export default function HomePage() {
   const runtimeRef = useRef<RuntimeModule | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -994,10 +1114,14 @@ export default function HomePage() {
   const passwordRef = useRef("demo");
   const charactersRef = useRef<SelectCharacterEntry[]>([]);
   const selectedCharacterIndexRef = useRef(0);
+  const uploadedBevyEntityAtlasKeysRef = useRef<Set<string>>(new Set());
+  const lastBevyEntityRenderStateJsonRef = useRef<string | null>(null);
 
   const [language, setLanguage] = useState<Mir2Language>("en");
   const [runtimePhase, setRuntimePhase] = useState("idle");
   const [runtimeMessage, setRuntimeMessage] = useState("Runtime not booted");
+  const [bevyEntityRendererReady, setBevyEntityRendererReady] = useState(false);
+  const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [screen, setScreen] = useState<ClientScreen>("login");
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
   const [logs, setLogs] = useState<UiLogLine[]>([]);
@@ -1006,6 +1130,8 @@ export default function HomePage() {
   const [chatMessage, setChatMessage] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
+  const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
+  const [walletPickerOpen, setWalletPickerOpen] = useState(false);
   const [characters, setCharacters] = useState<SelectCharacterEntry[]>(() => [fallbackCharacter("en")]);
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState(0);
   const [wsState, setWsState] = useState("closed");
@@ -1042,6 +1168,18 @@ export default function HomePage() {
       current.length === 1 && isFallbackCharacter(current[0]) ? [fallbackCharacter(language)] : current,
     );
   }, [language]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const refreshWallets = () => setSuiWallets(getSuiWalletSummaries());
+    refreshWallets();
+    const delayedRefresh = window.setTimeout(refreshWallets, 500);
+    const unsubscribe = subscribeToSuiWalletChanges(refreshWallets);
+    return () => {
+      window.clearTimeout(delayedRefresh);
+      unsubscribe();
+    };
+  }, []);
 
   const self = world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
   const selfPredictionAnchor = self ? authoritativeSelfForPrediction(self) : null;
@@ -1145,9 +1283,35 @@ export default function HomePage() {
       return;
     }
 
-    if (initialSceneAssetsReadyRef.current !== readiness.ready) {
-      setInitialSceneAssetsReadyState(readiness.ready);
+    // Keep movement unlocked after the first playable scene; before that, later renderer readiness can still tighten the gate.
+    const nextSceneInteractionReady = readiness.ready;
+    if (initialSceneAssetsReadyRef.current !== nextSceneInteractionReady) {
+      setInitialSceneAssetsReadyState(nextSceneInteractionReady);
     }
+  }
+
+  function handleBevyEntityRenderStateChange(state: BevyEntityRenderState) {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+
+    for (const atlas of state.atlasImages ?? []) {
+      if (!atlas.pixels) {
+        continue;
+      }
+      if (uploadedBevyEntityAtlasKeysRef.current.has(atlas.key)) {
+        continue;
+      }
+      runtime.setMir2EntityRenderAtlas?.(atlas.key, atlas.width, atlas.height, atlas.pixels);
+      uploadedBevyEntityAtlasKeysRef.current.add(atlas.key);
+    }
+
+    const { atlasImages: _atlasImages, ...serializableState } = state;
+    const serializableStateJson = JSON.stringify(serializableState);
+    if (serializableStateJson === lastBevyEntityRenderStateJsonRef.current) {
+      return;
+    }
+    lastBevyEntityRenderStateJsonRef.current = serializableStateJson;
+    runtime.setMir2EntityRenderState?.(serializableStateJson);
   }
 
   function sceneInputDeferredForInitialAssets() {
@@ -1305,6 +1469,55 @@ export default function HomePage() {
     if (state.events.length >= 300) {
       flushMovementDiagnostics("buffer");
     }
+  }
+
+  function captureMovementConsoleState(now = Date.now()) {
+    const currentWorld = worldRef.current;
+    const currentSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
+    const queuedDirectionStep = queuedDirectionStepRef.current;
+    const directionStepPending = directionStepPendingRef.current;
+    const movementPlan = movementPlanRef.current;
+    const debugWindow = window as MovementConsoleWindow;
+
+    return {
+      screen: screenRef.current,
+      wsState,
+      self: currentSelf
+        ? { x: currentSelf.x, y: currentSelf.y, direction: currentSelf.direction }
+        : null,
+      predicted: predictedPlayerPositionRef.current,
+      movementPlan: movementPlan
+        ? {
+            mode: movementPlan.mode,
+            packetMode: movementPlan.packetMode ?? "direction",
+            targetX: movementPlan.targetX,
+            targetY: movementPlan.targetY,
+            pendingX: movementPlan.pendingX ?? null,
+            pendingY: movementPlan.pendingY ?? null,
+            waitMs: Math.max(0, movementPlan.nextStepAt - now),
+            pendingAgeMs: movementPlan.pendingSentAt ? Math.max(0, now - movementPlan.pendingSentAt) : null,
+          }
+        : null,
+      queuedDirectionStep: queuedDirectionStep
+        ? {
+            direction: queuedDirectionStep.direction ?? null,
+            mode: queuedDirectionStep.mode,
+            requestedAgeMs: Math.max(0, now - queuedDirectionStep.requestedAt),
+            repeatCount: queuedDirectionStep.repeatCount ?? 1,
+          }
+        : null,
+      directionStepPending: directionStepPending
+        ? {
+            direction: directionStepPending.direction ?? null,
+            mode: directionStepPending.mode,
+            sentAgeMs: Math.max(0, now - directionStepPending.sentAt),
+          }
+        : null,
+      directionStepPendingQueueLength: directionStepPendingQueueRef.current.length,
+      crystalSelfActionFeedLength: crystalSelfActionFeedRef.current.length,
+      outstandingSelfMovementActionsLength: outstandingSelfMovementActionsRef.current.length,
+      pendingConsoleCommandCount: debugWindow.__mir2PendingMovementConsoleCommands?.length ?? 0,
+    };
   }
 
   function flushMovementDiagnostics(reason = "manual", useBeacon = false) {
@@ -1634,52 +1847,6 @@ export default function HomePage() {
     return typeof x === "number" && typeof y === "number" ? { x, y } : null;
   }
 
-  function commitLocalSelfTransform(position: PredictedPlayerMotion) {
-    const currentWorld = worldRef.current;
-    if (!currentWorld.playerObjectId) {
-      return false;
-    }
-
-    let foundSelf = false;
-    let changed = false;
-    const nextEntities = currentWorld.entities.map((entity) => {
-      if (entity.objectId !== currentWorld.playerObjectId) {
-        return entity;
-      }
-      foundSelf = true;
-      const nextDirection = position.direction ?? entity.direction;
-      if (entity.x === position.x && entity.y === position.y && entity.direction === nextDirection) {
-        return entity;
-      }
-      changed = true;
-      return {
-        ...entity,
-        x: position.x,
-        y: position.y,
-        direction: nextDirection,
-      };
-    });
-
-    if (!foundSelf || !changed) {
-      return false;
-    }
-
-    const nextWorld = {
-      ...currentWorld,
-      sceneView: currentWorld.sceneView
-        ? {
-            ...currentWorld.sceneView,
-            center: { x: position.x, y: position.y },
-          }
-        : currentWorld.sceneView,
-      entities: nextEntities,
-    };
-    worldRef.current = nextWorld;
-    setWorld(nextWorld);
-    runtimeRef.current?.setMir2WorldState?.(JSON.stringify(nextWorld));
-    return true;
-  }
-
   function clearLocalSelfPrediction() {
     predictedPlayerHoldUntilRef.current = 0;
     localMovementAnchorRef.current = null;
@@ -1721,12 +1888,34 @@ export default function HomePage() {
     crystalSelfActionFeedRef.current = crystalSelfActionFeedRef.current.filter(
       (entry) => entry.sentAt >= keepAfter,
     );
-    outstandingSelfMovementActionsRef.current = outstandingSelfMovementActionsRef.current.filter(
-      (entry) => entry.sentAt >= keepAfter,
-    );
+    pruneSettledOutstandingSelfMovementActions(now, keepAfter);
     recentSelfMovementActionHistoryRef.current = recentSelfMovementActionHistoryRef.current.filter(
       (entry) => entry.sentAt >= keepAfter,
     );
+  }
+
+  function pruneSettledOutstandingSelfMovementActions(now: number, keepAfter = now - MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
+    const ack = lastSelfMovementAckRef.current;
+    const movementIdle =
+      !movementPlanRef.current &&
+      !directionStepPendingRef.current &&
+      directionStepPendingQueueRef.current.length === 0 &&
+      !predictedPlayerPositionRef.current;
+    outstandingSelfMovementActionsRef.current = outstandingSelfMovementActionsRef.current.filter((entry) => {
+      if (entry.sentAt < keepAfter) {
+        return false;
+      }
+      if (now < entry.visualUntil + MOVEMENT_OUTSTANDING_ACTION_SETTLE_GRACE_MS) {
+        return true;
+      }
+      if (
+        ack &&
+        crystalActionMatchesAck(entry, ack.x, ack.y, ack.direction)
+      ) {
+        return false;
+      }
+      return !movementIdle;
+    });
   }
 
   function pruneLocallySettledDirectionStepPending(now: number) {
@@ -1760,10 +1949,11 @@ export default function HomePage() {
 
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
-    const lastAck = lastSelfMovementAckRef.current;
+    const authoritativeSelf = authoritativeSelfForMovementSettlement(serverSelf, now);
     const candidates = [
-      serverSelf ? { x: serverSelf.x, y: serverSelf.y, direction: serverSelf.direction } : null,
-      lastAck ? { x: lastAck.x, y: lastAck.y, direction: lastAck.direction } : null,
+      authoritativeSelf
+        ? { x: authoritativeSelf.x, y: authoritativeSelf.y, direction: authoritativeSelf.direction }
+        : null,
     ];
 
     return candidates.some(
@@ -1802,7 +1992,6 @@ export default function HomePage() {
       ...recentSelfMovementActionHistoryRef.current,
       entry,
     ].slice(-32);
-    commitLocalSelfTransform({ x: action.point.x, y: action.point.y, direction: action.direction });
   }
 
   function clearCrystalSelfActionFeed() {
@@ -1818,6 +2007,7 @@ export default function HomePage() {
   }
 
   function selfLocalMovementActive() {
+    pruneCrystalSelfActionFeed(Date.now());
     return (
       hasSelfMovementTransportEvidence() ||
       crystalSelfActionFeedRef.current.length > 0 ||
@@ -1826,6 +2016,7 @@ export default function HomePage() {
   }
 
   function hasSelfMovementTransportEvidence(now = Date.now()) {
+    pruneCrystalSelfActionFeed(now);
     const anchor = localMovementAnchorRef.current;
     return (
       Boolean(movementPlanRef.current) ||
@@ -1837,6 +2028,7 @@ export default function HomePage() {
   }
 
   function hasSelfMovementAckInFlight() {
+    pruneCrystalSelfActionFeed(Date.now());
     const plan = movementPlanRef.current;
     return (
       Boolean(
@@ -1863,18 +2055,37 @@ export default function HomePage() {
     };
   }
 
+  function authoritativeSelfForMovementSettlement(serverSelf: WorldEntity | null, now = Date.now()) {
+    const ack = lastSelfMovementAckRef.current;
+    if (ack) {
+      return {
+        x: ack.x,
+        y: ack.y,
+        direction: ack.direction ?? serverSelf?.direction,
+      };
+    }
+
+    return hasSelfMovementTransportEvidence(now) ? null : serverSelf;
+  }
+
   function rememberSnapshotSelfAck(
     entity: { x: number; y: number; direction?: string },
     now: number,
     force = false,
   ) {
-    if (force || !lastSelfMovementAckRef.current || !selfLocalMovementActive()) {
+    const confirmsLocalMovement = selfAckConfirmsLocalMovement(entity);
+    if (force || confirmsLocalMovement || !lastSelfMovementAckRef.current || !selfLocalMovementActive()) {
       lastSelfMovementAckRef.current = {
         x: entity.x,
         y: entity.y,
         direction: entity.direction,
         at: now,
       };
+    }
+    if (confirmsLocalMovement) {
+      lastSelfNoProgressAckRef.current = null;
+      clearSettledSelfActionsAt(entity.x, entity.y, entity.direction);
+      reconcileDirectionStepQueueWithServer(entity.x, entity.y, now, entity.direction, false, false);
     }
   }
 
@@ -1891,13 +2102,7 @@ export default function HomePage() {
     if (feed.length === 0) {
       return null;
     }
-    const latest = serverSelf
-      ? feed.reduce((best, entry) => {
-          const bestLead = Math.max(Math.abs(best.x - serverSelf.x), Math.abs(best.y - serverSelf.y));
-          const entryLead = Math.max(Math.abs(entry.x - serverSelf.x), Math.abs(entry.y - serverSelf.y));
-          return entryLead >= bestLead ? entry : best;
-        })
-      : feed[feed.length - 1];
+    const latest = feed[feed.length - 1];
     if (
       serverSelf &&
       !hasSelfMovementTransportEvidence(now) &&
@@ -1925,13 +2130,7 @@ export default function HomePage() {
     if (actions.length === 0) {
       return null;
     }
-    const latest = serverSelf
-      ? actions.reduce((best, entry) => {
-          const bestLead = Math.max(Math.abs(best.x - serverSelf.x), Math.abs(best.y - serverSelf.y));
-          const entryLead = Math.max(Math.abs(entry.x - serverSelf.x), Math.abs(entry.y - serverSelf.y));
-          return entryLead >= bestLead ? entry : best;
-        })
-      : actions[actions.length - 1];
+    const latest = actions[actions.length - 1];
     return {
       x: latest.x,
       y: latest.y,
@@ -2089,6 +2288,59 @@ export default function HomePage() {
       1,
     );
     return intermediate.x === x && intermediate.y === y;
+  }
+
+  function selfAckConfirmsLocalMovement(entity: { x: number; y: number; direction?: string }) {
+    const directionMatches = (direction?: string) =>
+      !direction || !entity.direction || direction === entity.direction;
+    if (
+      directionStepPendingQueueRef.current.some(
+        (pending) =>
+          directionMatches(pending.direction) &&
+          directionStepReachedOrPassed(pending, entity.x, entity.y),
+      )
+    ) {
+      return true;
+    }
+    if (
+      directionStepPendingRef.current &&
+      directionMatches(directionStepPendingRef.current.direction) &&
+      directionStepReachedOrPassed(directionStepPendingRef.current, entity.x, entity.y)
+    ) {
+      return true;
+    }
+    if (
+      crystalSelfActionFeedRef.current.some((entry) =>
+        crystalActionMatchesAck(entry, entity.x, entity.y, entity.direction),
+      )
+    ) {
+      return true;
+    }
+    if (
+      outstandingSelfMovementActionsRef.current.some((entry) =>
+        crystalActionMatchesAck(entry, entity.x, entity.y, entity.direction),
+      )
+    ) {
+      return true;
+    }
+
+    const predicted = predictedPlayerPositionRef.current;
+    if (
+      predicted &&
+      predicted.x === entity.x &&
+      predicted.y === entity.y &&
+      directionMatches(predicted.direction)
+    ) {
+      return true;
+    }
+
+    const anchor = localMovementAnchorRef.current;
+    return Boolean(
+      anchor &&
+        anchor.x === entity.x &&
+        anchor.y === entity.y &&
+        directionMatches(anchor.direction),
+    );
   }
 
   function staleSelfAckOverrideFromRecentActions(
@@ -2268,15 +2520,8 @@ export default function HomePage() {
 
     const oldest = feed[0];
     const correctedToKnownSource = feed.some((entry) => entry.fromX === x && entry.fromY === y);
-    const predicted = predictedPlayerPositionRef.current;
-    const predictedStillPlausible =
-      predicted &&
-      Math.max(Math.abs(predicted.x - x), Math.abs(predicted.y - y)) <= MOVEMENT_LOCAL_ACTION_MAX_LEAD_TILES;
-    const predictedStillAhead =
-      predictedStillPlausible &&
-      predictedPlayerAheadOfServer({ x, y }, predicted, predicted.direction ?? direction);
     const isHardFailurePacket = packet === "UserDashFail";
-    if (!isHardFailurePacket && (correctedToKnownSource || predictedStillAhead)) {
+    if (!isHardFailurePacket && correctedToKnownSource) {
       scheduleMovementConfirmTick();
       return "staleEcho";
     }
@@ -2373,18 +2618,8 @@ export default function HomePage() {
     return next;
   }
 
-  function rememberCrystalRunPrime(now: number) {
-    crystalRunPrimedUntilRef.current = Math.max(
-      crystalRunPrimedUntilRef.current,
-      now + CRYSTAL_RUN_PRIME_WINDOW_MS,
-    );
-  }
-
-  function crystalEffectiveMovementMode(requestedMode: "walk" | "run", now: number): "walk" | "run" {
-    if (requestedMode !== "run") {
-      return "walk";
-    }
-    return now <= crystalRunPrimedUntilRef.current ? "run" : "walk";
+  function crystalEffectiveMovementMode(requestedMode: "walk" | "run", _now: number): "walk" | "run" {
+    return requestedMode;
   }
 
   const viewportCenter = predictedSelf ?? self;
@@ -2446,62 +2681,116 @@ export default function HomePage() {
         const runtimeWindow = window as typeof window & {
           __mir2BevyRuntime?: RuntimeModule;
           __mir2BevyRuntimeBooted?: boolean;
+          __mir2BevyRuntimeBackend?: BevyRuntimeBackend;
+          __mir2BevyRuntimeDebug?: BevyRuntimeDebug;
         };
         const params = new URLSearchParams(window.location.search);
         if (params.get("skipRuntime") === "1") {
           const message = "Bevy runtime skipped by query parameter.";
           setRuntimePhase("dom-only");
           setRuntimeMessage(message);
+          setBevyEntityRendererReady(false);
+          setBevyRuntimeBackend(null);
           appendLog(message, "network");
           markMir2CacheMilestone("bevyRuntimeSkipped", { reason: "skipRuntime" });
           return;
         }
         if (runtimeWindow.__mir2BevyRuntimeBooted && runtimeWindow.__mir2BevyRuntime) {
           runtimeRef.current = runtimeWindow.__mir2BevyRuntime;
+          lastBevyEntityRenderStateJsonRef.current = null;
           runtimeWindow.__mir2BevyRuntime.setMir2WorldState?.(JSON.stringify(worldRef.current));
+          setBevyEntityRendererReady(Boolean(runtimeWindow.__mir2BevyRuntime.setMir2EntityRenderState));
+          setBevyRuntimeBackend(runtimeWindow.__mir2BevyRuntimeBackend ?? null);
           setRuntimePhase("running");
           setRuntimeMessage("Bevy runtime already booted.");
-          markMir2CacheMilestone("bevyRuntimeReady", { reused: true });
+          markMir2CacheMilestone("bevyRuntimeReady", {
+            reused: true,
+            backend: runtimeWindow.__mir2BevyRuntimeBackend ?? null,
+          });
           return;
         }
-        if (!hasWebGl2Support()) {
-          const message = "Bevy runtime skipped because WebGL2 is unavailable.";
+        const runtimeSupport = detectBevyRuntimeSupport();
+        const requestedBackend = params.get("bevyBackend")?.trim().toLowerCase() ?? null;
+        const selectedBackend = selectBevyRuntimeBackend(params, runtimeSupport);
+        if (!selectedBackend) {
+          const message = "Bevy runtime skipped because neither WebGPU nor WebGL2 is available.";
           setRuntimePhase("dom-only");
           setRuntimeMessage(message);
+          setBevyEntityRendererReady(false);
+          setBevyRuntimeBackend(null);
           appendLog(message, "network");
-          markMir2CacheMilestone("bevyRuntimeSkipped", { reason: "webgl2-unavailable" });
+          markMir2CacheMilestone("bevyRuntimeSkipped", {
+            reason: "gpu-backend-unavailable",
+            requestedBackend,
+            webgpuSupported: runtimeSupport.webgpu,
+            webgl2Supported: runtimeSupport.webgl2,
+          });
           return;
         }
 
         appendLog(t("runtime.loadingModule"), "network");
-        const runtimeVersionQuery = encodeURIComponent(BEVY_RUNTIME_VERSION);
-        const runtimePath = `/bevy-runtime/pkg/mir2_bevy_runtime.js?v=${runtimeVersionQuery}`;
-        const runtimeWasmPath = `/bevy-runtime/pkg/mir2_bevy_runtime_bg.wasm?v=${runtimeVersionQuery}`;
-        const runtime = (await import(
-          /* webpackIgnore: true */ runtimePath
-        )) as RuntimeModule;
-        if (disposed) return;
-        markMir2CacheMilestone("bevyRuntimeModuleReady");
-
-        if (typeof runtime.default === "function") {
-          await runtime.default(runtimeWasmPath);
+        let runtimeBackend = selectedBackend;
+        let fallbackFrom: BevyRuntimeBackend | undefined;
+        let runtime: RuntimeModule;
+        try {
+          runtime = await loadBevyRuntimeModule(runtimeBackend);
+        } catch (error) {
+          if (runtimeBackend === "webgpu" && runtimeSupport.webgl2) {
+            fallbackFrom = runtimeBackend;
+            runtimeBackend = "webgl2";
+            markMir2CacheMilestone("bevyRuntimeFallback", {
+              from: fallbackFrom,
+              to: runtimeBackend,
+              message: error instanceof Error ? error.message : String(error),
+            });
+            runtime = await loadBevyRuntimeModule(runtimeBackend);
+          } else {
+            throw error;
+          }
         }
+        if (disposed) return;
+        const compiledBackend = runtime.getMir2RendererBackend?.() ?? null;
+        markMir2CacheMilestone("bevyRuntimeModuleReady", {
+          backend: runtimeBackend,
+          compiledBackend,
+          fallbackFrom: fallbackFrom ?? null,
+        });
 
         runtime.setMir2StatusSink?.((status) => {
           setRuntimePhase(status.phase);
           setRuntimeMessage(status.message);
         });
 
-        runtime.bootMir2Runtime?.();
         runtime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
         runtimeRef.current = runtime;
+        lastBevyEntityRenderStateJsonRef.current = null;
         runtimeWindow.__mir2BevyRuntime = runtime;
         runtimeWindow.__mir2BevyRuntimeBooted = true;
-        markMir2CacheMilestone("bevyRuntimeReady", { reused: false });
+        runtimeWindow.__mir2BevyRuntimeBackend = runtimeBackend;
+        runtimeWindow.__mir2BevyRuntimeDebug = {
+          requestedBackend,
+          selectedBackend: runtimeBackend,
+          compiledBackend,
+          fallbackFrom,
+          webgpuSupported: runtimeSupport.webgpu,
+          webgl2Supported: runtimeSupport.webgl2,
+          runtimeVersion: BEVY_RUNTIME_VERSION,
+        };
+        setBevyEntityRendererReady(Boolean(runtime.setMir2EntityRenderState));
+        setBevyRuntimeBackend(runtimeBackend);
+        runtime.bootMir2Runtime?.();
+        markMir2CacheMilestone("bevyRuntimeReady", {
+          reused: false,
+          backend: runtimeBackend,
+          compiledBackend,
+          fallbackFrom: fallbackFrom ?? null,
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setRuntimePhase("boot-error");
         setRuntimeMessage(message);
+        setBevyEntityRendererReady(false);
+        setBevyRuntimeBackend(null);
         appendLog(t("runtime.bootFailed", [message]));
         markMir2CacheMilestone("bevyRuntimeError", { message });
         if (scheduleBevyRuntimeCacheRecovery(message)) {
@@ -2709,6 +2998,19 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!world.connected || wsState !== "open") return;
+    const keepAliveTimer = window.setInterval(() => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({ type: "keepAlive", time: Date.now() }));
+      }
+    }, CRYSTAL_KEEPALIVE_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(keepAliveTimer);
+    };
+  }, [world.connected, wsState]);
+
+  useEffect(() => {
+    if (!world.connected || wsState !== "open") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("autoTick") !== "1") return;
 
@@ -2718,15 +3020,8 @@ export default function HomePage() {
       }
     }, CRYSTAL_GAMEPLAY_TICK_MS);
 
-    const keepAliveTimer = window.setInterval(() => {
-      if (socketRef.current?.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({ type: "keepAlive", time: Date.now() }));
-      }
-    }, CRYSTAL_KEEPALIVE_INTERVAL_MS);
-
     return () => {
       window.clearInterval(tickTimer);
-      window.clearInterval(keepAliveTimer);
     };
   }, [world.connected, wsState]);
 
@@ -2755,6 +3050,7 @@ export default function HomePage() {
 	    const tickMovementPlan = () => {
 	      consumeQueuedDirectionStep();
 	      const tickNow = Date.now();
+	      pruneCrystalSelfActionFeed(tickNow);
 	      pruneLocallySettledDirectionStepPending(tickNow);
 	      clearSettledPredictedPlayer(tickNow);
       const plan = movementPlanRef.current;
@@ -2964,7 +3260,6 @@ export default function HomePage() {
                 pointTileDistance(nextPoint, { x: plan.targetX, y: plan.targetY })
                 ? currentPredicted
                 : { x: nextPoint.x, y: nextPoint.y, direction: nextAction.direction };
-            rememberCrystalRunPrime(movementNow);
             rememberCrystalSelfAction(source, nextAction, movementNow);
             if (!movementPredictionShouldWaitForServer(source, nextAction, currentWorld)) {
               rememberLocalMovementAnchor(displayPoint, movementNow, movementNow + MOVEMENT_PENDING_ACTION_MAX_AGE_MS);
@@ -3064,7 +3359,9 @@ export default function HomePage() {
       __mir2CommandHistory?: Array<Record<string, unknown>>;
       __mir2MovementSentCommands?: Array<Record<string, unknown>>;
     };
-    const debugCommand = { ...command, at: commandNow };
+    const debugCommand = isMovementConsoleCommand(command)
+      ? assignMovementConsoleSequence({ ...command, at: commandNow })
+      : { ...command, at: commandNow };
     debugWindow.__mir2LastCommand = command;
     debugWindow.__mir2CommandHistory = [debugCommand, ...(debugWindow.__mir2CommandHistory ?? [])].slice(0, 50);
     if (command.type === "startGame") {
@@ -3087,6 +3384,13 @@ export default function HomePage() {
       recordMovementDiagnostic("tx:movementCommand", {
         command: debugCommand,
         sample: captureMovementDiagnosticSample(commandNow),
+      });
+    }
+    if (isMovementConsoleCommand(command)) {
+      rememberMovementConsoleCommand(debugCommand);
+      recordMovementConsoleEvent("send", {
+        command: debugCommand,
+        state: captureMovementConsoleState(commandNow),
       });
     }
     socketRef.current.send(JSON.stringify(command));
@@ -3641,13 +3945,14 @@ export default function HomePage() {
     sendPasswordLoginCommand(send, accountId, password);
   }
 
-  async function submitSuiLogin(kind: SuiLoginKind) {
+  async function submitSuiLogin(kind: SuiLoginKind, walletId?: string) {
     resetGatewayReconnectState();
+    setWalletPickerOpen(false);
     setLoginBusy(true);
     setLoginErrorKey(null);
 
     try {
-      const login = await requestSuiLoginToken(kind);
+      const login = await requestSuiLoginToken(kind, walletId);
       activeReconnectAuthRef.current = {
         kind: "sui",
         accountId: login.accountId,
@@ -3672,8 +3977,14 @@ export default function HomePage() {
     void submitSuiLogin("passkey");
   }
 
-  function submitWalletLogin() {
-    void submitSuiLogin("wallet");
+  function toggleWalletPicker() {
+    setSuiWallets(getSuiWalletSummaries());
+    setWalletPickerOpen((current) => !current);
+  }
+
+  function submitWalletLogin(walletId: string) {
+    setWalletPickerOpen(false);
+    void submitSuiLogin("wallet", walletId);
   }
 
   function startSelectedCharacter() {
@@ -4199,14 +4510,6 @@ export default function HomePage() {
       activateEntity(occupant.objectId);
       return;
     }
-    const nearbyNpc = world.entities
-      .filter((entity) => entity.objectId !== world.playerObjectId && !entity.dead && entity.kind === "npc")
-      .sort((left, right) => pointTileDistance({ x, y }, left) - pointTileDistance({ x, y }, right))
-      .find((entity) => pointTileDistance({ x, y }, entity) <= 2 && tileDistance(self, entity) <= 3);
-    if (nearbyNpc) {
-      activateEntity(nearbyNpc.objectId);
-      return;
-    }
     const drop = world.groundDrops.find((entry) => entry.x === x && entry.y === y);
     if (drop) {
       pickGroundDrop(drop.objectId);
@@ -4278,11 +4581,29 @@ export default function HomePage() {
     consumeQueuedDirectionStep();
   }
 
-  function handleViewportDirectionIntent(direction: string, mode: "walk" | "run") {
+  function handleViewportDirectionIntent(
+    direction: string,
+    mode: "walk" | "run",
+    options?: { discrete?: boolean },
+  ) {
     if (sceneInputDeferredForInitialAssets()) {
       return;
     }
-    queuedDirectionStepRef.current = { direction, mode, requestedAt: Date.now() };
+    const now = Date.now();
+    const current = queuedDirectionStepRef.current;
+    const sameQueuedDirection =
+      current &&
+      current.direction === direction &&
+      current.mode === mode &&
+      current.x === undefined &&
+      current.y === undefined;
+    const currentRepeat = sameQueuedDirection ? current.repeatCount ?? 1 : 1;
+    const repeatCount = options?.discrete
+      ? Math.min(MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX, sameQueuedDirection ? currentRepeat + 1 : 1)
+      : sameQueuedDirection
+        ? currentRepeat
+        : 1;
+    queuedDirectionStepRef.current = { direction, mode, requestedAt: now, repeatCount };
     consumeQueuedDirectionStep();
   }
 
@@ -4291,7 +4612,7 @@ export default function HomePage() {
     if (!queued) return false;
     const now = Date.now();
     pruneLocallySettledDirectionStepPending(now);
-    if (now - queued.requestedAt > MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS) {
+    if (now - queued.requestedAt > queuedDirectionStepMaxAgeMs(queued)) {
       queuedDirectionStepRef.current = null;
       return false;
     }
@@ -4306,17 +4627,18 @@ export default function HomePage() {
     }
     clearVisuallySettledDirectionStepPending(now);
     const heldBlocked = heldDirectionBlockedUntilRef.current;
-    if (heldBlocked && now > heldBlocked.until) {
-      heldDirectionBlockedUntilRef.current = null;
-    } else if (
-      queued.direction &&
-      heldBlocked &&
-      serverSelf.x === heldBlocked.x &&
-      serverSelf.y === heldBlocked.y &&
-      queued.direction === heldBlocked.direction
-    ) {
-      queuedDirectionStepRef.current = null;
-      return false;
+    if (heldBlocked) {
+      const sameBlockedDirection =
+        queued.direction &&
+        serverSelf.x === heldBlocked.x &&
+        serverSelf.y === heldBlocked.y &&
+        queued.direction === heldBlocked.direction;
+      if (!sameBlockedDirection || now > heldBlocked.until) {
+        heldDirectionBlockedUntilRef.current = null;
+      } else {
+        queuedDirectionStepRef.current = null;
+        return false;
+      }
     }
 
     if (movementPlanRef.current) {
@@ -4328,7 +4650,17 @@ export default function HomePage() {
       return false;
     }
 
-    reconcileDirectionStepQueueWithServer(serverSelf.x, serverSelf.y, now, serverSelf.direction, false, false);
+    const settlementSelf = authoritativeSelfForMovementSettlement(serverSelf, now);
+    if (settlementSelf) {
+      reconcileDirectionStepQueueWithServer(
+        settlementSelf.x,
+        settlementSelf.y,
+        now,
+        settlementSelf.direction,
+        false,
+        false,
+      );
+    }
     if (
       queued.direction &&
       hasOpposingOutstandingSelfMovement(serverSelf, queued.direction, now)
@@ -4349,10 +4681,10 @@ export default function HomePage() {
       if (sameDirectionIntent && actionCadenceReady) {
         clearDirectionStepPendingQueue();
       } else {
-      if (now - oldestPending.sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
-        applyCrystalInputCorrection(serverSelf.x, serverSelf.y, now, serverSelf.direction);
-      }
-      return false;
+        if (now - oldestPending.sentAt >= MOVEMENT_SERVER_CORRECTION_GRACE_MS) {
+          applyCrystalInputCorrection(serverSelf.x, serverSelf.y, now, serverSelf.direction);
+        }
+        return false;
       }
     }
 
@@ -4374,6 +4706,15 @@ export default function HomePage() {
     }
 
     const blockedSteps = recentMovementBlockedSteps(movementBlockedStepsRef.current, now);
+    const repeatAfterSend =
+      queued.direction && (queued.repeatCount ?? 1) > 1
+        ? {
+            direction: queued.direction,
+            mode: queued.mode,
+            requestedAt: now,
+            repeatCount: (queued.repeatCount ?? 1) - 1,
+          }
+        : null;
     queuedDirectionStepRef.current = null;
     const effectiveMode = crystalEffectiveMovementMode(queued.mode, now);
     const nextAction = queued.direction
@@ -4415,7 +4756,6 @@ export default function HomePage() {
           sentFromY: pendingSource.y,
         },
       ]);
-      rememberCrystalRunPrime(now);
       if (!movementPredictionShouldWaitForServer(actionSelf, nextAction, currentWorld)) {
         rememberLocalMovementAnchor(
           { x: pendingPoint.x, y: pendingPoint.y, direction },
@@ -4428,14 +4768,16 @@ export default function HomePage() {
         );
       }
     } else if (direction !== actionSelf.direction) {
+      const turnVisualUntil = now + MOVEMENT_TURN_VISUAL_HOLD_MS;
+      directionStepVisualUntilRef.current = Math.max(directionStepVisualUntilRef.current, turnVisualUntil);
       rememberLocalMovementAnchor(
         { x: actionSelf.x, y: actionSelf.y, direction },
         now,
-        now + MOVEMENT_CONFIRM_TICK_DELAY_MS,
+        turnVisualUntil,
       );
       setPredictedPlayerMotion(
         { x: actionSelf.x, y: actionSelf.y, direction },
-        now + MOVEMENT_CONFIRM_TICK_DELAY_MS,
+        turnVisualUntil,
       );
       send({ type: "turn", direction });
       return true;
@@ -4446,7 +4788,17 @@ export default function HomePage() {
       return false;
     }
     send({ type: nextAction.mode === "run" ? "run" : "walk", direction });
+    if (repeatAfterSend) {
+      queuedDirectionStepRef.current = repeatAfterSend;
+      scheduleMovementConfirmTick();
+    }
     return true;
+  }
+
+  function queuedDirectionStepMaxAgeMs(queued: DirectionStepRequest) {
+    return (queued.repeatCount ?? 1) > 1
+      ? MOVEMENT_QUEUED_DIRECTION_REPEAT_MAX_AGE_MS
+      : MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS;
   }
 
   function localMovementActionSource(serverSelf: WorldEntity | null, currentPlan: MovementPlan | null) {
@@ -4818,13 +5170,32 @@ export default function HomePage() {
       case "MapInformation": {
         const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
-        setWorld((current) => ({
-          ...current,
-          mapTitle: stringOrNull(payload.title),
-          mapFileName: stringOrNull(payload.fileName) ?? current.mapFileName,
-          miniMapIndex: miniMapIndex && miniMapIndex > 0 ? miniMapIndex : null,
-          bigMapIndex: bigMapIndex && bigMapIndex > 0 ? bigMapIndex : null,
-        }));
+        setWorld((current) => {
+          const nextMapFileName = stringOrNull(payload.fileName) ?? current.mapFileName;
+          const mapChanged =
+            normalizeMapFileName(nextMapFileName) !== normalizeMapFileName(current.mapFileName);
+          const preservedSelfEntity = current.playerObjectId
+            ? current.entities.find((entity) => entity.objectId === current.playerObjectId)
+            : undefined;
+          const nextWorld = {
+            ...current,
+            mapTitle: stringOrNull(payload.title),
+            mapFileName: nextMapFileName,
+            miniMapIndex: miniMapIndex && miniMapIndex > 0 ? miniMapIndex : null,
+            bigMapIndex: bigMapIndex && bigMapIndex > 0 ? bigMapIndex : null,
+            selectedObjectId: mapChanged ? null : current.selectedObjectId,
+            activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
+            entities: mapChanged && preservedSelfEntity ? [preservedSelfEntity] : mapChanged ? [] : current.entities,
+            groundDrops: mapChanged ? [] : current.groundDrops,
+            projectiles: mapChanged ? [] : current.projectiles,
+            sceneView: mapChanged ? null : current.sceneView,
+            terrainPatches: mapChanged ? [] : current.terrainPatches,
+            decorObjects: mapChanged ? [] : current.decorObjects,
+            originalMapRegion: mapChanged ? null : current.originalMapRegion,
+          };
+          worldRef.current = nextWorld;
+          return nextWorld;
+        });
         break;
       }
       case "UserInformation": {
@@ -4865,11 +5236,14 @@ export default function HomePage() {
             x: userX,
             y: userY,
             direction: userDirection,
+            classKey: mapClassKey(payload.class),
+            genderKey: mapGenderKey(payload.gender),
             level: numberOrUndefined(payload.level),
             hp: numberOrUndefined(payload.hp),
             maxHp: numberOrUndefined(payload.hp),
             nameColourArgb: -1,
             disposition: "friendly",
+            sprite: playerSpriteFromPacket(payload),
           }),
         }));
         screenRef.current = "game";
@@ -4917,6 +5291,7 @@ export default function HomePage() {
         const hardSelfCorrectionPacket =
           event.packet === "UserLocation" || event.packet === "Pushed" || event.packet === "UserDashFail";
         let selfPacketLocalOverride: PredictedPlayerMotion | null = null;
+        let selfPacketAckDisposition: CrystalSelfAckDisposition | null = null;
         if (movementObjectId === worldRef.current.playerObjectId) {
           const previousSelf = worldRef.current.entities.find(
             (entity) => entity.objectId === worldRef.current.playerObjectId,
@@ -4926,27 +5301,17 @@ export default function HomePage() {
             previousSelf.x !== x ||
             previousSelf.y !== y ||
             (!!direction && previousSelf.direction !== direction);
+          const selfPacketConfirmsLocalMovement = selfAckConfirmsLocalMovement({ x, y, direction });
+          const selfMovementConfirmed = selfMovementAdvanced || selfPacketConfirmsLocalMovement;
           const hadSelfMovementAckInFlightBeforeAck = hasSelfMovementAckInFlight();
-          const noProgressAck = selfMovementAdvanced
+          const noProgressAck = selfMovementConfirmed
             ? null
             : recordSelfNoProgressAck(x, y, direction, movementNow);
-          const noProgressPendingAhead =
-            previousSelf &&
-            (Boolean(pendingDirectionStepStillAhead(previousSelf)) ||
-              Boolean(
-                predictedPlayerPositionRef.current &&
-                  predictedPlayerAheadOfServer(
-                    { x, y },
-                    predictedPlayerPositionRef.current,
-                    direction ?? predictedPlayerPositionRef.current.direction,
-                  ),
-              ));
           const noProgressDirection = noProgressAck
             ? outstandingSelfMovementDirectionFromSource(x, y, direction)
             : undefined;
           const repeatedNoProgressDirection =
             noProgressDirection &&
-            !noProgressPendingAhead &&
             noProgressAck &&
             noProgressAck.count >= 2
               ? noProgressDirection
@@ -4965,15 +5330,17 @@ export default function HomePage() {
                 movementPacket,
                 movementNow,
               );
+          selfPacketAckDisposition = crystalAckDisposition;
           const staleAckOverride =
             previousSelf && selfMovementAdvanced && !repeatedNoProgressDirection
               ? staleSelfAckOverrideFromRecentActions(x, y, direction, previousSelf, movementNow)
               : null;
           if (staleAckOverride) {
             crystalAckDisposition = "staleEcho";
+            selfPacketAckDisposition = crystalAckDisposition;
             selfPacketLocalOverride = staleAckOverride;
           }
-          if (selfMovementAdvanced && !staleAckOverride) {
+          if (selfMovementConfirmed && !staleAckOverride) {
             lastSelfNoProgressAckRef.current = null;
             if (heldDirectionBlockedUntilRef.current?.x !== x || heldDirectionBlockedUntilRef.current?.y !== y) {
               heldDirectionBlockedUntilRef.current = null;
@@ -4983,9 +5350,11 @@ export default function HomePage() {
               directionStepNextAtRef.current,
               movementNow,
             );
-            if (previousSelf && (previousSelf.x !== x || previousSelf.y !== y)) {
+            if (selfPacketConfirmsLocalMovement) {
+              clearSettledSelfActionsAt(x, y, direction);
+            }
+            if (previousSelf && movementPacket !== "UserLocation" && (previousSelf.x !== x || previousSelf.y !== y)) {
               if (hadSelfMovementAckInFlightBeforeAck) {
-                rememberCrystalRunPrime(movementNow);
               }
               const predicted = predictedPlayerPositionRef.current;
               const predictedAheadOfAck =
@@ -5042,23 +5411,56 @@ export default function HomePage() {
             staleAckOverride,
             sample: captureMovementDiagnosticSample(movementNow),
           });
+          if (selfMovementPacket) {
+            const ackedCommand = consumeMovementConsoleCommand();
+            const commandAt = numberOrUndefined(ackedCommand?.at);
+            recordMovementConsoleEvent(
+              selfPacketAckDisposition === "correction" ? "correction" : "ack",
+              {
+                packet: movementPacket,
+                point: { x, y, direction: direction ?? null },
+                disposition: selfPacketAckDisposition,
+                latencyMs: commandAt === undefined ? null : Math.max(0, movementNow - commandAt),
+                command: ackedCommand,
+                previousSelf: previousSelf
+                  ? { x: previousSelf.x, y: previousSelf.y, direction: previousSelf.direction }
+                  : null,
+                selfMovementAdvanced,
+                localOverride: selfPacketLocalOverride,
+                state: captureMovementConsoleState(movementNow),
+              },
+            );
+          }
         }
         setWorld((current) => {
           const nextWorld = {
             ...current,
             entities: current.entities.map((entity) =>
               entity.objectId === movementObjectId
-                ? withPacketMovementAnimation(
-                    {
-                      ...entity,
-                      x: selfPacketLocalOverride?.x ?? x,
-                      y: selfPacketLocalOverride?.y ?? y,
-                      direction: selfPacketLocalOverride?.direction ?? direction,
-                    },
-                    entity,
-                    movementPacket,
-                    movementNow,
-                  )
+                ? entity.objectId === current.playerObjectId && selfPacketAckDisposition
+                  ? withCrystalSelfPacketMovement(
+                      {
+                        ...entity,
+                        x: selfPacketLocalOverride?.x ?? x,
+                        y: selfPacketLocalOverride?.y ?? y,
+                        direction: selfPacketLocalOverride?.direction ?? direction,
+                      },
+                      entity,
+                      movementPacket,
+                      selfPacketAckDisposition,
+                      movementNow,
+                    )
+                  : withPacketMovementAnimation(
+                      {
+                        ...entity,
+                        x: selfPacketLocalOverride?.x ?? x,
+                        y: selfPacketLocalOverride?.y ?? y,
+                        direction: selfPacketLocalOverride?.direction ?? direction,
+                      },
+                      entity,
+                      movementPacket,
+                      movementNow,
+                    )
                 : entity,
             ),
           };
@@ -6802,7 +7204,7 @@ export default function HomePage() {
       x,
       y,
       direction,
-      until: now + MOVEMENT_ROUTE_BLOCK_MEMORY_MS,
+      until: now + MOVEMENT_HELD_BLOCKED_DIRECTION_SUPPRESS_MS,
     };
   }
 
@@ -7170,17 +7572,26 @@ export default function HomePage() {
     if (Date.now() < movementPredictionBlockedUntilRef.current) {
       return true;
     }
+    if (!currentWorld.originalMapRegion) {
+      return true;
+    }
     const distance = action.mode === "run" ? 2 : 1;
     for (let step = 1; step <= distance; step += 1) {
       const point = pointMoveInDirection(source, action.direction, step);
-      const dynamicBlockerNearPath = currentWorld.entities.some(
+      if (
+        !originalMapRegionContainsTile(currentWorld.originalMapRegion, point.x, point.y) ||
+        originalMapCellBlocksMovement(currentWorld.originalMapRegion, point.x, point.y)
+      ) {
+        return true;
+      }
+      const dynamicBlockerOnPath = currentWorld.entities.some(
         (entity) =>
           entity.objectId !== currentWorld.playerObjectId &&
           !entity.dead &&
-          (entity.kind === "monster" || entity.disposition === "hostile") &&
-          pointTileDistance(point, entity) <= 1,
+          entity.x === point.x &&
+          entity.y === point.y,
       );
-      if (dynamicBlockerNearPath) {
+      if (dynamicBlockerOnPath) {
         return true;
       }
     }
@@ -7298,13 +7709,11 @@ export default function HomePage() {
     }
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId) ?? null;
-    const authoritativeSelf = authoritativeSelfForPrediction(serverSelf);
+    const authoritativeSelf = authoritativeSelfForMovementSettlement(serverSelf, now);
     const candidateReached = (candidate: PredictedPlayerMotion | null | undefined) =>
       Boolean(candidate && candidate.x === pending.x && candidate.y === pending.y);
-    if (
-      candidateReached(authoritativeSelf) ||
-      candidateReached(serverSelf)
-    ) {
+    if (candidateReached(authoritativeSelf)) {
+      clearSettledSelfActionsAt(pending.x, pending.y, pending.direction);
       clearDirectionStepPendingQueue();
       clearLocalSelfPrediction();
     }
@@ -7317,7 +7726,7 @@ export default function HomePage() {
     }
     const currentWorld = worldRef.current;
     const serverSelf = currentWorld.entities.find((entity) => entity.objectId === currentWorld.playerObjectId);
-    const authoritativeSelf = authoritativeSelfForPrediction(serverSelf ?? null);
+    const authoritativeSelf = authoritativeSelfForMovementSettlement(serverSelf ?? null, now);
     if (authoritativeSelf?.x === predicted.x && authoritativeSelf.y === predicted.y) {
       clearSettledSelfActionsAt(predicted.x, predicted.y, predicted.direction ?? authoritativeSelf.direction);
       const plan = movementPlanRef.current;
@@ -7376,7 +7785,10 @@ export default function HomePage() {
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
+      bevyEntityRendererReady={bevyEntityRendererReady}
+      bevyRuntimeBackend={bevyRuntimeBackend}
       onSceneAssetReadinessChange={handleSceneAssetReadinessChange}
+      onBevyEntityRenderStateChange={handleBevyEntityRenderStateChange}
       getLivePlayerRenderPosition={() => {
         const currentWorld = worldRef.current;
         const currentSelf =
@@ -7408,6 +7820,9 @@ export default function HomePage() {
       chatMessage={chatMessage}
       loginBusy={loginBusy}
       loginError={loginErrorKey ? t(loginErrorKey) : null}
+      suiWallets={suiWallets}
+      walletPickerOpen={walletPickerOpen}
+      dubheWalletUrl={DUBHE_WALLET_URL}
       characters={characters}
       selectedCharacterIndex={selectedCharacterIndex}
       showInventory={showInventory}
@@ -7422,6 +7837,7 @@ export default function HomePage() {
       onCreateAccount={createAccount}
       onSubmitLogin={submitLogin}
       onPasskeyLogin={submitPasskeyLogin}
+      onWalletPickerToggle={toggleWalletPicker}
       onWalletLogin={submitWalletLogin}
       onQuickEnter={quickEnterWorld}
       onResetClient={resetClient}
@@ -7504,6 +7920,32 @@ function patchEntityInList(
   updater: (entity: WorldEntity) => WorldEntity,
 ) {
   return list.map((entity) => (entity.objectId === objectId ? updater(entity) : entity));
+}
+
+function withCrystalSelfPacketMovement(
+  nextEntity: WorldEntity,
+  previousEntity: WorldEntity,
+  packet: string,
+  disposition: CrystalSelfAckDisposition,
+  now: number,
+): WorldEntity {
+  if (packet === "UserLocation") {
+    if (disposition === "confirmed" || disposition === "staleEcho") {
+      return {
+        ...nextEntity,
+        ...preservedMovementAnimation(previousEntity, nextEntity.x, nextEntity.y, now),
+      };
+    }
+
+    return {
+      ...nextEntity,
+      movementAnimation: undefined,
+      movementStartedAt: undefined,
+      movementUntil: undefined,
+    };
+  }
+
+  return withPacketMovementAnimation(nextEntity, previousEntity, packet, now);
 }
 
 function withPacketMovementAnimation(
@@ -7594,12 +8036,84 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
     : [...list, nextDrop];
 }
 
+async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<RuntimeModule> {
+  const runtimeVersionQuery = encodeURIComponent(BEVY_RUNTIME_VERSION);
+  const runtimePackageDir = bevyRuntimePackageDir(backend);
+  const runtimePath = `/bevy-runtime/${runtimePackageDir}/mir2_bevy_runtime.js?v=${runtimeVersionQuery}`;
+  const runtimeWasmPath = `/bevy-runtime/${runtimePackageDir}/mir2_bevy_runtime_bg.wasm?v=${runtimeVersionQuery}`;
+  const runtime = (await import(
+    /* webpackIgnore: true */ runtimePath
+  )) as RuntimeModule;
+
+  if (typeof runtime.default === "function") {
+    await runtime.default(runtimeWasmPath);
+  }
+
+  return runtime;
+}
+
+function bevyRuntimePackageDir(backend: BevyRuntimeBackend) {
+  return backend === "webgpu" ? "pkg-webgpu" : "pkg-webgl2";
+}
+
+function selectBevyRuntimeBackend(
+  params: URLSearchParams,
+  support: BevyRuntimeSupport,
+): BevyRuntimeBackend | null {
+  const requestedBackend = normalizeBevyRuntimeBackendOverride(
+    params.get("bevyBackend") ?? safeLocalStorageGet("mir2-bevy-backend"),
+  );
+
+  if (requestedBackend === "webgl2") {
+    return support.webgl2 ? "webgl2" : null;
+  }
+
+  if (requestedBackend === "webgpu") {
+    return support.webgpu ? "webgpu" : support.webgl2 ? "webgl2" : null;
+  }
+
+  if (support.webgpu) return "webgpu";
+  if (support.webgl2) return "webgl2";
+  return null;
+}
+
+function normalizeBevyRuntimeBackendOverride(value: string | null): BevyRuntimeBackend | null {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "webgpu" || normalized === "gpu") return "webgpu";
+  if (normalized === "webgl2" || normalized === "webgl" || normalized === "gl") return "webgl2";
+  return null;
+}
+
+function detectBevyRuntimeSupport(): BevyRuntimeSupport {
+  return {
+    webgpu: hasWebGpuSupport(),
+    webgl2: hasWebGl2Support(),
+  };
+}
+
+function hasWebGpuSupport() {
+  try {
+    const maybeNavigator = navigator as Navigator & { gpu?: unknown };
+    return Boolean(window.isSecureContext && maybeNavigator.gpu);
+  } catch {
+    return false;
+  }
+}
+
 function hasWebGl2Support() {
   try {
     const canvas = document.createElement("canvas");
     return Boolean(canvas.getContext("webgl2"));
   } catch {
     return false;
+  }
+}
+
+function safeLocalStorageGet(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
   }
 }
 
@@ -8163,6 +8677,18 @@ function shouldReloadCrystalScene(
     center.x >= region.playBounds.maxX - SCENE_RELOAD_MARGIN_X ||
     center.y <= region.playBounds.minY + SCENE_RELOAD_MARGIN_Y ||
     center.y >= region.playBounds.maxY - SCENE_RELOAD_MARGIN_Y
+  );
+}
+
+function originalMapRegionContainsTile(region: OriginalMapRegion | null, x: number, y: number) {
+  if (!region) {
+    return false;
+  }
+  return (
+    x >= region.regionBounds.minX &&
+    x <= region.regionBounds.maxX &&
+    y >= region.regionBounds.minY &&
+    y <= region.regionBounds.maxY
   );
 }
 

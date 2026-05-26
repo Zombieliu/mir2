@@ -2,7 +2,15 @@
 
 use std::collections::BTreeSet;
 
+use super::combat::combat_delay_ticks;
+use super::components::{
+    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
+    MonsterAgent, MonsterVitals, PlayerVitals, Position,
+};
 use super::crystal_compat::*;
+use super::drops::{
+    zone_ground_drop_snapshots_for_monster, SharedAccountInventoryTransactionReceipt,
+};
 use super::equipment::*;
 use super::inventory::*;
 use super::items::{item_unique_id, user_item_from_item_state, ItemState};
@@ -11,20 +19,28 @@ use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
 use super::resources::{
-    BuffResource, ElementalResource, FishingResource, GroupResource, HeroInventoryResource,
-    InventoryResource, ItemRentalRecordState, ItemRentalResource, MapRuntimeResource,
-    MountResource, NpcStateResource, ObjectIdAllocatorResource, PlayerActionTimingResource,
-    PlayerPermissionResource, PlayerRuntimeResource, PotionRecoveryResource, QuestResource,
-    RuntimeClockResource, RuntimeConfigResource, RuntimeQueueResource, SessionResource,
-    SkillResource, Stage5SystemsResource,
+    advance_runtime_tick, BuffResource, ElementalResource, FishingResource, GroupResource,
+    HeroInventoryResource, InventoryResource, ItemRentalRecordState, ItemRentalResource,
+    MapRuntimeResource, MountResource, NpcStateResource, ObjectIdAllocatorResource,
+    PlayerActionTimingResource, PlayerMovementTimingResource, PlayerPermissionResource,
+    PlayerRuntimeResource, PotionRecoveryResource, QuestResource, RuntimeClockResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
+    Stage5SystemsResource,
 };
 use super::save::*;
 use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
-use crate::config::{ItemContainer, SimulationConfig, WorldSnapshot};
-use mir2_game_data::LanguageCode;
-use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
+use crate::config::{
+    CharacterRecord, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
+    WorldSnapshot,
+};
+use crate::runtime::zone::{SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterSpawn};
+use mir2_game_data::{crystal_monster_by_name, LanguageCode};
+use mir2_protocol::{
+    ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
+    UserItemRentalInformation,
+};
 
 #[cfg(test)]
 #[allow(unused_imports)]
@@ -177,6 +193,7 @@ impl SimulationSession {
         app.insert_resource(PlayerPermissionResource::new());
         app.insert_resource(PotionRecoveryResource::new());
         app.insert_resource(PlayerActionTimingResource::new());
+        app.insert_resource(PlayerMovementTimingResource::new());
         app.insert_resource(RuntimeClockResource::new());
         app.insert_resource(ObjectIdAllocatorResource::new());
         app.insert_resource(CrystalNpcRandomState::new());
@@ -315,8 +332,63 @@ impl SimulationSession {
         vec![ServerPacket::Connected]
     }
 
+    pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
+        let config = self
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
+        let characters = match login_passkey_account(&config, account_id) {
+            AccountLoginResult::Success(characters) => characters,
+            AccountLoginResult::Banned(ban) => {
+                return vec![ServerPacket::LoginBanned {
+                    reason: ban.reason,
+                    expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+                }];
+            }
+            AccountLoginResult::InvalidCredentials => {
+                return vec![ServerPacket::Login { result: 4 }];
+            }
+        };
+        let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+        session.account_id = Some(account_id.to_string());
+        session.characters = characters;
+        vec![ServerPacket::LoginSuccess {
+            characters: session
+                .characters
+                .iter()
+                .map(CharacterRecord::to_select_info)
+                .collect(),
+        }]
+    }
+
     pub fn world_snapshot(&self) -> WorldSnapshot {
         build_world_snapshot(self.app.world())
+    }
+
+    pub fn prepare_chat_packet_for_zone(
+        &mut self,
+        message: String,
+        linked_items: Vec<ChatItem>,
+    ) -> ChatPacketPreparation {
+        prepare_chat_packet(self.app.world_mut(), message, linked_items)
+    }
+
+    pub fn consume_zone_chat_shout_permission(&mut self, map_shout: bool, server_shout: bool) {
+        if !map_shout && !server_shout {
+            return;
+        }
+        let mut permissions = self
+            .app
+            .world_mut()
+            .resource_mut::<PlayerPermissionResource>();
+        if map_shout {
+            permissions.free_map_shout = false;
+        }
+        if server_shout {
+            permissions.free_server_shout = false;
+        }
     }
 
     pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
@@ -329,6 +401,366 @@ impl SimulationSession {
             character_name: character.name.clone(),
         })
     }
+
+    pub fn active_zone_join_snapshot(&self, session_id: impl Into<String>) -> Option<ZoneJoin> {
+        if !is_in_world(self.app.world()) {
+            return None;
+        }
+        let session = self.app.world().resource::<SessionResource>();
+        let account_id = session.account_id.clone()?;
+        let character = session.selected_character.as_ref()?.clone();
+        let snapshot = self.world_snapshot();
+        let self_player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)?;
+        let stage5 = self.app.world().resource::<Stage5SystemsResource>();
+        let permissions = self.app.world().resource::<PlayerPermissionResource>();
+        let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
+            .then(|| stage5.stage5_systems.guild.name.clone());
+        let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
+            .then(|| stage5.stage5_systems.mentor.name.clone());
+        let relationship_name = (!stage5
+            .stage5_systems
+            .relationship
+            .partner_name
+            .trim()
+            .is_empty())
+        .then(|| stage5.stage5_systems.relationship.partner_name.clone());
+        Some(ZoneJoin {
+            session_id: SessionId::new(session_id.into()),
+            account_id,
+            character_index: character.index,
+            object_id: self_player.object_id,
+            name: character.name,
+            class: character.class,
+            gender: character.gender,
+            level: character.level,
+            hp: snapshot.player_hp.unwrap_or(1),
+            max_hp: snapshot.player_max_hp.unwrap_or(1).max(1),
+            mp: snapshot.player_mp.unwrap_or_default().max(0),
+            map_file_name: snapshot.map_file_name.unwrap_or_default(),
+            position: Point {
+                x: self_player.x,
+                y: self_player.y,
+            },
+            direction: self_player.direction,
+            chat_profile: ZoneChatProfile {
+                group_members: stage5.stage5_systems.group.members.clone(),
+                guild_name,
+                blocked_names: stage5.stage5_systems.social.blocked.clone(),
+                mentor_name,
+                relationship_name,
+                is_gm: false,
+                free_map_shout: permissions.free_map_shout,
+                free_server_shout: permissions.free_server_shout,
+            },
+        })
+    }
+
+    pub fn force_authoritative_player_transform(
+        &mut self,
+        position: Point,
+        direction: mir2_protocol::MirDirection,
+    ) {
+        let world = self.app.world_mut();
+        if let Some(player) = player_entity(world) {
+            world
+                .entity_mut(player)
+                .insert((Position(position.clone()), Facing(direction)));
+        }
+        {
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.player_position = position;
+            runtime.player_direction = direction;
+        }
+        advance_runtime_tick(world);
+    }
+
+    pub fn apply_zone_player_damage(&mut self, damage: i32) {
+        if damage <= 0 || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                vitals.hp = vitals.hp.saturating_sub(damage).max(1);
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
+    pub fn apply_zone_player_heal(&mut self, amount: i32) {
+        if amount <= 0 || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                vitals.hp = vitals.hp.saturating_add(amount).min(vitals.max_hp);
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
+    pub fn apply_zone_player_magic_spend(&mut self, spell: Spell, mp_cost: i32, cooldown_ms: u64) {
+        if !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                vitals.mp = vitals.mp.saturating_sub(mp_cost.max(0)).max(0);
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+        }
+        if let Some(skill_key) = skill_key_for_crystal_spell(spell) {
+            let tick = runtime_tick(world);
+            let cooldown_ticks = combat_delay_ticks(cooldown_ms.max(1));
+            if let Some(skill) = world
+                .resource_mut::<SkillResource>()
+                .skills
+                .iter_mut()
+                .find(|skill| skill.key == skill_key)
+            {
+                skill.cooldown_ticks = cooldown_ticks.min(u64::from(u32::MAX)) as u32;
+                skill.delay_ms = i64::try_from(cooldown_ms).unwrap_or(i64::MAX);
+                skill.cooldown_ends_at = tick.saturating_add(cooldown_ticks);
+                skill.cast_time_ms = i64::try_from(tick.saturating_mul(1_000)).unwrap_or(i64::MAX);
+            }
+        }
+        advance_runtime_tick(world);
+    }
+
+    pub fn apply_zone_player_buff_packets(
+        &mut self,
+        packets: &[ServerPacket],
+        zone_object_id: u32,
+    ) {
+        for packet in packets {
+            self.apply_zone_player_buff_packet(packet, zone_object_id);
+        }
+    }
+
+    fn apply_zone_player_buff_packet(&mut self, packet: &ServerPacket, zone_object_id: u32) {
+        if !is_in_world(self.app.world()) {
+            return;
+        }
+        let local_player_object_id = player_entity(self.app.world())
+            .and_then(|player| entity_object_id(self.app.world(), player));
+        match packet {
+            ServerPacket::AddBuff { buff }
+                if local_player_object_id.is_some_and(|object_id| {
+                    zone_player_buff_targets_self(buff, object_id, zone_object_id)
+                }) =>
+            {
+                self.apply_zone_player_add_buff(buff);
+            }
+            ServerPacket::RemoveBuff {
+                object_id,
+                buff_type,
+            } if local_player_object_id.is_some_and(|local_object_id| {
+                *object_id == local_object_id || *object_id == zone_object_id
+            }) =>
+            {
+                self.apply_zone_player_remove_buff(*buff_type);
+            }
+            _ => {}
+        }
+    }
+
+    fn apply_zone_player_add_buff(&mut self, buff: &ClientBuff) {
+        let Some(key) = super::buffs::crystal_buff_key_for_type(buff.buff_type) else {
+            return;
+        };
+        let world = self.app.world_mut();
+        let tick = runtime_tick(world);
+        let expires_at_tick = if buff.infinite {
+            u64::MAX
+        } else {
+            let duration_ms = u64::try_from(buff.expire_time.max(0)).unwrap_or_default();
+            tick.saturating_add(combat_delay_ticks(duration_ms.max(1)))
+        };
+        let fallback_name = zone_buff_fallback_name(key);
+        let fallback_description = format!("{fallback_name} is active.");
+        let (name, description) =
+            super::buffs::buff_metadata(key, &fallback_name, &fallback_description);
+        super::buffs::apply_or_refresh_buff(
+            world,
+            super::buffs::BuffState {
+                key: key.to_string(),
+                name,
+                description,
+                expires_at_tick,
+                attack_bonus: 0,
+                defence_bonus: 0,
+                stats: buff.stats.clone(),
+            },
+        );
+        advance_runtime_tick(world);
+    }
+
+    fn apply_zone_player_remove_buff(&mut self, buff_type: u8) {
+        let Some(key) = super::buffs::crystal_buff_key_for_type(buff_type) else {
+            return;
+        };
+        let world = self.app.world_mut();
+        let before = world.resource::<BuffResource>().buffs.len();
+        world
+            .resource_mut::<BuffResource>()
+            .buffs
+            .retain(|buff| buff.key != key);
+        if world.resource::<BuffResource>().buffs.len() != before {
+            advance_runtime_tick(world);
+        }
+    }
+
+    pub fn commit_shared_skill_item_consumption_transaction(
+        &mut self,
+        spell: Spell,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        if !is_in_world(self.app.world()) {
+            return SharedAccountInventoryTransactionReceipt::skill_item_consumption(
+                false,
+                Vec::new(),
+            );
+        }
+        let packets = {
+            let world = self.app.world_mut();
+            consume_zone_magic_inventory_components(world, spell)
+        };
+        let Some(packets) = packets else {
+            return SharedAccountInventoryTransactionReceipt::skill_item_consumption(
+                false,
+                Vec::new(),
+            );
+        };
+        SharedAccountInventoryTransactionReceipt::skill_item_consumption(true, packets)
+    }
+
+    pub fn apply_shared_entity_snapshot(&mut self, snapshot: &WorldEntitySnapshot) -> bool {
+        if snapshot.kind != WorldEntityKind::Monster || !is_in_world(self.app.world()) {
+            return false;
+        }
+        let world = self.app.world_mut();
+        let Some(entity) = entity_by_object_id(world, snapshot.object_id) else {
+            return false;
+        };
+        if !world.entity(entity).contains::<Monster>() {
+            return false;
+        }
+
+        {
+            let mut entity_mut = world.entity_mut(entity);
+            entity_mut.insert((
+                Position(Point {
+                    x: snapshot.x,
+                    y: snapshot.y,
+                }),
+                Facing(snapshot.direction),
+            ));
+            if let Some(mut vitals) = entity_mut.get_mut::<MonsterVitals>() {
+                if let Some(max_hp) = snapshot.max_hp {
+                    vitals.max_hp = max_hp.max(1);
+                }
+                if let Some(hp) = snapshot.hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if snapshot.dead {
+                    vitals.hp = 0;
+                }
+            }
+            if let Some(mut agent) = entity_mut.get_mut::<MonsterAgent>() {
+                agent.dead = snapshot.dead || snapshot.hp.is_some_and(|hp| hp <= 0);
+            }
+        }
+        advance_runtime_tick(world);
+        true
+    }
+
+    pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return None;
+        }
+
+        let entity = entity_by_object_id(world, object_id)?;
+        let entry = world.entity(entity);
+        let agent = entry.get::<MonsterAgent>()?;
+        if agent.dead {
+            return None;
+        }
+        let vitals = entry.get::<MonsterVitals>()?;
+        let position = entry.get::<Position>()?.0.clone();
+        let direction = entry
+            .get::<Facing>()
+            .map(|facing| facing.0)
+            .unwrap_or(mir2_protocol::MirDirection::Down);
+        let name = entity_name(world, entity).unwrap_or_else(|| "Monster".to_string());
+        let template = crystal_monster_by_name(&name);
+        let object_id = entity_object_id(world, entity).unwrap_or(object_id);
+        let max_hp = vitals.max_hp.max(1);
+
+        Some(ZoneMonsterSpawn {
+            object_id,
+            name: name.clone(),
+            name_colour_argb: -1,
+            image: agent.image,
+            ai: agent.ai,
+            level: template.as_ref().map(|monster| monster.level).unwrap_or(1),
+            max_hp,
+            hp: vitals.hp.clamp(0, max_hp),
+            experience: template.map(|monster| monster.experience).unwrap_or(0),
+            position,
+            direction,
+            drops: zone_ground_drop_snapshots_for_monster(world, object_id, &name),
+        })
+    }
+}
+
+fn zone_player_buff_targets_self(
+    buff: &ClientBuff,
+    local_object_id: u32,
+    zone_object_id: u32,
+) -> bool {
+    buff.object_id == local_object_id || buff.object_id == zone_object_id
+}
+
+fn zone_buff_fallback_name(key: &str) -> String {
+    key.split('-')
+        .filter(|part| !part.is_empty())
+        .map(|part| {
+            let mut chars = part.chars();
+            match chars.next() {
+                Some(first) => first.to_uppercase().chain(chars).collect::<String>(),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn build_shared_item_rental_fee_offer(world: &World) -> Option<SharedItemRentalFeeOffer> {

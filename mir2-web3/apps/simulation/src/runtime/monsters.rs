@@ -353,7 +353,7 @@ pub(super) fn spawn_positions_for_rule_on_map(
 
     let candidates = crystal_spawn_candidates_on_map(config, map_file_name, origin, spread);
     if candidates.is_empty() {
-        return (0..slot_count).map(|_| origin.clone()).collect();
+        return Vec::new();
     }
 
     let seed = rule_index % candidates.len();
@@ -1442,14 +1442,20 @@ pub(super) fn start_game_visible_respawn_spawns(
                 i32::try_from(visible_width).expect("visible width should fit i32"),
             )
         };
-    if visible_count == 0 {
+    let representative_visible_count =
+        if visible_count == 0 && point_in_data_range(&respawn.location, player_position) {
+            1
+        } else {
+            visible_count
+        };
+    if representative_visible_count == 0 {
         return Vec::new();
     }
 
     let mut used = BTreeSet::new();
     let mut spawns = Vec::new();
 
-    for slot_index in 0..visible_count {
+    for slot_index in 0..representative_visible_count {
         let base = deterministic_roll(
             0,
             respawn.respawn_index.max(0) as usize,
@@ -1749,6 +1755,7 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
     !matches!(
         agent.ai,
         3 | 5
+            | 6
             | 12
             | 13
             | 14
@@ -1760,6 +1767,8 @@ pub(super) fn monster_can_follow_route(agent: &MonsterAgent) -> bool {
             | 50
             | 54
             | 56
+            | 57
+            | 58
             | 61
             | 79
             | 98

@@ -1,0 +1,73 @@
+name: Mir2 Gateway Release Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Optional release tag, for example 2026-05-18-001
+        required: false
+        type: string
+      publish_r2:
+        description: Upload the package to Cloudflare R2
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux-x64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust 1.89
+        run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Package Gateway
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ -n "$INPUT_RELEASE_TAG" ]; then
+            export MIR2_RELEASE_TAG="$INPUT_RELEASE_TAG"
+          else
+            export MIR2_RELEASE_TAG="${GITHUB_SHA::12}"
+          fi
+          bash scripts/package-gateway-release.sh
+
+      - name: Publish Gateway package to R2
+        if: ${{ inputs.publish_r2 }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          MIR2_R2_RELEASE_BUCKET: ${{ secrets.MIR2_R2_RELEASE_BUCKET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || [ -z "${MIR2_R2_RELEASE_BUCKET:-}" ]; then
+            echo "R2 publish requested but one of CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, or MIR2_R2_RELEASE_BUCKET is missing." >&2
+            exit 1
+          fi
+
+          meta="dist/gateway-releases/latest-mir2-gateway-release.json"
+          archive="$(node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('$meta','utf8')); process.stdout.write(m.archive)")"
+          tag="$(node -e "const fs=require('fs'); const m=JSON.parse(fs.readFileSync('$meta','utf8')); process.stdout.write(m.tag)")"
+          src="dist/gateway-releases/$archive"
+          sum="$src.sha256"
+
+          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz" --file "$src"
+          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/$tag/mir2-gateway-linux-x64.tar.gz.sha256" --file "$sum"
+          npx wrangler@latest r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/latest-mir2-gateway-release.json" --file "$meta"
+
+      - name: Upload Gateway package
+        uses: actions/upload-artifact@v4
+        with:
+          name: mir2-gateway-linux-x64
+          path: |
+            dist/gateway-releases/*.tar.gz
+            dist/gateway-releases/*.sha256
+            dist/gateway-releases/latest-mir2-gateway-release.json
+          if-no-files-found: error

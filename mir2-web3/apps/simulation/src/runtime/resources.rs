@@ -19,6 +19,7 @@ use super::quests::QuestState;
 use super::skills::SkillState;
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub(super) fn current_language(world: &World) -> LanguageCode {
     world.resource::<SessionResource>().language
@@ -201,6 +202,9 @@ pub(super) fn set_runtime_tick(world: &mut World, tick: u64) {
     if let Some(mut timing) = world.get_resource_mut::<PlayerActionTimingResource>() {
         timing.reset();
     }
+    if let Some(mut movement) = world.get_resource_mut::<PlayerMovementTimingResource>() {
+        movement.reset();
+    }
 }
 
 pub(super) fn advance_runtime_tick(world: &mut World) -> u64 {
@@ -234,6 +238,9 @@ pub(super) struct PlayerActionTimingResource {
     next_move_tick: u64,
     next_attack_tick: u64,
     next_spell_tick: u64,
+    next_move_at_ms: u64,
+    next_attack_at_ms: u64,
+    next_spell_at_ms: u64,
 }
 
 impl PlayerActionTimingResource {
@@ -242,6 +249,9 @@ impl PlayerActionTimingResource {
             next_move_tick: 0,
             next_attack_tick: 0,
             next_spell_tick: 0,
+            next_move_at_ms: 0,
+            next_attack_at_ms: 0,
+            next_spell_at_ms: 0,
         }
     }
 
@@ -249,6 +259,9 @@ impl PlayerActionTimingResource {
         self.next_move_tick = 0;
         self.next_attack_tick = 0;
         self.next_spell_tick = 0;
+        self.next_move_at_ms = 0;
+        self.next_attack_at_ms = 0;
+        self.next_spell_at_ms = 0;
     }
 
     fn next_tick_for(&self, kind: PlayerActionKind) -> u64 {
@@ -266,12 +279,38 @@ impl PlayerActionTimingResource {
             PlayerActionKind::Spell => self.next_spell_tick = tick,
         }
     }
+
+    fn next_at_ms_for(&self, kind: PlayerActionKind) -> u64 {
+        match kind {
+            PlayerActionKind::Move => self.next_move_at_ms,
+            PlayerActionKind::Attack => self.next_attack_at_ms,
+            PlayerActionKind::Spell => self.next_spell_at_ms,
+        }
+    }
+
+    fn set_next_at_ms_for(&mut self, kind: PlayerActionKind, at_ms: u64) {
+        match kind {
+            PlayerActionKind::Move => self.next_move_at_ms = at_ms,
+            PlayerActionKind::Attack => self.next_attack_at_ms = at_ms,
+            PlayerActionKind::Spell => self.next_spell_at_ms = at_ms,
+        }
+    }
+}
+
+const CRYSTAL_PACKET_ACTION_TICK_MS: u64 = 300;
+
+fn current_wall_time_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis().min(u128::from(u64::MAX)) as u64)
+        .unwrap_or(0)
 }
 
 pub(super) fn crystal_packet_action_ready(world: &World, kind: PlayerActionKind) -> bool {
     let current_tick = runtime_tick(world);
     let timing = world.resource::<PlayerActionTimingResource>();
     current_tick >= timing.next_tick_for(kind)
+        || current_wall_time_ms() >= timing.next_at_ms_for(kind)
 }
 
 pub(super) fn mark_crystal_packet_action(
@@ -280,9 +319,14 @@ pub(super) fn mark_crystal_packet_action(
     delay_ticks: u64,
 ) {
     let next_tick = runtime_tick(world).saturating_add(delay_ticks.max(1));
+    let next_at_ms =
+        current_wall_time_ms().saturating_add(delay_ticks.max(1) * CRYSTAL_PACKET_ACTION_TICK_MS);
     world
         .resource_mut::<PlayerActionTimingResource>()
         .set_next_tick_for(kind, next_tick);
+    world
+        .resource_mut::<PlayerActionTimingResource>()
+        .set_next_at_ms_for(kind, next_at_ms);
 }
 
 pub(super) fn crystal_packet_move_delay_ticks(_running: bool) -> u64 {
@@ -295,6 +339,91 @@ pub(super) fn crystal_packet_attack_delay_ticks() -> u64 {
 
 pub(super) fn crystal_packet_spell_delay_ticks() -> u64 {
     1
+}
+
+const CRYSTAL_PLAYER_CELL_TIME_MS: u64 = 500;
+const CRYSTAL_STEP_COUNTER_RESET_GRACE_MS: u64 = 700;
+
+#[derive(Resource, Debug, Clone)]
+pub(super) struct PlayerMovementTimingResource {
+    crystal_step_counter: u8,
+    crystal_step_counter_until_ms: u64,
+}
+
+impl PlayerMovementTimingResource {
+    pub(super) fn new() -> Self {
+        Self {
+            crystal_step_counter: 0,
+            crystal_step_counter_until_ms: 0,
+        }
+    }
+
+    fn reset(&mut self) {
+        self.crystal_step_counter = 0;
+        self.crystal_step_counter_until_ms = 0;
+    }
+
+    fn refresh(&mut self, now_ms: u64) {
+        if self.crystal_step_counter_until_ms < now_ms {
+            self.reset();
+        }
+    }
+}
+
+pub(super) fn reset_crystal_player_movement_timing(world: &mut World) {
+    if let Some(mut timing) = world.get_resource_mut::<PlayerMovementTimingResource>() {
+        timing.reset();
+    }
+}
+
+pub(super) fn crystal_player_can_run(world: &mut World) -> bool {
+    let now_ms = current_wall_time_ms();
+    let mut timing = world.resource_mut::<PlayerMovementTimingResource>();
+    timing.refresh(now_ms);
+    timing.crystal_step_counter > 0
+}
+
+pub(super) fn mark_crystal_player_move(world: &mut World, running: bool) {
+    let now_ms = current_wall_time_ms();
+    let mut timing = world.resource_mut::<PlayerMovementTimingResource>();
+    timing.refresh(now_ms);
+    if !running {
+        timing.crystal_step_counter = timing.crystal_step_counter.saturating_add(1).max(1);
+    }
+    if timing.crystal_step_counter > 0 {
+        timing.crystal_step_counter_until_ms = now_ms
+            .saturating_add(CRYSTAL_PLAYER_CELL_TIME_MS)
+            .saturating_add(CRYSTAL_STEP_COUNTER_RESET_GRACE_MS);
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(super) struct PendingMovementCommand {
+    pub(super) direction: MirDirection,
+    pub(super) running: bool,
+}
+
+pub(super) fn queue_crystal_movement_retry(
+    world: &mut World,
+    direction: MirDirection,
+    running: bool,
+) {
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_movement_command = Some(PendingMovementCommand { direction, running });
+}
+
+pub(super) fn take_crystal_movement_retry_if_ready(
+    world: &mut World,
+) -> Option<PendingMovementCommand> {
+    if !crystal_packet_action_ready(world, PlayerActionKind::Move) {
+        return None;
+    }
+
+    world
+        .resource_mut::<RuntimeQueueResource>()
+        .pending_movement_command
+        .take()
 }
 
 #[derive(Resource, Debug, Clone)]
@@ -330,6 +459,8 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) pk_points: i32,
     pub(super) chat_banned: bool,
     pub(super) chat_ban_until_ms: Option<u64>,
+    pub(super) chat_next_allowed_at_ms: u64,
+    pub(super) chat_spam_tick: u8,
 }
 
 impl PlayerRuntimeResource {
@@ -353,6 +484,8 @@ impl PlayerRuntimeResource {
             pk_points: 0,
             chat_banned: false,
             chat_ban_until_ms: None,
+            chat_next_allowed_at_ms: 0,
+            chat_spam_tick: 0,
         }
     }
 }
@@ -615,6 +748,7 @@ pub(super) struct RuntimeQueueResource {
     pub(super) pending_combat_actions: Vec<PendingCombatAction>,
     pub(super) pending_monster_spawns: Vec<PendingMonsterSpawnAction>,
     pub(super) pending_ground_spell_actions: Vec<PendingGroundSpellAction>,
+    pub(super) pending_movement_command: Option<PendingMovementCommand>,
 }
 
 impl RuntimeQueueResource {
@@ -623,6 +757,7 @@ impl RuntimeQueueResource {
             pending_combat_actions: Vec::new(),
             pending_monster_spawns: Vec::new(),
             pending_ground_spell_actions: Vec::new(),
+            pending_movement_command: None,
         }
     }
 }

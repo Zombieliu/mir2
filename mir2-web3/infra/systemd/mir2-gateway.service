@@ -1,0 +1,25 @@
+[Unit]
+Description=Mir2 Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mir2
+Group=mir2
+EnvironmentFile=/etc/mir2/gateway.env
+WorkingDirectory=/var/lib/mir2
+ExecStart=/opt/mir2/gateway/current/mir2-gateway
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/mir2 /var/log/mir2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

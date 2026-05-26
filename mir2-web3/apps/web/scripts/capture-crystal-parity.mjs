@@ -21,6 +21,7 @@ const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? DEFAULT_PASSWO
 const map = args.map ?? DEFAULT_MAP;
 const x = numberArg(args.x, DEFAULT_X);
 const y = numberArg(args.y, DEFAULT_Y);
+const settleMs = numberArg(args.settleMs ?? process.env.MIR2_CAPTURE_SETTLE_MS, 750);
 const chromePath = process.env.MIR2_CHROME_PATH ?? findChromePath();
 const debugPort = numberArg(args.debugPort ?? process.env.MIR2_CHROME_DEBUG_PORT, 9400 + (process.pid % 1000));
 
@@ -140,7 +141,7 @@ async function main() {
     await waitUntil(client, "window.__mir2Stage5?.state?.screen === 'game'", "game screen", 20_000);
     await transferIfNeeded(client, map, x, y);
     await waitUntil(client, "!document.querySelector('.login-transition-overlay')", "login transition cleared", 5_000);
-    await delay(750);
+    await delay(settleMs);
     if (args.openGameShop === "true") {
       await installCommandProbe(client);
       await click(client, ".hud-button.shop button");
@@ -504,6 +505,17 @@ async function readState(client) {
         entityCount: entities.length,
         npcCount: entities.filter((entity) => entity.kind === "npc").length,
         monsterCount: entities.filter((entity) => entity.kind === "monster").length,
+        entities: entities.map((entity) => ({
+          objectId: entity.objectId ?? null,
+          kind: entity.kind ?? null,
+          name: entity.name ?? null,
+          x: entity.x ?? null,
+          y: entity.y ?? null,
+          direction: entity.direction ?? null,
+          image: entity.image ?? null,
+          frame: entity.frame ?? null,
+          visible: entity.visible ?? null,
+        })),
         visibleNameplates: nameplateNodes.map((node) => node.innerText?.trim() ?? node.textContent?.trim() ?? ""),
         visibleNameplateDetails: nameplateNodes.map((node) => ({
           text: node.innerText?.trim() ?? node.textContent?.trim() ?? "",

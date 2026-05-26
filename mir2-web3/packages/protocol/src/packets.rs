@@ -3,15 +3,16 @@ use crate::frame::{decode_frame, encode_frame};
 use crate::ids::{ClientPacketId, ServerPacketId};
 use crate::io::{PacketReader, PacketWriter};
 use crate::types::{
-    AwakeningMaterial, BaseStats, ChatType, ClientAuction, ClientBuff, ClientFriend, ClientGtMap,
-    ClientHeroInformation, ClientIntelligentCreature, ClientMagic, ClientMail, ClientMapInfo,
-    ClientQuestInfo, ClientRecipeInfo, GameShopItem, GuildBuff, GuildBuffInfo, GuildRank,
-    GuildStorageItem, HeroUserInformation, ItemInfo, ItemRentalInformation, MapInformation,
-    MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, Notice, NpcInfo, ObjectAttackInfo,
-    ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo,
-    ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo,
-    ObjectSpellInfo, ObjectStruckInfo, PlayerInspectInfo, Point, RankCharacterInfo, SelectInfo,
-    Spell, StruckInfo, UserInformation, UserItem, UserLocation, WorldMapSetup,
+    AwakeningMaterial, BaseStats, ChatItem, ChatType, ClientAuction, ClientBuff, ClientFriend,
+    ClientGtMap, ClientHeroInformation, ClientIntelligentCreature, ClientMagic, ClientMail,
+    ClientMapInfo, ClientQuestInfo, ClientRecipeInfo, GameShopItem, GuildBuff, GuildBuffInfo,
+    GuildRank, GuildStorageItem, HeroUserInformation, ItemInfo, ItemRentalInformation,
+    MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, Notice, NpcInfo,
+    ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo,
+    ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo,
+    ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, PlayerInspectInfo, Point,
+    RankCharacterInfo, SelectInfo, Spell, StruckInfo, UserInformation, UserItem, UserLocation,
+    WorldMapSetup,
 };
 use serde::Serialize;
 
@@ -65,6 +66,7 @@ pub enum ClientPacket {
     },
     Chat {
         message: String,
+        linked_items: Vec<ChatItem>,
     },
     MoveItem {
         grid: MirGridType,
@@ -773,9 +775,15 @@ impl ClientPacket {
             Self::Turn { direction } | Self::Walk { direction } | Self::Run { direction } => {
                 writer.write_u8(*direction as u8)
             }
-            Self::Chat { message } => {
+            Self::Chat {
+                message,
+                linked_items,
+            } => {
                 writer.write_string(message)?;
-                writer.write_i32(0);
+                writer.write_i32(linked_items.len() as i32);
+                for item in linked_items {
+                    item.encode(writer)?;
+                }
             }
             Self::MoveItem { grid, from, to } => {
                 writer.write_u8(*grid as u8);
@@ -1343,14 +1351,21 @@ impl ClientPacket {
             ClientPacketId::Chat => {
                 let message = reader.read_string()?;
                 let linked_item_count = reader.read_i32()?;
-
-                if linked_item_count != 0 {
-                    return Err(PacketCodecError::UnsupportedLinkedItemCount(
-                        linked_item_count,
-                    ));
+                if linked_item_count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "chat_linked_items",
+                        value: linked_item_count,
+                    });
+                }
+                let mut linked_items = Vec::with_capacity(linked_item_count as usize);
+                for _ in 0..linked_item_count {
+                    linked_items.push(ChatItem::decode(reader)?);
                 }
 
-                Self::Chat { message }
+                Self::Chat {
+                    message,
+                    linked_items,
+                }
             }
             ClientPacketId::MoveItem => Self::MoveItem {
                 grid: MirGridType::try_from(reader.read_u8()?)?,
@@ -7250,6 +7265,34 @@ mod tests {
             let decoded = decode_client_packet(&encoded).expect("client packet should decode");
             assert_eq!(decoded, packet);
         }
+    }
+
+    #[test]
+    fn chat_client_packet_round_trips_linked_items_with_crystal_payload() {
+        let packet = ClientPacket::Chat {
+            message: "show <Bronze Ring>".to_string(),
+            linked_items: vec![ChatItem {
+                unique_id: 77,
+                title: "Bronze Ring".to_string(),
+                grid: MirGridType::Inventory,
+            }],
+        };
+
+        assert_eq!(packet.packet_id() as i16, 13);
+        let encoded = encode_client_packet(&packet).expect("chat packet should encode");
+        let decoded = decode_client_packet(&encoded).expect("chat packet should decode");
+        assert_eq!(decoded, packet);
+    }
+
+    #[test]
+    fn crystal_chat_type_enum_accepts_late_channel_values() {
+        assert_eq!(ChatType::try_from(10), Ok(ChatType::LevelUp));
+        assert_eq!(ChatType::try_from(11), Ok(ChatType::System2));
+        assert_eq!(ChatType::try_from(12), Ok(ChatType::Relationship));
+        assert_eq!(ChatType::try_from(13), Ok(ChatType::Mentor));
+        assert_eq!(ChatType::try_from(14), Ok(ChatType::Shout2));
+        assert_eq!(ChatType::try_from(15), Ok(ChatType::Shout3));
+        assert_eq!(ChatType::try_from(16), Ok(ChatType::LineMessage));
     }
 
     #[test]

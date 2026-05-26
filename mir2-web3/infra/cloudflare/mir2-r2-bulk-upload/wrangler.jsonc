@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "mir2-r2-bulk-upload",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-18",
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "assets.mir2.obelisk.build/upload*",
+      "zone_name": "obelisk.build"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MIR2_ASSETS",
+      "bucket_name": "mir2-web3-assets"
+    }
+  ]
+}

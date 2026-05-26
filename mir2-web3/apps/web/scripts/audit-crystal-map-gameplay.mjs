@@ -5,7 +5,12 @@ import path from "node:path";
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
 const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
-const CRYSTAL_CLIENT_ROOT = process.env.CRYSTAL_CLIENT_ROOT ?? DEFAULT_CRYSTAL_CLIENT_ROOT;
+const LOCAL_CRYSTAL_CLIENT_ROOT = path.resolve(REPO_ROOT, "..", "downloads", "crystal-client-full");
+const CRYSTAL_CLIENT_ROOT =
+  process.env.CRYSTAL_CLIENT_ROOT ??
+  (fs.existsSync(path.join(LOCAL_CRYSTAL_CLIENT_ROOT, "Map"))
+    ? LOCAL_CRYSTAL_CLIENT_ROOT
+    : DEFAULT_CRYSTAL_CLIENT_ROOT);
 const MAP_DIR = path.join(CRYSTAL_CLIENT_ROOT, "Map");
 const RESPAWN_MANIFEST_PATH = path.join(
   REPO_ROOT,

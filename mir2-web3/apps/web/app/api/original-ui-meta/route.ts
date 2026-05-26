@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 
 import {
-  ensureOriginalUiLibraryExport,
-  OriginalUiExportError,
-  readDeployedOriginalUiLibraryMeta,
-} from "../../../lib/original-ui-export-server";
+  normalizeOriginalUiLibraryKey,
+  OriginalUiMetaError,
+  readStaticOriginalUiLibraryMeta,
+} from "../../../lib/original-ui-meta-server";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -13,27 +16,20 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "missing library" }, { status: 400 });
   }
 
-  const normalizedLibrary = normalizeLibraryKey(library);
-  if (!normalizedLibrary || normalizedLibrary.startsWith("Map/")) {
+  try {
+    const normalizedLibrary = normalizeOriginalUiLibraryKey(library);
+    const staticMeta = await readStaticOriginalUiLibraryMeta(request, normalizedLibrary);
+    if (staticMeta) return NextResponse.json(staticMeta);
+
     return NextResponse.json(
       {
-        error: `Unsupported original UI library: ${normalizedLibrary}`,
-        code: "unsupported_library",
+        error: `Original UI library metadata is not deployed: ${normalizedLibrary}`,
+        code: "library_not_deployed",
       },
-      { status: 400 },
+      { status: 404 },
     );
-  }
-
-  try {
-    const existing = await readDeployedOriginalUiLibraryMeta(normalizedLibrary);
-    if (existing) {
-      return NextResponse.json(existing);
-    }
-
-    const staticMeta = await readStaticOriginalUiLibraryMeta(request, normalizedLibrary);
-    return NextResponse.json(staticMeta ?? (await ensureOriginalUiLibraryExport(normalizedLibrary)));
   } catch (error) {
-    if (error instanceof OriginalUiExportError) {
+    if (error instanceof OriginalUiMetaError) {
       return NextResponse.json(
         {
           error: error.message,
@@ -46,44 +42,9 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : String(error),
-        code: "original_ui_export_failed",
+        code: "original_ui_meta_failed",
       },
       { status: 500 },
     );
   }
-}
-
-async function readStaticOriginalUiLibraryMeta(request: Request, normalizedLibrary: string) {
-  const staticPath = normalizedLibrary
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-  const staticUrl = new URL(`/original-ui/${staticPath}/meta.json`, request.url);
-
-  try {
-    const response = await fetch(staticUrl, { cache: "force-cache" });
-    if (!response.ok) {
-      return null;
-    }
-    return (await response.json()) as unknown;
-  } catch {
-    return null;
-  }
-}
-
-function normalizeLibraryKey(libraryKey: string) {
-  const normalized = libraryKey
-    .replaceAll("\\", "/")
-    .split("/")
-    .filter(Boolean)
-    .join("/");
-
-  if (
-    normalized.startsWith("/") ||
-    normalized.split("/").some((segment) => segment === "." || segment === "..")
-  ) {
-    return "";
-  }
-
-  return normalized;
 }

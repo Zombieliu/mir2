@@ -4,10 +4,14 @@ const DEFAULT_VERSION = "bootstrap";
 let runtimeConfig = {
   version: DEFAULT_VERSION,
   staticAssetMaxEntries: 20000,
+  staticCriticalMaxEntries: 3000,
+  staticBackgroundMaxEntries: 6000,
+  staticRuntimeMaxEntries: 16000,
   sceneBlueprintMaxEntries: 512,
   apiMetadataMaxEntries: 512,
   remoteAssetBaseUrl: "",
 };
+let staticAssetTiers = new Map();
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -46,20 +50,31 @@ self.addEventListener("message", (event) => {
     return;
   }
 
+  if (data.type === "MIR2_ASSET_CACHE_HINT") {
+    const result = addStaticAssetTierHints(data.urls, data.cacheTier);
+    postClientMessage(event, "MIR2_ASSET_CACHE_HINTED", result);
+    return;
+  }
+
   if (data.type !== "MIR2_ASSET_CACHE_CONFIG") return;
 
   const manifest = data.manifest || {};
   const caches = manifest.runtimeCaches || {};
   const remoteAssets = manifest.remoteAssets || {};
+  const staticAssetMaxEntries = positiveNumber(caches.staticAssetMaxEntries, 20000);
   runtimeConfig = {
     version: String(data.manifestVersion || manifest.version || DEFAULT_VERSION),
-    staticAssetMaxEntries: Number(caches.staticAssetMaxEntries || 20000),
-    sceneBlueprintMaxEntries: Number(caches.sceneBlueprintMaxEntries || 512),
-    apiMetadataMaxEntries: Number(caches.apiMetadataMaxEntries || 512),
+    staticAssetMaxEntries,
+    staticCriticalMaxEntries: positiveNumber(caches.staticCriticalMaxEntries, Math.min(staticAssetMaxEntries, 3000)),
+    staticBackgroundMaxEntries: positiveNumber(caches.staticBackgroundMaxEntries, Math.min(staticAssetMaxEntries, 6000)),
+    staticRuntimeMaxEntries: positiveNumber(caches.staticRuntimeMaxEntries, staticAssetMaxEntries),
+    sceneBlueprintMaxEntries: positiveNumber(caches.sceneBlueprintMaxEntries, 512),
+    apiMetadataMaxEntries: positiveNumber(caches.apiMetadataMaxEntries, 512),
     remoteAssetBaseUrl: normalizeAssetBaseUrl(
       data.assetBaseUrl || remoteAssets.assetBaseUrl || manifest.assetBaseUrl || "",
     ),
   };
+  staticAssetTiers = buildStaticAssetTierIndex(manifest.resourcePacks || []);
 
   event.waitUntil(
     cleanupOldCaches(runtimeConfig.version).then((deletedCaches) => {
@@ -67,6 +82,7 @@ self.addEventListener("message", (event) => {
         deletedCaches,
         version: runtimeConfig.version,
         remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
+        staticAssetTiers: summarizeStaticAssetTiers(),
       });
     }),
   );
@@ -86,8 +102,9 @@ self.addEventListener("fetch", (event) => {
   if (runtimeConfig.version === DEFAULT_VERSION) return;
 
   if (isStaticGameAsset(url)) {
+    const policy = staticAssetCachePolicy(request);
     event.respondWith(
-      cacheFirst(request, cacheName("static"), runtimeConfig.staticAssetMaxEntries),
+      cacheFirst(request, cacheName(policy.cacheKind), policy.maxEntries, event),
     );
     return;
   }
@@ -123,14 +140,26 @@ function cacheName(kind) {
   return `${CACHE_PREFIX}-${kind}-${runtimeConfig.version || DEFAULT_VERSION}`;
 }
 
-async function cacheFirst(request, name, maxEntries) {
+async function cacheFirst(request, name, maxEntries, event) {
   const cache = await caches.open(name);
   const cached = await cache.match(request);
-  if (cached) return cached;
+  if (cached) {
+    event?.waitUntil(touchCacheEntry(cache, request, cached, maxEntries));
+    return cached;
+  }
 
   const response = await fetchStaticAsset(request);
   await putCacheEntry(cache, request, response, maxEntries);
   return response;
+}
+
+async function touchCacheEntry(cache, request, response, maxEntries) {
+  try {
+    await cache.put(request, response.clone());
+    await trimCache(cache, maxEntries);
+  } catch {
+    // Cache recency updates are opportunistic.
+  }
 }
 
 async function fetchStaticAsset(request) {
@@ -284,10 +313,113 @@ async function readCacheStatus() {
   return {
     version: runtimeConfig.version,
     remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
+    staticAssetTiers: summarizeStaticAssetTiers(),
     cacheCount: entries.length,
     entryCount: entries.reduce((sum, entry) => sum + entry.entries, 0),
     caches: entries,
   };
+}
+
+function staticAssetCachePolicy(request) {
+  const url = new URL(request.url);
+  const tier = staticAssetTiers.get(staticAssetCacheKey(url)) || "runtime";
+  if (tier === "critical") {
+    return {
+      cacheKind: "static-critical",
+      maxEntries: runtimeConfig.staticCriticalMaxEntries,
+    };
+  }
+  if (tier === "background") {
+    return {
+      cacheKind: "static-background",
+      maxEntries: runtimeConfig.staticBackgroundMaxEntries,
+    };
+  }
+  return {
+    cacheKind: "static-runtime",
+    maxEntries: runtimeConfig.staticRuntimeMaxEntries,
+  };
+}
+
+function buildStaticAssetTierIndex(resourcePacks) {
+  const tiers = new Map();
+  if (!Array.isArray(resourcePacks)) return tiers;
+
+  for (const pack of resourcePacks) {
+    const tier = normalizeStaticAssetTier(pack?.cacheTier || (pack?.phase === "background" ? "background" : "critical"));
+    const urls = Array.isArray(pack?.urls) ? pack.urls : [];
+    for (const value of urls) {
+      const key = normalizeStaticAssetCacheKey(value);
+      if (!key) continue;
+      putStaticAssetTier(tiers, key, tier);
+    }
+  }
+
+  return tiers;
+}
+
+function normalizeStaticAssetCacheKey(value) {
+  if (typeof value !== "string" || !value) return "";
+  try {
+    const url = new URL(value, self.location.origin);
+    if (url.origin !== self.location.origin || !isStaticGameAsset(url)) return "";
+    return staticAssetCacheKey(url);
+  } catch {
+    return "";
+  }
+}
+
+function addStaticAssetTierHints(urls, cacheTier) {
+  if (!Array.isArray(urls)) return { added: 0, ignored: 0, staticAssetTiers: summarizeStaticAssetTiers() };
+  const tier = normalizeStaticAssetTier(cacheTier);
+  let added = 0;
+  let ignored = 0;
+
+  for (const value of urls) {
+    const key = normalizeStaticAssetCacheKey(value);
+    if (!key) {
+      ignored += 1;
+      continue;
+    }
+    const changed = putStaticAssetTier(staticAssetTiers, key, tier);
+    if (changed) added += 1;
+    else ignored += 1;
+  }
+
+  return { added, ignored, staticAssetTiers: summarizeStaticAssetTiers() };
+}
+
+function putStaticAssetTier(tiers, key, tier) {
+  const existing = tiers.get(key);
+  if (existing && tierPriority(existing) <= tierPriority(tier)) return false;
+  tiers.set(key, tier);
+  return true;
+}
+
+function staticAssetCacheKey(url) {
+  return `${url.pathname}${url.search}`;
+}
+
+function normalizeStaticAssetTier(value) {
+  return value === "background" ? "background" : "critical";
+}
+
+function tierPriority(tier) {
+  return tier === "critical" ? 0 : 1;
+}
+
+function summarizeStaticAssetTiers() {
+  const summary = { critical: 0, background: 0, runtime: 0 };
+  for (const tier of staticAssetTiers.values()) {
+    if (tier === "background") summary.background += 1;
+    else summary.critical += 1;
+  }
+  return summary;
+}
+
+function positiveNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function normalizeAssetBaseUrl(value) {

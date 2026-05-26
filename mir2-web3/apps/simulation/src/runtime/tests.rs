@@ -21,9 +21,10 @@ use super::{
 };
 use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
-    deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot, ItemContainer,
-    QuestStage, SimulationConfig, Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind,
-    WorldEntityDisposition, WorldEntityKind,
+    deliver_stage5_system_mail, CharacterRecord, CharacterSaveRecord, EquipmentSlot,
+    GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, QuestStage, SimulationConfig,
+    Stage5AuctionListing, Stage5MailDelivery, Stage5MailTargetKind, WorldEntityDisposition,
+    WorldEntityKind,
 };
 use bevy_ecs::entity::Entity;
 use mir2_game_data::{
@@ -1427,7 +1428,14 @@ fn new_crystal_character_starts_without_web_seed_state() {
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
     assert!(snapshot.equipment_items.is_empty());
-    assert!(snapshot.quest_log.is_empty());
+    assert!(snapshot
+        .quest_log
+        .iter()
+        .any(|quest| quest.quest_id == 1 && quest.stage == QuestStage::Available));
+    assert!(snapshot
+        .quest_log
+        .iter()
+        .all(|quest| quest.stage == QuestStage::Available));
     assert!(snapshot.known_skills.is_empty());
     assert_eq!(snapshot.player_hp, Some(18));
     assert_eq!(snapshot.player_mp, Some(14));
@@ -1480,7 +1488,14 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     assert!(snapshot.belt_items.is_empty());
     assert!(snapshot.storage_items.is_empty());
     assert!(snapshot.equipment_items.is_empty());
-    assert!(snapshot.quest_log.is_empty());
+    assert!(snapshot
+        .quest_log
+        .iter()
+        .any(|quest| quest.quest_id == 1 && quest.stage == QuestStage::Available));
+    assert!(snapshot
+        .quest_log
+        .iter()
+        .all(|quest| quest.stage == QuestStage::Available));
     assert!(snapshot.known_skills.is_empty());
 
     let store = config
@@ -1495,6 +1510,7 @@ fn start_game_clears_legacy_level_one_web_seed_state() {
     assert_eq!(save.gold, 0);
     assert!(save.equipment_items_explicit_empty);
     assert!(save.inventory_items_json.is_empty());
+    assert!(save.quest_states_json.is_empty());
     assert!(save.skill_states_json.is_empty());
 }
 
@@ -1662,6 +1678,65 @@ fn new_account_starts_with_empty_crystal_character_list() {
             assert_eq!(char_info.last_access_binary_datetime, 0);
         }
         other => panic!("unexpected new character packet: {other:?}"),
+    }
+}
+
+#[test]
+fn missing_password_login_does_not_seed_default_character() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let login = session.handle_packet(ClientPacket::Login {
+        account_id: "ghostacct".to_string(),
+        password: "demo".to_string(),
+    });
+
+    assert!(matches!(login[0], ServerPacket::Login { result: 4 }));
+
+    let created = session.handle_packet(ClientPacket::NewAccount {
+        account_id: "ghostacct".to_string(),
+        password: "Tracepass1".to_string(),
+        birth_date_binary: 630_822_816_000_000_000,
+        user_name: "Ghost".to_string(),
+        secret_question: "q".to_string(),
+        secret_answer: "a".to_string(),
+        email_address: "ghost@example.test".to_string(),
+    });
+    assert!(matches!(created[0], ServerPacket::NewAccount { result: 8 }));
+}
+
+#[test]
+fn passkey_first_login_starts_with_empty_crystal_character_list() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let account_id = "sui:0xpasskeyempty";
+
+    let login = session.passkey_login(account_id);
+    match &login[0] {
+        ServerPacket::LoginSuccess { characters } => assert!(characters.is_empty()),
+        other => panic!("unexpected passkey login packet: {other:?}"),
+    }
+
+    let created_character = session.handle_packet(ClientPacket::NewCharacter {
+        name: "PassArcher".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Archer,
+    });
+    match &created_character[0] {
+        ServerPacket::NewCharacterSuccess { char_info } => {
+            assert_eq!(char_info.index, 1);
+            assert_eq!(char_info.name, "PassArcher");
+            assert_eq!(char_info.class, MirClass::Archer);
+            assert_eq!(char_info.gender, MirGender::Female);
+        }
+        other => panic!("unexpected new character packet: {other:?}"),
+    }
+
+    let relogin = session.passkey_login(account_id);
+    match &relogin[0] {
+        ServerPacket::LoginSuccess { characters } => {
+            assert_eq!(characters.len(), 1);
+            assert_eq!(characters[0].name, "PassArcher");
+            assert_eq!(characters[0].class, MirClass::Archer);
+        }
+        other => panic!("unexpected passkey relogin packet: {other:?}"),
     }
 }
 
@@ -2266,7 +2341,7 @@ fn movement_before_start_game_rejects_without_runtime_chat() {
 }
 
 #[test]
-fn crystal_packet_walk_timing_rejects_repeat_until_world_tick_advances() {
+fn crystal_packet_walk_timing_queues_repeat_without_user_location_correction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player = player_entity(session.app.world()).expect("player entity");
@@ -2291,10 +2366,13 @@ fn crystal_packet_walk_timing_rejects_repeat_until_world_tick_advances() {
         direction: MirDirection::Right,
     });
     let after_repeat = player_position(&session);
-    session.tick();
-    let resumed_packets = session.handle_packet(ClientPacket::Walk {
-        direction: MirDirection::Right,
-    });
+    let mut retry_packets = session.tick();
+    if !retry_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. }))
+    {
+        retry_packets.extend(session.tick());
+    }
 
     assert_eq!(
         after_first,
@@ -2307,9 +2385,7 @@ fn crystal_packet_walk_timing_rejects_repeat_until_world_tick_advances() {
     assert!(first_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectWalk { .. })));
-    assert!(repeat_packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    assert!(repeat_packets.is_empty());
     assert!(!repeat_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::ObjectWalk { .. })));
@@ -2320,7 +2396,7 @@ fn crystal_packet_walk_timing_rejects_repeat_until_world_tick_advances() {
             y: start.y
         }
     );
-    assert!(resumed_packets
+    assert!(retry_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
 }
@@ -2647,6 +2723,96 @@ fn walk_updates_self_location() {
         }
         other => panic!("unexpected packet: {other:?}"),
     }
+}
+
+#[test]
+fn crystal_run_from_standstill_echoes_location_without_moving() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+    let start = (305..360)
+        .find_map(|x| {
+            let origin = Point { x, y: 270 };
+            let first = Point { x: x + 1, y: 270 };
+            let second = Point { x: x + 2, y: 270 };
+            (can_occupy(session.app.world(), origin.clone(), Some(player))
+                && can_occupy(session.app.world(), first.clone(), Some(player))
+                && can_occupy(session.app.world(), second.clone(), Some(player)))
+            .then_some(origin)
+        })
+        .expect("test should find clear horizontal run cells");
+    set_player_position(&mut session, start.clone());
+
+    let packets = session.handle_packet(ClientPacket::Run {
+        direction: MirDirection::Right,
+    });
+
+    assert_eq!(player_position(&session), start);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location } if location.position == start
+    )));
+}
+
+#[test]
+fn crystal_walk_primes_next_run_like_crystal_step_counter() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+    let start = (305..360)
+        .find_map(|x| {
+            let origin = Point { x, y: 270 };
+            let first = Point { x: x + 1, y: 270 };
+            let second = Point { x: x + 2, y: 270 };
+            let third = Point { x: x + 3, y: 270 };
+            (can_occupy(session.app.world(), origin.clone(), Some(player))
+                && can_occupy(session.app.world(), first.clone(), Some(player))
+                && can_occupy(session.app.world(), second.clone(), Some(player))
+                && can_occupy(session.app.world(), third.clone(), Some(player)))
+            .then_some(origin)
+        })
+        .expect("test should find clear horizontal walk then run cells");
+    set_player_position(&mut session, start.clone());
+
+    let walk_packets = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Right,
+    });
+    let after_walk = Point {
+        x: start.x + 1,
+        y: start.y,
+    };
+    assert!(walk_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location } if location.position == after_walk
+    )));
+
+    let run_packets = session.handle_packet(ClientPacket::Run {
+        direction: MirDirection::Right,
+    });
+    assert!(run_packets.is_empty());
+
+    let expected = Point {
+        x: start.x + 3,
+        y: start.y,
+    };
+    let mut retry_packets = Vec::new();
+    for _ in 0..3 {
+        retry_packets.extend(session.tick());
+        if retry_packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::UserLocation { location } if location.position == expected
+            )
+        }) {
+            break;
+        }
+    }
+
+    assert_eq!(player_position(&session), expected);
+    assert!(retry_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location } if location.position == expected
+    )));
 }
 
 #[test]
@@ -3019,6 +3185,79 @@ fn crystal_manifest_movements_surface_as_runtime_transfers() {
 }
 
 #[test]
+fn walk_onto_crystal_manifest_movement_transfers_map() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:307:264");
+
+    let packets = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Right,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info }
+            if info.file_name == "0102" && info.title == "MeatStore"
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 3, y: 7 })
+    )));
+    assert_eq!(snapshot.map_file_name.as_deref(), Some("0102"));
+    assert_eq!(player_position(&session), Point { x: 3, y: 7 });
+}
+
+#[test]
+fn walk_onto_blocked_crystal_manifest_movement_source_transfers_map() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:322:248");
+
+    let packets = session.handle_packet(ClientPacket::Walk {
+        direction: MirDirection::Up,
+    });
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info }
+            if info.file_name == "0104" && info.title == "Library"
+    )));
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 4, y: 10 })
+    )));
+    assert_eq!(snapshot.map_file_name.as_deref(), Some("0104"));
+    assert_eq!(player_position(&session), Point { x: 4, y: 10 });
+}
+
+#[test]
+fn crystal_manifest_movements_skip_crystal_invalid_direct_transfers() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let invalid_archer_hideout_key = super::crystal_movement_transfer_key("0", 322, 473, 387, 0, 0);
+
+    assert!(!session
+        .world_snapshot()
+        .map_transfers
+        .iter()
+        .any(|transfer| transfer.key == invalid_archer_hideout_key));
+
+    set_player_position(&mut session, Point { x: 322, y: 473 });
+    let packets = session.transfer_map(&invalid_archer_hideout_key);
+
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::MapInformation { info } if info.file_name == "01041"
+    )));
+    assert_eq!(player_position(&session), Point { x: 322, y: 473 });
+}
+
+#[test]
 fn spread_slots_choose_walkable_tiles_inside_square_range() {
     let config = SimulationConfig::default();
     let origin = Point { x: 327, y: 265 };
@@ -3031,6 +3270,18 @@ fn spread_slots_choose_walkable_tiles_inside_square_range() {
             && is_static_spawnable_point(&config, position)
             && *position != origin
     }));
+}
+
+#[test]
+fn spread_slots_without_walkable_candidates_do_not_fallback_to_invalid_origin() {
+    let config = SimulationConfig::default();
+    let origin = Point { x: -1000, y: -1000 };
+    let positions = spawn_positions_for_rule(&config, &origin, 0, 3, 0);
+
+    assert!(
+        positions.is_empty(),
+        "Crystal MapRespawn with no WalkableCells does not spawn at the raw origin"
+    );
 }
 
 #[test]
@@ -3079,6 +3330,75 @@ fn crystal_current_map_spawn_table_uses_representative_map_rosters() {
 }
 
 #[test]
+fn crystal_map_runtime_start_game_excludes_starter_fixture_monsters() {
+    let config = SimulationConfig::default().with_crystal_map_runtime();
+    let mut session = SimulationSession::new(config);
+
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.map_title.as_deref(), Some("BichonProvince"));
+    assert!(!snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && matches!(entity.name.as_str(), "Training Dummy" | "Field Wasp")
+    }));
+    assert!(snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && matches!(entity.name.as_str(), "Royal_Guard" | "Royal_Archer")
+    }));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if matches!(info.name.as_str(), "Training Dummy" | "Field Wasp")
+    )));
+}
+
+#[test]
+fn crystal_map_runtime_start_game_uses_saved_crystal_map_roster() {
+    let config = SimulationConfig::default().with_crystal_map_runtime();
+    {
+        let mut store = config
+            .account_store
+            .lock()
+            .expect("account store mutex should not be poisoned");
+        let account = store
+            .accounts
+            .get_mut("demo")
+            .expect("default account should exist");
+        let save = account
+            .saves
+            .get_mut(&0)
+            .expect("default save should exist");
+        save.map_file_name = "1".to_string();
+        save.map_title = "WoomyonWoods(S)".to_string();
+        save.position = Point { x: 302, y: 164 };
+    }
+    let mut session = SimulationSession::new(config);
+
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let snapshot = session.world_snapshot();
+
+    assert_eq!(snapshot.map_file_name.as_deref(), Some("1"));
+    assert_eq!(snapshot.map_title.as_deref(), Some("WoomyonWoods(S)"));
+    assert!(!snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && matches!(entity.name.as_str(), "Royal_Guard" | "Royal_Archer")
+    }));
+    assert!(snapshot.entities.iter().any(|entity| {
+        entity.kind == WorldEntityKind::Monster
+            && matches!(
+                entity.name.as_str(),
+                "Oma" | "OmaFighter" | "OmaWarrior" | "ForestYeti"
+            )
+    }));
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if matches!(info.name.as_str(), "Royal_Guard" | "Royal_Archer")
+    )));
+}
+
+#[test]
 fn crystal_respawn_schedule_uses_minute_window_semantics() {
     let without_random = respawn_tick_for_schedule(
         &MonsterRespawnSchedule::CrystalMinutes {
@@ -3106,29 +3426,59 @@ fn crystal_respawn_schedule_uses_minute_window_semantics() {
 }
 
 #[test]
-fn crystal_route_guard_moves_along_patrol() {
+fn crystal_neutral_town_guards_do_not_follow_respawn_routes() {
     let mut config = SimulationConfig::default();
     config.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
     let mut session = SimulationSession::new(config);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let before = session
+    let tracked_guards = session
         .world_snapshot()
         .entities
         .into_iter()
-        .find(|entity| entity.name == "Royal_Guard" && entity.x == 319 && entity.y == 270)
-        .expect("route guard should spawn inside starter region");
+        .filter(|entity| matches!(entity.name.as_str(), "Royal_Guard" | "Royal_Archer"))
+        .map(|entity| (entity.object_id, entity.name, entity.x, entity.y))
+        .collect::<Vec<_>>();
 
-    let _ = session.tick();
+    assert!(
+        tracked_guards
+            .iter()
+            .any(|(_, name, _, _)| name == "Royal_Guard"),
+        "starter region should include Royal_Guard"
+    );
+    assert!(
+        tracked_guards
+            .iter()
+            .any(|(_, name, _, _)| name == "Royal_Archer"),
+        "starter region should include Royal_Archer"
+    );
 
-    let after = session
-        .world_snapshot()
-        .entities
-        .into_iter()
-        .find(|entity| entity.object_id == before.object_id)
-        .expect("route guard should still exist");
+    for _ in 0..4 {
+        let packets = session.tick();
+        for (object_id, name, _, _) in &tracked_guards {
+            assert!(
+                !packets.iter().any(|packet| matches!(
+                    packet,
+                    ServerPacket::ObjectWalk { movement } if movement.object_id == *object_id
+                )),
+                "{name} should not emit autonomous route ObjectWalk"
+            );
+        }
+    }
 
-    assert_ne!((after.x, after.y), (before.x, before.y));
+    let snapshot = session.world_snapshot();
+    for (object_id, name, x, y) in tracked_guards {
+        let after = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.object_id == object_id)
+            .expect("tracked guard should still exist");
+        assert_eq!(
+            (after.x, after.y),
+            (x, y),
+            "{name} should stay on its spawn tile without route movement"
+        );
+    }
 }
 
 #[test]
@@ -3202,6 +3552,27 @@ fn start_game_visible_respawns_include_spread_spawn_density() {
     let guard_spawns = start_game_visible_respawn_spawns("0", fixed_guard, &player_position);
     assert_eq!(guard_spawns.len(), 1);
     assert_eq!(guard_spawns[0].1, fixed_guard.location);
+}
+
+#[test]
+fn start_game_visible_respawns_spread_representative_crystal_map_spawns() {
+    let map = crystal_map_respawns_by_file_name("1").expect("Woomyon respawns");
+    let player_position = Point { x: 308, y: 170 };
+    let mut representative_points = Vec::new();
+
+    for respawn in map.respawns.iter() {
+        for (_, point, _) in start_game_visible_respawn_spawns("1", respawn, &player_position) {
+            assert!(point_in_data_range(&point, &player_position));
+            if !representative_points.contains(&point) {
+                representative_points.push(point);
+            }
+        }
+    }
+
+    assert!(
+        representative_points.len() > 4,
+        "representative respawns should not collapse onto one respawn origin"
+    );
 }
 
 #[test]
@@ -3465,11 +3836,19 @@ fn crystal_guards_ignore_hens_even_when_adjacent() {
     let guard_entity = find_monster_entity_by(&session, |name, agent, position| {
         name == "Royal_Guard" && agent.ai == 6 && position.x == 319 && position.y == 270
     });
-    let hen_entity =
-        find_monster_entity_by(&session, |name, agent, _| name == "Hen" && agent.ai == 1);
-
     let guard_position =
         entity_position(session.app.world(), guard_entity).expect("guard position");
+    let hen_entity = spawn_crystal_monster_for_test(
+        &mut session,
+        98_773_u32,
+        "Hen",
+        Point {
+            x: guard_position.x + 1,
+            y: guard_position.y,
+        },
+        MirDirection::Left,
+        false,
+    );
     let hen_object_id = entity_object_id(session.app.world(), hen_entity).expect("hen object id");
     let hen_hp_before = session
         .app
@@ -3480,14 +3859,6 @@ fn crystal_guards_ignore_hens_even_when_adjacent() {
         .hp;
 
     set_player_position(&mut session, guard_position.clone());
-    set_entity_position(
-        &mut session,
-        hen_entity,
-        Point {
-            x: guard_position.x + 1,
-            y: guard_position.y,
-        },
-    );
 
     let packets = session.tick();
 
@@ -21274,6 +21645,7 @@ fn chat_before_start_game_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "hi".to_string(),
+        linked_items: Vec::new(),
     });
 
     assert!(packets.is_empty());
@@ -21286,6 +21658,7 @@ fn chat_normal_message_emits_crystal_object_chat_only() {
 
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "hi".to_string(),
+        linked_items: Vec::new(),
     });
 
     assert_eq!(packets.len(), 1);
@@ -25205,6 +25578,283 @@ fn quest_client_packets_drive_crystal_change_complete_and_share_packets() {
 }
 
 #[test]
+fn original_crystal_normal_quest_manifest_covers_level_1_to_45_range() {
+    let infos = super::crystal_normal_quest_infos_1_to_45();
+    let manifest = mir2_game_data::crystal_quest_packet_manifest();
+
+    assert!(infos.len() >= 150);
+    assert!(infos
+        .iter()
+        .any(|info| info.index == 1 && info.min_level_needed == 1));
+    assert!(infos.iter().any(|info| info.min_level_needed == 45));
+    assert!(infos.iter().all(|info| !info.name.trim().is_empty()));
+    assert!(infos
+        .iter()
+        .all(|info| info.min_level_needed >= 1 && info.min_level_needed <= 45));
+    assert!(
+        manifest
+            .quests
+            .iter()
+            .map(|quest| quest.kill_tasks.len() + quest.item_tasks.len() + quest.flag_tasks.len())
+            .sum::<usize>()
+            >= 140
+    );
+}
+
+#[test]
+fn original_crystal_quest_packets_enforce_prerequisites_and_rewards() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let quest_one = super::crystal_quest_info_by_id(1).expect("quest 1");
+    let quest_two = super::crystal_quest_info_by_id(2).expect("quest 2");
+
+    let rejected_packets = session.handle_packet(ClientPacket::AcceptQuest {
+        npc_index: quest_two.npc_index,
+        quest_index: quest_two.index,
+    });
+    assert!(rejected_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat { message, .. } if message.contains("accept")
+    )));
+    assert!(!session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .any(|quest| quest.quest_id == quest_two.index));
+
+    let accept_packets = session.handle_packet(ClientPacket::AcceptQuest {
+        npc_index: quest_one.npc_index,
+        quest_index: quest_one.index,
+    });
+    assert!(accept_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken,
+            completed,
+            ..
+        } if *quest_id == quest_one.index && *taken && *completed
+    )));
+
+    super::set_quest_stage(
+        session.app.world_mut(),
+        quest_one.index,
+        QuestStage::ReadyToTurnIn,
+    );
+    let before = session.world_snapshot();
+    let finish_packets = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: quest_one.index,
+        selected_item_index: -1,
+    });
+    let after = session.world_snapshot();
+
+    assert!(finish_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests }
+            if completed_quests.contains(&quest_one.index)
+    )));
+    assert_eq!(
+        after.gold,
+        before.gold.saturating_add(quest_one.reward_gold)
+    );
+    assert_eq!(
+        after.player_experience,
+        before
+            .player_experience
+            .saturating_add(i64::from(quest_one.reward_exp))
+            .min(before.player_max_experience)
+    );
+    assert!(session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .any(|quest| quest.quest_id == quest_one.index && quest.stage == QuestStage::Completed));
+
+    let accept_two_packets = session.handle_packet(ClientPacket::AcceptQuest {
+        npc_index: quest_two.npc_index,
+        quest_index: quest_two.index,
+    });
+    assert!(accept_two_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken,
+            ..
+        } if *quest_id == quest_two.index && *taken
+    )));
+}
+
+#[test]
+fn original_crystal_quest_structured_kill_and_item_tasks_progress() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let manifest = mir2_game_data::crystal_quest_packet_manifest();
+    let kill_quest = manifest
+        .quests
+        .iter()
+        .find(|quest| {
+            super::crystal_quest_info_by_id(quest.index)
+                .is_some_and(|info| info.min_level_needed <= 45)
+                && !quest.kill_tasks.is_empty()
+        })
+        .expect("normal kill quest")
+        .clone();
+    let kill_task = kill_quest.kill_tasks.first().expect("kill task").clone();
+    super::ensure_runtime_quest(session.app.world_mut(), kill_quest.index);
+    super::set_quest_stage(
+        session.app.world_mut(),
+        kill_quest.index,
+        QuestStage::InProgress,
+    );
+
+    let kill_packets =
+        super::advance_crystal_quest_kill(session.app.world_mut(), &kill_task.monster_name);
+    assert!(kill_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest { quest_id, .. } if *quest_id == kill_quest.index
+    )));
+    assert_eq!(
+        super::quest_progress(session.app.world(), kill_quest.index)
+            .expect("kill quest progress")
+            .0,
+        1
+    );
+
+    let item_quest = manifest
+        .quests
+        .iter()
+        .find(|quest| {
+            super::crystal_quest_info_by_id(quest.index)
+                .is_some_and(|info| info.min_level_needed <= 45)
+                && !quest.item_tasks.is_empty()
+        })
+        .expect("normal item quest")
+        .clone();
+    let item_task = item_quest.item_tasks.first().expect("item task").clone();
+    super::ensure_runtime_quest(session.app.world_mut(), item_quest.index);
+    super::set_quest_stage(
+        session.app.world_mut(),
+        item_quest.index,
+        QuestStage::InProgress,
+    );
+    let item = mir2_game_data::crystal_item_by_index(item_task.item_index).expect("item template");
+    let item_key = super::crystal_item_key_for_template(&item);
+    let mut item_packets = Vec::new();
+
+    assert!(super::try_gain_crystal_quest_drop(
+        session.app.world_mut(),
+        &item_key,
+        &item.name,
+        1,
+        None,
+        None,
+        &mut item_packets,
+    ));
+    assert!(item_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest { quest_id, .. } if *quest_id == item_quest.index
+    )));
+    assert_eq!(
+        super::quest_progress(session.app.world(), item_quest.index)
+            .expect("item quest progress")
+            .0,
+        1
+    );
+}
+
+#[test]
+fn original_crystal_loaded_npc_links_accept_and_finish_quest() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let _ = session.transfer_map("crystal:0:283:606");
+
+    set_player_position(&mut session, Point { x: 283, y: 606 });
+    let _ = session.interact(3);
+    let dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("assistant dialog");
+    assert!(dialog
+        .links
+        .iter()
+        .any(|link| link.target == "@quest:accept:1"));
+
+    let accept_packets = session.select_npc_dialog_target("@quest:accept:1");
+    assert!(accept_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest {
+            quest_id,
+            taken,
+            ..
+        } if *quest_id == 1 && *taken
+    )));
+
+    set_player_position(&mut session, Point { x: 293, y: 619 });
+    let _ = session.interact(4);
+    let dialog = session
+        .world_snapshot()
+        .active_npc_dialog
+        .expect("craft lady dialog");
+    assert!(dialog
+        .links
+        .iter()
+        .any(|link| link.target == "@quest:finish:1"));
+
+    let finish_packets = session.select_npc_dialog_target("@quest:finish:1");
+    assert!(finish_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&1)
+    )));
+    assert!(session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .any(|quest| quest.quest_id == 1 && quest.stage == QuestStage::Completed));
+}
+
+#[test]
+fn original_crystal_selected_reward_is_granted_on_finish() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let info = super::crystal_normal_quest_infos_1_to_45()
+        .into_iter()
+        .find(|info| !info.rewards_select_item.is_empty())
+        .expect("at least one normal quest has selectable rewards");
+    let selected_reward_index = info.rewards_select_item.len() - 1;
+    let selected_reward = info
+        .rewards_select_item
+        .get(selected_reward_index)
+        .expect("selected reward")
+        .clone();
+
+    super::ensure_runtime_quest(session.app.world_mut(), info.index);
+    super::set_quest_stage(
+        session.app.world_mut(),
+        info.index,
+        QuestStage::ReadyToTurnIn,
+    );
+    let packets = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: info.index,
+        selected_item_index: i32::try_from(selected_reward_index).unwrap(),
+    });
+    let snapshot = session.world_snapshot();
+
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&info.index)
+    )));
+    assert!(snapshot.inventory_items.iter().any(|item| {
+        item.name == selected_reward.item.name && item.quantity >= u32::from(selected_reward.count)
+    }));
+}
+
+#[test]
 fn drop_gold_packet_silently_rejects_before_start_game() {
     let mut session = SimulationSession::new(SimulationConfig::default());
 
@@ -25275,6 +25925,44 @@ fn drop_gold_packet_ignores_insufficient_gold_like_crystal() {
     assert_eq!(snapshot.gold, 1280);
     assert!(snapshot.ground_drops.is_empty());
     assert!(packets.is_empty());
+}
+
+#[test]
+fn shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let drop = GroundDropSnapshot {
+        object_id: 88_001,
+        name: "Shared Gold".to_string(),
+        name_colour_argb: -1,
+        x: 330,
+        y: 270,
+        quantity: 1,
+        source_monster: "commit-test".to_string(),
+        owner_object_id: None,
+        ownership_remaining_ticks: None,
+        loot: GroundDropLootSnapshot::Gold { amount: 25 },
+    };
+    let gold_before = player_gold(&session);
+
+    let committed = session.apply_shared_ground_drop_pickup_commit(&drop);
+
+    assert!(committed.committed);
+    assert!(committed
+        .packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 25 })));
+    assert_eq!(player_gold(&session), gold_before + 25);
+
+    set_player_gold(&mut session, u32::MAX);
+    let rejected = session.apply_shared_ground_drop_pickup_commit(&drop);
+
+    assert!(!rejected.committed);
+    assert!(rejected
+        .packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::GainedGold { .. })));
+    assert_eq!(player_gold(&session), u32::MAX);
 }
 
 #[test]
@@ -34750,6 +35438,7 @@ fn addstorage_chat_command_expands_storage_and_updates_snapshot() {
 
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "@ADDSTORAGE".to_string(),
+        linked_items: Vec::new(),
     });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -34779,6 +35468,7 @@ fn addstorage_chat_command_extends_existing_expiry() {
 
     let first_packets = session.handle_packet(ClientPacket::Chat {
         message: "@ADDSTORAGE".to_string(),
+        linked_items: Vec::new(),
     });
     let first_expiry = first_packets
         .iter()
@@ -34793,6 +35483,7 @@ fn addstorage_chat_command_extends_existing_expiry() {
 
     let second_packets = session.handle_packet(ClientPacket::Chat {
         message: "@ADDSTORAGE".to_string(),
+        linked_items: Vec::new(),
     });
     let second_expiry = second_packets
         .iter()
@@ -34823,6 +35514,7 @@ fn chat_packet_respects_persisted_chat_ban() {
 
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "hello".to_string(),
+        linked_items: Vec::new(),
     });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -34852,6 +35544,7 @@ fn expired_chat_ban_clears_and_allows_chat() {
 
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "hello".to_string(),
+        linked_items: Vec::new(),
     });
 
     assert!(packets
@@ -51791,7 +52484,7 @@ fn mentor_packets_emit_crystal_hint_and_update_surfaces() {
     assert!(allow_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::Chat {
-            chat_type: ChatType::System,
+            chat_type: ChatType::Hint,
             ..
         }
     )));
@@ -51827,6 +52520,13 @@ fn mentor_packets_emit_crystal_hint_and_update_surfaces() {
     )));
 
     let cancel_packets = session.handle_packet(ClientPacket::CancelMentor);
+    assert!(cancel_packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Chat {
+            chat_type: ChatType::System,
+            message,
+        } if message.contains("cooldown")
+    )));
     assert!(cancel_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::MentorUpdate {

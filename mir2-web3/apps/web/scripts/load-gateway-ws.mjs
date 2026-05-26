@@ -21,10 +21,21 @@ const POOL = numberFromEnv("MIR2_WS_LOAD_POOL", Math.min(32, CLIENTS));
 const ACTIONS = numberFromEnv("MIR2_WS_LOAD_ACTIONS", 20);
 const THINK_MS = numberFromEnv("MIR2_WS_LOAD_THINK_MS", 20);
 const HOLD_OPEN_MS = numberFromEnv("MIR2_WS_LOAD_HOLD_OPEN_MS", 250);
+const PRE_PLAY_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_PRE_PLAY_SETTLE_MS", 0);
+const CHAT_EVERY = numberFromEnv("MIR2_WS_LOAD_CHAT_EVERY", 10);
 const READY_TIMEOUT_MS = numberFromEnv("MIR2_WS_LOAD_READY_TIMEOUT_MS", 15_000);
 const CLOSE_TIMEOUT_MS = numberFromEnv("MIR2_WS_LOAD_CLOSE_TIMEOUT_MS", 5_000);
 const EXPECT_READY = optionalNumberFromEnv("MIR2_WS_LOAD_EXPECT_READY");
 const EXPECT_REJECTED = optionalNumberFromEnv("MIR2_WS_LOAD_EXPECT_REJECTED");
+const EXPECT_KEEPALIVE_ACK_RATIO = optionalNumberFromEnv(
+  "MIR2_WS_LOAD_EXPECT_KEEPALIVE_ACK_RATIO",
+);
+const EXPECT_KEEPALIVE_P95_MAX_MS = optionalNumberFromEnv(
+  "MIR2_WS_LOAD_EXPECT_KEEPALIVE_P95_MAX_MS",
+);
+const SEND_KEEPALIVE = booleanFromEnv("MIR2_WS_LOAD_SEND_KEEPALIVE", true);
+const SEND_MOVEMENT = booleanFromEnv("MIR2_WS_LOAD_SEND_MOVEMENT", true);
+const SEND_CHAT = booleanFromEnv("MIR2_WS_LOAD_SEND_CHAT", true);
 const ENABLE_STAGE5_COMMANDS = booleanFromEnv(
   "MIR2_WS_LOAD_ENABLE_STAGE5_COMMANDS",
   false,
@@ -49,8 +60,15 @@ async function main() {
     actionsPerClient: ACTIONS,
     thinkMs: THINK_MS,
     holdOpenMs: HOLD_OPEN_MS,
+    prePlaySettleMs: PRE_PLAY_SETTLE_MS,
+    chatEvery: CHAT_EVERY,
     expectedReady: EXPECT_READY ?? CLIENTS,
     expectedCapacityRejected: EXPECT_REJECTED ?? 0,
+    expectedKeepAliveAckRatio: EXPECT_KEEPALIVE_ACK_RATIO,
+    expectedKeepAliveP95MaxMs: EXPECT_KEEPALIVE_P95_MAX_MS,
+    sendKeepAlive: SEND_KEEPALIVE,
+    sendMovement: SEND_MOVEMENT,
+    sendChat: SEND_CHAT,
     stage5CommandsEnabled: ENABLE_STAGE5_COMMANDS,
     reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
     accountPrefix: ACCOUNT_PREFIX,
@@ -129,6 +147,16 @@ async function main() {
   metrics.finishedAt = new Date().toISOString();
   metrics.durationMs = Date.now() - started;
   metrics.keepAlive = summarize(metrics.keepAliveLatenciesMs);
+  metrics.keepAliveAckRatio =
+    metrics.keepAliveCommandsSent === 0
+      ? 1
+      : Math.round(
+          (metrics.keepAliveLatenciesMs.length / metrics.keepAliveCommandsSent) * 10000,
+        ) / 10000;
+  metrics.pendingKeepAliveCount = Math.max(
+    0,
+    metrics.keepAliveCommandsSent - metrics.keepAliveLatenciesMs.length,
+  );
   metrics.rss = summarize(metrics.rssSamples.map((sample) => sample.workingSetBytes));
   metrics.cpuPercent = summarize(metrics.rssSamples.map((sample) => sample.cpuPercent));
   if (metrics.ready > 0 && metrics.network.playDurationMs > 0) {
@@ -150,9 +178,15 @@ async function main() {
     noUnexpectedClientFailures: metrics.clientFailures.length === 0,
     gameplayCommandsSentWhenReady:
       metrics.ready === 0 ||
-      (metrics.keepAliveCommandsSent >= metrics.ready &&
-        metrics.movementCommandsSent >= metrics.ready &&
-        metrics.chatCommandsSent >= metrics.ready),
+      ((!SEND_KEEPALIVE || metrics.keepAliveCommandsSent >= metrics.ready) &&
+        (!SEND_MOVEMENT || metrics.movementCommandsSent >= metrics.ready) &&
+        (!SEND_CHAT || metrics.chatCommandsSent >= metrics.ready)),
+    keepAliveAckRatioMatchesExpectation:
+      EXPECT_KEEPALIVE_ACK_RATIO === null ||
+      metrics.keepAliveAckRatio >= EXPECT_KEEPALIVE_ACK_RATIO,
+    keepAliveP95MatchesExpectation:
+      EXPECT_KEEPALIVE_P95_MAX_MS === null ||
+      (metrics.keepAlive.p95 !== null && metrics.keepAlive.p95 <= EXPECT_KEEPALIVE_P95_MAX_MS),
   };
   metrics.ok = Object.values(metrics.assertions).every(Boolean);
 
@@ -278,6 +312,9 @@ async function runClient(index, runId, metrics) {
         error: capacityError,
       };
     }
+    if (PRE_PLAY_SETTLE_MS > 0) {
+      await delay(PRE_PLAY_SETTLE_MS);
+    }
     const bytesSentAtReady = ws.bytesSent;
     const bytesReceivedAtReady = ws.bytesReceived;
     const playStartedAt = Date.now();
@@ -286,11 +323,14 @@ async function runClient(index, runId, metrics) {
     const directions = ["Right", "Down", "Left", "Up"];
     for (let action = 0; action < ACTIONS; action += 1) {
       const time = Date.now() * 1000 + index * 100 + action;
-      pendingKeepAlives.set(time, Date.now());
-      if (send(ws, metrics, { type: "keepAlive", time })) {
+      if (SEND_KEEPALIVE) {
+        pendingKeepAlives.set(time, Date.now());
+      }
+      if (SEND_KEEPALIVE && send(ws, metrics, { type: "keepAlive", time })) {
         metrics.keepAliveCommandsSent += 1;
       }
       if (
+        SEND_MOVEMENT &&
         send(ws, metrics, {
           type: action % 3 === 0 ? "run" : "walk",
           direction: directions[action % directions.length],
@@ -298,7 +338,7 @@ async function runClient(index, runId, metrics) {
       ) {
         metrics.movementCommandsSent += 1;
       }
-      if (action % 10 === 0) {
+      if (SEND_CHAT && action % CHAT_EVERY === 0) {
         if (send(ws, metrics, { type: "chat", message: `load ${index}:${action}` })) {
           metrics.chatCommandsSent += 1;
         }

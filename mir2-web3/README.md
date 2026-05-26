@@ -38,6 +38,7 @@ The new project should not modify Crystal directly. Use Crystal as a reference a
 
 Primary references:
 
+- `docs/ARCHITECTURE-CURRENT.md`
 - `docs/PARITY-TRUTH-AUDIT.md`
 - `docs/TECH-MODERNIZATION-RFC.md`
 - `docs/ARCHITECTURE-ADOPTION-PLAN.md`
@@ -82,8 +83,13 @@ Current implemented checkpoint:
 3. `apps/gateway` exposes TCP, HTTP health, WebSocket bridge, browser manual smoke UI, and a TCP smoke binary.
 4. `apps/admin-api` exposes an Axum Admin API with Postgres-backed operator auth, audited GM commands, peer approval, live gateway delivery, persistent receipts, Postgres command/audit/outbox adapters, and Redpanda/ClickHouse event reads.
 5. `apps/admin-web` is a separate NextJS operations console with login, dashboard, players, economy, activities, servers, risk, GM tools, approvals, operators, audit, timeline, and English/Simplified Chinese UI copy.
-6. `apps/simulation` and `apps/gateway` can run with Postgres as the explicit account-store source of truth with Redis session/routing cache.
-7. `apps/web` can be pointed at a staging Gateway through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL`, while preserving the local default gateway websocket.
+6. `apps/simulation`, `apps/gateway`, and `apps/admin-api` share the same account-store environment policy: local file store by default, Postgres source of truth when explicitly selected or when the runtime is production/staging.
+7. `apps/web` supports password, Sui Passkey, and Sui wallet login through the Gateway WebSocket flow, and can be pointed at a staging Gateway through `NEXT_PUBLIC_MIR2_GATEWAY_WS_URL` while preserving the local default gateway websocket.
+8. `scripts/quality-gate.sh` provides a lightweight repo gate for the current Rust/Web engineering boundary.
+9. `apps/web` has game-grade cache instrumentation for static Crystal assets,
+   scene blueprints, critical prewarm packs, cold/warm cache smoke, and real
+   first-playable timing through `smoke:cache-metrics` and
+   `smoke:playable-metrics`.
 
 Immediate next steps:
 

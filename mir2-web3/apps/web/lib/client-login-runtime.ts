@@ -1,12 +1,17 @@
 "use client";
 
 import {
+  DUBHE_WALLET_URL,
+  getSuiWalletSummaries,
   requestPasskeyLoginToken,
   requestWalletLoginToken,
+  subscribeToSuiWalletChanges,
   type SuiLoginToken,
+  type SuiWalletSummary,
 } from "./passkey-auth";
 
-export type { SuiLoginToken };
+export { DUBHE_WALLET_URL, getSuiWalletSummaries, subscribeToSuiWalletChanges };
+export type { SuiLoginToken, SuiWalletSummary };
 
 export type GatewaySend = (
   command: Record<string, unknown>,
@@ -62,6 +67,6 @@ export function sendSuiLoginCommand(
   send({ type: "passkeyLogin", accountId, token });
 }
 
-export function requestSuiLoginToken(kind: SuiLoginKind): Promise<SuiLoginToken> {
-  return kind === "passkey" ? requestPasskeyLoginToken() : requestWalletLoginToken();
+export function requestSuiLoginToken(kind: SuiLoginKind, walletId?: string): Promise<SuiLoginToken> {
+  return kind === "passkey" ? requestPasskeyLoginToken() : requestWalletLoginToken(walletId);
 }

@@ -3,6 +3,7 @@ node_modules/
 .next/
 dist/
 out/
+.mir2-remote-assets/
 
 # Rust
 target/
@@ -29,3 +30,4 @@ output/playwright/
 
 # Local AI-generated/reference images
 ai/
+.vercel

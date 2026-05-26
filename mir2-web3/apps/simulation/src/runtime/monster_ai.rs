@@ -26,8 +26,9 @@ use super::npc::process_crystal_npc_goods_expiry;
 use super::packets::*;
 use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
-    advance_runtime_tick, current_language, is_in_world, runtime_tick, BuffResource,
-    InventoryResource, MapRuntimeResource,
+    advance_runtime_tick, crystal_packet_move_delay_ticks, current_language, is_in_world,
+    mark_crystal_packet_action, runtime_tick, take_crystal_movement_retry_if_ready, BuffResource,
+    InventoryResource, MapRuntimeResource, PlayerActionKind,
 };
 use super::session::SimulationSession;
 use super::skills::tick_ground_spell_actions;
@@ -6000,6 +6001,15 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
 
 impl SimulationSession {
     pub fn tick(&mut self) -> Vec<ServerPacket> {
+        if let Some(command) = take_crystal_movement_retry_if_ready(self.app.world_mut()) {
+            mark_crystal_packet_action(
+                self.app.world_mut(),
+                PlayerActionKind::Move,
+                crystal_packet_move_delay_ticks(command.running),
+            );
+            let packets = self.move_player_by_direction(command.direction, command.running);
+            return self.finalize_packets(packets);
+        }
         let packets = advance_world(self.app.world_mut());
         self.finalize_packets(packets)
     }

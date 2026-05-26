@@ -75,6 +75,7 @@ export function OriginalClientSceneVisualLayers({
   entityMotionSnapshots,
   motionNow,
   sceneSpriteFrameIndex,
+  useBevyEntityRenderer,
   entityKindClassName,
   onPickGroundDrop,
   onActivateEntity,
@@ -93,6 +94,7 @@ export function OriginalClientSceneVisualLayers({
   entityMotionSnapshots: Record<string, EntityMotionSnapshot>;
   motionNow: number;
   sceneSpriteFrameIndex: number;
+  useBevyEntityRenderer: boolean;
   entityKindClassName: (kind: EntityKind) => string;
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
@@ -208,7 +210,7 @@ export function OriginalClientSceneVisualLayers({
                   event.stopPropagation();
                 }}
               />
-              {sprite?.rearWeapons.map((weapon, index) => (
+              {!useBevyEntityRenderer && sprite?.rearWeapons.map((weapon, index) => (
                 <img
                   key={`rear-${entity.objectId}-${index}-${weapon.path}`}
                   className="entity-sprite-layer weapon rear"
@@ -226,7 +228,7 @@ export function OriginalClientSceneVisualLayers({
                   }}
                 />
               ))}
-              {sprite?.body ? (
+              {!useBevyEntityRenderer && sprite?.body ? (
                 <img
                   className="entity-sprite-layer body"
                   src={sprite.body.path}
@@ -243,7 +245,7 @@ export function OriginalClientSceneVisualLayers({
                   }}
                 />
               ) : null}
-              {sprite?.hair ? (
+              {!useBevyEntityRenderer && sprite?.hair ? (
                 <img
                   className="entity-sprite-layer hair"
                   src={sprite.hair.path}
@@ -260,7 +262,7 @@ export function OriginalClientSceneVisualLayers({
                   }}
                 />
               ) : null}
-              {sprite?.frontWeapons.map((weapon, index) => (
+              {!useBevyEntityRenderer && sprite?.frontWeapons.map((weapon, index) => (
                 <img
                   key={`front-${entity.objectId}-${index}-${weapon.path}`}
                   className="entity-sprite-layer weapon front"

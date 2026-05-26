@@ -19,6 +19,8 @@ still depends on human Crystal visual/feel acceptance.
 - `src/main.rs`: HTTP/WebSocket/TCP gateway entry point.
 - `src/session.rs`: Crystal-framed TCP session handling.
 - `src/web.rs`: browser API, WebSocket commands, and JSON event projection.
+- `src/auth.rs`: Sui Passkey / Sui wallet gateway token verification.
+- `src/browser_commands.rs`: browser command parsing and protocol enum helpers.
 - `src/bin/smoke.rs`: scripted local TCP smoke.
 - `src/bin/packet_trace.rs`: local/live packet trace and matrix artifact harness.
 
@@ -48,6 +50,37 @@ Manual browser surface:
 Health check:
 
 - `http://127.0.0.1:7010/health`
+
+Account-store runtime policy:
+
+- local default uses `MIR2_ACCOUNT_STORE_PATH` or `.mir2-data/accounts.json`.
+- set `MIR2_ACCOUNT_STORE_BACKEND=postgres` and
+  `MIR2_ACCOUNT_STORE_DATABASE_URL` to use Postgres as the source of truth.
+- the Postgres account-store path uses an in-process connection pool; tune it
+  with `MIR2_ACCOUNT_STORE_PG_POOL_MAX_SIZE` (default `8`),
+  `MIR2_ACCOUNT_STORE_PG_POOL_WAIT_TIMEOUT_MS` (default `2000`), and
+  `MIR2_ACCOUNT_STORE_PG_CONNECT_TIMEOUT_MS` (default `3000`).
+- `MIR2_RUNTIME_ENV=production|prod|staging`,
+  `MIR2_DEPLOYMENT_ENV=production|prod|staging`, or
+  `MIR2_ENV=production|prod|staging` requires the Postgres source-of-truth
+  account store.
+- the same production/staging environment policy also requires
+  `MIR2_GATEWAY_REDIS_CACHE_URL`; local development may still use the
+  in-memory cache.
+- set `MIR2_GATEWAY_REQUIRE_REDIS_CACHE=1` to force Redis session/routing cache
+  even outside production/staging.
+- active route/session cache refreshes are throttled per WebSocket with
+  `MIR2_GATEWAY_ROUTE_REFRESH_INTERVAL_MS` (default `5000`, clamped
+  `250..30000`) so low-latency movement/keepalive traffic does not rewrite the
+  Redis route lease on every packet.
+- runtime tick cadence is configurable with `MIR2_GATEWAY_RUNTIME_TICK_MS`
+  (default `300`, clamped `100..5000`); raising it for soak tests reduces idle
+  per-session simulation CPU at the cost of slower delayed world effects.
+- Tokio worker count is configurable with `MIR2_GATEWAY_TOKIO_WORKER_THREADS`
+  (default host parallelism, clamped `1..64`) so CPU-heavy synchronous
+  simulation steps can be isolated from lightweight HTTP health scheduling.
+- production/staging Passkey and wallet login also requires
+  `MIR2_PASSKEY_AUTH_SECRET`.
 
 Admin runtime read endpoints:
 
