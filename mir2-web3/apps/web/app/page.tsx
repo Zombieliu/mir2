@@ -2986,12 +2986,47 @@ export default function HomePage() {
 
     let disposed = false;
 
-    async function loadSceneBlueprint() {
-      try {
-        loadingSceneKeyRef.current = sceneKey;
-        const params = new URLSearchParams({
-          map: normalizedMapFileName,
-          x: String(center.x),
+      async function loadSceneBlueprint() {
+        function applySceneBlueprint(blueprint: SceneBlueprint, key: string) {
+          markMir2CacheMilestone("sceneBlueprintReady", {
+            sceneKey,
+            sceneCache: key,
+            spriteCount: blueprint.originalMapRegion ? Object.keys(blueprint.originalMapRegion.sprites).length : 0,
+            cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
+          });
+          loadedSceneKeyRef.current = sceneKey;
+          loadingSceneKeyRef.current = null;
+          setWorld((current) => ({
+            ...current,
+            mapTitle: blueprint.mapTitle ?? current.mapTitle,
+            mapFileName: current.mapFileName ?? normalizedMapFileName,
+            miniMapIndex: blueprint.miniMapIndex ?? current.miniMapIndex,
+            bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
+            sceneView: blueprint.sceneView,
+            terrainPatches: blueprint.terrainPatches,
+            decorObjects: blueprint.decorObjects,
+            originalMapRegion: blueprint.originalMapRegion,
+          }));
+        }
+
+        async function applyStarterFallback() {
+          const fallbackResponse = await fetch("/api/scene/starter");
+          if (!fallbackResponse.ok) {
+            throw new Error(`scene starter route returned ${fallbackResponse.status}`);
+          }
+          const fallbackBlueprint = (await fallbackResponse.json()) as SceneBlueprint;
+          if (disposed) return;
+          if (!fallbackBlueprint?.originalMapRegion) {
+            throw new Error("starter scene missing originalMapRegion");
+          }
+          applySceneBlueprint(fallbackBlueprint, "starter");
+        }
+
+        try {
+          loadingSceneKeyRef.current = sceneKey;
+          const params = new URLSearchParams({
+            map: normalizedMapFileName,
+            x: String(center.x),
           y: String(center.y),
           width: String(SCENE_REQUEST_WIDTH),
           height: String(SCENE_REQUEST_HEIGHT),
@@ -3025,6 +3060,12 @@ export default function HomePage() {
                     "system",
                   );
                 }
+
+                const resourceMissingMapName = normalizeMapFileName(String(body?.mapFileName ?? body?.resource?.mapFileName ?? normalizedMapFileName));
+                if (resourceMissingMapName === "0") {
+                  await applyStarterFallback();
+                  return;
+                }
               }
             } catch {
               // Ignore parse errors and fall back to generic message.
@@ -3035,26 +3076,7 @@ export default function HomePage() {
 
         const blueprint = (await response.json()) as SceneBlueprint;
         if (disposed) return;
-        markMir2CacheMilestone("sceneBlueprintReady", {
-          sceneKey,
-          sceneCache: response.headers.get("x-mir2-scene-cache"),
-          spriteCount: blueprint.originalMapRegion ? Object.keys(blueprint.originalMapRegion.sprites).length : 0,
-          cellCount: blueprint.originalMapRegion?.cells.length ?? 0,
-        });
-
-        loadedSceneKeyRef.current = sceneKey;
-        loadingSceneKeyRef.current = null;
-        setWorld((current) => ({
-          ...current,
-          mapTitle: blueprint.mapTitle ?? current.mapTitle,
-          mapFileName: current.mapFileName ?? normalizedMapFileName,
-          miniMapIndex: blueprint.miniMapIndex ?? current.miniMapIndex,
-          bigMapIndex: blueprint.bigMapIndex ?? current.bigMapIndex,
-          sceneView: blueprint.sceneView,
-          terrainPatches: blueprint.terrainPatches,
-          decorObjects: blueprint.decorObjects,
-          originalMapRegion: blueprint.originalMapRegion,
-        }));
+        applySceneBlueprint(blueprint, response.headers.get("x-mir2-scene-cache") ?? "crystal");
       } catch (error) {
         if (!disposed) {
           appendLog(t("log.sceneLoadFailed", [error instanceof Error ? error.message : String(error)]));
