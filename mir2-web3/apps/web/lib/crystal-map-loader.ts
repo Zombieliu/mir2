@@ -13,6 +13,11 @@ const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
 const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
 const PUBLIC_ORIGINAL_MAP_DIR = path.join(WORKSPACE_ROOT, "public", "original-map");
+const PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH = path.join(
+  WORKSPACE_ROOT,
+  "public",
+  "original-asset-manifest.generated.json",
+);
 const GENERATED_DATA_DIR = path.join(WORKSPACE_ROOT, "lib", "generated");
 const LOCAL_CRYSTAL_CLIENT_ROOT = path.join(MIR2_ROOT, "downloads", "crystal-client-full");
 const DEFAULT_CRYSTAL_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
@@ -46,9 +51,6 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 const REQUEST_FILE_WRITES_ENABLED =
   process.env.MIR2_ENABLE_REQUEST_FILE_WRITES === "1" ||
   (IS_DEVELOPMENT && process.env.MIR2_DISABLE_REQUEST_FILE_WRITES !== "1");
-const REMOTE_ORIGINAL_MAP_ASSETS_ENABLED =
-  Boolean(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL || process.env.MIR2_ASSET_BASE_URL) &&
-  process.env.MIR2_DISABLE_REMOTE_ORIGINAL_MAP_ASSETS !== "1";
 const SYNTHETIC_MAP_FALLBACK_ENABLED = process.env.MIR2_ALLOW_SYNTHETIC_MAP_FALLBACK === "1";
 const SERVER_MAP_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_MAP_CACHE_MAX_BYTES, 64 * 1024 * 1024);
 const SERVER_LIBRARY_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_LIBRARY_CACHE_MAX_BYTES, 24 * 1024 * 1024);
@@ -143,6 +145,11 @@ type DecodedFrameCacheEntry = {
   bytes: number;
 };
 
+type OriginalAssetManifestPayload = {
+  schemaVersion?: number;
+  assets?: Record<string, unknown>;
+};
+
 const mapCache = new Map<string, SizedCacheEntry<ParsedMap>>();
 const libraryCache = new Map<string, SizedCacheEntry<ParsedLibrary | null>>();
 const decodedFrameCache = new Map<string, DecodedFrameCacheEntry>();
@@ -150,6 +157,7 @@ const exportedFrames = new Set<string>();
 let mapCacheBytes = 0;
 let libraryCacheBytes = 0;
 let decodedFrameCacheBytes = 0;
+let originalAssetManifestPaths: Set<string> | null | undefined;
 const resourceStats = {
   libraryParseCount: 0,
   frameHeaderReadCount: 0,
@@ -197,6 +205,67 @@ export function isCrystalResourceMissingError(error: unknown): error is CrystalR
     error !== null &&
     (error as { code?: unknown }).code === "resource_missing"
   );
+}
+
+function originalAssetManifestHasPublicPath(publicPath: string) {
+  const normalizedPath = normalizeOriginalAssetPublicPath(publicPath);
+  if (!normalizedPath) {
+    return false;
+  }
+  const manifestPaths = loadOriginalAssetManifestPaths();
+  return manifestPaths?.has(normalizedPath) ?? false;
+}
+
+function loadOriginalAssetManifestPaths() {
+  if (originalAssetManifestPaths !== undefined) {
+    return originalAssetManifestPaths;
+  }
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH, "utf8"),
+    ) as OriginalAssetManifestPayload;
+    originalAssetManifestPaths = new Set(
+      Object.keys(payload.assets ?? {})
+        .map(normalizeOriginalAssetPublicPath)
+        .filter((value): value is string => Boolean(value)),
+    );
+    return originalAssetManifestPaths;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+    originalAssetManifestPaths = null;
+    if (originalAssetManifestRequired()) {
+      throw new CrystalResourceMissingError({
+        message: `Original asset manifest is missing: ${PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH}`,
+        resourceType: "png",
+        resourcePath: PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH,
+      });
+    }
+    return null;
+  }
+}
+
+function originalAssetManifestRequired() {
+  return !IS_DEVELOPMENT && process.env.MIR2_DISABLE_ORIGINAL_ASSET_MANIFEST !== "1";
+}
+
+function normalizeOriginalAssetPublicPath(publicPath: string | null | undefined) {
+  if (typeof publicPath !== "string" || !publicPath.trim()) {
+    return null;
+  }
+  let pathname = publicPath.trim();
+  try {
+    pathname = new URL(pathname, "https://mir2.local").pathname;
+  } catch {
+    pathname = pathname.split("?")[0]?.split("#")[0] ?? pathname;
+  }
+  pathname = `/${pathname.replace(/^\/+/, "")}`;
+  if (!pathname.startsWith("/original-map/") && !pathname.startsWith("/original-ui/")) {
+    return null;
+  }
+  return pathname;
 }
 
 export async function loadCrystalSceneBlueprint(options: ExportRegionOptions = {}): Promise<SceneBlueprint> {
@@ -728,12 +797,13 @@ function exportFrame(
   const frameKey = `${normalizedKey}:${frameIndex}`;
   const exportDir = path.join(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_MAP_DIR, ...normalizedKey.split("/"));
   const pngPath = path.join(/* turbopackIgnore: true */ exportDir, `${frameIndex}.png`);
+  const publicPath = `/original-map/${normalizedKey}/${frameIndex}.png`;
   const pngExists = existsSync(/* turbopackIgnore: true */ pngPath);
-  if (!pngExists && !REQUEST_FILE_WRITES_ENABLED && !REMOTE_ORIGINAL_MAP_ASSETS_ENABLED) {
+  if (!pngExists && !REQUEST_FILE_WRITES_ENABLED && !originalAssetManifestHasPublicPath(publicPath)) {
     throw new CrystalResourceMissingError({
-      message: `Pre-exported map frame PNG is missing: ${pngPath}`,
+      message: `Pre-exported map frame PNG is missing from local public assets and original asset manifest: ${publicPath}`,
       resourceType: "png",
-      resourcePath: pngPath,
+      resourcePath: publicPath,
       libraryKey: normalizedKey,
       frameIndex,
     });
@@ -749,7 +819,7 @@ function exportFrame(
   }
 
   return {
-    path: `/original-map/${normalizedKey}/${frameIndex}.png`,
+    path: publicPath,
     width: frame.width,
     height: frame.height,
     offsetX: frame.x,
@@ -1446,6 +1516,14 @@ export function resetCrystalMapLoaderResourceStatsForTests() {
   resourceStats.decodedFrameCacheMisses = 0;
   decodedFrameCache.clear();
   decodedFrameCacheBytes = 0;
+}
+
+export function crystalOriginalAssetManifestHasPathForTests(publicPath: string) {
+  return originalAssetManifestHasPublicPath(publicPath);
+}
+
+export function resetCrystalOriginalAssetManifestForTests() {
+  originalAssetManifestPaths = undefined;
 }
 
 function normalizeLibraryName(libraryName: string) {

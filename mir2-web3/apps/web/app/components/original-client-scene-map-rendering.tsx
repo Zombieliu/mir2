@@ -416,6 +416,7 @@ type AlphaKeyedSceneAssetEntry = {
 };
 const alphaKeyedSceneAssetUrls = new Map<string, AlphaKeyedSceneAssetEntry>();
 const failedStaticSceneAssetUrls = new Map<string, number>();
+const loggedStaticSceneAssetFailures = new Set<string>();
 let alphaKeyedSceneAssetBytes = 0;
 
 export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[] {
@@ -919,11 +920,17 @@ function staticSceneAssetRecentlyFailed(url: string) {
 }
 
 function markStaticSceneAssetFailed(image: HTMLImageElement, originalSrc: string) {
-  failedStaticSceneAssetUrls.set(staticSceneAssetFailureKey(originalSrc), Date.now());
+  const failureKey = staticSceneAssetFailureKey(originalSrc);
+  failedStaticSceneAssetUrls.set(failureKey, Date.now());
+  if (!loggedStaticSceneAssetFailures.has(failureKey)) {
+    loggedStaticSceneAssetFailures.add(failureKey);
+    console.warn("[mir2] scene asset missing", { path: failureKey });
+  }
   while (failedStaticSceneAssetUrls.size > FAILED_STATIC_SCENE_ASSET_MAX_ENTRIES) {
     const oldestKey = failedStaticSceneAssetUrls.keys().next().value as string | undefined;
     if (!oldestKey) break;
     failedStaticSceneAssetUrls.delete(oldestKey);
+    loggedStaticSceneAssetFailures.delete(oldestKey);
   }
   image.dataset.mir2LoadFailed = "true";
   image.style.visibility = "hidden";

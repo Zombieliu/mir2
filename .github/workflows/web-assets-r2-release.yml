@@ -109,6 +109,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "1"
         run: |
           set -euo pipefail
           bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
@@ -123,6 +124,6 @@ jobs:
         with:
           name: mir2-web-remote-assets
           path: |
-            mir2-web3/apps/web/docs/generated/remote-assets/latest-remote-asset-release.json
-            mir2-web3/apps/web/docs/generated/remote-assets/**/remote-asset-release.json
+            mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json
+            mir2-web3/docs/generated/remote-assets/**/remote-asset-release.json
           if-no-files-found: error
