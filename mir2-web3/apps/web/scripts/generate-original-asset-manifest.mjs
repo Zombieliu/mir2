@@ -10,7 +10,7 @@ const REPO_ROOT = path.resolve(WEB_ROOT, "..", "..");
 const PUBLIC_ROOT = path.join(WEB_ROOT, "public");
 const DEFAULT_OUTPUT_PATH = path.join(PUBLIC_ROOT, "original-asset-manifest.generated.json");
 const SCHEMA_VERSION = 1;
-const PNG_EXTENSION = ".png";
+const TRACKED_ASSET_EXTENSIONS = new Set([".png", ".cur"]);
 const MANIFEST_ROOTS = [
   { publicRoot: "original-map", source: "original-map" },
   { publicRoot: "original-ui", source: "original-ui" },
@@ -136,7 +136,7 @@ async function collectGitTrackedPngs() {
   return result.stdout
     .split("\0")
     .filter(Boolean)
-    .filter((filePath) => path.extname(filePath).toLowerCase() === PNG_EXTENSION)
+    .filter((filePath) => TRACKED_ASSET_EXTENSIONS.has(path.extname(filePath).toLowerCase()))
     .map((filePath) => path.join(REPO_ROOT, filePath))
     .sort((left, right) => left.localeCompare(right));
 }
@@ -151,7 +151,7 @@ async function listPngFilesRecursive(root) {
       files.push(...(await listPngFilesRecursive(entryPath)));
       continue;
     }
-    if (entry.isFile() && path.extname(entry.name).toLowerCase() === PNG_EXTENSION) {
+    if (entry.isFile() && TRACKED_ASSET_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
       files.push(entryPath);
     }
   }

@@ -1,6 +1,11 @@
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const DEFAULT_ASSET_BASE_TEMPLATE = "https://assets.mir2.obelisk.build/mir2/v/{version}";
 const DEFAULT_PATHS = [
+  "/original-ui/Title/32.png",
+  "/original-ui/Title/30.png",
+  "/original-ui/ChrSel/0.png",
+  "/original-ui/Cursors/Cursor_Default.CUR",
+  "/original-ui/Cursors/Cursor_TextPrompt.CUR",
   "/original-map/WemadeMir2/Objects23/1422.png",
   "/original-map/WemadeMir2/Objects23/1426.png",
   "/original-map/WemadeMir2/Objects23/1428.png",
