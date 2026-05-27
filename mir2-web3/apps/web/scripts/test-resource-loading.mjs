@@ -120,6 +120,11 @@ const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-c
   assert.equal(loaderExports.crystalMapMiniMapIndexForTests("0"), 101, "Bichon map 0 mini index comes from transform metadata");
   assert.equal(loaderExports.crystalMapBigMapIndexForTests("0"), 101, "Bichon map 0 big map index comes from transform metadata");
   assert.equal(loaderExports.crystalMapMiniMapIndexForTests("Map/0.MAP"), 101);
+  assert.equal(loaderExports.crystalMapLibraryKeyForIndexForTests(245), "WemadeMir3/Snow/Tilesc");
+  assert.equal(loaderExports.crystalMapLibraryKeyForIndexForTests(227), "WemadeMir3/Object1c");
+  assert.equal(loaderExports.crystalMapLibraryKeyForIndexForTests(242), "WemadeMir3/Object1c");
+  assert.equal(loaderExports.crystalMapLibraryKeyForIndexForTests(257), "WemadeMir3/Object1c");
+  assert.equal(loaderExports.crystalMapLibraryKeyForIndexForTests(258), "WemadeMir3/Object2c");
 }
 
 {

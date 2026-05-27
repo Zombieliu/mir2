@@ -46,6 +46,9 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 const REQUEST_FILE_WRITES_ENABLED =
   process.env.MIR2_ENABLE_REQUEST_FILE_WRITES === "1" ||
   (IS_DEVELOPMENT && process.env.MIR2_DISABLE_REQUEST_FILE_WRITES !== "1");
+const REMOTE_ORIGINAL_MAP_ASSETS_ENABLED =
+  Boolean(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL || process.env.MIR2_ASSET_BASE_URL) &&
+  process.env.MIR2_DISABLE_REMOTE_ORIGINAL_MAP_ASSETS !== "1";
 const SYNTHETIC_MAP_FALLBACK_ENABLED = process.env.MIR2_ALLOW_SYNTHETIC_MAP_FALLBACK === "1";
 const SERVER_MAP_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_MAP_CACHE_MAX_BYTES, 64 * 1024 * 1024);
 const SERVER_LIBRARY_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_LIBRARY_CACHE_MAX_BYTES, 24 * 1024 * 1024);
@@ -725,7 +728,8 @@ function exportFrame(
   const frameKey = `${normalizedKey}:${frameIndex}`;
   const exportDir = path.join(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_MAP_DIR, ...normalizedKey.split("/"));
   const pngPath = path.join(/* turbopackIgnore: true */ exportDir, `${frameIndex}.png`);
-  if (!existsSync(/* turbopackIgnore: true */ pngPath) && !REQUEST_FILE_WRITES_ENABLED) {
+  const pngExists = existsSync(/* turbopackIgnore: true */ pngPath);
+  if (!pngExists && !REQUEST_FILE_WRITES_ENABLED && !REMOTE_ORIGINAL_MAP_ASSETS_ENABLED) {
     throw new CrystalResourceMissingError({
       message: `Pre-exported map frame PNG is missing: ${pngPath}`,
       resourceType: "png",
@@ -734,7 +738,7 @@ function exportFrame(
       frameIndex,
     });
   }
-  if (!exportedFrames.has(frameKey) && !existsSync(/* turbopackIgnore: true */ pngPath)) {
+  if (!exportedFrames.has(frameKey) && !pngExists && REQUEST_FILE_WRITES_ENABLED) {
     exportedFrames.add(frameKey);
     const decoded = decodeLibraryFrameRgba(library, frameIndex);
     if (!decoded) return null;
@@ -1207,6 +1211,10 @@ export function crystalMapBigMapIndexForTests(mapFileName: string) {
   return bigMapIndexForMapFileName(mapFileName, null);
 }
 
+export function crystalMapLibraryKeyForIndexForTests(index: number) {
+  return mapLibraryKeyForIndex(index);
+}
+
 function exportBoundsForScene(
   sceneView: { center: { x: number; y: number }; width: number; height: number },
   parsedMap: ParsedMap,
@@ -1307,6 +1315,10 @@ function mapMir3LibraryKey(index: number, baseIndex: 200 | 300, root: "WemadeMir
   ];
   const name = names[slot];
   if (!name) return null;
+
+  if (root === "WemadeMir3" && (name === "Object1c" || name === "Object2c")) {
+    return `${root}/${name}`;
+  }
 
   if (root === "WemadeMir3") {
     const folders = ["", "Wood", "Sand", "Snow", "Forest"];

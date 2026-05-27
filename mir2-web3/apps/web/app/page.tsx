@@ -1328,10 +1328,9 @@ export default function HomePage() {
       return;
     }
 
-    // Keep movement unlocked after the first playable scene; before that, later renderer readiness can still tighten the gate.
     const nextSceneInteractionReady = readiness.interactionReady ?? readiness.ready;
-    if (initialSceneAssetsReadyRef.current !== nextSceneInteractionReady) {
-      setInitialSceneAssetsReadyState(nextSceneInteractionReady);
+    if (nextSceneInteractionReady && !initialSceneAssetsReadyRef.current) {
+      setInitialSceneAssetsReadyState(true);
     }
   }
 
