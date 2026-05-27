@@ -9,7 +9,7 @@ import { ASSET_CACHE_PACKS } from "../../../lib/asset-cache-packs";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const CONTENT_HASH_LIMIT_BYTES = 8 * 1024 * 1024;
+const CONTENT_HASH_LIMIT_BYTES = 64 * 1024 * 1024;
 const isDevelopment = process.env.NODE_ENV === "development";
 
 type ManifestInput = {
@@ -30,6 +30,11 @@ const webRoot = process.cwd();
 const projectRoot = path.resolve(webRoot, "../..");
 
 const manifestInputs: ManifestInput[] = [
+  {
+    name: "original-asset-manifest",
+    absolutePath: path.join(webRoot, "public/original-asset-manifest.generated.json"),
+    required: !isDevelopment,
+  },
   {
     name: "original-ui-manifest",
     absolutePath: path.join(webRoot, "public/original-ui/manifest.generated.json"),

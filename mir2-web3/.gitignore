@@ -4,6 +4,7 @@ node_modules/
 dist/
 out/
 .mir2-remote-assets/
+apps/web/public/original-asset-manifest.generated.json
 
 # Rust
 target/

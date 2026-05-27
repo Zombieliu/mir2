@@ -22,6 +22,14 @@ const concurrency = numberArg(args.concurrency ?? process.env.MIR2_R2_UPLOAD_CON
 const includeReleaseManifest = booleanArg(args.includeReleaseManifest ?? process.env.MIR2_R2_UPLOAD_RELEASE_MANIFEST, true);
 const remote = booleanArg(args.remote ?? process.env.MIR2_R2_REMOTE, true);
 const maxAttempts = numberArg(args.maxAttempts ?? process.env.MIR2_R2_UPLOAD_ATTEMPTS, 3);
+const verifyOriginalAssets = booleanArg(
+  args.verifyOriginalAssets ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSETS,
+  false,
+);
+const verifyOriginalAssetConcurrency = numberArg(
+  args.verifyOriginalAssetConcurrency ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_CONCURRENCY,
+  16,
+);
 const uploadDriver = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVER ?? "wrangler").toLowerCase();
 const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? process.env.CF_ACCOUNT_ID ?? "";
 const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN ?? process.env.CF_API_TOKEN ?? "";
@@ -60,6 +68,7 @@ async function main() {
           assetBaseUrl: release.assetBaseUrl ?? null,
           uploadCount: uploads.length,
           totalBytes,
+          verifyOriginalAssets,
           sample: uploads.slice(0, 8).map((upload) => ({
             objectKey: upload.objectKey,
             size: upload.size,
@@ -110,6 +119,10 @@ async function main() {
     }
   });
 
+  if (verifyOriginalAssets) {
+    await verifyUploadedOriginalAssets(release, uploads);
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -122,11 +135,43 @@ async function main() {
         assetBaseUrl: release.assetBaseUrl ?? null,
         uploadCount: uploads.length,
         totalBytes,
+        verifiedOriginalAssetCount: verifyOriginalAssets
+          ? uploads.filter((upload) => upload.sources?.includes("original-asset-manifest")).length
+          : 0,
       },
       null,
       2,
     ),
   );
+}
+
+async function verifyUploadedOriginalAssets(release, uploads) {
+  const assetBaseUrl = normalizeOptionalUrl(release.assetBaseUrl ?? "");
+  if (!assetBaseUrl) {
+    throw new Error("MIR2_R2_VERIFY_ORIGINAL_ASSETS=1 requires release.assetBaseUrl.");
+  }
+
+  const originalAssetUploads = uploads.filter((upload) =>
+    Array.isArray(upload.sources) && upload.sources.includes("original-asset-manifest"),
+  );
+  if (!originalAssetUploads.length) {
+    throw new Error("No release files are tagged with original-asset-manifest; cannot verify published originals.");
+  }
+
+  let completed = 0;
+  await runPool(originalAssetUploads, verifyOriginalAssetConcurrency, async (upload) => {
+    const url = `${assetBaseUrl}/${String(upload.relativePath || upload.path || "").replace(/^\/+/, "")}`;
+    const response = await fetch(url, { method: "HEAD" });
+    if (!response.ok) {
+      throw new Error(
+        `Original asset missing after R2 upload: HTTP ${response.status} ${url} objectKey=${upload.objectKey}`,
+      );
+    }
+    completed += 1;
+    if (completed % 500 === 0 || completed === originalAssetUploads.length) {
+      console.log(`[mir2-r2] verified original assets ${completed}/${originalAssetUploads.length}`);
+    }
+  });
 }
 
 async function buildUploadList(release) {

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(WEB_ROOT, "..", "..");
+const ORIGINAL_ASSET_MANIFEST_PATH = path.join(WEB_ROOT, "public", "original-asset-manifest.generated.json");
 const DEFAULT_BASE_URL = "http://127.0.0.1:13010";
 const DEFAULT_OUTPUT_ROOT = path.resolve(REPO_ROOT, "docs", "generated", "remote-assets");
 const DEFAULT_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -117,6 +118,7 @@ async function main() {
     stats: {
       packCount: collected.packs.length,
       sceneCount: collected.scenes.length,
+      originalAssetManifestAssetCount: collected.originalAssetManifest.assetCount,
       sceneSpriteRootCount: collected.sceneSpriteRoots.length,
       sceneSpriteFileCount: collected.sceneSpriteRoots.reduce((sum, root) => sum + root.fileCount, 0),
       publicAssetRootCount: collected.publicAssetRoots.length,
@@ -128,6 +130,7 @@ async function main() {
     },
     packs: collected.packs,
     scenes: collected.scenes,
+    originalAssetManifest: collected.originalAssetManifest,
     sceneSpriteRoots: collected.sceneSpriteRoots,
     publicAssetRoots: collected.publicAssetRoots,
     files: staged.files,
@@ -171,6 +174,7 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
   const scenes = [];
   const sceneSpriteRootRecords = [];
   const publicAssetRootRecords = [];
+  const originalAssetManifestRecord = await collectOriginalAssetManifestStaticUrls(staticUrls);
   const resourcePacks = Array.isArray(assetManifest.resourcePacks) ? assetManifest.resourcePacks : [];
 
   for (const pack of [...resourcePacks].sort((a, b) => Number(a.priority ?? 0) - Number(b.priority ?? 0))) {
@@ -232,9 +236,58 @@ async function collectReleaseUrls(assetManifest, manifestUrl) {
     staticUrls,
     packs,
     scenes,
+    originalAssetManifest: originalAssetManifestRecord,
     sceneSpriteRoots: sceneSpriteRootRecords,
     publicAssetRoots: publicAssetRootRecords,
   };
+}
+
+async function collectOriginalAssetManifestStaticUrls(staticUrls) {
+  const manifest = await readOriginalAssetManifest();
+  const assetPaths = originalAssetManifestAssetPaths(manifest);
+  for (const assetPath of assetPaths) {
+    addStaticUrl(staticUrls, assetPath, "original-asset-manifest");
+  }
+
+  return {
+    path: path.relative(REPO_ROOT, ORIGINAL_ASSET_MANIFEST_PATH).split(path.sep).join("/"),
+    schemaVersion: manifest.schemaVersion ?? null,
+    assetHash: manifest.assetHash ?? null,
+    assetCount: assetPaths.length,
+    originalMapPngCount: manifest.stats?.originalMapPngCount ?? null,
+    originalUiPngCount: manifest.stats?.originalUiPngCount ?? null,
+  };
+}
+
+async function readOriginalAssetManifest() {
+  try {
+    return JSON.parse(await fs.readFile(ORIGINAL_ASSET_MANIFEST_PATH, "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(`Original asset manifest is missing: ${ORIGINAL_ASSET_MANIFEST_PATH}`);
+    }
+    throw error;
+  }
+}
+
+function originalAssetManifestAssetPaths(manifest) {
+  const paths = Object.keys(manifest?.assets ?? {})
+    .map(normalizeOriginalAssetManifestPath)
+    .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right));
+  if (!paths.length) {
+    throw new Error(`Original asset manifest has no assets: ${ORIGINAL_ASSET_MANIFEST_PATH}`);
+  }
+  return paths;
+}
+
+function normalizeOriginalAssetManifestPath(value) {
+  const pathname = String(value || "").trim().replace(/^\/+/, "");
+  if (!pathname) return "";
+  const assetPath = `/${pathname}`;
+  if (!assetPath.startsWith("/original-map/") && !assetPath.startsWith("/original-ui/")) return "";
+  if (path.extname(assetPath).toLowerCase() !== ".png") return "";
+  return assetPath;
 }
 
 function addStaticUrl(staticUrls, value, source) {

@@ -117,6 +117,15 @@ Status values:
   source-data or map-library mapping gap because that exact file is absent from
   the local source tree too; the new immutable negative cache prevents it from
   becoming a retry storm while the mapping gap is investigated.
+- 2026-05-27 production original-asset manifest hardening: Web now generates
+  `public/original-asset-manifest.generated.json` during build/test, hashes it
+  into `/api/asset-manifest`, and makes `/api/scene/crystal` refuse map frames
+  that are neither present locally nor declared in that manifest. The R2 release
+  builder stages every manifest-declared `/original-map` and `/original-ui` PNG,
+  and the R2 upload workflow can HEAD the final CDN object for each declared
+  original asset before accepting the release. Resource tests now lock the
+  previously failing `Objects23/1422/1426/1427/1428`, `NPC/16/27/83`, and
+  `Monster/000/139` paths plus Bichon scene blueprint frame coverage.
 - 2026-05-26 raw WebGL2 atlas gameplay closeout: Player Web now has a
   browser-native `WebGl2EntityAtlasLayer` that reuses the existing
   `BevyEntityRenderState`/entity atlas schema and draws atlas-backed entity
