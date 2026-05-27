@@ -29,7 +29,7 @@ the same value for the R2 upload, Cloudflare Worker proxy, and Vercel build.
 The current verified public R2 release base is:
 
 ```text
-https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c
+https://assets.mir2.obelisk.build/mir2/v/<asset-version>
 ```
 
 For local refresh, start Player Web, stage the release, and upload:
@@ -72,6 +72,17 @@ Release order is strict:
    `NEXT_PUBLIC_MIR2_ASSET_BASE_URL`, and `MIR2_ASSET_OBJECT_PREFIX`.
 
 Do not deploy Vercel before the R2 prefix and Worker proxy are verified.
+
+Do not deploy Vercel alone for production.
+`web-assets-r2-release` must run with:
+
+- `publish_r2=true`
+- `deploy_worker=true`
+- `deploy_vercel=true`
+
+Do not manually deploy `mir2-domain-proxy` unless both
+`MIR2_ASSET_VERSION` and `MIR2_ASSET_OBJECT_PREFIX` are explicit and
+consistent with `/api/asset-manifest`.
 
 For targeted full-library repairs without expanding the main checkout, export
 one Crystal UI library into a temporary staging root and upload a focused
@@ -208,6 +219,12 @@ The Cloudflare player-domain proxy should also route
 PNG frames are produced from source map sprite blend rules, and routing them to
 R2 avoids a cold first-load dependency on Vercel for the same URLs.
 
+Disable Cloudflare Rocket Loader for `mir2.obelisk.build/*` at the domain
+settings level until hydration behavior is fully verified. This is a temporary
+hardening step to remove JS scheduling side effects during smoke verification.
+As a secondary hardening layer, `OriginalClientShell` is rendered only on
+client-side (no SSR mount).
+
 The manual workflow `Mir2 Web Assets R2 Release` performs the same staging and
 upload flow in GitHub Actions when the generated static assets are present in
 the checkout.
@@ -231,16 +248,16 @@ MIR2_PUBLIC_R2_ASSET_BASE_URL
 Set these Vercel env vars before handing the URL to testers:
 
 ```text
-NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c
-MIR2_ASSET_OBJECT_PREFIX=mir2/v/37596e16d64fde7c
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/<asset-version>
+MIR2_ASSET_OBJECT_PREFIX=mir2/v/<asset-version>
 NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=wss://<gateway-domain>/ws
 MIR2_PASSKEY_AUTH_SECRET=<same-secret-as-gateway>
 MIR2_ENV=staging
 ```
 
-`NEXT_PUBLIC_MIR2_ASSET_BASE_URL` may be templated for future release prefixes,
-but production currently pins the already uploaded R2 prefix above. Do not point
-the app at a fresh `{version}` prefix until that prefix has been uploaded.
+`NEXT_PUBLIC_MIR2_ASSET_BASE_URL` should match the uploaded `MIR2_ASSET_VERSION`
+prefix in the same release cycle. Avoid pointing the app at a fresh
+`{version}` prefix before it is uploaded and smoke-verified.
 
 ## Gateway Map Asset Release
 

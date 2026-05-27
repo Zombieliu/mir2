@@ -1,10 +1,6 @@
 const DEFAULT_ORIGIN_URL =
   "https://mir2-web3-web.vercel.app";
 const DEFAULT_GATEWAY_ORIGIN_URL = "https://165.154.65.136.sslip.io";
-const DEFAULT_ASSET_ORIGIN_URL =
-  "https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c";
-const DEFAULT_ASSET_VERSION = "37596e16d64fde7c";
-const DEFAULT_ASSET_OBJECT_PREFIX_TEMPLATE = "mir2/v/{version}";
 const DEFAULT_ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const ASSET_NOT_FOUND_CACHE_CONTROL = "public, max-age=60";
 
@@ -220,19 +216,28 @@ async function serveStaticAssetFromR2(
   ctx: ExecutionContext,
   publicUrl: URL,
 ): Promise<Response> {
+  const releaseConfig = resolveAssetReleaseConfig(env);
+  if (releaseConfig.errorResponse) {
+    return releaseConfig.errorResponse;
+  }
+
+  const { assetVersion, assetObjectPrefix, assetOriginUrl } = releaseConfig;
+
   if (request.method !== "GET" && request.method !== "HEAD") {
-    return assetError("method_not_allowed", 405, "method_not_allowed", null);
+    return assetError("method_not_allowed", 405, "method_not_allowed", publicUrl.pathname, null);
   }
 
   if (!env.MIR2_ASSETS) {
-    const assetOriginUrl = env.ASSET_ORIGIN_URL || DEFAULT_ASSET_ORIGIN_URL;
-    const assetResponse = await fetch(rewriteToAssetOrigin(request, assetOriginUrl));
+    const requestAssetOriginUrl = assetOriginUrl.includes("{version}")
+      ? assetOriginUrl.replace("{version}", assetVersion)
+      : assetOriginUrl;
+    const assetResponse = await fetch(rewriteToAssetOrigin(request, requestAssetOriginUrl));
     return cleanAssetResponse(assetResponse);
   }
 
-  const objectKey = assetObjectKeyForPath(publicUrl.pathname, env);
+  const objectKey = assetObjectKeyForPath(publicUrl.pathname, assetObjectPrefix);
   if (!objectKey) {
-    return assetError("asset_not_found", 404, "invalid_asset_path", null);
+    return assetError("asset_not_found", 404, "invalid_asset_path", publicUrl.pathname, null);
   }
 
   const cacheKey = new Request(`https://mir2-r2-cache.local/${objectKey}`, { method: "GET" });
@@ -252,10 +257,10 @@ async function serveStaticAssetFromR2(
 
   const object = await env.MIR2_ASSETS.get(objectKey);
   if (!object) {
-    return assetError("asset_not_found", 404, "asset_not_found", objectKey);
+    return assetError("asset_not_found", 404, "asset_not_found", publicUrl.pathname, objectKey);
   }
 
-  const headers = assetObjectHeaders(objectKey, object, env, "MISS");
+  const headers = assetObjectHeaders(objectKey, object, env, assetVersion, "MISS");
   const response = new Response(request.method === "HEAD" ? null : object.body, {
     headers,
     status: 200,
@@ -283,6 +288,7 @@ function assetObjectHeaders(
   objectKey: string,
   object: R2Object,
   env: Env,
+  assetVersion: string,
   cacheState: "MISS" | "HIT",
 ): Headers {
   const headers = new Headers();
@@ -290,7 +296,7 @@ function assetObjectHeaders(
   headers.set("content-type", object.httpMetadata?.contentType || contentTypeForObjectKey(objectKey));
   headers.set("etag", object.httpEtag);
   headers.set("x-mir2-asset-key", objectKey);
-  headers.set("x-mir2-asset-version", assetVersion(env));
+  headers.set("x-mir2-asset-version", assetVersion);
   headers.set("x-mir2-domain-proxy", "r2-asset");
   headers.set("x-mir2-edge-cache", cacheState);
   disableHttp3AltSvc(headers);
@@ -301,23 +307,37 @@ function assetError(
   error: string,
   status: number,
   code: string,
+  publicPath: string,
   objectKey: string | null,
 ): Response {
   const headers = new Headers({
     "cache-control": status === 404 ? ASSET_NOT_FOUND_CACHE_CONTROL : "no-store",
     "content-type": "application/json; charset=utf-8",
   });
+  if (publicPath) {
+    headers.set("x-mir2-public-path", publicPath);
+  }
   if (objectKey) {
     headers.set("x-mir2-asset-key", objectKey);
   }
   disableHttp3AltSvc(headers);
-  return new Response(JSON.stringify({ error, code, objectKey }), {
+  const payload = {
+    error,
+    code,
+    publicPath,
+    objectKey,
+  };
+  return new Response(JSON.stringify(payload), {
     headers,
     status,
   });
 }
 
-function assetObjectKeyForPath(pathname: string, env: Env): string {
+function assetObjectKeyForPath(pathname: string, prefix: string): string {
+  if (!prefix) {
+    return "";
+  }
+
   const assetPath = pathname
     .split("/")
     .filter(Boolean)
@@ -332,19 +352,46 @@ function assetObjectKeyForPath(pathname: string, env: Env): string {
   if (!assetPath || assetPath.includes("..") || assetPath.includes("\\")) {
     return "";
   }
-  return `${assetObjectPrefix(env)}/${assetPath}`;
+  return `${prefix}/${assetPath}`;
 }
 
-function assetObjectPrefix(env: Env): string {
-  const configured = env.MIR2_ASSET_OBJECT_PREFIX?.trim();
-  if (configured) {
-    return configured.replace(/^\/+|\/+$/g, "");
+function normalizeAssetObjectPrefix(value: string | undefined): string {
+  return String(value ?? "").trim().replace(/^\/+|\/+$/g, "");
+}
+
+type AssetReleaseConfigResult = {
+  assetVersion: string;
+  assetObjectPrefix: string;
+  assetOriginUrl: string;
+  errorResponse: null | Response;
+};
+
+function resolveAssetReleaseConfig(env: Env): AssetReleaseConfigResult {
+  const assetVersion = normalizeAssetVersion(env.MIR2_ASSET_VERSION || "");
+  const objectPrefix = normalizeAssetObjectPrefix(env.MIR2_ASSET_OBJECT_PREFIX);
+  const assetOriginUrl = (env.ASSET_ORIGIN_URL || "").trim();
+
+  if (!assetVersion || !objectPrefix || !assetOriginUrl) {
+    return {
+      assetVersion: "",
+      assetObjectPrefix: "",
+      assetOriginUrl: "",
+      errorResponse: assetError(
+        "asset_release_config_missing",
+        503,
+        "asset_release_config_missing",
+        "",
+        null,
+      ),
+    };
   }
-  return DEFAULT_ASSET_OBJECT_PREFIX_TEMPLATE.replace("{version}", assetVersion(env));
-}
 
-function assetVersion(env: Env): string {
-  return normalizeAssetVersion(env.MIR2_ASSET_VERSION || DEFAULT_ASSET_VERSION) || DEFAULT_ASSET_VERSION;
+  return {
+    assetVersion,
+    assetObjectPrefix: objectPrefix,
+    assetOriginUrl,
+    errorResponse: null,
+  };
 }
 
 function normalizeAssetVersion(value: string): string {

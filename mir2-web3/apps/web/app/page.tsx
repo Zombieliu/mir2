@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import dynamic from "next/dynamic";
 
-import { OriginalClientShell } from "./original-client-shell";
 import {
   buildTranslator,
   formatRuntimeMessage,
@@ -57,6 +57,14 @@ import {
   type QueuedMoveIntent,
 } from "./components/original-client-movement-controller";
 import type { BevyEntityRenderState, SceneAssetReadiness } from "./components/original-client-shell-types";
+
+const OriginalClientShell = dynamic(
+  () => import("./original-client-shell").then((module) => module.OriginalClientShell),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 
 type RuntimeStatus = {
   phase: string;
@@ -1040,7 +1048,12 @@ function movementConsoleLogEnabled() {
 }
 
 function isMovementConsoleCommand(command: Record<string, unknown>) {
-  return command.type === "walk" || command.type === "run" || command.type === "moveTo" || command.type === "turn";
+  return (
+    command.type === "walk" ||
+    command.type === "run" ||
+    command.type === "turn" ||
+    command.type === "moveTo"
+  );
 }
 
 function assignMovementConsoleSequence(command: Record<string, unknown>) {
@@ -1196,8 +1209,11 @@ export default function HomePage() {
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
   const [predictedPlayerPosition, setPredictedPlayerPosition] = useState<PredictedPlayerMotion | null>(null);
   const [initialSceneAssetsReady, setInitialSceneAssetsReady] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false);
   const t = buildTranslator(language);
   const locale = languageLocale(language);
+
+  const loggedSceneResourceErrorsRef = useRef(new Set<string>());
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1205,6 +1221,7 @@ export default function HomePage() {
       href: window.location.href,
     });
     setLanguage(normalizeLanguage(window.localStorage.getItem("mir2-language")));
+    setIsClientReady(true);
   }, []);
 
   useEffect(() => {
@@ -2988,7 +3005,33 @@ export default function HomePage() {
           height: SCENE_REQUEST_HEIGHT,
         });
         const response = await fetch(`/api/scene/crystal?${params.toString()}`);
-        if (!response.ok) throw new Error(`scene route returned ${response.status}`);
+        if (!response.ok) {
+          if (response.status === 424) {
+            try {
+              const body = await response.clone().json();
+              if (body?.error === "resource_missing") {
+                const publicPath = String(body.publicPath || body.resource?.path || "unknown");
+                const signature = `${body.assetVersion ?? ""}:${body.publicPath ?? publicPath}:${response.status}`;
+                if (!loggedSceneResourceErrorsRef.current.has(signature)) {
+                  loggedSceneResourceErrorsRef.current.add(signature);
+                  appendLog(
+                    `scene resource missing for ${publicPath}: ${JSON.stringify({
+                      publicPath: body.publicPath ?? publicPath,
+                      libraryKey: body.libraryKey ?? body.resource?.libraryKey,
+                      frameIndex: body.frameIndex ?? body.resource?.frameIndex,
+                      manifestAssetHash: body.manifestAssetHash,
+                      assetVersion: body.assetVersion,
+                    })}`,
+                    "system",
+                  );
+                }
+              }
+            } catch {
+              // Ignore parse errors and fall back to generic message.
+            }
+          }
+          throw new Error(`scene route returned ${response.status}`);
+        }
 
         const blueprint = (await response.json()) as SceneBlueprint;
         if (disposed) return;
@@ -3381,7 +3424,7 @@ export default function HomePage() {
   }
 
   function isMovementCommand(command: Record<string, unknown>) {
-    return command.type === "walk" || command.type === "run" || command.type === "moveTo";
+    return command.type === "walk" || command.type === "run" || command.type === "turn";
   }
 
   function isMovementPredictionBlockingCommand(command: Record<string, unknown>) {
@@ -7620,6 +7663,7 @@ export default function HomePage() {
   }
 
   return (
+    !isClientReady ? null :
     <OriginalClientShell
       language={language}
       screen={screen}

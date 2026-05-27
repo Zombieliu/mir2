@@ -25,6 +25,8 @@ const MAPS = [
   { map: "HKR", x: 200, y: 200 },
 ];
 
+const CRITICAL_SCENE = { map: "0", x: 307, y: 232, width: 56, height: 68 };
+
 const results = [];
 const failures = [];
 
@@ -53,6 +55,8 @@ for (const pass of ["first", "warm"]) {
     }
   }
 }
+
+await runCriticalCrystalSceneRegression();
 
 console.table(results);
 
@@ -84,8 +88,8 @@ async function requestMap(target, pass) {
   url.searchParams.set("map", target.map);
   url.searchParams.set("x", String(target.x));
   url.searchParams.set("y", String(target.y));
-  url.searchParams.set("width", "24");
-  url.searchParams.set("height", "18");
+  url.searchParams.set("width", String(target.width ?? 24));
+  url.searchParams.set("height", String(target.height ?? 18));
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -100,6 +104,8 @@ async function requestMap(target, pass) {
       pass,
       map: target.map,
       status: response.status,
+      error: body?.error ?? null,
+      body,
       ms: elapsed,
       title: body?.mapTitle ?? "",
       mini: body?.miniMapIndex ?? "",
@@ -110,5 +116,44 @@ async function requestMap(target, pass) {
     };
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+async function runCriticalCrystalSceneRegression() {
+  const result = await requestMap(CRITICAL_SCENE, "critical");
+  if (result.status !== 200) {
+    failures.push(`critical scene (${CRITICAL_SCENE.map} at ${CRITICAL_SCENE.x},${CRITICAL_SCENE.y} ${CRITICAL_SCENE.width}x${CRITICAL_SCENE.height}) returned HTTP ${result.status}`);
+    if (result.error === "resource_missing") {
+      failures.push(`critical scene missing resources: ${JSON.stringify({
+        publicPath: result.body?.publicPath,
+        libraryKey: result.body?.libraryKey,
+        frameIndex: result.body?.frameIndex,
+        manifestAssetHash: result.body?.manifestAssetHash,
+        assetVersion: result.body?.assetVersion,
+      })}`);
+      if (!result.body?.publicPath) {
+        failures.push("critical scene 424 missing publicPath");
+      }
+      if (result.body?.libraryKey === undefined || result.body?.libraryKey === null) {
+        failures.push("critical scene 424 missing libraryKey");
+      }
+      if (result.body?.frameIndex === undefined || result.body?.frameIndex === null) {
+        failures.push("critical scene 424 missing frameIndex");
+      }
+      if (!result.body?.manifestAssetHash) {
+        failures.push("critical scene 424 missing manifestAssetHash");
+      }
+      if (!result.body?.assetVersion) {
+        failures.push("critical scene 424 missing assetVersion");
+      }
+    }
+    return;
+  }
+  if (result.sprites <= 0 || result.cells <= 0) {
+    failures.push("critical scene (0,307,232 56x68) returned no cells or sprites");
+    return;
+  }
+  if (!result.title) {
+    failures.push("critical scene regression returned empty map title");
   }
 }
