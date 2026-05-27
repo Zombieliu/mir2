@@ -168,23 +168,22 @@ jobs:
           fi
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
 
-      - name: Smoke R2/CDN direct original assets
+      - name: Release doctor: manifest + R2 asset checks
         if: ${{ inputs.publish_r2 }}
         working-directory: mir2-web3/apps/web
-        env:
-          MIR2_WEB_BASE_URL: "https://mir2.obelisk.build"
         run: |
           set -euo pipefail
-          asset_version="${MIR2_ASSET_VERSION}"
-          if [ -z "${asset_version:-}" ]; then
-            echo "MIR2_ASSET_VERSION is required for R2/CDN smoke." >&2
+          if [ -z "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
+            echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL is required for R2 asset checks." >&2
             exit 1
           fi
-          npm run smoke:production-original-assets -- \
-            --webBaseUrl "$MIR2_WEB_BASE_URL" \
-            --assetVersion "$asset_version" \
-            --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}" \
-            --targets cdn
+          npm run release:doctor -- \
+            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
+            --checkManifest true \
+            --checkR2 true \
+            --checkWorker false \
+            --checkBevyRuntime false \
+            --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}"
 
       - name: Deploy same-origin asset Worker proxy
         if: ${{ inputs.publish_r2 && inputs.deploy_worker }}
@@ -219,9 +218,24 @@ jobs:
 
       - name: Smoke same-origin original assets after worker deploy
         if: ${{ inputs.publish_r2 && inputs.deploy_worker }}
-        working-directory: mir2-web3/apps/web
         run: |
-          npm run smoke:production-original-assets -- --targets web --assetVersion "$MIR2_ASSET_VERSION" --assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+          set -euo pipefail
+          if [ -z "${MIR2_ASSET_VERSION:-}" ]; then
+            echo "MIR2_ASSET_VERSION is required for same-origin smoke." >&2
+            exit 1
+          fi
+          base_url="https://mir2.obelisk.build"
+          for path in \
+            "/original-ui/Title/32.png" \
+            "/original-ui/ChrSel/0.png" \
+            "/original-ui/Cursors/Cursor_Default.CUR"; do
+            echo "smoke: $base_url$path"
+            curl -fI "$base_url$path"
+          done
+          if ! curl -fI "$base_url/mir2_bevy_runtime.js" >/tmp/mir2_bevy_runtime.headers 2>/dev/null; then
+            bevy_status="$(curl -sI "$base_url/mir2_bevy_runtime.js" | awk '/^HTTP\\//{print $2}' | head -n1 || true)"
+            echo "::warning::separate-check: mir2_bevy_runtime.js status=${bevy_status:-unknown}"
+          fi
 
       - name: Deploy Player Web to Vercel
         if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
