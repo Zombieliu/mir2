@@ -133,4 +133,65 @@ const closeTo = (actual, expected, tolerance, label) => {
   closeTo(point.y, 285, 0.000001, "linear fallback y should match the legacy ratio");
 }
 
+{
+  const miniTransform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
+    mapFileName: "0",
+    miniMapIndex: 101,
+    bigMapIndex: 101,
+    kind: "mini",
+  });
+  assert.ok(miniTransform, "Bichon mini transform should exist for map 0");
+
+  const player = { x: 330, y: 270 };
+  const playerImagePoint = worldToMiniMapImagePoint(miniTransform, player);
+  closeTo(playerImagePoint.x, 571.0857142857143, 0.0001, "map 0 player image x should be 571.085714...");
+  closeTo(playerImagePoint.y, 300, 0.0001, "map 0 player image y should be 300");
+
+  const miniViewWidth = 120;
+  const miniViewHeight = 108;
+  const miniRasterLeft = Math.max(Math.min(Math.round(playerImagePoint.x - miniViewWidth / 2), 1052 - miniViewWidth), 0);
+  const miniRasterTop = Math.max(Math.min(Math.round(playerImagePoint.y - miniViewHeight / 2), 700 - miniViewHeight), 0);
+  const miniViewportPoint = {
+    x: playerImagePoint.x - miniRasterLeft,
+    y: playerImagePoint.y - miniRasterTop,
+  };
+  closeTo(miniViewportPoint.x, 60.085714285714285, 0.0001, "map 0 mini viewport x should stay centered on player");
+  closeTo(miniViewportPoint.y, 54, 0.0001, "map 0 mini viewport y should stay centered on player");
+
+  const bigTransform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
+    mapFileName: "0",
+    miniMapIndex: 101,
+    bigMapIndex: 101,
+    kind: "big",
+  });
+  assert.ok(bigTransform, "Bichon big transform should exist for map 0");
+  assert.notEqual(
+    miniTransform,
+    bigTransform,
+    "map 0 mini and big transform entries should be intentionally separated",
+  );
+  closeTo(worldToMiniMapImagePoint(bigTransform, player).x, playerImagePoint.x, 0.0001, "big transform should land on the same image X for map 0");
+  closeTo(worldToMiniMapImagePoint(bigTransform, player).y, playerImagePoint.y, 0.0001, "big transform should land on the same image Y for map 0");
+
+  const maxViewportWidth = 568;
+  const maxViewportHeight = 380;
+  const contentScale = Math.min(maxViewportWidth / 1052, maxViewportHeight / 700);
+  const bigContentWidth = Math.max(1, Math.round(1052 * contentScale));
+  const bigContentHeight = Math.max(1, Math.round(700 * contentScale));
+  const bigViewport = {
+    left: 14 + Math.round((maxViewportWidth - bigContentWidth) / 2),
+    top: 52 + Math.round((maxViewportHeight - bigContentHeight) / 2),
+    scale: contentScale,
+  };
+  const bigViewportPoint = {
+    x: bigViewport.left + playerImagePoint.x * bigViewport.scale,
+    y: bigViewport.top + playerImagePoint.y * bigViewport.scale,
+  };
+  closeTo(bigViewportPoint.x, 322.3428571428571, 0.0001, "map 0 big viewport x");
+  closeTo(bigViewportPoint.y, 214.97718631178705, 0.0001, "map 0 big viewport y");
+
+  closeTo((bigViewportPoint.x - bigViewport.left) / bigViewport.scale, playerImagePoint.x, 0.0001, "big viewport X should decode back to image space");
+  closeTo((bigViewportPoint.y - bigViewport.top) / bigViewport.scale, playerImagePoint.y, 0.0001, "big viewport Y should decode back to image space");
+}
+
 console.log("minimap transform tests passed");

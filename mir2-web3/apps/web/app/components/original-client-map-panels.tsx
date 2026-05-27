@@ -599,17 +599,39 @@ function originalBigMapAssetPath(bigMapIndex: number | null | undefined) {
 }
 
 function bigMapViewport(asset: MapRasterAsset | null) {
-  const contentWidth = asset ? Math.min(568, asset.width) : 568;
-  const contentHeight = asset ? Math.min(380, asset.height) : 380;
+  const maxViewportWidth = 568;
+  const maxViewportHeight = 380;
+  if (!asset) {
+    return {
+      left: 14,
+      top: 52,
+      width: maxViewportWidth,
+      height: maxViewportHeight,
+      contentWidth: maxViewportWidth,
+      contentHeight: maxViewportHeight,
+      imageLeft: 0,
+      imageTop: 0,
+      contentScale: 1,
+    };
+  }
+
+  const contentScale = Math.min(
+    maxViewportWidth / Math.max(asset.width, 1),
+    maxViewportHeight / Math.max(asset.height, 1),
+  );
+  const contentWidth = Math.max(1, Math.round(asset.width * contentScale));
+  const contentHeight = Math.max(1, Math.round(asset.height * contentScale));
+
   return {
-    left: 14 + Math.floor((568 - contentWidth) / 2),
-    top: 52 + Math.floor((380 - contentHeight) / 2),
-    width: contentWidth,
-    height: contentHeight,
+    left: 14 + Math.round((maxViewportWidth - contentWidth) / 2),
+    top: 52 + Math.round((maxViewportHeight - contentHeight) / 2),
+    width: maxViewportWidth,
+    height: maxViewportHeight,
     contentWidth,
     contentHeight,
     imageLeft: 0,
     imageTop: 0,
+    contentScale,
   };
 }
 
@@ -645,8 +667,15 @@ function bigMapImagePointToViewportPoint(
   viewport: ReturnType<typeof bigMapViewport>,
   asset: MapRasterAsset | null,
 ) {
-  const scaleX = asset ? viewport.contentWidth / Math.max(asset.width, 1) : 1;
-  const scaleY = asset ? viewport.contentHeight / Math.max(asset.height, 1) : 1;
+  if (!asset) {
+    return {
+      x: viewport.imageLeft + imagePoint.x,
+      y: viewport.imageTop + imagePoint.y,
+    };
+  }
+
+  const scaleX = viewport.contentScale;
+  const scaleY = viewport.contentScale;
   return {
     x: viewport.imageLeft + imagePoint.x * scaleX,
     y: viewport.imageTop + imagePoint.y * scaleY,
