@@ -3,6 +3,10 @@ const DEFAULT_ORIGIN_URL =
 const DEFAULT_GATEWAY_ORIGIN_URL = "https://165.154.65.136.sslip.io";
 const DEFAULT_ASSET_ORIGIN_URL =
   "https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c";
+const DEFAULT_ASSET_VERSION = "37596e16d64fde7c";
+const DEFAULT_ASSET_OBJECT_PREFIX_TEMPLATE = "mir2/v/{version}";
+const DEFAULT_ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
+const ASSET_NOT_FOUND_CACHE_CONTROL = "public, max-age=60";
 
 const HOP_BY_HOP_HEADERS = [
   "connection",
@@ -18,9 +22,23 @@ const HOP_BY_HOP_HEADERS = [
 export interface Env {
   ASSET_ORIGIN_URL?: string;
   GATEWAY_ORIGIN_URL?: string;
+  MIR2_ASSET_OBJECT_PREFIX?: string;
+  MIR2_ASSET_VERSION?: string;
+  MIR2_ASSETS?: R2Bucket;
   ORIGIN_URL?: string;
   VERCEL_BYPASS_SECRET?: string;
 }
+
+const ASSET_CONTENT_TYPES: Record<string, string> = {
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".wav": "audio/wav",
+  ".cur": "image/x-icon",
+  ".gif": "image/gif",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+};
 
 function canHaveRequestBody(method: string): boolean {
   return method !== "GET" && method !== "HEAD";
@@ -68,32 +86,6 @@ function rewriteToAssetOrigin(request: Request, assetOriginUrl: string): Request
   target.username = "";
   target.password = "";
   target.pathname = `${origin.pathname.replace(/\/+$/, "")}${target.pathname}`;
-
-  const headers = new Headers(request.headers);
-  headers.delete("host");
-
-  return new Request(target, {
-    headers,
-    method: request.method,
-    redirect: "manual",
-  });
-}
-
-function rewriteOriginalUiMetaToAssetOrigin(
-  request: Request,
-  assetOriginUrl: string,
-  library: string,
-): Request {
-  const origin = new URL(assetOriginUrl);
-  const target = new URL(request.url);
-
-  target.protocol = origin.protocol;
-  target.hostname = origin.hostname;
-  target.port = origin.port;
-  target.username = "";
-  target.password = "";
-  target.pathname = `${origin.pathname.replace(/\/+$/, "")}/original-ui/${library}/meta.json`;
-  target.search = "";
 
   const headers = new Headers(request.headers);
   headers.delete("host");
@@ -222,6 +214,154 @@ function cleanAssetResponse(response: Response): Response {
   });
 }
 
+async function serveStaticAssetFromR2(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  publicUrl: URL,
+): Promise<Response> {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return assetError("method_not_allowed", 405, "method_not_allowed", null);
+  }
+
+  if (!env.MIR2_ASSETS) {
+    const assetOriginUrl = env.ASSET_ORIGIN_URL || DEFAULT_ASSET_ORIGIN_URL;
+    const assetResponse = await fetch(rewriteToAssetOrigin(request, assetOriginUrl));
+    return cleanAssetResponse(assetResponse);
+  }
+
+  const objectKey = assetObjectKeyForPath(publicUrl.pathname, env);
+  if (!objectKey) {
+    return assetError("asset_not_found", 404, "invalid_asset_path", null);
+  }
+
+  const cacheKey = new Request(`https://mir2-r2-cache.local/${objectKey}`, { method: "GET" });
+  if (request.method === "GET") {
+    const cached = await caches.default.match(cacheKey);
+    if (cached) {
+      const cachedHeaders = new Headers(cached.headers);
+      cachedHeaders.set("x-mir2-domain-proxy", "r2-asset");
+      cachedHeaders.set("x-mir2-edge-cache", "HIT");
+      return new Response(cached.body, {
+        headers: cachedHeaders,
+        status: cached.status,
+        statusText: cached.statusText,
+      });
+    }
+  }
+
+  const object = await env.MIR2_ASSETS.get(objectKey);
+  if (!object) {
+    return assetError("asset_not_found", 404, "asset_not_found", objectKey);
+  }
+
+  const headers = assetObjectHeaders(objectKey, object, env, "MISS");
+  const response = new Response(request.method === "HEAD" ? null : object.body, {
+    headers,
+    status: 200,
+  });
+  if (request.method === "GET") {
+    ctx.waitUntil(caches.default.put(cacheKey, response.clone()));
+  }
+  return response;
+}
+
+async function serveOriginalUiMetaFromR2(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  library: string,
+): Promise<Response | null> {
+  const publicUrl = new URL(request.url);
+  publicUrl.pathname = `/original-ui/${library}/meta.json`;
+  publicUrl.search = "";
+  const response = await serveStaticAssetFromR2(request, env, ctx, publicUrl);
+  return response.ok ? response : null;
+}
+
+function assetObjectHeaders(
+  objectKey: string,
+  object: R2Object,
+  env: Env,
+  cacheState: "MISS" | "HIT",
+): Headers {
+  const headers = new Headers();
+  headers.set("cache-control", object.httpMetadata?.cacheControl || DEFAULT_ASSET_CACHE_CONTROL);
+  headers.set("content-type", object.httpMetadata?.contentType || contentTypeForObjectKey(objectKey));
+  headers.set("etag", object.httpEtag);
+  headers.set("x-mir2-asset-key", objectKey);
+  headers.set("x-mir2-asset-version", assetVersion(env));
+  headers.set("x-mir2-domain-proxy", "r2-asset");
+  headers.set("x-mir2-edge-cache", cacheState);
+  disableHttp3AltSvc(headers);
+  return headers;
+}
+
+function assetError(
+  error: string,
+  status: number,
+  code: string,
+  objectKey: string | null,
+): Response {
+  const headers = new Headers({
+    "cache-control": status === 404 ? ASSET_NOT_FOUND_CACHE_CONTROL : "no-store",
+    "content-type": "application/json; charset=utf-8",
+  });
+  if (objectKey) {
+    headers.set("x-mir2-asset-key", objectKey);
+  }
+  disableHttp3AltSvc(headers);
+  return new Response(JSON.stringify({ error, code, objectKey }), {
+    headers,
+    status,
+  });
+}
+
+function assetObjectKeyForPath(pathname: string, env: Env): string {
+  const assetPath = pathname
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return "";
+      }
+    })
+    .join("/");
+  if (!assetPath || assetPath.includes("..") || assetPath.includes("\\")) {
+    return "";
+  }
+  return `${assetObjectPrefix(env)}/${assetPath}`;
+}
+
+function assetObjectPrefix(env: Env): string {
+  const configured = env.MIR2_ASSET_OBJECT_PREFIX?.trim();
+  if (configured) {
+    return configured.replace(/^\/+|\/+$/g, "");
+  }
+  return DEFAULT_ASSET_OBJECT_PREFIX_TEMPLATE.replace("{version}", assetVersion(env));
+}
+
+function assetVersion(env: Env): string {
+  return normalizeAssetVersion(env.MIR2_ASSET_VERSION || DEFAULT_ASSET_VERSION) || DEFAULT_ASSET_VERSION;
+}
+
+function normalizeAssetVersion(value: string): string {
+  return value
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function contentTypeForObjectKey(objectKey: string): string {
+  const dotIndex = objectKey.lastIndexOf(".");
+  const extension = dotIndex >= 0 ? objectKey.slice(dotIndex).toLowerCase() : "";
+  return ASSET_CONTENT_TYPES[extension] || "application/octet-stream";
+}
+
 function disableHttp3AltSvc(headers: Headers): void {
   headers.set("alt-svc", "clear");
 }
@@ -244,7 +384,7 @@ function appendNoTransformForHtml(headers: Headers): void {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const publicUrl = new URL(request.url);
     if (isGatewayRequest(publicUrl)) {
       const gatewayOriginUrl =
@@ -253,21 +393,14 @@ export default {
     }
 
     if (isStaticAssetRequest(publicUrl)) {
-      const assetOriginUrl = env.ASSET_ORIGIN_URL || DEFAULT_ASSET_ORIGIN_URL;
-      const assetResponse = await fetch(rewriteToAssetOrigin(request, assetOriginUrl));
-      return cleanAssetResponse(assetResponse);
+      return serveStaticAssetFromR2(request, env, ctx, publicUrl);
     }
 
     if (request.method === "GET" || request.method === "HEAD") {
       const library = originalUiMetaLibrary(publicUrl);
       if (library) {
-        const assetOriginUrl = env.ASSET_ORIGIN_URL || DEFAULT_ASSET_ORIGIN_URL;
-        const assetResponse = await fetch(
-          rewriteOriginalUiMetaToAssetOrigin(request, assetOriginUrl, library),
-        );
-        if (assetResponse.ok) {
-          return cleanAssetResponse(assetResponse);
-        }
+        const assetResponse = await serveOriginalUiMetaFromR2(request, env, ctx, library);
+        if (assetResponse) return assetResponse;
       }
     }
 

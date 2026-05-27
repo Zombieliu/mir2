@@ -22,6 +22,7 @@
     "smoke:bevy-runtime-backends": "node ./scripts/smoke-bevy-runtime-backends.mjs",
     "smoke:cache-maintenance": "node ./scripts/smoke-cache-metrics.mjs --exerciseMaintenance true",
     "smoke:playable-metrics": "node ./scripts/smoke-cache-metrics.mjs --mode playable",
+    "smoke:production-original-assets": "node ./scripts/smoke-production-original-assets.mjs",
     "assets:remote:build": "node ./scripts/build-remote-asset-release.mjs",
     "assets:r2:dry-run": "node ./scripts/upload-r2-assets.mjs --dryRun true",
     "assets:r2:upload": "node ./scripts/upload-r2-assets.mjs",
