@@ -357,6 +357,11 @@ function loadParsedMap(mapFileName: string): ParsedMap {
       rememberMap(normalized, packaged);
       return packaged;
     }
+    if (normalized === "0") {
+      const parsed = loadPackagedFallbackMap("0");
+      rememberMap(normalized, parsed);
+      return parsed;
+    }
     if (!SYNTHETIC_MAP_FALLBACK_ENABLED) {
       throw new CrystalResourceMissingError({
         message: `Crystal map ${normalized}.map is missing and synthetic fallback is disabled`,
@@ -365,7 +370,7 @@ function loadParsedMap(mapFileName: string): ParsedMap {
         mapFileName: normalized,
       });
     }
-    const parsed = normalized === "0" ? loadPackagedFallbackMap("0") : loadMissingMapFallback(normalized);
+    const parsed = loadMissingMapFallback(normalized);
     rememberMap(normalized, parsed);
     return parsed;
   }
