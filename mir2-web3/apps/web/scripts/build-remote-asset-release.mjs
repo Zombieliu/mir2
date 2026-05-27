@@ -286,7 +286,8 @@ function normalizeOriginalAssetManifestPath(value) {
   if (!pathname) return "";
   const assetPath = `/${pathname}`;
   if (!assetPath.startsWith("/original-map/") && !assetPath.startsWith("/original-ui/")) return "";
-  if (path.extname(assetPath).toLowerCase() !== ".png") return "";
+  const ext = path.extname(assetPath).toLowerCase();
+  if (ext !== ".png" && ext !== ".cur") return "";
   return assetPath;
 }
 
