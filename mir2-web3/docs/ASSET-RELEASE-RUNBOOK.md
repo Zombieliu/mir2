@@ -23,6 +23,9 @@ Gateway assets:
 
 ## Web Asset R2 Release
 
+Player Web asset releases are versioned by `MIR2_ASSET_VERSION`. In CI this is
+the short GitHub SHA (`${GITHUB_SHA::12}`); locally set it explicitly and use
+the same value for the R2 upload, Cloudflare Worker proxy, and Vercel build.
 The current verified public R2 release base is:
 
 ```text
@@ -33,6 +36,9 @@ For local refresh, start Player Web, stage the release, and upload:
 
 ```bash
 cd apps/web
+MIR2_ASSET_VERSION=<asset-version> \
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL="https://assets.mir2.obelisk.build/mir2/v/<asset-version>" \
+MIR2_ASSET_OBJECT_PREFIX="mir2/v/<asset-version>" \
 npm run build
 npm run start -- --hostname 127.0.0.1 --port 13020
 ```
@@ -41,16 +47,31 @@ In another shell:
 
 ```bash
 cd apps/web
-NEXT_PUBLIC_MIR2_ASSET_BASE_URL="https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c" \
-MIR2_ASSET_OBJECT_PREFIX="mir2/v/37596e16d64fde7c" \
+MIR2_ASSET_VERSION=<asset-version> \
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL="https://assets.mir2.obelisk.build/mir2/v/<asset-version>" \
+MIR2_ASSET_OBJECT_PREFIX="mir2/v/<asset-version>" \
 npm run assets:remote:build -- \
   --baseUrl http://127.0.0.1:13020 \
-  --assetBaseUrl "https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c" \
-  --objectPrefix "mir2/v/37596e16d64fde7c"
+  --assetBaseUrl "https://assets.mir2.obelisk.build/mir2/v/<asset-version>" \
+  --objectPrefix "mir2/v/<asset-version>"
 
 MIR2_R2_BUCKET=mir2-web3-assets npm run assets:r2:dry-run
-MIR2_R2_BUCKET=mir2-web3-assets npm run assets:r2:upload
+MIR2_R2_BUCKET=mir2-web3-assets \
+MIR2_R2_VERIFY_ORIGINAL_ASSETS=1 \
+npm run assets:r2:upload
 ```
+
+Release order is strict:
+
+1. Generate original assets and `public/original-asset-manifest.generated.json`.
+2. Build the remote asset release under `mir2/v/$MIR2_ASSET_VERSION`.
+3. Upload that release to R2.
+4. HEAD-verify every manifest-declared original asset on the final CDN URL.
+5. Deploy the `mir2-domain-proxy` Worker with the same `MIR2_ASSET_VERSION`.
+6. Deploy Vercel with the same `MIR2_ASSET_VERSION`,
+   `NEXT_PUBLIC_MIR2_ASSET_BASE_URL`, and `MIR2_ASSET_OBJECT_PREFIX`.
+
+Do not deploy Vercel before the R2 prefix and Worker proxy are verified.
 
 For targeted full-library repairs without expanding the main checkout, export
 one Crystal UI library into a temporary staging root and upload a focused
@@ -82,10 +103,21 @@ request-time Crystal export in production. If a library returns
 focused R2 repair before redeploying or retesting.
 
 The production asset domain is served by `infra/cloudflare/mir2-r2-asset-cache`
-on route `assets.mir2.obelisk.build/*`. Keep that Worker deployed unless an
-equivalent Cloudflare Cache Rule is installed, because the raw R2 custom domain
-can otherwise report `cf-cache-status: DYNAMIC` even with immutable object
-headers.
+on route `assets.mir2.obelisk.build/*`. The player domain is served by
+`infra/cloudflare/mir2-domain-proxy`; it now serves same-origin asset paths
+directly from the same R2 bucket:
+
+```text
+https://mir2.obelisk.build/original-map/...              -> mir2/v/$MIR2_ASSET_VERSION/original-map/...
+https://mir2.obelisk.build/original-ui/...               -> mir2/v/$MIR2_ASSET_VERSION/original-ui/...
+https://mir2.obelisk.build/generated/original-map-blend/... -> mir2/v/$MIR2_ASSET_VERSION/generated/original-map-blend/...
+```
+
+Keep both Workers deployed unless an equivalent Cloudflare Cache Rule is
+installed, because the raw R2 custom domain can otherwise report
+`cf-cache-status: DYNAMIC` even with immutable object headers. Same-origin
+Bevy `/original-ui/...` asset requests depend on the player-domain Worker
+route, not on React image fallback.
 
 Player Web should only remote-fetch `/original-ui/...` and `/original-map/...`
 plus generated map blend paths through this R2 base. Keep `/bevy-runtime/...`
@@ -99,8 +131,9 @@ Vercel once the same paths are verified through the player-domain R2/CDN route.
 Use the prebuilt flow from `apps/web`:
 
 ```bash
-NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c \
-MIR2_ASSET_OBJECT_PREFIX=mir2/v/37596e16d64fde7c \
+MIR2_ASSET_VERSION=<asset-version> \
+NEXT_PUBLIC_MIR2_ASSET_BASE_URL=https://assets.mir2.obelisk.build/mir2/v/<asset-version> \
+MIR2_ASSET_OBJECT_PREFIX=mir2/v/<asset-version> \
 NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=wss://mir2.obelisk.build/ws \
 npm run vercel:build:prod -- \
   --report ../../docs/generated/remote-assets/vercel-output-prune-resource-cdn-first-$(date +%Y%m%d).json
@@ -128,6 +161,9 @@ script now retains it.
 After deploy, verify both the CDN-backed asset routes and the playable path:
 
 ```bash
+MIR2_WEB_BASE_URL=https://mir2.obelisk.build \
+npm run smoke:production-original-assets
+
 MIR2_WEB_BASE_URL=https://mir2.obelisk.build \
 npm run smoke:cache-maintenance -- \
   --runId resource-cdn-first-final-prod-$(date +%Y%m%d) \

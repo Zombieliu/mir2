@@ -14,9 +14,17 @@
   "observability": {
     "enabled": true
   },
+  "r2_buckets": [
+    {
+      "binding": "MIR2_ASSETS",
+      "bucket_name": "mir2-web3-assets"
+    }
+  ],
   "vars": {
     "ASSET_ORIGIN_URL": "https://assets.mir2.obelisk.build/mir2/v/37596e16d64fde7c",
     "GATEWAY_ORIGIN_URL": "https://165.154.65.136.sslip.io",
+    "MIR2_ASSET_OBJECT_PREFIX": "mir2/v/37596e16d64fde7c",
+    "MIR2_ASSET_VERSION": "37596e16d64fde7c",
     "ORIGIN_URL": "https://mir2-web3-web.vercel.app"
   }
 }

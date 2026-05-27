@@ -126,6 +126,16 @@ Status values:
   original asset before accepting the release. Resource tests now lock the
   previously failing `Objects23/1422/1426/1427/1428`, `NPC/16/27/83`, and
   `Monster/000/139` paths plus Bichon scene blueprint frame coverage.
+- 2026-05-27 deterministic asset release wiring: `/api/asset-manifest` now
+  prefers `MIR2_ASSET_VERSION`, ignores file mtimes for versioning, and uses
+  only `original-asset-manifest.generated.json.assetHash` from the original
+  asset manifest. The Web Assets R2 workflow resolves
+  `MIR2_ASSET_VERSION=${GITHUB_SHA::12}`, stages/uploads/verifies R2 under
+  `mir2/v/$MIR2_ASSET_VERSION`, can deploy the `mir2-domain-proxy` Worker with
+  the same version, and only then deploys Vercel. The player-domain Worker now
+  serves same-origin `/original-map`, `/original-ui`, and
+  `/generated/original-map-blend` requests from R2, so Bevy `/original-ui`
+  requests do not depend on React image fallback.
 - 2026-05-26 raw WebGL2 atlas gameplay closeout: Player Web now has a
   browser-native `WebGl2EntityAtlasLayer` that reuses the existing
   `BevyEntityRenderState`/entity atlas schema and draws atlas-backed entity
