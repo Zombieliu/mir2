@@ -147,7 +147,13 @@ type DecodedFrameCacheEntry = {
 
 type OriginalAssetManifestPayload = {
   schemaVersion?: number;
+  assetHash?: string;
   assets?: Record<string, unknown>;
+};
+
+export type CrystalOriginalAssetManifestMetadata = {
+  assetHash: string;
+  schemaVersion?: number;
 };
 
 const mapCache = new Map<string, SizedCacheEntry<ParsedMap>>();
@@ -158,6 +164,7 @@ let mapCacheBytes = 0;
 let libraryCacheBytes = 0;
 let decodedFrameCacheBytes = 0;
 let originalAssetManifestPaths: Set<string> | null | undefined;
+let originalAssetManifestMetadata: CrystalOriginalAssetManifestMetadata | null | undefined;
 const resourceStats = {
   libraryParseCount: 0,
   frameHeaderReadCount: 0,
@@ -173,6 +180,8 @@ export class CrystalResourceMissingError extends Error {
   readonly mapFileName?: string;
   readonly libraryKey?: string;
   readonly frameIndex?: number;
+  readonly manifestAssetHash?: string;
+  readonly manifestAssetVersion?: string;
 
   constructor({
     message,
@@ -181,6 +190,8 @@ export class CrystalResourceMissingError extends Error {
     mapFileName,
     libraryKey,
     frameIndex,
+    manifestAssetHash,
+    manifestAssetVersion,
   }: {
     message: string;
     resourceType: "map" | "library" | "frame" | "png";
@@ -188,6 +199,8 @@ export class CrystalResourceMissingError extends Error {
     mapFileName?: string;
     libraryKey?: string;
     frameIndex?: number;
+    manifestAssetHash?: string;
+    manifestAssetVersion?: string;
   }) {
     super(message);
     this.name = "CrystalResourceMissingError";
@@ -196,6 +209,8 @@ export class CrystalResourceMissingError extends Error {
     this.mapFileName = mapFileName;
     this.libraryKey = libraryKey;
     this.frameIndex = frameIndex;
+    this.manifestAssetHash = manifestAssetHash;
+    this.manifestAssetVersion = manifestAssetVersion;
   }
 }
 
@@ -231,20 +246,55 @@ function loadOriginalAssetManifestPaths() {
         .filter((value): value is string => Boolean(value)),
     );
     return originalAssetManifestPaths;
-  } catch (error) {
+    } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       throw error;
     }
     originalAssetManifestPaths = null;
     if (originalAssetManifestRequired()) {
+      const manifestMeta = getCrystalOriginalAssetManifestMetadata();
       throw new CrystalResourceMissingError({
         message: `Original asset manifest is missing: ${PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH}`,
         resourceType: "png",
         resourcePath: PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH,
+        manifestAssetHash: manifestMeta?.assetHash,
+        manifestAssetVersion: getManifestVersionForErrors(),
       });
     }
     return null;
   }
+}
+
+export function getCrystalOriginalAssetManifestMetadata(): CrystalOriginalAssetManifestMetadata | null {
+  if (originalAssetManifestMetadata !== undefined) {
+    return originalAssetManifestMetadata;
+  }
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(/* turbopackIgnore: true */ PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH, "utf8"),
+    ) as OriginalAssetManifestPayload;
+    const assetHash = typeof payload.assetHash === "string" ? payload.assetHash.trim() : "";
+    if (!assetHash) {
+      originalAssetManifestMetadata = null;
+      return null;
+    }
+    originalAssetManifestMetadata = {
+      assetHash,
+      schemaVersion: payload.schemaVersion,
+    };
+    return originalAssetManifestMetadata;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+    originalAssetManifestMetadata = null;
+    return null;
+  }
+}
+
+export function getManifestVersionForErrors() {
+  return (process.env.MIR2_ASSET_VERSION ?? "").trim();
 }
 
 function originalAssetManifestRequired() {
@@ -800,12 +850,15 @@ function exportFrame(
   const publicPath = `/original-map/${normalizedKey}/${frameIndex}.png`;
   const pngExists = existsSync(/* turbopackIgnore: true */ pngPath);
   if (!pngExists && !REQUEST_FILE_WRITES_ENABLED && !originalAssetManifestHasPublicPath(publicPath)) {
+    const manifestMeta = getCrystalOriginalAssetManifestMetadata();
     throw new CrystalResourceMissingError({
       message: `Pre-exported map frame PNG is missing from local public assets and original asset manifest: ${publicPath}`,
       resourceType: "png",
       resourcePath: publicPath,
       libraryKey: normalizedKey,
       frameIndex,
+      manifestAssetHash: manifestMeta?.assetHash,
+      manifestAssetVersion: getManifestVersionForErrors(),
     });
   }
   if (!exportedFrames.has(frameKey) && !pngExists && REQUEST_FILE_WRITES_ENABLED) {

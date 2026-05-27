@@ -31,6 +31,7 @@ Deploy:
 
 ```bash
 MIR2_ASSET_VERSION=<github-sha-short> \
+MIR2_ASSET_OBJECT_PREFIX=mir2/v/<github-sha-short> \
 CLOUDFLARE_API_TOKEN=... \
 npx wrangler deploy
 ```
@@ -42,6 +43,11 @@ project protection settings, then store it with:
 ```bash
 printf '%s' "$VERCEL_BYPASS_SECRET" | npx wrangler secret put VERCEL_BYPASS_SECRET
 ```
+
+If deploying from a CI/automation step, patch `MIR2_ASSET_VERSION` and
+`MIR2_ASSET_OBJECT_PREFIX` at deploy time from the same release version used by
+`/api/asset-manifest`. Avoid shipping hardcoded fallback versions in Worker
+defaults.
 
 Current origin:
 

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { isCrystalResourceMissingError } from "../../../../lib/crystal-map-loader";
+import {
+  getCrystalOriginalAssetManifestMetadata,
+  getManifestVersionForErrors,
+  isCrystalResourceMissingError,
+} from "../../../../lib/crystal-map-loader";
 import { loadCachedCrystalSceneBlueprint } from "../../../../lib/scene-blueprint-cache";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +14,10 @@ const isDevelopment = process.env.NODE_ENV === "development";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const manifestInfo = getCrystalOriginalAssetManifestMetadata();
+  const manifestAssetHash = manifestInfo?.assetHash ?? null;
+  const assetVersion = getManifestVersionForErrors() || null;
+
   let result: Awaited<ReturnType<typeof loadCachedCrystalSceneBlueprint>>;
   try {
     result = await loadCachedCrystalSceneBlueprint({
@@ -21,10 +29,21 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (isCrystalResourceMissingError(error)) {
+      const publicPathCandidate = error.resourcePath;
+      const missingPublicPath =
+        typeof publicPathCandidate === "string" &&
+        (publicPathCandidate.startsWith("/original-map/") || publicPathCandidate.startsWith("/original-ui/"))
+          ? publicPathCandidate
+          : null;
       return NextResponse.json(
         {
           error: "resource_missing",
           message: error.message,
+          publicPath: missingPublicPath,
+          libraryKey: error.libraryKey ?? null,
+          frameIndex: error.frameIndex ?? null,
+          manifestAssetHash: error.manifestAssetHash ?? manifestAssetHash,
+          assetVersion: error.manifestAssetVersion ?? assetVersion,
           resource: {
             type: error.resourceType,
             path: error.resourcePath,

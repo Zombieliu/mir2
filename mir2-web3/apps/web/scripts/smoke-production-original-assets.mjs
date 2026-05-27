@@ -1,27 +1,34 @@
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const DEFAULT_ASSET_BASE_TEMPLATE = "https://assets.mir2.obelisk.build/mir2/v/{version}";
 const DEFAULT_PATHS = [
+  "/original-map/WemadeMir2/Objects23/1422.png",
   "/original-map/WemadeMir2/Objects23/1426.png",
   "/original-map/WemadeMir2/Objects23/1428.png",
+  "/original-map/WemadeMir2/Objects23/1427.png",
   "/original-ui/NPC/27/0.png",
   "/original-ui/NPC/83/0.png",
   "/original-ui/Monster/139/14.png",
+  "/original-ui/Monster/000/2.png",
 ];
 
 const args = parseArgs(process.argv.slice(2));
 const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_WEB_BASE_URL);
-const assetVersion = await resolveAssetVersion(webBaseUrl, args.assetVersion ?? process.env.MIR2_ASSET_VERSION);
+const configuredAssetVersion = sanitizeAssetVersion(args.assetVersion ?? process.env.MIR2_ASSET_VERSION ?? "");
+const assetVersion = configuredAssetVersion
+  ? configuredAssetVersion
+  : await resolveAssetVersion(webBaseUrl);
 const assetBaseUrl = normalizeBaseUrl(
   resolveVersionTemplate(
     args.assetBaseUrl ?? process.env.MIR2_ASSET_BASE_URL ?? process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? DEFAULT_ASSET_BASE_TEMPLATE,
     assetVersion,
   ),
 );
+const targets = parseTargets(args.targets ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_TARGETS ?? "web,cdn");
 const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? DEFAULT_PATHS.join(","));
 
 const results = [];
 let ok = true;
-for (const baseUrl of [webBaseUrl, assetBaseUrl]) {
+for (const baseUrl of targets) {
   for (const path of paths) {
     const url = `${baseUrl}${path}`;
     const result = await probe(url);
@@ -118,6 +125,27 @@ function parsePaths(value) {
     .split(",")
     .map((path) => `/${path.trim().replace(/^\/+/, "")}`)
     .filter((path) => path.length > 1);
+}
+
+function parseTargets(value) {
+  const defaultTargets = ["web", "cdn"];
+  const requested = String(value || "")
+    .split(",")
+    .map((target) => target.trim().toLowerCase())
+    .filter(Boolean);
+
+  const normalized = requested.length ? requested : defaultTargets;
+  const deduped = [];
+  for (const target of normalized) {
+    if (target !== "web" && target !== "cdn") {
+      throw new Error(`Invalid smoke target '${target}'. Expected one of web,cdn`);
+    }
+    if (!deduped.includes(target)) {
+      deduped.push(target);
+    }
+  }
+
+  return deduped.flatMap((target) => (target === "web" ? [webBaseUrl] : [assetBaseUrl]));
 }
 
 function parseArgs(argv) {
