@@ -3,6 +3,10 @@ const REQUIRED_ORIGINAL_ASSET_PATHS = [
   "/original-ui/Title/320.png",
   "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
+  "/original-ui/Title/32.png",
+  "/original-ui/Title/30.png",
+  "/original-ui/ChrSel/0.png",
+  "/original-ui/Cursors/Cursor_TextPrompt.CUR",
 ];
 const BEVY_RUNTIME_PATHS = [
   "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",

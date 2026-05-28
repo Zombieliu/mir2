@@ -35,7 +35,31 @@ const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID 
 const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN ?? process.env.CF_API_TOKEN ?? "";
 const workerUploadUrl = normalizeOptionalUrl(args.workerUrl ?? process.env.MIR2_R2_UPLOAD_WORKER_URL ?? "");
 const workerUploadSecret = process.env.MIR2_R2_UPLOAD_SECRET ?? "";
+const s3Endpoint = normalizeOptionalUrl(
+  args.s3Endpoint ??
+    process.env.MIR2_R2_S3_ENDPOINT ??
+    process.env.MIR2_R2_ENDPOINT ??
+    process.env.MIR2_R2_S3_ENDPOINT_URL ??
+    process.env.R2_S3_ENDPOINT ??
+    "",
+);
+const s3AccessKeyId = String(
+  args.s3AccessKeyId ?? process.env.MIR2_R2_ACCESS_KEY_ID ?? process.env.R2_ACCESS_KEY_ID ?? "",
+).trim();
+const s3SecretAccessKey = String(
+  args.s3SecretAccessKey ??
+    process.env.MIR2_R2_SECRET_ACCESS_KEY ??
+    process.env.R2_SECRET_ACCESS_KEY ??
+    "",
+).trim();
+const s3SessionToken = String(
+  args.s3SessionToken ??
+    process.env.MIR2_R2_SESSION_TOKEN ??
+    process.env.R2_SESSION_TOKEN ??
+    "",
+).trim();
 const wranglerBin = process.platform === "win32" ? "npx.cmd" : "npx";
+let s3Client;
 
 async function main() {
   const release = JSON.parse(await fs.readFile(manifestPath, "utf8"));
@@ -86,8 +110,10 @@ async function main() {
     throw new Error("Set MIR2_R2_BUCKET or pass --bucket before uploading to R2.");
   }
 
-  if (!["wrangler", "api", "worker"].includes(uploadDriver)) {
-    throw new Error(`Unsupported MIR2_R2_UPLOAD_DRIVER: ${uploadDriver}. Expected "wrangler", "api", or "worker".`);
+  if (!["wrangler", "api", "worker", "s3"].includes(uploadDriver)) {
+    throw new Error(
+      `Unsupported MIR2_R2_UPLOAD_DRIVER: ${uploadDriver}. Expected "wrangler", "api", "worker", or "s3".`,
+    );
   }
 
   if (uploadDriver === "wrangler") {
@@ -108,6 +134,20 @@ async function main() {
 
   if (uploadDriver === "worker" && (!workerUploadUrl || !workerUploadSecret)) {
     throw new Error("Set MIR2_R2_UPLOAD_WORKER_URL and MIR2_R2_UPLOAD_SECRET before using MIR2_R2_UPLOAD_DRIVER=worker.");
+  }
+
+  if (uploadDriver === "s3" && !s3AccessKeyId) {
+    throw new Error("Set MIR2_R2_ACCESS_KEY_ID or R2_ACCESS_KEY_ID before using MIR2_R2_UPLOAD_DRIVER=s3.");
+  }
+
+  if (uploadDriver === "s3" && !s3SecretAccessKey) {
+    throw new Error(
+      "Set MIR2_R2_SECRET_ACCESS_KEY or R2_SECRET_ACCESS_KEY before using MIR2_R2_UPLOAD_DRIVER=s3.",
+    );
+  }
+
+  if (uploadDriver === "s3") {
+    resolveS3Endpoint();
   }
 
   let completed = 0;
@@ -206,6 +246,7 @@ async function uploadWithRetry(upload) {
     try {
       if (uploadDriver === "api") await uploadViaCloudflareApi(upload);
       else if (uploadDriver === "worker") await uploadViaWorker(upload);
+      else if (uploadDriver === "s3") await uploadViaS3(upload);
       else {
         await runWrangler(
           [
@@ -256,6 +297,53 @@ async function uploadViaWorker(upload) {
       `R2 upload Worker failed for ${upload.objectKey}: HTTP ${response.status} ${text || response.statusText}`,
     );
   }
+}
+
+async function uploadViaS3(upload) {
+  const { PutObjectCommand } = await import("@aws-sdk/client-s3");
+  const body = await fs.readFile(upload.stagePath);
+  const client = await createS3Client();
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: upload.objectKey,
+      Body: body,
+      ContentType: upload.contentType,
+      CacheControl: upload.cacheControl,
+    }),
+  );
+}
+
+function resolveS3Endpoint() {
+  if (s3Endpoint) {
+    return s3Endpoint;
+  }
+
+  if (!cloudflareAccountId) {
+    throw new Error(
+      "Set MIR2_R2_ENDPOINT/MIR2_R2_S3_ENDPOINT/MIR2_R2_S3_ENDPOINT_URL or CLOUDFLARE_ACCOUNT_ID before using MIR2_R2_UPLOAD_DRIVER=s3.",
+    );
+  }
+
+  return `https://${cloudflareAccountId}.r2.cloudflarestorage.com`;
+}
+
+async function createS3Client() {
+  if (s3Client) return s3Client;
+
+  const { S3Client } = await import("@aws-sdk/client-s3");
+  s3Client = new S3Client({
+    region: "auto",
+    endpoint: resolveS3Endpoint(),
+    forcePathStyle: true,
+    credentials: {
+      accessKeyId: s3AccessKeyId,
+      secretAccessKey: s3SecretAccessKey,
+      ...(s3SessionToken ? { sessionToken: s3SessionToken } : {}),
+    },
+  });
+
+  return s3Client;
 }
 
 async function uploadViaCloudflareApi(upload) {
