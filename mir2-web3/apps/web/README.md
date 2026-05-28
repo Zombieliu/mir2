@@ -166,7 +166,9 @@ Remote R2/CDN asset release:
 - Dry-run the R2 upload:
   `npm run assets:r2:dry-run -- --manifest ../../docs/generated/remote-assets/latest-remote-asset-release.json`.
   Upload for real with `MIR2_R2_BUCKET=<bucket> npm run assets:r2:upload`.
-  The upload command defaults to Wrangler's remote R2 target; pass
+  The upload command defaults to `MIR2_R2_UPLOAD_DRIVER=r2-s3` using
+  Cloudflare R2 S3 credentials (`MIR2_R2_ACCESS_KEY_ID` and
+  `MIR2_R2_SECRET_ACCESS_KEY`); pass
   `--remote false` only for local Wrangler storage tests.
   Add `--ensureBucket true` only when the logged-in Cloudflare account already
   has R2 enabled and you want Wrangler to create the bucket if missing.
