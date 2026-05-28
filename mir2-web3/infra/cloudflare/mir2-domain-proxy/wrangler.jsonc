@@ -21,10 +21,10 @@
     }
   ],
   "vars": {
-    "ASSET_ORIGIN_URL": "",
+    "ASSET_ORIGIN_URL": "https://assets.mir2.obelisk.build/mir2/v/20260528-20260528130924",
     "GATEWAY_ORIGIN_URL": "https://165.154.65.136.sslip.io",
-    "MIR2_ASSET_OBJECT_PREFIX": "",
-    "MIR2_ASSET_VERSION": "",
+    "MIR2_ASSET_OBJECT_PREFIX": "mir2/v/20260528-20260528130924",
+    "MIR2_ASSET_VERSION": "20260528-20260528130924",
     "ORIGIN_URL": "https://mir2-web3-web.vercel.app"
   }
 }
