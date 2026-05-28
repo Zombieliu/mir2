@@ -42,9 +42,11 @@ const PUBLIC_ASSET_EXTENSIONS = new Set([
 const REQUIRED_MANIFEST_PATHS = [
   "/original-ui/Title/32.png",
   "/original-ui/Title/30.png",
+  "/original-ui/Title/320.png",
   "/original-ui/ChrSel/0.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+  "/original-ui/Prguse/1084.png",
 ];
 
 const args = parseArgs(process.argv.slice(2));

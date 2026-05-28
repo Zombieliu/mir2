@@ -232,10 +232,6 @@ jobs:
             --checkWorker true \
             --checkBevyRuntime false \
             --webBaseUrl "$base_url"
-          if ! curl -fI "$base_url/mir2_bevy_runtime.js" >/tmp/mir2_bevy_runtime.headers 2>/dev/null; then
-            bevy_status="$(curl -sI "$base_url/mir2_bevy_runtime.js" | awk '/^HTTP\\//{print $2}' | head -n1 || true)"
-            echo "::warning::separate-check: mir2_bevy_runtime.js status=${bevy_status:-unknown}"
-          fi
 
       - name: Deploy Player Web to Vercel
         if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
@@ -288,6 +284,17 @@ jobs:
             process.exit(1);
           });
           NODE
+
+      - name: Smoke bevy runtime assets on web
+        if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
+        run: |
+          npm run --prefix mir2-web3/apps/web release:doctor -- \
+            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
+            --checkManifest false \
+            --checkR2 false \
+            --checkWorker false \
+            --checkBevyRuntime true \
+            --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Upload remote asset release manifest
         uses: actions/upload-artifact@v4
