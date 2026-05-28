@@ -1,5 +1,10 @@
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const DEFAULT_ASSET_BASE_TEMPLATE = "https://assets.mir2.obelisk.build/mir2/v/{version}";
+const DEFAULT_REQUIRED_PATHS = [
+  "/original-ui/Title/32.png",
+  "/original-ui/ChrSel/0.png",
+  "/original-ui/Cursors/Cursor_Default.CUR",
+];
 const DEFAULT_PATHS = [
   "/original-ui/Title/32.png",
   "/original-ui/Title/30.png",
@@ -29,7 +34,10 @@ const assetBaseUrl = normalizeBaseUrl(
   ),
 );
 const targets = parseTargets(args.targets ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_TARGETS ?? "web,cdn");
-const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? DEFAULT_PATHS.join(","));
+const pathMode = (args.pathMode ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATH_MODE ?? "required").toLowerCase();
+const basePathList =
+  pathMode === "extended" ? DEFAULT_PATHS : DEFAULT_REQUIRED_PATHS;
+const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? basePathList.join(","));
 
 const results = [];
 let ok = true;

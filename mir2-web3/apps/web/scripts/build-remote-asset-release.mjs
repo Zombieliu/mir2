@@ -39,6 +39,13 @@ const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".wav",
   ".webp",
 ]);
+const REQUIRED_MANIFEST_PATHS = [
+  "/original-ui/Title/32.png",
+  "/original-ui/Title/30.png",
+  "/original-ui/ChrSel/0.png",
+  "/original-ui/Cursors/Cursor_Default.CUR",
+  "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+];
 
 const args = parseArgs(process.argv.slice(2));
 const baseUrl = normalizeUrl(args.baseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DEFAULT_BASE_URL);
@@ -101,6 +108,18 @@ async function main() {
     allowMissing,
     concurrency: stageConcurrency,
   });
+  const requiredReleasePaths = REQUIRED_MANIFEST_PATHS.filter((requiredPath) =>
+    staged.files.some((file) => file.path === requiredPath),
+  );
+  const missingRequiredManifestPaths = REQUIRED_MANIFEST_PATHS.filter((requiredPath) =>
+    !requiredReleasePaths.includes(requiredPath),
+  );
+
+  if (missingRequiredManifestPaths.length > 0 && !allowMissing) {
+    throw new Error(
+      `Remote asset release is missing required paths: ${missingRequiredManifestPaths.join(", ")}`,
+    );
+  }
 
   const release = {
     schemaVersion: 1,
@@ -135,6 +154,8 @@ async function main() {
     publicAssetRoots: collected.publicAssetRoots,
     files: staged.files,
     missing: staged.missing,
+    requiredManifestPaths: REQUIRED_MANIFEST_PATHS,
+    missingRequiredManifestPaths,
   };
 
   if (release.missing.length > 0 && !allowMissing) {
