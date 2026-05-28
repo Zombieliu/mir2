@@ -1,16 +1,27 @@
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const DEFAULT_ASSET_BASE_TEMPLATE = "https://assets.mir2.obelisk.build/mir2/v/{version}";
+
+const LOGIN_TITLE_PATHS = [
+  ...makeRange(30, 32),
+  ...makeRange(320, 322),
+  ...makeRange(323, 325),
+  ...makeRange(326, 328),
+  ...makeRange(329, 331),
+  ...makeRange(332, 334),
+].map((value) => `/original-ui/Title/${value}.png`);
+
+const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
+
 const DEFAULT_REQUIRED_PATHS = [
-  "/original-ui/Title/32.png",
-  "/original-ui/ChrSel/0.png",
-  "/original-ui/Cursors/Cursor_Default.CUR",
-];
-const DEFAULT_PATHS = [
-  "/original-ui/Title/32.png",
-  "/original-ui/Title/30.png",
-  "/original-ui/ChrSel/0.png",
+  ...LOGIN_TITLE_PATHS,
+  ...LOGIN_CHRSEL_PATHS,
+  "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+];
+
+const DEFAULT_PATHS = [
+  ...DEFAULT_REQUIRED_PATHS,
   "/original-map/WemadeMir2/Objects23/1422.png",
   "/original-map/WemadeMir2/Objects23/1426.png",
   "/original-map/WemadeMir2/Objects23/1428.png",
@@ -35,8 +46,7 @@ const assetBaseUrl = normalizeBaseUrl(
 );
 const targets = parseTargets(args.targets ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_TARGETS ?? "web,cdn");
 const pathMode = (args.pathMode ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATH_MODE ?? "required").toLowerCase();
-const basePathList =
-  pathMode === "extended" ? DEFAULT_PATHS : DEFAULT_REQUIRED_PATHS;
+const basePathList = pathMode === "extended" ? DEFAULT_PATHS : DEFAULT_REQUIRED_PATHS;
 const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? basePathList.join(","));
 
 const results = [];
@@ -50,7 +60,10 @@ for (const baseUrl of targets) {
       path,
       ...result,
     });
-    if (!result.ok) ok = false;
+    if (!result.ok) {
+      logFailure({ baseUrl, path, ...result });
+      ok = false;
+    }
   }
 }
 
@@ -102,18 +115,65 @@ async function probe(url) {
       ok: false,
       status: null,
       elapsedMs: Date.now() - startedAt,
+      contentType: null,
+      cacheControl: null,
+      xMir2DomainProxy: null,
+      xMir2AssetKey: null,
+      xMir2AssetVersion: null,
+      bodyPreview: null,
       error: error instanceof Error ? error.message : String(error),
     };
   }
 
-  return {
+  const result = {
     ok: response.ok,
     status: response.status,
     elapsedMs: Date.now() - startedAt,
     contentType: response.headers.get("content-type"),
     cacheControl: response.headers.get("cache-control"),
-    assetKey: response.headers.get("x-mir2-asset-key"),
+    xMir2DomainProxy: response.headers.get("x-mir2-domain-proxy"),
+    xMir2AssetKey: response.headers.get("x-mir2-asset-key"),
+    xMir2AssetVersion: response.headers.get("x-mir2-asset-version"),
+    bodyPreview: null,
   };
+
+  if (!result.ok) {
+    result.bodyPreview = await readBodyPreview(url, 300);
+  }
+
+  return result;
+}
+
+async function readBodyPreview(url, maxChars) {
+  try {
+    const response = await fetch(url, { method: "GET", cache: "no-store" });
+    const text = await response.text();
+    return text.slice(0, maxChars);
+  } catch {
+    return null;
+  }
+}
+
+function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir2AssetKey, xMir2AssetVersion, bodyPreview, error }) {
+  console.log("");
+  console.log(`FAIL: ${baseUrl}${path}`);
+  console.log(`status: ${String(status)}`);
+  console.log(`content-type: ${contentType ?? ""}`);
+  console.log(`x-mir2-domain-proxy: ${xMir2DomainProxy ?? ""}`);
+  console.log(`x-mir2-asset-key: ${xMir2AssetKey ?? ""}`);
+  console.log(`x-mir2-asset-version: ${xMir2AssetVersion ?? ""}`);
+  if (error) {
+    console.log(`error: ${error}`);
+  }
+  console.log(`body[0..300]: ${bodyPreview ?? ""}`);
+}
+
+function makeRange(start, end) {
+  const values = [];
+  for (let value = start; value <= end; value += 1) {
+    values.push(value);
+  }
+  return values;
 }
 
 function resolveVersionTemplate(value, version) {
@@ -182,3 +242,4 @@ function parseArgs(argv) {
   }
   return parsed;
 }
+
