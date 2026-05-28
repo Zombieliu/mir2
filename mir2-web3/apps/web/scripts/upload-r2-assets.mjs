@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
+import { createReadStream } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -30,32 +31,28 @@ const verifyOriginalAssetConcurrency = numberArg(
   args.verifyOriginalAssetConcurrency ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSET_CONCURRENCY,
   16,
 );
-const uploadDriver = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVER ?? "wrangler").toLowerCase();
-const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? process.env.CF_ACCOUNT_ID ?? "";
-const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN ?? process.env.CF_API_TOKEN ?? "";
+const uploadDriverInput = String(args.driver ?? process.env.MIR2_R2_UPLOAD_DRIVER ?? "r2-s3").toLowerCase();
+const uploadDriver = normalizeUploadDriver(uploadDriverInput);
+const cloudflareAccountId = args.accountId ?? process.env.CLOUDFLARE_ACCOUNT_ID ?? "";
+const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN ?? "";
 const workerUploadUrl = normalizeOptionalUrl(args.workerUrl ?? process.env.MIR2_R2_UPLOAD_WORKER_URL ?? "");
 const workerUploadSecret = process.env.MIR2_R2_UPLOAD_SECRET ?? "";
 const s3Endpoint = normalizeOptionalUrl(
   args.s3Endpoint ??
     process.env.MIR2_R2_S3_ENDPOINT ??
-    process.env.MIR2_R2_ENDPOINT ??
-    process.env.MIR2_R2_S3_ENDPOINT_URL ??
-    process.env.R2_S3_ENDPOINT ??
     "",
 );
 const s3AccessKeyId = String(
-  args.s3AccessKeyId ?? process.env.MIR2_R2_ACCESS_KEY_ID ?? process.env.R2_ACCESS_KEY_ID ?? "",
+  args.s3AccessKeyId ?? process.env.MIR2_R2_ACCESS_KEY_ID ?? "",
 ).trim();
 const s3SecretAccessKey = String(
   args.s3SecretAccessKey ??
     process.env.MIR2_R2_SECRET_ACCESS_KEY ??
-    process.env.R2_SECRET_ACCESS_KEY ??
     "",
 ).trim();
 const s3SessionToken = String(
   args.s3SessionToken ??
     process.env.MIR2_R2_SESSION_TOKEN ??
-    process.env.R2_SESSION_TOKEN ??
     "",
 ).trim();
 const wranglerBin = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -87,7 +84,7 @@ async function main() {
           dryRun: true,
           manifestPath,
           bucket: bucket || null,
-          driver: uploadDriver,
+          driver: uploadDriverInput,
           objectPrefix: release.objectPrefix,
           assetBaseUrl: release.assetBaseUrl ?? null,
           uploadCount: uploads.length,
@@ -110,9 +107,9 @@ async function main() {
     throw new Error("Set MIR2_R2_BUCKET or pass --bucket before uploading to R2.");
   }
 
-  if (!["wrangler", "api", "worker", "s3"].includes(uploadDriver)) {
+  if (!["wrangler", "api", "worker", "s3", "r2-s3"].includes(uploadDriverInput)) {
     throw new Error(
-      `Unsupported MIR2_R2_UPLOAD_DRIVER: ${uploadDriver}. Expected "wrangler", "api", "worker", or "s3".`,
+      `Unsupported MIR2_R2_UPLOAD_DRIVER: ${uploadDriverInput}. Expected "wrangler", "api", "worker", or "r2-s3".`,
     );
   }
 
@@ -137,12 +134,16 @@ async function main() {
   }
 
   if (uploadDriver === "s3" && !s3AccessKeyId) {
-    throw new Error("Set MIR2_R2_ACCESS_KEY_ID or R2_ACCESS_KEY_ID before using MIR2_R2_UPLOAD_DRIVER=s3.");
+    throw new Error(
+      "Set MIR2_R2_ACCESS_KEY_ID and MIR2_R2_SECRET_ACCESS_KEY before using MIR2_R2_UPLOAD_DRIVER=r2-s3. " +
+        "These are Cloudflare R2 S3 API credentials; CLOUDFLARE_API_TOKEN is only used for Cloudflare worker/R2 control-path operations and is not used for r2-s3 uploads.",
+    );
   }
 
   if (uploadDriver === "s3" && !s3SecretAccessKey) {
     throw new Error(
-      "Set MIR2_R2_SECRET_ACCESS_KEY or R2_SECRET_ACCESS_KEY before using MIR2_R2_UPLOAD_DRIVER=s3.",
+      "Set MIR2_R2_ACCESS_KEY_ID and MIR2_R2_SECRET_ACCESS_KEY before using MIR2_R2_UPLOAD_DRIVER=r2-s3. " +
+        "These are Cloudflare R2 S3 API credentials; CLOUDFLARE_API_TOKEN is only used for Cloudflare worker/R2 control-path operations and is not used for r2-s3 uploads.",
     );
   }
 
@@ -170,7 +171,7 @@ async function main() {
         dryRun: false,
         manifestPath,
         bucket,
-        driver: uploadDriver,
+        driver: uploadDriverInput,
         objectPrefix: release.objectPrefix,
         assetBaseUrl: release.assetBaseUrl ?? null,
         uploadCount: uploads.length,
@@ -301,7 +302,7 @@ async function uploadViaWorker(upload) {
 
 async function uploadViaS3(upload) {
   const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-  const body = await fs.readFile(upload.stagePath);
+  const body = createReadStream(upload.stagePath);
   const client = await createS3Client();
   await client.send(
     new PutObjectCommand({
@@ -321,11 +322,16 @@ function resolveS3Endpoint() {
 
   if (!cloudflareAccountId) {
     throw new Error(
-      "Set MIR2_R2_ENDPOINT/MIR2_R2_S3_ENDPOINT/MIR2_R2_S3_ENDPOINT_URL or CLOUDFLARE_ACCOUNT_ID before using MIR2_R2_UPLOAD_DRIVER=s3.",
+      "Set MIR2_R2_S3_ENDPOINT or CLOUDFLARE_ACCOUNT_ID before using MIR2_R2_UPLOAD_DRIVER=r2-s3.",
     );
   }
 
   return `https://${cloudflareAccountId}.r2.cloudflarestorage.com`;
+}
+
+function normalizeUploadDriver(value) {
+  if (value === "r2-s3") return "s3";
+  return value;
 }
 
 async function createS3Client() {
