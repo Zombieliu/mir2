@@ -21,6 +21,11 @@ on:
         required: false
         default: false
         type: boolean
+      upload_driver:
+        description: Upload driver for R2 publish (wrangler, api, worker, s3)
+        required: false
+        default: wrangler
+        type: string
       deploy_worker:
         description: Deploy mir2.obelisk.build Worker proxy after R2 verification
         required: false
@@ -158,12 +163,17 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
           MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
+          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'wrangler' }}
+          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
+          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
+          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
+          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
           MIR2_R2_VERIFY_ORIGINAL_ASSETS: "1"
         run: |
           set -euo pipefail
           bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || [ -z "$bucket" ]; then
-            echo "R2 publish requested but CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, or MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET is missing." >&2
+          if [ -z "$bucket" ]; then
+            echo "R2 publish requested but MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET is missing." >&2
             exit 1
           fi
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
@@ -220,18 +230,8 @@ jobs:
         if: ${{ inputs.publish_r2 && inputs.deploy_worker }}
         run: |
           set -euo pipefail
-          if [ -z "${MIR2_ASSET_VERSION:-}" ]; then
-            echo "MIR2_ASSET_VERSION is required for same-origin smoke." >&2
-            exit 1
-          fi
-          base_url="https://mir2.obelisk.build"
-          npm run --prefix mir2-web3/apps/web release:doctor -- \
-            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
-            --checkManifest false \
-            --checkR2 false \
-            --checkWorker true \
-            --checkBevyRuntime false \
-            --webBaseUrl "$base_url"
+          npm run --prefix mir2-web3/apps/web smoke:production-asset-runtime -- \
+            --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Deploy Player Web to Vercel
         if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
@@ -288,12 +288,7 @@ jobs:
       - name: Smoke bevy runtime assets on web
         if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
         run: |
-          npm run --prefix mir2-web3/apps/web release:doctor -- \
-            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
-            --checkManifest false \
-            --checkR2 false \
-            --checkWorker false \
-            --checkBevyRuntime true \
+          npm run --prefix mir2-web3/apps/web smoke:production-asset-runtime -- \
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Upload remote asset release manifest
