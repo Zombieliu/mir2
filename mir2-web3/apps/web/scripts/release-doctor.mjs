@@ -16,9 +16,15 @@ const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 const REQUIRED_ASSETS = [
   "/original-ui/Title/32.png",
   "/original-ui/Title/30.png",
+  "/original-ui/Title/320.png",
   "/original-ui/ChrSel/0.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+  "/original-ui/Prguse/1084.png",
+];
+const BEVY_RUNTIME_PATHS = [
+  "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+  "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
 ];
 
 const args = parseArgs(process.argv.slice(2));
@@ -54,7 +60,11 @@ async function main() {
       manifest: { ok: true, missing: [], requiredCount: REQUIRED_ASSETS.length },
       r2: { ok: true, results: [] },
       worker: { ok: true, results: [] },
-      bevyRuntime: { status: null, message: "" },
+    bevyRuntime: {
+      ok: true,
+      paths: [],
+      message: "",
+    },
     },
   };
 
@@ -117,17 +127,37 @@ async function main() {
     }
   }
 
-  if (checkBevyRuntime && (checkR2 || checkWorker)) {
-    const bevyUrl = `${webBaseUrl}/mir2_bevy_runtime.js`;
-    const bevyResult = await probe(bevyUrl);
+  if (checkBevyRuntime) {
+    let bevyOk = false;
+    const checks = [];
+
+    for (const bevyPath of BEVY_RUNTIME_PATHS) {
+      const bevyUrl = `${webBaseUrl}${bevyPath}`;
+      const bevyResult = await probe(bevyUrl);
+      checks.push({ path: bevyPath, ...bevyResult });
+      if (bevyResult.ok) {
+        bevyOk = true;
+      }
+    }
+
     report.checks.bevyRuntime = {
-      status: bevyResult.status,
-      ok: bevyResult.ok,
-      error: bevyResult.error ?? null,
-      elapsedMs: bevyResult.elapsedMs,
+      ok: bevyOk,
+      paths: checks,
+      status: checks.map((item) => item.status),
+      message: bevyOk
+        ? "bevy runtime package reachable"
+        : "both bevy runtime package paths returned non-2xx",
     };
-    if (!bevyResult.ok && bevyResult.status === 404) {
-      console.warn(`[release-doctor] separate: mir2_bevy_runtime.js 404 (tracked independently from asset checks).`);
+
+    if (!bevyOk) {
+      failed = true;
+      report.checks.bevyRuntime = { ...report.checks.bevyRuntime, ok: false };
+      console.error("[release-doctor] separate: bevy runtime package check failed.");
+      for (const check of checks) {
+        console.error(`- ${check.path}: ${check.error ?? `HTTP ${check.status}`}`);
+      }
+    } else {
+      console.log("[release-doctor] bevy runtime package check passed.");
     }
   }
 
