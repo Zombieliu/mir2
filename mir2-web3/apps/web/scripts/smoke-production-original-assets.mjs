@@ -8,12 +8,23 @@ const LOGIN_TITLE_PATHS = [
 
 const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
 
+const EXTRA_ORIGINAL_ASSET_PATHS = [
+  "/original-ui/Sound/Login2.wav",
+  "/original-ui/Sound/100.wav",
+  "/original-ui/Prguse/44.png",
+  "/original-ui/Prguse/65.png",
+  "/original-ui/Prguse/940.png",
+  "/original-ui/Title/40.png",
+  ...makeRange(340, 362).map((value) => `/original-ui/Title/${value}.png`),
+];
+
 const REQUIRED_PATHS = [
   ...LOGIN_TITLE_PATHS,
   ...LOGIN_CHRSEL_PATHS,
   "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+  ...EXTRA_ORIGINAL_ASSET_PATHS,
 ];
 
 const DEFAULT_REQUIRED_PATHS = REQUIRED_PATHS;
