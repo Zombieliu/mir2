@@ -1,7 +1,19 @@
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
-const BEVY_RUNTIME_PATHS = [
-  "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
-  "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+const BEVY_RUNTIME_BACKENDS = [
+  {
+    label: "webgpu",
+    paths: [
+      "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+    ],
+  },
+  {
+    label: "webgl2",
+    paths: [
+      "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+    ],
+  },
 ];
 
 const args = parseArgs(process.argv.slice(2));
@@ -10,12 +22,18 @@ const webBaseUrl = normalizeBaseUrl(args.webBaseUrl ?? process.env.MIR2_WEB_BASE
 const results = [];
 let ok = false;
 
-for (const path of BEVY_RUNTIME_PATHS) {
-  const result = await probe(`${webBaseUrl}${path}`);
-  results.push({ kind: "bevy-runtime", path, ...result });
-  if (!result.ok) {
-    logFailure({ baseUrl: webBaseUrl, path, ...result });
-  } else {
+for (const backend of BEVY_RUNTIME_BACKENDS) {
+  let backendOk = true;
+  for (const path of backend.paths) {
+    const result = await probe(`${webBaseUrl}${path}`);
+    results.push({ kind: "bevy-runtime", backend: backend.label, path, ...result });
+    if (!result.ok) {
+      backendOk = false;
+      logFailure({ baseUrl: webBaseUrl, path, ...result });
+    }
+  }
+
+  if (backendOk) {
     ok = true;
   }
 }

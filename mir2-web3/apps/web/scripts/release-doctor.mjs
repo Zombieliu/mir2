@@ -13,14 +13,19 @@ const DEFAULT_MANIFEST = path.resolve(
 );
 const DEFAULT_WEB_BASE_URL = "https://mir2.obelisk.build";
 
+const LOGIN_TITLE_PATHS = [
+  ...makeRange(30, 32),
+  ...makeRange(320, 334),
+].map((value) => `/original-ui/Title/${value}.png`);
+
+const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
+
 const REQUIRED_ASSETS = [
-  "/original-ui/Title/32.png",
-  "/original-ui/Title/30.png",
-  "/original-ui/Title/320.png",
-  "/original-ui/ChrSel/0.png",
+  ...LOGIN_TITLE_PATHS,
+  ...LOGIN_CHRSEL_PATHS,
+  "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
-  "/original-ui/Prguse/1084.png",
 ];
 const BEVY_RUNTIME_PATHS = [
   "/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
@@ -240,6 +245,14 @@ function booleanArg(value, fallback) {
   if (value == null) return fallback;
   if (typeof value === "boolean") return value;
   return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+}
+
+function makeRange(start, end) {
+  const values = [];
+  for (let value = start; value <= end; value += 1) {
+    values.push(value);
+  }
+  return values;
 }
 
 function parseArgs(argv) {
