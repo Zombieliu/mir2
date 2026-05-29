@@ -8,6 +8,15 @@ const LOGIN_TITLE_PATHS = [
 
 const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
 
+const REQUIRED_LOGIN_PATHS = [
+  ...makeRange(30, 32).map((value) => `/original-ui/Title/${value}.png`),
+  ...makeRange(320, 322).map((value) => `/original-ui/Title/${value}.png`),
+  "/original-ui/Prguse/1084.png",
+  "/original-ui/Cursors/Cursor_Default.CUR",
+  "/original-ui/Cursors/Cursor_TextPrompt.CUR",
+  "/original-ui/ChrSel/0.png",
+];
+
 const DEFAULT_REQUIRED_PATHS = [
   ...LOGIN_TITLE_PATHS,
   ...LOGIN_CHRSEL_PATHS,
@@ -29,9 +38,9 @@ const assetBaseUrl = normalizeBaseUrl(
   ),
 );
 const targets = parseTargets(args.targets ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_TARGETS ?? "web,cdn");
-const pathMode = (args.pathMode ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATH_MODE ?? "required").toLowerCase();
+const pathMode = (args.pathMode ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATH_MODE ?? "extended").toLowerCase();
 const basePathList =
-  pathMode === "extended" ? DEFAULT_REQUIRED_PATHS : DEFAULT_REQUIRED_PATHS;
+  pathMode === "required" ? REQUIRED_LOGIN_PATHS : DEFAULT_REQUIRED_PATHS;
 const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? basePathList.join(","));
 
 const results = [];

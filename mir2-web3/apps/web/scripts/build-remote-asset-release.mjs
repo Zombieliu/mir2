@@ -28,6 +28,11 @@ const DEFAULT_PUBLIC_ASSET_ROOTS = [
   "original-map",
   "generated/original-map-blend",
 ];
+const LOGIN_TITLE_PATHS = [
+  ...makeRange(30, 32),
+  ...makeRange(320, 334),
+].map((value) => `/original-ui/Title/${value}.png`);
+const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
 const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".cur",
   ".gif",
@@ -40,13 +45,11 @@ const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".webp",
 ]);
 const REQUIRED_MANIFEST_PATHS = [
-  "/original-ui/Title/32.png",
-  "/original-ui/Title/30.png",
-  "/original-ui/Title/320.png",
-  "/original-ui/ChrSel/0.png",
+  ...LOGIN_TITLE_PATHS,
+  ...LOGIN_CHRSEL_PATHS,
+  "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
-  "/original-ui/Prguse/1084.png",
 ];
 
 const args = parseArgs(process.argv.slice(2));
@@ -639,6 +642,14 @@ function resolveTemplate(value, version) {
 
 function normalizeObjectPrefix(value) {
   return String(value || "").trim().replace(/^\/+|\/+$/g, "");
+}
+
+function makeRange(start, end) {
+  const values = [];
+  for (let value = start; value <= end; value += 1) {
+    values.push(value);
+  }
+  return values;
 }
 
 function normalizeAssetBaseUrl(value) {
