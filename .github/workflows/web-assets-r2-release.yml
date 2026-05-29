@@ -230,7 +230,8 @@ jobs:
         if: ${{ inputs.publish_r2 && inputs.deploy_worker }}
         run: |
           set -euo pipefail
-          npm run --prefix mir2-web3/apps/web smoke:production-asset-runtime -- \
+          npm run --prefix mir2-web3/apps/web smoke:production-original-assets -- \
+            --targets web \
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Deploy Player Web to Vercel
@@ -288,7 +289,7 @@ jobs:
       - name: Smoke bevy runtime assets on web
         if: ${{ inputs.publish_r2 && inputs.deploy_worker && inputs.deploy_vercel }}
         run: |
-          npm run --prefix mir2-web3/apps/web smoke:production-asset-runtime -- \
+          npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
             --webBaseUrl "https://mir2.obelisk.build"
 
       - name: Upload remote asset release manifest
