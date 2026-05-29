@@ -3,11 +3,7 @@ const DEFAULT_ASSET_BASE_TEMPLATE = "https://assets.mir2.obelisk.build/mir2/v/{v
 
 const LOGIN_TITLE_PATHS = [
   ...makeRange(30, 32),
-  ...makeRange(320, 322),
-  ...makeRange(323, 325),
-  ...makeRange(326, 328),
-  ...makeRange(329, 331),
-  ...makeRange(332, 334),
+  ...makeRange(320, 334),
 ].map((value) => `/original-ui/Title/${value}.png`);
 
 const LOGIN_CHRSEL_PATHS = Array.from({ length: 19 }, (_, index) => `/original-ui/ChrSel/${index}.png`);
@@ -18,18 +14,6 @@ const DEFAULT_REQUIRED_PATHS = [
   "/original-ui/Prguse/1084.png",
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
-];
-
-const DEFAULT_PATHS = [
-  ...DEFAULT_REQUIRED_PATHS,
-  "/original-map/WemadeMir2/Objects23/1422.png",
-  "/original-map/WemadeMir2/Objects23/1426.png",
-  "/original-map/WemadeMir2/Objects23/1428.png",
-  "/original-map/WemadeMir2/Objects23/1427.png",
-  "/original-ui/NPC/27/0.png",
-  "/original-ui/NPC/83/0.png",
-  "/original-ui/Monster/139/14.png",
-  "/original-ui/Monster/000/2.png",
 ];
 
 const args = parseArgs(process.argv.slice(2));
@@ -46,7 +30,8 @@ const assetBaseUrl = normalizeBaseUrl(
 );
 const targets = parseTargets(args.targets ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_TARGETS ?? "web,cdn");
 const pathMode = (args.pathMode ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATH_MODE ?? "required").toLowerCase();
-const basePathList = pathMode === "extended" ? DEFAULT_PATHS : DEFAULT_REQUIRED_PATHS;
+const basePathList =
+  pathMode === "extended" ? DEFAULT_REQUIRED_PATHS : DEFAULT_REQUIRED_PATHS;
 const paths = parsePaths(args.paths ?? process.env.MIR2_ORIGINAL_ASSET_SMOKE_PATHS ?? basePathList.join(","));
 
 const results = [];
@@ -138,7 +123,7 @@ async function probe(url) {
   };
 
   if (!result.ok) {
-    result.bodyPreview = await readBodyPreview(url, 300);
+    result.bodyPreview = await readBodyPreview(url, 500);
   }
 
   return result;
@@ -156,7 +141,9 @@ async function readBodyPreview(url, maxChars) {
 
 function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir2AssetKey, xMir2AssetVersion, bodyPreview, error }) {
   console.log("");
-  console.log(`FAIL: ${baseUrl}${path}`);
+  const url = `${baseUrl}${path}`;
+  console.log(`FAIL: ${url}`);
+  console.log(`url: ${url}`);
   console.log(`status: ${String(status)}`);
   console.log(`content-type: ${contentType ?? ""}`);
   console.log(`x-mir2-domain-proxy: ${xMir2DomainProxy ?? ""}`);
@@ -165,7 +152,7 @@ function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir
   if (error) {
     console.log(`error: ${error}`);
   }
-  console.log(`body[0..300]: ${bodyPreview ?? ""}`);
+  console.log(`body[0..500]: ${bodyPreview ?? ""}`);
 }
 
 function makeRange(start, end) {
@@ -242,4 +229,3 @@ function parseArgs(argv) {
   }
   return parsed;
 }
-

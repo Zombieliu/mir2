@@ -72,7 +72,7 @@ async function probe(url) {
   };
 
   if (!result.ok) {
-    result.bodyPreview = await readBodyPreview(url, 300);
+    result.bodyPreview = await readBodyPreview(url, 500);
   }
 
   return result;
@@ -90,7 +90,9 @@ async function readBodyPreview(url, maxChars) {
 
 function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir2AssetKey, xMir2AssetVersion, error, bodyPreview }) {
   console.log("");
-  console.log(`FAIL: ${baseUrl}${path}`);
+  const url = `${baseUrl}${path}`;
+  console.log(`FAIL: ${url}`);
+  console.log(`url: ${url}`);
   console.log(`status: ${String(status)}`);
   console.log(`content-type: ${contentType ?? ""}`);
   console.log(`x-mir2-domain-proxy: ${xMir2DomainProxy ?? ""}`);
@@ -99,7 +101,7 @@ function logFailure({ baseUrl, path, status, contentType, xMir2DomainProxy, xMir
   if (error) {
     console.log(`error: ${error}`);
   }
-  console.log(`body[0..300]: ${bodyPreview ?? ""}`);
+  console.log(`body[0..500]: ${bodyPreview ?? ""}`);
 }
 
 function normalizeBaseUrl(value) {
@@ -127,4 +129,3 @@ function parseArgs(argv) {
   }
   return parsed;
 }
-
