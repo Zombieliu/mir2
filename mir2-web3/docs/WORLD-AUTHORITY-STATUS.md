@@ -33,7 +33,7 @@ Legend: ✅ authoritative in the zone · 🟡 partial · ❌ still per-session /
 | 7 | Ground-drop spawn + ownership/contention arbitration | ✅ | `claim_ground_drop`, tombstones |
 | 8 | Status effects on monsters (poison/freeze/stun/paralysis, controls) | ✅ | `tick_native_monster_damage_poisons`, `expire_native_monster_controls` |
 | 9 | Area/projectile/summon spells resolved in the zone | ✅ | `resolve_pending_native_projectiles`, ground-spell ticks |
-| 10 | Monster → player damage **computed** in the zone | 🟡 | computed in `launch_native_monster_player_*`, but melee uses a fixed placeholder (`1`) while ranged already rolls Crystal stats; player base AC/MAC not yet subtracted (only buff AC). See "Remaining work". |
+| 10 | Monster → player damage **computed** in the zone | 🟡 | both melee and ranged now roll the monster's authoritative Crystal damage (`zone_native_monster_player_attack_damage`); the remaining gap is that the player's base `Min/MaxAC` / `Min/MaxMAC` are not yet subtracted from incoming damage (only buff AC), and incoming hits don't yet distinguish physical vs magic for AC-vs-MAC. |
 | 11 | **Magic/skill damage value** rolled in the zone | 🟡 | spell power is still computed in the attacker's session and passed as a scalar; the zone applies it. Moving the spell-power formulas into the zone overlaps the combat/skills numbers workstream. |
 | 12 | NPC state / quest mutation authority | ❌ | NPCs remain session-local (`npc_script.rs`) |
 | 13 | Single-writer tick correctness (in-process) | ✅ | monster think/attack windows (`next_ai_ready_at_ms`, `next_attack_ready_at_ms`) rate-limit actions, so N session-driven ticks per interval do not double-advance a monster |
@@ -67,13 +67,14 @@ regressions; the 70 are pre-existing/environmental).
 These are the honest gaps. Items 10/11 are partly the **combat-numbers** and
 **skills** workstreams, but they also gate "authoritative":
 
-1. **Monster → player melee damage** — replace the `1` placeholder in
-   `launch_native_monster_player_attack` with the Crystal-sourced roll already
-   used by the ranged path, and subtract the player's authoritative
-   `Min/MaxAC` / `Min/MaxMAC` (now carried on `ZonePlayerCombatStats`) in
-   `zone_player_native_incoming_damage`. Coupled change — must be tuned and
-   re-baselined against several mitigation tests (defence buff, magic shield),
-   which need the Crystal reference for the correct shield/absorb semantics.
+1. **Player armour mitigation for incoming damage** — the monster→player melee
+   placeholder is now fixed (it rolls the monster's Crystal damage), but
+   `zone_player_native_incoming_damage` still subtracts only *buff* AC. Subtract
+   the player's authoritative `Min/MaxAC` / `Min/MaxMAC` (now carried on
+   `ZonePlayerCombatStats`), distinguishing physical hits (AC) from magic hits
+   (MAC) — which needs a damage-type tag on `PendingNativePlayerHit`. The magic
+   shield / defence-buff mitigation semantics should be validated against the
+   Crystal reference when re-baselining.
 2. **Magic/skill damage value authority** — move the per-spell power formulas
    (`crystal_magic_damage_from_base` and friends) into the zone so the zone,
    not the session, produces the magic damage number, and subtract monster MAC.
