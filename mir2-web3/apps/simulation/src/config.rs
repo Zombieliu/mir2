@@ -1782,6 +1782,17 @@ pub struct MineZoneRecord {
     pub size: u16,
 }
 
+/// Environmental hazard flags for a map (Crystal `MapInfo.Lightning/Fire` and
+/// their damage caps). Hazards periodically strike players on the map.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MapHazardRecord {
+    pub map_file_name: String,
+    pub lightning: bool,
+    pub fire: bool,
+    pub lightning_damage: i32,
+    pub fire_damage: i32,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MonsterSpawnSource {
     StarterScenario,
@@ -1870,6 +1881,7 @@ pub struct SimulationConfig {
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
     pub mine_zones: Vec<MineZoneRecord>,
+    pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
@@ -1958,6 +1970,7 @@ impl SimulationConfig {
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
+            map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
             account_store_database_url: None,

@@ -1420,6 +1420,9 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
         map.doors = doors;
     }
     super::mining::rebuild_mine_spots(world);
+    if let Some(mut hazards) = world.get_resource_mut::<super::hazard::MapHazardResource>() {
+        hazards.reset();
+    }
 }
 
 pub(super) fn runtime_active_map_collision_data(

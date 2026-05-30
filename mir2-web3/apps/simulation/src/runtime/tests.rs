@@ -54205,3 +54205,104 @@ fn crystal_attack_into_mine_spot_triggers_mining() {
         "attacking into a mine spot with a pickaxe should mine it, got {packets:?}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Map system: environmental hazards (Crystal Map.Process lightning/lava)
+// ---------------------------------------------------------------------------
+
+fn enable_map_hazard(session: &mut SimulationSession, lightning: bool, fire: bool, damage: i32) {
+    let map_file = session
+        .app
+        .world()
+        .resource::<super::MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<RuntimeConfigResource>()
+        .config
+        .map_hazards
+        .push(crate::config::MapHazardRecord {
+            map_file_name: map_file,
+            lightning,
+            fire,
+            lightning_damage: damage,
+            fire_damage: damage,
+        });
+}
+
+#[test]
+fn crystal_lightning_hazard_strikes_on_lightning_map() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    enable_map_hazard(&mut session, true, false, 30);
+
+    let mut saw_lightning = false;
+    for _ in 0..18 {
+        let packets = session.tick();
+        if packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::ObjectSpell { info } if info.spell == Spell::MapLightning)
+        }) {
+            saw_lightning = true;
+            break;
+        }
+    }
+    assert!(saw_lightning, "a lightning map should periodically strike");
+}
+
+#[test]
+fn crystal_no_hazard_on_normal_map() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    for _ in 0..24 {
+        let packets = session.tick();
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectSpell { info }
+                    if info.spell == Spell::MapLightning || info.spell == Spell::MapLava
+            )),
+            "a normal map must not emit map lightning/lava"
+        );
+    }
+}
+
+#[test]
+fn crystal_hazard_damages_player_on_direct_hit() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Isolate the hazard as the only damage source.
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+    enable_map_hazard(&mut session, true, false, 80);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let max_hp = session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals")
+        .max_hp;
+
+    let mut damaged = false;
+    for _ in 0..400 {
+        session.tick();
+        let hp = session
+            .app
+            .world()
+            .entity(player)
+            .get::<PlayerVitals>()
+            .expect("player vitals")
+            .hp;
+        if hp < max_hp {
+            damaged = true;
+            break;
+        }
+    }
+    assert!(
+        damaged,
+        "lightning landing on the player's cell should deal damage"
+    );
+}

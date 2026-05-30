@@ -59,3 +59,14 @@ Tick model: 1 runtime tick = 1000 ms (`combat_delay_ticks(ms) = ceil(ms/1000)`).
 - Wired into `attack_in_direction_with_spell` (no creature target → mine).
 - Tests: depletion, no-pickaxe no-op, regen timer, guaranteed-set ore+dura,
   attack-flow integration.
+
+### Phase 3 — Environmental hazards (lightning/fire) ✅
+- `runtime/hazard.rs`: `MapHazardResource` + `tick_map_hazards`. On a hazard
+  map the server strikes every 3–15 ticks; 1-in-4 strikes hit a player's cell
+  (clean per-strike counter, deterministic 25%) for `Random(damage)`, the rest
+  hit a random cell within ±10 tiles. Emits `ObjectSpell{MapLightning/MapLava}`
+  and applies damage on a direct hit.
+- Hazard flags come from `SimulationConfig.map_hazards`; timers/counters reset
+  on map change. Wired into `advance_world`.
+- Tests: strikes on a lightning map, no strikes on a normal map, direct-hit
+  damage.

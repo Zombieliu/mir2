@@ -179,12 +179,12 @@ fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct PlayerDamageOutcome {
-    applied: bool,
-    died: bool,
+pub(super) struct PlayerDamageOutcome {
+    pub(super) applied: bool,
+    pub(super) died: bool,
 }
 
-fn apply_damage_to_current_player(
+pub(super) fn apply_damage_to_current_player(
     world: &mut World,
     damage: i32,
     packets: &mut Vec<ServerPacket>,
