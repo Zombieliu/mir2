@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   outputFileTracingExcludes: {
+    "/api/asset-manifest": [
+      "./public/generated/original-map-blend/**/*.png",
+      "./public/original-map/**/*.png",
+      "./public/original-ui/**/*.png",
+      "./public/original-ui/**/*.wav",
+    ],
     "/api/original-ui-meta": [
       "./public/original-ui/**/*.png",
       "./public/original-ui/**/*.wav",
