@@ -101,9 +101,13 @@ MIR2_QUALITY_FULL=1 scripts/quality-gate.sh
 
 ## Open Architecture Risks
 
-- World authority is still transitional: shared zone snapshots exist, but combat,
-  AI, NPC mutation, and remote pickup inventory gain are not fully promoted into
-  a single shared zone process.
+- World authority is still transitional, but advancing: the shared zone now
+  owns monster HP/AI and **resolves player→monster combat itself** (hit/miss
+  roll, `Random(MinDC..=MaxDC)`, monster armour) from an authoritative player
+  stat block kept fresh on equip/buff/level changes — see
+  `docs/WORLD-AUTHORITY-STATUS.md`. Still outstanding: monster→player melee
+  damage value, magic/skill damage value, NPC mutation, and cross-process
+  single-owner handoff are not yet fully promoted into one shared zone process.
 - Gameplay persistence is not fully normalized. Accounts can be source-of-truth
   in Postgres, while inventory/mail/economy normalization remains staged work.
 - Redpanda and ClickHouse are read-side/event projections only. They are not part
