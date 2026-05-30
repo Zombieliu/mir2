@@ -30,6 +30,14 @@ export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload &
 const SCENE_SPRITE_LIBRARY_CACHE_MAX_BYTES = 8 * 1024 * 1024;
 const libraryCache = new Map<string, { promise: Promise<OriginalSceneSpriteLibraryMeta>; bytes: number }>();
 let libraryCacheBytes = 0;
+// Libraries that returned a definitive "not available" (4xx) for this origin —
+// e.g. source-only libraries that were never exported to the asset CDN. The
+// scene renderer requests a library's metadata on every frame that needs it,
+// so without remembering these the same missing library is re-fetched
+// continuously, flooding the console with 404s and wasting requests. Transient
+// failures (5xx / network errors) are intentionally not recorded here so they
+// stay retryable.
+const missingSceneSpriteLibraries = new Set<string>();
 const availableSceneSpriteLibraries = new Set(
   Object.keys((originalSceneSpriteManifest as OriginalSceneSpriteManifestPayload).libraries ?? {}).map(
     normalizeSceneSpriteLibraryKey,
@@ -60,6 +68,9 @@ export function loadOriginalSceneSpriteLibrary(
     libraryCache.set(normalizedKey, cached);
     return cached.promise;
   }
+  if (missingSceneSpriteLibraries.has(normalizedKey)) {
+    return Promise.reject(new Error(`sprite meta ${normalizedKey} is not available`));
+  }
   if (!originalSceneSpriteLibraryExists(normalizedKey)) {
     return Promise.reject(new Error(`sprite meta ${normalizedKey} is not exported`));
   }
@@ -67,6 +78,9 @@ export function loadOriginalSceneSpriteLibrary(
   const pending = fetchOriginalSceneSpriteMeta(normalizedKey)
     .then(async (response) => {
       if (!response.ok) {
+        if (response.status >= 400 && response.status < 500) {
+          missingSceneSpriteLibraries.add(normalizedKey);
+        }
         throw new Error(`sprite meta ${normalizedKey} returned ${response.status}`);
       }
 
