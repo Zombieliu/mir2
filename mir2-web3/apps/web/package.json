@@ -11,13 +11,15 @@
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:stage5-ui": "node ./scripts/smoke-stage5-ui.mjs",
     "load:gateway-ws": "node ./scripts/load-gateway-ws.mjs",
-    "runtime:build:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 dev",
-    "runtime:build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-bevy-runtime.ps1 release",
+    "runtime:build:dev": "node ./scripts/build-bevy-runtime.mjs dev",
+    "runtime:build:release": "node ./scripts/build-bevy-runtime.mjs release",
     "dev": "npm run runtime:build:dev && next dev",
     "build": "npm run runtime:build:release && next build",
     "start": "next start"
   },
   "dependencies": {
+    "@mysten/sui": "^2.16.2",
+    "@mysten/wallet-standard": "^0.20.3",
     "next": "16.2.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
