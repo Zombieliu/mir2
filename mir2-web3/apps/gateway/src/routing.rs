@@ -3505,6 +3505,15 @@ impl SharedInProcessZoneSessionRuntime {
                         profile: join.chat_profile.clone(),
                     }),
             );
+            // Keep the zone's authoritative combat view fresh so equipment,
+            // buff, and level changes are reflected the next time the zone rolls
+            // this player's damage.
+            outbounds.extend(zone_state.zone_manager.handle(
+                ZoneCommand::UpdatePlayerCombatStats {
+                    session_id: session_id.clone(),
+                    stats: join.combat_stats,
+                },
+            ));
             outbounds.extend(
                 zone_state
                     .zone_manager
