@@ -12,16 +12,27 @@ const clearAltSvcHeader = { key: "Alt-Svc", value: "clear" };
 // Heavy static game media (PNG/WAV/WASM/cursor) is served by Vercel static
 // output and the Cloudflare Worker + R2 origin; these server functions only read
 // small JSON/meta at runtime, never the media itself. Excluding the media from
-// output file tracing keeps each serverless function under Vercel's 300MB limit
+// output file tracing keeps each serverless function under Vercel's size limit
 // (the /api/scene/crystal function was reported ~819MB before this). The earlier
-// excludes missed public/bevy-runtime/**/*.wasm (~106MB) and other public media
-// subtrees. JSON/meta under public/ is intentionally NOT excluded because
-// /api/original-ui-meta reads it at runtime.
+// excludes missed public/bevy-runtime/**/*.wasm (~106MB) and other public media.
+//
+// Patterns are matched relative to Next's outputFileTracingRoot. Locally that is
+// apps/web, so "./public/**" matches; but Vercel's monorepo build sets the root
+// higher (this app imports ../game-client), tracing files as
+// mir2-web3/apps/web/public/..., which "./public/**" does NOT match — that is why
+// the function stayed huge on Vercel while local `next build` traced ~11.5MB. The
+// "**/public/**" patterns match regardless of the traced prefix so the excludes
+// apply in both environments. JSON/meta under public/ is intentionally NOT
+// excluded because /api/original-ui-meta reads it at runtime.
 const heavyPublicMediaTracingExcludes = [
   "./public/**/*.png",
   "./public/**/*.wav",
   "./public/**/*.wasm",
   "./public/**/*.CUR",
+  "**/public/**/*.png",
+  "**/public/**/*.wav",
+  "**/public/**/*.wasm",
+  "**/public/**/*.CUR",
 ];
 
 const nextConfig: NextConfig = {
