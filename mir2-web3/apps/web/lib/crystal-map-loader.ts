@@ -7,7 +7,12 @@ import { deflateSync, gunzipSync } from "node:zlib";
 
 import { normalizeCrystalMiniMapFileName } from "./crystal-minimap-transform";
 import { CRYSTAL_MINI_MAP_TRANSFORMS } from "./generated/crystal-minimap-transforms";
-import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
+import type {
+  OriginalMapMissingAsset,
+  OriginalMapRegion,
+  OriginalMapSpriteFrame,
+  SceneBlueprint,
+} from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
@@ -52,6 +57,11 @@ const REQUEST_FILE_WRITES_ENABLED =
   process.env.MIR2_ENABLE_REQUEST_FILE_WRITES === "1" ||
   (IS_DEVELOPMENT && process.env.MIR2_DISABLE_REQUEST_FILE_WRITES !== "1");
 const SYNTHETIC_MAP_FALLBACK_ENABLED = process.env.MIR2_ALLOW_SYNTHETIC_MAP_FALLBACK === "1";
+// When strict, a single missing frame/library aborts the whole scene with HTTP 424 (used by
+// CI/release gates so missing assets are caught). When unset (the default at runtime), the
+// loader degrades gracefully: the missing sprite is skipped and recorded in the region's
+// `missingAssets` diagnostic list so the rest of the scene still renders.
+const STRICT_ASSET_RESOLUTION_ENABLED = process.env.MIR2_STRICT_ASSET_RESOLUTION === "1";
 const SERVER_MAP_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_MAP_CACHE_MAX_BYTES, 64 * 1024 * 1024);
 const SERVER_LIBRARY_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_LIBRARY_CACHE_MAX_BYTES, 24 * 1024 * 1024);
 const DECODED_FRAME_CACHE_MAX_BYTES = parseByteBudget(process.env.MIR2_DECODED_FRAME_CACHE_MAX_BYTES, 64 * 1024 * 1024);
@@ -171,6 +181,9 @@ const resourceStats = {
   frameDecodeCount: 0,
   decodedFrameCacheHits: 0,
   decodedFrameCacheMisses: 0,
+  // Cumulative count of unique asset misses recovered via graceful degradation (server
+  // lifetime). Stays 0 when every referenced asset resolves or when running in strict mode.
+  recoveredMissingAssetCount: 0,
 };
 
 export class CrystalResourceMissingError extends Error {
@@ -766,6 +779,7 @@ async function exportMapRegion(
   const cells: OriginalMapRegion["cells"] = [];
   const spriteIds = new Map<string, string>();
   const pendingWrites: Array<Promise<void>> = [];
+  const missingAssets = new Map<string, OriginalMapMissingAsset>();
 
   for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
     for (let y = bounds.minY; y <= bounds.maxY; y += 1) {
@@ -797,7 +811,7 @@ async function exportMapRegion(
   }
 
   await Promise.all(pendingWrites);
-  return {
+  const region: OriginalMapRegion = {
     mapFileName: parsedMap.fileName,
     mapWidth: parsedMap.width,
     mapHeight: parsedMap.height,
@@ -808,9 +822,19 @@ async function exportMapRegion(
     sprites,
     cells,
   };
+  if (missingAssets.size > 0) {
+    region.missingAssets = [...missingAssets.values()];
+  }
+  return region;
 
   function registerSprite(layer: { libraryKey: string; drawMode: "auto" | "floor" | "object"; frames: number[] }, kind: "back" | "middle" | "front" | "tileAnimation") {
-    const library = ensureLibrary(layer.libraryKey);
+    let library: ParsedLibrary | null;
+    try {
+      library = ensureLibrary(layer.libraryKey);
+    } catch (error) {
+      if (!recoverFromMissingAsset(error, missingAssets)) throw error;
+      return null;
+    }
     if (!library) return null;
 
     const drawMode = resolveDrawMode(layer, library);
@@ -818,9 +842,7 @@ async function exportMapRegion(
     const existingId = spriteIds.get(spriteKey);
     if (existingId) return existingId;
 
-    const frames = layer.frames
-      .map((frameIndex) => exportFrame(layer.libraryKey, library, frameIndex, pendingWrites))
-      .filter((frame): frame is OriginalMapSpriteFrame => frame !== null);
+    const frames = resolveLayerSpriteFrames(layer.libraryKey, library, layer.frames, pendingWrites, missingAssets);
     if (!frames.length) return null;
 
     const id = `sprite-${spriteIds.size + 1}`;
@@ -828,6 +850,58 @@ async function exportMapRegion(
     spriteIds.set(spriteKey, id);
     return id;
   }
+}
+
+// Resolve the frames of a single sprite layer. In graceful mode (the default), a missing
+// frame PNG / library is skipped and recorded in `missingAssets` rather than aborting the
+// whole scene. In strict mode the underlying CrystalResourceMissingError propagates (HTTP 424).
+function resolveLayerSpriteFrames(
+  libraryKey: string,
+  library: ParsedLibrary,
+  frames: number[],
+  pendingWrites: Array<Promise<void>>,
+  missingAssets: Map<string, OriginalMapMissingAsset>,
+): OriginalMapSpriteFrame[] {
+  const resolved: OriginalMapSpriteFrame[] = [];
+  for (const frameIndex of frames) {
+    try {
+      const frame = exportFrame(libraryKey, library, frameIndex, pendingWrites);
+      if (frame) resolved.push(frame);
+    } catch (error) {
+      if (!recoverFromMissingAsset(error, missingAssets)) throw error;
+    }
+  }
+  return resolved;
+}
+
+// Decide whether a thrown error is a per-sprite asset miss we can recover from. Only misses
+// that carry a `libraryKey` (a specific frame PNG or map library) are recoverable; a wholesale
+// missing original-asset manifest (no libraryKey) is a deploy fault and must still surface so
+// the route returns 424. Returns true (and records the miss) when recovery is permitted.
+function recoverFromMissingAsset(
+  error: unknown,
+  missingAssets: Map<string, OriginalMapMissingAsset>,
+): boolean {
+  if (STRICT_ASSET_RESOLUTION_ENABLED) return false;
+  if (!isCrystalResourceMissingError(error)) return false;
+  if (typeof error.libraryKey !== "string" || error.libraryKey.length === 0) return false;
+  recordMissingAsset(missingAssets, {
+    resourceType: error.resourceType,
+    path: error.resourcePath,
+    libraryKey: error.libraryKey,
+    frameIndex: error.frameIndex,
+  });
+  return true;
+}
+
+function recordMissingAsset(
+  missingAssets: Map<string, OriginalMapMissingAsset>,
+  asset: OriginalMapMissingAsset,
+) {
+  const key = `${asset.resourceType}|${asset.path}`;
+  if (missingAssets.has(key)) return;
+  missingAssets.set(key, asset);
+  resourceStats.recoveredMissingAssetCount += 1;
 }
 
 function parsedCellAt(parsedMap: ParsedMap, x: number, y: number) {
@@ -1572,8 +1646,18 @@ export function resetCrystalMapLoaderResourceStatsForTests() {
   resourceStats.frameDecodeCount = 0;
   resourceStats.decodedFrameCacheHits = 0;
   resourceStats.decodedFrameCacheMisses = 0;
+  resourceStats.recoveredMissingAssetCount = 0;
   decodedFrameCache.clear();
   decodedFrameCacheBytes = 0;
+}
+
+// Test seam: exercise graceful asset degradation for a single sprite layer without needing a
+// full parsed map. Returns the frames that resolved plus the misses that were recovered.
+export function resolveLayerSpriteFramesForTests(libraryKey: string, library: ParsedLibrary, frames: number[]) {
+  const missingAssets = new Map<string, OriginalMapMissingAsset>();
+  const pendingWrites: Array<Promise<void>> = [];
+  const resolved = resolveLayerSpriteFrames(libraryKey, library, frames, pendingWrites, missingAssets);
+  return { frames: resolved, missingAssets: [...missingAssets.values()], pendingWrites };
 }
 
 export function crystalOriginalAssetManifestHasPathForTests(publicPath: string) {
