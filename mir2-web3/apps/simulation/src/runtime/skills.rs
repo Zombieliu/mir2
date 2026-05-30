@@ -1536,8 +1536,11 @@ fn apply_manifest_spell_effect(
             packets.extend(apply_crystal_mirroring_spell(world, player, skill, tick));
             return packets;
         }
-        "CounterAttack" | "FatalSword" | "Fencing" | "FlamingSword" | "Focus" | "Hemorrhage"
-        | "Meditation" | "MentalState" | "MPEater" | "Slaying" | "SpiritSword" | "Thrusting" => {
+        "CounterAttack" | "FatalSword" | "FastMove" | "Fencing" | "FlamingSword" | "Focus"
+        | "Hemorrhage" | "Meditation" | "MentalState" | "MPEater" | "Slaying" | "SpiritSword"
+        | "Thrusting" => {
+            // Passive / always-on skills with no active server effect (FastMove is a passive
+            // movement-speed skill in Crystal with no cast handler).
             return packets;
         }
         "MoonMist" => {
@@ -1589,7 +1592,7 @@ fn apply_manifest_spell_effect(
     let Some(player_object_id) = current_player_object_id(world) else {
         return packets;
     };
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     schedule_damage_to_monster(
@@ -2384,7 +2387,11 @@ fn apply_crystal_elemental_shot_spell(
     );
     let orb_power =
         crystal_elemental_orb_power(world.resource::<ElementalResource>().elements_level, false);
-    let damage = crystal_magic_damage(magic, skill.level).saturating_add(orb_power);
+    let damage = crystal_magic_get_damage(
+        magic,
+        skill.level,
+        crystal_spell_attack_power(world, tick, magic).saturating_add(orb_power),
+    );
     schedule_damage_to_monster(
         world,
         due_tick,
@@ -2583,7 +2590,7 @@ fn apply_crystal_shoulder_dash_spell(
         damage_monster_entity(
             world,
             target_entity,
-            crystal_magic_damage(magic, skill.level).max(1),
+            crystal_spell_damage(world, tick, magic, skill.level),
             tick,
             &mut packets,
         );
@@ -2623,7 +2630,7 @@ fn apply_crystal_slashing_burst_spell(
                 due_tick,
                 object_id,
                 target_entity,
-                crystal_magic_damage(magic, skill.level),
+                crystal_spell_damage(world, tick, magic, skill.level),
                 Some(target_name.clone()),
                 Some(PendingMonsterDefeatAction {
                     object_id: target_id,
@@ -2723,7 +2730,7 @@ fn apply_crystal_flash_dash_spell(
                 due_tick,
                 object_id,
                 target_entity,
-                crystal_magic_damage(magic, skill.level),
+                crystal_spell_damage(world, tick, magic, skill.level),
                 Some(target_name.clone()),
                 Some(PendingMonsterDefeatAction {
                     object_id: target_id,
@@ -3092,7 +3099,7 @@ fn apply_crystal_storm_escape_spell(
     };
 
     let damage_due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let targets = {
         #[allow(deprecated)]
         world
@@ -3197,7 +3204,7 @@ fn apply_crystal_fire_wall_spell(
         .map(|context| context.target.clone())
         .unwrap_or(player_position);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let locations = fire_wall_cross_locations(world, &target);
 
     for (index, location) in locations.iter().enumerate() {
@@ -3261,7 +3268,7 @@ fn apply_crystal_lightning_spell(
         .or_else(|| entity_facing(world, player))
         .unwrap_or(MirDirection::Down);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
 
     let mut location = origin;
     for _ in 0..6 {
@@ -3316,7 +3323,7 @@ fn apply_crystal_hell_fire_spell(
         directions.push(rotated_direction(direction, 1));
         directions.push(rotated_direction(direction, -1));
     }
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
 
     for direction in directions {
@@ -3353,7 +3360,7 @@ fn apply_crystal_fire_bang_family_spell(
         .map(|context| context.target.clone())
         .or_else(|| entity_position(world, player))
         .unwrap_or(Point { x: 0, y: 0 });
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     for target_entity in hostile_monsters_in_square(world, &target, 1) {
         schedule_damage_to_hostile_monster_entity(
@@ -3405,13 +3412,14 @@ fn apply_crystal_blizzard_family_spell(
             },
         );
     }
+    let ground_damage = crystal_spell_damage(world, tick, magic, skill.level);
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_ground_spell_actions
         .push(PendingGroundSpellAction {
             spell,
             caster_object_id: player_object_id,
-            damage: crystal_magic_damage(magic, skill.level),
+            damage: ground_damage,
             locations,
             next_tick: due_tick.saturating_add(combat_delay_ticks(800)),
             expires_at_tick: due_tick.saturating_add(combat_delay_ticks(3_000)),
@@ -3445,7 +3453,7 @@ fn apply_crystal_meteor_shower_spell(
     };
     let player_position = entity_position(world, player).unwrap_or(Point { x: 0, y: 0 });
     let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -3560,7 +3568,7 @@ fn apply_crystal_fire_bounce_spell(
         chain.push(next_entity);
     }
 
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let mut due_tick = tick;
     let mut source_object_id = player_object_id;
     let mut source_position = player_position;
@@ -3623,7 +3631,7 @@ fn apply_crystal_thunder_bolt_spell(
     let Some(player_object_id) = current_player_object_id(world) else {
         return Vec::new();
     };
-    let mut damage = crystal_magic_damage(magic, skill.level);
+    let mut damage = crystal_spell_damage(world, tick, magic, skill.level);
     if monster_is_undead(world, target_entity) {
         damage = damage.saturating_mul(3).saturating_div(2).max(1);
     }
@@ -3706,7 +3714,7 @@ fn apply_crystal_flame_disruptor_spell(
     let Some(target_position) = entity_position(world, target_entity) else {
         return Vec::new();
     };
-    let mut damage = crystal_magic_damage(magic, skill.level);
+    let mut damage = crystal_spell_damage(world, tick, magic, skill.level);
     if !monster_is_undead(world, target_entity) {
         damage = damage.saturating_mul(3).saturating_div(2).max(1);
     }
@@ -3750,7 +3758,7 @@ fn apply_crystal_ice_thrust_spell(
         offset_point(&front, direction, 1),
         offset_point(&front, rotated_direction(direction, 1), 1),
     ];
-    let near_damage = crystal_magic_damage(magic, skill.level);
+    let near_damage = crystal_spell_damage(world, tick, magic, skill.level);
     let far_damage = near_damage.saturating_mul(3).saturating_div(5).max(1);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(1_500));
 
@@ -3827,7 +3835,7 @@ fn apply_crystal_frost_crunch_spell(
         return Vec::new();
     };
 
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -3905,7 +3913,7 @@ fn apply_crystal_vampirism_spell(
         return Vec::new();
     };
 
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -4021,7 +4029,7 @@ fn apply_crystal_thunder_storm_family_spell(
         return Vec::new();
     };
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let base_damage = crystal_magic_damage(magic, skill.level);
+    let base_damage = crystal_spell_damage(world, tick, magic, skill.level);
     let targets = hostile_monsters_in_square(world, &player_position, 2);
 
     for target_entity in targets {
@@ -4087,7 +4095,7 @@ fn apply_crystal_napalm_shot_spell(
         tick,
         ranged_attack_delay_ticks(&player_position, &center_position),
     );
-    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    let damage = crystal_archer_state_damage(world, crystal_spell_damage(world, tick, magic, skill.level));
     for target_entity in hostile_monsters_in_square(world, &center_position, 2) {
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
@@ -4145,7 +4153,7 @@ fn apply_crystal_delayed_explosion_spell(
         return Vec::new();
     };
 
-    let damage = crystal_magic_damage(magic, skill.level);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -4353,7 +4361,7 @@ fn apply_crystal_area_healing_spell(
     let heal = if healing_circle {
         25
     } else {
-        crystal_magic_damage(magic, skill.level)
+        crystal_spell_damage(world, tick, magic, skill.level)
     };
     schedule_heal_to_player(world, due_tick, heal);
 
@@ -4615,7 +4623,7 @@ fn apply_crystal_poisoning_spell(
     };
 
     let player_object_id = current_player_object_id(world).unwrap_or_default();
-    let power = crystal_magic_damage(magic, skill.level).max(1);
+    let power = crystal_spell_damage(world, tick, magic, skill.level);
     let poison_attack = current_player_crystal_stat(world, CRYSTAL_STAT_POISON_ATTACK).max(0);
     let poison_attack_bonus = if poison_attack > 0 {
         deterministic_roll(
@@ -4697,7 +4705,7 @@ fn apply_crystal_poison_cloud_spell(
         .unwrap_or(Point { x: 0, y: 0 });
     let locations = square_locations(&target, 1);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let damage = crystal_magic_damage(magic, skill.level).max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let object_id = allocate_runtime_monster_object_id(world);
     queue_due_packet(
         world,
@@ -4763,10 +4771,7 @@ fn apply_crystal_plague_spell(
         .or_else(|| entity_position(world, player))
         .unwrap_or(Point { x: 0, y: 0 });
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let spell_power = crystal_magic_damage(magic, skill.level)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC))
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
-        .max(1);
+    let spell_power = crystal_spell_damage(world, tick, magic, skill.level);
     let direct_damage = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
         .saturating_mul(2)
         .max(spell_power);
@@ -5091,13 +5096,14 @@ fn apply_crystal_explosive_trap_spell(
             },
         );
     }
+    let trap_damage = crystal_spell_damage(world, tick, magic, skill.level);
     world
         .resource_mut::<RuntimeQueueResource>()
         .pending_ground_spell_actions
         .push(PendingGroundSpellAction {
             spell: Spell::ExplosiveTrap,
             caster_object_id: player_object_id,
-            damage: crystal_magic_damage(magic, skill.level),
+            damage: trap_damage,
             locations: trap_locations,
             next_tick: due_tick,
             expires_at_tick: due_tick.saturating_add(combat_delay_ticks(10_000)),
@@ -5124,7 +5130,7 @@ fn apply_crystal_poison_sword_spell(
     };
     let direction = entity_facing(world, player).unwrap_or(MirDirection::Down);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    let power = crystal_magic_damage(magic, skill.level).max(1);
+    let power = crystal_spell_damage(world, tick, magic, skill.level);
     let poison_attack = current_player_crystal_stat(world, CRYSTAL_STAT_POISON_ATTACK).max(0);
     let poison_attack_bonus = if poison_attack > 0 {
         deterministic_roll(
@@ -5223,17 +5229,7 @@ fn apply_crystal_projectile_damage_spell(
         packets.push(delete_packet);
     }
 
-    let stat_bonus = if magic.spell == "SoulFireBall" {
-        current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
-            .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
-    } else {
-        current_player_crystal_stat(world, CRYSTAL_STAT_MAX_MC)
-            .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_MC))
-    }
-    .max(0);
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(stat_bonus)
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -5287,14 +5283,14 @@ fn apply_crystal_healing_spell(
         return Vec::new();
     }
 
-    let tao_power = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_SC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_SC))
-        .max(0);
     let level_bonus = i32::from(crystal_player_level(world, player));
-    let heal = crystal_magic_damage(magic, skill.level)
-        .saturating_add(tao_power.saturating_mul(2))
-        .saturating_add(level_bonus)
-        .max(1);
+    let heal = crystal_magic_get_damage(
+        magic,
+        skill.level,
+        crystal_spell_attack_power(world, tick, magic).saturating_mul(2),
+    )
+    .saturating_add(level_bonus)
+    .max(1);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     schedule_heal_to_player(world, due_tick, heal);
     let effect_packet = ServerPacket::ObjectEffect {
@@ -5395,12 +5391,7 @@ fn apply_crystal_blade_avalanche_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
-        .max(0);
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(dc)
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
 
     for lane in [-1, 0, 1] {
@@ -5450,12 +5441,7 @@ fn apply_crystal_crescent_slash_spell(
     let back = rotated_direction(direction, 4);
     let pre_back = rotated_direction(back, -1);
     let next_back = rotated_direction(back, 1);
-    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
-        .max(0);
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(dc)
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
 
     for offset in -4..=3 {
@@ -5498,12 +5484,7 @@ fn apply_crystal_half_moon_family_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
-        .max(0);
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(dc)
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(300));
     let full_ring = magic.spell == "CrossHalfMoon";
     let offsets: &[i32] = if full_ring {
@@ -5552,7 +5533,7 @@ fn apply_crystal_double_slash_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let damage = crystal_melee_magic_damage(world, skill, magic);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     for delay_ms in [300, 400] {
         let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
         let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
@@ -5598,7 +5579,7 @@ fn apply_crystal_twin_drake_blade_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let damage = crystal_melee_magic_damage(world, skill, magic);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
     schedule_damage_to_monster(
         world,
@@ -5683,7 +5664,7 @@ fn apply_crystal_heavenly_sword_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let damage = crystal_melee_magic_damage(world, skill, magic);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     let mut hit_point = player_position;
     for _ in 0..3 {
@@ -5806,19 +5787,6 @@ fn crystal_hostile_target_for_context(
     }
     let player_object_id = current_player_object_id(world)?;
     Some((player_object_id, target_entity, context.target_id))
-}
-
-fn crystal_melee_magic_damage(
-    world: &World,
-    skill: &SkillState,
-    magic: &CrystalMagicTemplate,
-) -> i32 {
-    let dc = current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC)
-        .max(current_player_crystal_stat(world, CRYSTAL_STAT_MIN_DC))
-        .max(0);
-    crystal_magic_damage(magic, skill.level)
-        .saturating_add(dc)
-        .max(1)
 }
 
 fn apply_crystal_mirroring_spell(
@@ -5949,9 +5917,7 @@ fn apply_crystal_moon_mist_spell(
         },
     });
 
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC))
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     for target_entity in hostile_monsters_in_square(world, &player_position, 2) {
         schedule_damage_to_hostile_monster_entity(
@@ -6018,9 +5984,7 @@ fn apply_crystal_cat_tongue_spell(
     let Some(target_position) = entity_position(world, target_entity) else {
         return Vec::new();
     };
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_DC))
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
@@ -6110,9 +6074,7 @@ fn apply_crystal_one_with_nature_spell(
             buffs.buffs.iter().any(|buff| buff.key == "poison-shot"),
         )
     };
-    let damage = crystal_magic_damage(magic, skill.level)
-        .saturating_add(current_player_crystal_stat(world, CRYSTAL_STAT_MAX_MC))
-        .max(1);
+    let damage = crystal_spell_damage(world, tick, magic, skill.level);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
     let targets = hostile_monsters_in_square(world, &player_position, 2);
     for target_entity in targets {
@@ -6320,7 +6282,13 @@ fn apply_crystal_special_arrow_shot(
         return Vec::new();
     };
 
-    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    let range = (player_position.x - target_position.x)
+        .abs()
+        .max((player_position.y - target_position.y).abs());
+    let damage = crystal_archer_state_damage(
+        world,
+        crystal_spell_range_damage(world, tick, magic, skill.level, range),
+    );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
     let due_tick = queued_before_world_tick_due_tick(
         tick,
@@ -6428,7 +6396,13 @@ fn apply_crystal_archer_basic_shot(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
-    let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
+    let range = (player_position.x - target_position.x)
+        .abs()
+        .max((player_position.y - target_position.y).abs());
+    let damage = crystal_archer_state_damage(
+        world,
+        crystal_spell_range_damage(world, tick, magic, skill.level, range),
+    );
     let hit_count = if magic.spell == "DoubleShot" { 2 } else { 1 };
     for hit in 0..hit_count {
         schedule_damage_to_monster(
@@ -6832,8 +6806,13 @@ pub(super) fn consume_zone_magic_inventory_components(
             let (poison_delete_packet, _) = consume_equipped_crystal_poison(world, Some(1), 5)?;
             Some(vec![amulet_delete_packet, poison_delete_packet])
         }
-        Spell::SummonSkeleton | Spell::SummonShinsu => {
+        Spell::SummonSkeleton => {
             let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 1)?;
+            Some(vec![amulet_delete_packet])
+        }
+        Spell::SummonShinsu => {
+            // Crystal `SummonShinsu` consumes 5 amulets (GetAmulet(5)/ConsumeItem(item, 5)).
+            let amulet_delete_packet = consume_equipped_crystal_amulet(world, 0, 5)?;
             Some(vec![amulet_delete_packet])
         }
         Spell::SummonHolyDeva => {
@@ -6851,6 +6830,172 @@ pub(super) fn crystal_magic_damage(magic: &CrystalMagicTemplate, level: u8) -> i
     let base = defence_power + (magic_power * level) / 4;
     let multiplier = magic.multiplier_base + f32::from(level as u16 - 1) * magic.multiplier_bonus;
     ((base.max(1) as f32) * multiplier.max(1.0)).round() as i32
+}
+
+/// Crystal `UserMagic.GetPower()` — the spell's intrinsic power scaling:
+/// `Round((MPower / 4) * (Level + 1) + DefPower)`. The MPower/DefPower ranges are
+/// collapsed to their deterministic mean (matching [`crystal_magic_damage`]) so the
+/// value stays reproducible across replays.
+pub(super) fn crystal_magic_get_power(magic: &CrystalMagicTemplate, level: u8) -> i32 {
+    let level = i32::from(level) + 1;
+    let defence_power = i32::from(magic.power_base) + i32::from(magic.power_bonus) / 2;
+    let magic_power = i32::from(magic.mpower_base) + i32::from(magic.mpower_bonus) / 2;
+    defence_power + (magic_power * level) / 4
+}
+
+/// Crystal `UserMagic.GetMultiplier()` = `MultiplierBase + Level * MultiplierBonus`.
+pub(super) fn crystal_magic_multiplier(magic: &CrystalMagicTemplate, level: u8) -> f32 {
+    magic.multiplier_base + f32::from(level) * magic.multiplier_bonus
+}
+
+/// Crystal `UserMagic.GetDamage(damageBase)` = `(damageBase + GetPower()) * GetMultiplier()`.
+///
+/// This is the canonical magic damage formula. Unlike the legacy approach of adding the
+/// player's attack power *after* the multiplier, Crystal folds `damageBase` (the player's
+/// MC/SC/DC attack roll) into the value *before* applying the level multiplier, so high-level
+/// spells scale the player's gear contribution too.
+pub(super) fn crystal_magic_get_damage(
+    magic: &CrystalMagicTemplate,
+    level: u8,
+    damage_base: i32,
+) -> i32 {
+    let power = crystal_magic_get_power(magic, level);
+    let multiplier = crystal_magic_multiplier(magic, level).max(1.0);
+    let base = damage_base.saturating_add(power).max(1);
+    ((base as f32) * multiplier).round() as i32
+}
+
+/// The player stat channel a spell's `damageBase` is rolled from. Wizard and archer spells
+/// scale off Magic-Crystal (MC), Taoist spells off Spirit-Crystal (SC), and Warrior/Assassin
+/// melee skills off Damage-Crystal (DC), mirroring Crystal's per-spell `GetAttackPower` source.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(super) enum CrystalDamageChannel {
+    Mc,
+    Sc,
+    Dc,
+}
+
+pub(super) fn crystal_spell_damage_channel(spell: &str) -> CrystalDamageChannel {
+    match spell {
+        // Taoist spells roll Spirit-Crystal (SC).
+        "SoulFireBall" | "Healing" | "MassHealing" | "HealingCircle" | "Poisoning"
+        | "PoisonCloud" | "Plague" | "Curse" | "TrapHexagon" | "Revelation" => {
+            CrystalDamageChannel::Sc
+        }
+        // Warrior + Assassin melee skills roll Damage-Crystal (DC).
+        "Slaying" | "DoubleSlash" | "Thrusting" | "HalfMoon" | "CrossHalfMoon"
+        | "TwinDrakeBlade" | "FlamingSword" | "BladeAvalanche" | "SlashingBurst"
+        | "CrescentSlash" | "HeavenlySword" | "PoisonSword" | "ShoulderDash" | "FlashDash"
+        | "MoonMist" | "CatTongue" => CrystalDamageChannel::Dc,
+        // Everything else (Wizard + Archer ranged) rolls Magic-Crystal (MC).
+        _ => CrystalDamageChannel::Mc,
+    }
+}
+
+fn crystal_channel_stats(channel: CrystalDamageChannel) -> (u8, u8) {
+    match channel {
+        CrystalDamageChannel::Mc => (CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC),
+        CrystalDamageChannel::Sc => (CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MAX_SC),
+        CrystalDamageChannel::Dc => (CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MAX_DC),
+    }
+}
+
+fn crystal_spell_salt(spell: &str) -> u64 {
+    spell
+        .bytes()
+        .enumerate()
+        .fold(0x517C_C1B7_2722_0A95u64, |acc, (idx, byte)| {
+            acc.wrapping_mul(31)
+                .wrapping_add(u64::from(byte).wrapping_add(idx as u64))
+        })
+}
+
+/// Crystal `MapObject.GetAttackPower(min, max)` — deterministic roll in `[min, max]` honoring
+/// the Luck stat (positive Luck can force the maximum, negative Luck the minimum). Uses the
+/// shared deterministic RNG so a given cast is reproducible across replays.
+pub(super) fn crystal_attack_power_roll(
+    world: &World,
+    tick: u64,
+    salt: u64,
+    min: i32,
+    max: i32,
+) -> i32 {
+    let min = min.max(0);
+    let max = max.max(min);
+    let object_id = current_player_object_id(world).unwrap_or_default();
+    let luck = current_player_crystal_stat(world, CRYSTAL_STAT_LUCK);
+    const MAX_LUCK: u64 = 10; // Crystal Settings.MaxLuck default.
+    if luck > 0 {
+        let roll = deterministic_roll(tick, object_id as usize, salt as usize, MAX_LUCK) as i32;
+        if luck > roll {
+            return max;
+        }
+    } else if luck < 0 {
+        let roll = deterministic_roll(
+            tick,
+            object_id as usize,
+            salt.wrapping_add(0xABCD) as usize,
+            MAX_LUCK,
+        ) as i32;
+        if luck < -roll {
+            return min;
+        }
+    }
+    if max <= min {
+        return min;
+    }
+    let span = (max - min + 1) as u64;
+    min + deterministic_roll(tick, object_id as usize, salt as usize, span) as i32
+}
+
+/// Rolls the player's attack power for a spell's damage channel
+/// (Crystal `GetAttackPower(MinXX, MaxXX)`).
+pub(super) fn crystal_spell_attack_power(
+    world: &World,
+    tick: u64,
+    magic: &CrystalMagicTemplate,
+) -> i32 {
+    let channel = crystal_spell_damage_channel(&magic.spell);
+    let (min_stat, max_stat) = crystal_channel_stats(channel);
+    let min = current_player_crystal_stat(world, min_stat);
+    let max = current_player_crystal_stat(world, max_stat);
+    crystal_attack_power_roll(world, tick, crystal_spell_salt(&magic.spell), min, max)
+}
+
+/// Crystal `magic.GetDamage(GetAttackPower(MinXX, MaxXX))` — the full per-cast damage for a
+/// spell, including the player's gear-scaled attack power folded inside the level multiplier.
+pub(super) fn crystal_spell_damage(
+    world: &World,
+    tick: u64,
+    magic: &CrystalMagicTemplate,
+    level: u8,
+) -> i32 {
+    let base = crystal_spell_attack_power(world, tick, magic);
+    crystal_magic_get_damage(magic, level, base).max(1)
+}
+
+/// Crystal `GetRangeAttackPower(min, max, range)` — applies the bow falloff penalty
+/// (`min -= floor(min / MaxAttackRange * (MaxAttackRange - range))`) before rolling. Archer
+/// shots use this so distant targets take less damage.
+pub(super) fn crystal_spell_range_damage(
+    world: &World,
+    tick: u64,
+    magic: &CrystalMagicTemplate,
+    level: u8,
+    range: i32,
+) -> i32 {
+    const MAX_ATTACK_RANGE: i32 = 9; // Crystal Globals.MaxAttackRange.
+    let channel = crystal_spell_damage_channel(&magic.spell);
+    let (min_stat, max_stat) = crystal_channel_stats(channel);
+    let max = current_player_crystal_stat(world, max_stat);
+    let mut min = current_player_crystal_stat(world, min_stat);
+    let range = range.clamp(0, MAX_ATTACK_RANGE);
+    let penalty = (f64::from(min) / f64::from(MAX_ATTACK_RANGE)
+        * f64::from(MAX_ATTACK_RANGE - range))
+    .floor() as i32;
+    min -= penalty;
+    let base = crystal_attack_power_roll(world, tick, crystal_spell_salt(&magic.spell), min, max);
+    crystal_magic_get_damage(magic, level, base).max(1)
 }
 
 pub(super) fn advance_magic_progression(
@@ -7132,5 +7277,115 @@ impl SimulationSession {
         }
 
         cast_skill(self.app.world_mut(), key)
+    }
+}
+
+#[cfg(test)]
+mod crystal_damage_formula_tests {
+    use super::*;
+
+    fn test_magic(
+        spell: &str,
+        power_base: u16,
+        power_bonus: u16,
+        mpower_base: u16,
+        mpower_bonus: u16,
+        multiplier_base: f32,
+        multiplier_bonus: f32,
+    ) -> CrystalMagicTemplate {
+        CrystalMagicTemplate {
+            name: spell.to_string(),
+            spell: spell.to_string(),
+            base_cost: 0,
+            level_cost: 0,
+            icon: 0,
+            level1: 0,
+            level2: 0,
+            level3: 0,
+            need1: 0,
+            need2: 0,
+            need3: 0,
+            delay_base: 0,
+            delay_reduction: 0,
+            power_base,
+            power_bonus,
+            mpower_base,
+            mpower_bonus,
+            multiplier_base,
+            multiplier_bonus,
+            range: 0,
+        }
+    }
+
+    #[test]
+    fn get_power_matches_crystal_def_plus_mpower_scaling() {
+        // Crystal GetPower() = Round(MPower/4 * (Level+1) + DefPower).
+        let magic = test_magic("FireBall", 10, 0, 8, 0, 1.0, 0.0);
+        // level 0: 10 + (8 * 1) / 4 = 12
+        assert_eq!(crystal_magic_get_power(&magic, 0), 12);
+        // level 2: 10 + (8 * 3) / 4 = 16
+        assert_eq!(crystal_magic_get_power(&magic, 2), 16);
+    }
+
+    #[test]
+    fn multiplier_scales_linearly_with_level() {
+        // Crystal GetMultiplier() = MultiplierBase + Level * MultiplierBonus.
+        let magic = test_magic("FireBall", 0, 0, 0, 0, 1.0, 0.5);
+        assert_eq!(crystal_magic_multiplier(&magic, 0), 1.0);
+        assert_eq!(crystal_magic_multiplier(&magic, 1), 1.5);
+        assert_eq!(crystal_magic_multiplier(&magic, 2), 2.0);
+    }
+
+    #[test]
+    fn get_damage_folds_attack_power_inside_multiplier() {
+        // Crystal GetDamage(base) = (base + GetPower()) * GetMultiplier().
+        // This is the key fidelity fix: the player's attack power is multiplied too.
+        let magic = test_magic("FireBall", 10, 0, 8, 0, 1.0, 0.5);
+        // level 2: power = 16, mult = 2.0 -> (20 + 16) * 2 = 72
+        assert_eq!(crystal_magic_get_damage(&magic, 2, 20), 72);
+        // A higher attack roll scales through the multiplier: (40 + 16) * 2 = 112
+        assert_eq!(crystal_magic_get_damage(&magic, 2, 40), 112);
+    }
+
+    #[test]
+    fn get_damage_with_zero_base_equals_legacy_intrinsic_damage() {
+        // GetDamage(0) must equal the legacy crystal_magic_damage (the spell's intrinsic power),
+        // proving the new formula is a strict superset that adds the attack-power term.
+        let magic = test_magic("Lightning", 5, 4, 12, 6, 1.2, 0.4);
+        for level in 0..=3u8 {
+            assert_eq!(
+                crystal_magic_get_damage(&magic, level, 0),
+                crystal_magic_damage(&magic, level),
+                "level {level} GetDamage(0) should match legacy intrinsic damage",
+            );
+        }
+    }
+
+    #[test]
+    fn damage_channel_matches_crystal_class_sources() {
+        // Wizard + Archer ranged scale off Magic-Crystal (MC).
+        for spell in ["FireBall", "GreatFireBall", "Lightning", "FrostCrunch", "StraightShot"] {
+            assert_eq!(
+                crystal_spell_damage_channel(spell),
+                CrystalDamageChannel::Mc,
+                "{spell} should roll MC",
+            );
+        }
+        // Taoist spells scale off Spirit-Crystal (SC).
+        for spell in ["Healing", "SoulFireBall", "Poisoning", "Curse", "MassHealing"] {
+            assert_eq!(
+                crystal_spell_damage_channel(spell),
+                CrystalDamageChannel::Sc,
+                "{spell} should roll SC",
+            );
+        }
+        // Warrior + Assassin melee scale off Damage-Crystal (DC).
+        for spell in ["Slaying", "HalfMoon", "TwinDrakeBlade", "CrescentSlash", "CatTongue"] {
+            assert_eq!(
+                crystal_spell_damage_channel(spell),
+                CrystalDamageChannel::Dc,
+                "{spell} should roll DC",
+            );
+        }
     }
 }
