@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-05-30T23:23:05.909Z",
+  "sections": {
+    "originalAssets": {
+      "available": true,
+      "pngCount": 14963
+    },
+    "mapSpriteCoverage": {
+      "available": true,
+      "requiredFrames": 192391,
+      "presentFrames": 191938,
+      "renderablePercent": 99.76,
+      "accountedPercent": 100,
+      "mapsWithMissingSourceAssets": 11
+    },
+    "miniMapCoverage": {
+      "available": true,
+      "neededMiniMaps": 226,
+      "exportedMiniMaps": 227,
+      "missingMiniMaps": 0,
+      "coveragePercent": 100
+    },
+    "soundCoverage": {
+      "available": true,
+      "presentSounds": 4,
+      "indexedSounds": 450,
+      "coveragePercent": 0.89,
+      "note": "remaining sounds are raw-asset-limited (need the Crystal client)"
+    }
+  },
+  "overall": {
+    "available": true,
+    "renderCoveragePercent": 99.88
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T09:41:01.052Z",
+  "generatedAt": "2026-05-30T23:23:05.688Z",
   "representativeMaps": [
     "0",
     "1",
@@ -13,10 +13,7 @@
     "D1801"
   ],
   "neededMiniMapCount": 226,
-  "exportedMiniMapCount": 225,
-  "missingMiniMapIndices": [
-    450,
-    451
-  ],
+  "exportedMiniMapCount": 227,
+  "missingMiniMapIndices": [],
   "failures": []
 }
