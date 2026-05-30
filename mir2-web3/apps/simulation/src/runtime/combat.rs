@@ -889,6 +889,53 @@ pub(super) fn tick_monster_poisons(
     }
 }
 
+/// Crystal `MonsterObject.ProcessRegen`: a living, damaged monster recovers ~2.2% of its maximum
+/// HP (plus one) every `RegenDelay` (10s). Non-combat props (gates/traps/elementals that ignore
+/// damage) and training dummies do not regen. Object-id phasing spreads pulses across ticks the way
+/// Crystal's randomised `RegenTime` does, so a slow attacker can be out-healed exactly as in Crystal.
+pub(super) fn tick_monster_regen(
+    world: &mut World,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let candidates = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|entity| {
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead || agent.ai == 56 || ignores_monster_damage(agent) {
+                    return None;
+                }
+                let vitals = entity.get::<MonsterVitals>()?;
+                if vitals.hp <= 0 || vitals.hp >= vitals.max_hp {
+                    return None;
+                }
+                let object_id = entity.get::<ObjectId>().map(|id| id.0)?;
+                Some((entity.id(), object_id, vitals.hp, vitals.max_hp))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for (entity, object_id, hp, max_hp) in candidates {
+        if (current_tick.wrapping_add(u64::from(object_id))) % MONSTER_REGEN_INTERVAL_TICKS != 0 {
+            continue;
+        }
+        let heal = (max_hp.saturating_mul(MONSTER_REGEN_PERMILLE) / 1000).max(0) + 1;
+        let next_hp = hp.saturating_add(heal).min(max_hp);
+        if next_hp == hp {
+            continue;
+        }
+        world.entity_mut(entity).insert(MonsterVitals {
+            hp: next_hp,
+            max_hp,
+        });
+        if let Some(info) = object_health_info_for_entity(world, entity, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+    }
+}
+
 pub(super) fn tick_player_status_effects(
     world: &mut World,
     current_tick: u64,

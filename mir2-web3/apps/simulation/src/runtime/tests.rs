@@ -18,7 +18,8 @@ use super::{
     PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
     SessionResource, SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource,
     SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState, BASE_STORAGE_SLOTS,
-    CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
+    CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS, MONSTER_REGEN_INTERVAL_TICKS,
+    MONSTER_REGEN_PERMILLE,
 };
 use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
@@ -4008,6 +4009,156 @@ fn player_attack_locks_monster_target_and_uses_runtime_counterattack() {
     )));
     let after_counter_hp = session.world_snapshot().player_hp.expect("player hp");
     assert!(after_counter_hp < before_hp);
+}
+
+#[test]
+fn crystal_damaged_monster_regenerates_health_over_time() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Keep the monster far from the player so it stays passive and only its regen affects HP.
+    let player_origin = Point { x: 40, y: 40 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let monster_object_id = 91_234_u32;
+    let max_hp = 1_000;
+    let start_hp = 500;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Regen Test Beast"),
+            Position(Point { x: 320, y: 240 }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: start_hp,
+                max_hp,
+            },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: Point { x: 320, y: 240 },
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    let monster_hp = |session: &SimulationSession| {
+        session
+            .app
+            .world()
+            .entity(monster_entity)
+            .get::<MonsterVitals>()
+            .expect("monster vitals")
+            .hp
+    };
+
+    // Within one full regen interval the monster must pulse-heal exactly once (authoritative
+    // server HP; packet delivery itself is AOI-gated and covered elsewhere).
+    for _ in 0..MONSTER_REGEN_INTERVAL_TICKS {
+        session.tick();
+    }
+
+    let healed_hp = monster_hp(&session);
+    // Crystal heals (MaxHP * 0.022) + 1 per pulse = 23 for a 1000-HP monster.
+    let expected_pulse = (max_hp * MONSTER_REGEN_PERMILLE / 1000) + 1;
+    assert_eq!(expected_pulse, 23);
+    assert!(
+        healed_hp >= start_hp + expected_pulse,
+        "expected regen of at least {expected_pulse} (>= {}), got {healed_hp}",
+        start_hp + expected_pulse
+    );
+    assert!(healed_hp <= max_hp, "regen must never exceed max HP");
+
+    // A second full interval heals again but never exceeds the maximum.
+    for _ in 0..MONSTER_REGEN_INTERVAL_TICKS {
+        session.tick();
+    }
+    let twice_healed_hp = monster_hp(&session);
+    assert!(twice_healed_hp >= healed_hp + expected_pulse);
+    assert!(twice_healed_hp <= max_hp);
+}
+
+#[test]
+fn crystal_full_health_monster_does_not_regenerate_or_broadcast() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_origin = Point { x: 40, y: 40 };
+    set_player_position(&mut session, player_origin);
+
+    let monster_object_id = 91_235_u32;
+    let max_hp = 1_000;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Full Health Beast"),
+            Position(Point { x: 320, y: 240 }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: max_hp,
+                max_hp,
+            },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: Point { x: 320, y: 240 },
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    for _ in 0..(MONSTER_REGEN_INTERVAL_TICKS * 2) {
+        let packets = session.tick();
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectHealth { info } if info.object_id == monster_object_id
+            )),
+            "a full-health monster must not emit regen health packets"
+        );
+    }
+
+    let vitals = session
+        .app
+        .world()
+        .entity(monster_entity)
+        .get::<MonsterVitals>()
+        .expect("monster vitals");
+    assert_eq!(vitals.hp, max_hp);
 }
 
 #[test]
