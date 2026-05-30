@@ -4162,6 +4162,74 @@ fn crystal_full_health_monster_does_not_regenerate_or_broadcast() {
 }
 
 #[test]
+fn crystal_poisoned_monster_does_not_regenerate() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_origin = Point { x: 40, y: 40 };
+    set_player_position(&mut session, player_origin);
+
+    let monster_object_id = 91_236_u32;
+    let max_hp = 1_000;
+    let start_hp = 500;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Poisoned Beast"),
+            Position(Point { x: 320, y: 240 }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: start_hp,
+                max_hp,
+            },
+            // Active green poison with no per-tick damage: isolates the PoisonStopRegen rule.
+            MonsterPoisonState {
+                poison: 1,
+                green_damage: 0,
+                next_damage_tick: current_tick + 1_000_000,
+                expires_at_tick: current_tick + 1_000_000,
+            },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: Point { x: 320, y: 240 },
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    for _ in 0..(MONSTER_REGEN_INTERVAL_TICKS * 2) {
+        session.tick();
+    }
+
+    let hp = session
+        .app
+        .world()
+        .entity(monster_entity)
+        .get::<MonsterVitals>()
+        .expect("monster vitals")
+        .hp;
+    assert_eq!(hp, start_hp, "a poisoned monster must not regenerate HP");
+}
+
+#[test]
 fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

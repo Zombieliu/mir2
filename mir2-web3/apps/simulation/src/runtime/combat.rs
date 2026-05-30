@@ -907,6 +907,12 @@ pub(super) fn tick_monster_regen(
                 if agent.dead || agent.ai == 56 || ignores_monster_damage(agent) {
                     return None;
                 }
+                // Crystal `PoisonStopRegen` (true for every monster except the training dummy):
+                // an actively poisoned monster keeps pushing RegenTime forward, so it cannot heal
+                // while a green/bleeding poison is ticking on it.
+                if entity.get::<MonsterPoisonState>().is_some() {
+                    return None;
+                }
                 let vitals = entity.get::<MonsterVitals>()?;
                 if vitals.hp <= 0 || vitals.hp >= vitals.max_hp {
                     return None;
