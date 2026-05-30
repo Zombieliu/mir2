@@ -40,7 +40,8 @@ const EXTRA_ORIGINAL_ASSET_PATHS = [
   "/original-ui/Prguse/65.png",
   "/original-ui/Prguse/940.png",
   "/original-ui/Title/40.png",
-  ...makeRange(340, 362).map((value) => `/original-ui/Title/${value}.png`),
+  ...makeRange(340, 354).map((value) => `/original-ui/Title/${value}.png`),
+  ...makeRange(360, 362).map((value) => `/original-ui/Title/${value}.png`),
 ];
 const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".cur",
