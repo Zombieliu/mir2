@@ -2031,7 +2031,15 @@ pub(super) fn monster_player_attack_damage(
     if base_damage <= 0 {
         return 0;
     }
-    (base_damage - mitigation).max(1)
+    let mitigated = (base_damage - mitigation).max(1);
+    // Ranged monster strikes are the magic-school attacks in Crystal; the
+    // player's MagicResist further shrugs part of the blow. Inert (no change)
+    // for a player without magic resistance.
+    if tile_distance(source, target) > 1 {
+        super::combat::crystal_player_magic_mitigated(world, mitigated)
+    } else {
+        mitigated
+    }
 }
 
 pub(super) fn monster_player_status_effect(

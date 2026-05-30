@@ -1107,7 +1107,7 @@ pub(super) fn tick_stage5_hero_auto_pot(
             packets.extend(use_hero_inventory_item_packet(world, unique_id));
         }
     }
-    if pending_mp <= 0 && stage5_hero_auto_pot_needs(vitals.mp, 100, auto_mp_percent) {
+    if pending_mp <= 0 && stage5_hero_auto_pot_needs(vitals.mp, vitals.max_mp, auto_mp_percent) {
         if let Some(unique_id) = stage5_hero_auto_pot_item_unique_id(world, mp_item_index) {
             packets.extend(use_hero_inventory_item_packet(world, unique_id));
         }
@@ -4790,7 +4790,7 @@ pub(super) fn object_mana_info_for_entity(world: &World, entity: Entity) -> Opti
 
     Some(ObjectManaInfo {
         object_id,
-        percent: mana_percent(vitals.mp, 100),
+        percent: mana_percent(vitals.mp, vitals.max_mp),
     })
 }
 

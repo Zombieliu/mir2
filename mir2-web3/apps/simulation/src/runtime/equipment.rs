@@ -605,16 +605,19 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
 }
 
 pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
-    let mut resources = world.resource_mut::<InventoryResource>();
-    if let Some(existing) = resources
-        .equipment_items
-        .iter_mut()
-        .find(|item| item.slot == next.slot)
     {
-        *existing = next;
-    } else {
-        resources.equipment_items.push(next);
+        let mut resources = world.resource_mut::<InventoryResource>();
+        if let Some(existing) = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == next.slot)
+        {
+            *existing = next;
+        } else {
+            resources.equipment_items.push(next);
+        }
     }
+    super::stats::refresh_player_stats(world);
 }
 
 pub(super) fn item_state_from_equipment_state(
@@ -1141,6 +1144,7 @@ pub(super) fn equip_item_impl(
         to,
         success: true,
     });
+    super::stats::refresh_player_stats(world);
     packets
 }
 
@@ -1214,6 +1218,7 @@ pub(super) fn remove_equipped_item_impl(
         }
     }
 
+    super::stats::refresh_player_stats(world);
     vec![ServerPacket::RemoveItem {
         grid,
         unique_id,

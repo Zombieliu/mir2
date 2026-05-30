@@ -3929,6 +3929,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     tick_fishing(world, &mut packets);
     resolve_pending_combat_actions(world, tick, &mut packets);
     tick_player_status_effects(world, tick, &mut packets);
+    tick_player_vital_regen(world, tick, &mut packets);
     tick_ground_spell_actions(world, tick, &mut packets);
     tick_monster_poisons(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);

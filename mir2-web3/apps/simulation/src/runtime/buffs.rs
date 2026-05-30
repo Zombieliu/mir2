@@ -316,7 +316,7 @@ pub(super) fn restore_current_player_vitals(world: &mut World, heal_hp: i32, hea
         let mut entity = world.entity_mut(player);
         let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
         vitals.hp = (vitals.hp + heal_hp.max(0)).min(vitals.max_hp);
-        vitals.mp = (vitals.mp + heal_mp.max(0)).min(100);
+        vitals.mp = (vitals.mp + heal_mp.max(0)).min(vitals.max_mp);
         *vitals
     };
 
@@ -334,7 +334,7 @@ pub(super) fn restore_current_hero_vitals(world: &mut World, heal_hp: i32, heal_
             return false;
         };
         vitals.hp = (vitals.hp + heal_hp.max(0)).min(vitals.max_hp);
-        vitals.mp = (vitals.mp + heal_mp.max(0)).min(100);
+        vitals.mp = (vitals.mp + heal_mp.max(0)).min(vitals.max_mp);
     }
 
     true

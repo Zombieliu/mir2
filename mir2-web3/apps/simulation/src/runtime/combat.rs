@@ -50,6 +50,7 @@ use super::resources::{
 };
 use super::session::SimulationSession;
 use super::skills::{advance_magic_progression, crystal_magic_damage, normalize_crystal_skill_key};
+use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
@@ -93,6 +94,12 @@ const CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL: u64 = 2;
 const CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
 const CRYSTAL_PLAYER_BLEEDING_TICK_DAMAGE: i32 = 3;
 const CRYSTAL_RED_POISON_DAMAGE_BONUS_PERCENT: i32 = 25;
+/// Passive regeneration cadence and tuning. The combat delay ensures regen
+/// pauses while the player is actively taking damage.
+const CRYSTAL_PLAYER_REGEN_INTERVAL_TICKS: u64 = 10;
+const CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS: u64 = 10;
+const CRYSTAL_PLAYER_REGEN_HP_DIVISOR: i32 = 20;
+const CRYSTAL_PLAYER_REGEN_MP_DIVISOR: i32 = 20;
 
 fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
     let key = normalize_crystal_skill_key(spell_name);
@@ -218,7 +225,12 @@ fn apply_damage_to_current_player(
         };
     };
 
-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = updated_vitals;
+    {
+        let tick = runtime_tick(world);
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = updated_vitals;
+        runtime.last_damaged_tick = tick;
+    }
     if let Some(info) = object_health_info_for_entity(world, player, 0) {
         packets.push(ServerPacket::ObjectHealth { info });
     }
@@ -236,7 +248,7 @@ fn apply_damage_to_current_player(
     }
 }
 
-fn crystal_player_melee_damage(world: &World) -> i32 {
+pub(super) fn crystal_player_melee_damage(world: &World) -> i32 {
     let resources = world.resource::<InventoryResource>();
     let session = world.resource::<SessionResource>();
     let level_bonus = i32::from(
@@ -305,6 +317,80 @@ fn crystal_skill_accuracy_bonus(world: &World) -> i32 {
 fn crystal_player_accuracy(world: &World) -> i32 {
     crystal_equipment_added_stat_total(world.resource::<InventoryResource>(), CRYSTAL_STAT_ACCURACY)
         .saturating_add(crystal_skill_accuracy_bonus(world))
+}
+
+const CRYSTAL_SALT_MELEE_DC_ROLL: usize = 41_001;
+const CRYSTAL_SALT_CRITICAL: u64 = 41_002;
+
+/// Slaying skill flat melee bonus (mirrors [`crystal_player_melee_damage`]).
+fn crystal_slaying_melee_bonus(world: &World) -> i32 {
+    crystal_skill_level(world, "Slaying")
+        .map(|level| {
+            let bonuses = [5, 6, 7, 8];
+            bonuses[usize::from(level).min(bonuses.len() - 1)]
+        })
+        .unwrap_or(0)
+}
+
+/// Crystal critical-hit application: when a `CriticalRate` roll lands, the blow
+/// is amplified by `CriticalDamage` (each point is +10%). Inert when the player
+/// has no crit stats (the seed case).
+fn crystal_apply_player_critical(
+    _world: &World,
+    stats: &PlayerStats,
+    actor_id: u32,
+    current_tick: u64,
+    damage: i32,
+) -> i32 {
+    let rate = stats.critical_rate();
+    if rate <= 0 || damage <= 0 {
+        return damage;
+    }
+    let roll = deterministic_roll(
+        current_tick,
+        usize::try_from(actor_id).unwrap_or_default(),
+        CRYSTAL_SALT_CRITICAL as usize,
+        100,
+    );
+    if roll >= u64::try_from(rate).unwrap_or(0) {
+        return damage;
+    }
+    let bonus_steps = stats.critical_damage().max(1);
+    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+}
+
+/// Rolled melee damage for the local player: `Random(MinDC, MaxDC)` from the
+/// authoritative stat block, plus the Slaying bonus and the critical-hit roll.
+///
+/// For seed equipment the stat block's `MaxDC` equals
+/// [`crystal_player_melee_damage`] and `MinDC == MaxDC`, so the result is the
+/// historical flat figure; explicit `Min/Max DC` gear opens a real spread.
+pub(super) fn crystal_player_rolled_melee_damage(world: &World, current_tick: u64) -> i32 {
+    let stats = player_stats(world);
+    let slaying = crystal_slaying_melee_bonus(world);
+    let min = (stats.min_dc() + slaying).max(1);
+    let max = (stats.max_dc() + slaying).max(min);
+    let actor_id = current_player_object_id(world).unwrap_or(0);
+    let rolled =
+        deterministic_range_roll(current_tick, actor_id, CRYSTAL_SALT_MELEE_DC_ROLL, min, max);
+    crystal_apply_player_critical(world, &stats, actor_id, current_tick, rolled)
+}
+
+/// Reduce inbound magic damage by the player's magic resistance. Crystal applies
+/// `MagicResist` as a flat per-point chance to shrug a tenth of the blow; we
+/// model the expected value deterministically (resist is capped 0..10). Inert
+/// when the player has no magic resistance.
+pub(super) fn crystal_player_magic_mitigated(world: &World, damage: i32) -> i32 {
+    if damage <= 0 {
+        return damage;
+    }
+    let stats = player_stats(world);
+    let resist = stats.magic_resist();
+    if resist <= 0 {
+        return damage;
+    }
+    let mitigated = damage.saturating_sub(damage.saturating_mul(resist).div_euclid(10));
+    mitigated.max(1)
 }
 
 fn crystal_monster_agility(world: &World, monster_entity: Entity) -> i32 {
@@ -414,7 +500,7 @@ fn restore_player_mp(world: &mut World, amount: i32, packets: &mut Vec<ServerPac
     let restored = {
         let mut entity = world.entity_mut(player);
         entity.get_mut::<PlayerVitals>().map(|mut vitals| {
-            vitals.mp = (vitals.mp + amount).min(100);
+            vitals.mp = (vitals.mp + amount).min(vitals.max_mp);
             *vitals
         })
     };
@@ -906,8 +992,95 @@ pub(super) fn tick_player_status_effects(
         damage += CRYSTAL_PLAYER_BLEEDING_TICK_DAMAGE;
     }
 
+    // Poison resistance shrugs off a fraction of every poison/bleed tick. Each
+    // PoisonResist point removes 10% of the tick (capped 0..10). Inert for a
+    // player with no poison resistance.
+    if damage > 0 {
+        let resist = player_stats(world).poison_resist();
+        if resist > 0 {
+            damage = damage
+                .saturating_sub(damage.saturating_mul(resist).div_euclid(10))
+                .max(0);
+        }
+    }
+
     if damage > 0 {
         let _ = apply_damage_to_current_player(world, damage, packets);
+    }
+}
+
+/// Crystal-style passive HP/MP regeneration.
+///
+/// Fires on a fixed cadence while the player is alive, below a pool maximum, and
+/// has not been struck recently (regeneration pauses in combat). The per-pulse
+/// amount is a small fraction of the maximum plus the player's
+/// `HealthRecovery`/`SpellRecovery` stats.
+pub(super) fn tick_player_vital_regen(
+    world: &mut World,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if current_tick % CRYSTAL_PLAYER_REGEN_INTERVAL_TICKS != 0 {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(vitals) = world.entity(player).get::<PlayerVitals>().copied() else {
+        return;
+    };
+    if vitals.hp <= 0 {
+        return;
+    }
+    if vitals.hp >= vitals.max_hp && vitals.mp >= vitals.max_mp {
+        return;
+    }
+
+    let last_damaged_tick = world.resource::<PlayerRuntimeResource>().last_damaged_tick;
+    if current_tick
+        < last_damaged_tick.saturating_add(CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS)
+    {
+        return;
+    }
+
+    let stats = player_stats(world);
+    let hp_regen = (vitals.max_hp / CRYSTAL_PLAYER_REGEN_HP_DIVISOR)
+        .max(1)
+        .saturating_add(stats.health_recovery());
+    let mp_regen = (vitals.max_mp / CRYSTAL_PLAYER_REGEN_MP_DIVISOR)
+        .max(1)
+        .saturating_add(stats.spell_recovery());
+
+    let (updated, hp_changed, mp_changed) = {
+        let mut entity = world.entity_mut(player);
+        let mut vitals = entity.get_mut::<PlayerVitals>().expect("player vitals");
+        let before_hp = vitals.hp;
+        let before_mp = vitals.mp;
+        if vitals.hp < vitals.max_hp {
+            vitals.hp = (vitals.hp + hp_regen).min(vitals.max_hp);
+        }
+        if vitals.mp < vitals.max_mp {
+            vitals.mp = (vitals.mp + mp_regen).min(vitals.max_mp);
+        }
+        (*vitals, vitals.hp != before_hp, vitals.mp != before_mp)
+    };
+    if !hp_changed && !mp_changed {
+        return;
+    }
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = updated;
+        runtime.last_regen_tick = current_tick;
+    }
+    if hp_changed {
+        if let Some(info) = object_health_info_for_entity(world, player, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+    }
+    if mp_changed {
+        if let Some(info) = object_mana_info_for_entity(world, player) {
+            packets.push(ServerPacket::ObjectMana { info });
+        }
     }
 }
 
@@ -985,6 +1158,25 @@ pub(super) fn apply_player_red_poison(world: &mut World, current_tick: u64, dura
             key: YIMOOGI_RED_POISON_BUFF_KEY.to_string(),
             name: "Red Poison".to_string(),
             description: "Crystal red poison is active.".to_string(),
+            expires_at_tick: current_tick + duration_ticks,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        },
+    );
+}
+
+pub(super) fn apply_toxic_ghoul_green_poison(
+    world: &mut World,
+    current_tick: u64,
+    duration_ticks: u64,
+) {
+    apply_or_refresh_buff(
+        world,
+        BuffState {
+            key: TOXIC_GHOUL_GREEN_POISON_BUFF_KEY.to_string(),
+            name: "Green Poison".to_string(),
+            description: "Crystal green poison is active.".to_string(),
             expires_at_tick: current_tick + duration_ticks,
             attack_bonus: 0,
             defence_bonus: 0,
@@ -2408,7 +2600,7 @@ impl SimulationSession {
             queued_before_world_tick_due_tick(current_tick, melee_attack_delay_ticks());
         let target_object_id =
             entity_object_id(self.app.world(), monster_entity).unwrap_or(object_id);
-        let mut damage = crystal_player_melee_damage(self.app.world());
+        let mut damage = crystal_player_rolled_melee_damage(self.app.world(), current_tick);
         let mut attack_spell = Spell::None;
         let mut attack_spell_level = 0;
         let mut due_packet = None;
@@ -2733,7 +2925,7 @@ impl SimulationSession {
         let current_tick = runtime_tick(self.app.world());
         let player_object_id =
             current_player_object_id(self.app.world()).expect("player object id");
-        let mut damage = crystal_player_melee_damage(self.app.world());
+        let mut damage = crystal_player_rolled_melee_damage(self.app.world(), current_tick);
         let mut spell = Spell::None;
         let mut spell_level = 0;
         if let Some((magic, level)) = crystal_skill_magic(self.app.world(), "Focus") {
