@@ -5487,14 +5487,20 @@ fn zone_native_player_magic_shield_adds_zone_buff_and_mitigates_hits() {
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == 9100
     )));
+    // The magic shield applies a 40% damage-reduction buff (stat 124). Against
+    // the monster's authoritative melee damage of 7 it does not fully block but
+    // mitigates the hit to 7 * 60% = 4 (previously the fixed-1 placeholder
+    // rounded to 0, which read as a full block).
     let mitigated_hit = zone.tick(620);
-    assert!(!has_packet(&mitigated_hit, &first, |packet| matches!(
+    assert!(has_packet(&mitigated_hit, &first, |packet| matches!(
         packet,
-        ServerPacket::ObjectStruck { .. } | ServerPacket::DamageIndicator { .. }
+        ServerPacket::DamageIndicator { object_id, damage, .. }
+            if *object_id == 101 && *damage == 4
     )));
-    assert!(!mitigated_hit.iter().any(|outbound| matches!(
+    assert!(mitigated_hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, .. } if session_id == &first
+        ZoneOutbound::PlayerDamaged { session_id, damage }
+            if session_id == &first && *damage == 4
     )));
 }
 
@@ -7004,20 +7010,23 @@ fn zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit() {
         ServerPacket::ObjectStruck { info }
             if info.object_id == 101 && info.attacker_id == 9100
     )));
+    // Field Wasp has no Crystal combat-manifest entry, so the zone rolls the
+    // authoritative fallback melee damage of 7 (previously a fixed placeholder
+    // of 1). Player 60 -> 53 HP = 88%.
     assert!(has_packet(&hit, &first, |packet| matches!(
         packet,
         ServerPacket::DamageIndicator { object_id, damage, .. }
-            if *object_id == 101 && *damage == 1
+            if *object_id == 101 && *damage == 7
     )));
     assert!(has_packet(&hit, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectHealth { info }
-            if info.object_id == 101 && info.percent == 98
+            if info.object_id == 101 && info.percent == 88
     )));
     assert!(hit.iter().any(|outbound| matches!(
         outbound,
         ZoneOutbound::PlayerDamaged { session_id, damage }
-            if session_id == &first && *damage == 1
+            if session_id == &first && *damage == 7
     )));
 }
 
@@ -7205,7 +7214,9 @@ fn zone_native_player_defence_buff_mitigates_monster_damage_until_expiry() {
                 expire_time: 600,
                 infinite: false,
                 paused: false,
-                stats: vec![UserItemStat { stat: 1, value: 1 }],
+                // MaxAC high enough to fully absorb the monster's authoritative
+                // melee damage while the buff is active.
+                stats: vec![UserItemStat { stat: 1, value: 99 }],
                 values: Vec::new(),
             },
         }],
@@ -7237,16 +7248,18 @@ fn zone_native_player_defence_buff_mitigates_monster_damage_until_expiry() {
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == 9100
     )));
+    // Once the defence buff expires the monster's full authoritative melee
+    // damage (Field Wasp fallback = 7) lands.
     let unmitigated_hit = zone.tick(1_800);
     assert!(has_packet(&unmitigated_hit, &first, |packet| matches!(
         packet,
         ServerPacket::DamageIndicator { object_id, damage, .. }
-            if *object_id == 101 && *damage == 1
+            if *object_id == 101 && *damage == 7
     )));
     assert!(unmitigated_hit.iter().any(|outbound| matches!(
         outbound,
         ZoneOutbound::PlayerDamaged { session_id, damage }
-            if session_id == &first && *damage == 1
+            if session_id == &first && *damage == 7
     )));
 }
 
@@ -8275,4 +8288,33 @@ fn zone_update_player_combat_stats_promotes_to_authoritative_damage() {
         now_ms: 620,
     });
     assert_eq!(damage_indicator_for(&zone.tick(620), 9100), Some(30));
+}
+
+#[test]
+fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
+    // A monster present in the Crystal combat manifest deals its authoritative
+    // melee damage (CaveMaggot max_dc = 8), not the old fixed placeholder.
+    let mut zone = zone();
+    let first = session("first");
+    let mut spawn = native_monster_spawn(9300, 331, 270);
+    spawn.name = "CaveMaggot".to_string();
+    spawn.ai = 7;
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: spawn,
+        now_ms: 0,
+    });
+
+    // Tick once to launch the adjacent melee, then again past the hit delay.
+    assert!(has_packet(&zone.tick(0), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 9300
+    )));
+    let hit = zone.tick(600);
+    assert!(hit.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::PlayerDamaged { session_id, damage }
+            if session_id == &first && *damage == 8
+    )));
 }

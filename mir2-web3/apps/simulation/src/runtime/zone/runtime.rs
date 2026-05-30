@@ -4922,15 +4922,22 @@ impl ZoneRuntime {
         }
         monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
         let monster_position = monster.position.clone();
-        self.pending_native_player_hits
-            .push(PendingNativePlayerHit {
-                ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
-                attacker_object_id: object_id,
-                attacker_ai: monster.ai,
-                target_session_id: target.session_id.clone(),
-                target_object_id: target.object_id,
-                damage: 1,
-            });
+        // Roll the monster's melee damage from its Crystal stats (matching the
+        // ranged path) instead of a fixed placeholder of 1, so monster→player
+        // damage is the zone's authoritative, data-driven value.
+        let damage = zone_native_monster_player_attack_damage(monster, &target.position);
+        let attacker_ai = monster.ai;
+        if damage > 0 {
+            self.pending_native_player_hits
+                .push(PendingNativePlayerHit {
+                    ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
+                    attacker_object_id: object_id,
+                    attacker_ai,
+                    target_session_id: target.session_id.clone(),
+                    target_object_id: target.object_id,
+                    damage,
+                });
+        }
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
                 object_id,
