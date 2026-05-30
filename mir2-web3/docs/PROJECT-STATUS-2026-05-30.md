@@ -18,13 +18,14 @@ However, the PR cannot be merged into `main` yet. It is still Draft, GitHub repo
 - URL: `https://github.com/Zombieliu/mir2/pull/1`
 - Branch: `codex/web-scene-fallback-20260521`
 - Base: `main`
-- Current pushed head: `7f1f338bf253875434bdff41fe40eb37ba8da845`
+- Readiness evaluation code head: `7f1f338bf253875434bdff41fe40eb37ba8da845`
+- Documentation-only commits may follow that code head on the PR branch.
 - GitHub state:
   - `isDraft: true`
   - `mergeable: CONFLICTING`
   - `mergeStateStatus: DIRTY`
   - `mergedAt: null`
-- Status checks at the current head:
+- Status checks observed for the readiness evaluation:
   - `Vercel`: failure
   - `Vercel Preview Comments`: success
 
