@@ -7022,6 +7022,20 @@ fn crystal_luck_crit_chance(world: &World) -> i32 {
 /// Crystal `GetRangeAttackPower(min, max, range)` — applies the bow falloff penalty
 /// (`min -= floor(min / MaxAttackRange * (MaxAttackRange - range))`) before rolling. Archer
 /// shots use this so distant targets take less damage.
+/// Crystal `Globals.MaxAttackRange`.
+const CRYSTAL_MAX_ATTACK_RANGE: i32 = 9;
+
+/// Crystal `GetRangeAttackPower` bow falloff applied to the minimum roll:
+/// `min -= floor(min / MaxAttackRange * (MaxAttackRange - range))`. Closer targets take less
+/// (bows reward shooting at maximum range).
+fn crystal_range_min_after_falloff(min: i32, range: i32) -> i32 {
+    let range = range.clamp(0, CRYSTAL_MAX_ATTACK_RANGE);
+    let penalty = (f64::from(min) / f64::from(CRYSTAL_MAX_ATTACK_RANGE)
+        * f64::from(CRYSTAL_MAX_ATTACK_RANGE - range))
+    .floor() as i32;
+    min - penalty
+}
+
 pub(super) fn crystal_spell_range_damage(
     world: &World,
     tick: u64,
@@ -7029,16 +7043,10 @@ pub(super) fn crystal_spell_range_damage(
     level: u8,
     range: i32,
 ) -> i32 {
-    const MAX_ATTACK_RANGE: i32 = 9; // Crystal Globals.MaxAttackRange.
     let channel = crystal_spell_damage_channel(&magic.spell);
     let (min_stat, max_stat) = crystal_channel_stats(channel);
     let max = current_player_crystal_stat(world, max_stat);
-    let mut min = current_player_crystal_stat(world, min_stat);
-    let range = range.clamp(0, MAX_ATTACK_RANGE);
-    let penalty = (f64::from(min) / f64::from(MAX_ATTACK_RANGE)
-        * f64::from(MAX_ATTACK_RANGE - range))
-    .floor() as i32;
-    min -= penalty;
+    let min = crystal_range_min_after_falloff(current_player_crystal_stat(world, min_stat), range);
     let base = crystal_attack_power_roll(world, tick, crystal_spell_salt(&magic.spell), min, max);
     crystal_magic_get_damage(magic, level, base).max(1)
 }
@@ -7432,5 +7440,16 @@ mod crystal_damage_formula_tests {
                 "{spell} should roll DC",
             );
         }
+    }
+
+    #[test]
+    fn range_falloff_rewards_maximum_range() {
+        // Crystal bows do full min damage at max range and the least at point blank.
+        assert_eq!(crystal_range_min_after_falloff(90, CRYSTAL_MAX_ATTACK_RANGE), 90);
+        assert_eq!(crystal_range_min_after_falloff(90, 0), 0);
+        // Mid range: penalty = floor(90/9 * (9-4)) = 50 -> 40.
+        assert_eq!(crystal_range_min_after_falloff(90, 4), 40);
+        // Range above the cap is clamped (no negative penalty / over-damage).
+        assert_eq!(crystal_range_min_after_falloff(90, 50), 90);
     }
 }
