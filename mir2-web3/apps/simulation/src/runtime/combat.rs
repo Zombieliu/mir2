@@ -2673,6 +2673,19 @@ impl SimulationSession {
         });
 
         let Some(object_id) = object_id else {
+            // No creature in front — Crystal swings into the cell ahead and, with
+            // a pickaxe (spell == None), mines it (`HumanObject` Mining label).
+            if requested_spell == Spell::None {
+                if let Some(mut mine_packets) =
+                    super::mining::try_mine(self.app.world_mut(), direction)
+                {
+                    let mut packets = vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                    packets.append(&mut mine_packets);
+                    return packets;
+                }
+            }
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];

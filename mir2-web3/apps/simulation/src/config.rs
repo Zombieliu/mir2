@@ -1770,6 +1770,18 @@ pub struct MapDropRuleRecord {
     pub need_bridle: bool,
 }
 
+/// A rectangular mining zone on a map (Crystal `MapInfo.MineZones`). Every cell
+/// within `size` tiles of `(x, y)` becomes a mineable spot served by the given
+/// built-in mine set (`mine_set` is 1-based, matching Crystal's `MineIndex`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MineZoneRecord {
+    pub map_file_name: String,
+    pub mine_set: u8,
+    pub x: i32,
+    pub y: i32,
+    pub size: u16,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MonsterSpawnSource {
     StarterScenario,
@@ -1857,6 +1869,7 @@ pub struct SimulationConfig {
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
+    pub mine_zones: Vec<MineZoneRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
@@ -1944,6 +1957,7 @@ impl SimulationConfig {
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
+            mine_zones: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
             account_store_database_url: None,

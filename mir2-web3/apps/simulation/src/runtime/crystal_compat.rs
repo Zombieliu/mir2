@@ -174,6 +174,7 @@ pub(super) const CRYSTAL_BIND_UNABLE_TO_DISASSEMBLE: i16 = 0x2000;
 pub(super) const CRYSTAL_BIND_NO_HERO: i16 = i16::MIN;
 
 pub(super) const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
+pub(super) const CRYSTAL_ITEM_TYPE_ORE: u8 = 14;
 pub(super) const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;
 pub(super) const CRYSTAL_ITEM_TYPE_ARMOUR: u8 = 2;
 pub(super) const CRYSTAL_ITEM_TYPE_HELMET: u8 = 4;

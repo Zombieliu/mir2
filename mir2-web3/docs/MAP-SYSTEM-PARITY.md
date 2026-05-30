@@ -43,3 +43,19 @@ Tick model: 1 runtime tick = 1000 ms (`combat_delay_ticks(ms) = ceil(ms/1000)`).
 
 > Sandbox note: real `.map` files are absent here, so map-file-dependent
 > transfer tests fail environmentally (pre-existing, not from this work).
+
+### Phase 2 — Mining nodes ✅
+- `runtime/mining.rs`: `MineSet`/`MineDrop`/`MineSpot`/`MiningResource` with the
+  two built-in Crystal mine sets (HitRate 25, DropRate 10, MaxStones 80,
+  SpotRegenRate 5 min; set 1 = Gold/Silver/Copper/BlackIron, set 2 =
+  Platinum/Ruby/Nephrite/Amethyst).
+- `try_mine`: a melee swing (`Spell::None`) into a mineable cell with a
+  `CanMine` weapon depletes a stone, rolls a hit (`HitRate`), on hit rolls a
+  payout (`DropRate` → `GetMinePayout`: ore with `(MinDura+rand)*1000`
+  durability + bonus) and damages the pickaxe; depleted spots regenerate stones
+  on a timer. Emits `MapEffect{Mine}` + `GainedItem` + `DuraChanged`.
+- Mine zones come from `SimulationConfig.mine_zones` (Crystal stores them in the
+  Map DB, absent here); rebuilt on map change via `rebuild_mine_spots`.
+- Wired into `attack_in_direction_with_spell` (no creature target → mine).
+- Tests: depletion, no-pickaxe no-op, regen timer, guaranteed-set ore+dura,
+  attack-flow integration.

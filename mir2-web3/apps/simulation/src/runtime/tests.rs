@@ -54014,3 +54014,194 @@ fn crystal_open_door_only_unblocks_its_own_cells() {
     assert!(can_occupy(session.app.world(), cell_a, Some(player)));
     assert!(!can_occupy(session.app.world(), cell_b, Some(player)));
 }
+
+// ---------------------------------------------------------------------------
+// Map system: mining nodes (Crystal Map.CreateMine / Mining / GetMinePayout)
+// ---------------------------------------------------------------------------
+
+fn equip_pickaxe(session: &mut SimulationSession) {
+    let template =
+        mir2_game_data::crystal_item_by_name("PickAxe").expect("PickAxe item template exists");
+    let key = super::super::items::crystal_item_key_for_template(&template);
+    let mut inventory = session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>();
+    let weapon = inventory
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("weapon slot");
+    weapon.key = key;
+    weapon.durability_current = 5000;
+    weapon.durability_max = 5000;
+}
+
+fn place_mine_spot_in_front(
+    session: &mut SimulationSession,
+    stones_left: u8,
+    mine_set_index: usize,
+) -> Point {
+    let player = player_entity(session.app.world()).expect("player entity");
+    let position = player_position(session);
+    session
+        .app
+        .world_mut()
+        .entity_mut(player)
+        .insert(Facing(MirDirection::Right));
+    let target = offset_point(&position, MirDirection::Right, 1);
+    let mut mining = session
+        .app
+        .world_mut()
+        .resource_mut::<super::super::mining::MiningResource>();
+    mining.spots.insert(
+        (target.x, target.y),
+        super::super::mining::MineSpot {
+            mine_set_index,
+            stones_left,
+            last_regen_tick: 0,
+        },
+    );
+    target
+}
+
+#[test]
+fn crystal_mining_swing_emits_mine_effect_and_depletes_stone() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+    let target = place_mine_spot_in_front(&mut session, 40, 0);
+
+    let packets = super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right)
+        .expect("mining should resolve over a mine spot with a pickaxe");
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MapEffect { effect: 12, .. })),
+        "mining swing should emit the Mine map effect"
+    );
+    let stones = session
+        .app
+        .world()
+        .resource::<super::super::mining::MiningResource>()
+        .spots
+        .get(&(target.x, target.y))
+        .expect("spot")
+        .stones_left;
+    assert_eq!(stones, 39, "one stone should be consumed");
+}
+
+#[test]
+fn crystal_mining_without_pickaxe_does_nothing() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Default weapon is a wooden sword (not CanMine).
+    let _target = place_mine_spot_in_front(&mut session, 40, 0);
+
+    assert!(
+        super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right).is_none(),
+        "mining without a pickaxe must not resolve"
+    );
+}
+
+#[test]
+fn crystal_mining_depleted_spot_regenerates_timer() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+    let target = place_mine_spot_in_front(&mut session, 0, 0);
+
+    super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right)
+        .expect("mining a depleted spot still resolves");
+    let spot = session
+        .app
+        .world()
+        .resource::<super::super::mining::MiningResource>()
+        .spots
+        .get(&(target.x, target.y))
+        .expect("spot")
+        .clone();
+    // Crystal sets LastRegenTick = now + SpotRegenRate(5)*60 ticks on regen.
+    assert!(
+        spot.last_regen_tick >= 300,
+        "depleted spot should arm its regen timer, got {}",
+        spot.last_regen_tick
+    );
+}
+
+#[test]
+fn crystal_mining_guaranteed_set_yields_ore_and_damages_pickaxe() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+
+    // Inject a deterministic mine set: every hit lands and every hit pays out.
+    let guaranteed_index = {
+        let mut mining = session
+            .app
+            .world_mut()
+            .resource_mut::<super::super::mining::MiningResource>();
+        mining.mine_sets.push(super::super::mining::MineSet {
+            spot_regen_rate_minutes: 5,
+            max_stones: 80,
+            hit_rate: 100,
+            drop_rate: 100,
+            total_slots: 2,
+            drops: vec![super::super::mining::MineDrop {
+                item_name: "GoldOre",
+                min_slot: 0,
+                max_slot: 2,
+                min_dura: 3,
+                max_dura: 16,
+                bonus_chance: 20,
+                max_bonus_dura: 10,
+            }],
+        });
+        mining.mine_sets.len() - 1
+    };
+    let _target = place_mine_spot_in_front(&mut session, 10, guaranteed_index);
+
+    let packets = super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right)
+        .expect("mining should resolve");
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })),
+        "guaranteed mine set should yield ore, got {packets:?}"
+    );
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DuraChanged { .. })),
+        "a landed mining hit should damage the pickaxe"
+    );
+
+    let weapon_dura = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("weapon")
+        .durability_current;
+    assert!(weapon_dura < 5000, "pickaxe durability should drop after a hit");
+}
+
+#[test]
+fn crystal_attack_into_mine_spot_triggers_mining() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+    // Remove monsters/NPCs so the swing has no creature target ahead.
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+    let _target = place_mine_spot_in_front(&mut session, 40, 0);
+
+    let packets = session.attack_in_direction_with_spell(MirDirection::Right, Spell::None);
+    assert!(
+        packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MapEffect { effect: 12, .. })),
+        "attacking into a mine spot with a pickaxe should mine it, got {packets:?}"
+    );
+}

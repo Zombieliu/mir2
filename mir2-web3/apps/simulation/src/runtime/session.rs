@@ -171,6 +171,8 @@ impl SimulationSession {
             initial_collision.closed_door_set,
             initial_doors,
         ));
+        app.insert_resource(super::mining::MiningResource::with_builtin_sets());
+        super::mining::rebuild_mine_spots(app.world_mut());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();

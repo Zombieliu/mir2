@@ -10,6 +10,7 @@ mod hero_ai;
 mod inventory;
 mod items;
 mod map;
+mod mining;
 mod monster_ai;
 mod monsters;
 mod movement;
