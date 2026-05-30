@@ -9,8 +9,8 @@ use mir2_protocol::{
 };
 use mir2_simulation::{
     GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig, SimulationSession,
-    WorldEntityKind, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntime,
+    WorldEntityKind, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense,
+    ZoneMonsterSpawn, ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 
 fn session(value: &str) -> SessionId {
@@ -34,6 +34,7 @@ fn join(session_id: &str, object_id: u32, name: &str, x: i32, y: i32) -> ZoneJoi
         position: Point { x, y },
         direction: MirDirection::Down,
         chat_profile: Default::default(),
+        combat_stats: Default::default(),
     }
 }
 
@@ -168,6 +169,7 @@ fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
         experience: 6,
         position: Point { x, y },
         direction: MirDirection::Down,
+        defense: Default::default(),
         drops: vec![GroundDropSnapshot {
             object_id: 9200,
             name: "Wasp Gold".to_string(),
@@ -194,6 +196,58 @@ fn native_neutral_monster_spawn(
     spawn.name = name.to_string();
     spawn.ai = ai;
     spawn
+}
+
+/// A join carrying an authoritative combat stat block so the zone — not the
+/// caller — rolls/validates the player's damage.
+fn join_with_combat_stats(
+    session_id: &str,
+    object_id: u32,
+    name: &str,
+    x: i32,
+    y: i32,
+    combat_stats: ZonePlayerCombatStats,
+) -> ZoneJoin {
+    let mut join = join(session_id, object_id, name, x, y);
+    join.combat_stats = combat_stats;
+    join
+}
+
+/// A high-HP native monster with explicit authoritative defensive stats, used to
+/// exercise zone-side hit/miss + armour resolution without the monster dying in
+/// a single blow.
+fn native_monster_spawn_with_defense(
+    object_id: u32,
+    x: i32,
+    y: i32,
+    max_hp: i32,
+    defense: ZoneMonsterDefense,
+) -> ZoneMonsterSpawn {
+    let mut spawn = native_monster_spawn(object_id, x, y);
+    spawn.max_hp = max_hp;
+    spawn.hp = max_hp;
+    spawn.defense = defense;
+    spawn
+}
+
+/// Extract the first `DamageIndicator` damage value addressed at `object_id`.
+fn damage_indicator_for(outbounds: &[ZoneOutbound], object_id: u32) -> Option<i32> {
+    outbounds.iter().find_map(|outbound| {
+        let packets = match outbound {
+            ZoneOutbound::ToSession { packets, .. }
+            | ZoneOutbound::ToMany { packets, .. }
+            | ZoneOutbound::ToAll { packets } => packets,
+            _ => return None,
+        };
+        packets.iter().find_map(|packet| match packet {
+            ServerPacket::DamageIndicator {
+                damage,
+                object_id: target,
+                ..
+            } if *target == object_id => Some(*damage),
+            _ => None,
+        })
+    })
 }
 
 fn packets_for(outbounds: &[ZoneOutbound], session_id: &SessionId) -> Vec<ServerPacket> {
@@ -7862,4 +7916,363 @@ fn zone_movement_writes_back_authoritative_transform_to_session() {
 
     assert_eq!((self_player.x, self_player.y), (position.x, position.y));
     assert_eq!(self_player.direction, direction);
+}
+
+#[test]
+fn zone_resolves_player_attack_damage_from_authoritative_stats() {
+    // The zone must roll damage from the attacker's authoritative stat block and
+    // subtract the monster's armour itself — ignoring whatever scalar the gateway
+    // pre-rolled in the personal session (here a deliberately absurd 999).
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 15,
+            max_dc: 15,
+            accuracy: 10_000,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                agility: 0,
+                min_ac: 5,
+                max_ac: 5,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    let struck = zone.tick(10);
+
+    // 15 (MaxDC roll) - 5 (armour) = 10, not the trusted 999 scalar.
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(10));
+    assert!(has_packet(&struck, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 90
+    )));
+}
+
+#[test]
+fn zone_player_attack_armour_can_fully_block_authoritative_damage() {
+    // When armour meets or exceeds the rolled damage the hit lands but deals 0 —
+    // a Crystal "block" — and the monster keeps full HP.
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 10,
+            max_dc: 10,
+            accuracy: 10_000,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                agility: 0,
+                min_ac: 50,
+                max_ac: 50,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    let struck = zone.tick(10);
+
+    // Struck animation lands, damage is fully absorbed, HP unchanged.
+    assert!(has_packet(&struck, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectStruck { info } if info.object_id == 9100
+    )));
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(0));
+    assert!(has_packet(&struck, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 100
+    )));
+}
+
+#[test]
+fn zone_player_attack_misses_evasive_monster_authoritatively() {
+    // A player with zero accuracy against a hugely evasive monster fails the
+    // accuracy-vs-agility check: only the swing animation is broadcast — no
+    // struck/health/damage reaction, and the monster keeps full HP.
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 30,
+            max_dc: 30,
+            accuracy: 0,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                agility: 1_000_000,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    let launch = zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    // Swing animation still broadcasts.
+    assert!(has_packet(&launch, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 101
+    )));
+
+    let resolved = zone.tick(10);
+    assert!(!has_packet(&resolved, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectStruck { .. } | ServerPacket::DamageIndicator { .. }
+    )));
+    assert_eq!(damage_indicator_for(&resolved, 9100), None);
+}
+
+#[test]
+fn zone_authoritative_attack_is_deterministic_across_runs() {
+    // Two independently constructed zones with identical inputs must resolve the
+    // same damage roll — the zone RNG is a pure function of (tick, ids, stats).
+    fn run() -> Option<i32> {
+        let mut zone = zone();
+        let attacker = session("first");
+        zone.handle(ZoneCommand::Join(join_with_combat_stats(
+            "first",
+            101,
+            "Scout",
+            330,
+            270,
+            ZonePlayerCombatStats {
+                min_dc: 10,
+                max_dc: 40,
+                accuracy: 10_000,
+                ..Default::default()
+            },
+        )));
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: attacker.clone(),
+            monster: native_monster_spawn_with_defense(
+                9100,
+                331,
+                270,
+                500,
+                ZoneMonsterDefense::default(),
+            ),
+            now_ms: 0,
+        });
+        zone.handle(ZoneCommand::PlayerAttackObject {
+            session_id: attacker.clone(),
+            object_id: 9100,
+            direction: MirDirection::Right,
+            spell: Spell::None as u8,
+            level: 0,
+            attack_type: 0,
+            damage: 999,
+            now_ms: 10,
+        });
+        damage_indicator_for(&zone.tick(10), 9100)
+    }
+
+    let first = run();
+    let second = run();
+    assert_eq!(first, second);
+    let damage = first.expect("attack should land against a non-evasive monster");
+    assert!(
+        (10..=40).contains(&damage),
+        "rolled damage {damage} must be within [MinDC, MaxDC]"
+    );
+}
+
+#[test]
+fn zone_authoritative_damage_shared_hp_consistent_across_attackers() {
+    // Two attackers with authoritative stat blocks hit the same shared monster.
+    // Both observers must always agree on the single zone-owned HP value.
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+    let stats = ZonePlayerCombatStats {
+        min_dc: 12,
+        max_dc: 12,
+        accuracy: 10_000,
+        ..Default::default()
+    };
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first", 101, "Scout", 330, 270, stats,
+    )));
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "second", 102, "Blade", 332, 270, stats,
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                min_ac: 2,
+                max_ac: 2,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    // First attacker: 12 - 2 = 10 damage -> 90 HP.
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 0,
+        now_ms: 10,
+    });
+    let after_first = zone.tick(10);
+    for observer in [&first, &second] {
+        assert!(has_packet(&after_first, observer, |packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 90
+        )));
+    }
+
+    // Second attacker hits the SAME shared HP -> 80 HP for both observers.
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: second.clone(),
+        object_id: 9100,
+        direction: MirDirection::Left,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 0,
+        now_ms: 30,
+    });
+    let after_second = zone.tick(30);
+    for observer in [&first, &second] {
+        assert!(has_packet(&after_second, observer, |packet| matches!(
+            packet,
+            ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 80
+        )));
+    }
+}
+
+#[test]
+fn zone_update_player_combat_stats_promotes_to_authoritative_damage() {
+    // Before a stat block is supplied the zone trusts the gateway scalar (legacy
+    // path). After UpdatePlayerCombatStats the zone rolls damage itself.
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            500,
+            ZoneMonsterDefense::default(),
+        ),
+        now_ms: 0,
+    });
+
+    // Legacy: trusted scalar of 7 applies verbatim.
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 7,
+        now_ms: 10,
+    });
+    assert_eq!(damage_indicator_for(&zone.tick(10), 9100), Some(7));
+
+    // Promote to authoritative stats and confirm the trusted scalar is ignored.
+    zone.handle(ZoneCommand::UpdatePlayerCombatStats {
+        session_id: attacker.clone(),
+        stats: ZonePlayerCombatStats {
+            min_dc: 30,
+            max_dc: 30,
+            accuracy: 10_000,
+            ..Default::default()
+        },
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 620,
+    });
+    assert_eq!(damage_indicator_for(&zone.tick(620), 9100), Some(30));
 }
