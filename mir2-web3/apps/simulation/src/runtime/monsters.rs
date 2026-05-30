@@ -2022,7 +2022,13 @@ pub(super) fn monster_player_attack_damage(
         45 | 46 => crystal_monster_attack_damage(monster_name),
         117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
         117 => crystal_monster_attack_damage(monster_name),
-        _ => 7,
+        // Crystal `MonsterObject.Attack` deals `GetAttackPower(MinDC, MaxDC)` for every family that
+        // does not override it (SpittingSpider, ShamanZombie, BoneSpearman, VampireSpider,
+        // SpittingToad, the plain MonsterObject, …). The previous flat `7` placeholder made those
+        // monsters deal a fixed 7 to players regardless of their stats; fall back to the monster's
+        // real damage-class instead. Families that never strike players (guards, training dummy,
+        // egg, devil node) never reach this path.
+        _ => crystal_monster_attack_damage(monster_name),
     };
     let mitigation = total_defence_bonus(
         world.resource::<InventoryResource>(),
@@ -2038,6 +2044,11 @@ pub(super) fn monster_player_status_effect(
     agent: &MonsterAgent,
 ) -> Option<PendingPlayerStatusEffect> {
     match agent.ai {
+        // SpittingSpider.CompleteAttack: PoisonTarget(target, 8, 5, PoisonType.Green, 2000).
+        4 => Some(PendingPlayerStatusEffect::GreenPoison {
+            chance_denominator: SPITTING_SPIDER_GREEN_POISON_CHANCE_DENOMINATOR,
+            duration_ticks: SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS,
+        }),
         7 => Some(PendingPlayerStatusEffect::Paralysis {
             chance_denominator: CAVE_MAGGOT_PARALYSIS_CHANCE_DENOMINATOR,
             duration_ticks: CAVE_MAGGOT_PARALYSIS_DURATION_TICKS,

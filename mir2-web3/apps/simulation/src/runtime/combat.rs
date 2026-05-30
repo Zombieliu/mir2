@@ -1010,10 +1010,25 @@ pub(super) fn deterministic_chance_roll(
         return true;
     }
 
+    deterministic_value(current_tick, attacker_id, salt, denominator) == 0
+}
+
+/// Deterministic uniform value in `[0, modulo)` seeded by `(tick, attacker_id, salt)`. Shares the
+/// hash of `deterministic_chance_roll` so existing 1/denominator chance rolls keep their meaning
+/// (`value % denominator == 0`).
+pub(super) fn deterministic_value(
+    current_tick: u64,
+    attacker_id: u32,
+    salt: u64,
+    modulo: u64,
+) -> u64 {
+    if modulo == 0 {
+        return 0;
+    }
     let value = current_tick.wrapping_mul(0x9E37_79B9_7F4A_7C15)
         ^ u64::from(attacker_id).wrapping_mul(0xBF58_476D_1CE4_E5B9)
         ^ salt.wrapping_mul(0x94D0_49BB_1331_11EB);
-    value % denominator == 0
+    value % modulo
 }
 
 pub(super) fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: u64) {

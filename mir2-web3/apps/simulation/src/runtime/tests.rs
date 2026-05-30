@@ -4230,6 +4230,68 @@ fn crystal_poisoned_monster_does_not_regenerate() {
 }
 
 #[test]
+fn crystal_unhandled_family_deals_real_damage_class_not_flat_seven() {
+    // BoneSpearman (ai 29) carries DC 17-30. Before the fix every family missing an explicit
+    // damage case fell through to a flat `7`; it must now deal its real damage class.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 320, y: 240 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 1_000,
+        max_hp: 1_000,
+        mp: 100,
+    });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let current_tick = runtime_tick(session.app.world());
+    session.app.world_mut().spawn((
+        ObjectId(92_401),
+        DisplayName::literal("BoneSpearman"),
+        Position(Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        }),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals {
+            hp: 500,
+            max_hp: 500,
+        },
+        MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: player_origin.clone(),
+            ai: 29,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+
+    for _ in 0..6 {
+        session.tick();
+    }
+    let after_hp = session.world_snapshot().player_hp.expect("player hp");
+    let drop = before_hp - after_hp;
+    assert!(
+        drop > 7,
+        "BoneSpearman (DC 17-30) should deal its damage class, not the flat 7 placeholder; drop was {drop}"
+    );
+}
+
+#[test]
 fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
