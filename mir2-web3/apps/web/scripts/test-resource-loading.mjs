@@ -275,6 +275,35 @@ const fullBichonMapDataAvailable =
   }
 }
 
+// A wholly-missing map degrades to a synthetic empty region (recorded in missingAssets) at
+// runtime, and still hard-fails under strict resolution so missing maps are caught in CI.
+{
+  const missingMapName = "ZzMir2NonexistentMapForTest";
+  const blueprint = await loaderExports.loadCrystalSceneBlueprint({ mapFileName: missingMapName });
+  assert.ok(blueprint.originalMapRegion, "missing map should still yield a (synthetic) region");
+  const mapMisses = (blueprint.originalMapRegion.missingAssets ?? []).filter(
+    (asset) => asset.resourceType === "map",
+  );
+  assert.equal(mapMisses.length, 1, "synthetic map must be recorded as a missing asset");
+
+  process.env.MIR2_STRICT_ASSET_RESOLUTION = "1";
+  let strictLoader;
+  try {
+    strictLoader = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
+      "server-only": {},
+      "./crystal-minimap-transform": minimapHelperExports,
+      "./generated/crystal-minimap-transforms": minimapTransformExports,
+    });
+  } finally {
+    delete process.env.MIR2_STRICT_ASSET_RESOLUTION;
+  }
+  await assert.rejects(
+    () => strictLoader.loadCrystalSceneBlueprint({ mapFileName: missingMapName }),
+    (error) => strictLoader.isCrystalResourceMissingError(error),
+    "strict mode must reject a wholly-missing map",
+  );
+}
+
 console.log("resource loading tests passed");
 
 function readOriginalAssetManifest() {

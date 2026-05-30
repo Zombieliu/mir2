@@ -96,6 +96,10 @@ type ParsedMap = {
   type: number;
   cells: ParsedMapCell[] | null;
   fallbackOriginalMapRegion?: OriginalMapRegion | null;
+  // Set when this map could not be loaded and a synthetic empty map is standing in for it, so
+  // the scene degrades gracefully instead of failing. The path is recorded in the region's
+  // missingAssets diagnostics.
+  syntheticResourcePath?: string;
 };
 
 type ParsedMapCell = {
@@ -375,7 +379,10 @@ function loadParsedMap(mapFileName: string): ParsedMap {
       rememberMap(normalized, parsed);
       return parsed;
     }
-    if (!SYNTHETIC_MAP_FALLBACK_ENABLED) {
+    // A wholly-missing map degrades to a synthetic empty map at runtime so the scene never
+    // hard-fails. Strict mode (CI/release gates) still throws unless synthetic fallback is
+    // explicitly enabled, so a genuinely missing map is caught before shipping.
+    if (STRICT_ASSET_RESOLUTION_ENABLED && !SYNTHETIC_MAP_FALLBACK_ENABLED) {
       throw new CrystalResourceMissingError({
         message: `Crystal map ${normalized}.map is missing and synthetic fallback is disabled`,
         resourceType: "map",
@@ -383,7 +390,7 @@ function loadParsedMap(mapFileName: string): ParsedMap {
         mapFileName: normalized,
       });
     }
-    const parsed = loadMissingMapFallback(normalized);
+    const parsed = loadMissingMapFallback(normalized, mapPath);
     rememberMap(normalized, parsed);
     return parsed;
   }
@@ -771,7 +778,17 @@ async function exportMapRegion(
   }
 
   if (!parsedMap.cells) {
-    return fallbackMapRegion(parsedMap, sceneView);
+    const region = fallbackMapRegion(parsedMap, sceneView);
+    if (parsedMap.syntheticResourcePath) {
+      resourceStats.recoveredMissingAssetCount += 1;
+      region.missingAssets = [
+        {
+          resourceType: "map",
+          path: parsedMap.syntheticResourcePath,
+        },
+      ];
+    }
+    return region;
   }
 
   const bounds = exportBoundsForScene(sceneView, parsedMap);
@@ -989,7 +1006,7 @@ function loadPackagedFallbackMap(fileName: string): ParsedMap {
   };
 }
 
-function loadMissingMapFallback(fileName: string): ParsedMap {
+function loadMissingMapFallback(fileName: string, resourcePath?: string): ParsedMap {
   const dimensions = missingMapDimensionsForMap(fileName);
   return {
     fileName,
@@ -998,6 +1015,7 @@ function loadMissingMapFallback(fileName: string): ParsedMap {
     type: -1,
     cells: null,
     fallbackOriginalMapRegion: null,
+    syntheticResourcePath: resourcePath ?? `${fileName}.map`,
   };
 }
 
