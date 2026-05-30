@@ -23,6 +23,7 @@ mod session;
 mod skills;
 mod social_economy;
 mod stage5;
+mod stats;
 pub mod zone;
 
 pub use drops::{

@@ -47,7 +47,7 @@ use mir2_protocol::{
 pub(super) use super::{
     buffs::*, combat::*, components::*, crystal_compat::*, drops::*, equipment::*, fishing::*,
     inventory::*, items::*, map::*, monster_ai::*, monsters::*, movement::*, npc::*, npc_script::*,
-    packets::*, quests::*, rental::*, resources::*, save::*, skills::*, stage5::*,
+    packets::*, quests::*, rental::*, resources::*, save::*, skills::*, stage5::*, stats::*,
 };
 #[cfg(test)]
 #[allow(unused_imports)]

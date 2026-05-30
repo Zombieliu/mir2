@@ -7289,6 +7289,7 @@ fn thunder_element_can_reposition_before_area_attack() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let thunder = spawn_crystal_monster_for_test(
         &mut session,
@@ -12722,6 +12723,7 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -13133,6 +13135,7 @@ fn seedings_general_close_splash_branch_uses_type_one_mc() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -13385,6 +13388,7 @@ fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -14264,6 +14268,7 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -14357,6 +14362,7 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -14489,6 +14495,7 @@ fn tucson_general_rage_spawns_rock_spell_objects_and_targeted_impacts() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let current_tick = runtime_tick(session.app.world());
@@ -17323,6 +17330,7 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -17508,6 +17516,7 @@ fn frozen_warewolf_hp_branch_spawns_snow_wolf_slaves() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let wolf = spawn_crystal_monster_for_test(
         &mut session,
@@ -17611,6 +17620,7 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let wolf = spawn_crystal_monster_for_test(
         &mut session,
@@ -17765,6 +17775,7 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -19950,6 +19961,7 @@ fn water_dragon_range_hit_applies_green_poison() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -30930,6 +30942,7 @@ fn use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp() {
         hp: 10,
         max_hp: 120,
         mp: 0,
+        max_mp: 100,
     };
     let player = player_entity(session.app.world()).expect("player entity");
     session
@@ -32199,12 +32212,12 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
     set_current_player_mp(&mut session, 0);
 
     let player_entity = player_entity(session.app.world()).expect("player entity");
-    let max_hp = session
+    let (max_hp, max_mp) = session
         .app
         .world()
         .entity(player_entity)
         .get::<PlayerVitals>()
-        .map(|vitals| vitals.max_hp)
+        .map(|vitals| (vitals.max_hp, vitals.max_mp))
         .expect("player vitals");
     let player_object_id =
         super::current_player_object_id(session.app.world()).expect("player object id");
@@ -32234,7 +32247,7 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
     )));
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.player_hp, Some(max_hp));
-    assert_eq!(snapshot.player_mp, Some(100));
+    assert_eq!(snapshot.player_mp, Some(max_mp));
     assert!(!snapshot
         .inventory_items
         .iter()
@@ -46134,6 +46147,7 @@ fn casting_stonetrap_spawns_friendly_trap_with_extra() {
             hp: 120,
             max_hp: 120,
             mp: 200,
+            max_mp: 200,
         });
 
     let _ = session.cast_skill("stonetrap");
@@ -46351,6 +46365,7 @@ fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
             hp: 120,
             max_hp: 120,
             mp: 200,
+            max_mp: 200,
         });
 
     let _ = session.cast_skill("stonetrap");
@@ -53877,4 +53892,354 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
             && mail.items == vec!["dagger".to_string()]
             && mail.item_states_json.len() == 1
     }));
+}
+
+// ---------------------------------------------------------------------------
+// Player stat engine (stats.rs) — Crystal RefreshStats parity coverage.
+// ---------------------------------------------------------------------------
+
+fn equipped_weapon_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
+    {
+        let mut inventory = session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("seed weapon");
+        weapon.added_stats.push(UserItemStat { stat, value });
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
+    {
+        let mut inventory = session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>();
+        let armour = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Armour)
+            .expect("seed armour");
+        armour.added_stats.push(UserItemStat { stat, value });
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+#[test]
+fn player_stats_seed_collapses_dc_range_to_legacy_melee() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    // Seed equipment carries no explicit Min/Max DC, so the range collapses and
+    // the engine MaxDC equals the historical flat melee figure.
+    assert_eq!(stats.min_dc(), stats.max_dc());
+    assert_eq!(
+        stats.max_dc(),
+        super::crystal_player_melee_damage(session.app.world())
+    );
+}
+
+#[test]
+fn player_stats_seed_max_mp_tracks_class_base_not_hardcoded_hundred() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Compute the expected base MP for whatever the seed character actually is.
+    let (class, level) = {
+        let session_res = session.app.world().resource::<SessionResource>();
+        let character = session_res
+            .selected_character
+            .as_ref()
+            .expect("selected character");
+        (character.class, character.level)
+    };
+    let (_, base_mp) = crate::config::crystal_base_vitals(class, level);
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.max_mp(), base_mp);
+
+    let player = super::player_entity(session.app.world()).expect("player");
+    let vitals = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals");
+    // The pool tracks the class/level base, not the legacy hard-coded 100.
+    assert_eq!(vitals.max_mp, base_mp);
+    assert_eq!(vitals.max_mp, stats.max_mp());
+}
+
+#[test]
+fn mana_restore_caps_at_max_mp_not_legacy_hundred() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let max_mp = super::player_stats(session.app.world()).max_mp();
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.mp = 0;
+    }
+    // Attempt to overheal far beyond the real pool.
+    super::restore_current_player_vitals(session.app.world_mut(), 0, 100_000);
+    let player = super::player_entity(session.app.world()).expect("player");
+    let vitals = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals");
+    assert_eq!(vitals.mp, max_mp);
+}
+
+#[test]
+fn equipping_dc_range_weapon_produces_damage_spread() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let flat_before = super::crystal_player_melee_damage(session.app.world());
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 12);
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+
+    let stats = super::player_stats(session.app.world());
+    assert!(
+        stats.max_dc() - stats.min_dc() >= 8,
+        "explicit Min/Max DC should open a spread (min={}, max={})",
+        stats.min_dc(),
+        stats.max_dc()
+    );
+    // MaxDC grows by the added MaxDC stat over the legacy flat value.
+    assert_eq!(stats.max_dc(), flat_before + 12);
+
+    // The rolled damage stays within [min_dc, max_dc] across ticks.
+    for tick in 0..32 {
+        let rolled = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
+        assert!(
+            rolled >= stats.min_dc() && rolled <= stats.max_dc(),
+            "rolled {rolled} outside [{}, {}]",
+            stats.min_dc(),
+            stats.max_dc()
+        );
+    }
+}
+
+#[test]
+fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player = super::player_entity(session.app.world()).expect("player");
+    let base_max_hp = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals")
+        .max_hp;
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_HP, 250);
+    let boosted = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals")
+        .max_hp;
+    assert_eq!(boosted, base_max_hp + 250);
+    assert_eq!(super::player_stats(session.app.world()).max_hp(), boosted);
+}
+
+#[test]
+fn critical_hit_amplifies_melee_when_crit_stats_present() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let flat = super::crystal_player_melee_damage(session.app.world());
+    // Guaranteed crit (rate 100) for +100% (CriticalDamage 10 == ten 10% steps).
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_RATE, 100);
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
+
+    let rolled = super::crystal_player_rolled_melee_damage(session.app.world(), 7);
+    assert_eq!(
+        rolled,
+        flat * 2,
+        "a guaranteed crit with CriticalDamage 10 should double the blow"
+    );
+}
+
+#[test]
+fn poison_resistance_reduces_player_poison_tick_damage() {
+    // Baseline: unresisted green poison applies the full tick.
+    let mut baseline = SimulationSession::new(SimulationConfig::default());
+    baseline.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let player = super::player_entity(baseline.app.world()).expect("player");
+        let mut entity = baseline.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = vitals.max_hp;
+    }
+    let tick = super::runtime_tick(baseline.app.world());
+    super::apply_toxic_ghoul_green_poison(baseline.app.world_mut(), tick, 20);
+    let hp_before = baseline.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_status_effects(baseline.app.world_mut(), tick + 2, &mut packets);
+    let unresisted_loss = hp_before - baseline.world_snapshot().player_hp.expect("hp");
+    assert!(unresisted_loss > 0, "green poison should hurt unresisted");
+
+    // With poison resistance the same tick is mitigated.
+    let mut resisted = SimulationSession::new(SimulationConfig::default());
+    resisted.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equipped_armour_push_stat(&mut resisted, super::CRYSTAL_STAT_POISON_RESIST, 5);
+    {
+        let player = super::player_entity(resisted.app.world()).expect("player");
+        let mut entity = resisted.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = vitals.max_hp;
+    }
+    let tick = super::runtime_tick(resisted.app.world());
+    super::apply_toxic_ghoul_green_poison(resisted.app.world_mut(), tick, 20);
+    let hp_before = resisted.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_status_effects(resisted.app.world_mut(), tick + 2, &mut packets);
+    let resisted_loss = hp_before - resisted.world_snapshot().player_hp.expect("hp");
+    assert!(
+        resisted_loss < unresisted_loss,
+        "poison resist should reduce the tick (resisted {resisted_loss} vs {unresisted_loss})"
+    );
+}
+
+#[test]
+fn magic_resistance_reduces_incoming_magic_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert_eq!(super::crystal_player_magic_mitigated(session.app.world(), 100), 100);
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 5);
+    let mitigated = super::crystal_player_magic_mitigated(session.app.world(), 100);
+    assert!(
+        mitigated < 100 && mitigated >= 1,
+        "magic resist 5 should shave the blow (got {mitigated})"
+    );
+}
+
+#[test]
+fn passive_regen_restores_pools_after_combat_delay() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = 1;
+        vitals.mp = 0;
+    }
+    // No recent damage (last_damaged_tick stays at its default), so regen is
+    // eligible. Drive the regen system directly at a cadence tick to keep the
+    // assertion independent of nearby monster AI.
+    {
+        let mut runtime = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        runtime.last_damaged_tick = 0;
+    }
+    let hp_before = session.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_vital_regen(session.app.world_mut(), 100, &mut packets);
+    let hp_after = session.world_snapshot().player_hp.expect("hp");
+    assert!(
+        hp_after > hp_before,
+        "idle player should passively regenerate (before {hp_before}, after {hp_after})"
+    );
+}
+
+#[test]
+fn passive_regen_is_paused_immediately_after_taking_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = 1;
+    }
+    // Took damage at tick 95; a cadence tick at 100 is still inside the
+    // post-damage window, so regen must stay paused (gate is the combat delay,
+    // not the cadence: 100 % 10 == 0).
+    {
+        let mut runtime = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        runtime.last_damaged_tick = 95;
+    }
+    let hp_before = session.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_vital_regen(session.app.world_mut(), 100, &mut packets);
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("hp"),
+        hp_before,
+        "regen must stay paused while the player is in combat"
+    );
+}
+
+#[test]
+fn social_relationships_grant_experience_rate_bonus() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Unattached player: experience is unchanged.
+    assert_eq!(
+        super::crystal_apply_social_exp_rate(session.app.world(), 1_000),
+        1_000
+    );
+    assert_eq!(
+        super::crystal_player_social_exp_rate_percent(session.app.world()),
+        0
+    );
+
+    // Marry, join a guild, and gain a mentor.
+    {
+        let mut systems = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        systems.stage5_systems.relationship.partner_name = "Spouse".to_string();
+        systems.stage5_systems.guild.name = "Knights".to_string();
+        systems.stage5_systems.mentor.name = "Sifu".to_string();
+    }
+    let rate = super::crystal_player_social_exp_rate_percent(session.app.world());
+    assert_eq!(
+        rate,
+        super::CRYSTAL_LOVER_EXP_RATE_PERCENT
+            + super::CRYSTAL_GUILD_EXP_RATE_PERCENT
+            + super::CRYSTAL_MENTEE_EXP_RATE_PERCENT
+    );
+    let boosted = super::crystal_apply_social_exp_rate(session.app.world(), 1_000);
+    assert_eq!(boosted, 1_000 + 1_000 * rate as u32 / 100);
+}
+
+#[test]
+fn player_stats_expose_class_weight_capacities() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    // Crystal base weight capacities are present (bag 50+, hand 12+, wear 15+).
+    assert!(stats.bag_weight() >= 50);
+    assert!(stats.hand_weight() >= 12);
+    assert!(stats.wear_weight() >= 15);
 }
