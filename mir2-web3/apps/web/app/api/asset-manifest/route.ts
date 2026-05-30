@@ -57,6 +57,19 @@ const manifestInputs: ManifestInput[] = [
     digestMode: "stableJson",
   },
   {
+    // Bumps the asset version when the set of committed sound bytes changes, so clients pick up
+    // newly-added sounds.
+    name: "present-sounds",
+    absolutePath: path.join(webRoot, "lib/generated/crystal-present-sounds.generated.json"),
+    digestMode: "stableJson",
+  },
+  {
+    // Bumps the asset version when the packed entity atlas changes, busting CDN/SW caches.
+    name: "bevy-entity-atlas-manifest",
+    absolutePath: path.join(webRoot, "public/bevy-entity-atlases/manifest.json"),
+    digestMode: "stableJson",
+  },
+  {
     name: "full-crystal-client-index",
     absolutePath: path.join(projectRoot, "docs/generated/assets/full-crystal-client-index.json"),
     digestMode: "stableJson",
