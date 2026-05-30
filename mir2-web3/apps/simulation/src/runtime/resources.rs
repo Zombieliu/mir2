@@ -548,6 +548,8 @@ pub(super) struct MapRuntimeResource {
     pub(super) blocked_cells: BTreeSet<(i32, i32)>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
     pub(super) doors: DoorRegistry,
+    /// Cells flagged fishable in the `.map` file → their fishing attribute.
+    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
 }
 
@@ -558,6 +560,7 @@ impl MapRuntimeResource {
         blocked_cells: BTreeSet<(i32, i32)>,
         closed_door_cells: BTreeSet<(i32, i32)>,
         doors: DoorRegistry,
+        fishing_cells: BTreeMap<(i32, i32), i8>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),
@@ -565,6 +568,7 @@ impl MapRuntimeResource {
             blocked_cells,
             closed_door_cells,
             doors,
+            fishing_cells,
             conquest_wars: config.conquest_wars.clone(),
         }
     }

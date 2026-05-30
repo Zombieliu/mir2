@@ -70,3 +70,22 @@ Tick model: 1 runtime tick = 1000 ms (`combat_delay_ticks(ms) = ceil(ms/1000)`).
   on map change. Wired into `advance_world`.
 - Tests: strikes on a lightning map, no strikes on a normal map, direct-hit
   damage.
+
+### Phase 4 — Fishing cell attributes ✅
+- `.map` parsers (v0/v1/v2/v3/v5/v7/v100) now read each cell's light byte and
+  record fishable cells (light 100..=119 → attribute 0..=19), matching Crystal
+  `LoadMapCells*`. v4/v6 carry none (Crystal doesn't parse them).
+- `FishingCellTemplate` added to `StarterMapCollision`; fishing cells flow into
+  `RuntimeMapCollisionData` and `MapRuntimeResource.fishing_cells`.
+- Fishing cast derives `fishing_attribute` from the cell three tiles ahead
+  (Crystal `FishingCast` `PointMove(loc, dir, 3)`). Maps that declare no fishing
+  cells keep the permissive default so the synthetic starter field stays
+  fishable (no regression).
+- Tests: v0 parser (in/out of range), cast over a fishing cell, cast rejected
+  off a fishing cell.
+
+## Outcome
+Map system raised well past 90% for cell-/map-level mechanics: doors, mining,
+hazards and fishing cells now match Crystal. Remaining (tracked, lower
+priority): conquest/siege movement gating (depends on the guild-war system) and
+zone-shared door/hazard authority (part of the broader world-authority work).

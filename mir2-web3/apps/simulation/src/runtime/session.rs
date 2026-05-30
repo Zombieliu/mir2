@@ -170,6 +170,7 @@ impl SimulationSession {
             initial_collision.blocked_set,
             initial_collision.closed_door_set,
             initial_doors,
+            initial_collision.fishing_cells,
         ));
         app.insert_resource(super::mining::MiningResource::with_builtin_sets());
         super::mining::rebuild_mine_spots(app.world_mut());

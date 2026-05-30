@@ -295,21 +295,27 @@ fn give_mine_payout(
         }
         // Crystal skips drops whose item is not present in the item table.
         let template = crystal_item_by_name(drop.item_name)?;
-        if template.item_type != CRYSTAL_ITEM_TYPE_ORE {
-            // Not an ore in this item table — still respect Crystal's payout.
-        }
 
-        let span = u64::from(drop.max_dura.saturating_sub(drop.min_dura)).max(1);
-        let base_units =
-            u64::from(drop.min_dura) + roll(tick, object_id, target, 0x60 + index, span);
-        let mut dura = base_units.saturating_mul(1_000).min(u64::from(u16::MAX)) as u16;
-        if drop.bonus_chance > 0
-            && roll(tick, object_id, target, 0x70 + index, 100) <= u64::from(drop.bonus_chance)
-        {
-            let bonus = roll(tick, object_id, target, 0x80 + index, u64::from(drop.max_bonus_dura).max(1))
-                .saturating_mul(1_000);
-            dura = (u64::from(dura) + bonus).min(u64::from(u16::MAX)) as u16;
-        }
+        // Ore durability is the mined quantity: (MinDura + rand) * 1000, with a
+        // bonus chance. Non-ore payouts keep the item's template durability
+        // (Crystal only overrides `CurrentDura` for `ItemType.Ore`).
+        let dura = if template.item_type == CRYSTAL_ITEM_TYPE_ORE {
+            let span = u64::from(drop.max_dura.saturating_sub(drop.min_dura)).max(1);
+            let base_units =
+                u64::from(drop.min_dura) + roll(tick, object_id, target, 0x60 + index, span);
+            let mut dura = base_units.saturating_mul(1_000).min(u64::from(u16::MAX)) as u16;
+            if drop.bonus_chance > 0
+                && roll(tick, object_id, target, 0x70 + index, 100) <= u64::from(drop.bonus_chance)
+            {
+                let bonus =
+                    roll(tick, object_id, target, 0x80 + index, u64::from(drop.max_bonus_dura).max(1))
+                        .saturating_mul(1_000);
+                dura = (u64::from(dura) + bonus).min(u64::from(u16::MAX)) as u16;
+            }
+            dura
+        } else {
+            u16::try_from(template.durability).unwrap_or(0)
+        };
 
         let key = crystal_item_key_for_template(&template);
         {

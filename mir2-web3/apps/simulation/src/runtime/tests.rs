@@ -54306,3 +54306,101 @@ fn crystal_hazard_damages_player_on_direct_hit() {
         "lightning landing on the player's cell should deal damage"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Map system: fishing cell attributes parsed from .map (Crystal FishingAttribute)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_map_v0_parses_fishing_attribute_cell() {
+    // Minimal 1x1 type-0 map: width/height = 1, one cell of stride 12 at off 52.
+    let mut bytes = vec![0u8; 64];
+    bytes[0] = 1; // width = 1
+    bytes[2] = 1; // height = 1
+    bytes[52 + 11] = 105; // light byte -> fishing attribute 5
+    let collision =
+        super::super::map::parse_runtime_map_collision("fishtest", &bytes).expect("v0 map parses");
+    assert_eq!(
+        collision.fishing_cells,
+        vec![mir2_game_data::FishingCellTemplate {
+            x: 0,
+            y: 0,
+            attribute: 5
+        }]
+    );
+}
+
+#[test]
+fn crystal_map_v0_light_outside_fishing_range_is_not_a_cell() {
+    let mut bytes = vec![0u8; 64];
+    bytes[0] = 1;
+    bytes[2] = 1;
+    bytes[52 + 11] = 50; // light outside 100..=119
+    let collision =
+        super::super::map::parse_runtime_map_collision("fishtest", &bytes).expect("v0 map parses");
+    assert!(collision.fishing_cells.is_empty());
+}
+
+fn setup_fishing_session() -> SimulationSession {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
+    add_inventory_crystal_item(&mut session, "FishBait", 31);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<FishingResource>()
+        .rod_has_hook = true;
+    session
+}
+
+#[test]
+fn crystal_fishing_uses_map_fishing_cell_three_tiles_ahead() {
+    let mut session = setup_fishing_session();
+    let player = player_entity(session.app.world()).expect("player entity");
+    set_player_position(&mut session, Point { x: 320, y: 270 });
+    session
+        .app
+        .world_mut()
+        .entity_mut(player)
+        .insert(Facing(MirDirection::Right));
+    {
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        // The cell three tiles ahead (323, 270) is fishable; also seed another.
+        map.fishing_cells.insert((323, 270), 0);
+        map.fishing_cells.insert((400, 400), 3);
+    }
+
+    session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    let fishing = session.app.world().resource::<FishingResource>();
+    assert!(fishing.fishing, "fishing should begin over a fishing cell");
+    assert_eq!(fishing.fishing_attribute, 0, "attribute taken from the cell");
+}
+
+#[test]
+fn crystal_fishing_rejected_when_no_fishing_cell_ahead() {
+    let mut session = setup_fishing_session();
+    let player = player_entity(session.app.world()).expect("player entity");
+    set_player_position(&mut session, Point { x: 320, y: 270 });
+    session
+        .app
+        .world_mut()
+        .entity_mut(player)
+        .insert(Facing(MirDirection::Right));
+    {
+        // Map declares fishing cells, but none three tiles ahead of the player.
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        map.fishing_cells.insert((400, 400), 3);
+    }
+
+    session.handle_packet(ClientPacket::FishingCast { cast_out: true });
+    let fishing = session.app.world().resource::<FishingResource>();
+    assert!(!fishing.fishing, "fishing must not begin away from a fishing cell");
+    assert_eq!(fishing.fishing_attribute, -1);
+}
