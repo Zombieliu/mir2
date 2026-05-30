@@ -331,6 +331,9 @@ impl ZoneRuntime {
                 session_id,
                 profile,
             } => self.update_chat_profile(&session_id, profile),
+            ZoneCommand::UpdatePlayerCombatStats { session_id, stats } => {
+                self.update_player_combat_stats(&session_id, stats)
+            }
             ZoneCommand::SyncPlayerTransform {
                 session_id,
                 position,
@@ -1171,6 +1174,17 @@ impl ZoneRuntime {
         Vec::new()
     }
 
+    fn update_player_combat_stats(
+        &mut self,
+        session_id: &SessionId,
+        stats: super::types::ZonePlayerCombatStats,
+    ) -> Vec<ZoneOutbound> {
+        if let Some(player) = self.players.get_mut(session_id) {
+            player.combat_stats = stats;
+        }
+        Vec::new()
+    }
+
     fn chat(
         &mut self,
         session_id: &SessionId,
@@ -1439,13 +1453,17 @@ impl ZoneRuntime {
                 attack_type,
             },
         };
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(std::slice::from_ref(&attack_packet), now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -1538,13 +1556,17 @@ impl ZoneRuntime {
                 },
             },
         ];
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(&action_packets, now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -4047,6 +4069,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position,
             direction: summon.direction,
             drops: Vec::new(),
@@ -4797,6 +4820,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position: spawn_position,
             direction,
             drops: Vec::new(),
@@ -7072,6 +7096,78 @@ fn zone_player_native_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
     base_damage
         .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC))
         .max(1)
+}
+
+/// Deterministically roll an inclusive `[min, max]` stat range using the shared
+/// zone RNG so every observer of the zone derives the same value.
+fn zone_roll_stat_range(min: i32, max: i32, tick: u64, actor_id: u32, salt: u64) -> i32 {
+    let lo = min.min(max).max(0);
+    let hi = max.max(min).max(0);
+    if hi <= lo {
+        return lo;
+    }
+    let span = u64::try_from(hi - lo + 1).unwrap_or(1);
+    let roll = zone_deterministic_roll(
+        tick,
+        usize::try_from(actor_id).unwrap_or_default(),
+        usize::try_from(salt).unwrap_or_default(),
+        span,
+    );
+    lo.saturating_add(i32::try_from(roll).unwrap_or_default())
+}
+
+/// Authoritatively resolve a player's physical (melee/range) attack against a
+/// shared-zone monster.
+///
+/// Historically the attacker's *personal* session pre-rolled the damage and the
+/// zone trusted that scalar — there was no hit/miss check and no armour applied
+/// inside the zone, so the shared world was not the combat authority. This rolls
+/// `Random(MinDC..=MaxDC)` (+ buff DC), runs the Crystal accuracy-vs-agility hit
+/// check, and subtracts `Random(MinAC..=MaxAC)` using the monster's own
+/// authoritative defensive stats.
+///
+/// Returns `None` on a miss (only the already-broadcast swing animation is
+/// shown), or `Some(damage)` on a hit. `damage` may be `0` when armour fully
+/// absorbs the blow (a Crystal "block").
+///
+/// When the attacker has no authoritative stat block yet
+/// (`combat_stats.has_authoritative_damage() == false`) this falls back to the
+/// legacy trusted scalar so existing callers keep working unchanged.
+fn zone_resolve_player_physical_attack(
+    player: &ZonePlayer,
+    monster: &ZoneNativeMonster,
+    monster_object_id: u32,
+    fallback_damage: i32,
+    now_ms: u64,
+) -> Option<i32> {
+    let stats = player.combat_stats;
+    if !stats.has_authoritative_damage() {
+        return Some(zone_player_native_damage(player, fallback_damage));
+    }
+
+    let agility = monster.defense.agility.max(0);
+    if agility > 0 {
+        let roll = zone_deterministic_roll(
+            now_ms,
+            usize::try_from(player.object_id).unwrap_or_default(),
+            usize::try_from(monster_object_id).unwrap_or_default(),
+            u64::try_from(agility.saturating_add(1)).unwrap_or(1),
+        );
+        if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
+            return None;
+        }
+    }
+
+    let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
+        .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let armour = zone_roll_stat_range(
+        monster.defense.min_ac,
+        monster.defense.max_ac,
+        now_ms,
+        player.object_id,
+        0x0AC,
+    );
+    Some(base.saturating_sub(armour).max(0))
 }
 
 fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {

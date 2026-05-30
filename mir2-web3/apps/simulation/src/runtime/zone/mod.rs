@@ -11,5 +11,5 @@ pub use manager::ZoneManager;
 pub use runtime::ZoneRuntime;
 pub use types::{
     PlayerId, SessionId, ZoneChatItem, ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound, ZonePlayerCombatStats,
 };

@@ -16,7 +16,8 @@ use mir2_simulation::{
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
     WorldCommand, WorldCommandExecution, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand,
-    ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntimeHandle,
+    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneRuntimeHandle,
 };
 
 use crate::GatewayConfig;
@@ -2639,6 +2640,9 @@ fn zone_monster_spawn_from_shared_entity(
         max_hp,
         hp,
         experience: template_ref.map(|monster| monster.experience).unwrap_or(0),
+        defense: template_ref
+            .map(|monster| ZoneMonsterDefense::from_crystal_template(monster))
+            .unwrap_or_default(),
         position: Point {
             x: entity.x,
             y: entity.y,
