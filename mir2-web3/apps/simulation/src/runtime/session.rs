@@ -162,11 +162,14 @@ impl SimulationSession {
         app.insert_resource(RuntimeConfigResource::new(&config));
         app.insert_resource(SessionResource::new(&config));
         app.insert_resource(PlayerRuntimeResource::new(&config));
+        let initial_doors =
+            super::resources::DoorRegistry::from_templates(&initial_collision.collision.doors);
         app.insert_resource(MapRuntimeResource::new(
             &config,
             initial_collision.collision.region_bounds,
             initial_collision.blocked_set,
             initial_collision.closed_door_set,
+            initial_doors,
         ));
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
         inventory.inventory_items = seed_inventory_items();

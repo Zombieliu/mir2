@@ -3380,6 +3380,7 @@ fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacke
     if !is_in_world(world) {
         return Vec::new();
     }
+    // Conquest gate bookkeeping — siege gates a guild can toggle during war.
     push_unique_u8(
         &mut world
             .resource_mut::<Stage5SystemsResource>()
@@ -3388,10 +3389,19 @@ fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacke
             .open_gates,
         door_index,
     );
-    vec![ServerPacket::OpenDoor {
-        door_index,
-        close: false,
-    }]
+    // Drive the real door state machine: open the physical door, schedule its
+    // 5s auto-close and unblock its cells (Crystal `Map.OpenDoor`).
+    let mut packets = super::door::open_door(world, door_index);
+    if packets.is_empty() {
+        // No physical door with this index on the current map (e.g. a conquest
+        // gate placeholder, or a map whose doors are not parsed here). Still
+        // acknowledge the open so conquest gate handling matches Crystal.
+        packets.push(ServerPacket::OpenDoor {
+            door_index,
+            close: false,
+        });
+    }
+    packets
 }
 
 fn request_map_info_packet(world: &World, map_index: i32) -> Vec<ServerPacket> {

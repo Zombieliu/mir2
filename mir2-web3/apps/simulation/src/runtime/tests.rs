@@ -53878,3 +53878,139 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
             && mail.item_states_json.len() == 1
     }));
 }
+
+// ---------------------------------------------------------------------------
+// Map system: dynamic doors (Crystal Map.OpenDoor / Map.Process / CheckDoorOpen)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_door_registry_groups_cells_by_index_and_masks_high_bit() {
+    let templates = vec![
+        mir2_game_data::DoorMapCellTemplate { x: 10, y: 5, index: 3, closed: true },
+        mir2_game_data::DoorMapCellTemplate { x: 11, y: 5, index: 3, closed: true },
+        // High bit (0x80) must be masked off so it matches index 3 as well.
+        mir2_game_data::DoorMapCellTemplate { x: 12, y: 5, index: 0x83, closed: true },
+        mir2_game_data::DoorMapCellTemplate { x: 20, y: 9, index: 4, closed: true },
+    ];
+    let registry = super::super::resources::DoorRegistry::from_templates(&templates);
+    assert_eq!(registry.doors.len(), 2, "two distinct door indices");
+    let door3 = registry
+        .doors
+        .iter()
+        .find(|door| door.index == 3)
+        .expect("door index 3");
+    assert_eq!(door3.cells, vec![(10, 5), (11, 5), (12, 5)]);
+    assert!(door3.close_at_tick.is_none(), "doors start closed");
+}
+
+#[test]
+fn crystal_open_door_unblocks_then_auto_closes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+
+    // Pick a walkable, unoccupied cell to register as a (closed) door cell.
+    let door_cell = (305..360)
+        .map(|x| Point { x, y: 268 })
+        .find(|point| can_occupy(session.app.world(), point.clone(), Some(player)))
+        .expect("a walkable cell for the door");
+    set_player_position(
+        &mut session,
+        Point {
+            x: door_cell.x,
+            y: door_cell.y + 1,
+        },
+    );
+
+    const DOOR_INDEX: u8 = 7;
+    {
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        map.closed_door_cells.insert((door_cell.x, door_cell.y));
+        map.doors.doors.push(super::super::resources::DoorRuntime {
+            index: DOOR_INDEX,
+            cells: vec![(door_cell.x, door_cell.y)],
+            close_at_tick: None,
+        });
+    }
+
+    // A closed door blocks movement onto its cell.
+    assert!(
+        !can_occupy(session.app.world(), door_cell.clone(), Some(player)),
+        "closed door should block"
+    );
+
+    // Opening emits OpenDoor{close:false} and unblocks the cell.
+    let open_packets = session.handle_packet(ClientPacket::OpenDoor {
+        door_index: DOOR_INDEX,
+    });
+    assert!(
+        open_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::OpenDoor { door_index, close }
+                if *door_index == DOOR_INDEX && !*close
+        )),
+        "expected OpenDoor open broadcast, got {open_packets:?}"
+    );
+    assert!(
+        can_occupy(session.app.world(), door_cell.clone(), Some(player)),
+        "open door should be walkable"
+    );
+
+    // After roughly five seconds it auto-closes (OpenDoor{close:true}) and re-blocks.
+    let mut closed = false;
+    for _ in 0..8 {
+        let packets = session.tick();
+        if packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::OpenDoor { door_index, close }
+                if *door_index == DOOR_INDEX && *close
+        )) {
+            closed = true;
+            break;
+        }
+    }
+    assert!(closed, "door should auto-close after its timer elapses");
+    assert!(
+        !can_occupy(session.app.world(), door_cell, Some(player)),
+        "auto-closed door should block again"
+    );
+}
+
+#[test]
+fn crystal_open_door_only_unblocks_its_own_cells() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+
+    // Two distinct walkable cells, registered as two separate doors.
+    let cells: Vec<Point> = (305..360)
+        .map(|x| Point { x, y: 266 })
+        .filter(|point| can_occupy(session.app.world(), point.clone(), Some(player)))
+        .take(2)
+        .collect();
+    assert_eq!(cells.len(), 2, "need two walkable cells");
+    let (cell_a, cell_b) = (cells[0].clone(), cells[1].clone());
+
+    {
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        for (index, cell) in [(10u8, &cell_a), (11u8, &cell_b)] {
+            map.closed_door_cells.insert((cell.x, cell.y));
+            map.doors.doors.push(super::super::resources::DoorRuntime {
+                index,
+                cells: vec![(cell.x, cell.y)],
+                close_at_tick: None,
+            });
+        }
+    }
+
+    // Opening door 10 must unblock only cell A, leaving door 11's cell blocked.
+    session.handle_packet(ClientPacket::OpenDoor { door_index: 10 });
+    assert!(can_occupy(session.app.world(), cell_a, Some(player)));
+    assert!(!can_occupy(session.app.world(), cell_b, Some(player)));
+}

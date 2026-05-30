@@ -1411,10 +1411,12 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
         runtime_map_collision_from_template(fallback)
     });
 
+    let doors = super::resources::DoorRegistry::from_templates(&collision.collision.doors);
     let mut map = world.resource_mut::<MapRuntimeResource>();
     map.map_region_bounds = collision.collision.region_bounds;
     map.blocked_cells = collision.blocked_set;
     map.closed_door_cells = collision.closed_door_set;
+    map.doors = doors;
 }
 
 pub(super) fn runtime_active_map_collision_data(

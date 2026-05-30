@@ -2,6 +2,7 @@ mod buffs;
 mod combat;
 mod components;
 mod crystal_compat;
+mod door;
 mod drops;
 mod equipment;
 mod fishing;
