@@ -29,7 +29,7 @@ use super::components::{
     MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
 use super::crystal_compat::{
-    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_AGILITY, CRYSTAL_STAT_ATTACK_SPEED,
+    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY, CRYSTAL_STAT_ATTACK_SPEED,
     CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
     CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN, CRYSTAL_STAT_ENERGY_SHIELD_PERCENT, CRYSTAL_STAT_LUCK,
     CRYSTAL_STAT_MANA_PENALTY_PERCENT, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
@@ -3758,7 +3758,8 @@ fn apply_crystal_ice_thrust_spell(
         offset_point(&front, direction, 1),
         offset_point(&front, rotated_direction(direction, 1), 1),
     ];
-    let near_damage = crystal_spell_damage(world, tick, magic, skill.level);
+    let near_damage =
+        crystal_spell_damage_with_crit(world, tick, magic, skill.level, crystal_luck_crit_chance(world));
     let far_damage = near_damage.saturating_mul(3).saturating_div(5).max(1);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(1_500));
 
@@ -5391,7 +5392,13 @@ fn apply_crystal_blade_avalanche_spell(
     world
         .entity_mut(player)
         .insert(super::components::Facing(direction));
-    let damage = crystal_spell_damage(world, tick, magic, skill.level);
+    let damage = crystal_spell_damage_with_crit(
+        world,
+        tick,
+        magic,
+        skill.level,
+        crystal_luck_crit_chance(world),
+    );
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
 
     for lane in [-1, 0, 1] {
@@ -5441,7 +5448,13 @@ fn apply_crystal_crescent_slash_spell(
     let back = rotated_direction(direction, 4);
     let pre_back = rotated_direction(back, -1);
     let next_back = rotated_direction(back, 1);
-    let damage = crystal_spell_damage(world, tick, magic, skill.level);
+    let damage = crystal_spell_damage_with_crit(
+        world,
+        tick,
+        magic,
+        skill.level,
+        current_player_crystal_stat(world, CRYSTAL_STAT_ACCURACY),
+    );
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
 
     for offset in -4..=3 {
@@ -6972,6 +6985,38 @@ pub(super) fn crystal_spell_damage(
 ) -> i32 {
     let base = crystal_spell_attack_power(world, tick, magic);
     crystal_magic_get_damage(magic, level, base).max(1)
+}
+
+/// Like [`crystal_spell_damage`] but with a critical-hit chance (out of 100) that *doubles the
+/// rolled attack power* before applying `GetDamage` — Crystal's melee skill crit behaviour
+/// (`if Random(0,100) <= chance) damageBase += damageBase`). Only the gear-scaled attack power
+/// doubles, not the whole damage, matching Crystal's intent.
+pub(super) fn crystal_spell_damage_with_crit(
+    world: &World,
+    tick: u64,
+    magic: &CrystalMagicTemplate,
+    level: u8,
+    crit_chance: i32,
+) -> i32 {
+    let mut base = crystal_spell_attack_power(world, tick, magic);
+    if crit_chance > 0 {
+        let object_id = current_player_object_id(world).unwrap_or_default();
+        let roll = deterministic_roll(
+            tick,
+            object_id as usize,
+            crystal_spell_salt(&magic.spell).wrapping_add(0x5C0F) as usize,
+            100,
+        ) as i32;
+        if roll < crit_chance {
+            base = base.saturating_add(base);
+        }
+    }
+    crystal_magic_get_damage(magic, level, base).max(1)
+}
+
+/// Crystal melee crit chance for Luck-scaled skills (`1 + Luck`, e.g. BladeAvalanche, IceThrust).
+fn crystal_luck_crit_chance(world: &World) -> i32 {
+    1 + current_player_crystal_stat(world, CRYSTAL_STAT_LUCK)
 }
 
 /// Crystal `GetRangeAttackPower(min, max, range)` — applies the bow falloff penalty
