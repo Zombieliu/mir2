@@ -29,8 +29,8 @@ type ManifestInputState = {
   mtimeMs?: number | null;
 };
 
-const webRoot = process.cwd();
-const projectRoot = path.resolve(webRoot, "../..");
+const webRoot = /* turbopackIgnore: true */ process.cwd();
+const projectRoot = path.resolve(/* turbopackIgnore: true */ webRoot, "../..");
 
 const manifestInputs: ManifestInput[] = [
   {
