@@ -164,6 +164,10 @@ pub enum AdminCommand {
         character_id: String,
         name: Option<String>,
         level: Option<u16>,
+        #[serde(default)]
+        experience: Option<i64>,
+        #[serde(default)]
+        max_experience: Option<i64>,
         gold: Option<u32>,
         credit: Option<u32>,
         map_file_name: Option<String>,
@@ -244,6 +248,15 @@ pub enum AdminCommand {
         record_key: String,
         payload_json: Value,
     },
+    RollbackContentBundle {
+        bundle_id: String,
+        category: String,
+        record_key: String,
+    },
+    AddSupportNote {
+        account_id: String,
+        note: String,
+    },
     ServerControl {
         action: String,
         target: Option<String>,
@@ -280,6 +293,8 @@ impl AdminCommand {
             | AdminCommand::NameListCreate { .. }
             | AdminCommand::NameListDelete { .. } => Permission::NameListManage,
             AdminCommand::PublishContentBundle { .. } => Permission::ContentPublish,
+            AdminCommand::RollbackContentBundle { .. } => Permission::ContentRollback,
+            AdminCommand::AddSupportNote { .. } => Permission::AccountWrite,
             AdminCommand::ServerControl { .. } => Permission::ServerControl,
         }
     }
@@ -2795,6 +2810,8 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                 character_id,
                 name,
                 level,
+                experience,
+                max_experience,
                 gold,
                 credit,
                 map_file_name,
@@ -2844,6 +2861,14 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                     character.level = *level;
                     save.character.level = *level;
                     changes.push("level");
+                }
+                if let Some(experience) = experience {
+                    save.experience = (*experience).max(0);
+                    changes.push("experience");
+                }
+                if let Some(max_experience) = max_experience {
+                    save.max_experience = (*max_experience).max(1);
+                    changes.push("max_experience");
                 }
                 if let Some(gold) = gold {
                     save.gold = *gold;
@@ -3218,6 +3243,27 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                 category,
                 record_key,
                 payload_json,
+                operator_id,
+                reason,
+                accepted_at_ms,
+            ),
+            AdminCommand::RollbackContentBundle {
+                bundle_id,
+                category,
+                record_key,
+            } => rollback_content_bundle(
+                &self.content_bundle_dir,
+                bundle_id,
+                category,
+                record_key,
+                operator_id,
+                reason,
+                accepted_at_ms,
+            ),
+            AdminCommand::AddSupportNote { account_id, note } => add_support_note(
+                &self.content_bundle_dir,
+                account_id,
+                note,
                 operator_id,
                 reason,
                 accepted_at_ms,
@@ -3680,6 +3726,110 @@ fn publish_content_bundle(
     ))
 }
 
+/// Roll a published content bundle back: move its published JSON aside to a
+/// timestamped `.rolledback` artifact so the world/zone reload no longer serves
+/// it, and the action is auditable/recoverable. Errors if the bundle was never
+/// published.
+fn rollback_content_bundle(
+    root: &PathBuf,
+    bundle_id: &str,
+    category: &str,
+    record_key: &str,
+    operator_id: &str,
+    reason: &str,
+    updated_at_ms: u64,
+) -> Result<String, AdminError> {
+    let bundle_id = sanitized_file_stem("bundle_id", bundle_id)?;
+    let _category = required_string("category", category)?;
+    let _record_key = required_string("record_key", record_key)?;
+    let path = root.join(format!("{bundle_id}.json"));
+    if !path.exists() {
+        return Err(AdminError::InvalidCommand(format!(
+            "content bundle {bundle_id} is not published; nothing to roll back"
+        )));
+    }
+    let archive = root.join(format!("{bundle_id}.rolledback-{updated_at_ms}.json"));
+    let marker = serde_json::json!({
+        "bundleId": bundle_id,
+        "category": _category,
+        "recordKey": _record_key,
+        "operatorId": operator_id,
+        "reason": reason,
+        "rolledBackAtMs": updated_at_ms,
+    });
+    let prior = fs::read(&path).unwrap_or_default();
+    fs::write(&archive, prior).map_err(|error| {
+        AdminError::Repository(format!(
+            "archive content bundle {} failed: {error}",
+            archive.display()
+        ))
+    })?;
+    fs::remove_file(&path).map_err(|error| {
+        AdminError::Repository(format!(
+            "remove published content bundle {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    let receipt = root.join(format!("{bundle_id}.rollback-receipt-{updated_at_ms}.json"));
+    let _ = fs::write(
+        &receipt,
+        serde_json::to_vec_pretty(&marker).unwrap_or_default(),
+    );
+    Ok(format!(
+        "content bundle {bundle_id} rolled back (archived to {})",
+        archive.display()
+    ))
+}
+
+/// Append an immutable support note for an account. Notes are stored per-account
+/// as newline-delimited JSON so support history survives restarts and can be
+/// read back by the operations UI.
+fn add_support_note(
+    root: &PathBuf,
+    account_id: &str,
+    note: &str,
+    operator_id: &str,
+    reason: &str,
+    created_at_ms: u64,
+) -> Result<String, AdminError> {
+    let account_stem = sanitized_file_stem("account_id", account_id)?;
+    let note = required_string("note", note)?;
+    let dir = root.join("support-notes");
+    fs::create_dir_all(&dir).map_err(|error| {
+        AdminError::Repository(format!(
+            "create support-notes dir {} failed: {error}",
+            dir.display()
+        ))
+    })?;
+    let record = serde_json::json!({
+        "accountId": account_id,
+        "note": note,
+        "operatorId": operator_id,
+        "reason": reason,
+        "createdAtMs": created_at_ms,
+    });
+    let line = format!("{}\n", serde_json::to_string(&record).unwrap_or_default());
+    let path = dir.join(format!("{account_stem}.ndjson"));
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .map_err(|error| {
+            AdminError::Repository(format!(
+                "open support-notes file {} failed: {error}",
+                path.display()
+            ))
+        })?;
+    use std::io::Write as _;
+    file.write_all(line.as_bytes()).map_err(|error| {
+        AdminError::Repository(format!(
+            "write support note {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    Ok(format!("support note recorded for account {account_id}"))
+}
+
 fn canonical_control_action(action: &str) -> Result<String, AdminError> {
     let action = required_string("action", action)?
         .replace('-', "_")
@@ -3966,6 +4116,18 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         )
         .route("/admin/commands/kick-player", post(submit_kick_player))
         .route("/admin/commands/ban-account", post(submit_ban_account))
+        .route(
+            "/admin/commands/grant-experience",
+            post(submit_grant_experience),
+        )
+        .route(
+            "/admin/commands/add-support-note",
+            post(submit_support_note),
+        )
+        .route(
+            "/admin/commands/rollback-content-bundle",
+            post(submit_rollback_content_bundle),
+        )
         .route("/admin/commands/console", post(submit_console_command))
         .with_state(state)
 }
@@ -4014,6 +4176,42 @@ pub struct SubmitGrantCurrencyRequest {
     pub character_id: String,
     pub currency: String,
     pub amount: u64,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitGrantExperienceRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub character_id: String,
+    pub experience: i64,
+    #[serde(default)]
+    pub max_experience: Option<i64>,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitSupportNoteRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub account_id: String,
+    pub note: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitRollbackContentBundleRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub bundle_id: String,
+    pub category: String,
+    pub record_key: String,
     pub reason: String,
 }
 
@@ -5550,6 +5748,122 @@ async fn submit_grant_currency(
             character_id: request.character_id,
             currency: request.currency,
             amount: request.amount,
+        },
+        now,
+    )
+    .await
+}
+
+async fn submit_grant_experience(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitGrantExperienceRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-grant-experience-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::Character,
+            target_id: request.character_id.clone(),
+            account_id: None,
+            character_id: Some(request.character_id.clone()),
+        },
+        request.reason,
+        AdminCommand::UpdateCharacter {
+            character_id: request.character_id,
+            name: None,
+            level: None,
+            experience: Some(request.experience),
+            max_experience: request.max_experience,
+            gold: None,
+            credit: None,
+            map_file_name: None,
+            map_title: None,
+            position_x: None,
+            position_y: None,
+            hp: None,
+            max_hp: None,
+            mp: None,
+            pk_points: None,
+        },
+        now,
+    )
+    .await
+}
+
+async fn submit_support_note(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitSupportNoteRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-support-note-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::Account,
+            target_id: request.account_id.clone(),
+            account_id: Some(request.account_id.clone()),
+            character_id: None,
+        },
+        request.reason,
+        AdminCommand::AddSupportNote {
+            account_id: request.account_id,
+            note: request.note,
+        },
+        now,
+    )
+    .await
+}
+
+async fn submit_rollback_content_bundle(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitRollbackContentBundleRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-rollback-bundle-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::World,
+            target_id: request.bundle_id.clone(),
+            account_id: None,
+            character_id: None,
+        },
+        request.reason,
+        AdminCommand::RollbackContentBundle {
+            bundle_id: request.bundle_id,
+            category: request.category,
+            record_key: request.record_key,
         },
         now,
     )
@@ -8090,6 +8404,24 @@ fn validate_command_payload(command: &AdminCommand) -> Result<(), AdminError> {
             require_non_empty("category", category)?;
             require_non_empty("record_key", record_key)?;
         }
+        AdminCommand::RollbackContentBundle {
+            bundle_id,
+            category,
+            record_key,
+        } => {
+            require_non_empty("bundle_id", bundle_id)?;
+            require_non_empty("category", category)?;
+            require_non_empty("record_key", record_key)?;
+        }
+        AdminCommand::AddSupportNote { account_id, note } => {
+            require_non_empty("account_id", account_id)?;
+            require_non_empty("note", note)?;
+            if note.trim().len() > 2000 {
+                return Err(AdminError::InvalidCommand(
+                    "note must be at most 2000 characters".into(),
+                ));
+            }
+        }
         AdminCommand::ServerControl { action, .. } => {
             require_non_empty("action", action)?;
         }
@@ -8109,7 +8441,8 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
         | AdminCommand::KillPlayer { .. }
         | AdminCommand::MarketDeleteListing { .. }
         | AdminCommand::NameListDelete { .. }
-        | AdminCommand::PublishContentBundle { .. } => true,
+        | AdminCommand::PublishContentBundle { .. }
+        | AdminCommand::RollbackContentBundle { .. } => true,
         AdminCommand::ServerControl { action, .. } => matches!(
             canonical_control_action(action).as_deref(),
             Ok("stop" | "reboot" | "close")
@@ -8128,7 +8461,8 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
         | AdminCommand::GuildSendMessage { .. }
         | AdminCommand::NameListAdd { .. }
         | AdminCommand::NameListRemove { .. }
-        | AdminCommand::NameListCreate { .. } => false,
+        | AdminCommand::NameListCreate { .. }
+        | AdminCommand::AddSupportNote { .. } => false,
     }
 }
 
@@ -8600,6 +8934,8 @@ fn command_type(command: &AdminCommand) -> String {
         AdminCommand::NameListCreate { .. } => "namelist_create",
         AdminCommand::NameListDelete { .. } => "namelist_delete",
         AdminCommand::PublishContentBundle { .. } => "publish_content_bundle",
+        AdminCommand::RollbackContentBundle { .. } => "rollback_content_bundle",
+        AdminCommand::AddSupportNote { .. } => "add_support_note",
         AdminCommand::ServerControl { .. } => "server_control",
     }
     .to_string()
@@ -9903,6 +10239,8 @@ mod tests {
                 character_id: "demo:0".into(),
                 name: Some("ScoutGM".into()),
                 level: Some(11),
+                experience: Some(4096),
+                max_experience: Some(8192),
                 gold: Some(333),
                 credit: Some(7),
                 map_file_name: None,
@@ -10108,6 +10446,51 @@ mod tests {
             .submit(content_envelope, 2_000)
             .expect("content publish");
 
+        // Support note (low-risk, no approval): appended to per-account history.
+        submit_console_for_test(
+            &mut control,
+            Permission::AccountWrite,
+            AdminCommand::AddSupportNote {
+                account_id: "demo".into(),
+                note: "Player reported a stuck quest; advised relog.".into(),
+            },
+        )
+        .expect("add support note");
+
+        // Roll back the bundle we just published (high-risk: requires approval).
+        let mut rollback_envelope = test_console_envelope(
+            operator_with([Permission::ContentRollback]),
+            AdminCommand::RollbackContentBundle {
+                bundle_id: "bundle-one".into(),
+                category: "items".into(),
+                record_key: "WoodenSword".into(),
+            },
+        );
+        rollback_envelope.command_id = "cmd-rollback".into();
+        rollback_envelope.approval_id = Some("approval-rollback".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-rollback".into(),
+                "cmd-rollback".into(),
+                "rollback_content_bundle".into(),
+                "op-1".into(),
+                "content rollback review".into(),
+                1_000,
+            ))
+            .expect("rollback approval");
+        control
+            .decide_approval(
+                "approval-rollback",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved".into()),
+                1_500,
+            )
+            .expect("approve rollback");
+        control
+            .submit(rollback_envelope, 2_000)
+            .expect("content rollback");
+
         let store =
             AccountStore::load_or_new(&account_path, SimulationConfig::default().default_character);
         assert!(store.accounts.contains_key("ops"));
@@ -10118,6 +10501,8 @@ mod tests {
         assert_eq!(demo.characters[0].name, "ScoutGM");
         assert_eq!(save.character.name, "ScoutGM");
         assert_eq!(save.character.level, 11);
+        assert_eq!(save.experience, 4096);
+        assert_eq!(save.max_experience, 8192);
         assert_eq!(save.gold, 333);
         assert_eq!(save.credit, 7);
         assert_eq!(save.pk_points, 22);
@@ -10155,9 +10540,19 @@ mod tests {
         assert!(namelist.lines().any(|line| line == "Scout"));
         assert!(namelist_root.join("NewList.txt").exists());
         assert!(!namelist_root.join("OldList.txt").exists());
-        let bundle =
-            std::fs::read_to_string(content_root.join("bundle-one.json")).expect("bundle exists");
-        assert!(bundle.contains("\"recordKey\": \"WoodenSword\""));
+        // Published bundle was rolled back: the live JSON is gone, an archive remains.
+        assert!(!content_root.join("bundle-one.json").exists());
+        assert!(std::fs::read_dir(&content_root)
+            .expect("content dir")
+            .filter_map(Result::ok)
+            .any(|entry| entry
+                .file_name()
+                .to_string_lossy()
+                .starts_with("bundle-one.rolledback-")));
+        // Support note persisted to the per-account ndjson history.
+        let notes = std::fs::read_to_string(content_root.join("support-notes").join("demo.ndjson"))
+            .expect("support notes file");
+        assert!(notes.contains("stuck quest"));
 
         let snapshot = snapshot_from_store("test", store);
         assert_eq!(build_accounts_read_model(&snapshot).accounts.len(), 2);
@@ -10269,7 +10664,9 @@ mod tests {
             | AdminCommand::NameListRemove { list_name, .. }
             | AdminCommand::NameListCreate { list_name }
             | AdminCommand::NameListDelete { list_name } => list_name.clone(),
-            AdminCommand::PublishContentBundle { bundle_id, .. } => bundle_id.clone(),
+            AdminCommand::PublishContentBundle { bundle_id, .. }
+            | AdminCommand::RollbackContentBundle { bundle_id, .. } => bundle_id.clone(),
+            AdminCommand::AddSupportNote { account_id, .. } => account_id.clone(),
             AdminCommand::ServerControl { action, .. } => action.clone(),
             AdminCommand::Broadcast { .. } => "global".into(),
             AdminCommand::SendSystemMail { target_id, .. } => target_id.clone(),
