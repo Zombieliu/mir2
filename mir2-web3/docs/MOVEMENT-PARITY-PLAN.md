@@ -13,9 +13,9 @@ work can continue without re-deriving the analysis.
 | 1 | Server-side A* pathfinding (click-to-move routes around blockers) | ✅ done + tests |
 | 2 | Conquest-gated map transfers (open in peace, seal at war) | ✅ done + tests |
 | 3 | Frozen blocks movement + Slow doubles cadence (zone) | ✅ done + tests |
-| 4 | Mount speed boost (zone, via MountUpdate state) | ✅ done + tests |
-| 5 | AOI interest management w/ hysteresis | ⬜ next |
-| 6 | Roadmap doc refresh | ⬜ pending |
+| 4 | Mount speed boost (zone) + no_mount force-dismount on transfer | ✅ done + tests |
+| 5 | AOI interest management w/ hysteresis | ⛔ skipped (diverges from Crystal) |
+| 6 | Roadmap doc refresh | 🔄 this file kept current |
 
 Commits: `01844886` (A* module + plan), `b6f1c956` (wire A*, conquest, cadence),
 `d9e10ce5` (mount cadence zone test). New unit tests: 6 pathfind + 5 zone
@@ -120,25 +120,41 @@ Real remaining gaps → the work items below.
   type does not speed up) + integration `mounted_player_walks_a_step_sooner_than_
   an_unmounted_player` in `tests/shared_zone.rs` (full client→zone→cadence path).
 - Follow-ups (not yet done):
-  - `no_mount` map enforcement inside the zone: plumb the map's `no_mount` flag
-    into `ZoneRuntime` and force `riding_mount=false` + emit `MountUpdate` on join.
-    (Single-session toggle already respects `no_mount` in `equipment.rs`.)
-  - Dismount-on-hit: clear `riding_mount` + `MountUpdate` where the zone reduces
-    player HP from a native monster attack.
+  - ✅ `no_mount` map enforcement on transfer: `map.rs::dismount_for_no_mount_map`
+    (called from `relocate_player_to_map`) clears `MountResource.riding_mount`
+    and emits `MountUpdate` + a system message when entering a no-mount map,
+    mirroring the existing no-hero despawn. (Single-session ride toggle already
+    respected `no_mount` in `equipment.rs`.) Tested in `tests.rs`.
+  - Remaining: zone-side `no_mount` enforcement keyed off the zone's map (the
+    authoritative multiplayer path currently relies on the session transfer
+    dismount above); dismount-on-hit (clear `riding_mount` + `MountUpdate` where
+    the zone reduces player HP from a native monster attack).
 
-### 5. AOI interest management w/ hysteresis — `zone/aoi.rs` + 2 diff fns
-- `aoi.rs`: add `AOI_HYSTERESIS_MARGIN` and `points_stay_visible` /
-  `players_stay_visible` (range + margin). Keep `points_visible` (entry) as-is.
-- `zone/runtime.rs::diff_visibility_for` (6699): for the `(visible_now,
-  was_visible)` match, compute `visible_now` with entry range BUT keep an object
-  visible while within stay-range — i.e. remove only when NOT
-  `players_stay_visible`. Same for `diff_zone_object_visibility_for` (6176).
-- ⚠️ Re-run `tests/shared_zone.rs`: boundary visibility tests may need the margin
-  accounted for; keep margin small (1–2) and adjust assertions if needed.
+### 5. AOI interest management w/ hysteresis — ⛔ SKIPPED (intentional)
+- Crystal uses a **fixed rectangular** view range (no hysteresis), and the
+  existing test `player_movement_diffs_retained_zone_object_visibility` asserts
+  an object is removed the instant the player steps one tile past the boundary.
+- Adding an enter/exit margin would reduce ObjectPlayer/ObjectRemove churn at the
+  boundary but **diverge from Crystal parity** and break that intentional test.
+- Decision: keep the fixed `±18×±14` rectangle (`aoi.rs`) to stay 1:1 with
+  Crystal. Revisit only if profiling shows boundary-flicker bandwidth is a real
+  production problem, and then gate it behind a non-parity "QoL" flag.
 
 ### 6. Tests + docs
-- New `apps/simulation/tests/movement_parity.rs` covering #1–#5.
-- Update `docs/CRYSTAL-1TO1-ROADMAP.md` movement section and this file.
+- Unit tests live next to the code: `pathfind::tests`, `conquest_gate_tests`
+  (map.rs), `movement_status_tests` (zone/runtime.rs), plus the
+  `transfer_onto_*_map_*mount*` tests in `runtime/tests.rs`. Integration:
+  `mounted_player_walks_a_step_sooner_than_an_unmounted_player` in
+  `tests/shared_zone.rs`. (No separate `movement_parity.rs` file was needed.)
+- This file is the living movement-parity record; update the movement section of
+  `docs/CRYSTAL-1TO1-ROADMAP.md` when the remaining item-4 follow-ups land.
+
+## Remaining movement follow-ups (smaller, lower priority)
+- Zone-side `no_mount` enforcement (authoritative multiplayer) + dismount-on-hit.
+- Route heroes / monster AI through `pathfind::find_path` so they path around
+  obstacles like the player now does.
+- Mounted movement at run distance from a walk intent (Crystal lets mounts move
+  faster than on-foot walking), if we want the mount to also extend reach.
 
 ## Build/verify discipline for this environment
 - `cd /home/user/mir2/mir2-web3 && cargo build -p mir2-simulation 2>&1 | tail -25`
