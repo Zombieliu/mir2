@@ -4318,6 +4318,98 @@ fn crystal_reviving_zombie_life_count_is_randomised_zero_to_two() {
 }
 
 #[test]
+fn crystal_water_dragon_ambushes_like_evil_centipede() {
+    // WaterDragon (ai 181, EvilCentipede subclass) stays invisible until a target steps within 3.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let far_origin = Point { x: 40, y: 40 };
+    set_player_position(&mut session, far_origin.clone());
+
+    let dragon_object_id = 92_500_u32;
+    let dragon_position = Point { x: 320, y: 240 };
+    let current_tick = runtime_tick(session.app.world());
+    let dragon = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(dragon_object_id),
+            DisplayName::literal("Hydra"),
+            Position(dragon_position.clone()),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: 500,
+                max_hp: 1_000,
+            },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: dragon_position.clone(),
+                ai: 181,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: false,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    // No target within range: the water dragon buries itself and restores HP.
+    for _ in 0..4 {
+        session.tick();
+    }
+    let hidden = session
+        .app
+        .world()
+        .entity(dragon)
+        .get::<MonsterAiState>()
+        .map(|state| state.hidden)
+        .unwrap_or(false);
+    assert!(hidden, "water dragon should hide when no target is near");
+    let vitals = session
+        .app
+        .world()
+        .entity(dragon)
+        .get::<MonsterVitals>()
+        .expect("vitals");
+    assert_eq!(vitals.hp, vitals.max_hp, "hidden water dragon restores HP");
+
+    // Move a target within 3 tiles: it surfaces to attack.
+    set_player_position(
+        &mut session,
+        Point {
+            x: dragon_position.x + 1,
+            y: dragon_position.y,
+        },
+    );
+    let mut revealed = false;
+    for _ in 0..6 {
+        session.tick();
+        if !session
+            .app
+            .world()
+            .entity(dragon)
+            .get::<MonsterAiState>()
+            .map(|state| state.hidden)
+            .unwrap_or(true)
+        {
+            revealed = true;
+            break;
+        }
+    }
+    assert!(revealed, "water dragon should surface when a target is within 3 tiles");
+}
+
+#[test]
 fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

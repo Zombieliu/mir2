@@ -673,7 +673,10 @@ pub(super) fn update_special_monster_state(
     }
 
     match agent.ai {
-        14 => update_evil_centipede_state(
+        // EvilCentipede (14) and WaterDragon (181, an EvilCentipede subclass: Hydra/DarkSpirit)
+        // share the same ambush cycle — invisible until a target steps within 3 tiles, HP reset
+        // while hidden.
+        14 | 181 => update_evil_centipede_state(
             world,
             entity,
             agent,
