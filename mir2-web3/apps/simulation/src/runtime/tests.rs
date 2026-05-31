@@ -20052,10 +20052,6 @@ fn water_dragon_range_hit_applies_green_poison() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("Hydra") - total_defence_bonus(session.app.world()))
-            .max(1)
-    };
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
         hydra_object_id,
@@ -20105,9 +20101,13 @@ fn water_dragon_range_hit_applies_green_poison() {
         packet,
         ServerPacket::Struck { info } if info.attacker_id == hydra_object_id
     )));
+    // The water-dragon ranged green-poison strike deals the monster's full magic
+    // damage with no armour mitigation (Crystal armour-ignoring branch); #16's
+    // stat engine gave the seed player nonzero physical defence, which the old
+    // `- total_defence_bonus` expectation wrongly subtracted from this hit.
     assert_eq!(
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
+        super::crystal_monster_magic_damage("Hydra"),
     );
     assert!(session
         .world_snapshot()
