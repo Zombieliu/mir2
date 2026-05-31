@@ -2241,6 +2241,9 @@ pub(super) fn monster_player_attack_damage(
         // MaxDC)` (resolved against MAC) — SC is only the slow/poison's `power`, not the hit. The
         // generated profile mislabels these as `sc`, so pin them to DC here.
         216 | 221 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        // HoodedSummoner (211): its RangedAttack deals `GetAttackPower(MinMC, MaxMC)` (resolved
+        // against MAC). The generated profile mislabels it `dc`, so pin it to MC here.
+        211 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
         // Crystal `MonsterObject.Attack` deals `GetAttackPower(MinDC, MaxDC)` for every family that
         // does not override it (SpittingSpider, ShamanZombie, BoneSpearman, VampireSpider,
         // SpittingToad, the plain MonsterObject, …). The previous flat `7` placeholder made those
