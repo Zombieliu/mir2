@@ -5,7 +5,9 @@ use mir2_protocol::{MirDirection, Point, Spell};
 use super::runtime::ZoneRuntime;
 use super::types::{SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneOutbound};
 
-#[derive(Debug, Clone, Default)]
+// Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
+// non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
+#[derive(Debug)]
 pub struct ZoneManager {
     zones: BTreeMap<ZoneKey, ZoneRuntime>,
     session_zones: BTreeMap<SessionId, ZoneKey>,
@@ -13,7 +15,10 @@ pub struct ZoneManager {
 
 impl ZoneManager {
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            zones: BTreeMap::new(),
+            session_zones: BTreeMap::new(),
+        }
     }
 
     pub fn join(&mut self, join: ZoneJoin) -> Vec<ZoneOutbound> {
