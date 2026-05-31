@@ -261,6 +261,7 @@ pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapT
         .chain(crystal_movement_transfer_records_for_map(
             &map.current_map.file_name,
         ))
+        .filter(|transfer| conquest_transfer_allowed(map, transfer.conquest_index))
         .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
 }
 
@@ -273,9 +274,11 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
         .map_transfers
         .iter()
         .filter(|transfer| normalize_map_file_name(&transfer.from_map_file_name) == current_map)
+        .filter(|transfer| conquest_transfer_allowed(map, transfer.conquest_index))
         .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_movement_transfer_records_for_map(&map.current_map.file_name)
             .iter()
+            .filter(|transfer| conquest_transfer_allowed(map, transfer.conquest_index))
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
 }
 
@@ -297,7 +300,12 @@ pub(super) fn crystal_movement_transfer_records_for_map(
     map.movements
         .iter()
         .filter_map(|movement| {
-            if movement.need_hole || movement.need_move || movement.conquest_index > 0 {
+            // `need_hole`/`need_move` movements require items/quest state we do
+            // not model yet, so they stay excluded. Conquest movements are now
+            // retained and carry their index; whether they actually fire is
+            // gated on live war state at the call sites (see
+            // `conquest_transfer_allowed`).
+            if movement.need_hole || movement.need_move {
                 return None;
             }
             let target = crystal_map_respawns_by_index(movement.map_index)?;
@@ -327,9 +335,30 @@ pub(super) fn crystal_movement_transfer_records_for_map(
                 to_map_title: target.map_title,
                 to_position: movement.destination.clone(),
                 to_direction: MirDirection::Down,
+                conquest_index: movement.conquest_index,
             })
         })
         .collect()
+}
+
+/// A conquest-gated movement only fires during peacetime. `conquest_index == 0`
+/// is an unconditional movement; a positive index is sealed while that conquest
+/// is flagged at war in [`MapRuntimeResource::conquest_wars`].
+pub(super) fn conquest_transfer_allowed(map: &MapRuntimeResource, conquest_index: i32) -> bool {
+    conquest_transfer_allowed_with(&map.conquest_wars, conquest_index)
+}
+
+/// Core conquest gate, parameterised over the war-state map so it is testable
+/// without constructing a full [`MapRuntimeResource`].
+fn conquest_transfer_allowed_with(
+    conquest_wars: &BTreeMap<i32, bool>,
+    conquest_index: i32,
+) -> bool {
+    conquest_index <= 0
+        || !conquest_wars
+            .get(&conquest_index)
+            .copied()
+            .unwrap_or(false)
 }
 
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
@@ -1691,5 +1720,38 @@ impl SimulationSession {
         }
 
         apply_map_transfer(self.app.world_mut(), key)
+    }
+}
+
+#[cfg(test)]
+mod conquest_gate_tests {
+    use super::conquest_transfer_allowed_with;
+    use std::collections::BTreeMap;
+
+    #[test]
+    fn unconditional_movements_always_allowed() {
+        let wars = BTreeMap::new();
+        // conquest_index 0 (and any non-positive) is an ordinary movement.
+        assert!(conquest_transfer_allowed_with(&wars, 0));
+        assert!(conquest_transfer_allowed_with(&wars, -1));
+    }
+
+    #[test]
+    fn conquest_movement_opens_in_peacetime_and_when_unknown() {
+        let mut wars = BTreeMap::new();
+        // Unknown conquest id => treated as peace => allowed.
+        assert!(conquest_transfer_allowed_with(&wars, 7));
+        // Explicit peace.
+        wars.insert(7, false);
+        assert!(conquest_transfer_allowed_with(&wars, 7));
+    }
+
+    #[test]
+    fn conquest_movement_seals_during_active_war() {
+        let mut wars = BTreeMap::new();
+        wars.insert(7, true);
+        assert!(!conquest_transfer_allowed_with(&wars, 7));
+        // A different, peaceful conquest is unaffected.
+        assert!(conquest_transfer_allowed_with(&wars, 8));
     }
 }

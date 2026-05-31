@@ -1746,6 +1746,10 @@ pub struct MapTransferRecord {
     pub to_map_title: String,
     pub to_position: Point,
     pub to_direction: MirDirection,
+    /// Crystal `MovementInfo.ConquestIndex`. `0` means an unconditional
+    /// movement; a positive value means the transfer is sealed while that
+    /// conquest is at war and only opens during peacetime.
+    pub conquest_index: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2597,6 +2601,7 @@ fn starter_map_transfers() -> Vec<MapTransferRecord> {
         to_map_title: "BichonProvince".to_string(),
         to_position: Point { x: 330, y: 270 },
         to_direction: MirDirection::Down,
+        conquest_index: 0,
     }]
 }
 

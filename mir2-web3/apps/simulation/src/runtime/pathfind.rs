@@ -72,7 +72,7 @@ impl PartialOrd for Frontier {
     }
 }
 
-/// Find an 8-direction path from `start` to `goal`.
+/// Find an 8-direction path from `start` to `goal` over the live ECS world.
 ///
 /// Returns the ordered list of tiles to step onto, **excluding** `start` and
 /// **including** `goal`. Returns `Some(vec![])` when already standing on `goal`,
@@ -88,13 +88,25 @@ pub(super) fn find_path(
     goal: &Point,
     ignore_entity: Option<Entity>,
 ) -> Option<Vec<Point>> {
+    find_path_with(start, goal, |point| {
+        can_occupy(world, point.clone(), ignore_entity)
+    })
+}
+
+/// Pure 8-direction A* core, parameterised over a walkability predicate so it
+/// can be unit-tested without constructing a Bevy `World`. `is_walkable` is
+/// called for the goal tile and every intermediate tile (never for `start`).
+pub(super) fn find_path_with<F>(start: &Point, goal: &Point, mut is_walkable: F) -> Option<Vec<Point>>
+where
+    F: FnMut(&Point) -> bool,
+{
     if start == goal {
         return Some(Vec::new());
     }
     if tile_distance(start, goal) > PATHFIND_MAX_RANGE {
         return None;
     }
-    if !can_occupy(world, goal.clone(), ignore_entity) {
+    if !is_walkable(goal) {
         return None;
     }
 
@@ -134,12 +146,11 @@ pub(super) fn find_path(
         for direction in DIRECTIONS {
             let next = offset_point(&current_point, direction, 1);
             let next_key = (next.x, next.y);
-            if next_key != goal_key && !can_occupy(world, next.clone(), ignore_entity) {
+            // The goal tile is validated above, so reuse it without a redundant
+            // predicate call; intermediate tiles must be walkable.
+            if next_key != goal_key && !is_walkable(&next) {
                 continue;
             }
-            // The goal tile is validated above, but intermediate tiles must be
-            // occupiable. (The `next_key != goal_key` guard above lets us reuse
-            // the already-confirmed goal without a redundant check.)
             let tentative_g = current.g + 1;
             if tentative_g < *g_score.get(&next_key).unwrap_or(&i32::MAX) {
                 came_from.insert(next_key, current.key);
@@ -154,26 +165,6 @@ pub(super) fn find_path(
     }
 
     None
-}
-
-/// Compute the next tile to step onto when routing from `from` toward `to`.
-///
-/// `step` is the number of tiles to advance (1 for walk, 2 for run). The returned
-/// point is the tile the mover should occupy after this step, following the A*
-/// route. Returns `None` when no route exists.
-pub(super) fn next_step_toward(
-    world: &World,
-    from: &Point,
-    to: &Point,
-    step: i32,
-    ignore_entity: Option<Entity>,
-) -> Option<Point> {
-    let path = find_path(world, from, to, ignore_entity)?;
-    if path.is_empty() {
-        return None;
-    }
-    let index = (step.max(1) as usize).min(path.len()) - 1;
-    Some(path[index].clone())
 }
 
 fn reconstruct_path(
@@ -192,4 +183,102 @@ fn reconstruct_path(
     }
     path.reverse();
     path
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    fn point(x: i32, y: i32) -> Point {
+        Point { x, y }
+    }
+
+    /// Every returned step is exactly one Chebyshev tile from the previous one,
+    /// the path ends on the goal and never crosses a blocked tile.
+    fn assert_valid_path(start: &Point, path: &[Point], goal: &Point, blocked: &HashSet<(i32, i32)>) {
+        assert_eq!(path.last(), Some(goal), "path must end on the goal");
+        let mut prev = start.clone();
+        for step in path {
+            let dx = (step.x - prev.x).abs();
+            let dy = (step.y - prev.y).abs();
+            assert!(
+                dx <= 1 && dy <= 1 && (dx + dy) > 0,
+                "step {step:?} is not adjacent to {prev:?}"
+            );
+            assert!(
+                !blocked.contains(&(step.x, step.y)),
+                "path walks through blocked tile {step:?}"
+            );
+            prev = step.clone();
+        }
+    }
+
+    #[test]
+    fn empty_path_when_already_on_goal() {
+        let here = point(5, 5);
+        let path = find_path_with(&here, &here, |_| true).expect("same-tile path exists");
+        assert!(path.is_empty());
+    }
+
+    #[test]
+    fn straight_diagonal_on_open_ground() {
+        let start = point(0, 0);
+        let goal = point(4, 4);
+        let path = find_path_with(&start, &goal, |_| true).expect("open-ground path exists");
+        // Uniform-cost diagonal: 4 single diagonal steps.
+        assert_eq!(path.len(), 4);
+        assert_valid_path(&start, &path, &goal, &HashSet::new());
+    }
+
+    #[test]
+    fn routes_around_a_wall() {
+        // Vertical wall at x == 2 for y in 0..=4, with a gap at y == 5 so the
+        // only way across is to go around the bottom. A straight line from
+        // (0,2) to (4,2) would slam into the wall at x==2.
+        let mut blocked: HashSet<(i32, i32)> = HashSet::new();
+        for y in 0..=4 {
+            blocked.insert((2, y));
+        }
+        let start = point(0, 2);
+        let goal = point(4, 2);
+        let path = find_path_with(&start, &goal, |p| !blocked.contains(&(p.x, p.y)))
+            .expect("a detour around the wall exists");
+        assert_valid_path(&start, &path, &goal, &blocked);
+        // The detour is necessarily longer than the blocked straight line.
+        assert!(path.len() > 4, "expected a detour, got {} steps", path.len());
+    }
+
+    #[test]
+    fn none_when_goal_is_walled_off() {
+        // Fully enclose the goal tile.
+        let goal = point(3, 3);
+        let mut blocked: HashSet<(i32, i32)> = HashSet::new();
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                if dx != 0 || dy != 0 {
+                    blocked.insert((goal.x + dx, goal.y + dy));
+                }
+            }
+        }
+        let start = point(0, 0);
+        let path = find_path_with(&start, &goal, |p| !blocked.contains(&(p.x, p.y)));
+        assert!(path.is_none(), "walled-off goal must be unreachable");
+    }
+
+    #[test]
+    fn none_when_goal_tile_itself_blocked() {
+        let start = point(0, 0);
+        let goal = point(2, 2);
+        let path = find_path_with(&start, &goal, |p| (p.x, p.y) != (goal.x, goal.y));
+        assert!(path.is_none(), "blocked goal tile is unreachable");
+    }
+
+    #[test]
+    fn none_when_beyond_max_range() {
+        let start = point(0, 0);
+        let goal = point(PATHFIND_MAX_RANGE + 1, 0);
+        let path = find_path_with(&start, &goal, |_| true);
+        assert!(path.is_none(), "targets beyond max range are rejected");
+    }
 }
