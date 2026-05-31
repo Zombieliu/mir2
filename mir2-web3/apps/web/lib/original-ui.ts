@@ -283,6 +283,14 @@ export const ORIGINAL_UI = {
     worldBorder: "/original-ui/Prguse2/1366.png",
     mapLinkIcon: (index: number) => `/original-ui/MapLinkIcon/${index}.png`,
   },
+  npc: {
+    // Crystal NPCDialog: Prguse frame 995 background, close (Prguse2 360-362) at
+    // (413,3), help (Prguse2 257-259) at (390,3), body text at (8,34) 420px wide
+    // on an 18px line stride, scrollbar column at x=417.
+    frame: "/original-ui/Prguse/995.png",
+    closeButton: sprite("/original-ui/Prguse2/360.png", "/original-ui/Prguse2/361.png", "/original-ui/Prguse2/362.png"),
+    helpButton: sprite("/original-ui/Prguse2/257.png", "/original-ui/Prguse2/258.png", "/original-ui/Prguse2/259.png"),
+  },
   mail: {
     width: 312,
     height: 444,

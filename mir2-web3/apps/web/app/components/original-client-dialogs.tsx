@@ -388,12 +388,25 @@ export function NpcDialogPanel({
 
   return (
     <section className="npc-dialog-panel">
-      <div className="npc-dialog-head">
-        <strong>{title}</strong>
-        <div className="npc-dialog-actions">
-          <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
-          <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close")} onClick={onClose} />
-        </div>
+      <img
+        className="npc-dialog-frame"
+        src={ORIGINAL_UI.npc.frame}
+        alt=""
+        draggable={false}
+        onError={(event) => {
+          // Until Prguse/995 is exported, hide the broken frame and let the
+          // CSS fallback chrome stand in.
+          const img = event.currentTarget;
+          img.style.display = "none";
+          img.parentElement?.classList.add("npc-dialog-frame-fallback");
+        }}
+      />
+      <strong className="npc-dialog-title">{title}</strong>
+      <div className="npc-dialog-help">
+        <SpriteButton sprite={ORIGINAL_UI.npc.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
+      </div>
+      <div className="npc-dialog-close">
+        <SpriteButton sprite={ORIGINAL_UI.npc.closeButton} label={t("ui.close")} onClick={onClose} />
       </div>
       <div className="npc-dialog-body">
         {bodyLines.map((line, index) => (
