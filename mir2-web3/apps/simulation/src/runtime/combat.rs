@@ -23,7 +23,7 @@ use super::equipment::{damage_weapon_durability, damage_worn_durability, total_a
 use super::items::crystal_equipment_added_stat_total;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
-    snow_wolf_king_teleport_to_player,
+    snow_wolf_king_teleport_to_player_with_effect,
 };
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_monster_attack_damage,
@@ -2099,9 +2099,11 @@ pub(super) fn damage_monster_entity(
             );
         }
     }
-    // SnowWolfKing FindWeakerTarget: surviving a blow heavier than its own DC, the king blinks to a
-    // fresh target half the time (player attacker).
-    if !monster_dead && dead_ai == 180 {
+    // FindWeakerTarget: surviving a blow heavier than its own DC, the monster blinks to a fresh
+    // (weaker) target half the time. SnowWolfKing (180) shares this exact mechanic with GlacierWarrior
+    // (203) and MutatedManworm (65); with the player the sole target, all three blink toward the
+    // player. The teleport effect id differs (king uses 11, the warriors use 4).
+    if !monster_dead && matches!(dead_ai, 180 | 203 | 65) {
         let own_dc = name
             .as_deref()
             .map(crystal_monster_raw_attack_damage)
@@ -2114,7 +2116,18 @@ pub(super) fn damage_monster_entity(
                     1_800,
                     SNOW_WOLF_KING_TELEPORT_CHANCE_DENOMINATOR,
                 ) {
-                    snow_wolf_king_teleport_to_player(world, monster_entity, current_tick, packets);
+                    let effect = if dead_ai == 180 {
+                        SNOW_WOLF_KING_TELEPORT_EFFECT
+                    } else {
+                        GLACIER_WARRIOR_TELEPORT_EFFECT
+                    };
+                    snow_wolf_king_teleport_to_player_with_effect(
+                        world,
+                        monster_entity,
+                        current_tick,
+                        effect,
+                        packets,
+                    );
                 }
             }
         }

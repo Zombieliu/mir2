@@ -4666,6 +4666,75 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn mutated_manworm_blinks_with_effect_four_when_struck_hard() {
+    // MutatedManworm (ai 65) shares SnowWolfKing's FindWeakerTarget blink, but with teleport effect 4
+    // instead of 11. A blow heavier than its own DC (28-55) gives a 50% chance to blink toward the
+    // player; over many hits it must eventually move, and emit ObjectTeleportOut with effect 4.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_pos = Point { x: 320, y: 240 };
+    set_player_position(&mut session, player_pos.clone());
+
+    let worm_pos = Point {
+        x: player_pos.x + 5,
+        y: player_pos.y,
+    };
+    let worm_id = 92_965_u32;
+    let current_tick = runtime_tick(session.app.world());
+    let worm = spawn_crystal_monster_for_test(
+        &mut session,
+        worm_id,
+        "MutatedManworm",
+        worm_pos.clone(),
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(worm);
+        entry.insert(MonsterVitals {
+            hp: 1_000_000,
+            max_hp: 1_000_000,
+        });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("worm agent");
+        agent.ai = 65;
+        agent.tracking_player = true;
+    }
+    sync_visible_objects(&mut session);
+
+    let mut blinked = false;
+    let mut saw_effect_four = false;
+    for offset in 0..24 {
+        let mut packets = Vec::new();
+        super::damage_monster_entity(
+            session.app.world_mut(),
+            worm,
+            500,
+            current_tick + offset,
+            &mut packets,
+        );
+        saw_effect_four |= packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectTeleportOut { object_id, effect_type }
+                if *object_id == worm_id && *effect_type == super::GLACIER_WARRIOR_TELEPORT_EFFECT
+        ));
+        let position = session
+            .app
+            .world()
+            .entity(worm)
+            .get::<Position>()
+            .expect("worm position")
+            .0
+            .clone();
+        if position != worm_pos {
+            blinked = true;
+            break;
+        }
+    }
+    assert!(blinked, "MutatedManworm should blink toward the player when struck hard");
+    assert!(saw_effect_four, "the blink must use teleport effect 4, not the king's 11");
+}
+
+#[test]
 fn football_is_kicked_not_damaged_when_attacked() {
     // Crystal Football (ai 68): a player hit deals 0 damage and rolls the ball up to 4 tiles in the
     // attacker's facing; it never dies. Place the ball one tile right of the player, attack it (the

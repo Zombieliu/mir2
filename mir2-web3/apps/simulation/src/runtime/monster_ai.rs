@@ -1569,10 +1569,13 @@ pub(super) fn foxman_teleport_destination(
 
 /// SnowWolfKing FindWeakerTarget: blink toward the player (its only target in the single-player
 /// authority) and re-acquire, mirroring Crystal's TeleportToTarget with the snow-blink effect.
-pub(super) fn snow_wolf_king_teleport_to_player(
+/// The shared FindWeakerTarget blink: reposition adjacent to the player and re-arm. `effect_type` is
+/// the teleport visual (SnowWolfKing uses 11; GlacierWarrior / MutatedManworm use 4).
+pub(super) fn snow_wolf_king_teleport_to_player_with_effect(
     world: &mut World,
     entity: Entity,
     current_tick: u64,
+    effect_type: u8,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
     let Some(player) = player_entity(world) else {
@@ -1598,7 +1601,7 @@ pub(super) fn snow_wolf_king_teleport_to_player(
     if let Some(object_id) = entity_object_id(world, entity) {
         packets.push(ServerPacket::ObjectTeleportOut {
             object_id,
-            effect_type: SNOW_WOLF_KING_TELEPORT_EFFECT,
+            effect_type,
         });
         packets.push(ServerPacket::ObjectWalk {
             movement: ObjectMovement {
@@ -1609,7 +1612,7 @@ pub(super) fn snow_wolf_king_teleport_to_player(
         });
         packets.push(ServerPacket::ObjectTeleportIn {
             object_id,
-            effect_type: SNOW_WOLF_KING_TELEPORT_EFFECT,
+            effect_type,
         });
     }
     true
