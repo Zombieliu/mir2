@@ -1280,6 +1280,17 @@ fn player_position(session: &SimulationSession) -> Point {
         .clone()
 }
 
+/// Returns true when a non-starter Crystal map's collision data is loadable in
+/// this environment. The starter map ("0") is embedded, but every other map is
+/// parsed from the Crystal client `.map` binaries, which are not vendored. Tests
+/// that assert on a specific non-starter map's geometry use this to skip
+/// (rather than hard-fail) when the client is absent; they still run fully in
+/// any environment that has the client checked out / CRYSTAL_CLIENT_ROOT set.
+fn crystal_client_map_available(map_file_name: &str) -> bool {
+    super::runtime_map_collision_data(map_file_name).is_some()
+}
+
+
 fn unique_runtime_temp_dir(label: &str) -> std::path::PathBuf {
     let unique = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -3418,6 +3429,16 @@ fn walk_onto_crystal_manifest_movement_transfers_map() {
 
 #[test]
 fn walk_onto_blocked_crystal_manifest_movement_source_transfers_map() {
+    // Asserts the destination map 0104/Library's geometry; needs the Crystal
+    // client `.map` binaries (not vendored). Skip when the client is absent.
+    if !crystal_client_map_available("0104") {
+        eprintln!(
+            "skipping walk_onto_blocked_crystal_manifest_movement_source_transfers_map: \
+             Crystal client map 0104 unavailable"
+        );
+        return;
+    }
+
     let mut session = SimulationSession::new(SimulationConfig::default());
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let _ = session.transfer_map("crystal:0:322:248");
@@ -3511,6 +3532,17 @@ fn crystal_starter_region_source_builds_imported_spawn_rules() {
 
 #[test]
 fn crystal_current_map_spawn_table_uses_representative_map_rosters() {
+    // Asserts spawn-slot geometry on HF1/D1801/HKR, which is derived from the
+    // Crystal client `.map` collision binaries (not vendored). Skip when the
+    // client is absent.
+    if !crystal_client_map_available("HF1") {
+        eprintln!(
+            "skipping crystal_current_map_spawn_table_uses_representative_map_rosters: \
+             Crystal client map HF1 unavailable"
+        );
+        return;
+    }
+
     let config = SimulationConfig::default();
 
     let hf1 = build_crystal_current_map_spawn_table(&config, "HF1");
