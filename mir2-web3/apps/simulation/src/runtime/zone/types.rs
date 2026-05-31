@@ -127,6 +127,10 @@ pub struct ZonePlayerCombatStats {
     pub max_ac: i32,
     pub min_mac: i32,
     pub max_mac: i32,
+    /// Crystal `CriticalRate` (0..100 chance) and `CriticalDamage` (each point is
+    /// +10% on a landed crit). Zero for a player with no crit gear.
+    pub critical_rate: i32,
+    pub critical_damage: i32,
 }
 
 impl ZonePlayerCombatStats {
@@ -374,6 +378,18 @@ pub enum ZoneCommand {
     TickPlayerMovement {
         session_id: SessionId,
         now_ms: u64,
+    },
+    OpenDoor {
+        session_id: SessionId,
+        door_index: u8,
+        now_ms: u64,
+    },
+    ConfigureHazards {
+        session_id: SessionId,
+        lightning: bool,
+        fire: bool,
+        lightning_damage: i32,
+        fire_damage: i32,
     },
     Tick {
         now_ms: u64,

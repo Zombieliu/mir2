@@ -104,7 +104,8 @@ export function BigMapDialog({
 }) {
   const [showWorldMap, setShowWorldMap] = useState(false);
   const mapDebug = useMapDebugEnabled();
-  const bigMapAsset = originalBigMapAssetPath(world.bigMapIndex);
+  const bigMapAsset =
+    originalBigMapAssetPath(world.bigMapIndex) ?? originalMiniMapAssetPath(world.miniMapIndex);
   const viewport = bigMapViewport(bigMapAsset);
   const transform = mapPanelTransformForWorld(world, bigMapAsset, "big");
   const playerImagePoint = transform && player ? worldToMiniMapImagePoint(transform, player) : null;

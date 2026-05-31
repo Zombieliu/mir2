@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{Resource, World};
-use mir2_game_data::{LanguageCode, MapBounds};
+use mir2_game_data::{DoorMapCellTemplate, LanguageCode, MapBounds};
 use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 
@@ -498,13 +498,69 @@ impl PlayerRuntimeResource {
     }
 }
 
+/// Runtime state of a single logical door (all map cells that share one door
+/// index, deduplicated exactly like Crystal's `Map.AddDoor`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct DoorRuntime {
+    pub(crate) index: u8,
+    pub(crate) cells: Vec<(i32, i32)>,
+    /// `None` means closed. `Some(tick)` means the door is open and should
+    /// auto-close once the runtime clock reaches this tick — Crystal closes
+    /// doors 5000 ms after they were opened (`Map.Process`).
+    pub(crate) close_at_tick: Option<u64>,
+}
+
+/// All doors on the current map, mirroring Crystal's `Map.Doors` list.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct DoorRegistry {
+    pub(crate) doors: Vec<DoorRuntime>,
+}
+
+impl DoorRegistry {
+    /// Build the registry from parsed door cells, grouping cells by door index
+    /// (`index & 0x7F`) so opening one index opens every cell of that door —
+    /// matching Crystal's `AddDoor` dedup.
+    pub(crate) fn from_templates(templates: &[DoorMapCellTemplate]) -> Self {
+        let mut doors: Vec<DoorRuntime> = Vec::new();
+        for template in templates {
+            let index = template.index & 0x7F;
+            if let Some(existing) = doors.iter_mut().find(|door| door.index == index) {
+                if !existing.cells.contains(&(template.x, template.y)) {
+                    existing.cells.push((template.x, template.y));
+                }
+            } else {
+                doors.push(DoorRuntime {
+                    index,
+                    cells: vec![(template.x, template.y)],
+                    close_at_tick: None,
+                });
+            }
+        }
+        Self { doors }
+    }
+
+    pub(crate) fn find_mut(&mut self, index: u8) -> Option<&mut DoorRuntime> {
+        let index = index & 0x7F;
+        self.doors.iter_mut().find(|door| door.index == index)
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.doors.is_empty()
+    }
+}
+
 #[derive(Resource, Debug, Clone)]
 pub(super) struct MapRuntimeResource {
     pub(super) current_map: MapInformation,
     pub(super) map_region_bounds: MapBounds,
     pub(super) blocked_cells: BTreeSet<(i32, i32)>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
+    pub(super) doors: DoorRegistry,
+    /// Cells flagged fishable in the `.map` file → their fishing attribute.
+    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → owning guild name (gates conquest movements).
+    pub(super) conquest_owners: BTreeMap<i32, String>,
 }
 
 impl MapRuntimeResource {
@@ -513,13 +569,18 @@ impl MapRuntimeResource {
         map_region_bounds: MapBounds,
         blocked_cells: BTreeSet<(i32, i32)>,
         closed_door_cells: BTreeSet<(i32, i32)>,
+        doors: DoorRegistry,
+        fishing_cells: BTreeMap<(i32, i32), i8>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),
             map_region_bounds,
             blocked_cells,
             closed_door_cells,
+            doors,
+            fishing_cells,
             conquest_wars: config.conquest_wars.clone(),
+            conquest_owners: config.conquest_owners.clone(),
         }
     }
 }

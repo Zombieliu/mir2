@@ -184,12 +184,12 @@ fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct PlayerDamageOutcome {
-    applied: bool,
-    died: bool,
+pub(super) struct PlayerDamageOutcome {
+    pub(super) applied: bool,
+    pub(super) died: bool,
 }
 
-fn apply_damage_to_current_player(
+pub(super) fn apply_damage_to_current_player(
     world: &mut World,
     damage: i32,
     packets: &mut Vec<ServerPacket>,
@@ -257,30 +257,12 @@ pub(super) fn crystal_player_melee_damage(world: &World) -> i32 {
         .max(1)
 }
 
+/// Representative (max) melee scalar handed to the zone as the non-authoritative
+/// fallback / the base for range & magic profiles. Unified with the engine
+/// (`crystal_player_melee_damage` = stat-block `MaxDC` + Slaying), so it reflects
+/// the real weapon damage rather than the retired flat floor.
 fn crystal_player_zone_base_melee_damage(world: &World) -> i32 {
-    let resources = world.resource::<InventoryResource>();
-    let session = world.resource::<SessionResource>();
-    let level_bonus = i32::from(
-        session
-            .selected_character
-            .as_ref()
-            .map(|c| c.level)
-            .unwrap_or(1)
-            / 2,
-    );
-    let equipment_attack = resources
-        .equipment_items
-        .iter()
-        .filter(|item| !item.is_broken())
-        .map(|item| item.total_attack())
-        .sum::<i32>();
-    let mut damage = 18 + level_bonus + equipment_attack;
-    if let Some(level) = crystal_skill_level(world, "Slaying") {
-        let bonuses = [5, 6, 7, 8];
-        let index = usize::from(level).min(bonuses.len() - 1);
-        damage = damage.saturating_add(bonuses[index]);
-    }
-    damage.max(1)
+    crystal_player_melee_damage(world)
 }
 
 fn crystal_skill_accuracy_bonus(world: &World) -> i32 {
@@ -409,37 +391,34 @@ pub(super) fn crystal_player_magic_mitigated(world: &World, damage: i32) -> i32 
 }
 
 /// Build the authoritative combat stat block the shared zone uses to resolve
-/// this player's attacks. The melee damage range currently collapses to the
-/// session's single base value (`min_dc == max_dc`); widening it into a true
-/// `Random(MinDC..=MaxDC)` spread is the combat-numbers parity workstream and
-/// is intentionally left to that effort so this change does not silently move
-/// the balance curve. Accuracy/agility/armour are populated so the zone can run
-/// the Crystal-style hit check and armour subtraction itself.
+/// this player's attacks. Sourced from the Crystal-numeric [`player_stats`]
+/// engine, so the zone rolls the real `Random(MinDC..=MaxDC)` melee spread and
+/// `Random(MinAC..=MaxAC)`/`Random(MinMAC..=MaxMAC)` armour — identical to the
+/// per-session combat path. The passive Slaying DC bonus is folded into the DC
+/// bounds to match `crystal_player_melee_damage`.
+///
+/// (Critical hits remain a session-only refinement for now — `ZonePlayerCombatStats`
+/// carries no crit fields yet.)
 fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatStats {
-    let base = crystal_player_zone_base_melee_damage(world).max(1);
-    let accuracy = crystal_player_accuracy(world);
-    let resources = world.resource::<InventoryResource>();
-    let agility = crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_AGILITY).max(0);
-    let armour: i32 = resources
-        .equipment_items
-        .iter()
-        .filter(|item| !item.is_broken())
-        .map(|item| item.total_defence())
-        .sum();
-    let magic_armour = crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_MAX_MAC).max(0);
+    let stats = player_stats(world);
+    let slaying = crystal_slaying_melee_bonus(world);
     super::ZonePlayerCombatStats {
-        min_dc: base,
-        max_dc: base,
-        min_mc: 0,
-        max_mc: 0,
-        min_sc: 0,
-        max_sc: 0,
-        accuracy,
-        agility,
-        min_ac: 0,
-        max_ac: armour.max(0),
-        min_mac: 0,
-        max_mac: magic_armour,
+        min_dc: (stats.min_dc() + slaying).max(0),
+        max_dc: (stats.max_dc() + slaying).max(0),
+        min_mc: stats.min_mc(),
+        max_mc: stats.max_mc(),
+        min_sc: stats.min_sc(),
+        max_sc: stats.max_sc(),
+        // Hit roll uses the same accuracy as the session path (equipment + skills,
+        // no class base) so zone and session hit/miss agree.
+        accuracy: crystal_player_accuracy(world),
+        agility: stats.agility(),
+        min_ac: stats.min_ac(),
+        max_ac: stats.max_ac(),
+        min_mac: stats.min_mac(),
+        max_mac: stats.max_mac(),
+        critical_rate: stats.critical_rate(),
+        critical_damage: stats.critical_damage(),
     }
 }
 
@@ -3048,6 +3027,19 @@ impl SimulationSession {
         });
 
         let Some(object_id) = object_id else {
+            // No creature in front — Crystal swings into the cell ahead and, with
+            // a pickaxe (spell == None), mines it (`HumanObject` Mining label).
+            if requested_spell == Spell::None {
+                if let Some(mut mine_packets) =
+                    super::mining::try_mine(self.app.world_mut(), direction)
+                {
+                    let mut packets = vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                    packets.append(&mut mine_packets);
+                    return packets;
+                }
+            }
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];

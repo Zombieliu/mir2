@@ -938,6 +938,53 @@ impl SessionRouter for MapZoneSessionRouter {
     }
 }
 
+/// Routes each map to its **own** zone automatically (`ZoneId = "map:<map>"`),
+/// without enumerating every map — the routing primitive for map=zone (see
+/// `docs/GATEWAY-MAP-ZONE-ROUTING-DESIGN.md`). Explicit `group(map, zone)`
+/// overrides let several low-traffic maps share one zone. Sessions with no map
+/// (anonymous / pre-character-select) fall back to the default zone.
+///
+/// NOT yet wired into the live gateway: production still opens sessions
+/// anonymously on the default zone. Turning this on additionally requires the
+/// per-zone tick driver and the map-transfer zone handoff (design steps 2–3),
+/// because routing alone would strand a player in their old zone after a
+/// cross-map transfer.
+#[derive(Debug, Clone, Default)]
+pub struct PerMapSessionRouter {
+    overrides: BTreeMap<String, ZoneId>,
+}
+
+impl PerMapSessionRouter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Pin an explicit map into a shared/override zone (e.g. group many cold
+    /// leveling maps, or give a sieged map a dedicated zone).
+    pub fn group(mut self, map_file_name: impl Into<String>, zone_id: ZoneId) -> Self {
+        self.overrides.insert(map_file_name.into(), zone_id);
+        self
+    }
+
+    /// The default zone id a map routes to under per-map routing.
+    pub fn zone_for_map(map_file_name: &str) -> ZoneId {
+        ZoneId::new(format!("map:{map_file_name}"))
+    }
+}
+
+impl SessionRouter for PerMapSessionRouter {
+    fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
+        match request.map_file_name.as_ref() {
+            Some(map_file_name) => self
+                .overrides
+                .get(map_file_name)
+                .cloned()
+                .unwrap_or_else(|| Self::zone_for_map(map_file_name)),
+            None => default_zone_id.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct InProcessZoneRuntimeFactory;
 
@@ -3353,6 +3400,7 @@ impl SharedInProcessZoneSessionRuntime {
             .filter(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
             .filter_map(|entity| self.inner.zone_monster_spawn_snapshot(entity.object_id))
             .collect::<Vec<_>>();
+        let map_hazard_config = self.inner.current_map_hazard_config();
         let shared_entity_ids = shared_entities
             .iter()
             .map(|entity| entity.object_id)
@@ -3464,6 +3512,17 @@ impl SharedInProcessZoneSessionRuntime {
                         monster: monster.clone(),
                         now_ms,
                     }));
+                }
+                if let Some((lightning, fire, lightning_damage, fire_damage)) = map_hazard_config {
+                    outbounds.extend(zone_state.zone_manager.handle(
+                        ZoneCommand::ConfigureHazards {
+                            session_id: session_id.clone(),
+                            lightning,
+                            fire,
+                            lightning_damage,
+                            fire_damage,
+                        },
+                    ));
                 }
                 let (
                     zone_packets,
@@ -4760,6 +4819,19 @@ impl SharedInProcessZoneSessionRuntime {
                 }
                 ChatPacketPreparation::Immediate(packets) => Some(packets),
             },
+            ClientPacket::OpenDoor { door_index } => {
+                // Doors are shared world state: route to the zone, which opens
+                // the door for every co-located player, broadcasts it, and
+                // auto-closes it on a shared timer (Crystal `Map.Doors`).
+                Some(self.dispatch_zone_player_command(
+                    ZoneCommand::OpenDoor {
+                        session_id,
+                        door_index: *door_index,
+                        now_ms: Self::zone_now_ms(),
+                    },
+                    false,
+                ))
+            }
             _ => None,
         }
     }
@@ -5708,6 +5780,20 @@ impl ZoneRegistry {
         )
     }
 
+    /// In-process zone runtime + router, but with a caller-chosen owner-lease
+    /// authority (e.g. the Postgres failover authority selected from the
+    /// environment). Used by the production gateway bootstrap.
+    pub fn in_process_with_owner_lease_authority(
+        owner_lease_authority: SharedZoneOwnerLeaseAuthority,
+    ) -> Self {
+        Self::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            owner_lease_authority,
+        )
+    }
+
     pub fn new(default_zone_id: ZoneId, runtime_factory: SharedZoneRuntimeFactory) -> Self {
         Self::with_router(
             default_zone_id,
@@ -5796,9 +5882,9 @@ mod tests {
         shared_npc_entity_side_effect_packets, world_entity_from_monster_info,
         zone_monster_spawn_from_shared_entity, InMemoryZoneOwnerLeaseAuthority,
         InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
-        MapZoneSessionRouter, SessionRouteRequest, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryService,
-        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
+        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
         SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
         SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
@@ -5908,6 +5994,147 @@ mod tests {
         assert_eq!(routed.owner_lease.fencing_token(), 1);
         assert_eq!(default_routed.zone_id, ZoneId::primary());
         assert_eq!(default_routed.owner_lease.owner_id(), "in-process:primary");
+    }
+
+    #[test]
+    fn per_map_router_derives_distinct_zone_per_map() {
+        let router = PerMapSessionRouter::new().group("99", ZoneId::new("fields-cluster"));
+        let default_zone = ZoneId::primary();
+        let route = |map: Option<&str>| {
+            router.route_session(
+                &SessionRouteRequest {
+                    account_id: None,
+                    character_index: None,
+                    map_file_name: map.map(str::to_string),
+                },
+                &default_zone,
+            )
+        };
+
+        // Each distinct map derives its own zone; same map is stable.
+        assert_eq!(route(Some("0")), ZoneId::new("map:0"));
+        assert_eq!(route(Some("1")), ZoneId::new("map:1"));
+        assert_ne!(route(Some("0")), route(Some("1")));
+        assert_eq!(route(Some("0")), route(Some("0")));
+        // Explicit override groups a map into a shared zone.
+        assert_eq!(route(Some("99")), ZoneId::new("fields-cluster"));
+        // No map yet (anonymous / pre-character-select) -> default zone.
+        assert_eq!(route(None), default_zone);
+    }
+
+    #[test]
+    fn per_map_routing_assigns_two_maps_to_two_zones_through_registry() {
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let open_on_map = |map: &str, account: &str| {
+            registry.open_session_for(
+                GatewayConfig::default(),
+                SessionRouteRequest {
+                    account_id: Some(account.to_string()),
+                    character_index: Some(0),
+                    map_file_name: Some(map.to_string()),
+                },
+            )
+        };
+
+        let map0 = open_on_map("0", "a");
+        let map1 = open_on_map("1", "b");
+        let map0_again = open_on_map("0", "c");
+
+        // Different maps route to different zones; same map shares one. The
+        // owner lease tracks the routed zone too.
+        assert_eq!(map0.zone_id, ZoneId::new("map:0"));
+        assert_eq!(map1.zone_id, ZoneId::new("map:1"));
+        assert_ne!(map0.zone_id, map1.zone_id);
+        assert_eq!(map0_again.zone_id, ZoneId::new("map:0"));
+        assert_eq!(map0.owner_lease.zone_id(), &ZoneId::new("map:0"));
+    }
+
+    // --- map=zone integration harness (oracle for the per-zone-tick + handoff steps) ---
+
+    fn open_per_map_session(registry: &ZoneRegistry, map: &str, account: &str) -> GatewaySession {
+        let routed = registry.open_session_for(
+            GatewayConfig::default(),
+            SessionRouteRequest {
+                account_id: Some(account.to_string()),
+                character_index: Some(0),
+                map_file_name: Some(map.to_string()),
+            },
+        );
+        GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime)
+    }
+
+    fn session_sees_player(session: &GatewaySession, name: &str) -> bool {
+        session
+            .world_snapshot()
+            .entities
+            .iter()
+            .any(|entity| entity.kind == WorldEntityKind::Player && entity.name == name)
+    }
+
+    #[test]
+    fn map_zone_two_sessions_on_same_map_share_a_zone_and_see_each_other() {
+        // Baseline that per-zone routing must preserve: two players routed to the
+        // same map share one zone and are mutually visible at the gateway level.
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+
+        let mut scout = open_per_map_session(&registry, "0", "scout-acct");
+        start_new_character(&mut scout, "scout-acct", "Scout");
+        let mut blade = open_per_map_session(&registry, "0", "blade-acct");
+        start_new_character(&mut blade, "blade-acct", "Blade");
+
+        assert_eq!(scout.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(blade.zone_id(), &ZoneId::new("map:0"));
+        assert!(
+            session_sees_player(&blade, "Scout"),
+            "blade should see scout in the shared map:0 zone"
+        );
+        assert!(
+            session_sees_player(&scout, "Blade"),
+            "scout should see blade in the shared map:0 zone"
+        );
+    }
+
+    #[test]
+    fn map_zone_transfer_changes_map_but_not_zone_today() {
+        // Characterizes the handoff GAP: a map transfer moves the player's map but
+        // leaves the session bound to its original zone. The map=zone handoff step
+        // will flip the zone assertion; locking the current behavior makes that
+        // change visible (and guards against an accidental partial handoff).
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let mut session = open_per_map_session(&registry, "0", "wanderer");
+        start_new_character(&mut session, "wanderer", "Wanderer");
+        assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+
+        // Debug crystal-transfer key relocates the player to map "0102"; mirror
+        // the working transfer test (transfer + a step) to commit it.
+        session.transfer_map("crystal:0:307:264");
+        session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        });
+
+        let map_after = session.world_snapshot().map_file_name.clone();
+        assert_eq!(
+            map_after.as_deref(),
+            Some("0102"),
+            "transfer should move the player onto map 0102; actual: {map_after:?}"
+        );
+        assert_eq!(
+            session.zone_id(),
+            &ZoneId::new("map:0"),
+            "GAP: a map transfer does NOT yet re-route the zone (map=zone handoff closes this)"
+        );
     }
 
     #[test]
@@ -6242,7 +6469,10 @@ mod tests {
         assert_eq!(entity.kind, WorldEntityKind::Monster);
         assert_eq!((entity.x, entity.y), (331, 270));
         assert_eq!(entity.direction, MirDirection::Down);
-        assert_eq!(entity.disposition, WorldEntityDisposition::Hostile);
+        // ai 6 is a Crystal Neutral AI (see monster_disposition_for_ai /
+        // world_entity_disposition_for_monster_ai); the shared-zone packet path
+        // must record it as Neutral, matching world_entity_from_monster_info.
+        assert_eq!(entity.disposition, WorldEntityDisposition::Neutral);
         assert_eq!(
             entity
                 .sprite
@@ -9149,7 +9379,11 @@ mod tests {
             "first session should report a non-empty map"
         );
         let mut owner_packets = Vec::new();
-        for tick in 0..8 {
+        // Crystal-faithful zone melee (PR #21) lowers per-hit damage, so the
+        // level-7 starter now needs ~11 hits to kill the starter monster (was
+        // <=8). Budget with headroom; the loop short-circuits on ObjectDied, so a
+        // larger safety cap costs nothing at runtime.
+        for tick in 0..32 {
             owner_packets.extend(first.attack(monster.object_id));
             owner_packets.extend(first.handle_packet(ClientPacket::KeepAlive { time: tick }));
             if owner_packets.iter().any(|packet| {

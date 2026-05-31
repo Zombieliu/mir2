@@ -502,10 +502,7 @@ impl PostgresAccountStoreConnectionPool {
         if *migrated {
             return Ok(());
         }
-        client
-            .batch_execute(include_str!(
-                "../../../infra/postgres/migrations/0001_core.sql"
-            ))
+        crate::db_projection::apply_migrations(client)
             .map_err(|error| format!("postgres account-store migration failed: {error}"))?;
         *migrated = true;
         Ok(())
@@ -1010,12 +1007,21 @@ mod tests {
 
     fn cleanup_postgres_account(database_url: &str, account_id: &str) {
         if let Ok(mut client) = Client::connect(database_url, NoTls) {
+            for table in [
+                "character_items",
+                "character_mail",
+                "character_npc_state",
+                "character_state",
+                "character_saves",
+                "characters",
+            ] {
+                let _ = client.execute(
+                    &format!("DELETE FROM {table} WHERE account_id = $1"),
+                    &[&account_id],
+                );
+            }
             let _ = client.execute(
-                "DELETE FROM character_saves WHERE account_id = $1",
-                &[&account_id],
-            );
-            let _ = client.execute(
-                "DELETE FROM characters WHERE account_id = $1",
+                "DELETE FROM auction_listings WHERE seller_account_id = $1",
                 &[&account_id],
             );
             let _ = client.execute("DELETE FROM accounts WHERE account_id = $1", &[&account_id]);
@@ -1583,6 +1589,328 @@ mod tests {
         cleanup_postgres_account(&database_url, &account_id);
     }
 
+    fn projection_sample_save(save: &mut CharacterSaveRecord, owner_name: &str) {
+        save.gold = 7777;
+        save.credit = 12;
+        save.map_file_name = "3".to_string();
+        save.position = Point { x: 100, y: 200 };
+        save.inventory_items_json = vec![
+            r#"{"key":"red-potion","name":"Red Potion","icon":1,"slot":0,"unique_id":101,"container":"Bag1","quantity":20,"description":"","durability_current":null,"durability_max":null,"weight":1,"equip_slot":null,"grade":"Common","attack":0,"defence":0,"heal_hp":50,"heal_mp":0}"#.to_string(),
+            r#"{"key":"iron-sword","name":"Iron Sword","icon":2,"slot":1,"unique_id":102,"container":"Bag1","quantity":1,"description":"","durability_current":35,"durability_max":40,"weight":10,"equip_slot":null,"grade":"Rare","attack":7,"defence":0,"heal_hp":0,"heal_mp":0}"#.to_string(),
+        ];
+        let mut systems = Stage5SystemsState::default();
+        systems.guild.name = "Crimson".to_string();
+        systems.mail.push(Stage5MailMessage {
+            id: 9,
+            from: "GM".to_string(),
+            to: owner_name.to_string(),
+            subject: "Reward".to_string(),
+            body: String::new(),
+            gold: 500,
+            items: Vec::new(),
+            item_states_json: Vec::new(),
+            opened: false,
+            locked: false,
+            claimed: false,
+            deleted: false,
+        });
+        systems.auction.push(Stage5AuctionListing {
+            id: 3,
+            seller: owner_name.to_string(),
+            item_key: "iron-sword".to_string(),
+            price: 999,
+            sold: false,
+            cancelled: false,
+            expired: false,
+        });
+        save.stage5_systems_json =
+            Some(serde_json::to_string(&systems).expect("systems serialize"));
+    }
+
+    #[test]
+    fn postgres_save_projects_normalized_rows() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres projection test because Postgres is unavailable");
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("projection");
+        cleanup_postgres_account(&database_url, &account_id);
+        let owner_name = store.accounts[&account_id].characters[0].name.clone();
+        projection_sample_save(
+            store
+                .accounts
+                .get_mut(&account_id)
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("test save should exist"),
+            &owner_name,
+        );
+
+        save_account_store_to_postgres(
+            database_url.clone(),
+            store,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("source write should succeed and project rows");
+
+        let mut client = Client::connect(&database_url, NoTls).expect("connect to assert");
+        let state = client
+            .query_one(
+                "SELECT gold, credit, guild_name, inventory_count, mail_count, \
+                 unclaimed_mail_count, active_auction_count, map_file_name, save_version \
+                 FROM character_state WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("character_state row should exist");
+        assert_eq!(state.get::<_, i64>("gold"), 7777);
+        assert_eq!(state.get::<_, i64>("credit"), 12);
+        assert_eq!(state.get::<_, String>("guild_name"), "Crimson");
+        assert_eq!(state.get::<_, i32>("inventory_count"), 2);
+        assert_eq!(state.get::<_, i32>("mail_count"), 1);
+        assert_eq!(state.get::<_, i32>("unclaimed_mail_count"), 1);
+        assert_eq!(state.get::<_, i32>("active_auction_count"), 1);
+        assert_eq!(state.get::<_, String>("map_file_name"), "3");
+        assert_eq!(state.get::<_, i64>("save_version"), 1);
+
+        let items: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_items WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("item count")
+            .get(0);
+        assert_eq!(items, 2);
+        let sword = client
+            .query_one(
+                "SELECT quantity, unique_id, durability_current FROM character_items \
+                 WHERE account_id = $1 AND item_key = 'iron-sword'",
+                &[&account_id],
+            )
+            .expect("sword row");
+        assert_eq!(sword.get::<_, i64>("quantity"), 1);
+        assert_eq!(sword.get::<_, i64>("unique_id"), 102);
+        assert_eq!(sword.get::<_, Option<i32>>("durability_current"), Some(35));
+
+        let mail = client
+            .query_one(
+                "SELECT sender, gold, claimed FROM character_mail \
+                 WHERE account_id = $1 AND mail_id = 9",
+                &[&account_id],
+            )
+            .expect("mail row");
+        assert_eq!(mail.get::<_, String>("sender"), "GM");
+        assert_eq!(mail.get::<_, i64>("gold"), 500);
+        assert!(!mail.get::<_, bool>("claimed"));
+
+        let auction_active: bool = client
+            .query_one(
+                "SELECT active FROM auction_listings \
+                 WHERE seller_account_id = $1 AND listing_id = 3",
+                &[&account_id],
+            )
+            .expect("auction row")
+            .get("active");
+        assert!(auction_active);
+
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
+    #[test]
+    fn postgres_projection_reflects_item_removal() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres projection-shrink test because Postgres is unavailable");
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("projection-shrink");
+        cleanup_postgres_account(&database_url, &account_id);
+        let owner_name = store.accounts[&account_id].characters[0].name.clone();
+        projection_sample_save(
+            store
+                .accounts
+                .get_mut(&account_id)
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("test save should exist"),
+            &owner_name,
+        );
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+
+        let mut shrunk = store.with_source_versions(versions);
+        {
+            let save = shrunk
+                .accounts
+                .get_mut(&account_id)
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("save should exist");
+            save.inventory_items_json.clear();
+            let mut systems = Stage5SystemsState::default();
+            // Mark the auction sold so it should no longer be "active".
+            systems.auction.push(Stage5AuctionListing {
+                id: 3,
+                seller: owner_name.clone(),
+                item_key: "iron-sword".to_string(),
+                price: 999,
+                sold: true,
+                cancelled: false,
+                expired: false,
+            });
+            save.stage5_systems_json =
+                Some(serde_json::to_string(&systems).expect("systems serialize"));
+        }
+        save_account_store_to_postgres(
+            database_url.clone(),
+            shrunk,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("second source write should succeed");
+
+        let mut client = Client::connect(&database_url, NoTls).expect("connect to assert");
+        let items: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_items WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("item count")
+            .get(0);
+        assert_eq!(
+            items, 0,
+            "removed items must not leave stale projection rows"
+        );
+        let active: i64 = client
+            .query_one(
+                "SELECT count(*) FROM auction_listings \
+                 WHERE seller_account_id = $1 AND active",
+                &[&account_id],
+            )
+            .expect("active auction count")
+            .get(0);
+        assert_eq!(active, 0, "sold auction must flip to inactive");
+        let state_auctions: i32 = client
+            .query_one(
+                "SELECT active_auction_count FROM character_state \
+                 WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("state row")
+            .get(0);
+        assert_eq!(state_auctions, 0);
+
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
+    #[test]
+    fn postgres_projection_drops_deleted_character_rows() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres deleted-character projection test (Postgres unavailable)");
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("projection-delete");
+        cleanup_postgres_account(&database_url, &account_id);
+        let owner_name = store.accounts[&account_id].characters[0].name.clone();
+        projection_sample_save(
+            store
+                .accounts
+                .get_mut(&account_id)
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("test save should exist"),
+            &owner_name,
+        );
+        // Add a second character so the account is not emptied by the delete.
+        {
+            let account = store.accounts.get_mut(&account_id).expect("account");
+            let mut second = CharacterRecord {
+                index: 1,
+                name: format!("{owner_name}-2"),
+                level: 1,
+                class: MirClass::Taoist,
+                gender: MirGender::Male,
+            };
+            second.index = 1;
+            account.characters.push(second.clone());
+            account.saves.insert(1, CharacterSaveRecord::new(second));
+        }
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+
+        let mut client = Client::connect(&database_url, NoTls).expect("connect to assert");
+        let before: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_state WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("state count")
+            .get(0);
+        assert_eq!(before, 2);
+
+        // Delete character 0 (with all its items/mail/auctions) and re-save.
+        let mut pruned = store.with_source_versions(versions);
+        {
+            let account = pruned.accounts.get_mut(&account_id).expect("account");
+            account.characters.retain(|character| character.index != 0);
+            account.saves.remove(&0);
+        }
+        save_account_store_to_postgres(
+            database_url.clone(),
+            pruned,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("prune source write should succeed");
+
+        let after_state: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_state WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("state count")
+            .get(0);
+        assert_eq!(
+            after_state, 1,
+            "deleted character must drop its character_state row"
+        );
+        let after_items: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_items WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("item count")
+            .get(0);
+        assert_eq!(after_items, 0, "deleted character must drop its item rows");
+        let after_auctions: i64 = client
+            .query_one(
+                "SELECT count(*) FROM auction_listings \
+                 WHERE seller_account_id = $1 AND seller_character_index = 0",
+                &[&account_id],
+            )
+            .expect("auction count")
+            .get(0);
+        assert_eq!(
+            after_auctions, 0,
+            "deleted character must drop its auction rows"
+        );
+        let saves: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_saves WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("save count")
+            .get(0);
+        assert_eq!(
+            saves, 0,
+            "deleted character must drop its character_saves mirror row"
+        );
+
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
     #[test]
     fn postgres_source_mode_reload_can_save_after_version_refresh() {
         let Some(database_url) = postgres_test_url() else {
@@ -1755,6 +2083,10 @@ pub struct MapTransferRecord {
     pub to_map_title: String,
     pub to_position: Point,
     pub to_direction: MirDirection,
+    /// Crystal `MovementInfo.ConquestIndex`. `0` means an ordinary movement;
+    /// `> 0` means the movement only fires for a player whose guild owns the
+    /// conquest with that index.
+    pub conquest_index: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1777,6 +2109,29 @@ pub struct MapDropRuleRecord {
     pub no_mount: bool,
     pub no_hero: bool,
     pub need_bridle: bool,
+}
+
+/// A rectangular mining zone on a map (Crystal `MapInfo.MineZones`). Every cell
+/// within `size` tiles of `(x, y)` becomes a mineable spot served by the given
+/// built-in mine set (`mine_set` is 1-based, matching Crystal's `MineIndex`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MineZoneRecord {
+    pub map_file_name: String,
+    pub mine_set: u8,
+    pub x: i32,
+    pub y: i32,
+    pub size: u16,
+}
+
+/// Environmental hazard flags for a map (Crystal `MapInfo.Lightning/Fire` and
+/// their damage caps). Hazards periodically strike players on the map.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MapHazardRecord {
+    pub map_file_name: String,
+    pub lightning: bool,
+    pub fire: bool,
+    pub lightning_damage: i32,
+    pub fire_damage: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1863,9 +2218,14 @@ pub struct SimulationConfig {
     pub visible_monsters: Vec<VisibleMonsterRecord>,
     pub visible_npcs: Vec<VisibleNpcRecord>,
     pub conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → name of the guild that currently owns it. Gates
+    /// conquest movements (Crystal `MyGuild.Conquest.Info.Index`).
+    pub conquest_owners: BTreeMap<i32, String>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
+    pub mine_zones: Vec<MineZoneRecord>,
+    pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
@@ -1950,9 +2310,12 @@ impl SimulationConfig {
                 })
                 .collect(),
             conquest_wars: BTreeMap::new(),
+            conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
+            mine_zones: Vec::new(),
+            map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
             account_store_database_url: None,
@@ -2362,6 +2725,23 @@ fn upsert_account_store_to_postgres(
                 .or_default()
                 .insert(*character_index, save_version);
         }
+        // Reconcile deleted characters: the authoritative reload is driven by
+        // accounts.raw_json, so any character_saves / projection rows for indices
+        // no longer present are ghosts that would otherwise inflate aggregates.
+        let present_indices: Vec<i32> = account.saves.keys().copied().collect();
+        transaction
+            .execute(
+                "DELETE FROM character_saves WHERE account_id = $1 AND character_index <> ALL($2)",
+                &[&account_id, &present_indices],
+            )
+            .map_err(|error| {
+                format!("postgres orphan character_saves cleanup failed for {account_id}: {error}")
+            })?;
+        crate::db_projection::retain_character_projections(
+            &mut transaction,
+            account_id,
+            &present_indices,
+        )?;
     }
     transaction
         .commit()
@@ -2572,7 +2952,28 @@ fn upsert_character_save_record(
                 "postgres character save upsert failed for {account_id}/{character_index}: {error}"
             )
         })?;
-    Ok(row.get("save_version"))
+    let save_version: i64 = row.get("save_version");
+
+    // Maintain the normalized read-side projections inside the same transaction so
+    // query models (admin/economy/anti-fraud) never drift from the authoritative
+    // snapshot we just wrote.
+    let projection = crate::db_projection::derive_character_projection(
+        account_id,
+        character_index,
+        save,
+        save_version,
+        postgres_now_ms(),
+    );
+    crate::db_projection::write_character_projection(client, &projection)?;
+
+    Ok(save_version)
+}
+
+fn postgres_now_ms() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as i64)
+        .unwrap_or_default()
 }
 
 fn to_json<T>(value: &T) -> Result<Value, String>
@@ -2606,6 +3007,7 @@ fn starter_map_transfers() -> Vec<MapTransferRecord> {
         to_map_title: "BichonProvince".to_string(),
         to_position: Point { x: 330, y: 270 },
         to_direction: MirDirection::Down,
+        conquest_index: 0,
     }]
 }
 

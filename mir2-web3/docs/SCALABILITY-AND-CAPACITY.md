@@ -44,7 +44,7 @@ Measured from the code (`apps/simulation/src/runtime/zone/`, `apps/gateway/src/`
 | --- | --- | --- |
 | Zone concurrency | **Single global lock, serial** | `routing.rs:335` `runtime: Mutex<Option<ZoneRuntimeHandle>>` — all commands for a zone run one-at-a-time; multi-core unused. |
 | Visibility (players) | **was O(N²), now grid O(local)** ✅ | `diff_visibility_for` previously scanned all players each move/tick; now scans an AOI-grid neighborhood (this branch). |
-| Visibility (objects/monsters) | **still O(N) full scan** | `diff_zone_object_visibility_for` iterates `self.objects.values()` — next target for the same grid. |
+| Visibility (objects/monsters) | **grid O(local)** ✅ | `diff_zone_object_visibility_for` now uses the AOI object grid (L1). |
 | Combat / AI / skills authority | **per-session, broadcast** | Not a single authoritative tick; two players each compute their own copy of a monster. |
 | Multi-zone | **isolated zones exist** ✅ | `zone/manager.rs` `zones: BTreeMap<ZoneKey, ZoneRuntime>` + `tick_all` — the seam for map=node. |
 | Cross-process | **none (in-process loopback)** | `ZoneOwner` is loopback; no real network/process handoff. |
@@ -67,8 +67,8 @@ risk is integration/debugging, not code generation.
 
 | Lvl | Work | Difficulty | Effort | Unlocks |
 | --- | --- | --- | --- | --- |
-| **L1** | Grid AOI for players ✅ + objects (next) | 🟢 easy, local | ~3–7 days | same-screen tens → ~1–2 hundred |
-| **L2** | Move `ZoneRuntime` onto a real Bevy ECS `World` + `Schedule`; drop the global `Mutex`; per-zone parallel tick | 🟡 hard, core rewrite (~8k lines) | ~2–4 wks | hundreds/zone, multi-core |
+| **L1** | Grid AOI for players ✅ + objects ✅ | 🟢 easy, local | done | measured knee ~600/zone/core (see below) |
+| **L2** | ECS World foundation ✅ + parallel multi-zone tick ✅; ECS *storage* rewrite deprioritized (L1 grids already solved its target) — **see `L2-ECS-ZONE-DESIGN.md` status** | 🟡 | high-value parts done | proven 1.44–1.88× multi-zone speedup (dormant until gateway map=zone routing) |
 | **L3** | Unify world authority: combat/AI/skills/pickup run **once** in the zone tick (not per-session) | 🟡🔴 hard, cross-session, emergent bugs | ~4–8 wks | consistent same-map combat |
 | **L4** | Cross-process zone split: loopback `ZoneOwner` → real RPC/handoff; map=node, walk-between-maps = node handoff | 🔴 distributed systems | ~6–12 wks | global server, horizontal scale |
 | **L5** | Siege specials: Time Dilation, on-screen culling, AoE batch resolution, queue/instancing | 🔴 hardest in the field | ~4–10 wks + tuning | Sabuk-scale same-map |
@@ -90,10 +90,30 @@ frequency`.
 | Boss/event maps | hundreds burst | high (one mob) | combat/AoE resolution | one map/process + **L3 authority** |
 | **Sabuk siege** | hundreds–thousands | **extreme** | everything compounds | **dedicated high-spec node + TiDi + culling (L5)** |
 
-### You cannot get real per-map numbers without a load test
+### Measured capacity (L1 load harness)
 
-Today the only evidence is 64 idle connections — **not** a same-screen combat
-load. Before sizing machines, build a **same-map-N-players-fighting** harness
+`examples/zone_load.rs` now provides the same-map combat/movement ruler. First
+measured result (release, single core, in-process, all players walking each
+tick, 100 ms/tick budget):
+
+| players/zone | mean ms/tick | ms/player |
+| ---: | ---: | ---: |
+| 100 | 4.0 | 0.040 |
+| 400 | 55.7 | 0.139 |
+| **600** | **108.9 (knee)** | 0.182 |
+| 1000 | 262.6 | 0.263 |
+
+**Knee ≈ 600 players per zone per core** at a 100 ms budget. ms/player rises
+0.04 → 0.26, i.e. single-zone cost is **super-linear**: with L1 having gridded
+the visibility path, the residual O(N²) is the per-player combat-authority work
+(PR #11) — the L2/L3 target. This is an **optimistic upper bound** (no
+network/serialization cost). Sizing: `cores_per_map ≈ peak_on_map / 600`, with
+headroom. Re-run after every L2 step to track the constant coming down.
+
+### Earlier evidence was connections-only
+
+Before this harness the only number was 64 idle connections — **not** a
+same-screen combat load. Before sizing machines, build a **same-map-N-players-fighting** harness
 (separate from the connection load test):
 
 1. Step-load 50 → 100 → 200 → … real sessions in one zone, all moving + casting.
@@ -105,12 +125,31 @@ load. Before sizing machines, build a **same-map-N-players-fighting** harness
 This harness is ~1–2 days and is the acceptance ruler for every level above —
 without it, optimization is blind.
 
-## Status on this branch
+## Status (merged to `main`)
 
-- **L1 (players): shipped & verified.** `AoiGrid` primitive (5 unit tests incl.
-  a 400-member brute-force superset proof) + wired into `diff_visibility_for`;
-  `shared_zone` suite 131/131 (+2 new AOI regression tests). Visibility output
-  is provably identical to the full scan; work is now bounded by local density.
-- **Next increments**: (a) apply the grid to `diff_zone_object_visibility_for`
-  (objects/monsters), (b) build the same-map combat load harness, (c) L2 ECS
-  design doc. L3–L5 are multi-week and tracked here for planning.
+- **L1: shipped & verified** (PR #7). `AoiGrid` primitive (5 unit tests incl. a
+  400-member brute-force superset proof) wired into **both** visibility hot
+  paths — `diff_visibility_for` (players) and `diff_zone_object_visibility_for`
+  (objects/monsters). `shared_zone` 141/141. Output provably identical to the
+  full scan; work bounded by local density.
+- **Load harness: shipped** — `examples/zone_load.rs`, with the measured knee
+  above (~600/zone/core).
+- **L2: high-value parts DONE; storage rewrite deprioritized.** See the
+  "Implementation status" section of `L2-ECS-ZONE-DESIGN.md`.
+  - *Step 1 (ECS World mirror): done* — `zone/ecs.rs` mirrors player entities
+    into a `bevy_ecs::World`; invariant-tested; `shared_zone` 141/141.
+  - *Stage A (parallel multi-zone tick): done* — `ZoneManager::tick_all` runs
+    independent zones on a persistent `ComputeTaskPool` (deterministic; proven
+    parallel == sequential). Measured 4-core speedup **1.44×@4z, 1.57×@8z,
+    1.88×@16z**, neutral below a 4-zone break-even.
+  - *ECS storage migration (steps 2–4): deprioritized* — L1's grids already
+    killed the O(N²) it targeted; the harness shows the residual single-zone
+    cost is per-player combat-authority work, not `BTreeMap` iteration. Weeks of
+    hot-file risk for a modest constant-factor gain — not worth it post-L1.
+- **The real next capacity step is gateway map=zone routing.** Stage A's
+  parallel tick is dormant groundwork: the gateway still runs a single
+  `"primary"` zone and never calls `tick_all`. Routing sessions to per-map zones
+  (L4-adjacent, entangled with the ZoneOwner lease/RPC machinery) is what makes
+  the multi-core win real — it deserves its own design pass, not a bundle into L2.
+- **L3 authority consolidation** is partly underway (PR #11 promoted combat
+  resolution into the zone); the dominant single-zone cost now lives there.
