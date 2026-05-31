@@ -35,6 +35,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0002_normalized_projections",
         include_str!("../../../infra/postgres/migrations/0002_normalized_projections.sql"),
     ),
+    (
+        "0003_zone_owner_leases",
+        include_str!("../../../infra/postgres/migrations/0003_zone_owner_leases.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order. Safe to call concurrently from
