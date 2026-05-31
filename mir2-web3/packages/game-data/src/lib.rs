@@ -1374,6 +1374,50 @@ pub fn crystal_monster_ai_summary() -> CrystalMonsterAiSummary {
         .clone()
 }
 
+/// On-hit poison a monster's normal attack applies, extracted from its Crystal `PoisonTarget` call.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalMonsterCombatPoison {
+    pub kind: String,
+    pub chance: u64,
+    pub duration: u64,
+}
+
+/// Per-AI combat profile (damage class, attack reach, on-hit poison) extracted from each Crystal
+/// monster subclass — used as the runtime fallback for families without a bespoke handler, so even
+/// never-spawned "data-only" classes fight with the correct damage class, reach and poison.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalMonsterCombatProfile {
+    pub ai: u8,
+    pub crystal_class: String,
+    /// `"dc"`, `"mc"`, `"sc"` or `"dc_mc"` (physical in melee, magic at range).
+    pub damage: String,
+    /// Maximum attack reach; `0` means the family attacks out to its view range.
+    pub attack_range: i32,
+    pub ranged: bool,
+    #[serde(default)]
+    pub poison: Option<CrystalMonsterCombatPoison>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrystalMonsterCombatProfileManifest {
+    pub total: usize,
+    pub profiles: BTreeMap<String, CrystalMonsterCombatProfile>,
+}
+
+pub fn crystal_monster_combat_profile(ai: u8) -> Option<CrystalMonsterCombatProfile> {
+    static MANIFEST: OnceLock<CrystalMonsterCombatProfileManifest> = OnceLock::new();
+    MANIFEST
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/generated/crystal_monster_combat_profile.json"
+            ))
+            .expect("crystal monster combat profile json should be valid")
+        })
+        .profiles
+        .get(&ai.to_string())
+        .cloned()
+}
+
 pub fn crystal_respawn_manifest() -> CrystalRespawnManifest {
     static CRYSTAL_RESPAWN_MANIFEST: OnceLock<CrystalRespawnManifest> = OnceLock::new();
     CRYSTAL_RESPAWN_MANIFEST

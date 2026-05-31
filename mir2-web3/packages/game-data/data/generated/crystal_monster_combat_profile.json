@@ -1,0 +1,1934 @@
+{
+ "generated_from": "Crystal/Server/MirObjects/Monsters",
+ "total": 209,
+ "profiles": {
+  "1": {
+   "ai": 1,
+   "crystal_class": "Deer",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "2": {
+   "ai": 2,
+   "crystal_class": "Deer",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "3": {
+   "ai": 3,
+   "crystal_class": "Tree",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "4": {
+   "ai": 4,
+   "crystal_class": "SpittingSpider",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 8,
+    "duration": 5
+   }
+  },
+  "5": {
+   "ai": 5,
+   "crystal_class": "CannibalPlant",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "6": {
+   "ai": 6,
+   "crystal_class": "Guard",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "7": {
+   "ai": 7,
+   "crystal_class": "CaveMaggot",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 20,
+    "duration": 5
+   }
+  },
+  "8": {
+   "ai": 8,
+   "crystal_class": "AxeSkeleton",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "9": {
+   "ai": 9,
+   "crystal_class": "HarvestMonster",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "10": {
+   "ai": 10,
+   "crystal_class": "FlamingWooma",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "11": {
+   "ai": 11,
+   "crystal_class": "WoomaTaurus",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "12": {
+   "ai": 12,
+   "crystal_class": "BugBagMaggot",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "13": {
+   "ai": 13,
+   "crystal_class": "RedMoonEvil",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "14": {
+   "ai": 14,
+   "crystal_class": "EvilCentipede",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 15
+   }
+  },
+  "15": {
+   "ai": 15,
+   "crystal_class": "ZumaMonster",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "16": {
+   "ai": 16,
+   "crystal_class": "RedThunderZuma",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "17": {
+   "ai": 17,
+   "crystal_class": "ZumaTaurus",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "18": {
+   "ai": 18,
+   "crystal_class": "Shinsu",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "19": {
+   "ai": 19,
+   "crystal_class": "KingScorpion",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "20": {
+   "ai": 20,
+   "crystal_class": "DarkDevil",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "21": {
+   "ai": 21,
+   "crystal_class": "IncarnatedGhoul",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 15,
+    "duration": 5
+   }
+  },
+  "22": {
+   "ai": 22,
+   "crystal_class": "IncarnatedZT",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 12,
+    "duration": 5
+   }
+  },
+  "23": {
+   "ai": 23,
+   "crystal_class": "BoneFamiliar",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "24": {
+   "ai": 24,
+   "crystal_class": "DigOutZombie",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "25": {
+   "ai": 25,
+   "crystal_class": "RevivingZombie",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "26": {
+   "ai": 26,
+   "crystal_class": "ShamanZombie",
+   "damage": "dc",
+   "attack_range": 6,
+   "ranged": true,
+   "poison": null
+  },
+  "27": {
+   "ai": 27,
+   "crystal_class": "Khazard",
+   "damage": "dc",
+   "attack_range": 4,
+   "ranged": true,
+   "poison": null
+  },
+  "28": {
+   "ai": 28,
+   "crystal_class": "ToxicGhoul",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 8,
+    "duration": 5
+   }
+  },
+  "29": {
+   "ai": 29,
+   "crystal_class": "BoneSpearman",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "30": {
+   "ai": 30,
+   "crystal_class": "BoneLord",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "31": {
+   "ai": 31,
+   "crystal_class": "RightGuard",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "32": {
+   "ai": 32,
+   "crystal_class": "LeftGuard",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "33": {
+   "ai": 33,
+   "crystal_class": "MinotaurKing",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "34": {
+   "ai": 34,
+   "crystal_class": "FrostTiger",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "35": {
+   "ai": 35,
+   "crystal_class": "SandWorm",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "36": {
+   "ai": 36,
+   "crystal_class": "Yimoogi",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": {
+    "kind": "red",
+    "chance": 1,
+    "duration": 6
+   }
+  },
+  "37": {
+   "ai": 37,
+   "crystal_class": "CrystalSpider",
+   "damage": "dc",
+   "attack_range": 3,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 8,
+    "duration": 5
+   }
+  },
+  "38": {
+   "ai": 38,
+   "crystal_class": "HolyDeva",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "39": {
+   "ai": 39,
+   "crystal_class": "RootSpider",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "40": {
+   "ai": 40,
+   "crystal_class": "BombSpider",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "41": {
+   "ai": 41,
+   "crystal_class": "YinDevilNode",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "42": {
+   "ai": 42,
+   "crystal_class": "YinDevilNode",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "43": {
+   "ai": 43,
+   "crystal_class": "OmaKing",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "44": {
+   "ai": 44,
+   "crystal_class": "BlackFoxman",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "45": {
+   "ai": 45,
+   "crystal_class": "RedFoxman",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "46": {
+   "ai": 46,
+   "crystal_class": "WhiteFoxman",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "47": {
+   "ai": 47,
+   "crystal_class": "TrapRock",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "48": {
+   "ai": 48,
+   "crystal_class": "GuardianRock",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "49": {
+   "ai": 49,
+   "crystal_class": "ThunderElement",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "50": {
+   "ai": 50,
+   "crystal_class": "GreatFoxSpirit",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 5,
+    "duration": 15
+   }
+  },
+  "51": {
+   "ai": 51,
+   "crystal_class": "HedgeKekTal",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "52": {
+   "ai": 52,
+   "crystal_class": "EvilMir",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 15
+   }
+  },
+  "53": {
+   "ai": 53,
+   "crystal_class": "EvilMirBody",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "54": {
+   "ai": 54,
+   "crystal_class": "DragonStatue",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "55": {
+   "ai": 55,
+   "crystal_class": "HumanWizard",
+   "damage": "mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "56": {
+   "ai": 56,
+   "crystal_class": "Trainer",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "57": {
+   "ai": 57,
+   "crystal_class": "TownArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "58": {
+   "ai": 58,
+   "crystal_class": "Guard",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "59": {
+   "ai": 59,
+   "crystal_class": "HumanAssassin",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "60": {
+   "ai": 60,
+   "crystal_class": "VampireSpider",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "61": {
+   "ai": 61,
+   "crystal_class": "SpittingToad",
+   "damage": "dc",
+   "attack_range": 12,
+   "ranged": true,
+   "poison": null
+  },
+  "62": {
+   "ai": 62,
+   "crystal_class": "SnakeTotem",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "63": {
+   "ai": 63,
+   "crystal_class": "CharmedSnake",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "65": {
+   "ai": 65,
+   "crystal_class": "MutatedManworm",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "66": {
+   "ai": 66,
+   "crystal_class": "CrazyManworm",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "67": {
+   "ai": 67,
+   "crystal_class": "DarkDevourer",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "68": {
+   "ai": 68,
+   "crystal_class": "Football",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "69": {
+   "ai": 69,
+   "crystal_class": "PoisonHugger",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "70": {
+   "ai": 70,
+   "crystal_class": "Hugger",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "71": {
+   "ai": 71,
+   "crystal_class": "Behemoth",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "bleeding",
+    "chance": 15,
+    "duration": 5
+   }
+  },
+  "72": {
+   "ai": 72,
+   "crystal_class": "FinialTurtle",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 8,
+    "duration": 15
+   }
+  },
+  "73": {
+   "ai": 73,
+   "crystal_class": "TurtleKing",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "dazed",
+    "chance": 8,
+    "duration": 3
+   }
+  },
+  "74": {
+   "ai": 74,
+   "crystal_class": "LightTurtle",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "75": {
+   "ai": 75,
+   "crystal_class": "WitchDoctor",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "76": {
+   "ai": 76,
+   "crystal_class": "HellSlasher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "77": {
+   "ai": 77,
+   "crystal_class": "HellPirate",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "78": {
+   "ai": 78,
+   "crystal_class": "HellCannibal",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "79": {
+   "ai": 79,
+   "crystal_class": "HellKeeper",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "80": {
+   "ai": 80,
+   "crystal_class": "ConquestArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "81": {
+   "ai": 81,
+   "crystal_class": "Gate",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "82": {
+   "ai": 82,
+   "crystal_class": "Wall",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "83": {
+   "ai": 83,
+   "crystal_class": "Tornado",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "84": {
+   "ai": 84,
+   "crystal_class": "WingedTigerLord",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 2,
+    "duration": 5
+   }
+  },
+  "85": {
+   "ai": 85,
+   "crystal_class": "FlamingMutant",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "86": {
+   "ai": 86,
+   "crystal_class": "ManectricClaw",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "87": {
+   "ai": 87,
+   "crystal_class": "ManectricBlest",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "88": {
+   "ai": 88,
+   "crystal_class": "ManectricKing",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "89": {
+   "ai": 89,
+   "crystal_class": "IcePillar",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "frozen",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "90": {
+   "ai": 90,
+   "crystal_class": "TrollBomber",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "91": {
+   "ai": 91,
+   "crystal_class": "TrollKing",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "92": {
+   "ai": 92,
+   "crystal_class": "FlameSpear",
+   "damage": "mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "93": {
+   "ai": 93,
+   "crystal_class": "FlameMage",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "94": {
+   "ai": 94,
+   "crystal_class": "FlameScythe",
+   "damage": "mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "95": {
+   "ai": 95,
+   "crystal_class": "FlameAssassin",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "96": {
+   "ai": 96,
+   "crystal_class": "FlameQueen",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "97": {
+   "ai": 97,
+   "crystal_class": "HellKnight",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "98": {
+   "ai": 98,
+   "crystal_class": "HellLord",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "99": {
+   "ai": 99,
+   "crystal_class": "HellBomb",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "frozen",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "100": {
+   "ai": 100,
+   "crystal_class": "VenomSpider",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 8,
+    "duration": 5
+   }
+  },
+  "101": {
+   "ai": 101,
+   "crystal_class": "AncientBringer",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "102": {
+   "ai": 102,
+   "crystal_class": "IceGuard",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "103": {
+   "ai": 103,
+   "crystal_class": "ElementGuard",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "red",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "104": {
+   "ai": 104,
+   "crystal_class": "DemonGuard",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "105": {
+   "ai": 105,
+   "crystal_class": "KingGuard",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 5,
+    "duration": 10
+   }
+  },
+  "106": {
+   "ai": 106,
+   "crystal_class": "DeathCrawler",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "107": {
+   "ai": 107,
+   "crystal_class": "BurningZombie",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "108": {
+   "ai": 108,
+   "crystal_class": "MudZombie",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 8
+   }
+  },
+  "109": {
+   "ai": 109,
+   "crystal_class": "HardenRhino",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "110": {
+   "ai": 110,
+   "crystal_class": "DemonWolf",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": {
+    "kind": "bleeding",
+    "chance": 4,
+    "duration": 5
+   }
+  },
+  "111": {
+   "ai": 111,
+   "crystal_class": "WhiteMammoth",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "dazed",
+    "chance": 0,
+    "duration": 5
+   }
+  },
+  "112": {
+   "ai": 112,
+   "crystal_class": "DarkBeast",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "bleeding",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "113": {
+   "ai": 113,
+   "crystal_class": "ArcherGuard",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "114": {
+   "ai": 114,
+   "crystal_class": "Mandrill",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "115": {
+   "ai": 115,
+   "crystal_class": "SandSnail",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "116": {
+   "ai": 116,
+   "crystal_class": "BlackHammerCat",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "117": {
+   "ai": 117,
+   "crystal_class": "StrayCat",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "118": {
+   "ai": 118,
+   "crystal_class": "CatShaman",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "red",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "119": {
+   "ai": 119,
+   "crystal_class": "Jar1",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "120": {
+   "ai": 120,
+   "crystal_class": "Jar2",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "frozen",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "121": {
+   "ai": 121,
+   "crystal_class": "SeedingsGeneral",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "frozen",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "122": {
+   "ai": 122,
+   "crystal_class": "RestlessJar",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "blindness",
+    "chance": 4,
+    "duration": 10
+   }
+  },
+  "123": {
+   "ai": 123,
+   "crystal_class": "GeneralMeowMeow",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "124": {
+   "ai": 124,
+   "crystal_class": "Armadillo",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "125": {
+   "ai": 125,
+   "crystal_class": "ArmadilloElder",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "126": {
+   "ai": 126,
+   "crystal_class": "TucsonMage",
+   "damage": "dc",
+   "attack_range": 3,
+   "ranged": true,
+   "poison": null
+  },
+  "127": {
+   "ai": 127,
+   "crystal_class": "TucsonWarrior",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "128": {
+   "ai": 128,
+   "crystal_class": "TucsonEgg",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "129": {
+   "ai": 129,
+   "crystal_class": "SwampWarrior",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 8,
+    "duration": 5
+   }
+  },
+  "130": {
+   "ai": 130,
+   "crystal_class": "CannibalTentacles",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "131": {
+   "ai": 131,
+   "crystal_class": "TucsonGeneral",
+   "damage": "sc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "132": {
+   "ai": 132,
+   "crystal_class": "GasToad",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "133": {
+   "ai": 133,
+   "crystal_class": "Mantis",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "dazed",
+    "chance": 8,
+    "duration": 6
+   }
+  },
+  "134": {
+   "ai": 134,
+   "crystal_class": "AssassinBird",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "135": {
+   "ai": 135,
+   "crystal_class": "StoningStatue",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "136": {
+   "ai": 136,
+   "crystal_class": "FlyingStatue",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "137": {
+   "ai": 137,
+   "crystal_class": "RhinoPriest",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 2,
+    "duration": 5
+   }
+  },
+  "138": {
+   "ai": 138,
+   "crystal_class": "ElephantMan",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "139": {
+   "ai": 139,
+   "crystal_class": "StoneGolem",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "140": {
+   "ai": 140,
+   "crystal_class": "EarthGolem",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "141": {
+   "ai": 141,
+   "crystal_class": "TreeGuardian",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "142": {
+   "ai": 142,
+   "crystal_class": "TreeQueen",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "143": {
+   "ai": 143,
+   "crystal_class": "PeacockSpider",
+   "damage": "sc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 4,
+    "duration": 5
+   }
+  },
+  "144": {
+   "ai": 144,
+   "crystal_class": "OmaCannibal",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "145": {
+   "ai": 145,
+   "crystal_class": "OmaBlest",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "146": {
+   "ai": 146,
+   "crystal_class": "OmaSlasher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "147": {
+   "ai": 147,
+   "crystal_class": "OmaMage",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 6,
+    "duration": 5
+   }
+  },
+  "148": {
+   "ai": 148,
+   "crystal_class": "OmaWitchDoctor",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "149": {
+   "ai": 149,
+   "crystal_class": "PowerBead",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "150": {
+   "ai": 150,
+   "crystal_class": "DarkOmaKing",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "151": {
+   "ai": 151,
+   "crystal_class": "CaveStatue",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "152": {
+   "ai": 152,
+   "crystal_class": "PlagueCrab",
+   "damage": "dc",
+   "attack_range": 4,
+   "ranged": true,
+   "poison": null
+  },
+  "153": {
+   "ai": 153,
+   "crystal_class": "CreeperPlant",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "154": {
+   "ai": 154,
+   "crystal_class": "Nadz",
+   "damage": "dc",
+   "attack_range": 3,
+   "ranged": true,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "155": {
+   "ai": 155,
+   "crystal_class": "AvengingSpirit",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 7,
+    "duration": 5
+   }
+  },
+  "156": {
+   "ai": 156,
+   "crystal_class": "AvengingWarrior",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "red",
+    "chance": 5,
+    "duration": 8
+   }
+  },
+  "157": {
+   "ai": 157,
+   "crystal_class": "AxePlant",
+   "damage": "dc",
+   "attack_range": 3,
+   "ranged": true,
+   "poison": null
+  },
+  "158": {
+   "ai": 158,
+   "crystal_class": "WoodBox",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "159": {
+   "ai": 159,
+   "crystal_class": "DarkCaptain",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "160": {
+   "ai": 160,
+   "crystal_class": "BlueSoul",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "161": {
+   "ai": 161,
+   "crystal_class": "SackWarrior",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "bleeding",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "162": {
+   "ai": 162,
+   "crystal_class": "KingHydrax",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 2,
+    "duration": 10
+   }
+  },
+  "163": {
+   "ai": 163,
+   "crystal_class": "HornedMage",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "164": {
+   "ai": 164,
+   "crystal_class": "HornedArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "165": {
+   "ai": 165,
+   "crystal_class": "HornedWarrior",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "166": {
+   "ai": 166,
+   "crystal_class": "FloatingRock",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "167": {
+   "ai": 167,
+   "crystal_class": "ScalyBeast",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "paralysis",
+    "chance": 5,
+    "duration": 4
+   }
+  },
+  "168": {
+   "ai": 168,
+   "crystal_class": "WereTiger",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "169": {
+   "ai": 169,
+   "crystal_class": "HornedSorceror",
+   "damage": "sc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "170": {
+   "ai": 170,
+   "crystal_class": "BoulderSpirit",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "171": {
+   "ai": 171,
+   "crystal_class": "HornedCommander",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "174": {
+   "ai": 174,
+   "crystal_class": "ManTree",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "stun",
+    "chance": 5,
+    "duration": 5
+   }
+  },
+  "175": {
+   "ai": 175,
+   "crystal_class": "ChieftainArcher",
+   "damage": "sc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "177": {
+   "ai": 177,
+   "crystal_class": "FrozenKnight",
+   "damage": "dc_mc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "178": {
+   "ai": 178,
+   "crystal_class": "IcePhantom",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "179": {
+   "ai": 179,
+   "crystal_class": "SnowWolf",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 4,
+    "duration": 5
+   }
+  },
+  "180": {
+   "ai": 180,
+   "crystal_class": "SnowWolfKing",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "181": {
+   "ai": 181,
+   "crystal_class": "WaterDragon",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 7,
+    "duration": 5
+   }
+  },
+  "182": {
+   "ai": 182,
+   "crystal_class": "BlackTortoise",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 7,
+    "duration": 5
+   }
+  },
+  "184": {
+   "ai": 184,
+   "crystal_class": "DragonWarrior",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "dazed",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "186": {
+   "ai": 186,
+   "crystal_class": "Kirin",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "187": {
+   "ai": 187,
+   "crystal_class": "FrozenMiner",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "188": {
+   "ai": 188,
+   "crystal_class": "FrozenAxeman",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "189": {
+   "ai": 189,
+   "crystal_class": "FrozenMagician",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "190": {
+   "ai": 190,
+   "crystal_class": "SnowYeti",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "191": {
+   "ai": 191,
+   "crystal_class": "IceCrystalSoldier",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "192": {
+   "ai": 192,
+   "crystal_class": "DarkWraith",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "196": {
+   "ai": 196,
+   "crystal_class": "AntCommander",
+   "damage": "dc_mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 7
+   }
+  },
+  "197": {
+   "ai": 197,
+   "crystal_class": "GlacierSnail",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "198": {
+   "ai": 198,
+   "crystal_class": "FurbolgWarrior",
+   "damage": "dc",
+   "attack_range": 2,
+   "ranged": true,
+   "poison": null
+  },
+  "199": {
+   "ai": 199,
+   "crystal_class": "FurbolgArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "200": {
+   "ai": 200,
+   "crystal_class": "FurbolgCommander",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "201": {
+   "ai": 201,
+   "crystal_class": "FurbolgGuard",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "202": {
+   "ai": 202,
+   "crystal_class": "GlacierBeast",
+   "damage": "dc_mc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 3,
+    "duration": 5
+   }
+  },
+  "203": {
+   "ai": 203,
+   "crystal_class": "GlacierWarrior",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "210": {
+   "ai": 210,
+   "crystal_class": "HoodedSummonerScrolls",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "green",
+    "chance": 7,
+    "duration": 5
+   }
+  },
+  "211": {
+   "ai": 211,
+   "crystal_class": "HoodedSummoner",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "212": {
+   "ai": 212,
+   "crystal_class": "PurpleFaeFlower",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "213": {
+   "ai": 213,
+   "crystal_class": "Siege",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "214": {
+   "ai": 214,
+   "crystal_class": "SepWarrior",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "215": {
+   "ai": 215,
+   "crystal_class": "SepWizard",
+   "damage": "dc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "216": {
+   "ai": 216,
+   "crystal_class": "SepTaoist",
+   "damage": "sc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "217": {
+   "ai": 217,
+   "crystal_class": "SepAssassin",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "218": {
+   "ai": 218,
+   "crystal_class": "SepArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": true,
+   "poison": null
+  },
+  "219": {
+   "ai": 219,
+   "crystal_class": "SepHighWarrior",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "220": {
+   "ai": 220,
+   "crystal_class": "SepHighWizard",
+   "damage": "mc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": null
+  },
+  "221": {
+   "ai": 221,
+   "crystal_class": "SepHighTaoist",
+   "damage": "sc",
+   "attack_range": 0,
+   "ranged": true,
+   "poison": {
+    "kind": "slow",
+    "chance": 1,
+    "duration": 5
+   }
+  },
+  "222": {
+   "ai": 222,
+   "crystal_class": "SepHighAssassin",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  },
+  "223": {
+   "ai": 223,
+   "crystal_class": "SepHighArcher",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": {
+    "kind": "green",
+    "chance": 5,
+    "duration": 8
+   }
+  },
+  "255": {
+   "ai": 255,
+   "crystal_class": "StoneTrap",
+   "damage": "dc",
+   "attack_range": 1,
+   "ranged": false,
+   "poison": null
+  }
+ }
+}

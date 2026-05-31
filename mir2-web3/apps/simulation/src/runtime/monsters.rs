@@ -3,8 +3,9 @@ use std::collections::BTreeSet;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_starter_region_respawns,
-    starter_server_data, CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
+    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_monster_combat_profile,
+    crystal_starter_region_respawns, starter_server_data, CrystalMonsterTemplate,
+    CrystalRespawnTemplate, CrystalRoutePoint,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
@@ -2065,6 +2066,31 @@ pub(super) fn monster_attack_delay_ticks(
     }
 }
 
+/// Damage-class fallback driven by the generated per-AI combat profile: casters use magic/spell
+/// power, distance-gated families use DC in melee and MC at range. Families with a bespoke case in
+/// `monster_player_attack_damage` never reach this.
+fn crystal_monster_profile_attack_damage(
+    name: &str,
+    ai: u8,
+    source: &Point,
+    target: &Point,
+    tick: u64,
+    attacker_id: u32,
+) -> i32 {
+    match crystal_monster_combat_profile(ai).map(|profile| profile.damage) {
+        Some(damage) if damage == "mc" => {
+            crystal_monster_magic_damage_rolled(name, tick, attacker_id)
+        }
+        Some(damage) if damage == "sc" => {
+            crystal_monster_spell_damage_rolled(name, tick, attacker_id)
+        }
+        Some(damage) if damage == "dc_mc" && tile_distance(source, target) > 1 => {
+            crystal_monster_magic_damage_rolled(name, tick, attacker_id)
+        }
+        _ => crystal_monster_attack_damage_rolled(name, tick, attacker_id),
+    }
+}
+
 /// Crystal tags each monster attack with a `DefenceType`; `MAC`/`MACAgility` attacks are reduced by
 /// the target's magic armour rather than physical AC. This captures, per AI family, whether the
 /// attack at the given range resolves against the player's magic defence (extracted from each
@@ -2180,7 +2206,14 @@ pub(super) fn monster_player_attack_damage(
         // monsters deal a fixed 7 to players regardless of their stats; fall back to the monster's
         // real damage-class instead. Families that never strike players (guards, training dummy,
         // egg, devil node) never reach this path.
-        _ => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        _ => crystal_monster_profile_attack_damage(
+            monster_name,
+            agent.ai,
+            source,
+            target,
+            tick,
+            attacker_id,
+        ),
     };
     let mitigation = monster_player_damage_mitigation(world, agent.ai, source, target);
     if base_damage <= 0 {
