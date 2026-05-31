@@ -54160,7 +54160,7 @@ fn monster_magic_attack_is_mitigated_by_mac_not_physical_ac() {
 }
 
 #[test]
-fn monster_melee_attack_is_reduced_by_randomised_player_ac() {
+fn monster_melee_attack_is_reduced_by_player_physical_ac() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let player_pos = Point { x: 333, y: 267 };
@@ -54172,7 +54172,7 @@ fn monster_melee_attack_is_reduced_by_randomised_player_ac() {
     );
     assert!(player_ac > 0, "starter expected to have physical AC");
 
-    // Force a high-DC physical melee blow so the rolled armour is observable.
+    // Force a high-DC physical melee blow so the mitigation is observable.
     let mob = spawn_crystal_monster_for_test(
         &mut session,
         91_011,
@@ -54191,7 +54191,7 @@ fn monster_melee_attack_is_reduced_by_randomised_player_ac() {
     agent.ai = 7; // physical melee branch of the AI dispatch
     let source = Point { x: player_pos.x + 1, y: player_pos.y };
     let raw_dc = super::crystal_monster_attack_damage("BombSpider");
-    assert!(raw_dc > player_ac, "test needs DC above AC to observe the roll");
+    assert!(raw_dc > player_ac, "test needs DC above AC to observe mitigation");
 
     let damage = super::monster_player_attack_damage(
         session.app.world(),
@@ -54200,11 +54200,8 @@ fn monster_melee_attack_is_reduced_by_randomised_player_ac() {
         &source,
         &player_pos,
     );
-    // Physical armour is rolled in [0, MaxAC], so the blow lands in [raw - MaxAC, raw].
-    assert!(
-        damage >= (raw_dc - player_ac).max(1) && damage <= raw_dc,
-        "incoming melee {damage} should be raw {raw_dc} minus armour in [0, {player_ac}]"
-    );
+    // Physical blows are reduced by the physical defence (AC), not the MAC.
+    assert_eq!(damage, (raw_dc - player_ac).max(1));
 }
 
 #[test]

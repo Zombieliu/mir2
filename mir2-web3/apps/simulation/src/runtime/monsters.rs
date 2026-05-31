@@ -25,7 +25,7 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
-use super::combat_engine::{deterministic_range, get_defence_power, MAGIC_RESIST_WEIGHT};
+use super::combat_engine::{deterministic_range, MAGIC_RESIST_WEIGHT};
 use super::equipment::total_defence_bonus;
 use super::items::current_player_required_stat_total;
 use super::map::{
@@ -2058,17 +2058,19 @@ pub(super) fn monster_player_attack_damage(
         }
     }
 
-    // Crystal rolls the absorbed armour as `GetDefencePower(0, MaxAC)` rather than
-    // subtracting the full value, so incoming damage varies hit-to-hit. Magic/spell
-    // blows are mitigated by the magic armour (MAC), matching `DefenceType.MAC`.
+    // Magic/spell blows are mitigated by the player's magic armour (MAC), matching
+    // `DefenceType.MAC`; physical blows by the physical defence. (Crystal rolls the
+    // absorbed armour in `[0, MaxAC]`, but the incoming monster damage here is a
+    // flat max rather than a `GetAttackPower` roll, so subtracting the full armour
+    // keeps the two halves balanced; rolling only the armour would roughly double
+    // effective incoming damage.)
     let inventory = world.resource::<InventoryResource>();
     let buffs = world.resource::<BuffResource>();
-    let max_armour = if is_magic {
+    let mitigation = if is_magic {
         current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_MAX_MAC)
     } else {
         total_defence_bonus(inventory, buffs)
     };
-    let mitigation = get_defence_power(0, max_armour, tick, salt);
     (base_damage - mitigation).max(1)
 }
 
