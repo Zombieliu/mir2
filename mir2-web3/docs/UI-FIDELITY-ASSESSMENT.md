@@ -50,11 +50,37 @@ Closed several of the largest interaction gaps (verified by `tsc --noEmit` +
   with hold-repeat, drag slider, Max button) instead of a bare number input.
   ~30% -> ~70%.
 
-Still open after this pass: social dialogs remain collapsed (un-collapse is a
-separate work package), character paperdoll preview + full stat block + rich
-item tooltips (need data-model fields), NPC buy/sell/repair dialogs, BigMap
-teleport, mail compose, and skill/buff **icon art** (no MagIcon library
-extracted).
+## Update 2026-05-31 (round 2)
+
+Closed the round-1 "still open" headline items (verified by `tsc`/`next build`,
+plus `cargo check` + the `world_snapshot` lib tests for the backend pieces):
+
+- **Real max MP (backend)** - `mana_percent`/`zone_mana_percent` now divide by
+  the player's real class/level max MP (`crystal_base_vitals`) instead of a
+  literal 100, so a full-mana low-level character reads 100% not ~17%. Packet
+  shape unchanged (percent-only, Crystal parity); the lib test suite shows the
+  identical pass/fail set with and without the change.
+- **Character paperdoll preview** - the player's standing sprite renders in the
+  character dialog via the scene sprite pipeline.
+- **Full stat block** - the session already computes the player's combat stats
+  to send to the zone; forwarded into the world snapshot (serde auto-forward),
+  so the Stats I tab shows real DC/MC/SC/AC/MAC ranges + Accuracy/Agility.
+- **Rich item tooltips** - `WorldItemSnapshot` now forwards base attack/defence
+  and weight (grade + added attack/defence were already serialized); tooltips
+  show grade name colour, Attack/Defence (base +bonus), and Weight.
+- **Player-to-player Trade dialog** - the full gateway trade protocol wired into
+  a real two-grid dialog (drag-deposit/retrieve via the drag layer, partner grid
+  resolved from `NewItemInfo`, gold, lock/confirm, cancel, request prompt). Live
+  two-player feel is human-gated (cannot drive two clients in CI).
+- **Social dialog identity** - each social system gets a Crystal menu-icon
+  header + per-system accent, so they read as distinct dialogs rather than one
+  generic tab panel.
+
+Still deeper-gated: required-level/class + price tooltip fields (in ItemInfo,
+not ItemState), per-dialog Crystal bitmap frames for the social windows, the
+data-gated social interactions (guild ranks/war, searchable market), skill/buff
+icon art (no MagIcon library extracted), NPC buy/sell/repair dialogs, and
+BigMap teleport.
 
 ## Two dimensions
 
