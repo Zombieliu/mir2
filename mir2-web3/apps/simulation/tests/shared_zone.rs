@@ -3771,6 +3771,57 @@ fn zone_native_player_magic_damages_monster_and_projects_authoritatively() {
 }
 
 #[test]
+fn zone_native_player_magic_subtracts_monster_magic_armour() {
+    // A monster with authoritative MAC must mitigate incoming attack-magic with
+    // Random(MinMAC,MaxMAC) — mirroring how the physical path subtracts AC. Here
+    // FireBall deals 9, the monster's MAC range is a flat 3, so the zone applies
+    // 9 - 3 = 6 against a 20-HP monster -> 70% health, not the raw 9 (= 55%).
+    let mut zone = zone();
+    let first = session("first");
+    let attacker = first.clone();
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            334,
+            270,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 3,
+                max_mac: 3,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 7,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let struck = zone.tick(20);
+
+    // 9 (spell) - 3 (rolled MAC) = 6 damage, leaving 14/20 HP = 70%.
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(6));
+    assert!(has_packet(&struck, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == 9100 && info.percent == 70
+    )));
+}
+
+#[test]
 fn zone_native_player_area_magic_damages_secondary_monsters_authoritatively() {
     let mut zone = zone();
     let first = session("first");
@@ -4155,6 +4206,57 @@ fn zone_native_player_firewall_spawns_ground_spell_and_ticks_damage() {
             ServerPacket::ObjectHealth { info } if info.object_id == 9101
         )));
     }
+}
+
+#[test]
+fn zone_native_player_firewall_subtracts_monster_magic_armour() {
+    // Ground/AoE attack spells mitigate their direct hit with monster MAC, just
+    // like the single-target cast. FireWall ticks 4 damage; the monster's flat
+    // MAC 2 leaves 4 - 2 = 2 per tick, so a 20-HP monster drops to 18/20 = 90%
+    // on the first tick (vs 80% with the raw, un-mitigated 4).
+    let mut zone = zone();
+    let first = session("first");
+    let target = Point { x: 334, y: 270 };
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            target.x,
+            target.y,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 2,
+                max_mac: 2,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::FireWall,
+        direction: MirDirection::Right,
+        target: target.clone(),
+        cast: true,
+        level: 2,
+        damage: 4,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+
+    zone.tick(519);
+    let tick = zone.tick(520);
+    assert_eq!(damage_indicator_for(&tick, 9100), Some(2));
+    assert!(has_packet(&tick, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == 9100 && info.percent == 90
+    )));
 }
 
 #[test]
@@ -7986,6 +8088,61 @@ fn zone_resolves_player_attack_damage_from_authoritative_stats() {
         packet,
         ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 90
     )));
+}
+
+#[test]
+fn zone_resolves_player_critical_hit_from_authoritative_stats() {
+    // With CriticalRate 100 the zone amplifies the rolled DC by CriticalDamage
+    // (10 == +100%) before subtracting armour — the Crystal crit, owned by the
+    // zone rather than the session.
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 15,
+            max_dc: 15,
+            accuracy: 10_000,
+            critical_rate: 100,
+            critical_damage: 10,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                agility: 0,
+                min_ac: 5,
+                max_ac: 5,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    let struck = zone.tick(10);
+
+    // base 15 -> crit doubles to 30, minus 5 armour = 25 (vs 10 without crit).
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(25));
 }
 
 #[test]
