@@ -41505,7 +41505,8 @@ fn magic_packet_crystal_frost_crunch_damages_and_freezes_target() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_line(&session, player, MirDirection::Right, 4);
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
