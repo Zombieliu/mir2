@@ -53263,20 +53263,13 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .slots
         .is_empty());
 
-    // Re-deposit an ingredient so the refine attempt actually has materials.
+    // Re-deposit an ingredient so a refine attempt can run.
     let redeposit = session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
     assert!(redeposit.iter().any(|packet| matches!(
         packet,
         ServerPacket::DepositRefineItem { success: true, .. }
     )));
 
-    let added_before = session
-        .world_snapshot()
-        .inventory_items
-        .iter()
-        .find(|item| item.key == "dagger")
-        .map(|item| item.added_attack)
-        .expect("dagger should be in starter inventory");
     let refine_packets = session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
     assert_eq!(
         refine_packets,
@@ -53284,10 +53277,10 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     );
     let in_oven = session.world_snapshot();
     assert!(in_oven.stage5_systems.refine.ready);
-    // A real success chance was computed from the deposited ingredient.
-    assert!(in_oven.stage5_systems.refine.pending_chance > 0);
     assert_eq!(in_oven.stage5_systems.refine.pending_unique_id, 4);
 
+    // The starter ingredient has no DC/MC/SC and there is no BlackIronOre, so
+    // Crystal sets RefinedValue::None and the weapon is smashed on test.
     let check_packets = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
     assert!(check_packets
         .iter()
@@ -53295,38 +53288,43 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     let after_check = session.world_snapshot();
     // The refine session is fully reset after the attempt resolves.
     assert_eq!(after_check.stage5_systems.refine.current_item, None);
-    assert_eq!(after_check.stage5_systems.refine.pending_chance, 0);
     assert_eq!(after_check.stage5_systems.refine.pending_unique_id, 0);
-    // A DC refine never reduces the weapon's attack (success adds, failure costs
-    // durability instead) — no more unconditional +1.
-    let after_attack = after_check
-        .inventory_items
-        .iter()
-        .find(|item| item.key == "dagger")
-        .map(|item| item.added_attack)
-        .expect("dagger should still be in inventory");
-    assert!(after_attack >= added_before);
+    assert!(
+        !after_check
+            .inventory_items
+            .iter()
+            .any(|item| item.key == "dagger"),
+        "weapon should be smashed when refined without proper ore/stat ingredients"
+    );
 }
 
 #[test]
-fn refine_without_materials_is_rejected() {
+fn refine_without_proper_materials_smashes_weapon() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    // No ingredients deposited -> the refine cannot start.
+    // Crystal proceeds even with no ingredients (RefinedValue stays None).
     let refine_packets = session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
     assert_eq!(
         refine_packets,
-        vec![ServerPacket::NPCCollectRefine { success: false }]
+        vec![ServerPacket::RefineItem { unique_id: 4 }]
     );
-    let snapshot = session.world_snapshot();
-    assert!(!snapshot.stage5_systems.refine.ready);
-    assert_eq!(snapshot.stage5_systems.refine.pending_chance, 0);
+    assert!(session.world_snapshot().stage5_systems.refine.ready);
+
+    let check = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
+    assert!(check
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RefineItem { unique_id: 4 })));
+    assert!(!session
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| item.key == "dagger"));
 }
 
 #[test]
 fn refine_outcome_is_deterministic_across_runs() {
-    fn run_refine_added_attack() -> i32 {
+    fn dagger_survives() -> bool {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
@@ -53336,56 +53334,68 @@ fn refine_outcome_is_deterministic_across_runs() {
             .world_snapshot()
             .inventory_items
             .iter()
-            .find(|item| item.key == "dagger")
-            .map(|item| item.added_attack)
-            .expect("dagger should still be in inventory")
+            .any(|item| item.key == "dagger")
     }
 
-    assert_eq!(run_refine_added_attack(), run_refine_added_attack());
+    assert_eq!(dagger_survives(), dagger_survives());
 }
 
 #[test]
-fn refine_success_chance_scales_with_ingredients_and_caps() {
-    use super::super::packets::refine_success_chance;
-    // More ingredients -> higher chance.
-    assert!(refine_success_chance(3, 0) > refine_success_chance(1, 0));
-    // A more heavily refined weapon is harder to refine further.
-    assert!(refine_success_chance(3, 0) > refine_success_chance(3, 5));
-    // Capped at the refine ceiling: no chance once maxed out.
-    assert_eq!(refine_success_chance(5, 10), 0);
-    // Always within [3, 90].
-    for count in 0..8 {
-        for refined in 0..12 {
-            let chance = refine_success_chance(count, refined);
-            assert!(chance <= 90);
-        }
-    }
-}
-
-#[test]
-fn refine_roll_is_deterministic_and_respects_chance() {
-    use super::super::packets::refine_roll_succeeds;
-    // Boundaries.
-    for tick in 0..50u64 {
-        assert!(!refine_roll_succeeds(tick, 4, 0));
-        assert!(refine_roll_succeeds(tick, 4, 100));
-    }
-    // Deterministic for identical inputs.
+fn refine_success_chance_crystal_matches_formula() {
+    use super::super::packets::{refine_success_chance_crystal, RefineComponents};
+    // One DC ingredient (total_dc = 10, full durability) + one BlackIronOre
+    // (purity 10): item(35) + ore(35) + luck(5) + base(20) - penalty(0) = 95.
+    let components = RefineComponents {
+        total_dc: 10,
+        item_amount: 1,
+        durability: 1,
+        current_dura: 1,
+        ore_amount: 1,
+        ore_purity: 10,
+        ..Default::default()
+    };
     assert_eq!(
-        refine_roll_succeeds(1234, 4, 50),
-        refine_roll_succeeds(1234, 4, 50)
+        refine_success_chance_crystal(&components, 10, 0, 0, 0, true),
+        95
     );
-    // A mid chance produces both outcomes across ticks (not a constant).
-    let mut hits = 0;
-    let mut misses = 0;
-    for tick in 0..200u64 {
-        if refine_roll_succeeds(tick, 4, 50) {
-            hits += 1;
-        } else {
-            misses += 1;
-        }
+    // No ore -> guaranteed smash (chance 0).
+    let no_ore = RefineComponents {
+        total_dc: 10,
+        item_amount: 1,
+        ..Default::default()
+    };
+    assert_eq!(refine_success_chance_crystal(&no_ore, 10, 0, 0, 0, true), 0);
+    // No stat ingredients -> 0.
+    let no_stats = RefineComponents {
+        ore_amount: 1,
+        ore_purity: 10,
+        ..Default::default()
+    };
+    assert_eq!(
+        refine_success_chance_crystal(&no_stats, 0, 0, 0, 0, true),
+        0
+    );
+}
+
+#[test]
+fn refine_deterministic_1_99_is_in_range_and_deterministic() {
+    use super::super::packets::refine_deterministic_1_99;
+    for tick in 0..300u64 {
+        let roll = refine_deterministic_1_99(tick, 4, 0x05A1);
+        assert!((1..=99).contains(&roll));
     }
-    assert!(hits > 0 && misses > 0);
+    assert_eq!(
+        refine_deterministic_1_99(1234, 4, 0x05A1),
+        refine_deterministic_1_99(1234, 4, 0x05A1)
+    );
+    // Independent fail vs crit streams.
+    let fail: Vec<i32> = (0..20)
+        .map(|t| refine_deterministic_1_99(t, 4, 0x05A1))
+        .collect();
+    let crit: Vec<i32> = (0..20)
+        .map(|t| refine_deterministic_1_99(t, 4, 0xC817))
+        .collect();
+    assert_ne!(fail, crit);
 }
 
 #[test]
