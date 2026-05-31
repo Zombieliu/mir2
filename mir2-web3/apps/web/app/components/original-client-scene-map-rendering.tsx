@@ -405,7 +405,11 @@ const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
 const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
 const MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS = 18;
 const MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS = 72;
-const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 10 * 60 * 1000;
+// Once a scene asset has exhausted its retries it is negatively cached for this long before the
+// client will attempt it again. Kept short (3 min) so that an asset fixed or deployed
+// server-side recovers quickly; the cost of a few extra retries for a genuinely-absent asset is
+// low now that the server degrades gracefully and reports misses instead of 424-ing the scene.
+const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 3 * 60 * 1000;
 const ALPHA_KEYED_SCENE_ASSET_MAX_BYTES = 32 * 1024 * 1024;
 const ALPHA_KEYED_SCENE_ASSET_MAX_ENTRIES = 256;
 const FAILED_STATIC_SCENE_ASSET_MAX_ENTRIES = 1024;

@@ -11,7 +11,7 @@ import {
   normalizeLanguage,
   type Mir2Language,
 } from "../lib/localization";
-import { playOriginalSoundId } from "../lib/original-audio";
+import { playOriginalSoundEvent, playOriginalSoundId } from "../lib/original-audio";
 import {
   DUBHE_WALLET_URL,
   getSuiWalletSummaries,
@@ -5072,6 +5072,7 @@ export default function HomePage() {
           return visibleCharacters;
         });
         appendLog(t("ui.newCharacterCreated", [], "Character created."), "system");
+        playOriginalSoundEvent("characterCreated");
         break;
       case "NewCharacter":
         appendLog(t("ui.newCharacterFailed", [], "Character creation failed."), "system");
