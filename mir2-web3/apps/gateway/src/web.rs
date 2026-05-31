@@ -665,6 +665,10 @@ enum BrowserCommand {
         #[serde(alias = "objectId")]
         object_id: u32,
     },
+    Inspect {
+        #[serde(alias = "objectId")]
+        object_id: u32,
+    },
     AttackDirection {
         direction: String,
         #[serde(default)]
@@ -2406,6 +2410,11 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             running: parse_move_mode(mode.as_deref())?,
         }),
         BrowserCommand::Attack { object_id } => Ok(SessionAction::Attack { object_id }),
+        BrowserCommand::Inspect { object_id } => Ok(SessionAction::Packet(ClientPacket::Inspect {
+            object_id,
+            ranking: false,
+            hero: false,
+        })),
         BrowserCommand::AttackDirection { direction, spell } => {
             Ok(SessionAction::Packet(ClientPacket::Attack {
                 direction: parse_direction(&direction)?,
@@ -3184,6 +3193,22 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "lightning": info.has_lightning(),
                     "fire": info.has_fire()
                 }
+            }
+        }),
+        ServerPacket::PlayerInspect { info } => json!({
+            "type": "packet",
+            "packet": "PlayerInspect",
+            "payload": {
+                "name": info.name,
+                "guildName": info.guild_name,
+                "guildRank": info.guild_rank,
+                "class": format!("{:?}", info.class),
+                "gender": format!("{:?}", info.gender),
+                "hair": info.hair,
+                "level": info.level,
+                "loverName": info.lover_name,
+                "isHero": info.is_hero,
+                "equipment": info.equipment
             }
         }),
         ServerPacket::UserInformation { info } => json!({

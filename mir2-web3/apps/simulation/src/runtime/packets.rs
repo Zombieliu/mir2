@@ -15,8 +15,8 @@ use mir2_protocol::{
     GuildRank, GuildStorageItem, HeroUserInformation, MirClass, MirDirection, MirGender,
     MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
     ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo,
-    ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId,
-    Spell, StruckInfo, UserInformation, UserItem, UserItemStat,
+    ObjectSpellInfo, ObjectStruckInfo, PlayerInspectInfo, Point, RankCharacterInfo, ServerPacket,
+    ServerPacketId, Spell, StruckInfo, UserInformation, UserItem, UserItemStat,
 };
 
 use crate::config::{
@@ -5265,6 +5265,50 @@ pub(super) fn build_user_information(
     }
 }
 
+// Crystal Inspect: clicking a player requests their visible gear. The
+// single-session world only holds the local player's full equipment, so we can
+// answer an inspect of the self player (the common "inspect myself" case);
+// inspecting other shared-zone players needs cross-session state and is left
+// for the world-authority work.
+pub(super) fn inspect_player_packet(world: &World, object_id: u32) -> Vec<ServerPacket> {
+    let self_object_id = current_player_object_id(world);
+    if self_object_id != Some(object_id) {
+        return Vec::new();
+    }
+    let session = world.resource::<SessionResource>();
+    let Some(character) = session.selected_character.as_ref() else {
+        return Vec::new();
+    };
+    let resources = world.resource::<InventoryResource>();
+    let hair = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .appearance
+        .hair;
+    let guild_name = stage5_current_guild_name(world);
+    let guild_rank = if guild_name.is_empty() {
+        String::new()
+    } else {
+        stage5_current_guild_rank_name(world)
+    };
+
+    vec![ServerPacket::PlayerInspect {
+        info: PlayerInspectInfo {
+            name: character.name.clone(),
+            guild_name,
+            guild_rank,
+            equipment: user_equipment_slots(&resources.equipment_items),
+            class: character.class,
+            gender: character.gender,
+            hair,
+            level: character.level,
+            lover_name: String::new(),
+            allow_observe: false,
+            is_hero: false,
+        },
+    }]
+}
+
 pub(super) fn user_inventory_slots(items: &[ItemState]) -> Vec<Option<UserItem>> {
     let mut slots = vec![None; 46];
     for item in items {
@@ -6288,10 +6332,12 @@ impl SimulationSession {
                     item_index,
                 }]
             }
+            ClientPacket::Inspect { object_id, .. } => {
+                inspect_player_packet(self.app.world(), object_id)
+            }
             ClientPacket::ReplaceWedRing { .. }
             | ClientPacket::TeleportToNpc { .. }
             | ClientPacket::SearchMap { .. }
-            | ClientPacket::Inspect { .. }
             | ClientPacket::Observe { .. }
             | ClientPacket::ChangeAMode { .. }
             | ClientPacket::ChangePMode { .. }
