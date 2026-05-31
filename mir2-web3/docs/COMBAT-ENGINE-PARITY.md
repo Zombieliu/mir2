@@ -30,12 +30,15 @@ plus end-to-end integration tests.
   PoisonAttack→Green against the level offset.
 - **Weapon durability** — 1 point per landed swing, matching `DamageWeapon`.
 
-Both melee and physical ranged player attacks resolve through this pipeline.
-Incoming monster damage is reduced by the player's physical defence (AC), or the
-magic armour (MAC) for magic/spell blows, matching Crystal's `DefenceType`
-routing; it can also miss via the agility dodge (physical) or magic resist
-(magic) from `GetArmour`. Vampiric gear (`HPDrainRatePercent`) heals the player a
-fraction of the damage dealt.
+Player melee, physical ranged, **and skill / magic** attacks all resolve through
+this pipeline: each spell carries its Crystal `DefenceType`
+(`crystal_spell_defence_type` — wizard/taoist magic as `MAC`, warrior weapon
+skills and archer bow shots as `AC`), so the target's matching armour is
+subtracted and criticals apply. Incoming monster damage is reduced by the
+player's physical defence (AC), or the magic armour (MAC) for magic/spell blows,
+matching Crystal's `DefenceType` routing; it can also miss via the agility dodge
+(physical) or magic resist (magic) from `GetArmour`. Vampiric gear
+(`HPDrainRatePercent`) heals the player a fraction of the damage dealt.
 
 ## Deterministic rolling
 
@@ -64,9 +67,6 @@ moduli combat uses).
 - **Incoming reflect.** The player's `Reflect` stat is honoured by the
   victim-side resolver (`resolve_attack_on_player`) but not by the monster attack
   scheduler, which lacks the attacker entity needed to bounce damage back.
-- **Skill / magic damage** still uses the legacy direct-damage path (no armour
-  subtraction); migrating it onto the pipeline (with the `MAC`/`MACAgility`
-  defence types) is part of the same step.
 - **Monster Slow/Paralysis movement.** The Slow status flag is applied and
   broadcast, but the monster AI does not yet act on it.
 - **Zone (shared-world) path** resolves damage with its own simplified math and
