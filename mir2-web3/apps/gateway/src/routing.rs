@@ -9354,7 +9354,11 @@ mod tests {
             "first session should report a non-empty map"
         );
         let mut owner_packets = Vec::new();
-        for tick in 0..8 {
+        // Crystal-faithful zone melee (PR #21) lowers per-hit damage, so the
+        // level-7 starter now needs ~11 hits to kill the starter monster (was
+        // <=8). Budget with headroom; the loop short-circuits on ObjectDied, so a
+        // larger safety cap costs nothing at runtime.
+        for tick in 0..32 {
             owner_packets.extend(first.attack(monster.object_id));
             owner_packets.extend(first.handle_packet(ClientPacket::KeepAlive { time: tick }));
             if owner_packets.iter().any(|packet| {
