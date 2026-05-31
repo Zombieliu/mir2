@@ -33928,6 +33928,258 @@ fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
         .any(|item| item.unique_id == 9401));
 }
 
+/// Pushes a Crystal item (by manifest index) into the bag at a known slot and
+/// quantity so crafting tests can offer exact ingredient/tool slots.
+fn add_recipe_item(session: &mut SimulationSession, item_index: i32, slot: u8, quantity: u32) {
+    let template = mir2_game_data::crystal_item_by_index(item_index)
+        .expect("recipe item template should exist");
+    let key = super::crystal_item_key_for_template(&template);
+    let durability = (template.durability > 0).then_some(template.durability);
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    resources.inventory_items.push(ItemState {
+        key: key.clone(),
+        name: template.name.clone(),
+        icon: super::item_icon_for_key(&key),
+        slot,
+        unique_id: u64::from(slot),
+        container: ItemContainer::Bag1,
+        quantity,
+        description: template.tooltip.clone().unwrap_or_default(),
+        durability_current: durability,
+        durability_max: durability,
+        weight: u16::from(template.weight),
+        equip_slot: super::crystal_equipment_slot_for_template(&template),
+        grade: ItemGrade::None,
+        added_attack: 0,
+        added_defence: 0,
+        added_stats: Vec::new(),
+        socketed: Vec::new(),
+        cursed: false,
+        socket_slots: 0,
+        gem_count: 0,
+        identified: None,
+        soul_bound_id: None,
+        sealed_expiry_time_binary_datetime: 0,
+        sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
+        attack: 0,
+        defence: 0,
+        heal_hp: 0,
+        heal_mp: 0,
+    });
+}
+
+fn inventory_item_quantity(session: &SimulationSession, item_index: i32) -> Option<u32> {
+    let key = format!("crystal-item-{item_index}");
+    let resources = session.app.world().resource::<InventoryResource>();
+    resources
+        .inventory_items
+        .iter()
+        .chain(resources.belt_items.iter())
+        .find(|item| item.key == key)
+        .map(|item| item.quantity)
+}
+
+fn set_inventory_item_durability(session: &mut SimulationSession, slot: u8, durability: u16) {
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let item = resources
+        .inventory_items
+        .iter_mut()
+        .find(|item| item.slot == slot)
+        .expect("inventory item at slot");
+    item.durability_current = Some(durability);
+}
+
+fn inventory_item_durability(session: &SimulationSession, slot: u8) -> Option<u16> {
+    session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.slot == slot)
+        .and_then(|item| item.durability_current)
+}
+
+#[test]
+fn craft_item_packet_produces_output_and_consumes_ingredients() {
+    // GreenPoison: chance 100, gold 100, produces a stack of 4 while consuming
+    // EbonyFruit x1, SpiderTeeth x2, CannibalLeaf x4 (recipe output unique id 32).
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 500);
+    add_recipe_item(&mut session, 864, 60, 1); // EbonyFruit, exact amount
+    add_recipe_item(&mut session, 868, 61, 5); // SpiderTeeth, surplus (need 2)
+    add_recipe_item(&mut session, 866, 62, 4); // CannibalLeaf, exact amount (need 4)
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 32,
+        count: 1,
+        slots: vec![60, 61, 62],
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::CraftItem { success: true })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 100 })));
+    let gained = packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::GainedItem { item } => Some(item),
+            _ => None,
+        })
+        .expect("a chance-100 craft grants the output");
+    assert_eq!(gained.item_index, 710);
+    assert_eq!(gained.count, 4);
+
+    assert_eq!(player_gold(&session), 400);
+    // Exact-amount ingredients are removed; the surplus stack is reduced by 2.
+    assert_eq!(inventory_item_quantity(&session, 864), None);
+    assert_eq!(inventory_item_quantity(&session, 868), Some(3));
+    assert_eq!(inventory_item_quantity(&session, 866), None);
+    assert_eq!(inventory_item_quantity(&session, 710), Some(4));
+}
+
+#[test]
+fn craft_item_packet_rejects_insufficient_gold() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 50); // GreenPoison costs 100
+    add_recipe_item(&mut session, 864, 60, 1);
+    add_recipe_item(&mut session, 868, 61, 2);
+    add_recipe_item(&mut session, 866, 62, 4);
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 32,
+        count: 1,
+        slots: vec![60, 61, 62],
+    });
+
+    assert_eq!(packets, vec![ServerPacket::CraftItem { success: false }]);
+    // A rejected craft consumes nothing.
+    assert_eq!(player_gold(&session), 50);
+    assert_eq!(inventory_item_quantity(&session, 864), Some(1));
+    assert_eq!(inventory_item_quantity(&session, 866), Some(4));
+}
+
+#[test]
+fn craft_item_packet_rejects_insufficient_ingredient_quantity() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 500);
+    add_recipe_item(&mut session, 864, 60, 1);
+    add_recipe_item(&mut session, 868, 61, 2);
+    add_recipe_item(&mut session, 866, 62, 3); // need 4, only 3 in the stack
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 32,
+        count: 1,
+        slots: vec![60, 61, 62],
+    });
+
+    assert_eq!(packets, vec![ServerPacket::CraftItem { success: false }]);
+    assert_eq!(player_gold(&session), 500);
+    assert_eq!(inventory_item_quantity(&session, 866), Some(3));
+}
+
+#[test]
+fn craft_item_packet_rejects_unknown_recipe() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 9_999_999,
+        count: 1,
+        slots: Vec::new(),
+    });
+
+    assert_eq!(packets, vec![ServerPacket::CraftItem { success: false }]);
+}
+
+#[test]
+fn craft_item_packet_rejects_when_an_ingredient_slot_is_not_offered() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 500);
+    add_recipe_item(&mut session, 864, 60, 1);
+    add_recipe_item(&mut session, 868, 61, 2);
+    add_recipe_item(&mut session, 866, 62, 4);
+
+    // Offer only two of the three required ingredient slots.
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 32,
+        count: 1,
+        slots: vec![60, 61],
+    });
+
+    assert_eq!(packets, vec![ServerPacket::CraftItem { success: false }]);
+    assert_eq!(inventory_item_quantity(&session, 864), Some(1));
+    assert_eq!(inventory_item_quantity(&session, 866), Some(4));
+}
+
+#[test]
+fn craft_item_packet_enforces_tool_durability() {
+    // BraveryOrb requires a CraftingBook tool with floor(CurrentDura / 1000) >= count.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 50_000);
+    add_recipe_item(&mut session, 1348, 70, 1); // CraftingBook (tool)
+    add_recipe_item(&mut session, 646, 71, 1); // DCStone
+    add_recipe_item(&mut session, 677, 72, 1); // ImpactDrug(L)
+    add_recipe_item(&mut session, 664, 73, 2); // (HP)DrugXL x2
+    set_inventory_item_durability(&mut session, 70, 500); // floor(500/1000) = 0 < 1
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 17,
+        count: 1,
+        slots: vec![70, 71, 72, 73],
+    });
+
+    assert_eq!(packets, vec![ServerPacket::CraftItem { success: false }]);
+    // Nothing consumed when the tool is too worn.
+    assert_eq!(player_gold(&session), 50_000);
+    assert_eq!(inventory_item_quantity(&session, 646), Some(1));
+}
+
+#[test]
+fn craft_item_packet_with_tool_consumes_ingredients_even_on_a_missed_roll() {
+    // BraveryOrb has a 20% chance: Crystal still consumes the ingredients, gold and
+    // tool durability and returns success for any valid attempt; only the produced
+    // item is gated on the roll.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_player_gold(&mut session, 50_000);
+    add_recipe_item(&mut session, 1348, 70, 1);
+    add_recipe_item(&mut session, 646, 71, 1);
+    add_recipe_item(&mut session, 677, 72, 1);
+    add_recipe_item(&mut session, 664, 73, 2);
+    set_inventory_item_durability(&mut session, 70, 3000); // floor(3000/1000) = 3 >= 1
+
+    let packets = session.handle_packet(ClientPacket::CraftItem {
+        unique_id: 17,
+        count: 1,
+        slots: vec![70, 71, 72, 73],
+    });
+
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::CraftItem { success: true })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 10_000 })));
+    // Ingredients and gold are consumed regardless of the 20% item roll.
+    assert_eq!(inventory_item_quantity(&session, 646), None);
+    assert_eq!(inventory_item_quantity(&session, 664), None);
+    assert_eq!(player_gold(&session), 40_000);
+    // Tool durability is reduced by count * 1000 and the tool stays in the bag.
+    assert_eq!(inventory_item_durability(&session, 70), Some(2000));
+}
+
 #[test]
 fn equipping_same_slot_returns_previous_gear_to_bag() {
     let mut session = SimulationSession::new(SimulationConfig::default());

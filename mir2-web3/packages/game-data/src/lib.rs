@@ -654,6 +654,39 @@ pub struct CrystalRecipeBootstrapPacket {
     pub payload: Vec<u8>,
 }
 
+/// One item slot inside a decoded Crystal recipe (the output, a tool, or an
+/// ingredient). Decoded from the `UserItem` records embedded in the captured
+/// `NewRecipeInfo` payload, so the values match exactly what Crystal serializes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalRecipeItem {
+    pub item_index: i32,
+    /// `UserItem.Count`: required quantity for tools/ingredients, or the
+    /// produced stack size for the recipe output (`goods.Count`).
+    pub count: u16,
+    /// `UserItem.CurrentDura`: for ingredients this is the minimum durability the
+    /// supplied item must meet when `current_dura < max_dura` (0 means no check).
+    pub current_dura: u16,
+    pub max_dura: u16,
+}
+
+/// A Crystal crafting recipe decoded from the captured `NewRecipeInfo` packet
+/// (`ClientRecipeInfo`). Mirrors the server-side `RecipeInfo` fields that reach
+/// the client: gold cost, success chance, the produced item, required tools and
+/// required ingredients (each with its per-item count). The criteria fields
+/// (level/class/gender/quest/flag) live only in the server's `RecipeInfo` and are
+/// not transmitted, so they are intentionally absent here.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CrystalRecipe {
+    pub name: String,
+    /// `recipe.Item.UniqueID`: the id the client echoes back when crafting.
+    pub output_unique_id: u64,
+    pub output: CrystalRecipeItem,
+    pub gold: u32,
+    pub chance: u8,
+    pub tools: Vec<CrystalRecipeItem>,
+    pub ingredients: Vec<CrystalRecipeItem>,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CrystalGameShopPacketManifest {
     pub generated_at: String,
@@ -1271,6 +1304,217 @@ pub fn crystal_recipe_bootstrap_packets() -> Vec<CrystalRecipeBootstrapPacket> {
         .collect()
 }
 
+/// Sequential little-endian reader over a captured recipe payload, mirroring the
+/// `BinaryReader` traversal Crystal uses to deserialize `ClientRecipeInfo`.
+struct RecipePayloadReader<'a> {
+    bytes: &'a [u8],
+    offset: usize,
+}
+
+impl<'a> RecipePayloadReader<'a> {
+    fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, offset: 0 }
+    }
+
+    fn take(&mut self, len: usize) -> Result<&'a [u8], String> {
+        let end = self
+            .offset
+            .checked_add(len)
+            .ok_or_else(|| "recipe payload length overflow".to_string())?;
+        if end > self.bytes.len() {
+            return Err(format!(
+                "recipe payload truncated: need {len} bytes at offset {} of {}",
+                self.offset,
+                self.bytes.len()
+            ));
+        }
+        let slice = &self.bytes[self.offset..end];
+        self.offset = end;
+        Ok(slice)
+    }
+
+    fn read_u8(&mut self) -> Result<u8, String> {
+        Ok(self.take(1)?[0])
+    }
+
+    fn read_bool(&mut self) -> Result<bool, String> {
+        Ok(self.read_u8()? != 0)
+    }
+
+    fn read_u16(&mut self) -> Result<u16, String> {
+        let bytes = self.take(2)?;
+        Ok(u16::from_le_bytes([bytes[0], bytes[1]]))
+    }
+
+    fn read_i32(&mut self) -> Result<i32, String> {
+        let bytes = self.take(4)?;
+        Ok(i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
+    }
+
+    fn read_u32(&mut self) -> Result<u32, String> {
+        let bytes = self.take(4)?;
+        Ok(u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
+    }
+
+    fn read_u64(&mut self) -> Result<u64, String> {
+        let bytes = self.take(8)?;
+        let mut buf = [0u8; 8];
+        buf.copy_from_slice(bytes);
+        Ok(u64::from_le_bytes(buf))
+    }
+
+    /// Skips a .NET `BinaryWriter`-style length-prefixed UTF-8 string (7-bit
+    /// encoded length prefix followed by the raw bytes).
+    fn skip_string(&mut self) -> Result<(), String> {
+        let mut len: usize = 0;
+        let mut shift: u32 = 0;
+        loop {
+            let byte = self.read_u8()?;
+            len |= ((byte & 0x7f) as usize) << shift;
+            if byte & 0x80 == 0 {
+                break;
+            }
+            shift += 7;
+        }
+        self.take(len)?;
+        Ok(())
+    }
+}
+
+/// Reads a single `UserItem` record, returning its unique id and the recipe-level
+/// view (index + count + durability). Follows `UserItem.Save` field order exactly
+/// (UniqueID, ItemIndex, CurrentDura, MaxDura, Count, SoulBoundId, bool flags,
+/// nested slots, GemCount, AddedStats, Awake, refine fields, WeddingRing, and the
+/// optional Expire/Rental/Sealed blocks) so the cursor lands precisely on the
+/// next record.
+fn read_recipe_user_item(
+    reader: &mut RecipePayloadReader,
+) -> Result<(u64, CrystalRecipeItem), String> {
+    let unique_id = reader.read_u64()?;
+    let item_index = reader.read_i32()?;
+    let current_dura = reader.read_u16()?;
+    let max_dura = reader.read_u16()?;
+    let count = reader.read_u16()?;
+    let _soul_bound_id = reader.read_i32()?;
+    let _bools = reader.read_u8()?;
+
+    let slot_count = reader.read_i32()?;
+    for _ in 0..slot_count.max(0) {
+        // `UserItem.Save` writes true for empty slots and recurses otherwise.
+        let is_null = reader.read_bool()?;
+        if !is_null {
+            read_recipe_user_item(reader)?;
+        }
+    }
+
+    let _gem_count = reader.read_u16()?;
+
+    let added_stat_count = reader.read_i32()?;
+    for _ in 0..added_stat_count.max(0) {
+        let _stat = reader.read_u8()?;
+        let _value = reader.read_i32()?;
+    }
+
+    let _awake_type = reader.read_u8()?;
+    let awake_count = reader.read_i32()?;
+    for _ in 0..awake_count.max(0) {
+        let _value = reader.read_u8()?;
+    }
+
+    let _refined_value = reader.read_u8()?;
+    let _refine_added = reader.read_u8()?;
+    let _refine_success_chance = reader.read_i32()?;
+    let _wedding_ring = reader.read_i32()?;
+
+    if reader.read_bool()? {
+        // ExpireInfo: ExpiryDate (i64 binary).
+        reader.take(8)?;
+    }
+    if reader.read_bool()? {
+        // RentalInformation: OwnerName, BindingFlags (i16), ExpiryDate (i64), RentalLocked (bool).
+        reader.skip_string()?;
+        reader.take(2)?;
+        reader.take(8)?;
+        reader.read_bool()?;
+    }
+    let _is_shop_item = reader.read_bool()?;
+    if reader.read_bool()? {
+        // SealedInfo: ExpiryDate + NextSealDate (both i64 binary).
+        reader.take(16)?;
+    }
+    let _gm_made = reader.read_bool()?;
+
+    Ok((
+        unique_id,
+        CrystalRecipeItem {
+            item_index,
+            count,
+            current_dura,
+            max_dura,
+        },
+    ))
+}
+
+fn decode_crystal_recipe(template: &CrystalRecipePacketTemplate) -> Result<CrystalRecipe, String> {
+    let bytes = decode_hex(&template.payload_hex)?;
+    let mut reader = RecipePayloadReader::new(&bytes);
+
+    let gold = reader.read_u32()?;
+    let chance = reader.read_u8()?;
+    let (output_unique_id, output) = read_recipe_user_item(&mut reader)?;
+
+    let tool_count = reader.read_i32()?;
+    let mut tools = Vec::with_capacity(tool_count.max(0) as usize);
+    for _ in 0..tool_count.max(0) {
+        tools.push(read_recipe_user_item(&mut reader)?.1);
+    }
+
+    let ingredient_count = reader.read_i32()?;
+    let mut ingredients = Vec::with_capacity(ingredient_count.max(0) as usize);
+    for _ in 0..ingredient_count.max(0) {
+        ingredients.push(read_recipe_user_item(&mut reader)?.1);
+    }
+
+    if reader.offset != bytes.len() {
+        return Err(format!(
+            "recipe {} decoded with {} trailing bytes",
+            template.name,
+            bytes.len() - reader.offset
+        ));
+    }
+
+    Ok(CrystalRecipe {
+        name: template.name.clone(),
+        output_unique_id,
+        output,
+        gold,
+        chance,
+        tools,
+        ingredients,
+    })
+}
+
+/// Every Crystal crafting recipe, decoded once from the captured `NewRecipeInfo`
+/// payloads. The decoded ingredient/tool counts come straight from the bytes
+/// Crystal ships to clients, so the crafting transaction stays 1:1 with the
+/// original server.
+pub fn crystal_recipes() -> Vec<CrystalRecipe> {
+    static CRYSTAL_RECIPES: OnceLock<Vec<CrystalRecipe>> = OnceLock::new();
+    CRYSTAL_RECIPES
+        .get_or_init(|| {
+            crystal_recipe_packet_manifest()
+                .recipes
+                .iter()
+                .map(|template| {
+                    decode_crystal_recipe(template).unwrap_or_else(|error| {
+                        panic!("crystal recipe {} should decode: {error}", template.name)
+                    })
+                })
+                .collect()
+        })
+        .clone()
+}
+
 pub fn crystal_game_shop_packet_manifest() -> CrystalGameShopPacketManifest {
     static CRYSTAL_GAME_SHOP_PACKET_MANIFEST: OnceLock<CrystalGameShopPacketManifest> =
         OnceLock::new();
@@ -1546,10 +1790,10 @@ mod tests {
         crystal_npc_info_manifest, crystal_npc_manifest, crystal_npc_script_by_key,
         crystal_quest_packet_manifest, crystal_quest_packet_payloads,
         crystal_random_item_stat_profile, crystal_random_item_stats_manifest,
-        crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_respawn_manifest,
-        crystal_starter_region_respawns, format_localized_text, localization_bundle,
-        localized_text, starter_map_collision, starter_scene, starter_server_data, DropTemplate,
-        LanguageCode, MapCellAttribute, SkillEffectTemplate,
+        crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_recipes,
+        crystal_respawn_manifest, crystal_starter_region_respawns, format_localized_text,
+        localization_bundle, localized_text, starter_map_collision, starter_scene,
+        starter_server_data, DropTemplate, LanguageCode, MapCellAttribute, SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
 
@@ -1947,6 +2191,91 @@ mod tests {
         let packets = crystal_recipe_bootstrap_packets();
         assert_eq!(packets.len(), manifest.total_recipes);
         assert_eq!(packets[0].payload.len(), first.payload_len);
+    }
+
+    #[test]
+    fn crystal_recipes_decode_every_payload() {
+        let manifest = crystal_recipe_packet_manifest();
+        let recipes = crystal_recipes();
+        assert_eq!(recipes.len(), manifest.total_recipes);
+
+        // Each decoded recipe must agree with the pre-extracted manifest fields:
+        // gold, chance, tool/ingredient counts, and the ordered item-info indices
+        // (output, then tools, then ingredients). This proves the binary cursor
+        // lands exactly on every record across all recipes.
+        for (recipe, template) in recipes.iter().zip(manifest.recipes.iter()) {
+            assert_eq!(recipe.gold, template.gold, "{} gold", recipe.name);
+            assert_eq!(recipe.chance, template.chance, "{} chance", recipe.name);
+            assert_eq!(
+                recipe.tools.len(),
+                template.tool_count,
+                "{} tools",
+                recipe.name
+            );
+            assert_eq!(
+                recipe.ingredients.len(),
+                template.ingredient_count,
+                "{} ingredients",
+                recipe.name
+            );
+
+            let mut indices = vec![recipe.output.item_index];
+            indices.extend(recipe.tools.iter().map(|tool| tool.item_index));
+            indices.extend(
+                recipe
+                    .ingredients
+                    .iter()
+                    .map(|ingredient| ingredient.item_index),
+            );
+            assert_eq!(
+                indices, template.item_info_indices,
+                "{} indices",
+                recipe.name
+            );
+        }
+    }
+
+    #[test]
+    fn crystal_recipes_decode_per_ingredient_counts() {
+        let recipes = crystal_recipes();
+
+        // BraveryOrb: a tool plus a multi-count ingredient at a non-100 chance.
+        let bravery = recipes
+            .iter()
+            .find(|recipe| recipe.name == "BraveryOrb")
+            .expect("BraveryOrb recipe");
+        assert_eq!(bravery.gold, 10_000);
+        assert_eq!(bravery.chance, 20);
+        assert_eq!(bravery.output_unique_id, 17);
+        assert_eq!(bravery.output.item_index, 747);
+        assert_eq!(bravery.output.count, 1);
+        assert_eq!(bravery.tools.len(), 1);
+        assert_eq!(bravery.tools[0].item_index, 1348);
+        assert_eq!(bravery.tools[0].count, 1);
+        assert_eq!(
+            bravery
+                .ingredients
+                .iter()
+                .map(|ingredient| (ingredient.item_index, ingredient.count))
+                .collect::<Vec<_>>(),
+            vec![(646, 1), (677, 1), (664, 2)]
+        );
+
+        // GreenPoison: produces a stack of 4 and consumes multi-count ingredients.
+        let poison = recipes
+            .iter()
+            .find(|recipe| recipe.name == "GreenPoison")
+            .expect("GreenPoison recipe");
+        assert_eq!(poison.output.item_index, 710);
+        assert_eq!(poison.output.count, 4);
+        assert_eq!(
+            poison
+                .ingredients
+                .iter()
+                .map(|ingredient| (ingredient.item_index, ingredient.count))
+                .collect::<Vec<_>>(),
+            vec![(864, 1), (868, 2), (866, 4)]
+        );
     }
 
     #[test]

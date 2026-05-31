@@ -6610,7 +6610,11 @@ impl SimulationSession {
                 from,
                 to,
             } => stage5_guild_storage_item_packet(self.app.world_mut(), change_type, from, to),
-            ClientPacket::CraftItem { .. } => vec![ServerPacket::CraftItem { success: false }],
+            ClientPacket::CraftItem {
+                unique_id,
+                count,
+                slots,
+            } => craft_item_impl(self.app.world_mut(), unique_id, count, slots),
             ClientPacket::DepositTradeItem { from, to } => {
                 stage5_deposit_trade_item_packet(self.app.world_mut(), from, to)
             }
