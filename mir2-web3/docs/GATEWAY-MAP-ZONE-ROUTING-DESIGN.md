@@ -284,13 +284,51 @@ oracle (above) as the acceptance gate. It should be a single focused effort,
 serialized through the architect with the `routing.rs` owner — not folded into an
 unrelated change.
 
+### KEY FINDING: visibility is already map-filtered (Steps 2+3 must pair)
+
+Reading the sync path settles the sequencing: **within a single zone, visibility
+is already filtered by map** (`SharedInProcessZoneSessionRuntime::sync_zone_snapshot`
+calls `sync_map_layer(map_file_name, …)` and tracks shared entities/drops
+per-map; `world_snapshot` entities are the player's current-map set). Two players
+in the same zone on *different* maps already don't see each other; two on the same
+map do — **regardless of whether they're in one zone or split into per-map zones.**
+
+Consequences:
+
+- **Map=zone routing changes performance/isolation, NOT visibility.** Its win is
+  that each map's zone can tick on its own core (Step 2) and a load spike on one
+  map can't starve others — not any change to who-sees-whom.
+- **The handoff (Step 3 rebind) alone has no observable benefit and fixes no bug.**
+  Moving a transferring player's *presence* between per-zone state objects doesn't
+  change visibility (already map-filtered) and doesn't change performance until
+  per-zone ticking exists. Implemented alone it is dead groundwork carrying real
+  regression risk to the sync/transfer path — a bad trade.
+- **Therefore Steps 2 and 3 must land together** as one focused effort: the
+  per-zone tick driver (the value) plus the handoff (so a transferred player ends
+  up in the zone that's actually ticking their map). The rebind itself is now
+  precisely scoped + simplified by reading the code:
+  - No character migration needed in-process (the character stays in the
+    per-session `inner` runtime; only the shared-zone *presence* moves).
+  - The rebind is contained: `remove_presence()` (leaves old zone, notifies old
+    observers) → swap `self.zone_state` to `states.entry(new_zone)` (just
+    `SharedInProcessZoneState::new()`, no services) → reset the per-map caches →
+    the existing `sync_zone_snapshot` re-joins the new zone. Inject it at the top
+    of `sync_zone_snapshot` once `map_file_name` is known.
+  - It needs the per-session runtime to carry a router + `states` handle +
+    `current_zone_id` (additive fields, gated by an `Option` so default
+    single-zone behavior is unchanged).
+  - Verification needs an internal accessor (e.g. `current_zone_id`) since there's
+    no observable visibility change — a gameplay oracle can't distinguish it.
+
 ### Status of map=zone work
 - **Step 1 (routing primitive): merged** — `PerMapSessionRouter` (auto 1-zone-per-map).
 - **Integration harness / oracle: merged** — `map_zone_two_sessions_..._see_each_other`
   (baseline) + `map_zone_transfer_changes_map_but_not_zone_today` (gap locked).
-- **Step 2 (per-zone tick) + Step 3 (handoff): designed + scoped above, not yet
-  implemented.** Both change live-loop / cross-layer behavior; they are the focused
-  next efforts, gated by the harness.
+- **Steps 2 + 3 (per-zone tick driver + handoff): designed, scoped, and proven to
+  require pairing (above). Not implemented** — this is the focused next effort;
+  the live-loop tick inversion (Step 2) is its riskiest part and wants live
+  validation, so it should be a deliberate, coordinated change, not a session-tail
+  attempt.
 
 > Status note: this spec was written during a window where the build/test loop
 > was unavailable; it is grounded in the read-verified API above, not in compiled
