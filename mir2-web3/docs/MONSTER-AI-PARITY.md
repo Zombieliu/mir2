@@ -259,6 +259,23 @@ holds an EnergyShield buff. Test:
 `crystal_energy_shield_heals_player_on_landed_hit` (100% proc + 50 HP gain
 offsets an incoming hit so net HP loss is lower than without the shield).
 
+## Combat numerics: Reflect ✅
+Crystal `HumanObject.Attacked` rolls `Random.Next(100) < Stats[Stat.Reflect]`
+and on success reflects the full hit back to the attacker
+(`attacker.Attacked(this, damage, type, false)`), broadcasts
+`SpellEffect.Reflect` (effect 10), and the player takes no damage (`return 0`).
+Added `crystal_player_reflect_proc` in the combat Player branch, checked first
+(before DamageReductionPercent and EnergyShield, matching `Attacked` ordering):
+on a successful roll it schedules the reflected damage to the attacker monster,
+emits the Reflect ObjectEffect for the player, and the caller skips the player
+damage. Inert unless the player carries Reflect on gear/buffs. Test:
+`crystal_reflect_bounces_hit_back_and_spares_player` (100% Reflect → player HP
+unchanged, attacker HP drops, Reflect effect 10 broadcast).
+
+With Reflect, the runtime now covers the full `HumanObject.Attacked` defensive
+numeric suite: accuracy/agility hit roll (both directions), DamageReductionPercent
+(MagicShield/ElementalBarrier), EnergyShield HP-gain, Reflect, and crit.
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:

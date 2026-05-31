@@ -91,6 +91,9 @@ const CRYSTAL_SPELL_EFFECT_FATAL_SWORD: u8 = 1;
 const CRYSTAL_SPELL_EFFECT_MP_EATER: u8 = 17;
 const CRYSTAL_SPELL_EFFECT_HEMORRHAGE: u8 = 18;
 const CRYSTAL_SPELL_EFFECT_CRITICAL: u8 = 11;
+// Crystal `SpellEffect.Reflect` (Shared/Enums.cs): None=0 .. Entrapment=9,
+// Reflect=10, Critical=11.
+const CRYSTAL_SPELL_EFFECT_REFLECT: u8 = 10;
 const CRYSTAL_POISON_BLEEDING: u16 = 128;
 const CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL: u64 = 2;
 const CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
@@ -416,6 +419,59 @@ pub(super) fn crystal_player_damage_reduction_percent(world: &World) -> i32 {
         .map(|buff| user_item_stat_total(&buff.stats, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT))
         .sum();
     equipment.saturating_add(buffs).clamp(0, 100)
+}
+
+/// Crystal `HumanObject.Attacked` Reflect proc: when a hit lands, with
+/// `Stats[Stat.Reflect]`% chance the player takes no damage and reflects the
+/// hit back to the attacker (`attacker.Attacked(this, damage, type, false)`),
+/// broadcasting `SpellEffect.Reflect`. Returns true when the hit was reflected
+/// (the caller then skips the player damage). Inert unless the player carries
+/// Reflect on gear/buffs.
+fn crystal_player_reflect_proc(
+    world: &mut World,
+    attacker_id: u32,
+    damage: i32,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    let reflect = current_player_required_stat_total(
+        world.resource::<InventoryResource>(),
+        world.resource::<BuffResource>(),
+        CRYSTAL_STAT_REFLECT,
+    );
+    if reflect <= 0 {
+        return false;
+    }
+    let Some(player_id) = current_player_object_id(world) else {
+        return false;
+    };
+    // Crystal: `Envir.Random.Next(100) < Stats[Stat.Reflect]`.
+    let roll = deterministic_roll(current_tick, player_id as usize, 0x2E, 100);
+    if roll >= u64::try_from(reflect).unwrap_or(0) {
+        return false;
+    }
+
+    if damage > 0 {
+        if let Some(attacker) = entity_by_object_id(world, attacker_id) {
+            if monster_is_damageable(world, attacker) {
+                schedule_damage_to_monster(
+                    world,
+                    current_tick + 1,
+                    player_id,
+                    attacker,
+                    damage,
+                    None,
+                    None,
+                );
+            }
+        }
+    }
+    packets.push(object_effect_packet(
+        player_id,
+        CRYSTAL_SPELL_EFFECT_REFLECT,
+        0,
+    ));
+    true
 }
 
 /// Crystal `HumanObject.Attacked` EnergyShield proc: when a hit lands, with
@@ -1532,6 +1588,18 @@ pub(super) fn resolve_pending_combat_actions(
                                 object_id,
                             });
                         }
+                        continue;
+                    }
+                    // Crystal Reflect: chance to bounce the hit back to the
+                    // attacker and take no damage. Checked before EnergyShield
+                    // and damage (matching `Attacked` ordering).
+                    if crystal_player_reflect_proc(
+                        world,
+                        action.attacker_id,
+                        action.damage,
+                        current_tick,
+                        packets,
+                    ) {
                         continue;
                     }
                     // Crystal EnergyShield heals on a landed hit, before the

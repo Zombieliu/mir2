@@ -55840,3 +55840,125 @@ fn crystal_energy_shield_heals_player_on_landed_hit() {
         "EnergyShield (100% proc, +50 HP) should offset the incoming hit; without={without} with={with}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Combat numerics: Reflect — Crystal `HumanObject.Attacked` rolls
+// `Random.Next(100) < Stats[Stat.Reflect]` and on success reflects the hit
+// back to the attacker (`attacker.Attacked(this, damage, type, false)`),
+// broadcasts SpellEffect.Reflect, and the player takes no damage.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_reflect_bounces_hit_back_and_spares_player() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    set_player_position(&mut session, player_origin.clone());
+    let player_object_id = current_player_object_id(session.app.world()).expect("player object id");
+
+    // 100% Reflect buff.
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(super::BuffState {
+            key: "test-reflect".to_string(),
+            name: "Test Reflect".to_string(),
+            description: "Synthetic Reflect for the test.".to_string(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![UserItemStat {
+                stat: super::CRYSTAL_STAT_REFLECT,
+                value: 100,
+            }],
+        });
+
+    let current_tick = runtime_tick(session.app.world());
+    let attacker_object_id = 91_800_u32;
+    let attacker = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(attacker_object_id),
+            DisplayName::literal("Reflect Test Mob"),
+            Position(Point {
+                x: player_origin.x + 1,
+                y: player_origin.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 80, max_hp: 80 },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: player_origin.clone(),
+                ai: 0,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+            MonsterCombatStats {
+                agility: 0,
+                accuracy: 0,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    let before_player_hp = session.world_snapshot().player_hp.expect("player hp");
+    let before_mob_hp = session
+        .app
+        .world()
+        .entity(attacker)
+        .get::<MonsterVitals>()
+        .expect("mob vitals")
+        .hp;
+
+    let mut saw_reflect_effect = false;
+    for _ in 0..6 {
+        let packets = session.tick();
+        saw_reflect_effect |= packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectEffect { info }
+                    if info.object_id == player_object_id && info.effect == 10
+            )
+        });
+    }
+
+    let after_player_hp = session.world_snapshot().player_hp.expect("player hp");
+    let after_mob_hp = session
+        .app
+        .world()
+        .entity(attacker)
+        .get::<MonsterVitals>()
+        .expect("mob vitals")
+        .hp;
+
+    assert_eq!(
+        after_player_hp, before_player_hp,
+        "100% Reflect should spare the player from all incoming damage; before={before_player_hp} after={after_player_hp}"
+    );
+    assert!(
+        after_mob_hp < before_mob_hp,
+        "100% Reflect should bounce the hit back to the attacker; before={before_mob_hp} after={after_mob_hp}"
+    );
+    assert!(
+        saw_reflect_effect,
+        "Reflect should broadcast a SpellEffect.Reflect (effect 10) for the player"
+    );
+}
