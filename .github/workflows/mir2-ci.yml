@@ -97,8 +97,10 @@ jobs:
             ${{ runner.os }}-cargo-
       - name: Build workspace
         run: cargo build --workspace --locked
-      # Deterministic gameplay-logic crates (includes the simulation candidate_gate test).
-      # admin-api/gateway integration tests that need Postgres/Redis are intentionally excluded.
+      # Deterministic gameplay-logic crates. mir2-simulation's integration tests
+      # (hero_ai, ranking, security_lifecycle, shared_zone, social_economy_integration,
+      # vertical_slice) plus protocol/game-data unit tests; none require Postgres/Redis/network.
+      # admin-api/gateway tests that need external services are intentionally excluded.
       - name: Test core crates
         run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture
         env:
