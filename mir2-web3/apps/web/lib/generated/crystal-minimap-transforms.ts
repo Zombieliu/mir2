@@ -12,7 +12,7 @@ export const CRYSTAL_MINI_MAP_TRANSFORMS: CrystalMiniMapTransform[] = [
     imageMinY: 0,
     imageMaxX: 1052,
     imageMaxY: 700,
-    projection: "isometric",
+    projection: "linear",
   },
   {
     mapFileName: "0",
@@ -26,6 +26,6 @@ export const CRYSTAL_MINI_MAP_TRANSFORMS: CrystalMiniMapTransform[] = [
     imageMinY: 0,
     imageMaxX: 1052,
     imageMaxY: 700,
-    projection: "isometric",
+    projection: "linear",
   },
 ];

@@ -10,11 +10,17 @@ are **externally constrained** (original art + Crystal-client calibration).
   the player with a tracking dot.
 - **Assets**: ✅ **294/294** maps with `mini_map > 0` have their image in
   `public/original-ui/MMap/` (0 missing; 227 MMap frames cover all indices).
-- **Projection calibration**: ⚠️ only map `0` (Bichon) has a hand-calibrated
-  **isometric** transform in `CRYSTAL_MINI_MAP_TRANSFORMS`. The other 462 maps
-  use `createLinearMiniMapTransform` (a linear world→image fit from the map's
-  real W×H and the image W×H). The dot is placed, but on maps whose MMap frame
-  is an isometric render the placement is approximate rather than pixel-exact.
+- **Projection**: ✅ **verified 1:1 with the Crystal client source.**
+  `MainDialogs.DrawMiniMap` (and `BigMapDialog`) project the player **linearly**:
+  `scaleX = image.Width / map.Width`, `scaleY = image.Height / map.Height`,
+  `imageX = worldX * scaleX`. There is **no isometric minimap code in Crystal**.
+  - The Rust `createLinearMiniMapTransform` fallback is exactly this, so the 462
+    non-calibrated maps were **already 1:1** (my earlier "462 maps need
+    calibration" was a misdiagnosis).
+  - The lone anomaly was map `0`'s hand-tuned `projection: "isometric"`
+    override, which contradicted the source. **Fixed here**: flipped map `0` to
+    `linear` so every map matches Crystal's projection; the minimap-transform
+    test was updated to the source-derived linear values.
 
 ## Big map (大地图)
 - **UI**: ✅ `BigMapDialog` renders the `MMap` frame scaled into the world-map
