@@ -207,6 +207,12 @@ type GatewayWorldItem = {
   description: string;
   durabilityCurrent?: number | null;
   durabilityMax?: number | null;
+  grade?: string;
+  attack?: number | null;
+  defence?: number | null;
+  addedAttack?: number | null;
+  addedDefence?: number | null;
+  weight?: number | null;
 };
 
 type GatewayEquipmentItem = {
@@ -433,6 +439,12 @@ type WorldItem = {
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  grade?: string;
+  attack?: number;
+  defence?: number;
+  addedAttack?: number;
+  addedDefence?: number;
+  weight?: number;
 };
 
 type ItemCommandRef = {
@@ -6254,6 +6266,12 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      grade: item.grade ?? undefined,
+      attack: item.attack ?? undefined,
+      defence: item.defence ?? undefined,
+      addedAttack: item.addedAttack ?? undefined,
+      addedDefence: item.addedDefence ?? undefined,
+      weight: item.weight ?? undefined,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
       key: item.key,
@@ -6266,6 +6284,12 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      grade: item.grade ?? undefined,
+      attack: item.attack ?? undefined,
+      defence: item.defence ?? undefined,
+      addedAttack: item.addedAttack ?? undefined,
+      addedDefence: item.addedDefence ?? undefined,
+      weight: item.weight ?? undefined,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
       key: item.key,
@@ -6278,6 +6302,12 @@ export default function HomePage() {
       description: item.description,
       durabilityCurrent: item.durabilityCurrent ?? undefined,
       durabilityMax: item.durabilityMax ?? undefined,
+      grade: item.grade ?? undefined,
+      attack: item.attack ?? undefined,
+      defence: item.defence ?? undefined,
+      addedAttack: item.addedAttack ?? undefined,
+      addedDefence: item.addedDefence ?? undefined,
+      weight: item.weight ?? undefined,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,

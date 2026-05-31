@@ -145,6 +145,12 @@ export type DisplayItem = {
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  grade?: string;
+  attack?: number;
+  defence?: number;
+  addedAttack?: number;
+  addedDefence?: number;
+  weight?: number;
 };
 
 export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;

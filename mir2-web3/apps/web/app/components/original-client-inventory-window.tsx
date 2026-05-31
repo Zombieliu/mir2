@@ -676,6 +676,12 @@ export function InventoryWindow({
                 quantity={item.quantity}
                 durabilityCurrent={item.durabilityCurrent}
                 durabilityMax={item.durabilityMax}
+                grade={item.grade}
+                attack={item.attack}
+                defence={item.defence}
+                addedAttack={item.addedAttack}
+                addedDefence={item.addedDefence}
+                weight={item.weight}
                 align={slot.x > 210 ? "left" : "right"}
               />
             </button>
@@ -999,6 +1005,12 @@ export function InventoryWindow({
                     quantity={item.quantity}
                     durabilityCurrent={item.durabilityCurrent}
                     durabilityMax={item.durabilityMax}
+                grade={item.grade}
+                attack={item.attack}
+                defence={item.defence}
+                addedAttack={item.addedAttack}
+                addedDefence={item.addedDefence}
+                weight={item.weight}
                     align={slot.x > 270 ? "left" : "right"}
                   />
                 </button>

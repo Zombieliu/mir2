@@ -13,7 +13,20 @@ export type OriginalItemTooltipProps = {
   durabilityMax?: number;
   attack?: number;
   defence?: number;
+  addedAttack?: number;
+  addedDefence?: number;
+  weight?: number;
+  grade?: string;
   align?: ItemTooltipAlign;
+};
+
+// Crystal item-grade name colours.
+const GRADE_COLORS: Record<string, string> = {
+  common: "#ffffff",
+  rare: "#5aa9ff",
+  legendary: "#ff9a3c",
+  mythical: "#c56bff",
+  heroic: "#ff5a4d",
 };
 
 export function OriginalItemTooltip({
@@ -25,6 +38,10 @@ export function OriginalItemTooltip({
   durabilityMax,
   attack,
   defence,
+  addedAttack,
+  addedDefence,
+  weight,
+  grade,
   align = "right",
 }: OriginalItemTooltipProps) {
   const descriptionLines = description
@@ -44,16 +61,25 @@ export function OriginalItemTooltip({
       value: `${durabilityCurrent}/${durabilityMax}`,
     });
   }
-  if (attack !== undefined && attack > 0) {
-    rows.push({ label: t("ui.attack", [], "Attack"), value: String(attack) });
+  const baseAttack = attack ?? 0;
+  const bonusAttack = addedAttack ?? 0;
+  if (baseAttack > 0 || bonusAttack > 0) {
+    rows.push({ label: t("ui.attack", [], "Attack"), value: statValue(baseAttack, bonusAttack) });
   }
-  if (defence !== undefined && defence > 0) {
-    rows.push({ label: t("ui.defence", [], "Defence"), value: String(defence) });
+  const baseDefence = defence ?? 0;
+  const bonusDefence = addedDefence ?? 0;
+  if (baseDefence > 0 || bonusDefence > 0) {
+    rows.push({ label: t("ui.defence", [], "Defence"), value: statValue(baseDefence, bonusDefence) });
   }
+  if (weight !== undefined && weight > 0) {
+    rows.push({ label: t("ui.weight", [], "Weight"), value: String(weight) });
+  }
+
+  const gradeColor = grade ? GRADE_COLORS[grade] : undefined;
 
   return (
     <div className={`original-item-tooltip align-${align}`} role="tooltip">
-      <strong>{name}</strong>
+      <strong style={gradeColor ? { color: gradeColor } : undefined}>{name}</strong>
       {descriptionLines.length ? (
         <div className="original-item-tooltip-description">
           {descriptionLines.map((line) => (
@@ -73,4 +99,11 @@ export function OriginalItemTooltip({
       ) : null}
     </div>
   );
+}
+
+function statValue(base: number, bonus: number) {
+  if (bonus > 0) {
+    return `${base} (+${bonus})`;
+  }
+  return String(base);
 }

@@ -125,6 +125,9 @@ impl ItemState {
             grade: self.grade,
             added_attack: self.added_attack,
             added_defence: self.added_defence,
+            attack: self.attack,
+            defence: self.defence,
+            weight: self.weight,
         }
     }
 

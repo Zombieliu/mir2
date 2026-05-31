@@ -2724,6 +2724,9 @@ pub struct WorldItemSnapshot {
     pub grade: ItemGrade,
     pub added_attack: i32,
     pub added_defence: i32,
+    pub attack: i32,
+    pub defence: i32,
+    pub weight: u16,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
