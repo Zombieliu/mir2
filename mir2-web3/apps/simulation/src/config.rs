@@ -2728,6 +2728,14 @@ pub struct WorldItemSnapshot {
     pub defence: i32,
     pub weight: u16,
     pub added_stats: Vec<UserItemStat>,
+    #[serde(default)]
+    pub item_type: u8,
+    #[serde(default)]
+    pub required_type: u8,
+    #[serde(default)]
+    pub required_class: u8,
+    #[serde(default)]
+    pub required_amount: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

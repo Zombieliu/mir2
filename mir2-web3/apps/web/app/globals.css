@@ -5536,3 +5536,29 @@ body.mir-dragging-item * {
   color: #b89a63;
   text-align: right;
 }
+
+/* ---- Item tooltip equip requirements ---- */
+.original-item-tooltip-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(166, 130, 77, 0.3);
+}
+
+.original-item-tooltip-requirements span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.original-item-tooltip-requirements em {
+  color: #b89a63;
+  font-style: normal;
+}
+
+.original-item-tooltip-requirements b {
+  color: #ff8a7a;
+}

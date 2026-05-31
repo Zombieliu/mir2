@@ -111,6 +111,7 @@ pub(super) struct ItemState {
 
 impl ItemState {
     pub(super) fn snapshot(&self, language: LanguageCode) -> WorldItemSnapshot {
+        let template = crystal_item_template_for_item_key(&self.key);
         WorldItemSnapshot {
             key: self.key.clone(),
             name: localized_item_name(language, &self.key, &self.name),
@@ -129,6 +130,10 @@ impl ItemState {
             defence: self.defence,
             weight: self.weight,
             added_stats: self.added_stats.clone(),
+            item_type: template.as_ref().map(|t| t.item_type).unwrap_or(0),
+            required_type: template.as_ref().map(|t| t.required_type).unwrap_or(0),
+            required_class: template.as_ref().map(|t| t.required_class).unwrap_or(0),
+            required_amount: template.as_ref().map(|t| t.required_amount).unwrap_or(0),
         }
     }
 

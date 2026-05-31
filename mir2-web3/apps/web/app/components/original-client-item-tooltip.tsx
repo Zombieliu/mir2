@@ -18,8 +18,42 @@ export type OriginalItemTooltipProps = {
   weight?: number;
   grade?: string;
   addedStats?: Array<{ stat: number; value: number }>;
+  requiredType?: number;
+  requiredClass?: number;
+  requiredAmount?: number;
   align?: ItemTooltipAlign;
 };
+
+// Crystal RequiredType enum -> label.
+const REQUIRED_TYPE_LABELS: Record<number, string> = {
+  0: "Level",
+  1: "AC",
+  2: "MAC",
+  3: "DC",
+  4: "MC",
+  5: "SC",
+  6: "Max Level",
+  7: "AC",
+  8: "MAC",
+  9: "DC",
+  10: "MC",
+  11: "SC",
+};
+
+// Crystal RequiredClass bitmask.
+const REQUIRED_CLASS_FLAGS: Array<{ flag: number; label: string }> = [
+  { flag: 1, label: "War" },
+  { flag: 2, label: "Wiz" },
+  { flag: 4, label: "Tao" },
+  { flag: 8, label: "Sin" },
+  { flag: 16, label: "Archer" },
+];
+
+function requiredClassLabel(mask: number): string | null {
+  if (!mask || mask === 31) return null; // 0 or all-classes => no restriction
+  const names = REQUIRED_CLASS_FLAGS.filter((entry) => (mask & entry.flag) !== 0).map((entry) => entry.label);
+  return names.length ? names.join("/") : null;
+}
 
 // Crystal item-grade name colours.
 const GRADE_COLORS: Record<string, string> = {
@@ -64,6 +98,9 @@ export function OriginalItemTooltip({
   weight,
   grade,
   addedStats,
+  requiredType,
+  requiredClass,
+  requiredAmount,
   align = "right",
 }: OriginalItemTooltipProps) {
   const descriptionLines = description
@@ -112,6 +149,20 @@ export function OriginalItemTooltip({
     rows.push({ label: t("ui.weight", [], "Weight"), value: String(weight) });
   }
 
+  // Equip requirements render as their own (red-tinted) rows below the stats.
+  const requirementRows: Array<{ label: string; value: string }> = [];
+  if (requiredAmount !== undefined && requiredAmount > 0) {
+    const reqLabel = requiredType !== undefined ? REQUIRED_TYPE_LABELS[requiredType] : undefined;
+    requirementRows.push({
+      label: t("ui.require", [], "Requires"),
+      value: `${reqLabel ?? t("ui.level", [], "Level")} ${requiredAmount}`,
+    });
+  }
+  const classLabel = requiredClass !== undefined ? requiredClassLabel(requiredClass) : null;
+  if (classLabel) {
+    requirementRows.push({ label: t("ui.class", [], "Class"), value: classLabel });
+  }
+
   const gradeColor = grade ? GRADE_COLORS[grade] : undefined;
 
   return (
@@ -127,6 +178,16 @@ export function OriginalItemTooltip({
       {rows.length ? (
         <div className="original-item-tooltip-stats">
           {rows.map((row) => (
+            <span key={row.label}>
+              <em>{row.label}</em>
+              <b>{row.value}</b>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {requirementRows.length ? (
+        <div className="original-item-tooltip-requirements">
+          {requirementRows.map((row) => (
             <span key={row.label}>
               <em>{row.label}</em>
               <b>{row.value}</b>

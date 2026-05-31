@@ -214,6 +214,10 @@ type GatewayWorldItem = {
   addedDefence?: number | null;
   weight?: number | null;
   addedStats?: Array<{ stat: number; value: number }> | null;
+  itemType?: number | null;
+  requiredType?: number | null;
+  requiredClass?: number | null;
+  requiredAmount?: number | null;
 };
 
 type GatewayEquipmentItem = {
@@ -461,6 +465,10 @@ type WorldItem = {
   addedDefence?: number;
   weight?: number;
   addedStats?: Array<{ stat: number; value: number }>;
+  itemType?: number;
+  requiredType?: number;
+  requiredClass?: number;
+  requiredAmount?: number;
 };
 
 const TRADE_SLOT_COUNT = 10;
@@ -6540,6 +6548,10 @@ export default function HomePage() {
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
       addedStats: item.addedStats ?? undefined,
+      itemType: item.itemType ?? undefined,
+      requiredType: item.requiredType ?? undefined,
+      requiredClass: item.requiredClass ?? undefined,
+      requiredAmount: item.requiredAmount ?? undefined,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
       key: item.key,
@@ -6559,6 +6571,10 @@ export default function HomePage() {
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
       addedStats: item.addedStats ?? undefined,
+      itemType: item.itemType ?? undefined,
+      requiredType: item.requiredType ?? undefined,
+      requiredClass: item.requiredClass ?? undefined,
+      requiredAmount: item.requiredAmount ?? undefined,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
       key: item.key,
@@ -6578,6 +6594,10 @@ export default function HomePage() {
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
       addedStats: item.addedStats ?? undefined,
+      itemType: item.itemType ?? undefined,
+      requiredType: item.requiredType ?? undefined,
+      requiredClass: item.requiredClass ?? undefined,
+      requiredAmount: item.requiredAmount ?? undefined,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,

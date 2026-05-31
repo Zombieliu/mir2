@@ -683,6 +683,9 @@ export function InventoryWindow({
                 addedDefence={item.addedDefence}
                 weight={item.weight}
                 addedStats={item.addedStats}
+                requiredType={item.requiredType}
+                requiredClass={item.requiredClass}
+                requiredAmount={item.requiredAmount}
                 align={slot.x > 210 ? "left" : "right"}
               />
             </button>
@@ -1013,6 +1016,9 @@ export function InventoryWindow({
                 addedDefence={item.addedDefence}
                 weight={item.weight}
                 addedStats={item.addedStats}
+                requiredType={item.requiredType}
+                requiredClass={item.requiredClass}
+                requiredAmount={item.requiredAmount}
                     align={slot.x > 270 ? "left" : "right"}
                   />
                 </button>
