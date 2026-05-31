@@ -38543,6 +38543,11 @@ fn magic_packet_crystal_ultimate_enhancer_consumes_amulet_and_scales_target_clas
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     {
+        let player = player_entity(session.app.world()).expect("player entity");
+        let origin = find_combat_origin_box(&session, player, 2, 2, 2, 2);
+        set_player_position(&mut session, origin);
+    }
+    {
         let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         let weapon = inventory
             .equipment_items
@@ -40079,6 +40084,8 @@ fn magic_packet_crystal_special_arrow_shots_queue_damage_and_apply_visible_buffs
             40,
         );
         set_current_player_mp(&mut session, 500);
+        // PoisonShot needs an equipped poison amulet; harmless for VampireShot.
+        equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::Amulet);
         let player = player_entity(session.app.world()).expect("player entity");
         let origin = find_combat_origin_box(&session, player, 6, 2, 2, 2);
         set_player_position(&mut session, origin.clone());
