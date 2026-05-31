@@ -55738,3 +55738,105 @@ fn crystal_player_damage_reduction_percent_reduces_incoming_monster_damage() {
         "50% DamageReductionPercent (MagicShield) should reduce incoming damage; unshielded={unshielded} shielded={shielded}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Combat numerics: EnergyShield HP-gain-on-hit — Crystal `HumanObject.Attacked`
+// rolls `Random.Next(100) < EnergyShieldPercent` on a landed hit and, on
+// success, restores `EnergyShieldHPGain` HP (capped at max). Previously the
+// EnergyShield buff applied the stats but they were never consumed.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_energy_shield_heals_player_on_landed_hit() {
+    fn net_hp_loss(with_energy_shield: bool) -> i32 {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+        let player_origin = Point { x: 900, y: 900 };
+        set_player_position(&mut session, player_origin.clone());
+
+        if with_energy_shield {
+            // 100% proc chance + a large HP gain so the heal clearly offsets the
+            // incoming hit.
+            session
+                .app
+                .world_mut()
+                .resource_mut::<BuffResource>()
+                .buffs
+                .push(super::BuffState {
+                    key: "test-energy-shield".to_string(),
+                    name: "Test Energy Shield".to_string(),
+                    description: "Synthetic EnergyShield for the test.".to_string(),
+                    expires_at_tick: u64::MAX,
+                    attack_bonus: 0,
+                    defence_bonus: 0,
+                    stats: vec![
+                        UserItemStat {
+                            stat: super::CRYSTAL_STAT_ENERGY_SHIELD_PERCENT,
+                            value: 100,
+                        },
+                        UserItemStat {
+                            stat: super::CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN,
+                            value: 50,
+                        },
+                    ],
+                });
+        }
+
+        let current_tick = runtime_tick(session.app.world());
+        session.app.world_mut().spawn((
+            ObjectId(91_700_u32),
+            DisplayName::literal("Energy Shield Test Mob"),
+            Position(Point {
+                x: player_origin.x + 1,
+                y: player_origin.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 80, max_hp: 80 },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: player_origin.clone(),
+                ai: 0,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+            MonsterCombatStats {
+                agility: 0,
+                accuracy: 0,
+            },
+        ));
+        sync_visible_objects(&mut session);
+
+        let before = session.world_snapshot().player_hp.expect("player hp");
+        for _ in 0..3 {
+            let _ = session.tick();
+        }
+        let after = session.world_snapshot().player_hp.expect("player hp");
+        before - after
+    }
+
+    let without = net_hp_loss(false);
+    let with = net_hp_loss(true);
+    assert!(
+        without > 0,
+        "baseline monster hit should reduce player HP, got {without}"
+    );
+    assert!(
+        with < without,
+        "EnergyShield (100% proc, +50 HP) should offset the incoming hit; without={without} with={with}"
+    );
+}

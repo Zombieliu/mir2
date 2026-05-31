@@ -244,6 +244,21 @@ DamageReductionPercent buff (e.g. MagicShield); no effect otherwise, so the
 `crystal_player_damage_reduction_percent_reduces_incoming_monster_damage`
 (a RightGuard hit lands for less with a 50% buff than without).
 
+## Combat numerics: EnergyShield HP-gain-on-hit ✅
+Crystal `HumanObject.Attacked` rolls `Random.Next(100) <
+Stats[Stat.EnergyShieldPercent]` on a landed hit and, on success, restores
+`Stats[Stat.EnergyShieldHPGain]` HP (capped at max HP). The player already
+gained an EnergyShield buff (with both stats) from casting the spell, but —
+like MagicShield — the stats were never consumed. Added
+`crystal_player_energy_shield_proc` in the combat Player branch
+(`resolve_pending_combat_actions`), firing before the damage is applied
+(matching Crystal's ordering in `Attacked`) and only on a hit that lands
+(after the dodge roll). Scoped to combat hits, not poison/hazard ticks
+(Crystal's EnergyShield only triggers in `Attacked`). Inert unless the player
+holds an EnergyShield buff. Test:
+`crystal_energy_shield_heals_player_on_landed_hit` (100% proc + 50 HP gain
+offsets an incoming hit so net HP loss is lower than without the shield).
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:

@@ -20,7 +20,9 @@ use super::drops::{
     HarvestTargetSelection,
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability, total_attack_bonus};
-use super::items::{crystal_equipment_added_stat_total, user_item_stat_total};
+use super::items::{
+    crystal_equipment_added_stat_total, current_player_required_stat_total, user_item_stat_total,
+};
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
 };
@@ -414,6 +416,57 @@ pub(super) fn crystal_player_damage_reduction_percent(world: &World) -> i32 {
         .map(|buff| user_item_stat_total(&buff.stats, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT))
         .sum();
     equipment.saturating_add(buffs).clamp(0, 100)
+}
+
+/// Crystal `HumanObject.Attacked` EnergyShield proc: when a hit lands, with
+/// `Stats[Stat.EnergyShieldPercent]`% chance the player gains
+/// `Stats[Stat.EnergyShieldHPGain]` HP (capped at max HP). Heals before the
+/// damage is subtracted (Crystal applies it earlier in `Attacked`). Inert
+/// unless the player holds an EnergyShield buff.
+fn crystal_player_energy_shield_proc(
+    world: &mut World,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let inventory = world.resource::<InventoryResource>();
+    let buffs = world.resource::<BuffResource>();
+    let percent =
+        current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_ENERGY_SHIELD_PERCENT);
+    if percent <= 0 {
+        return;
+    }
+    let hp_gain =
+        current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN);
+    if hp_gain <= 0 {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(player_id) = current_player_object_id(world) else {
+        return;
+    };
+    // Crystal: `Envir.Random.Next(100) < EnergyShieldPercent`.
+    let roll = deterministic_roll(current_tick, player_id as usize, 0xE5, 100);
+    if roll >= u64::try_from(percent).unwrap_or(0) {
+        return;
+    }
+
+    let healed = {
+        let mut entity = world.entity_mut(player);
+        entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+            if vitals.hp > 0 {
+                vitals.hp = (vitals.hp.saturating_add(hp_gain)).min(vitals.max_hp);
+            }
+            *vitals
+        })
+    };
+    if let Some(vitals) = healed {
+        world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+        if let Some(info) = object_health_info_for_entity(world, player, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+    }
 }
 
 fn crystal_monster_accuracy(world: &World, monster_entity: Entity) -> i32 {
@@ -1481,6 +1534,9 @@ pub(super) fn resolve_pending_combat_actions(
                         }
                         continue;
                     }
+                    // Crystal EnergyShield heals on a landed hit, before the
+                    // damage is applied.
+                    crystal_player_energy_shield_proc(world, current_tick, packets);
                     let outcome = apply_damage_to_current_player(world, action.damage, packets);
                     if outcome.applied {
                         packets.push(player_struck_packet(action.attacker_id));
