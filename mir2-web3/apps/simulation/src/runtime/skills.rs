@@ -331,7 +331,9 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::BlessedArmour
         | Spell::UltimateEnhancer
         // Assassin self-centred hide that also mists nearby tiles.
-        | Spell::MoonMist => SkillCastKind::SelfOnly,
+        | Spell::MoonMist
+        // Friendly decoy trap placed at the caster's own feet (no target/aim).
+        | Spell::Stonetrap => SkillCastKind::SelfOnly,
         Spell::FireWall
         | Spell::FireBang
         | Spell::IceStorm
@@ -344,7 +346,6 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::Trap
         | Spell::ExplosiveTrap
         | Spell::DelayedExplosion
-        | Spell::Stonetrap
         | Spell::Portal
         | Spell::Blink
         | Spell::Teleport

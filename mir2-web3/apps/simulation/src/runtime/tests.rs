@@ -46356,6 +46356,8 @@ fn hero_spell_toggle_routes_crystal_default_toggle_to_spawned_hero() {
 fn casting_summon_shinsu_spawns_friendly_player_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
     let cast_packets = session.cast_skill("summon-shinsu");
@@ -46395,6 +46397,8 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
 fn casting_summon_shinsu_recalls_existing_pet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let first_position = Point { x: 333, y: 267 };
     let second_position = Point { x: 360, y: 267 };
     set_player_position(&mut session, first_position.clone());
@@ -46872,6 +46876,8 @@ fn friendly_spitting_toad_uses_range_attack_against_hostile_monster() {
 fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, origin.clone());
 
