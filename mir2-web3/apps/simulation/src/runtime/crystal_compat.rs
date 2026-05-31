@@ -50,8 +50,11 @@ pub(super) const REVIVING_ZOMBIE_MAX_REVIVALS: u8 = 2;
 pub(super) const REVIVING_ZOMBIE_LIFECOUNT_SALT: usize = 25_001;
 pub(super) const REVIVING_ZOMBIE_DELAY_SALT: usize = 25_002;
 // Crystal `PoisonType` bit flags (`Shared/Enums.cs`). `MonsterPoisonState.poison` stores these.
+// GREEN/SLOW round out the documented bit set but are only referenced by the mask unit test.
+#[allow(dead_code)]
 pub(super) const CRYSTAL_POISON_GREEN: u16 = 1;
 pub(super) const CRYSTAL_POISON_RED: u16 = 2;
+#[allow(dead_code)]
 pub(super) const CRYSTAL_POISON_SLOW: u16 = 4;
 pub(super) const CRYSTAL_POISON_FROZEN: u16 = 8;
 pub(super) const CRYSTAL_POISON_STUN: u16 = 16;
