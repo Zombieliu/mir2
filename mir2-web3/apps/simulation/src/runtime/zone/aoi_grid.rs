@@ -45,7 +45,10 @@ impl<K: Ord + Clone> AoiGrid<K> {
     }
 
     fn cell_of(&self, point: &Point) -> (i32, i32) {
-        (point.x.div_euclid(self.cell_w), point.y.div_euclid(self.cell_h))
+        (
+            point.x.div_euclid(self.cell_w),
+            point.y.div_euclid(self.cell_h),
+        )
     }
 
     /// Insert (or relocate) `id` at `point`.
@@ -120,7 +123,7 @@ impl<K: Ord + Clone> AoiGrid<K> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::zone::aoi::{AOI_X_RANGE, AOI_Y_RANGE, points_visible};
+    use crate::runtime::zone::aoi::{points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 
     fn p(x: i32, y: i32) -> Point {
         Point { x, y }
@@ -131,9 +134,13 @@ mod tests {
         let mut state = seed;
         let mut out = Vec::new();
         for id in 0..count as u32 {
-            state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let x = (state >> 33) as i32 % span - span / 2;
-            state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let y = (state >> 33) as i32 % span - span / 2;
             out.push((id, p(x, y)));
         }

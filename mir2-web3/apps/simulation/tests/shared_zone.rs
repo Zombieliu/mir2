@@ -7863,3 +7863,81 @@ fn zone_movement_writes_back_authoritative_transform_to_session() {
     assert_eq!((self_player.x, self_player.y), (position.x, position.y));
     assert_eq!(self_player.direction, direction);
 }
+
+// --- AOI grid (L1 scaling) regression coverage ---
+// These lock the behavior of the spatial-grid visibility path: the grid must
+// never drop a visible peer (it returns a superset that the exact visibility
+// test filters) and must still emit appear/remove as players cross the AOI
+// boundary. AOI range is 18x14 (see zone::aoi).
+
+#[test]
+fn aoi_grid_players_far_apart_do_not_see_each_other() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    // 60 tiles away on X — far outside the 18-wide AOI, several grid cells over.
+    let outbounds = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 390, 270)));
+
+    assert!(
+        !has_packet(&outbounds, &first, |packet| matches!(
+            packet,
+            ServerPacket::ObjectPlayer { info } if info.name == "Blade"
+        )),
+        "a player joining far outside AOI range must not appear"
+    );
+    assert!(!has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPlayer { info } if info.name == "Scout"
+    )));
+}
+
+#[test]
+fn aoi_grid_walking_into_range_triggers_appearance() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+
+    // Start just outside AOI X-range (19 > 18) so they are mutually invisible,
+    // then walk the second player one tile left into range. This crosses toward
+    // (and possibly across) a grid-cell boundary, exercising the
+    // neighbors-union-visible candidate set in diff_visibility_for.
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    let join_out = zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 349, 270)));
+    assert!(
+        !has_packet(&join_out, &first, |packet| matches!(
+            packet,
+            ServerPacket::ObjectPlayer { info } if info.object_id == 102
+        )),
+        "precondition: peers start out of AOI range"
+    );
+
+    let mut now = 0u64;
+    let mut saw_appearance = false;
+    // Walk left repeatedly; within a few steps 102 enters 101's AOI range and
+    // 101 must receive an ObjectPlayer for 102.
+    for _ in 0..6 {
+        zone.handle(ZoneCommand::Walk {
+            session_id: second.clone(),
+            direction: MirDirection::Left,
+            seq: 1,
+            now_ms: now,
+        });
+        let outbounds = zone.tick(now);
+        if has_packet(
+            &outbounds,
+            &first,
+            |packet| matches!(packet, ServerPacket::ObjectPlayer { info } if info.object_id == 102),
+        ) {
+            saw_appearance = true;
+            break;
+        }
+        now += 700; // > ZONE_WALK_DELAY_MS so each walk commits
+    }
+
+    assert!(
+        saw_appearance,
+        "second player walking into AOI range must appear to the first via the grid path"
+    );
+}
