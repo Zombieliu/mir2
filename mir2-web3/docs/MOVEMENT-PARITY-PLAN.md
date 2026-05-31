@@ -1,10 +1,33 @@
 # Movement System → 90%+ Parity: Plan & Progress
 
-Status: **in progress** on branch `claude/optimistic-mayer-gswKV`.
+Status: **in progress** on branch `claude/optimistic-mayer-gswKV` (PR #8).
 
 This document captures the full implementation plan to bring the **movement
 system** to production (Crystal/Mir2 1:1) parity, plus the exact edit sites, so
 work can continue without re-deriving the analysis.
+
+## Progress summary
+
+| # | Work item | Status |
+|---|-----------|--------|
+| 1 | Server-side A* pathfinding (click-to-move routes around blockers) | ✅ done + tests |
+| 2 | Conquest-gated map transfers (open in peace, seal at war) | ✅ done + tests |
+| 3 | Frozen blocks movement + Slow doubles cadence (zone) | ✅ done + tests |
+| 4 | Mount speed boost (zone, via MountUpdate state) | ✅ done + tests |
+| 5 | AOI interest management w/ hysteresis | ⬜ next |
+| 6 | Roadmap doc refresh | ⬜ pending |
+
+Commits: `01844886` (A* module + plan), `b6f1c956` (wire A*, conquest, cadence),
+`d9e10ce5` (mount cadence zone test). New unit tests: 6 pathfind + 5 zone
+cadence/status + 3 conquest gate; new integration test: mount cadence. Full
+130-test `shared_zone` suite stays green; whole workspace builds.
+
+Note on #4 scope: rather than adding `ZoneJoin` mount fields + a dedicated
+`SetMount` command, the mount state rides the existing observer-action path —
+a client `MountUpdate` broadcast through `ZoneCommand::BroadcastPackets` flips
+`ZonePlayer.riding_mount`/`mount_type` via `apply_observer_action_state`
+(`zone/packets.rs`), which `zone_player_move_delay_ms` then honours. `no_mount`
+map enforcement + dismount-on-hit remain follow-ups (see item 4 notes below).
 
 > NOTE on environment: this session repeatedly hit very long tool-result
 > delivery stalls (a runaway background research agent ran ~40 min before dying;
@@ -44,67 +67,64 @@ Real remaining gaps → the work items below.
 
 ## Work items (each independently committable + testable)
 
-### 1. Server-side A* pathfinding — DONE (module written), needs wiring
-- File added: `apps/simulation/src/runtime/pathfind.rs` (bounded 8-dir A*,
-  Chebyshev heuristic, uses `movement::can_occupy`). **Currently NOT declared in
-  `mod.rs`, so it is inert / build stays green.**
-- TODO wiring:
-  - `runtime/mod.rs`: add `mod pathfind;` (near the other `mod` lines).
-  - `runtime/movement.rs::move_to_with_mode_impl` (lines ~557-608): replace the
-    straight-line `step_point_toward_by` + `can_traverse_between` candidate with
-    `pathfind::next_step_toward(world, &next_position, &target,
-    move_distance_for_mode(running), Some(player_entity))`, falling back to the
-    existing straight-line logic when it returns `None` (graceful degradation).
-  - Optionally use it in `follow_player_with_stage5_hero` for hero routing.
-  - Test: place a wall between player and click target; assert the player reaches
-    a tile that requires a detour (straight line would be blocked).
+### 1. Server-side A* pathfinding — ✅ DONE
+- `apps/simulation/src/runtime/pathfind.rs`: bounded 8-dir A*, Chebyshev
+  heuristic. Refactored into a pure closure-based core `find_path_with` (unit
+  testable, no `World`) + a `World`-backed wrapper `find_path` using
+  `movement::can_occupy`. Declared in `mod.rs`.
+- Wired into `movement.rs::move_to_with_mode_impl`: a new `pathfind_next_step`
+  helper picks the next routed tile (run extends to the 2nd tile only when the
+  route keeps the same direction, else degrades to a walk step); falls back to
+  the original straight-line `step_point_toward_by`/`can_traverse_between` when
+  no full route exists (e.g. clicking onto an occupied/monster tile), preserving
+  the legacy "approach then stop" feel.
+- Tests (`pathfind::tests`): open-ground diagonal, wall detour, walled-off goal,
+  blocked goal tile, range cap, already-on-goal.
+- Follow-up (optional): also route `follow_player_with_stage5_hero` and monster
+  AI through `find_path` so heroes/monsters path around obstacles too.
 
-### 2. Conquest-gated map transfers — `map.rs` + `config.rs`
-- `config.rs` `MapTransferRecord` (struct @1741): add `pub conquest_index: i32`.
-  Update ALL constructors (grep `MapTransferRecord {`): map.rs:310 (set from
-  `movement.conquest_index`), config.rs defaults / any tests (set `0`).
-- `map.rs::crystal_movement_transfer_records_for_map` (line 300): change filter
-  from `|| movement.conquest_index > 0` (drop) to KEEP conquest movements, store
-  `conquest_index: movement.conquest_index`. Keep dropping `need_hole`/`need_move`.
-- Add gate helper (has `world`):
-  ```rust
-  fn conquest_transfer_allowed(world: &World, conquest_index: i32) -> bool {
-      conquest_index <= 0
-          || !world.resource::<MapRuntimeResource>()
-              .conquest_wars.get(&conquest_index).copied().unwrap_or(false)
-  }
-  ```
-- Apply gate in `transfer_for_current_player_position` (line 264 `.find`) and
-  `is_current_map_transfer_source` (line 277 crystal branch `.any`): only treat
-  the cell as an active transfer when `conquest_transfer_allowed`. During an
-  active war the cell is still walkable (don't add it as a transfer source).
-- Test: war active (conquest_wars[idx]=true) ⇒ no transfer; war off ⇒ transfer.
+### 2. Conquest-gated map transfers — ✅ DONE
+- `config.rs` `MapTransferRecord`: added `pub conquest_index: i32` (0 =
+  unconditional). All constructors updated (map.rs from `movement.conquest_index`,
+  config.rs starter transfer = 0).
+- `map.rs::crystal_movement_transfer_records_for_map`: no longer drops conquest
+  movements — keeps them and carries `conquest_index`; still drops
+  `need_hole`/`need_move`.
+- Gate helpers: `conquest_transfer_allowed(&MapRuntimeResource, i32)` delegating
+  to a pure, testable `conquest_transfer_allowed_with(&BTreeMap<i32,bool>, i32)`.
+  Applied in `transfer_for_current_player_position` and
+  `is_current_map_transfer_source` (both manifest + config branches). During an
+  active war the cell stays walkable but does not transfer.
+- Tests (`conquest_gate_tests`): unconditional always allowed; opens in peace /
+  when unknown; seals during active war (and a different conquest is unaffected).
+  Existing `walk_onto_crystal_manifest_movement_transfers_map` (peacetime
+  transfer) still passes.
 
-### 3. Slow-debuff cadence + Frozen blocks (zone) — `zone/runtime.rs`
-- `zone_player_status_blocks_movement` (7249): also block on
-  `CRYSTAL_POISON_FROZEN` (8) while unexpired (frozen = cannot move, matches
-  Crystal).
-- Add `zone_player_move_delay_ms(player, effective_running, now_ms)`:
-  base = `movement_delay_ms(effective_running)`; if `native_status_poison &
-  CRYSTAL_POISON_SLOW (4)` and unexpired ⇒ `base = base * 2`; if mounted (see #4)
-  ⇒ `base = base * 2 / 3`. Use it in `consume_step_action` line 964-965 in place
-  of `movement_delay_ms(effective_running)`.
-- Test: slowed player's `movement_ready_at_ms` advances 2× a normal player's.
+### 3. Slow-debuff cadence + Frozen blocks (zone) — ✅ DONE
+- `zone_player_status_blocks_movement`: now also blocks on `CRYSTAL_POISON_FROZEN`
+  (8) while unexpired (frozen = cannot move, matching paralysis/stun).
+- Added `zone_player_move_delay_ms(player, running, now_ms)`: base =
+  `movement_delay_ms(running)`; mounted (`riding_mount && mount_type>=0`) ⇒
+  `base*2/3`; `zone_player_slowed` (CRYSTAL_POISON_SLOW=4, unexpired) ⇒ `base*2`.
+  Wired into `consume_step_action` (replaces the bare `movement_delay_ms`).
+- Tests (`movement_status_tests`): frozen blocks until expiry; green poison alone
+  does not block; slow doubles the delay (and reverts on expiry).
 
-### 4. Mount speed + restriction (zone) — types/runtime/manager/join + protocol
-- Carry mount into the zone: add `mount_type: i16`, `riding_mount: bool` to
-  `ZoneJoin` (zone/types.rs) and `ZonePlayer::from_join`; populate from the
-  session's `MountResource` where `active_zone_join_snapshot` is built.
-- Speed: in `zone_player_move_delay_ms` apply the mounted factor (see #3). Mounts
-  also let you move at run distance — optional: treat mounted walk as run.
-- Restriction (`no_mount` maps): plumb the map's `no_mount` flag into
-  `ZoneRuntime` (alongside `collision`); when a player joins / the zone is for a
-  `no_mount` map, force `riding_mount=false` and emit `MountUpdate`.
-- Add `ZoneCommand::SetMount { session_id, mount_type, riding_mount }` →
-  updates player + broadcasts `ServerPacket::MountUpdate` to AOI observers.
-- Dismount-on-hit is combat-adjacent; do it where the zone reduces player HP
-  (native monster attack application) — set `riding_mount=false` + MountUpdate.
-- Test: mounted player faster than unmounted; no_mount map forces dismount.
+### 4. Mount speed + restriction (zone) — ✅ DONE (speed); restrictions = follow-up
+- Mount state reaches the zone via the existing observer-action path: a client
+  `MountUpdate` sent through `ZoneCommand::BroadcastPackets` flips
+  `ZonePlayer.riding_mount`/`mount_type` in `apply_observer_action_state`
+  (`zone/packets.rs`). No new `ZoneJoin` fields or `SetMount` command needed.
+- Speed: `zone_player_move_delay_ms` applies the mounted `*2/3` factor (item 3).
+- Tests: `movement_status_tests` (mounted faster; riding flag without a mount
+  type does not speed up) + integration `mounted_player_walks_a_step_sooner_than_
+  an_unmounted_player` in `tests/shared_zone.rs` (full client→zone→cadence path).
+- Follow-ups (not yet done):
+  - `no_mount` map enforcement inside the zone: plumb the map's `no_mount` flag
+    into `ZoneRuntime` and force `riding_mount=false` + emit `MountUpdate` on join.
+    (Single-session toggle already respects `no_mount` in `equipment.rs`.)
+  - Dismount-on-hit: clear `riding_mount` + `MountUpdate` where the zone reduces
+    player HP from a native monster attack.
 
 ### 5. AOI interest management w/ hysteresis — `zone/aoi.rs` + 2 diff fns
 - `aoi.rs`: add `AOI_HYSTERESIS_MARGIN` and `points_stay_visible` /
