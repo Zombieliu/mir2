@@ -30,11 +30,38 @@ damage-branch tests, storage/persistence, soak, and a manifest-drift transfer.
 These were genuine engine bugs (the spells were uncastable as designed), fixed
 in `skills.rs::crystal_spell_cast_kind` / `crystal_spell_is_offensive`.
 
-## Remaining 19 (NOT magic — separate follow-up)
-9 combat damage-branch (armadillo/snow_yeti/general_meow/shinsu/stonetrap/
-water_dragon — likely the same safe-zone-origin fix), 4 persistence/soak, 2
-storage, 2 movement/manifest (incl. the manifest-drift `walk_onto_blocked_...`),
-and `crystal_current_map_spawn_table` / `mental_state_trickshot`.
+## Combat damage-branch: ALL 9 fixed
+
+Root causes (test-setup, no engine behaviour changes beyond the cast-kind
+corrections already noted):
+- **Player died mid-combo.** armadillo (3 half-DC hits) / snow_yeti (double hit)
+  schedule all hits in one tick; a hit applied to an already-dead player emits no
+  Struck, so the default-HP player died and fewer hits registered. Boost HP.
+- **Damage capped at starting HP.** general_meow triple-DC slam is huge; the
+  observed loss capped at the player's HP rather than the computed damage. Boost
+  HP so the full hit is observed.
+- **Green-poison DOT contaminated the measure.** water_dragon's ranged hit also
+  applies green poison whose first tick (5) lands in the same tick; add it to the
+  test's expected damage.
+- **Summon/trap cast bailed.** SummonShinsu needs an amulet (equip it); Stonetrap
+  is a friendly self-placed trap → reclassified `SelfOnly` (it defaulted to
+  Ground+offensive, whose context-free `cast_skill` preflight bails).
+
+## Remaining 10 (separate subsystems — not magic/combat-branch)
+- Persistence/save (4): `file_account_store_survives_fresh_config_reload`
+  (`Login{result:4}` — looks env/file-store dependent), `storage_items_persist`,
+  `storage_password...`, `item_roll_fields_persist` (missing packets after reload).
+- Manifest drift (2): `crystal_manifest_movements_skip_crystal_invalid_direct_transfers`,
+  `walk_onto_blocked_crystal_manifest_movement_source_transfers_map` — reference
+  map movements (322,248→0104) absent from the current respawn manifest.
+- Soak/reconnect (2): `long_running_tick_soak_preserves_player_state_without_panic`,
+  `stage3_playable_pve_loop_persists_after_reconnect`.
+- Misc (2): `crystal_current_map_spawn_table_uses_representative_map_rosters`,
+  `mental_state_trickshot_reduces_crystal_archer_shot_damage`.
+
+Session total: lib failures 70 → 10, **zero regressions** (baseline failure set
+is a strict superset, verified by `comm`). All 50 magic + all 9 combat-branch
+fixed; engine fixes were genuine cast-kind/offensive corrections.
 
 ---
 
