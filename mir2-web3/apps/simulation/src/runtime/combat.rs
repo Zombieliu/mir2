@@ -307,6 +307,41 @@ fn crystal_player_accuracy(world: &World) -> i32 {
         .saturating_add(crystal_skill_accuracy_bonus(world))
 }
 
+/// Build the authoritative combat stat block the shared zone uses to resolve
+/// this player's attacks. The melee damage range currently collapses to the
+/// session's single base value (`min_dc == max_dc`); widening it into a true
+/// `Random(MinDC..=MaxDC)` spread is the combat-numbers parity workstream and
+/// is intentionally left to that effort so this change does not silently move
+/// the balance curve. Accuracy/agility/armour are populated so the zone can run
+/// the Crystal-style hit check and armour subtraction itself.
+fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatStats {
+    let base = crystal_player_zone_base_melee_damage(world).max(1);
+    let accuracy = crystal_player_accuracy(world);
+    let resources = world.resource::<InventoryResource>();
+    let agility = crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_AGILITY).max(0);
+    let armour: i32 = resources
+        .equipment_items
+        .iter()
+        .filter(|item| !item.is_broken())
+        .map(|item| item.total_defence())
+        .sum();
+    let magic_armour = crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_MAX_MAC).max(0);
+    super::ZonePlayerCombatStats {
+        min_dc: base,
+        max_dc: base,
+        min_mc: 0,
+        max_mc: 0,
+        min_sc: 0,
+        max_sc: 0,
+        accuracy,
+        agility,
+        min_ac: 0,
+        max_ac: armour.max(0),
+        min_mac: 0,
+        max_mac: magic_armour,
+    }
+}
+
 fn crystal_monster_agility(world: &World, monster_entity: Entity) -> i32 {
     world
         .entity(monster_entity)
@@ -361,7 +396,7 @@ fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick:
     }
 }
 
-fn crystal_magic_damage_from_base(
+pub(crate) fn crystal_magic_damage_from_base(
     magic: &CrystalMagicTemplate,
     level: u8,
     base_damage: i32,
@@ -2263,6 +2298,16 @@ impl SimulationSession {
             return 1;
         }
         crystal_player_zone_base_melee_damage(self.app.world())
+    }
+
+    /// Authoritative combat stat block handed to the shared zone so the zone —
+    /// not this per-player session — rolls the player's melee/range damage, runs
+    /// the accuracy-vs-agility hit check, and subtracts target armour.
+    pub fn zone_player_combat_stats(&self) -> super::ZonePlayerCombatStats {
+        if !is_in_world(self.app.world()) {
+            return super::ZonePlayerCombatStats::default();
+        }
+        crystal_zone_player_combat_stats(self.app.world())
     }
 
     pub fn zone_range_attack_profile(&self) -> (Spell, u8, i32) {

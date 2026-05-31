@@ -37,8 +37,8 @@ pub use session::{
 };
 pub use zone::{
     PlayerId, SessionId, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntime,
+    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

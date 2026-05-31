@@ -41,6 +41,7 @@ impl ZoneManager {
             | ZoneCommand::Run { session_id, .. }
             | ZoneCommand::Turn { session_id, .. }
             | ZoneCommand::UpdateChatProfile { session_id, .. }
+            | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }

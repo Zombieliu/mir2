@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
-use mir2_game_data::crystal_monster_by_name;
+use mir2_game_data::{crystal_magic_by_spell, crystal_monster_by_name};
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirDirection, MonsterInfo, ObjectAttackInfo, ObjectDiedInfo,
     ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
@@ -128,6 +128,8 @@ struct PendingNativePlayerHit {
     target_session_id: SessionId,
     target_object_id: u32,
     damage: i32,
+    /// Whether the incoming hit is magical (mitigated by MAC) or physical (AC).
+    magic: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -344,6 +346,9 @@ impl ZoneRuntime {
                 session_id,
                 profile,
             } => self.update_chat_profile(&session_id, profile),
+            ZoneCommand::UpdatePlayerCombatStats { session_id, stats } => {
+                self.update_player_combat_stats(&session_id, stats)
+            }
             ZoneCommand::SyncPlayerTransform {
                 session_id,
                 position,
@@ -1192,6 +1197,17 @@ impl ZoneRuntime {
         Vec::new()
     }
 
+    fn update_player_combat_stats(
+        &mut self,
+        session_id: &SessionId,
+        stats: super::types::ZonePlayerCombatStats,
+    ) -> Vec<ZoneOutbound> {
+        if let Some(player) = self.players.get_mut(session_id) {
+            player.combat_stats = stats;
+        }
+        Vec::new()
+    }
+
     fn chat(
         &mut self,
         session_id: &SessionId,
@@ -1460,13 +1476,17 @@ impl ZoneRuntime {
                 attack_type,
             },
         };
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(std::slice::from_ref(&attack_packet), now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -1559,13 +1579,17 @@ impl ZoneRuntime {
                 },
             },
         ];
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(&action_packets, now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -1607,6 +1631,18 @@ impl ZoneRuntime {
         if cast && now_ms < player.next_spell_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
         }
+        // Authoritatively recompute the magic damage from the player's stat block
+        // instead of trusting the gateway-supplied scalar. Value-identical to the
+        // session formula, so it only relocates authority; PoisonCloud keeps the
+        // supplied value because its bonus depends on inventory the zone lacks.
+        let damage = if player.combat_stats.has_authoritative_damage()
+            && !zone_magic_keeps_supplied_damage(spell)
+        {
+            zone_authoritative_magic_damage(spell, level, player.combat_stats.max_dc)
+                .unwrap_or(damage)
+        } else {
+            damage
+        };
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
             return self.player_cast_native_ground_magic(
                 session_id,
@@ -3785,7 +3821,7 @@ impl ZoneRuntime {
             if target.object_id != hit.target_object_id || target.dead {
                 return Vec::new();
             }
-            let damage = zone_player_native_incoming_damage(target, hit.damage)
+            let damage = zone_player_native_incoming_damage(target, hit.damage, hit.magic, now_ms)
                 .min(target.hp.saturating_sub(1));
             if damage <= 0 {
                 return Vec::new();
@@ -4068,6 +4104,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position,
             direction: summon.direction,
             drops: Vec::new(),
@@ -4818,6 +4855,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position: spawn_position,
             direction,
             drops: Vec::new(),
@@ -4919,15 +4957,23 @@ impl ZoneRuntime {
         }
         monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
         let monster_position = monster.position.clone();
-        self.pending_native_player_hits
-            .push(PendingNativePlayerHit {
-                ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
-                attacker_object_id: object_id,
-                attacker_ai: monster.ai,
-                target_session_id: target.session_id.clone(),
-                target_object_id: target.object_id,
-                damage: 1,
-            });
+        // Roll the monster's melee damage from its Crystal stats (matching the
+        // ranged path) instead of a fixed placeholder of 1, so monster→player
+        // damage is the zone's authoritative, data-driven value.
+        let (damage, magic) = zone_native_monster_player_attack_damage(monster, &target.position);
+        let attacker_ai = monster.ai;
+        if damage > 0 {
+            self.pending_native_player_hits
+                .push(PendingNativePlayerHit {
+                    ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
+                    attacker_object_id: object_id,
+                    attacker_ai,
+                    target_session_id: target.session_id.clone(),
+                    target_object_id: target.object_id,
+                    damage,
+                    magic,
+                });
+        }
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
                 object_id,
@@ -4957,7 +5003,7 @@ impl ZoneRuntime {
         direction: MirDirection,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some((monster_position, attack_type, damage, attacker_ai)) = ({
+        let Some((monster_position, attack_type, (damage, magic), attacker_ai)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -4989,6 +5035,7 @@ impl ZoneRuntime {
                     target_session_id: target.session_id.clone(),
                     target_object_id: target.object_id,
                     damage,
+                    magic,
                 });
         }
         let packet = ServerPacket::ObjectRangeAttack {
@@ -7011,29 +7058,40 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
     }
 }
 
-fn zone_native_monster_player_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
+/// Returns the monster's authoritative attack damage and whether it is a magic
+/// attack (so the zone can mitigate with the target's MAC instead of AC).
+fn zone_native_monster_player_attack_damage(
+    monster: &ZoneNativeMonster,
+    target: &Point,
+) -> (i32, bool) {
     let distance = zone_tile_distance(&monster.position, target);
     match monster.ai {
-        19 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        20 if distance > 1 => zone_crystal_monster_attack_damage(&monster.name) * 3,
-        43 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        120 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        121 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        122 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        123 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        102 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        86 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        88 => zone_crystal_monster_magic_damage(&monster.name),
-        126 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        127 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        188 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
-        189 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        192 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
-        130 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        131 if distance > 2 => zone_crystal_monster_spell_damage(&monster.name),
-        118 | 181 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        182 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        _ => zone_crystal_monster_attack_damage(&monster.name),
+        19 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        20 if distance > 1 => (zone_crystal_monster_attack_damage(&monster.name) * 3, false),
+        43 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        120 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        121 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        122 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        123 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        102 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        86 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        88 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        188 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
+            false,
+        ),
+        189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        192 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
+            false,
+        ),
+        130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
+        118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        182 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        _ => (zone_crystal_monster_attack_damage(&monster.name), false),
     }
 }
 
@@ -7135,6 +7193,104 @@ fn zone_player_native_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
         .max(1)
 }
 
+/// Deterministically roll an inclusive `[min, max]` stat range using the shared
+/// zone RNG so every observer of the zone derives the same value.
+fn zone_roll_stat_range(min: i32, max: i32, tick: u64, actor_id: u32, salt: u64) -> i32 {
+    let lo = min.min(max).max(0);
+    let hi = max.max(min).max(0);
+    if hi <= lo {
+        return lo;
+    }
+    let span = u64::try_from(hi - lo + 1).unwrap_or(1);
+    let roll = zone_deterministic_roll(
+        tick,
+        usize::try_from(actor_id).unwrap_or_default(),
+        usize::try_from(salt).unwrap_or_default(),
+        span,
+    );
+    lo.saturating_add(i32::try_from(roll).unwrap_or_default())
+}
+
+/// Authoritatively resolve a player's physical (melee/range) attack against a
+/// shared-zone monster.
+///
+/// Historically the attacker's *personal* session pre-rolled the damage and the
+/// zone trusted that scalar — there was no hit/miss check and no armour applied
+/// inside the zone, so the shared world was not the combat authority. This rolls
+/// `Random(MinDC..=MaxDC)` (+ buff DC), runs the Crystal accuracy-vs-agility hit
+/// check, and subtracts `Random(MinAC..=MaxAC)` using the monster's own
+/// authoritative defensive stats.
+///
+/// Returns `None` on a miss (only the already-broadcast swing animation is
+/// shown), or `Some(damage)` on a hit. `damage` may be `0` when armour fully
+/// absorbs the blow (a Crystal "block").
+///
+/// When the attacker has no authoritative stat block yet
+/// (`combat_stats.has_authoritative_damage() == false`) this falls back to the
+/// legacy trusted scalar so existing callers keep working unchanged.
+fn zone_resolve_player_physical_attack(
+    player: &ZonePlayer,
+    monster: &ZoneNativeMonster,
+    monster_object_id: u32,
+    fallback_damage: i32,
+    now_ms: u64,
+) -> Option<i32> {
+    let stats = player.combat_stats;
+    if !stats.has_authoritative_damage() {
+        return Some(zone_player_native_damage(player, fallback_damage));
+    }
+
+    let agility = monster.defense.agility.max(0);
+    if agility > 0 {
+        let roll = zone_deterministic_roll(
+            now_ms,
+            usize::try_from(player.object_id).unwrap_or_default(),
+            usize::try_from(monster_object_id).unwrap_or_default(),
+            u64::try_from(agility.saturating_add(1)).unwrap_or(1),
+        );
+        if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
+            return None;
+        }
+    }
+
+    let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
+        .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let armour = zone_roll_stat_range(
+        monster.defense.min_ac,
+        monster.defense.max_ac,
+        now_ms,
+        player.object_id,
+        0x0AC,
+    );
+    Some(base.saturating_sub(armour).max(0))
+}
+
+/// Authoritatively recompute a spell's damage from the Crystal magic template,
+/// so the zone — not the attacker's session — owns the magic damage number.
+///
+/// This mirrors the session's `zone_magic_attack_profile` formula exactly
+/// (`crystal_magic_damage_from_base` over the player's melee base, with the two
+/// pure-control spells dealing 0), so for every spell the recomputed value
+/// matches what the gateway previously supplied. Returns `None` for spells with
+/// no magic template so the caller falls back to the supplied value.
+fn zone_authoritative_magic_damage(spell: Spell, level: u8, base: i32) -> Option<i32> {
+    if matches!(spell, Spell::ElectricShock | Spell::Entrapment) {
+        return Some(0);
+    }
+    let template = crystal_magic_by_spell(&format!("{spell:?}"))?;
+    Some(
+        crate::runtime::combat::crystal_magic_damage_from_base(&template, level, base.max(1))
+            .max(1),
+    )
+}
+
+/// Spells whose final damage the gateway adjusts with inventory-dependent item
+/// bonuses (currently only PoisonCloud's amulet bonus), so the zone keeps the
+/// supplied value for them rather than recomputing the base formula.
+fn zone_magic_keeps_supplied_damage(spell: Spell) -> bool {
+    matches!(spell, Spell::PoisonCloud)
+}
+
 fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     if secondary && spell == Spell::MeteorShower {
         return damage.saturating_div(2).max(1);
@@ -7142,10 +7298,32 @@ fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     damage
 }
 
-fn zone_player_native_incoming_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
+fn zone_player_native_incoming_damage(
+    player: &ZonePlayer,
+    base_damage: i32,
+    magic: bool,
+    now_ms: u64,
+) -> i32 {
+    let buff_ac = zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0);
+    // Subtract the player's authoritative base armour, rolled from their stat
+    // block: MAC for magical hits, AC for physical hits. With no stat block the
+    // range is 0..0 and only buff AC + the reduction buff apply (legacy).
+    let (min_armour, max_armour) = if magic {
+        (player.combat_stats.min_mac, player.combat_stats.max_mac)
+    } else {
+        (player.combat_stats.min_ac, player.combat_stats.max_ac)
+    };
+    let base_armour = zone_roll_stat_range(
+        min_armour,
+        max_armour,
+        now_ms,
+        player.object_id,
+        if magic { 0x3AC } else { 0x4AC },
+    );
     let mitigated = base_damage
         .max(0)
-        .saturating_sub(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0));
+        .saturating_sub(buff_ac)
+        .saturating_sub(base_armour);
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated
