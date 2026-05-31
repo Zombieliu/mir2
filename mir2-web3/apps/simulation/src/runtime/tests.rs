@@ -13822,6 +13822,10 @@ fn general_meow_meow_close_slam_branch_uses_triple_dc() {
         y: player_origin.y,
     };
     let general_object_id = 98_969_u32;
+    // The triple-DC slam is large; give the player enough HP to absorb the full
+    // hit so the observed loss equals the computed damage (rather than capping
+    // at the player's starting HP).
+    set_current_player_hp(&mut session, 9000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
         (super::crystal_monster_attack_damage("GeneralMeowMeow") * 3
@@ -20094,9 +20098,14 @@ fn water_dragon_range_hit_applies_green_poison() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
+    // The ranged hit also applies green poison, whose first DOT tick (the Crystal
+    // player green-poison tick is 5) lands in the same tick the hit resolves, so
+    // the measured HP loss is the direct hit plus one poison tick.
+    const GREEN_POISON_TICK_DAMAGE: i32 = 5;
     let expected_damage = {
         (super::crystal_monster_magic_damage("Hydra") - total_defence_bonus(session.app.world()))
             .max(1)
+            + GREEN_POISON_TICK_DAMAGE
     };
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
