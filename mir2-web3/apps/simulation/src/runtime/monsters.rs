@@ -1629,7 +1629,7 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         130 => agent.view_range.max(1),
         131 => agent.view_range.max(1),
         31 | 32 => 8,
-        6 | 113 => agent.view_range.max(1),
+        6 | 58 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
         _ => 1,
@@ -2063,7 +2063,7 @@ pub(super) fn monster_locks_player_target_on_hit(agent: &MonsterAgent) -> bool {
 }
 
 pub(super) fn guard_can_target_monster(attacker: &MonsterAgent, target: &MonsterAgent) -> bool {
-    matches!(attacker.ai, 6 | 113)
+    matches!(attacker.ai, 6 | 58 | 113)
         && !target.dead
         && !matches!(target.ai, 1 | 2 | 3 | 6 | 57 | 58 | 113)
 }

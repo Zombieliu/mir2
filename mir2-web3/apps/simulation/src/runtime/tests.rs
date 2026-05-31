@@ -54624,3 +54624,95 @@ fn crystal_no_critical_effect_without_crit_gear() {
         "basic gear (no CriticalRate) must not crit"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 58 is Crystal's `Guard` (identical to AI 6) — town guard that
+// attacks hostile monsters and ignores players (Crystal MonsterObject.GetMonster
+// case 58 -> new Guard(info)).
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai58_town_guard_attacks_hostile_monsters() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+    let current_tick = runtime_tick(session.app.world());
+    let guard_position = Point { x: 900, y: 900 };
+    let guard_object_id = 91_058_u32;
+
+    let guard_agent = |ai: u8, disposition, hostile: bool| MonsterAgent {
+        image: 0,
+        dead: false,
+        patrol_origin: guard_position.clone(),
+        ai,
+        disposition,
+        hostile_to_player: hostile,
+        tracking_player: false,
+        view_range: 10,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: current_tick,
+        next_attack_tick: current_tick,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: current_tick,
+    };
+
+    let _guard_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            WorldObject,
+            ObjectId(guard_object_id),
+            DisplayName::literal("Test Town Guard"),
+            Position(guard_position.clone()),
+            Facing(MirDirection::Down),
+            Monster,
+            MonsterVitals { hp: 80, max_hp: 80 },
+            guard_agent(58, WorldEntityDisposition::Neutral, false),
+        ))
+        .id();
+
+    let hostile_object_id = 98_766_u32;
+    let _hostile_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(hostile_object_id),
+            DisplayName::literal("Guard Test Wasp"),
+            Position(Point {
+                x: guard_position.x + 1,
+                y: guard_position.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 12, max_hp: 12 },
+            guard_agent(0, WorldEntityDisposition::Hostile, true),
+        ))
+        .id();
+
+    set_player_position(&mut session, guard_position.clone());
+
+    let packets = session.tick();
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { info } if info.object_id == guard_object_id
+        )),
+        "AI-58 town guard should attack the hostile monster like an AI-6 guard, got {packets:?}"
+    );
+
+    // The scheduled hit lands on the next tick (Crystal guard melee), striking
+    // the hostile monster — proving AI 58 engages monsters as a guard.
+    let hit_packets = session.tick();
+    assert!(
+        hit_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectStruck { info }
+                if info.object_id == hostile_object_id && info.attacker_id == guard_object_id
+        )),
+        "AI-58 guard's attack should strike the hostile monster, got {hit_packets:?}"
+    );
+}

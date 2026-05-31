@@ -499,7 +499,7 @@ pub(super) fn monster_prefers_monster_target(
         .get::<SummonedMonster>()
         .map(|_| !attacker_agent.hostile_to_player)
         .unwrap_or(false)
-        || matches!(attacker_agent.ai, 6 | 113)
+        || matches!(attacker_agent.ai, 6 | 58 | 113)
 }
 
 pub(super) fn update_special_monster_state(
@@ -4006,12 +4006,12 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
                         let attack_direction =
                             monster_attack_packet_direction(&agent, current_direction, direction);
-                        if agent.ai != 6 && current_direction != attack_direction {
+                        if !matches!(agent.ai, 6 | 58) && current_direction != attack_direction {
                             world.entity_mut(entity).insert(Facing(attack_direction));
                         }
                         world.entity_mut(entity).insert(agent.clone());
 
-                        if agent.ai == 6 {
+                        if matches!(agent.ai, 6 | 58) {
                             if let Some(attack_packets) =
                                 guard_melee_attack_packets(world, entity, target_entity)
                             {
