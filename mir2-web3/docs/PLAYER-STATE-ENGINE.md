@@ -70,29 +70,30 @@ is preserved: `Min/Max` ranges collapse for seed gear, crit/resist/recovery are
 `player_stats_expose_class_weight_capacities`,
 `class_base_stats_scale_with_level_per_crystal_formula`.
 
-## Remaining gap to numeric 1:1: the combat damage curve
+## Combat damage curve — now Crystal-numeric
 
-The stat engine is semantically 1:1, but two combat numbers still diverge from
-Crystal, both deliberately retained to keep the large existing combat-regression
-suite green. Closing them is the scoped "combat number" phase:
+The previously-retained numeric deviations have been closed:
 
-1. **Melee floor.** `compute_player_stats` adds a non-Crystal `18 + level/2`
-   floor to `Min/MaxDC`. Crystal has no floor — melee `MaxDC` is
-   `class-base (≈0 at low level) + equipment`. Removing it requires importing
-   Crystal-accurate starting-equipment stats (the seed weapons here use
-   placeholder attack values) and re-baselining the damage assertions.
+1. **Melee floor removed.** `compute_player_stats` no longer adds the non-Crystal
+   `18 + level/2` floor. Melee `Min/MaxDC` come entirely from the class table
+   (`BaseStat.Calculate`, ≈0 at low level) plus equipment, exactly as Crystal.
+   A level-1 warrior now hits for single digits, not ~24.
 
-2. **Roll-based mitigation.** Monster→player damage currently subtracts a flat
-   equipment-defence total. Crystal `HumanObject.Attacked` → `GetArmour` does:
-   - physical (`ACAgility`): an agility/accuracy miss check
-     (`Random(Agility+1) > attacker.Accuracy`) then `armour = Random(MinAC, MaxAC)`;
-   - magic (`MACAgility`/`MAC`): the `MagicResist` miss check then
-     `armour = Random(MinMAC, MaxMAC)`;
-   - then `DamageReductionPercent`, `Reflect`, `EnergyShield`, `MagicShield`.
+2. **Real Crystal starter gear.** `seed_equipment_items` carries the actual item
+   manifest stats: WoodenSword `MinDC 2 / MaxDC 4`, LightLeatherArmour
+   `MinAC 3 / MaxAC 5 / MinMAC 3 / MaxMAC 4`. Player melee is `Random(MinDC, MaxDC)`
+   over the real range.
 
-   The stat block already exposes the `Min/Max AC/MAC` and resist inputs these
-   need; wiring the rolls + miss checks changes per-hit damage and so requires
-   re-baselining the monster-combat tests.
+3. **Roll-based mitigation.** Monster→player physical damage now subtracts
+   `crystal_player_rolled_armour` = `Random(MinAC, MaxAC)` (Crystal `GetArmour`),
+   reading the stat block's real AC range, instead of a flat defence total. Magic
+   blows additionally apply the `MagicResist` miss-chance.
 
-Other minor items: full physical hit-roll base accuracy parity, and
-proximity-gating the lover/mentor experience bonus (currently relationship-gated).
+The combat-regression suite was re-baselined for these (kill tests use a lethal
+test weapon to keep their defeat-outcome intent; per-hit damage assertions became
+armour-roll ranges).
+
+Remaining minor items: the physical `Random(Agility+1) > attacker.Accuracy` miss
+check on monster melee (monster accuracy is not yet modelled server-side),
+`MinMAC..MaxMAC` magic armour rolls (magic currently uses the AC roll + resist
+miss), and proximity-gating the lover/mentor experience bonus.

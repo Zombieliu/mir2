@@ -97,11 +97,61 @@ fn new_character_success_index(packets: &[ServerPacket]) -> i32 {
     }
 }
 
+/// Give the seed player overwhelming, always-hitting melee. With Crystal-real
+/// starter gear (WoodenSword 2-4) a level-1 character can no longer one-shot
+/// field monsters, so kill/drop/quest tests that only care about the *defeat*
+/// outcome use this to keep their bounded attack loops lethal.
+fn ensure_lethal_player_damage(session: &mut SimulationSession) {
+    {
+        let mut inventory = session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>();
+        if let Some(weapon) = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+        {
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_MIN_DC,
+                value: 5_000,
+            });
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_DC,
+                value: 5_000,
+            });
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_ACCURACY,
+                value: 1_000,
+            });
+        }
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+/// Assert an inbound blow landed within the Crystal armour-roll range:
+/// `base_damage - Random(MinAC, MaxAC)`, floored at 1. Monster→player physical
+/// mitigation is now a roll, so per-hit damage is a range rather than a fixed
+/// value.
+fn assert_mitigated_by_armour(session: &SimulationSession, taken: i32, base_damage: i32) {
+    let stats = super::player_stats(session.app.world());
+    let lo = (base_damage - stats.max_ac()).max(1);
+    let hi = (base_damage - stats.min_ac()).max(1);
+    assert!(
+        (lo..=hi).contains(&taken),
+        "damage {taken} outside armour-mitigated range [{lo}, {hi}] \
+         (base {base_damage}, AC {}..{})",
+        stats.min_ac(),
+        stats.max_ac()
+    );
+}
+
 fn attack_until_monster_dies(
     session: &mut SimulationSession,
     object_id: u32,
     max_rounds: usize,
 ) -> Vec<ServerPacket> {
+    ensure_lethal_player_damage(session);
     for _ in 0..max_rounds {
         let packets = session.attack(object_id);
         if packet_has_object_died(&packets, object_id) {
@@ -14271,11 +14321,7 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_spell_damage("TucsonGeneral") * 2
-            - total_defence_bonus(session.app.world()))
-        .max(1)
-    };
+    let base_damage = super::crystal_monster_spell_damage("TucsonGeneral") * 2;
     let general = spawn_crystal_monster_for_test(
         &mut session,
         general_object_id,
@@ -14329,10 +14375,10 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
         packet,
         ServerPacket::Struck { info } if info.attacker_id == general_object_id
     )));
-    assert_eq!(
+    assert_mitigated_by_armour(
+        &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral type-2 ranged branch should use imported Crystal SC * 2 after defence"
+        base_damage,
     );
 }
 
@@ -14365,11 +14411,7 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("TucsonGeneral")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
-    };
+    let base_damage = super::crystal_monster_magic_damage("TucsonGeneral");
     let general = spawn_crystal_monster_for_test(
         &mut session,
         general_object_id,
@@ -14454,10 +14496,10 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
         ServerPacket::ObjectStruck { info }
             if info.object_id == ally_object_id && info.attacker_id == general_object_id
     )));
-    assert_eq!(
+    assert_mitigated_by_armour(
+        &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral close stomp should use imported Crystal MC after defence"
+        base_damage,
     );
     assert!(session
         .world_snapshot()
@@ -31103,7 +31145,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
     assert!(!first_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(total_attack_bonus(session.app.world()), 12);
+    assert_eq!(total_attack_bonus(session.app.world()), 10);
 
     add_inventory_crystal_item(&mut session, "ImpactDrug(M)", 32);
     let second_packets = session.handle_packet(ClientPacket::UseItem {
@@ -31127,7 +31169,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
             grid: MirGridType::Inventory,
         }
     )));
-    assert_eq!(total_attack_bonus(session.app.world()), 12);
+    assert_eq!(total_attack_bonus(session.app.world()), 10);
 }
 
 #[test]
@@ -31169,7 +31211,7 @@ fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
             .map(|buff| buff.attack_bonus),
         Some(2)
     );
-    assert_eq!(total_attack_bonus(session.app.world()), 9);
+    assert_eq!(total_attack_bonus(session.app.world()), 7);
 }
 
 #[test]
@@ -33672,7 +33714,7 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Weapon)
             .map(|item| (item.grade, item.added_attack, item.attack)),
-        Some((ItemGrade::Common, 2, 6))
+        Some((ItemGrade::Common, 0, 4))
     );
     assert_eq!(
         snapshot
@@ -33680,11 +33722,13 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.grade, item.added_defence, item.defence)),
-        Some((ItemGrade::Common, 1, 4))
+        Some((ItemGrade::Common, 0, 5))
     );
 
-    assert_eq!(total_attack_bonus(session.app.world()), 7);
-    assert_eq!(total_defence_bonus(session.app.world()), 6);
+    // WoodenSword MaxDC 4 (+ Copper Necklace 1); LightLeatherArmour MaxAC 5
+    // (+ bracelet/sandals 1 each).
+    assert_eq!(total_attack_bonus(session.app.world()), 5);
+    assert_eq!(total_defence_bonus(session.app.world()), 7);
 }
 
 #[test]
@@ -53931,18 +53975,28 @@ fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i
 }
 
 #[test]
-fn player_stats_seed_collapses_dc_range_to_legacy_melee() {
+fn player_stats_seed_reflects_real_weapon_dc_range() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let stats = super::player_stats(session.app.world());
-    // Seed equipment carries no explicit Min/Max DC, so the range collapses and
-    // the engine MaxDC equals the historical flat melee figure.
-    assert_eq!(stats.min_dc(), stats.max_dc());
+    // Crystal-real starter gear: WoodenSword carries a MinDC 2 / MaxDC 4 spread,
+    // so the player's DC is a genuine range (no flat floor), and the melee
+    // figure equals MaxDC.
+    assert!(
+        stats.min_dc() < stats.max_dc(),
+        "real weapon should open a DC spread (min={}, max={})",
+        stats.min_dc(),
+        stats.max_dc()
+    );
+    assert_eq!(stats.max_dc() - stats.min_dc(), 2);
     assert_eq!(
         stats.max_dc(),
         super::crystal_player_melee_damage(session.app.world())
     );
+    // Level-1 melee is now single digits (Crystal newbie damage), not the old
+    // ~24 floor.
+    assert!(stats.max_dc() < 12, "no inflated melee floor remains");
 }
 
 #[test]
@@ -54065,7 +54119,6 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let flat = super::crystal_player_melee_damage(session.app.world());
     // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
     // (Crystal RefreshStatCaps). So crits land ~18% of the time and each adds
     // CriticalDamage*10% = +100% (a doubled blow).
@@ -54074,15 +54127,18 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
     let stats = super::player_stats(session.app.world());
     assert_eq!(stats.critical_rate(), 18);
     assert_eq!(stats.critical_damage(), 10);
+    let (min, max) = (stats.min_dc(), stats.max_dc());
 
     let (mut crits, mut normals) = (0, 0);
     for tick in 0..200 {
-        match super::crystal_player_rolled_melee_damage(session.app.world(), tick) {
-            d if d == flat => normals += 1,
-            d => {
-                assert_eq!(d, flat * 2, "a crit with CriticalDamage 10 doubles the blow");
-                crits += 1;
-            }
+        let d = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
+        if (min..=max).contains(&d) {
+            normals += 1;
+        } else if (2 * min..=2 * max).contains(&d) {
+            // crit: Random(MinDC,MaxDC) doubled by CriticalDamage 10.
+            crits += 1;
+        } else {
+            panic!("rolled {d} is neither a normal [{min},{max}] nor crit hit");
         }
     }
     assert!(crits > 0, "an 18% crit rate should land some crits");

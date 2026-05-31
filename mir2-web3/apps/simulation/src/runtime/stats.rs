@@ -31,12 +31,6 @@ pub(super) const CRYSTAL_LOVER_EXP_RATE_PERCENT: i32 = 5;
 pub(super) const CRYSTAL_MENTEE_EXP_RATE_PERCENT: i32 = 10;
 pub(super) const CRYSTAL_GUILD_EXP_RATE_PERCENT: i32 = 3;
 
-/// Flat melee floor that has always backed player physical damage. This is not
-/// part of the Crystal base-stat table (Crystal base `MaxDC` starts near zero
-/// and is gear-driven) but is retained verbatim so existing damage numbers are
-/// unchanged.
-pub(super) const CRYSTAL_MELEE_BASE_FLOOR: i32 = 18;
-
 /// A computed Crystal stat block. Stat indices follow `CRYSTAL_STAT_*`.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(super) struct PlayerStats {
@@ -226,6 +220,8 @@ fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
             s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 20.0, 0.0),
             s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 13.0, 0.0),
             s!(CRYSTAL_STAT_MAX_AC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_DC, Stat, 0, 5.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_DC, Stat, 0, 5.0, 0.0),
             s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
             s!(CRYSTAL_STAT_ACCURACY, Stat, 5, 0.0, 0.0),
         ],
@@ -235,6 +231,8 @@ fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
             s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 5.0, 0.0),
             s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 100.0, 0.0),
             s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 90.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_DC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_DC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_MIN_MC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_MAX_MC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
@@ -248,6 +246,8 @@ fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
             s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 42.0, 0.0),
             s!(CRYSTAL_STAT_MIN_MAC, Stat, 0, 12.0, 0.0),
             s!(CRYSTAL_STAT_MAX_MAC, Stat, 0, 6.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_DC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_DC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_MIN_SC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_MAX_SC, Stat, 0, 7.0, 0.0),
             s!(CRYSTAL_STAT_AGILITY, Stat, 18, 0.0, 0.0),
@@ -259,6 +259,8 @@ fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
             s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 3.5, 0.0),
             s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 33.0, 0.0),
             s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 30.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_DC, Stat, 0, 8.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_DC, Stat, 0, 8.0, 0.0),
             s!(CRYSTAL_STAT_AGILITY, Stat, 18, 0.0, 0.0),
             s!(CRYSTAL_STAT_ACCURACY, Stat, 7, 0.0, 0.0),
         ],
@@ -268,6 +270,8 @@ fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
             s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 4.0, 0.0),
             s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 33.0, 0.0),
             s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 30.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_DC, Stat, 0, 8.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_DC, Stat, 0, 8.0, 0.0),
             s!(CRYSTAL_STAT_MIN_MC, Stat, 0, 8.0, 0.0),
             s!(CRYSTAL_STAT_MAX_MC, Stat, 0, 8.0, 0.0),
             s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
@@ -414,20 +418,12 @@ pub(super) fn compute_player_stats(world: &World) -> PlayerStats {
     let mut stats = PlayerStats::default();
 
     // --- Base class / level stats (Crystal RefreshLevelStats via BaseStat.Calculate). ---
-    // HP/MP/AC/MAC/MC/SC/Accuracy/Agility/weights scale per the Crystal formula.
-    // (MinDC/MaxDC are intentionally driven by the melee floor below rather than
-    // the class table — see CRYSTAL_MELEE_BASE_FLOOR.)
+    // The class table provides MinDC/MaxDC (and AC/MAC/MC/SC) scaling; there is
+    // no flat melee floor — melee derives entirely from base + equipment, as in
+    // Crystal.
     for entry in class_base_stats(class) {
         stats.add(entry.stat, crystal_base_stat_value(entry, class, level));
     }
-
-    // Melee floor: the historical `18 + level/2` physical base, applied to both
-    // bounds so the seed range stays collapsed. This is the one retained
-    // non-Crystal compatibility shim (Crystal derives MinDC/MaxDC from the class
-    // table + equipment with no flat floor); see docs/PLAYER-STATE-ENGINE.md.
-    let melee_floor = CRYSTAL_MELEE_BASE_FLOOR + level / 2;
-    stats.add(CRYSTAL_STAT_MAX_DC, melee_floor);
-    stats.add(CRYSTAL_STAT_MIN_DC, melee_floor);
 
     // --- Equipment. ---
     let inventory = world.resource::<InventoryResource>();

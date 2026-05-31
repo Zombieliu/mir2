@@ -19,7 +19,7 @@ use super::drops::{
     handle_monster_defeat, harvest_monster_entity, harvest_target_in_direction,
     HarvestTargetSelection,
 };
-use super::equipment::{damage_weapon_durability, damage_worn_durability, total_attack_bonus};
+use super::equipment::{damage_weapon_durability, damage_worn_durability};
 use super::items::crystal_equipment_added_stat_total;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
@@ -246,25 +246,15 @@ fn apply_damage_to_current_player(
     }
 }
 
+/// The player's representative (max) melee figure: the stat block's `MaxDC`
+/// plus the Slaying bonus. Crystal derives this from base + equipment with no
+/// flat floor. Used as the base for melee-scaled spells (Thrusting/Slaying/etc.).
 pub(super) fn crystal_player_melee_damage(world: &World) -> i32 {
-    let resources = world.resource::<InventoryResource>();
-    let session = world.resource::<SessionResource>();
-    let level_bonus = i32::from(
-        session
-            .selected_character
-            .as_ref()
-            .map(|c| c.level)
-            .unwrap_or(1)
-            / 2,
-    );
-    let mut damage =
-        18 + level_bonus + total_attack_bonus(&resources, world.resource::<BuffResource>());
-    if let Some(level) = crystal_skill_level(world, "Slaying") {
-        let bonuses = [5, 6, 7, 8];
-        let index = usize::from(level).min(bonuses.len() - 1);
-        damage = damage.saturating_add(bonuses[index]);
-    }
-    damage.max(1)
+    let stats = player_stats(world);
+    stats
+        .max_dc()
+        .saturating_add(crystal_slaying_melee_bonus(world))
+        .max(1)
 }
 
 fn crystal_player_zone_base_melee_damage(world: &World) -> i32 {
@@ -320,6 +310,23 @@ fn crystal_player_accuracy(world: &World) -> i32 {
 const CRYSTAL_SALT_MELEE_DC_ROLL: usize = 41_001;
 const CRYSTAL_SALT_CRITICAL: u64 = 41_002;
 const CRYSTAL_SALT_MAGIC_RESIST: usize = 41_003;
+const CRYSTAL_SALT_ARMOUR_AC: usize = 41_004;
+
+/// Crystal `GetArmour` physical armour roll: `Random(MinAC, MaxAC)` from the
+/// player's stat block (which now carries the real item Min/Max AC). Resolved
+/// deterministically off the runtime tick so combat stays reproducible.
+/// Replaces the previous flat equipment-defence subtraction.
+pub(super) fn crystal_player_rolled_armour(world: &World) -> i32 {
+    let stats = player_stats(world);
+    let actor_id = current_player_object_id(world).unwrap_or(0);
+    deterministic_range_roll(
+        runtime_tick(world),
+        actor_id,
+        CRYSTAL_SALT_ARMOUR_AC,
+        stats.min_ac(),
+        stats.max_ac(),
+    )
+}
 
 /// Slaying skill flat melee bonus (mirrors [`crystal_player_melee_damage`]).
 fn crystal_slaying_melee_bonus(world: &World) -> i32 {
