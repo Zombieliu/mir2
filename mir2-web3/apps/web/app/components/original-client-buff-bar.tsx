@@ -7,10 +7,27 @@ export type BuffBarProps = {
   buffs: DisplayActiveBuff[];
 };
 
-// Crystal's BuffDialog shows active buffs as an icon row under the minimap.
-// The web client has no extracted buff-icon library, so each buff renders as a
-// labelled chip with its remaining duration and a tooltip describing its
-// bonuses - a functional stand-in for the icon row.
+// Crystal's BuffDialog shows active buffs as a BuffIcon row. Map the sim's buff
+// keys to the Crystal BuffType -> BuffIcon frame index; unmapped buffs fall back
+// to a labelled chip.
+const BUFF_ICON_FRAMES: Record<string, number> = {
+  "temporal-flux": 0,
+  hiding: 1,
+  "haste": 2,
+  "swift-feet": 3,
+  "moon-light": 4,
+  "ultimate-enhancer": 5,
+  "soul-shield": 6,
+  "block-movement": 7,
+  "energy-shield": 8,
+  "magic-booster": 9,
+  "concentration": 10,
+  "magic-shield": 13,
+  "protection-field": 14,
+  "battle-focus": 19,
+  "elemental-barrier": 24,
+};
+
 export function BuffBar({ t, buffs }: BuffBarProps) {
   if (!buffs.length) {
     return null;
@@ -23,6 +40,7 @@ export function BuffBar({ t, buffs }: BuffBarProps) {
         if (buff.attackBonus) bonuses.push(`${t("ui.attack", [], "DC")} +${buff.attackBonus}`);
         if (buff.defenceBonus) bonuses.push(`${t("ui.defence", [], "AC")} +${buff.defenceBonus}`);
         const tooltip = [buff.name, buff.description, bonuses.join(", ")].filter(Boolean).join(" - ");
+        const iconFrame = BUFF_ICON_FRAMES[buff.key];
         return (
           <div
             key={buff.key}
@@ -30,9 +48,13 @@ export function BuffBar({ t, buffs }: BuffBarProps) {
             data-buff-key={buff.key}
             title={tooltip}
           >
-            <span className="buff-chip-icon" aria-hidden>
-              {buffInitials(buff.name)}
-            </span>
+            {typeof iconFrame === "number" ? (
+              <img className="buff-chip-image" src={`/original-ui/BuffIcon/${iconFrame}.png`} alt="" draggable={false} />
+            ) : (
+              <span className="buff-chip-icon" aria-hidden>
+                {buffInitials(buff.name)}
+              </span>
+            )}
             <span className="buff-chip-time">{formatBuffRemaining(buff.remainingTicks)}</span>
           </div>
         );

@@ -2854,6 +2854,8 @@ pub struct SkillSnapshot {
     pub delay_ms: i64,
     pub cast_time_ms: i64,
     pub cooldown_remaining_ticks: u32,
+    #[serde(default)]
+    pub icon: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

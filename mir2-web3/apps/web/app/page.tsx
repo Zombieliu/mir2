@@ -256,6 +256,7 @@ type GatewayKnownSkill = {
   delayMs?: number;
   castTimeMs?: number;
   cooldownRemainingTicks: number;
+  icon?: number;
 };
 
 type GatewayActiveBuff = {
@@ -580,6 +581,7 @@ type KnownSkill = {
   delayMs?: number;
   castTimeMs?: number;
   cooldownRemainingTicks: number;
+  icon?: number;
 };
 
 type ActiveBuff = {
@@ -6638,6 +6640,7 @@ export default function HomePage() {
       delayMs: skill.delayMs,
       castTimeMs: skill.castTimeMs,
       cooldownRemainingTicks: skill.cooldownRemainingTicks,
+      icon: skill.icon,
     }));
     const activeBuffs = (snapshot.activeBuffs ?? []).map((buff) => ({
       key: buff.key,

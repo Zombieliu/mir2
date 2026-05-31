@@ -198,6 +198,7 @@ export type DisplayKnownSkill = {
   delayMs?: number;
   castTimeMs?: number;
   cooldownRemainingTicks: number;
+  icon?: number;
 };
 
 export type DisplayActiveBuff = {

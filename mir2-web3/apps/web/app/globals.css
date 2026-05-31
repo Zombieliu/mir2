@@ -5604,3 +5604,25 @@ body.mir-dragging-item * {
   height: 28px;
   image-rendering: pixelated;
 }
+
+/* ---- Real skill/buff icons (from MagIcon.Lib / BuffIcon.Lib) ---- */
+.skill-bar-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.skill-bar-slot.cooldown .skill-bar-icon {
+  filter: grayscale(0.7) brightness(0.6);
+}
+
+.buff-chip-image {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}

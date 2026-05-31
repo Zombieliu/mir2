@@ -64,6 +64,7 @@ export function SkillBar({ t, knownSkills, onCastSkill }: SkillBarProps) {
 
         const onCooldown = skill.cooldownRemainingTicks > 0;
         const toggled = skill.castKind === "toggle";
+        const hasIcon = typeof skill.icon === "number" && skill.icon > 0;
         return (
           <button
             key={`skill-slot-${index}-${skill.key}`}
@@ -74,8 +75,12 @@ export function SkillBar({ t, knownSkills, onCastSkill }: SkillBarProps) {
             title={`${skill.name}${skill.description ? ` - ${skill.description}` : ""}`}
             onClick={() => onCastSkill(skill.key)}
           >
+            {hasIcon ? (
+              <img className="skill-bar-icon" src={`/original-ui/MagIcon/${skill.icon}.png`} alt="" draggable={false} />
+            ) : (
+              <span className="skill-bar-name">{abbreviateSkillName(skill.name)}</span>
+            )}
             <span className="skill-bar-key">{hotkeyLabel}</span>
-            <span className="skill-bar-name">{abbreviateSkillName(skill.name)}</span>
             {onCooldown ? <span className="skill-bar-cooldown">{skill.cooldownRemainingTicks}</span> : null}
           </button>
         );

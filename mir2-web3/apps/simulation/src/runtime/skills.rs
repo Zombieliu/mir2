@@ -101,6 +101,7 @@ impl SkillState {
             delay_ms: self.delay_ms,
             cast_time_ms: self.cast_time_ms,
             cooldown_remaining_ticks: self.cooldown_ends_at.saturating_sub(tick) as u32,
+            icon: crystal_magic_for_skill_key(&self.key).map(|magic| magic.icon).unwrap_or(0),
         }
     }
 }
