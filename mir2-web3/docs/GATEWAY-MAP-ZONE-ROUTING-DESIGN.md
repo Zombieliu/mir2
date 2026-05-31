@@ -237,6 +237,61 @@ Step 2 target:
 - a per-zone tick driver test: with ≥2 zones, one tick advances each zone exactly
   once and each session receives only its own zone's outbounds.
 
+## Handoff implementation — verified structure (the hard part)
+
+Reading the code pins down exactly why the handoff is architecturally significant,
+not a one-line change:
+
+- `SharedInProcessZoneSessionRuntime` (the per-session runtime) holds **one**
+  `zone_state: Arc<Mutex<SharedInProcessZoneState>>`, bound at `create_runtime`
+  (`routing.rs:3244` via `state_for_zone(zone_id)`). It has **no reference to the
+  factory's `states` map or to the `SessionRouter`**, so it cannot, today, reach
+  a *different* zone's state to rebind.
+- `GatewaySession` stores `zone_id` + `zone_owner_lease` as **construction-time
+  fields**; nothing updates them after open. So even if the runtime rebound its
+  `zone_state`, `session.zone_id()` would stay stale → a *partial* handoff (the
+  inconsistent half-state the harness's `..._not_zone_today` test guards against).
+
+A correct handoff therefore needs **all** of these, atomically:
+
+1. **Give the session-runtime the means to rebind.** Pass the factory's
+   `states` handle + the `SessionRouter` into `create_runtime` so the runtime can
+   `route(new_map) → new_zone_id` and `state_for_zone(new_zone_id)`.
+2. **Leave → rebind → join.** On a map change whose `route(new_map) != current
+   zone`: `old_zone.handle(Leave)` (emits `ObjectRemove` to old observers — the
+   cleanup that's missing today), swap `self.zone_state`, `new_zone.handle(Join)`
+   at the destination position (emits the new visible set + `ObjectPlayer` to new
+   observers), reset the per-map caches (`cached_map_file_name`,
+   `last_shared_entity_ids_by_map`, `presence_key`).
+3. **Migrate character state.** The character lives in the per-session `inner`
+   runtime + account store. The zone change should `save_active_character()` on
+   the old binding and reload on the new (the seam already exists for persistence).
+4. **Signal the new zone up to `GatewaySession`.** Thread an optional
+   `zone_changed: Option<ZoneId>` through `WorldCommandExecution` (simulation
+   crate) so `GatewaySession` updates `zone_id` + re-leases `zone_owner_lease`
+   (and, for L4, re-acquires the cross-process fencing token).
+5. **Atomicity.** Buffer/reject the session's other commands during the swap so a
+   Walk/Attack can't land in the old zone after Leave.
+
+Alternative (do it one layer up): give `GatewaySession` a `ZoneRegistry` handle
+and re-home the whole session on map change (open on the new zone, migrate the
+character, drop the old). Cleaner conceptually, but still touches `GatewaySession`
+construction + character migration + old-zone cleanup.
+
+Either way this is a **multi-component, cross-layer change** (~1–2 weeks) on the
+most-contended file, with the `cross_zone_transfer_moves_zone_and_cleans_old_observers`
+oracle (above) as the acceptance gate. It should be a single focused effort,
+serialized through the architect with the `routing.rs` owner — not folded into an
+unrelated change.
+
+### Status of map=zone work
+- **Step 1 (routing primitive): merged** — `PerMapSessionRouter` (auto 1-zone-per-map).
+- **Integration harness / oracle: merged** — `map_zone_two_sessions_..._see_each_other`
+  (baseline) + `map_zone_transfer_changes_map_but_not_zone_today` (gap locked).
+- **Step 2 (per-zone tick) + Step 3 (handoff): designed + scoped above, not yet
+  implemented.** Both change live-loop / cross-layer behavior; they are the focused
+  next efforts, gated by the harness.
+
 > Status note: this spec was written during a window where the build/test loop
 > was unavailable; it is grounded in the read-verified API above, not in compiled
 > tests. Implement + verify (`cargo test -p mir2-gateway`) before relying on it.
