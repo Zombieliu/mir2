@@ -20933,7 +20933,7 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 339, y: 275 };
+    let player_origin = Point { x: 315, y: 248 };
     let bomb_spider = bomb_spider_template().expect("bomb spider template");
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let player = player_entity(session.app.world());
@@ -20964,7 +20964,14 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     .expect("spawned bomb spider");
     sync_visible_objects(&mut session);
 
+    {
+        let snap = session.world_snapshot();
+        let pl = snap.entities.iter().find(|e| e.kind == crate::WorldEntityKind::SelfPlayer).map(|e|(e.x,e.y));
+        let mon: Vec<_> = snap.entities.iter().filter(|e| matches!(e.kind, crate::WorldEntityKind::Monster)).map(|e|(e.object_id,e.x,e.y,e.dead)).collect();
+        eprintln!("BSDBG player={:?} monsters={:?}", pl, mon);
+    }
     let explode_packets = session.tick();
+    eprintln!("BSDBG explode died={} struck={}", explode_packets.iter().filter(|p|matches!(p,ServerPacket::ObjectDied{..})).count(), explode_packets.iter().filter(|p|matches!(p,ServerPacket::Struck{..})).count());
     assert!(explode_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ObjectDied { info } if info.object_id >= 80_000
