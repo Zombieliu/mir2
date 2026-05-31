@@ -88,6 +88,7 @@ fn attack_target_in_direction_at_distance(
 const CRYSTAL_SPELL_EFFECT_FATAL_SWORD: u8 = 1;
 const CRYSTAL_SPELL_EFFECT_MP_EATER: u8 = 17;
 const CRYSTAL_SPELL_EFFECT_HEMORRHAGE: u8 = 18;
+const CRYSTAL_SPELL_EFFECT_CRITICAL: u8 = 11;
 const CRYSTAL_POISON_BLEEDING: u16 = 128;
 const CRYSTAL_PLAYER_STATUS_DAMAGE_TICK_INTERVAL: u64 = 2;
 const CRYSTAL_PLAYER_GREEN_POISON_TICK_DAMAGE: i32 = 5;
@@ -255,6 +256,48 @@ fn crystal_player_melee_damage(world: &World) -> i32 {
         damage = damage.saturating_add(bonuses[index]);
     }
     damage.max(1)
+}
+
+/// Crystal critical-hit roll (`MonsterObject.Attacked`): a `CriticalRate`-driven
+/// chance to boost a melee hit by `CriticalDamage`. With `CriticalRateWeight = 5`
+/// the chance is `CriticalRate * 5`%, and the bonus is
+/// `floor(damage * CriticalDamage / CriticalDamageWeight * 10)` (weight 50).
+/// Basic gear grants no `CriticalRate`, so this is inert until crit stats are
+/// equipped. Returns the (possibly boosted) damage and whether it crit.
+fn crystal_apply_player_critical(
+    world: &World,
+    damage: i32,
+    current_tick: u64,
+    attacker_id: u32,
+) -> (i32, bool) {
+    const CRYSTAL_CRITICAL_RATE_WEIGHT: i32 = 5;
+    const CRYSTAL_CRITICAL_DAMAGE_WEIGHT: i64 = 50;
+
+    if damage <= 0 {
+        return (damage, false);
+    }
+    let inventory = world.resource::<InventoryResource>();
+    let crit_rate =
+        crystal_equipment_added_stat_total(inventory, CRYSTAL_STAT_CRITICAL_RATE).max(0);
+    if crit_rate == 0 {
+        return (damage, false);
+    }
+    let chance = i64::from(crit_rate.saturating_mul(CRYSTAL_CRITICAL_RATE_WEIGHT)).clamp(0, 100)
+        as u64;
+    let roll = deterministic_roll(
+        current_tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        0x0C1A,
+        100,
+    );
+    if roll >= chance {
+        return (damage, false);
+    }
+    let crit_damage =
+        crystal_equipment_added_stat_total(inventory, CRYSTAL_STAT_CRITICAL_DAMAGE).max(0);
+    let bonus =
+        (i64::from(damage) * i64::from(crit_damage) * 10 / CRYSTAL_CRITICAL_DAMAGE_WEIGHT) as i32;
+    (damage.saturating_add(bonus), true)
 }
 
 fn crystal_player_zone_base_melee_damage(world: &World) -> i32 {
@@ -2595,6 +2638,16 @@ impl SimulationSession {
             }
         }
 
+        let (crit_damage, crit) =
+            crystal_apply_player_critical(self.app.world(), damage, current_tick, player_object_id);
+        damage = crit_damage;
+        if crit {
+            packets.push(object_effect_packet(
+                target_object_id,
+                CRYSTAL_SPELL_EFFECT_CRITICAL,
+                0,
+            ));
+        }
         if let Some(packet) = object_attack_packet_for_player(
             self.app.world(),
             player_entity,
