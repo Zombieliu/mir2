@@ -41,6 +41,7 @@ export type ItemDropTarget =
   | { kind: "storage"; slot: number }
   | { kind: "belt"; slot: number }
   | { kind: "trade"; slot: number }
+  | { kind: "npcSell" }
   | { kind: "equipment"; equipmentSlot: EquipmentSlot }
   | { kind: "ground" };
 
@@ -246,6 +247,8 @@ function findDropTarget(x: number, y: number): ItemDropTarget | null {
       if (!Number.isFinite(slot)) return null;
       return { kind: "trade", slot };
     }
+    case "npcSell":
+      return { kind: "npcSell" };
     case "equipment": {
       const equipmentSlot = dropElement.dataset.itemDropEquip as EquipmentSlot | undefined;
       if (!equipmentSlot) return null;

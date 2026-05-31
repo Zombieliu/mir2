@@ -31,11 +31,15 @@ export function NpcShopDialog({ t, shop, gold, onBuy, onClose }: NpcShopDialogPr
             ×
           </button>
         </div>
-        <div className="npc-shop-banner-text">
-          {shop.mode === "sell"
-            ? t("ui.npcSellHint", [], "Sell mode active — use Sell on items in your inventory.")
-            : t("ui.npcRepairHint", [], "Repair mode active — use Repair on equipped items.")}
-        </div>
+        {shop.mode === "sell" ? (
+          <div className="npc-shop-sell-zone" data-item-drop-kind="npcSell">
+            {t("ui.npcSellDrop", [], "Drag items here to sell.")}
+          </div>
+        ) : (
+          <div className="npc-shop-banner-text">
+            {t("ui.npcRepairHint", [], "Repair mode active — use Repair on equipped items.")}
+          </div>
+        )}
       </section>
     );
   }

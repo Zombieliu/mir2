@@ -328,6 +328,21 @@ export function GameUiScene({
       return;
     }
 
+    if (target.kind === "npcSell") {
+      if (source.kind === "inventory" || source.kind === "belt") {
+        onSellItem(
+          {
+            key: payload.key,
+            uniqueId: payload.uniqueId,
+            slot: source.slot,
+            container: source.kind === "belt" ? "belt" : source.container,
+          },
+          payload.quantity,
+        );
+      }
+      return;
+    }
+
     if (target.kind === "ground") {
       if (source.kind === "inventory" || source.kind === "belt") {
         onDropItem({ key: payload.key, uniqueId: payload.uniqueId, slot: source.slot, container: source.kind === "belt" ? "belt" : source.container });
