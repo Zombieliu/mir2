@@ -4586,6 +4586,86 @@ fn crystal_monster_armour_subtracts_its_ac_from_player_melee() {
 }
 
 #[test]
+fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
+    // IcePillar (ai 89, data-only boss) overrides Attacked to lose exactly 1 HP per non-blocked hit
+    // regardless of rolled damage (`ChangeHP(-1)`), and overrides ApplyPoison to a no-op (immune).
+    // Spawn IcePilar (its in-game name, AC 20), force ai 89, agility 0 so the accuracy roll lands,
+    // and grant a big attack bonus so a swing clears AC 20 and is "non-blocked".
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    grant_player_attack_bonus(&mut session, 200);
+
+    let pillar_id = 70_601_u32;
+    let pillar = spawn_crystal_monster_for_test(
+        &mut session,
+        pillar_id,
+        "IcePilar",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(pillar);
+        entry.insert((
+            MonsterVitals {
+                hp: 1_000,
+                max_hp: 1_000,
+            },
+            MonsterCombatStats { agility: 0 },
+        ));
+        entry.get_mut::<MonsterAgent>().expect("agent").ai = 89;
+    }
+    sync_visible_objects(&mut session);
+
+    let hp = |session: &SimulationSession| {
+        session
+            .app
+            .world()
+            .entity(pillar)
+            .get::<MonsterVitals>()
+            .expect("pillar vitals")
+            .hp
+    };
+
+    // Each landed swing removes exactly 1 HP, never the rolled (200+) damage.
+    let mut landed = 0;
+    for _ in 0..6 {
+        let before = hp(&session);
+        session.attack(pillar_id);
+        session.tick();
+        let dropped = before - hp(&session);
+        assert!(
+            dropped == 0 || dropped == 1,
+            "IcePillar must lose 0 or 1 HP per hit, lost {dropped}"
+        );
+        landed += dropped;
+    }
+    assert!(landed > 0, "at least one swing should land its 1-HP chip");
+    assert!(
+        hp(&session) >= 1_000 - 6,
+        "after 6 swings the sponge should have lost at most 6 HP, not its full bar"
+    );
+
+    // Poison immunity: applying a green poison directly must not stick.
+    let current_tick = runtime_tick(session.app.world());
+    super::apply_monster_poison(session.app.world_mut(), pillar, CRYSTAL_POISON_GREEN, 50, current_tick, 10);
+    assert!(
+        session
+            .app
+            .world()
+            .entity(pillar)
+            .get::<super::MonsterPoisonState>()
+            .is_none(),
+        "IcePillar is immune to poison (ApplyPoison is a no-op)"
+    );
+}
+
+#[test]
 fn crystal_spell_magic_defence_classification_matches_crystal() {
     // The audit: Wizard/Taoist offensive spells (MinMC/MinSC damage) resolve MAC; warrior/assassin
     // melee skills (MinDC damage) resolve AC, with BladeAvalanche the lone DC-damage MAC exception.

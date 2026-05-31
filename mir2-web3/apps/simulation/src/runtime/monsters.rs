@@ -1928,6 +1928,7 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 58
                 | 61
                 | 79
+                | 89
                 | 98
                 | 99
                 | 113
@@ -1960,6 +1961,7 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 58
                 | 61
                 | 79
+                | 89
                 | 98
                 | 99
                 | 113

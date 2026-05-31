@@ -418,6 +418,15 @@ fn crystal_resolve_player_attack_on_monster(
     if armour >= damage {
         return None;
     }
+    // IcePillar (ai 89) is a damage sponge: Crystal's `Attacked` does the full armour/miss roll, but
+    // on any non-blocked hit it loses exactly 1 HP (`ChangeHP(-1)`) regardless of the rolled damage.
+    if world
+        .entity(monster_entity)
+        .get::<MonsterAgent>()
+        .is_some_and(|agent| agent.ai == ICE_PILLAR_AI)
+    {
+        return Some(1);
+    }
     Some((damage - armour).max(1))
 }
 
@@ -969,6 +978,14 @@ pub(super) fn apply_monster_poison(
     if poison == 0 || duration_ticks == 0 {
         return;
     }
+    // IcePillar (ai 89) overrides `ApplyPoison` to a no-op — it is immune to every poison.
+    if world
+        .entity(monster_entity)
+        .get::<MonsterAgent>()
+        .is_some_and(|agent| agent.ai == ICE_PILLAR_AI)
+    {
+        return;
+    }
 
     world.entity_mut(monster_entity).insert(MonsterPoisonState {
         poison,
@@ -1045,7 +1062,12 @@ pub(super) fn tick_monster_regen(
             .iter_entities()
             .filter_map(|entity| {
                 let agent = entity.get::<MonsterAgent>()?;
-                if agent.dead || agent.ai == 56 || ignores_monster_damage(agent) {
+                // ai 56 is the training dummy; ai 89 (IcePillar) overrides `CanRegen` to false.
+                if agent.dead
+                    || agent.ai == 56
+                    || agent.ai == ICE_PILLAR_AI
+                    || ignores_monster_damage(agent)
+                {
                     return None;
                 }
                 // Crystal `PoisonStopRegen` (true for every monster except the training dummy):
