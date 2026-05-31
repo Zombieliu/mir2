@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { ORIGINAL_UI } from "../../lib/original-ui";
 import {
   clientCommandForSocialAction,
   featureTitleForSocialPanel,
@@ -20,6 +21,21 @@ type TranslateFn = (
   params?: Array<string | number>,
   fallback?: string,
 ) => string;
+
+// Give each social system its own Crystal menu icon so the dialogs read as
+// distinct windows rather than one identical generic tab panel. Combined with a
+// per-system accent (CSS keyed on data-system-social-panel), this un-collapses
+// the visual identity of guild / group / friend / mentor / relationship /
+// ranking even though they share the data-driven body.
+const SOCIAL_PANEL_ICONS: Partial<Record<SystemMenuSocialPanel, string>> = {
+  ranking: ORIGINAL_UI.menu.buttons.ranking.sprite.base,
+  friend: ORIGINAL_UI.menu.buttons.friend.sprite.base,
+  mentor: ORIGINAL_UI.menu.buttons.mentor.sprite.base,
+  relationship: ORIGINAL_UI.menu.buttons.relationship.sprite.base,
+  marriage: ORIGINAL_UI.menu.buttons.relationship.sprite.base,
+  group: ORIGINAL_UI.menu.buttons.group.sprite.base,
+  guild: ORIGINAL_UI.menu.buttons.guild.sprite.base,
+};
 
 
 export function SocialSystemPanel({
@@ -83,6 +99,17 @@ export function SocialSystemPanel({
       data-system-social-selected-row={resolvedSelectedRowName}
       data-system-social-status={statusLine}
     >
+      <div className="system-social-header">
+        {SOCIAL_PANEL_ICONS[panel] ? (
+          <img
+            className="system-social-header-icon"
+            src={SOCIAL_PANEL_ICONS[panel]}
+            alt=""
+            draggable={false}
+          />
+        ) : null}
+        <span className="system-social-header-title">{featureTitleForSocialPanel(t, panel)}</span>
+      </div>
       <div className="system-social-subtitle">{resolvedSubtitle}</div>
       <div className="system-social-tabs" role="tablist" aria-label={featureTitleForSocialPanel(t, panel)}>
         {definition.tabs.map((tab, index) => {

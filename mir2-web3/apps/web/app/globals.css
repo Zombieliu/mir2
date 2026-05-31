@@ -5265,3 +5265,38 @@ body.mir-dragging-item * {
   border: 1px solid #705932;
   cursor: pointer;
 }
+
+/* ---- Per-system identity for social dialogs (un-collapse) ---- */
+.system-social-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--social-accent, #6b5430);
+  background: linear-gradient(180deg, rgba(58, 41, 24, 0.6), rgba(25, 17, 10, 0.6));
+}
+
+.system-social-header-icon {
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+}
+
+.system-social-header-title {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--social-accent-text, #ffe2a0);
+}
+
+.system-social-panel .system-social-tabs button.active {
+  border-color: var(--social-accent, #caa24f);
+}
+
+.system-social-panel[data-system-social-panel="guild"] { --social-accent: #caa24f; --social-accent-text: #ffe2a0; }
+.system-social-panel[data-system-social-panel="group"] { --social-accent: #5aa9ff; --social-accent-text: #bcdcff; }
+.system-social-panel[data-system-social-panel="friend"] { --social-accent: #7dff79; --social-accent-text: #c8ffc6; }
+.system-social-panel[data-system-social-panel="mentor"] { --social-accent: #ff9a3c; --social-accent-text: #ffd6a8; }
+.system-social-panel[data-system-social-panel="relationship"],
+.system-social-panel[data-system-social-panel="marriage"] { --social-accent: #ff77c6; --social-accent-text: #ffc8e8; }
+.system-social-panel[data-system-social-panel="ranking"] { --social-accent: #c56bff; --social-accent-text: #e3c8ff; }
+.system-social-panel[data-system-social-panel="market"] { --social-accent: #ffd24a; --social-accent-text: #ffe9a6; }
