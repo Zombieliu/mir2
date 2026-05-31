@@ -4343,6 +4343,24 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_combat_profile_drives_data_only_family_damage_class() {
+    use mir2_game_data::crystal_monster_combat_profile;
+    // FlameSpear (ai 92) is a never-spawned magic family; its profile must report magic damage so
+    // the runtime fallback rolls MC, not DC.
+    let flame = crystal_monster_combat_profile(92).expect("FlameSpear profile");
+    assert_eq!(flame.damage, "mc");
+    assert!(flame.ranged);
+    // OmaMage (ai 147) is distance-gated DC-melee / MC-range with a slow poison.
+    let oma = crystal_monster_combat_profile(147).expect("OmaMage profile");
+    assert_eq!(oma.damage, "dc_mc");
+    assert_eq!(oma.poison.as_ref().map(|p| p.kind.as_str()), Some("slow"));
+    // EvilMir (ai 52) reaches out to view range and applies green poison.
+    let mir = crystal_monster_combat_profile(52).expect("EvilMir profile");
+    assert_eq!(mir.attack_range, 0);
+    assert_eq!(mir.poison.as_ref().map(|p| p.kind.as_str()), Some("green"));
+}
+
+#[test]
 fn crystal_data_only_family_is_functional_when_spawned() {
     // EvilMir (ai 52) ships in the monster database but no stock respawn places it. Spawned by a
     // quest/GM it must still behave as a combat monster (chase + attack with its DC) through the

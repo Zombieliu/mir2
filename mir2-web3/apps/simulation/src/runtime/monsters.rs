@@ -3,9 +3,9 @@ use std::collections::BTreeSet;
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_monster_combat_profile,
-    crystal_starter_region_respawns, starter_server_data, CrystalMonsterTemplate,
-    CrystalRespawnTemplate, CrystalRoutePoint,
+    crystal_map_respawns_by_file_name, crystal_monster_ai_is_data_only, crystal_monster_by_name,
+    crystal_monster_combat_profile, crystal_starter_region_respawns, starter_server_data,
+    CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
 };
 use mir2_protocol::{
     MirDirection, MonsterInfo, ObjectAttackInfo, ObjectEffectInfo, ObjectRangeAttackInfo,
@@ -1747,7 +1747,18 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         6 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
-        _ => 1,
+        // Families without a bespoke reach fall back to the generated profile's InAttackRange
+        // distance (0 means "out to view range"), so data-only ranged casters/archers engage from
+        // distance instead of only when adjacent.
+        _ => crystal_monster_combat_profile(agent.ai)
+            .map(|profile| {
+                if profile.attack_range == 0 {
+                    agent.view_range.max(1)
+                } else {
+                    profile.attack_range.max(1)
+                }
+            })
+            .unwrap_or(1),
     }
 }
 
@@ -2247,8 +2258,64 @@ pub(super) fn monster_player_status_effect(
             chance_denominator: TOXIC_GHOUL_GREEN_POISON_CHANCE_DENOMINATOR,
             duration_ticks: TOXIC_GHOUL_GREEN_POISON_DURATION_TICKS,
         }),
-        _ => None,
+        // Generated-profile poison fallback: families without a bespoke poison case apply the
+        // on-hit poison extracted from their Crystal `PoisonTarget` call (data-only families etc.).
+        ai => crystal_monster_profile_poison(ai),
     }
+}
+
+fn crystal_monster_profile_poison(ai: u8) -> Option<PendingPlayerStatusEffect> {
+    // Spawned families already have curated poison (explicit cases plus the advance_world cascade,
+    // including non-poison special attacks like SandSnail's halfmoon); only fill the gap for the
+    // never-spawned data-only classes.
+    if !crystal_monster_ai_is_data_only(ai) {
+        return None;
+    }
+    let poison = crystal_monster_combat_profile(ai)?.poison?;
+    let chance_denominator = poison.chance.max(1);
+    let duration_ticks = poison.duration;
+    let salt = 0x9_0000 + u64::from(ai);
+    Some(match poison.kind.as_str() {
+        "green" => PendingPlayerStatusEffect::GreenPoison {
+            chance_denominator,
+            duration_ticks,
+        },
+        "red" => PendingPlayerStatusEffect::RedPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        "paralysis" => PendingPlayerStatusEffect::Paralysis {
+            chance_denominator,
+            duration_ticks,
+        },
+        "slow" => PendingPlayerStatusEffect::SlowPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        "frozen" => PendingPlayerStatusEffect::FrozenPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        "bleeding" => PendingPlayerStatusEffect::BleedingPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        "stun" => PendingPlayerStatusEffect::StunPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        "blindness" => PendingPlayerStatusEffect::BlindnessPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        },
+        _ => return None,
+    })
 }
 
 pub(super) fn monster_locks_player_target_on_hit(agent: &MonsterAgent) -> bool {

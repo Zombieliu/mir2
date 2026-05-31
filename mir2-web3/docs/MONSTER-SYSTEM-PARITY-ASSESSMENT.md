@@ -11,7 +11,7 @@ Two completeness lenses, kept separate on purpose:
 | Lens | Estimate | Notes |
 | --- | --- | --- |
 | Spawned families (87 of 212) — playable content | ~91–93% | Deep per-family handling; base damage + variance now corrected |
-| All 212 Crystal monster classes | ~42% | 117 "data-only" classes are defined but never placed by stock respawns (no gameplay impact until spawned by GM/quests/custom content) |
+| All 212 Crystal monster classes | ~58% | The 117 data-only classes are now combat-faithful (damage class, reach, poison via the generated profile); their bespoke special moves remain the long tail |
 
 ## What is already implemented faithfully (verified against Crystal source)
 
@@ -46,6 +46,7 @@ failure (`armadillo_type_one_branch_uses_three_half_dc_hits`).
 11. **SnowWolfKing (ai 180) FindWeakerTarget** — surviving a blow heavier than its own DC, the king blinks (effect 11) toward the player 50 % of the time, reusing the foxman destination search.
 12. **HellLord (ai 98) SpawnQuakes** — scatters a `MapQuake` cluster within 4 tiles of the player each pulse; a new `damages_player` ground-hazard path damages whoever stands on an erupting tile (reusing the fire-wall/poison-cloud pipeline).
 13. **Data-only families functional** — the ~100 monster classes the stock respawns never place now resolve their physical/magic defence correctly (MAC table covers the full roster) and behave as combat monsters through the generic AI (verified with a spawned `EvilMir`).
+14. **Generated per-AI combat profile** — `crystal_monster_combat_profile.json` (209 profiles extracted from each subclass's `Attack()`/`InAttackRange()`/`PoisonTarget`, resolving the class hierarchy) drives the runtime fallbacks: a family without a bespoke case now rolls the correct **damage class** (casters get MC/SC, distance-gated families DC-melee/MC-range), engages at its real **reach** (ranged archers/casters attack from distance, not only when adjacent), and applies its on-hit **poison** (gated to data-only families so curated spawned behaviour is untouched). This lifts every one of the 212 classes to combat-faithful when spawned.
 
 ## Genuine remaining gaps
 

@@ -1404,6 +1404,23 @@ pub struct CrystalMonsterCombatProfileManifest {
     pub profiles: BTreeMap<String, CrystalMonsterCombatProfile>,
 }
 
+/// True when no stock respawn ever places a family with this AI (a "data-only" class). Spawned
+/// families already have bespoke combat handling, so the generated-profile poison fallback only
+/// applies to data-only families to avoid double-applying or overriding curated behaviour.
+pub fn crystal_monster_ai_is_data_only(ai: u8) -> bool {
+    static SPAWNED_AI: OnceLock<std::collections::BTreeSet<u8>> = OnceLock::new();
+    !SPAWNED_AI
+        .get_or_init(|| {
+            crystal_monster_ai_summary()
+                .families
+                .iter()
+                .filter(|family| family.respawn_entity_count > 0)
+                .map(|family| family.ai)
+                .collect()
+        })
+        .contains(&ai)
+}
+
 pub fn crystal_monster_combat_profile(ai: u8) -> Option<CrystalMonsterCombatProfile> {
     static MANIFEST: OnceLock<CrystalMonsterCombatProfileManifest> = OnceLock::new();
     MANIFEST
