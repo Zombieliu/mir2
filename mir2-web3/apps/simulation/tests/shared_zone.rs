@@ -8318,3 +8318,81 @@ fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
             if session_id == &first && *damage == 8
     )));
 }
+
+#[test]
+fn zone_player_base_armour_mitigates_incoming_monster_melee() {
+    // A player carrying authoritative AC takes reduced melee damage from a
+    // monster: Field Wasp melee 7 minus AC 5 = 2.
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_ac: 5,
+            max_ac: 5,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn(9100, 331, 270),
+        now_ms: 0,
+    });
+
+    assert!(has_packet(&zone.tick(0), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 9100
+    )));
+    let hit = zone.tick(600);
+    assert!(has_packet(&hit, &first, |packet| matches!(
+        packet,
+        ServerPacket::DamageIndicator { object_id, damage, .. }
+            if *object_id == 101 && *damage == 2
+    )));
+}
+
+#[test]
+fn zone_player_physical_armour_does_not_reduce_incoming_magic_damage() {
+    // Magic monster damage is mitigated by MAC, not AC. A player with huge AC
+    // but zero MAC takes the full magic hit (Field Wasp fallback magic = 7),
+    // proving the zone applies the correct armour channel per damage type.
+    let mut zone = zone();
+    let first = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_ac: 100,
+            max_ac: 100,
+            min_mac: 0,
+            max_mac: 0,
+            ..Default::default()
+        },
+    )));
+    // ai 19 prefers a ranged magic attack from distance 3 (no melee closing).
+    let mut caster = native_monster_spawn(9100, 333, 270);
+    caster.ai = 19;
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: caster,
+        now_ms: 0,
+    });
+
+    assert!(has_packet(&zone.tick(0), &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectRangeAttack { info } if info.object_id == 9100
+    )));
+    let hit = zone.tick(600);
+    assert!(has_packet(&hit, &first, |packet| matches!(
+        packet,
+        ServerPacket::DamageIndicator { object_id, damage, .. }
+            if *object_id == 101 && *damage == 7
+    )));
+}
