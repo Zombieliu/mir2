@@ -24,7 +24,9 @@ use super::inventory::{add_or_increment_item_with_random_metadata, can_gain_item
 use super::items::{crystal_item_key_for_template, crystal_item_template_for_item_key};
 use super::monsters::deterministic_roll;
 use super::movement::offset_point;
-use super::resources::{runtime_tick, InventoryResource, MapRuntimeResource, RuntimeConfigResource};
+use super::resources::{
+    runtime_tick, InventoryResource, MapRuntimeResource, RuntimeConfigResource,
+};
 use crate::config::{EquipmentSlot, ItemContainer};
 
 /// `SpellEffect.Mine` from Crystal's shared enums — the swing/dust visual.
@@ -252,7 +254,13 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
         }
     } else if tick >= last_regen_tick {
         let regen_ticks = u64::from(set.spot_regen_rate_minutes) * 60;
-        let new_stones = roll(tick, object_id, &target, 0x40, u64::from(set.max_stones).max(1)) as u8;
+        let new_stones = roll(
+            tick,
+            object_id,
+            &target,
+            0x40,
+            u64::from(set.max_stones).max(1),
+        ) as u8;
         if let Some(spot) = world
             .resource_mut::<MiningResource>()
             .spots
@@ -266,7 +274,11 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
     Some(packets)
 }
 
-fn damage_pickaxe(world: &mut World, pickaxe: &EquippedPickaxe, damage: u16) -> Option<ServerPacket> {
+fn damage_pickaxe(
+    world: &mut World,
+    pickaxe: &EquippedPickaxe,
+    damage: u16,
+) -> Option<ServerPacket> {
     let mut inventory = world.resource_mut::<InventoryResource>();
     let weapon = inventory
         .equipment_items
@@ -288,7 +300,13 @@ fn give_mine_payout(
     object_id: u32,
     target: &Point,
 ) -> Option<ServerPacket> {
-    let slot = roll(tick, object_id, target, 0x50, u64::from(set.total_slots).max(1)) as u16;
+    let slot = roll(
+        tick,
+        object_id,
+        target,
+        0x50,
+        u64::from(set.total_slots).max(1),
+    ) as u16;
     for (index, drop) in set.drops.iter().enumerate() {
         if slot < drop.min_slot || slot > drop.max_slot {
             continue;
@@ -307,9 +325,14 @@ fn give_mine_payout(
             if drop.bonus_chance > 0
                 && roll(tick, object_id, target, 0x70 + index, 100) <= u64::from(drop.bonus_chance)
             {
-                let bonus =
-                    roll(tick, object_id, target, 0x80 + index, u64::from(drop.max_bonus_dura).max(1))
-                        .saturating_mul(1_000);
+                let bonus = roll(
+                    tick,
+                    object_id,
+                    target,
+                    0x80 + index,
+                    u64::from(drop.max_bonus_dura).max(1),
+                )
+                .saturating_mul(1_000);
                 dura = (u64::from(dura) + bonus).min(u64::from(u16::MAX)) as u16;
             }
             dura

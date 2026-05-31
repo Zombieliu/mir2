@@ -282,8 +282,8 @@ fn crystal_apply_player_critical(
     if crit_rate == 0 {
         return (damage, false);
     }
-    let chance = i64::from(crit_rate.saturating_mul(CRYSTAL_CRITICAL_RATE_WEIGHT)).clamp(0, 100)
-        as u64;
+    let chance =
+        i64::from(crit_rate.saturating_mul(CRYSTAL_CRITICAL_RATE_WEIGHT)).clamp(0, 100) as u64;
     let roll = deterministic_roll(
         current_tick,
         usize::try_from(attacker_id).unwrap_or_default(),

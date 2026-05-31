@@ -672,7 +672,12 @@ impl ZoneRuntime {
     /// Open a shared door (Crystal `Map.OpenDoor`): unblock its cells for every
     /// player on the map, schedule the 5 s auto-close, and broadcast the open.
     /// Re-opening refreshes the timer and re-broadcasts, matching Crystal.
-    fn open_door(&mut self, _session_id: &SessionId, door_index: u8, now_ms: u64) -> Vec<ZoneOutbound> {
+    fn open_door(
+        &mut self,
+        _session_id: &SessionId,
+        door_index: u8,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
         let door_index = door_index & 0x7F;
         if !self.collision.doors().contains_key(&door_index) {
             return Vec::new();
@@ -760,7 +765,11 @@ impl ZoneRuntime {
             .iter()
             .filter(|(_, player)| !player.dead)
             .map(|(session_id, player)| {
-                (session_id.clone(), player.object_id, player.position.clone())
+                (
+                    session_id.clone(),
+                    player.object_id,
+                    player.position.clone(),
+                )
             })
             .collect();
 
@@ -770,10 +779,11 @@ impl ZoneRuntime {
             let location = if on_player {
                 position.clone()
             } else {
-                let dx = (zone_hazard_hash(strike_index, salt ^ u64::from(object_id)) % 21) as i32 - 10;
+                let dx =
+                    (zone_hazard_hash(strike_index, salt ^ u64::from(object_id)) % 21) as i32 - 10;
                 let dy =
-                    (zone_hazard_hash(strike_index, salt.wrapping_mul(7) ^ u64::from(object_id)) % 21)
-                        as i32
+                    (zone_hazard_hash(strike_index, salt.wrapping_mul(7) ^ u64::from(object_id))
+                        % 21) as i32
                         - 10;
                 Point {
                     x: position.x + dx,
@@ -8208,9 +8218,7 @@ fn packets_with_linked_items(
 
 /// Deterministic 64-bit mix for shared hazard rolls (splitmix-style).
 fn zone_hazard_hash(a: u64, b: u64) -> u64 {
-    let mut x = a
-        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
-        ^ b.wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    let mut x = a.wrapping_mul(0x9E37_79B9_7F4A_7C15) ^ b.wrapping_mul(0xBF58_476D_1CE4_E5B9);
     x ^= x >> 27;
     x = x.wrapping_mul(0x94D0_49BB_1331_11EB);
     x ^ (x >> 31)
@@ -8332,9 +8340,10 @@ mod hazard_tests {
             }) {
                 match outbound {
                     ZoneOutbound::ToAll { packets } => {
-                        if packets.iter().any(|packet| matches!(packet,
-                            ServerPacket::ObjectSpell { info } if info.spell == Spell::MapLightning))
-                        {
+                        if packets.iter().any(|packet| {
+                            matches!(packet,
+                            ServerPacket::ObjectSpell { info } if info.spell == Spell::MapLightning)
+                        }) {
                             saw_strike = true;
                         }
                     }
@@ -8348,7 +8357,10 @@ mod hazard_tests {
             }
         }
         assert!(saw_strike, "lightning should strike on a hazard map");
-        assert!(saw_damage, "a direct strike should authoritatively damage the player");
+        assert!(
+            saw_damage,
+            "a direct strike should authoritatively damage the player"
+        );
     }
 
     #[test]

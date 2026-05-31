@@ -68,8 +68,9 @@ struct HazardConfig {
 }
 
 fn current_map_hazard(world: &World) -> Option<HazardConfig> {
-    let current_map =
-        super::map::normalize_map_file_name(&world.resource::<MapRuntimeResource>().current_map.file_name);
+    let current_map = super::map::normalize_map_file_name(
+        &world.resource::<MapRuntimeResource>().current_map.file_name,
+    );
     world
         .resource::<RuntimeConfigResource>()
         .config
@@ -179,8 +180,12 @@ fn strike(
     });
 
     if location == player_position {
-        let damage = deterministic_roll(tick, object_id as usize, salt + 3, i64::from(max_damage.max(1)) as u64)
-            as i32;
+        let damage = deterministic_roll(
+            tick,
+            object_id as usize,
+            salt + 3,
+            i64::from(max_damage.max(1)) as u64,
+        ) as i32;
         apply_damage_to_current_player(world, damage, packets);
     }
 }

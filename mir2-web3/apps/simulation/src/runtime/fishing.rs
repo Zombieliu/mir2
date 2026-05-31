@@ -165,7 +165,11 @@ pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
 /// without parsed fishing data (e.g. the synthetic starter field) keep the
 /// permissive default attribute so they remain fishable.
 fn sync_fishing_attribute_from_map(world: &mut World) {
-    if world.resource::<MapRuntimeResource>().fishing_cells.is_empty() {
+    if world
+        .resource::<MapRuntimeResource>()
+        .fishing_cells
+        .is_empty()
+    {
         return;
     }
     let location = current_location(world);

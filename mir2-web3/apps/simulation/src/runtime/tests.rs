@@ -53886,11 +53886,31 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
 #[test]
 fn crystal_door_registry_groups_cells_by_index_and_masks_high_bit() {
     let templates = vec![
-        mir2_game_data::DoorMapCellTemplate { x: 10, y: 5, index: 3, closed: true },
-        mir2_game_data::DoorMapCellTemplate { x: 11, y: 5, index: 3, closed: true },
+        mir2_game_data::DoorMapCellTemplate {
+            x: 10,
+            y: 5,
+            index: 3,
+            closed: true,
+        },
+        mir2_game_data::DoorMapCellTemplate {
+            x: 11,
+            y: 5,
+            index: 3,
+            closed: true,
+        },
         // High bit (0x80) must be masked off so it matches index 3 as well.
-        mir2_game_data::DoorMapCellTemplate { x: 12, y: 5, index: 0x83, closed: true },
-        mir2_game_data::DoorMapCellTemplate { x: 20, y: 9, index: 4, closed: true },
+        mir2_game_data::DoorMapCellTemplate {
+            x: 12,
+            y: 5,
+            index: 0x83,
+            closed: true,
+        },
+        mir2_game_data::DoorMapCellTemplate {
+            x: 20,
+            y: 9,
+            index: 4,
+            closed: true,
+        },
     ];
     let registry = super::super::resources::DoorRegistry::from_templates(&templates);
     assert_eq!(registry.doors.len(), 2, "two distinct door indices");
@@ -53963,11 +53983,13 @@ fn crystal_open_door_unblocks_then_auto_closes() {
     let mut closed = false;
     for _ in 0..8 {
         let packets = session.tick();
-        if packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::OpenDoor { door_index, close }
-                if *door_index == DOOR_INDEX && *close
-        )) {
+        if packets.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::OpenDoor { door_index, close }
+                    if *door_index == DOOR_INDEX && *close
+            )
+        }) {
             closed = true;
             break;
         }
@@ -54023,10 +54045,7 @@ fn equip_pickaxe(session: &mut SimulationSession) {
     let template =
         mir2_game_data::crystal_item_by_name("PickAxe").expect("PickAxe item template exists");
     let key = super::super::items::crystal_item_key_for_template(&template);
-    let mut inventory = session
-        .app
-        .world_mut()
-        .resource_mut::<InventoryResource>();
+    let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
     let weapon = inventory
         .equipment_items
         .iter_mut()
@@ -54185,7 +54204,10 @@ fn crystal_mining_guaranteed_set_yields_ore_and_damages_pickaxe() {
         .find(|item| item.slot == EquipmentSlot::Weapon)
         .expect("weapon")
         .durability_current;
-    assert!(weapon_dura < 5000, "pickaxe durability should drop after a hit");
+    assert!(
+        weapon_dura < 5000,
+        "pickaxe durability should drop after a hit"
+    );
 }
 
 #[test]
@@ -54377,7 +54399,10 @@ fn crystal_fishing_uses_map_fishing_cell_three_tiles_ahead() {
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     let fishing = session.app.world().resource::<FishingResource>();
     assert!(fishing.fishing, "fishing should begin over a fishing cell");
-    assert_eq!(fishing.fishing_attribute, 0, "attribute taken from the cell");
+    assert_eq!(
+        fishing.fishing_attribute, 0,
+        "attribute taken from the cell"
+    );
 }
 
 #[test]
@@ -54401,7 +54426,10 @@ fn crystal_fishing_rejected_when_no_fishing_cell_ahead() {
 
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
     let fishing = session.app.world().resource::<FishingResource>();
-    assert!(!fishing.fishing, "fishing must not begin away from a fishing cell");
+    assert!(
+        !fishing.fishing,
+        "fishing must not begin away from a fishing cell"
+    );
     assert_eq!(fishing.fishing_attribute, -1);
 }
 
@@ -54537,8 +54565,14 @@ fn equip_crit_gear(session: &mut SimulationSession, rate: i32, crit_damage: i32)
         .expect("weapon slot");
     // Stat 35 = CriticalRate, 36 = CriticalDamage.
     weapon.added_stats = vec![
-        UserItemStat { stat: 35, value: rate },
-        UserItemStat { stat: 36, value: crit_damage },
+        UserItemStat {
+            stat: 35,
+            value: rate,
+        },
+        UserItemStat {
+            stat: 36,
+            value: crit_damage,
+        },
     ];
 }
 
