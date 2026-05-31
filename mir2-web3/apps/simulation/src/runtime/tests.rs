@@ -4488,7 +4488,7 @@ fn monster_attack_delays_struck_for_player_until_next_tick() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let monster_object_id = 98_768_u32;
     let current_tick = runtime_tick(session.app.world());
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -4562,7 +4562,7 @@ fn ai0_default_monsterobject_uses_imported_melee_baseline() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let yob_position = Point {
         x: player_origin.x + 1,
         y: player_origin.y,
@@ -4649,7 +4649,7 @@ fn spitting_spider_ai_attacks_from_two_tiles_with_line_timing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let monster_object_id = 98_880_u32;
     let current_tick = runtime_tick(session.app.world());
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
@@ -5712,7 +5712,7 @@ fn pending_monster_damage_can_kill_player_and_snapshot_dead_state_syncs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     set_current_player_hp(&mut session, 10);
     let attacker = spawn_crystal_monster_for_test(
@@ -17768,7 +17768,7 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let wolf_object_id = 98_930_u32;
     set_player_position(&mut session, player_origin.clone());
     let player = player_entity(session.app.world()).expect("player entity");
@@ -20927,7 +20927,7 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let bomb_spider = bomb_spider_template().expect("bomb spider template");
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let player = player_entity(session.app.world());
@@ -21007,7 +21007,7 @@ fn hell_bomb_ignores_damage_and_explodes_after_timeout() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 343, y: 281 };
+    let player_origin = Point { x: 322, y: 277 };
     let bomb_object_id = 98_947;
     set_player_position(&mut session, player_origin.clone());
     let bomb = spawn_crystal_monster_for_test(
@@ -21074,7 +21074,7 @@ fn hell_bomb_explosion_applies_poison_variant() {
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-        let player_origin = Point { x: 343, y: 281 };
+        let player_origin = Point { x: 322, y: 277 };
         let bomb_object_id = 98_981 + index;
         set_player_position(&mut session, player_origin.clone());
         let bomb = spawn_crystal_monster_for_test(
@@ -40424,7 +40424,7 @@ fn magic_packet_crystal_mass_healing_queues_delayed_area_heal() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 10);
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -40487,7 +40487,7 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 10);
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -42352,7 +42352,7 @@ fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
                 ..current
             });
     }
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     {
         let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
@@ -42825,7 +42825,7 @@ fn counter_attack_spell_toggle_applies_crystal_buff_stats() {
 fn magic_packet_crystal_counter_attack_procs_on_adjacent_incoming_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     let player = player_entity(session.app.world()).expect("player");
     {
@@ -45058,7 +45058,7 @@ fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effe
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 20);
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -45441,7 +45441,7 @@ fn magic_packet_crystal_healing_and_blink_emit_effects() {
             .resource_mut::<PlayerRuntimeResource>()
             .player_vitals = vitals;
     }
-    let origin = Point { x: 343, y: 281 };
+    let origin = Point { x: 322, y: 277 };
     set_player_position(&mut session, origin.clone());
     session
         .app
