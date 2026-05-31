@@ -917,10 +917,7 @@ impl PostgresAdminRepository {
 
     pub fn ensure_schema(&self) -> Result<(), AdminError> {
         let mut client = self.client.lock().map_err(repository_lock_error)?;
-        client
-            .batch_execute(include_str!(
-                "../../../infra/postgres/migrations/0001_core.sql"
-            ))
+        mir2_simulation::apply_migrations(&mut client)
             .map_err(|error| AdminError::Repository(format!("postgres migration failed: {error}")))
     }
 
@@ -5716,15 +5713,11 @@ fn read_postgres_account_snapshot(
             "postgres account read-model connect failed: {error}"
         ))
     })?;
-    client
-        .batch_execute(include_str!(
-            "../../../infra/postgres/migrations/0001_core.sql"
+    mir2_simulation::apply_migrations(&mut client).map_err(|error| {
+        AdminError::Repository(format!(
+            "postgres account read-model migration failed: {error}"
         ))
-        .map_err(|error| {
-            AdminError::Repository(format!(
-                "postgres account read-model migration failed: {error}"
-            ))
-        })?;
+    })?;
     let rows = client
         .query(
             "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
