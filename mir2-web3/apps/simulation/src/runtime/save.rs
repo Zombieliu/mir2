@@ -58,6 +58,7 @@ pub(super) fn default_save_for_character(
     save.hp = max_hp;
     save.max_hp = max_hp;
     save.mp = mp;
+    save.max_mp = mp;
     save.experience = 0;
     save.max_experience = 100;
     save.gold = 0;
@@ -139,6 +140,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         hp: vitals.hp,
         max_hp: vitals.max_hp,
         mp: vitals.mp,
+        max_mp: vitals.max_mp,
         experience: player_runtime.experience,
         max_experience: player_runtime.max_experience.max(1),
         gold: player_runtime.gold,
@@ -544,6 +546,7 @@ pub(super) fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) ->
     save.hp = max_hp;
     save.max_hp = max_hp;
     save.mp = mp;
+    save.max_mp = mp;
     true
 }
 
@@ -635,6 +638,24 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         .resource_mut::<PlayerPermissionResource>()
         .free_server_shout = false;
     {
+        // Source GM rank from the authoritative account record (0 for normal
+        // players). Gates the in-game `@` command dispatcher.
+        let gm_level = {
+            let config = world.resource::<RuntimeConfigResource>().config.clone();
+            let account_id = world.resource::<SessionResource>().account_id.clone();
+            account_id
+                .and_then(|account_id| {
+                    config
+                        .account_store
+                        .lock()
+                        .ok()
+                        .and_then(|store| store.accounts.get(&account_id).map(|a| a.gm_level))
+                })
+                .unwrap_or(0)
+        };
+        world.resource_mut::<PlayerPermissionResource>().gm_level = gm_level;
+    }
+    {
         let mut recovery = world.resource_mut::<PotionRecoveryResource>();
         recovery.pending_pot_health_amount = 0;
         recovery.pending_pot_mana_amount = 0;
@@ -678,10 +699,16 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
             save.position.clone()
         };
         player_runtime.player_direction = save.direction;
+        let restored_max_mp = if save.max_mp > 0 {
+            save.max_mp
+        } else {
+            crate::config::crystal_base_vitals(save.character.class, save.character.level).1
+        };
         player_runtime.player_vitals = PlayerVitals {
             hp: save.hp.max(1),
             max_hp: save.max_hp.max(1),
             mp: save.mp.max(0),
+            max_mp: restored_max_mp.max(save.mp.max(0)),
         };
         player_runtime.experience = save.experience.max(0);
         player_runtime.max_experience = save.max_experience.max(1);

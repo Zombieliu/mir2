@@ -694,6 +694,7 @@ fn zone_join(session_id_value: &str, object_id: u32, name: &str, x: i32, y: i32)
         position: Point { x, y },
         direction: MirDirection::Down,
         chat_profile: Default::default(),
+        combat_stats: Default::default(),
     }
 }
 

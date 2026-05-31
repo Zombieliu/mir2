@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-present-sound-manifest",
+  "soundDir": "public/original-ui/Sound",
+  "presentSoundCount": 4,
+  "files": [
+    "100.wav",
+    "Login2.wav",
+    "NewChar.wav",
+    "Select2.wav"
+  ]
+}

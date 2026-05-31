@@ -125,6 +125,10 @@ Current implementation:
 - `GET /admin/read/players`
 - `GET /admin/read/players/:player_id`
 - `GET /admin/read/economy`
+- `GET /admin/read/economy/aggregate`
+- `GET /admin/read/mail`
+- `GET /admin/read/auctions`
+- `GET /admin/read/items`
 - `GET /admin/read/activities`
 - `GET /admin/read/servers`
 - `GET /admin/read/risk`
@@ -279,6 +283,25 @@ Current implementation:
   mode for account-store load/save. It loads `accounts.raw_json`, writes through
   a Postgres transaction, locks account rows, and increments `store_version` /
   `save_version` on source writes. JSON remains the default runtime backend.
+- Migration `0002_normalized_projections.sql` adds normalized read-side query
+  tables (`character_state`, `character_items`, `character_mail`,
+  `auction_listings`, `character_npc_state`) that every authoritative character
+  save projects into **inside the same transaction**, so they never drift from
+  the snapshot. The new `/admin/read/economy/aggregate`, `/admin/read/mail`,
+  `/admin/read/auctions`, and `/admin/read/items` endpoints query these tables
+  with real SQL (gold supply/distribution/top-holders, mail recipient auditing,
+  global auction depth, item-holder and duplicate-unique-id detection) instead of
+  deserializing every account blob. See `docs/PERSISTENCE-OPERATIONS-STATUS.md`.
+- Migration `0003_zone_owner_leases.sql` adds durable, fenced zone-ownership
+  leases (`PostgresZoneOwnerLeaseAuthority`) as the coordination primitive for
+  distributed gateway failover, selected via
+  `MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL`.
+- Migrations are applied by an ordered, idempotent runner
+  (`mir2_simulation::apply_migrations`, recorded in `schema_migrations`) shared by
+  the simulation account store, the admin API, and the gateway lease authority.
+  The `mir2-ops` CLI (`migrate` / `status` / `health`) runs them and inspects
+  readiness independently of app startup. See
+  `docs/PERSISTENCE-OPERATIONS-RUNBOOK.md`.
 
 ### Redis
 

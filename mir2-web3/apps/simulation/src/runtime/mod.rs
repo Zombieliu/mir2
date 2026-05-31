@@ -2,13 +2,17 @@ mod buffs;
 mod combat;
 mod components;
 mod crystal_compat;
+mod door;
 mod drops;
 mod equipment;
 mod fishing;
+mod gm_commands;
+mod hazard;
 mod hero_ai;
 mod inventory;
 mod items;
 mod map;
+mod mining;
 mod monster_ai;
 mod monsters;
 mod movement;
@@ -24,6 +28,7 @@ mod session;
 mod skills;
 mod social_economy;
 mod stage5;
+mod stats;
 pub mod zone;
 
 pub use drops::{
@@ -38,8 +43,8 @@ pub use session::{
 };
 pub use zone::{
     PlayerId, SessionId, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntime,
+    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

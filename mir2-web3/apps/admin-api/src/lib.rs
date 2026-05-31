@@ -164,6 +164,10 @@ pub enum AdminCommand {
         character_id: String,
         name: Option<String>,
         level: Option<u16>,
+        #[serde(default)]
+        experience: Option<i64>,
+        #[serde(default)]
+        max_experience: Option<i64>,
         gold: Option<u32>,
         credit: Option<u32>,
         map_file_name: Option<String>,
@@ -244,6 +248,15 @@ pub enum AdminCommand {
         record_key: String,
         payload_json: Value,
     },
+    RollbackContentBundle {
+        bundle_id: String,
+        category: String,
+        record_key: String,
+    },
+    AddSupportNote {
+        account_id: String,
+        note: String,
+    },
     ServerControl {
         action: String,
         target: Option<String>,
@@ -280,6 +293,8 @@ impl AdminCommand {
             | AdminCommand::NameListCreate { .. }
             | AdminCommand::NameListDelete { .. } => Permission::NameListManage,
             AdminCommand::PublishContentBundle { .. } => Permission::ContentPublish,
+            AdminCommand::RollbackContentBundle { .. } => Permission::ContentRollback,
+            AdminCommand::AddSupportNote { .. } => Permission::AccountWrite,
             AdminCommand::ServerControl { .. } => Permission::ServerControl,
         }
     }
@@ -917,10 +932,7 @@ impl PostgresAdminRepository {
 
     pub fn ensure_schema(&self) -> Result<(), AdminError> {
         let mut client = self.client.lock().map_err(repository_lock_error)?;
-        client
-            .batch_execute(include_str!(
-                "../../../infra/postgres/migrations/0001_core.sql"
-            ))
+        mir2_simulation::apply_migrations(&mut client)
             .map_err(|error| AdminError::Repository(format!("postgres migration failed: {error}")))
     }
 
@@ -2795,6 +2807,8 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                 character_id,
                 name,
                 level,
+                experience,
+                max_experience,
                 gold,
                 credit,
                 map_file_name,
@@ -2844,6 +2858,14 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                     character.level = *level;
                     save.character.level = *level;
                     changes.push("level");
+                }
+                if let Some(experience) = experience {
+                    save.experience = (*experience).max(0);
+                    changes.push("experience");
+                }
+                if let Some(max_experience) = max_experience {
+                    save.max_experience = (*max_experience).max(1);
+                    changes.push("max_experience");
                 }
                 if let Some(gold) = gold {
                     save.gold = *gold;
@@ -3218,6 +3240,27 @@ impl SystemMailDomain for AccountStoreSystemMailDomain {
                 category,
                 record_key,
                 payload_json,
+                operator_id,
+                reason,
+                accepted_at_ms,
+            ),
+            AdminCommand::RollbackContentBundle {
+                bundle_id,
+                category,
+                record_key,
+            } => rollback_content_bundle(
+                &self.content_bundle_dir,
+                bundle_id,
+                category,
+                record_key,
+                operator_id,
+                reason,
+                accepted_at_ms,
+            ),
+            AdminCommand::AddSupportNote { account_id, note } => add_support_note(
+                &self.content_bundle_dir,
+                account_id,
+                note,
                 operator_id,
                 reason,
                 accepted_at_ms,
@@ -3680,6 +3723,110 @@ fn publish_content_bundle(
     ))
 }
 
+/// Roll a published content bundle back: move its published JSON aside to a
+/// timestamped `.rolledback` artifact so the world/zone reload no longer serves
+/// it, and the action is auditable/recoverable. Errors if the bundle was never
+/// published.
+fn rollback_content_bundle(
+    root: &PathBuf,
+    bundle_id: &str,
+    category: &str,
+    record_key: &str,
+    operator_id: &str,
+    reason: &str,
+    updated_at_ms: u64,
+) -> Result<String, AdminError> {
+    let bundle_id = sanitized_file_stem("bundle_id", bundle_id)?;
+    let _category = required_string("category", category)?;
+    let _record_key = required_string("record_key", record_key)?;
+    let path = root.join(format!("{bundle_id}.json"));
+    if !path.exists() {
+        return Err(AdminError::InvalidCommand(format!(
+            "content bundle {bundle_id} is not published; nothing to roll back"
+        )));
+    }
+    let archive = root.join(format!("{bundle_id}.rolledback-{updated_at_ms}.json"));
+    let marker = serde_json::json!({
+        "bundleId": bundle_id,
+        "category": _category,
+        "recordKey": _record_key,
+        "operatorId": operator_id,
+        "reason": reason,
+        "rolledBackAtMs": updated_at_ms,
+    });
+    let prior = fs::read(&path).unwrap_or_default();
+    fs::write(&archive, prior).map_err(|error| {
+        AdminError::Repository(format!(
+            "archive content bundle {} failed: {error}",
+            archive.display()
+        ))
+    })?;
+    fs::remove_file(&path).map_err(|error| {
+        AdminError::Repository(format!(
+            "remove published content bundle {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    let receipt = root.join(format!("{bundle_id}.rollback-receipt-{updated_at_ms}.json"));
+    let _ = fs::write(
+        &receipt,
+        serde_json::to_vec_pretty(&marker).unwrap_or_default(),
+    );
+    Ok(format!(
+        "content bundle {bundle_id} rolled back (archived to {})",
+        archive.display()
+    ))
+}
+
+/// Append an immutable support note for an account. Notes are stored per-account
+/// as newline-delimited JSON so support history survives restarts and can be
+/// read back by the operations UI.
+fn add_support_note(
+    root: &PathBuf,
+    account_id: &str,
+    note: &str,
+    operator_id: &str,
+    reason: &str,
+    created_at_ms: u64,
+) -> Result<String, AdminError> {
+    let account_stem = sanitized_file_stem("account_id", account_id)?;
+    let note = required_string("note", note)?;
+    let dir = root.join("support-notes");
+    fs::create_dir_all(&dir).map_err(|error| {
+        AdminError::Repository(format!(
+            "create support-notes dir {} failed: {error}",
+            dir.display()
+        ))
+    })?;
+    let record = serde_json::json!({
+        "accountId": account_id,
+        "note": note,
+        "operatorId": operator_id,
+        "reason": reason,
+        "createdAtMs": created_at_ms,
+    });
+    let line = format!("{}\n", serde_json::to_string(&record).unwrap_or_default());
+    let path = dir.join(format!("{account_stem}.ndjson"));
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .map_err(|error| {
+            AdminError::Repository(format!(
+                "open support-notes file {} failed: {error}",
+                path.display()
+            ))
+        })?;
+    use std::io::Write as _;
+    file.write_all(line.as_bytes()).map_err(|error| {
+        AdminError::Repository(format!(
+            "write support note {} failed: {error}",
+            path.display()
+        ))
+    })?;
+    Ok(format!("support note recorded for account {account_id}"))
+}
+
 fn canonical_control_action(action: &str) -> Result<String, AdminError> {
     let action = required_string("action", action)?
         .replace('-', "_")
@@ -3944,6 +4091,10 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         .route("/admin/read/players", get(read_players))
         .route("/admin/read/players/:player_id", get(read_player_detail))
         .route("/admin/read/economy", get(read_economy))
+        .route("/admin/read/economy/aggregate", get(read_economy_aggregate))
+        .route("/admin/read/mail", get(read_mail))
+        .route("/admin/read/auctions", get(read_auctions))
+        .route("/admin/read/items", get(read_items))
         .route("/admin/read/market", get(read_market))
         .route("/admin/read/guilds", get(read_guilds))
         .route("/admin/read/namelists", get(read_namelists))
@@ -3966,6 +4117,18 @@ pub fn admin_router_with_state(state: AdminApiState) -> Router {
         )
         .route("/admin/commands/kick-player", post(submit_kick_player))
         .route("/admin/commands/ban-account", post(submit_ban_account))
+        .route(
+            "/admin/commands/grant-experience",
+            post(submit_grant_experience),
+        )
+        .route(
+            "/admin/commands/add-support-note",
+            post(submit_support_note),
+        )
+        .route(
+            "/admin/commands/rollback-content-bundle",
+            post(submit_rollback_content_bundle),
+        )
         .route("/admin/commands/console", post(submit_console_command))
         .with_state(state)
 }
@@ -4014,6 +4177,42 @@ pub struct SubmitGrantCurrencyRequest {
     pub character_id: String,
     pub currency: String,
     pub amount: u64,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitGrantExperienceRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub character_id: String,
+    pub experience: i64,
+    #[serde(default)]
+    pub max_experience: Option<i64>,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitSupportNoteRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub account_id: String,
+    pub note: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmitRollbackContentBundleRequest {
+    pub command_id: Option<String>,
+    pub trace_id: Option<String>,
+    pub approval_id: Option<String>,
+    pub bundle_id: String,
+    pub category: String,
+    pub record_key: String,
     pub reason: String,
 }
 
@@ -4786,6 +4985,17 @@ impl AdminReadModelStore {
             }
         }
     }
+
+    /// The Postgres URL backing normalized read-side projections, when the
+    /// account store is Postgres-backed. Normalized SQL read models query these
+    /// projection tables (character_state/items/mail/auction) instead of
+    /// deserializing every account blob.
+    fn normalized_postgres_url(&self) -> Option<String> {
+        match &self.source {
+            AdminReadModelSource::Postgres(database_url) => Some(database_url.clone()),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -5556,6 +5766,122 @@ async fn submit_grant_currency(
     .await
 }
 
+async fn submit_grant_experience(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitGrantExperienceRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-grant-experience-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::Character,
+            target_id: request.character_id.clone(),
+            account_id: None,
+            character_id: Some(request.character_id.clone()),
+        },
+        request.reason,
+        AdminCommand::UpdateCharacter {
+            character_id: request.character_id,
+            name: None,
+            level: None,
+            experience: Some(request.experience),
+            max_experience: request.max_experience,
+            gold: None,
+            credit: None,
+            map_file_name: None,
+            map_title: None,
+            position_x: None,
+            position_y: None,
+            hp: None,
+            max_hp: None,
+            mp: None,
+            pk_points: None,
+        },
+        now,
+    )
+    .await
+}
+
+async fn submit_support_note(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitSupportNoteRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-support-note-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::Account,
+            target_id: request.account_id.clone(),
+            account_id: Some(request.account_id.clone()),
+            character_id: None,
+        },
+        request.reason,
+        AdminCommand::AddSupportNote {
+            account_id: request.account_id,
+            note: request.note,
+        },
+        now,
+    )
+    .await
+}
+
+async fn submit_rollback_content_bundle(
+    State(state): State<AdminApiState>,
+    headers: HeaderMap,
+    Json(request): Json<SubmitRollbackContentBundleRequest>,
+) -> Result<Json<SubmitCommandResponse>, ApiError> {
+    let now = now_ms();
+    let command_id = request
+        .command_id
+        .clone()
+        .unwrap_or_else(|| format!("cmd-rollback-bundle-{now}"));
+    submit_admin_http_command(
+        state,
+        headers,
+        command_id,
+        request
+            .trace_id
+            .unwrap_or_else(|| format!("trace-admin-{now}")),
+        request.approval_id,
+        AdminTarget {
+            target_type: TargetType::World,
+            target_id: request.bundle_id.clone(),
+            account_id: None,
+            character_id: None,
+        },
+        request.reason,
+        AdminCommand::RollbackContentBundle {
+            bundle_id: request.bundle_id,
+            category: request.category,
+            record_key: request.record_key,
+        },
+        now,
+    )
+    .await
+}
+
 async fn submit_kick_player(
     State(state): State<AdminApiState>,
     headers: HeaderMap,
@@ -5716,15 +6042,11 @@ fn read_postgres_account_snapshot(
             "postgres account read-model connect failed: {error}"
         ))
     })?;
-    client
-        .batch_execute(include_str!(
-            "../../../infra/postgres/migrations/0001_core.sql"
+    mir2_simulation::apply_migrations(&mut client).map_err(|error| {
+        AdminError::Repository(format!(
+            "postgres account read-model migration failed: {error}"
         ))
-        .map_err(|error| {
-            AdminError::Repository(format!(
-                "postgres account read-model migration failed: {error}"
-            ))
-        })?;
+    })?;
     let rows = client
         .query(
             "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
@@ -6670,6 +6992,563 @@ fn build_economy_read_model(
         price_feeds,
         price_feed_configured,
     }
+}
+
+// ---------------------------------------------------------------------------
+// Normalized SQL read models.
+//
+// These query the normalized projection tables (character_state, character_items,
+// character_mail, auction_listings) maintained transactionally with character
+// saves. They are the scalable replacement for "deserialize every account blob",
+// and they enable cross-player operational queries (economy aggregates, mail
+// auditing, auction-house depth, item-holder / duplicate detection) that are not
+// possible from opaque per-character JSON blobs.
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminGoldBucket {
+    pub bucket: String,
+    pub characters: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminGoldHolder {
+    pub account_id: String,
+    pub character_index: i32,
+    pub character_name: String,
+    pub gold: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMapGold {
+    pub map_file_name: String,
+    pub total_gold: i64,
+    pub characters: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminEconomyAggregateReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub character_count: i64,
+    pub total_gold: i64,
+    pub total_credit: i64,
+    pub average_gold: i64,
+    pub max_gold: i64,
+    pub active_auction_count: i64,
+    pub active_auction_value: i64,
+    pub unclaimed_mail_count: i64,
+    pub unclaimed_mail_gold: i64,
+    pub gold_distribution: Vec<AdminGoldBucket>,
+    pub top_holders: Vec<AdminGoldHolder>,
+    pub gold_by_map: Vec<AdminMapGold>,
+}
+
+impl AdminEconomyAggregateReadModel {
+    fn unconfigured() -> Self {
+        Self {
+            source: "normalized_projection_unwired".into(),
+            generated_at_ms: now_ms(),
+            configured: false,
+            character_count: 0,
+            total_gold: 0,
+            total_credit: 0,
+            average_gold: 0,
+            max_gold: 0,
+            active_auction_count: 0,
+            active_auction_value: 0,
+            unclaimed_mail_count: 0,
+            unclaimed_mail_gold: 0,
+            gold_distribution: Vec::new(),
+            top_holders: Vec::new(),
+            gold_by_map: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMailRecord {
+    pub account_id: String,
+    pub character_index: i32,
+    pub mail_id: i64,
+    pub owner_name: String,
+    pub sender: String,
+    pub recipient: String,
+    pub subject: String,
+    pub gold: i64,
+    pub item_count: i32,
+    pub opened: bool,
+    pub locked: bool,
+    pub claimed: bool,
+    pub deleted: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMailReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub matched: i64,
+    pub mail: Vec<AdminMailRecord>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminMailQuery {
+    #[serde(default)]
+    pub recipient: Option<String>,
+    #[serde(default)]
+    pub sender: Option<String>,
+    #[serde(default)]
+    pub pending: Option<bool>,
+    #[serde(default)]
+    pub limit: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAuctionRecord {
+    pub seller_account_id: String,
+    pub seller_character_index: i32,
+    pub listing_id: i64,
+    pub seller_name: String,
+    pub item_key: String,
+    pub price: i64,
+    pub sold: bool,
+    pub cancelled: bool,
+    pub expired: bool,
+    pub active: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAuctionsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub matched: i64,
+    pub listings: Vec<AdminAuctionRecord>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminAuctionsQuery {
+    #[serde(default)]
+    pub active: Option<bool>,
+    #[serde(default)]
+    pub item: Option<String>,
+    #[serde(default)]
+    pub limit: Option<i64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminItemRecord {
+    pub account_id: String,
+    pub character_index: i32,
+    pub container: String,
+    pub slot: i32,
+    pub item_key: String,
+    pub item_name: String,
+    pub unique_id: i64,
+    pub quantity: i64,
+    pub grade: String,
+    pub durability_current: Option<i32>,
+    pub durability_max: Option<i32>,
+    pub cursed: bool,
+    pub sealed: bool,
+    pub rental: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminDuplicateItem {
+    pub unique_id: i64,
+    pub holders: i64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminItemsReadModel {
+    pub source: String,
+    pub generated_at_ms: u64,
+    pub configured: bool,
+    pub matched: i64,
+    pub items: Vec<AdminItemRecord>,
+    pub duplicate_unique_ids: Vec<AdminDuplicateItem>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdminItemsQuery {
+    #[serde(default)]
+    pub item_key: Option<String>,
+    #[serde(default)]
+    pub unique_id: Option<i64>,
+    #[serde(default)]
+    pub limit: Option<i64>,
+}
+
+fn clamp_limit(limit: Option<i64>, default: i64, max: i64) -> i64 {
+    limit.unwrap_or(default).clamp(1, max)
+}
+
+fn normalized_read_client(database_url: &str) -> Result<Client, AdminError> {
+    let mut client = Client::connect(database_url, NoTls).map_err(|error| {
+        AdminError::Repository(format!("normalized read-model connect failed: {error}"))
+    })?;
+    // Idempotent + skips already-applied versions, so the projection tables are
+    // guaranteed present even on an admin process that boots before any save.
+    mir2_simulation::apply_migrations(&mut client).map_err(|error| {
+        AdminError::Repository(format!("normalized read-model migration failed: {error}"))
+    })?;
+    Ok(client)
+}
+
+const GOLD_BUCKET_ORDER: &[&str] = &["0", "1-9999", "10k-99k", "100k-999k", "1m+"];
+
+fn query_economy_aggregate(
+    database_url: &str,
+) -> Result<AdminEconomyAggregateReadModel, AdminError> {
+    let mut client = normalized_read_client(database_url)?;
+    let totals = client
+        .query_one(
+            "SELECT count(*)::bigint AS characters, \
+             COALESCE(SUM(gold), 0)::bigint AS total_gold, \
+             COALESCE(SUM(credit), 0)::bigint AS total_credit, \
+             COALESCE(ROUND(AVG(gold)), 0)::bigint AS average_gold, \
+             COALESCE(MAX(gold), 0)::bigint AS max_gold \
+             FROM character_state",
+            &[],
+        )
+        .map_err(|error| {
+            AdminError::Repository(format!("economy aggregate query failed: {error}"))
+        })?;
+    let auctions = client
+        .query_one(
+            "SELECT count(*)::bigint AS c, COALESCE(SUM(price), 0)::bigint AS v \
+             FROM auction_listings WHERE active",
+            &[],
+        )
+        .map_err(|error| {
+            AdminError::Repository(format!("auction aggregate query failed: {error}"))
+        })?;
+    let mail = client
+        .query_one(
+            "SELECT count(*)::bigint AS c, COALESCE(SUM(gold), 0)::bigint AS v \
+             FROM character_mail WHERE NOT claimed AND NOT deleted",
+            &[],
+        )
+        .map_err(|error| AdminError::Repository(format!("mail aggregate query failed: {error}")))?;
+
+    let bucket_rows = client
+        .query(
+            "SELECT bucket, count(*)::bigint AS characters FROM (\
+                SELECT CASE \
+                    WHEN gold = 0 THEN '0' \
+                    WHEN gold < 10000 THEN '1-9999' \
+                    WHEN gold < 100000 THEN '10k-99k' \
+                    WHEN gold < 1000000 THEN '100k-999k' \
+                    ELSE '1m+' END AS bucket \
+                FROM character_state) AS labelled \
+             GROUP BY bucket",
+            &[],
+        )
+        .map_err(|error| {
+            AdminError::Repository(format!("gold distribution query failed: {error}"))
+        })?;
+    let mut bucket_counts: BTreeMap<String, i64> = BTreeMap::new();
+    for row in bucket_rows {
+        bucket_counts.insert(row.get("bucket"), row.get("characters"));
+    }
+    let gold_distribution = GOLD_BUCKET_ORDER
+        .iter()
+        .filter_map(|bucket| {
+            bucket_counts
+                .get(*bucket)
+                .map(|characters| AdminGoldBucket {
+                    bucket: (*bucket).to_string(),
+                    characters: *characters,
+                })
+        })
+        .collect();
+
+    let top_holders = client
+        .query(
+            "SELECT account_id, character_index, character_name, gold \
+             FROM character_state ORDER BY gold DESC, account_id LIMIT 10",
+            &[],
+        )
+        .map_err(|error| AdminError::Repository(format!("top holders query failed: {error}")))?
+        .into_iter()
+        .map(|row| AdminGoldHolder {
+            account_id: row.get("account_id"),
+            character_index: row.get("character_index"),
+            character_name: row.get("character_name"),
+            gold: row.get("gold"),
+        })
+        .collect();
+
+    let gold_by_map = client
+        .query(
+            "SELECT map_file_name, COALESCE(SUM(gold), 0)::bigint AS total_gold, \
+             count(*)::bigint AS characters FROM character_state \
+             GROUP BY map_file_name ORDER BY total_gold DESC LIMIT 20",
+            &[],
+        )
+        .map_err(|error| AdminError::Repository(format!("gold by map query failed: {error}")))?
+        .into_iter()
+        .map(|row| AdminMapGold {
+            map_file_name: row.get("map_file_name"),
+            total_gold: row.get("total_gold"),
+            characters: row.get("characters"),
+        })
+        .collect();
+
+    Ok(AdminEconomyAggregateReadModel {
+        source: "postgres_normalized_projection".into(),
+        generated_at_ms: now_ms(),
+        configured: true,
+        character_count: totals.get("characters"),
+        total_gold: totals.get("total_gold"),
+        total_credit: totals.get("total_credit"),
+        average_gold: totals.get("average_gold"),
+        max_gold: totals.get("max_gold"),
+        active_auction_count: auctions.get("c"),
+        active_auction_value: auctions.get("v"),
+        unclaimed_mail_count: mail.get("c"),
+        unclaimed_mail_gold: mail.get("v"),
+        gold_distribution,
+        top_holders,
+        gold_by_map,
+    })
+}
+
+fn query_mail(
+    database_url: &str,
+    query: &AdminMailQuery,
+) -> Result<AdminMailReadModel, AdminError> {
+    let mut client = normalized_read_client(database_url)?;
+    let limit = clamp_limit(query.limit, 100, 1000);
+    let rows = client
+        .query(
+            "SELECT account_id, character_index, mail_id, owner_name, sender, recipient, \
+             subject, gold, item_count, opened, locked, claimed, deleted \
+             FROM character_mail \
+             WHERE ($1::text IS NULL OR recipient = $1) \
+               AND ($2::text IS NULL OR sender = $2) \
+               AND ($3::bool IS NULL OR (NOT claimed AND NOT deleted) = $3) \
+             ORDER BY updated_at_ms DESC, mail_id DESC LIMIT $4",
+            &[&query.recipient, &query.sender, &query.pending, &limit],
+        )
+        .map_err(|error| AdminError::Repository(format!("mail query failed: {error}")))?;
+    let mail: Vec<AdminMailRecord> = rows
+        .into_iter()
+        .map(|row| AdminMailRecord {
+            account_id: row.get("account_id"),
+            character_index: row.get("character_index"),
+            mail_id: row.get("mail_id"),
+            owner_name: row.get("owner_name"),
+            sender: row.get("sender"),
+            recipient: row.get("recipient"),
+            subject: row.get("subject"),
+            gold: row.get("gold"),
+            item_count: row.get("item_count"),
+            opened: row.get("opened"),
+            locked: row.get("locked"),
+            claimed: row.get("claimed"),
+            deleted: row.get("deleted"),
+        })
+        .collect();
+    Ok(AdminMailReadModel {
+        source: "postgres_normalized_projection".into(),
+        generated_at_ms: now_ms(),
+        configured: true,
+        matched: mail.len() as i64,
+        mail,
+    })
+}
+
+fn query_auctions(
+    database_url: &str,
+    query: &AdminAuctionsQuery,
+) -> Result<AdminAuctionsReadModel, AdminError> {
+    let mut client = normalized_read_client(database_url)?;
+    let limit = clamp_limit(query.limit, 100, 1000);
+    let rows = client
+        .query(
+            "SELECT seller_account_id, seller_character_index, listing_id, seller_name, \
+             item_key, price, sold, cancelled, expired, active \
+             FROM auction_listings \
+             WHERE ($1::bool IS NULL OR active = $1) \
+               AND ($2::text IS NULL OR item_key = $2) \
+             ORDER BY active DESC, price DESC LIMIT $3",
+            &[&query.active, &query.item, &limit],
+        )
+        .map_err(|error| AdminError::Repository(format!("auction query failed: {error}")))?;
+    let listings: Vec<AdminAuctionRecord> = rows
+        .into_iter()
+        .map(|row| AdminAuctionRecord {
+            seller_account_id: row.get("seller_account_id"),
+            seller_character_index: row.get("seller_character_index"),
+            listing_id: row.get("listing_id"),
+            seller_name: row.get("seller_name"),
+            item_key: row.get("item_key"),
+            price: row.get("price"),
+            sold: row.get("sold"),
+            cancelled: row.get("cancelled"),
+            expired: row.get("expired"),
+            active: row.get("active"),
+        })
+        .collect();
+    Ok(AdminAuctionsReadModel {
+        source: "postgres_normalized_projection".into(),
+        generated_at_ms: now_ms(),
+        configured: true,
+        matched: listings.len() as i64,
+        listings,
+    })
+}
+
+fn query_items(
+    database_url: &str,
+    query: &AdminItemsQuery,
+) -> Result<AdminItemsReadModel, AdminError> {
+    let mut client = normalized_read_client(database_url)?;
+    let limit = clamp_limit(query.limit, 100, 1000);
+    let rows = client
+        .query(
+            "SELECT account_id, character_index, container, slot, item_key, item_name, \
+             unique_id, quantity, grade, durability_current, durability_max, cursed, sealed, rental \
+             FROM character_items \
+             WHERE ($1::text IS NULL OR item_key = $1) \
+               AND ($2::bigint IS NULL OR unique_id = $2) \
+             ORDER BY item_key, account_id, character_index LIMIT $3",
+            &[&query.item_key, &query.unique_id, &limit],
+        )
+        .map_err(|error| AdminError::Repository(format!("item query failed: {error}")))?;
+    let items: Vec<AdminItemRecord> = rows
+        .into_iter()
+        .map(|row| AdminItemRecord {
+            account_id: row.get("account_id"),
+            character_index: row.get("character_index"),
+            container: row.get("container"),
+            slot: row.get("slot"),
+            item_key: row.get("item_key"),
+            item_name: row.get("item_name"),
+            unique_id: row.get("unique_id"),
+            quantity: row.get("quantity"),
+            grade: row.get("grade"),
+            durability_current: row.get("durability_current"),
+            durability_max: row.get("durability_max"),
+            cursed: row.get("cursed"),
+            sealed: row.get("sealed"),
+            rental: row.get("rental"),
+        })
+        .collect();
+    let duplicate_unique_ids = client
+        .query(
+            "SELECT unique_id, count(*)::bigint AS holders FROM character_items \
+             WHERE unique_id <> 0 GROUP BY unique_id HAVING count(*) > 1 \
+             ORDER BY holders DESC, unique_id LIMIT 50",
+            &[],
+        )
+        .map_err(|error| AdminError::Repository(format!("duplicate item query failed: {error}")))?
+        .into_iter()
+        .map(|row| AdminDuplicateItem {
+            unique_id: row.get("unique_id"),
+            holders: row.get("holders"),
+        })
+        .collect();
+    Ok(AdminItemsReadModel {
+        source: "postgres_normalized_projection".into(),
+        generated_at_ms: now_ms(),
+        configured: true,
+        matched: items.len() as i64,
+        items,
+        duplicate_unique_ids,
+    })
+}
+
+async fn read_economy_aggregate(
+    State(state): State<AdminApiState>,
+) -> Result<Json<AdminEconomyAggregateReadModel>, ApiError> {
+    let response =
+        tokio::task::spawn_blocking(move || match state.read_models.normalized_postgres_url() {
+            Some(url) => query_economy_aggregate(&url).map_err(ApiError::from),
+            None => Ok(AdminEconomyAggregateReadModel::unconfigured()),
+        })
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_mail(
+    State(state): State<AdminApiState>,
+    Query(query): Query<AdminMailQuery>,
+) -> Result<Json<AdminMailReadModel>, ApiError> {
+    let response =
+        tokio::task::spawn_blocking(move || match state.read_models.normalized_postgres_url() {
+            Some(url) => query_mail(&url, &query).map_err(ApiError::from),
+            None => Ok(AdminMailReadModel {
+                source: "normalized_projection_unwired".into(),
+                generated_at_ms: now_ms(),
+                configured: false,
+                matched: 0,
+                mail: Vec::new(),
+            }),
+        })
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_auctions(
+    State(state): State<AdminApiState>,
+    Query(query): Query<AdminAuctionsQuery>,
+) -> Result<Json<AdminAuctionsReadModel>, ApiError> {
+    let response =
+        tokio::task::spawn_blocking(move || match state.read_models.normalized_postgres_url() {
+            Some(url) => query_auctions(&url, &query).map_err(ApiError::from),
+            None => Ok(AdminAuctionsReadModel {
+                source: "normalized_projection_unwired".into(),
+                generated_at_ms: now_ms(),
+                configured: false,
+                matched: 0,
+                listings: Vec::new(),
+            }),
+        })
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
+}
+
+async fn read_items(
+    State(state): State<AdminApiState>,
+    Query(query): Query<AdminItemsQuery>,
+) -> Result<Json<AdminItemsReadModel>, ApiError> {
+    let response =
+        tokio::task::spawn_blocking(move || match state.read_models.normalized_postgres_url() {
+            Some(url) => query_items(&url, &query).map_err(ApiError::from),
+            None => Ok(AdminItemsReadModel {
+                source: "normalized_projection_unwired".into(),
+                generated_at_ms: now_ms(),
+                configured: false,
+                matched: 0,
+                items: Vec::new(),
+                duplicate_unique_ids: Vec::new(),
+            }),
+        })
+        .await
+        .map_err(join_error)??;
+    Ok(Json(response))
 }
 
 fn build_activities_read_model(
@@ -8090,6 +8969,24 @@ fn validate_command_payload(command: &AdminCommand) -> Result<(), AdminError> {
             require_non_empty("category", category)?;
             require_non_empty("record_key", record_key)?;
         }
+        AdminCommand::RollbackContentBundle {
+            bundle_id,
+            category,
+            record_key,
+        } => {
+            require_non_empty("bundle_id", bundle_id)?;
+            require_non_empty("category", category)?;
+            require_non_empty("record_key", record_key)?;
+        }
+        AdminCommand::AddSupportNote { account_id, note } => {
+            require_non_empty("account_id", account_id)?;
+            require_non_empty("note", note)?;
+            if note.trim().len() > 2000 {
+                return Err(AdminError::InvalidCommand(
+                    "note must be at most 2000 characters".into(),
+                ));
+            }
+        }
         AdminCommand::ServerControl { action, .. } => {
             require_non_empty("action", action)?;
         }
@@ -8109,7 +9006,8 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
         | AdminCommand::KillPlayer { .. }
         | AdminCommand::MarketDeleteListing { .. }
         | AdminCommand::NameListDelete { .. }
-        | AdminCommand::PublishContentBundle { .. } => true,
+        | AdminCommand::PublishContentBundle { .. }
+        | AdminCommand::RollbackContentBundle { .. } => true,
         AdminCommand::ServerControl { action, .. } => matches!(
             canonical_control_action(action).as_deref(),
             Ok("stop" | "reboot" | "close")
@@ -8128,7 +9026,8 @@ fn command_requires_approval(command: &AdminCommand) -> bool {
         | AdminCommand::GuildSendMessage { .. }
         | AdminCommand::NameListAdd { .. }
         | AdminCommand::NameListRemove { .. }
-        | AdminCommand::NameListCreate { .. } => false,
+        | AdminCommand::NameListCreate { .. }
+        | AdminCommand::AddSupportNote { .. } => false,
     }
 }
 
@@ -8600,6 +9499,8 @@ fn command_type(command: &AdminCommand) -> String {
         AdminCommand::NameListCreate { .. } => "namelist_create",
         AdminCommand::NameListDelete { .. } => "namelist_delete",
         AdminCommand::PublishContentBundle { .. } => "publish_content_bundle",
+        AdminCommand::RollbackContentBundle { .. } => "rollback_content_bundle",
+        AdminCommand::AddSupportNote { .. } => "add_support_note",
         AdminCommand::ServerControl { .. } => "server_control",
     }
     .to_string()
@@ -8773,6 +9674,172 @@ mod tests {
                 message: "accepted".into(),
             })
         }
+    }
+
+    fn pg_test_url() -> Option<String> {
+        let url = std::env::var("MIR2_TEST_POSTGRES_URL")
+            .unwrap_or_else(|_| "postgres://mir2:mir2_dev_password@127.0.0.1:5432/mir2".into());
+        Client::connect(&url, NoTls).ok().map(|_| url)
+    }
+
+    fn unique_projection_account(label: &str) -> String {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or_default();
+        format!("admintest-{label}-{}-{unique}", std::process::id())
+    }
+
+    fn cleanup_projection_account(client: &mut Client, account_id: &str) {
+        for table in [
+            "character_items",
+            "character_mail",
+            "character_npc_state",
+            "character_state",
+        ] {
+            let _ = client.execute(
+                &format!("DELETE FROM {table} WHERE account_id = $1"),
+                &[&account_id],
+            );
+        }
+        let _ = client.execute(
+            "DELETE FROM auction_listings WHERE seller_account_id = $1",
+            &[&account_id],
+        );
+    }
+
+    #[test]
+    fn normalized_economy_and_item_reads_query_projection_tables() {
+        let Some(url) = pg_test_url() else {
+            eprintln!("skipping normalized economy read test because Postgres is unavailable");
+            return;
+        };
+        let mut client = normalized_read_client(&url).expect("client + migrations");
+        let account_id = unique_projection_account("economy");
+        cleanup_projection_account(&mut client, &account_id);
+
+        let whale_gold = 999_000_000i64;
+        let dup_unique = 70_000_000i64 + (std::process::id() as i64);
+        client
+            .execute(
+                "INSERT INTO character_state (account_id, character_index, character_name, \
+                 class, gold, credit, map_file_name, active_auction_count, save_version, updated_at_ms) \
+                 VALUES ($1, 0, $2, 'Warrior', $3, 10, '3', 0, 1, 1)",
+                &[&account_id, &format!("{account_id}-hero"), &whale_gold],
+            )
+            .expect("seed character_state");
+        // Two item rows sharing a unique_id across characters => a duplicate to flag.
+        for (character_index, ordinal) in [(0i32, 0i32), (1i32, 0i32)] {
+            client
+                .execute(
+                    "INSERT INTO character_items (account_id, character_index, container, ordinal, \
+                     slot, item_key, item_name, unique_id, quantity, grade) \
+                     VALUES ($1, $2, 'inventory', $3, 0, 'iron-sword', 'Iron Sword', $4, 1, 'Rare')",
+                    &[&account_id, &character_index, &ordinal, &dup_unique],
+                )
+                .expect("seed character_items");
+        }
+
+        let economy = query_economy_aggregate(&url).expect("economy aggregate");
+        assert!(economy.configured);
+        assert!(economy.character_count >= 1);
+        assert!(economy.total_gold >= whale_gold);
+        assert!(economy
+            .top_holders
+            .iter()
+            .any(|holder| holder.account_id == account_id && holder.gold == whale_gold));
+        assert!(economy
+            .gold_distribution
+            .iter()
+            .any(|bucket| bucket.bucket == "1m+" && bucket.characters >= 1));
+
+        let items = query_items(
+            &url,
+            &AdminItemsQuery {
+                item_key: Some("iron-sword".into()),
+                unique_id: Some(dup_unique),
+                limit: None,
+            },
+        )
+        .expect("items query");
+        assert_eq!(items.matched, 2);
+        assert!(items
+            .duplicate_unique_ids
+            .iter()
+            .any(|dup| dup.unique_id == dup_unique && dup.holders >= 2));
+
+        cleanup_projection_account(&mut client, &account_id);
+    }
+
+    #[test]
+    fn normalized_mail_and_auction_reads_filter() {
+        let Some(url) = pg_test_url() else {
+            eprintln!("skipping normalized mail/auction read test because Postgres is unavailable");
+            return;
+        };
+        let mut client = normalized_read_client(&url).expect("client + migrations");
+        let account_id = unique_projection_account("mail");
+        cleanup_projection_account(&mut client, &account_id);
+        let recipient = format!("{account_id}-rcpt");
+        let item_key = format!("auction-key-{}", std::process::id());
+
+        client
+            .execute(
+                "INSERT INTO character_mail (account_id, character_index, mail_id, owner_name, \
+                 sender, recipient, subject, gold, item_count, opened, locked, claimed, deleted, updated_at_ms) \
+                 VALUES ($1, 0, 1, $2, 'GM', $2, 'Reward', 500, 0, false, false, false, false, 10)",
+                &[&account_id, &recipient],
+            )
+            .expect("seed mail");
+        for (listing_id, active, sold) in [(1i64, true, false), (2i64, false, true)] {
+            client
+                .execute(
+                    "INSERT INTO auction_listings (seller_account_id, seller_character_index, listing_id, \
+                     seller_name, item_key, price, sold, cancelled, expired, active, updated_at_ms) \
+                     VALUES ($1, 0, $2, 'Seller', $3, 1000, $4, false, false, $5, 10)",
+                    &[&account_id, &listing_id, &item_key, &sold, &active],
+                )
+                .expect("seed auction");
+        }
+
+        let mail = query_mail(
+            &url,
+            &AdminMailQuery {
+                recipient: Some(recipient.clone()),
+                sender: None,
+                pending: Some(true),
+                limit: None,
+            },
+        )
+        .expect("mail query");
+        assert_eq!(mail.matched, 1);
+        assert_eq!(mail.mail[0].sender, "GM");
+        assert_eq!(mail.mail[0].gold, 500);
+
+        let active_auctions = query_auctions(
+            &url,
+            &AdminAuctionsQuery {
+                active: Some(true),
+                item: Some(item_key.clone()),
+                limit: None,
+            },
+        )
+        .expect("auction query");
+        assert_eq!(active_auctions.matched, 1);
+        assert!(active_auctions.listings[0].active);
+
+        let all_for_item = query_auctions(
+            &url,
+            &AdminAuctionsQuery {
+                active: None,
+                item: Some(item_key),
+                limit: None,
+            },
+        )
+        .expect("auction query all");
+        assert_eq!(all_for_item.matched, 2);
+
+        cleanup_projection_account(&mut client, &account_id);
     }
 
     #[test]
@@ -9903,6 +10970,8 @@ mod tests {
                 character_id: "demo:0".into(),
                 name: Some("ScoutGM".into()),
                 level: Some(11),
+                experience: Some(4096),
+                max_experience: Some(8192),
                 gold: Some(333),
                 credit: Some(7),
                 map_file_name: None,
@@ -10108,6 +11177,51 @@ mod tests {
             .submit(content_envelope, 2_000)
             .expect("content publish");
 
+        // Support note (low-risk, no approval): appended to per-account history.
+        submit_console_for_test(
+            &mut control,
+            Permission::AccountWrite,
+            AdminCommand::AddSupportNote {
+                account_id: "demo".into(),
+                note: "Player reported a stuck quest; advised relog.".into(),
+            },
+        )
+        .expect("add support note");
+
+        // Roll back the bundle we just published (high-risk: requires approval).
+        let mut rollback_envelope = test_console_envelope(
+            operator_with([Permission::ContentRollback]),
+            AdminCommand::RollbackContentBundle {
+                bundle_id: "bundle-one".into(),
+                category: "items".into(),
+                record_key: "WoodenSword".into(),
+            },
+        );
+        rollback_envelope.command_id = "cmd-rollback".into();
+        rollback_envelope.approval_id = Some("approval-rollback".into());
+        control
+            .create_approval(ApprovalRecord::pending(
+                "approval-rollback".into(),
+                "cmd-rollback".into(),
+                "rollback_content_bundle".into(),
+                "op-1".into(),
+                "content rollback review".into(),
+                1_000,
+            ))
+            .expect("rollback approval");
+        control
+            .decide_approval(
+                "approval-rollback",
+                ApprovalStatus::Approved,
+                "lead-gm".into(),
+                Some("approved".into()),
+                1_500,
+            )
+            .expect("approve rollback");
+        control
+            .submit(rollback_envelope, 2_000)
+            .expect("content rollback");
+
         let store =
             AccountStore::load_or_new(&account_path, SimulationConfig::default().default_character);
         assert!(store.accounts.contains_key("ops"));
@@ -10118,6 +11232,8 @@ mod tests {
         assert_eq!(demo.characters[0].name, "ScoutGM");
         assert_eq!(save.character.name, "ScoutGM");
         assert_eq!(save.character.level, 11);
+        assert_eq!(save.experience, 4096);
+        assert_eq!(save.max_experience, 8192);
         assert_eq!(save.gold, 333);
         assert_eq!(save.credit, 7);
         assert_eq!(save.pk_points, 22);
@@ -10155,9 +11271,19 @@ mod tests {
         assert!(namelist.lines().any(|line| line == "Scout"));
         assert!(namelist_root.join("NewList.txt").exists());
         assert!(!namelist_root.join("OldList.txt").exists());
-        let bundle =
-            std::fs::read_to_string(content_root.join("bundle-one.json")).expect("bundle exists");
-        assert!(bundle.contains("\"recordKey\": \"WoodenSword\""));
+        // Published bundle was rolled back: the live JSON is gone, an archive remains.
+        assert!(!content_root.join("bundle-one.json").exists());
+        assert!(std::fs::read_dir(&content_root)
+            .expect("content dir")
+            .filter_map(Result::ok)
+            .any(|entry| entry
+                .file_name()
+                .to_string_lossy()
+                .starts_with("bundle-one.rolledback-")));
+        // Support note persisted to the per-account ndjson history.
+        let notes = std::fs::read_to_string(content_root.join("support-notes").join("demo.ndjson"))
+            .expect("support notes file");
+        assert!(notes.contains("stuck quest"));
 
         let snapshot = snapshot_from_store("test", store);
         assert_eq!(build_accounts_read_model(&snapshot).accounts.len(), 2);
@@ -10269,7 +11395,9 @@ mod tests {
             | AdminCommand::NameListRemove { list_name, .. }
             | AdminCommand::NameListCreate { list_name }
             | AdminCommand::NameListDelete { list_name } => list_name.clone(),
-            AdminCommand::PublishContentBundle { bundle_id, .. } => bundle_id.clone(),
+            AdminCommand::PublishContentBundle { bundle_id, .. }
+            | AdminCommand::RollbackContentBundle { bundle_id, .. } => bundle_id.clone(),
+            AdminCommand::AddSupportNote { account_id, .. } => account_id.clone(),
             AdminCommand::ServerControl { action, .. } => action.clone(),
             AdminCommand::Broadcast { .. } => "global".into(),
             AdminCommand::SendSystemMail { target_id, .. } => target_id.clone(),

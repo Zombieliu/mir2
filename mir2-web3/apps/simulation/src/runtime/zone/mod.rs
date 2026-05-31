@@ -1,5 +1,7 @@
 mod aoi;
+mod aoi_grid;
 mod collision;
+mod ecs;
 mod manager;
 mod movement;
 mod packets;
@@ -11,5 +13,6 @@ pub use manager::ZoneManager;
 pub use runtime::ZoneRuntime;
 pub use types::{
     PlayerId, SessionId, ZoneChatItem, ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZonePlayerCombatStats,
 };

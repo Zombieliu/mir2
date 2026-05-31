@@ -1,6 +1,9 @@
 mod config;
+pub mod db_projection;
 mod runtime;
 mod world_runtime;
+
+pub use db_projection::{apply_migrations, MIGRATIONS};
 
 pub use config::{
     account_store_requires_postgres_source_from_env, account_store_runtime_backend_from_env,
@@ -25,8 +28,8 @@ pub use runtime::{
     SharedGroundDropPickupCommit, SharedItemRentalAgreement, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
     SimulationSession, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntime,
+    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,

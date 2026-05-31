@@ -1,5 +1,5 @@
 use bevy_ecs::prelude::{Resource, World};
-use mir2_game_data::{LanguageCode, MapBounds};
+use mir2_game_data::{DoorMapCellTemplate, LanguageCode, MapBounds};
 use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 
@@ -461,6 +461,11 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) chat_ban_until_ms: Option<u64>,
     pub(super) chat_next_allowed_at_ms: u64,
     pub(super) chat_spam_tick: u8,
+    /// Tick at which the player last took damage; gates passive regeneration so
+    /// it pauses during combat (Crystal behaviour).
+    pub(super) last_damaged_tick: u64,
+    /// Tick of the most recent passive regeneration pulse.
+    pub(super) last_regen_tick: u64,
 }
 
 impl PlayerRuntimeResource {
@@ -476,6 +481,7 @@ impl PlayerRuntimeResource {
                 hp: default_max_hp,
                 max_hp: default_max_hp,
                 mp: default_mp,
+                max_mp: default_mp,
             },
             experience: 0,
             max_experience: 100,
@@ -486,7 +492,60 @@ impl PlayerRuntimeResource {
             chat_ban_until_ms: None,
             chat_next_allowed_at_ms: 0,
             chat_spam_tick: 0,
+            last_damaged_tick: 0,
+            last_regen_tick: 0,
         }
+    }
+}
+
+/// Runtime state of a single logical door (all map cells that share one door
+/// index, deduplicated exactly like Crystal's `Map.AddDoor`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct DoorRuntime {
+    pub(crate) index: u8,
+    pub(crate) cells: Vec<(i32, i32)>,
+    /// `None` means closed. `Some(tick)` means the door is open and should
+    /// auto-close once the runtime clock reaches this tick — Crystal closes
+    /// doors 5000 ms after they were opened (`Map.Process`).
+    pub(crate) close_at_tick: Option<u64>,
+}
+
+/// All doors on the current map, mirroring Crystal's `Map.Doors` list.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct DoorRegistry {
+    pub(crate) doors: Vec<DoorRuntime>,
+}
+
+impl DoorRegistry {
+    /// Build the registry from parsed door cells, grouping cells by door index
+    /// (`index & 0x7F`) so opening one index opens every cell of that door —
+    /// matching Crystal's `AddDoor` dedup.
+    pub(crate) fn from_templates(templates: &[DoorMapCellTemplate]) -> Self {
+        let mut doors: Vec<DoorRuntime> = Vec::new();
+        for template in templates {
+            let index = template.index & 0x7F;
+            if let Some(existing) = doors.iter_mut().find(|door| door.index == index) {
+                if !existing.cells.contains(&(template.x, template.y)) {
+                    existing.cells.push((template.x, template.y));
+                }
+            } else {
+                doors.push(DoorRuntime {
+                    index,
+                    cells: vec![(template.x, template.y)],
+                    close_at_tick: None,
+                });
+            }
+        }
+        Self { doors }
+    }
+
+    pub(crate) fn find_mut(&mut self, index: u8) -> Option<&mut DoorRuntime> {
+        let index = index & 0x7F;
+        self.doors.iter_mut().find(|door| door.index == index)
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.doors.is_empty()
     }
 }
 
@@ -496,7 +555,12 @@ pub(super) struct MapRuntimeResource {
     pub(super) map_region_bounds: MapBounds,
     pub(super) blocked_cells: BTreeSet<(i32, i32)>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
+    pub(super) doors: DoorRegistry,
+    /// Cells flagged fishable in the `.map` file → their fishing attribute.
+    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → owning guild name (gates conquest movements).
+    pub(super) conquest_owners: BTreeMap<i32, String>,
 }
 
 impl MapRuntimeResource {
@@ -505,13 +569,18 @@ impl MapRuntimeResource {
         map_region_bounds: MapBounds,
         blocked_cells: BTreeSet<(i32, i32)>,
         closed_door_cells: BTreeSet<(i32, i32)>,
+        doors: DoorRegistry,
+        fishing_cells: BTreeMap<(i32, i32), i8>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),
             map_region_bounds,
             blocked_cells,
             closed_door_cells,
+            doors,
+            fishing_cells,
             conquest_wars: config.conquest_wars.clone(),
+            conquest_owners: config.conquest_owners.clone(),
         }
     }
 }
@@ -749,6 +818,9 @@ pub(super) struct RuntimeQueueResource {
     pub(super) pending_monster_spawns: Vec<PendingMonsterSpawnAction>,
     pub(super) pending_ground_spell_actions: Vec<PendingGroundSpellAction>,
     pub(super) pending_movement_command: Option<PendingMovementCommand>,
+    /// Defence type of the spell currently being cast, so scheduled/deferred damage rolls the
+    /// correct target armour (Crystal `DefenceType`). `None` outside a player cast.
+    pub(super) current_spell_defence: Option<super::combat::CrystalDefence>,
 }
 
 impl RuntimeQueueResource {
@@ -758,6 +830,7 @@ impl RuntimeQueueResource {
             pending_monster_spawns: Vec::new(),
             pending_ground_spell_actions: Vec::new(),
             pending_movement_command: None,
+            current_spell_defence: None,
         }
     }
 }
@@ -804,6 +877,9 @@ pub(super) struct PlayerPermissionResource {
     pub(super) unlock_curse: bool,
     pub(super) free_map_shout: bool,
     pub(super) free_server_shout: bool,
+    /// GM rank for in-game `@` command access (0 = normal player). Sourced from
+    /// the account store at StartGame; gates the `@` command dispatcher.
+    pub(super) gm_level: u8,
 }
 
 impl PlayerPermissionResource {
@@ -812,7 +888,12 @@ impl PlayerPermissionResource {
             unlock_curse: false,
             free_map_shout: false,
             free_server_shout: false,
+            gm_level: 0,
         }
+    }
+
+    pub(super) fn is_gm(&self) -> bool {
+        self.gm_level > 0
     }
 }
 

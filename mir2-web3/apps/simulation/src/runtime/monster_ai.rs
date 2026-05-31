@@ -16,7 +16,7 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::tick_ground_drop_expiry;
-use super::equipment::total_defence_bonus;
+
 use super::fishing::tick_fishing;
 use super::hero_ai::tick_stage5_hero_combat_ai;
 use super::inventory::sync_expired_expanded_storage;
@@ -27,8 +27,8 @@ use super::packets::*;
 use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
     advance_runtime_tick, crystal_packet_move_delay_ticks, current_language, is_in_world,
-    mark_crystal_packet_action, runtime_tick, take_crystal_movement_retry_if_ready, BuffResource,
-    InventoryResource, MapRuntimeResource, PlayerActionKind,
+    mark_crystal_packet_action, runtime_tick, take_crystal_movement_retry_if_ready,
+    MapRuntimeResource, PlayerActionKind, PlayerRuntimeResource,
 };
 use super::session::SimulationSession;
 use super::skills::tick_ground_spell_actions;
@@ -533,7 +533,7 @@ pub(super) fn monster_prefers_monster_target(
         .get::<SummonedMonster>()
         .map(|_| !attacker_agent.hostile_to_player)
         .unwrap_or(false)
-        || matches!(attacker_agent.ai, 6 | 113)
+        || matches!(attacker_agent.ai, 6 | 58 | 113)
 }
 
 pub(super) fn update_special_monster_state(
@@ -798,11 +798,23 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
-        42 => update_yin_devil_node_state(agent, tick),
+        // Crystal `MonsterObject.GetMonster` cases 41 + 42 both return
+        // `new YinDevilNode(info)` — immobile passive node.
+        41 | 42 => update_yin_devil_node_state(agent, tick),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
         131 => update_tucson_general_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
+        57 => update_town_archer_state(
             world,
             entity,
             agent,
@@ -1808,10 +1820,7 @@ pub(super) fn update_kirin_ice_thrust_state(
     let Some(attack_direction) = direction_toward(position, player_position) else {
         return false;
     };
-    let mitigation = total_defence_bonus(
-        world.resource::<InventoryResource>(),
-        world.resource::<BuffResource>(),
-    );
+    let mitigation = crystal_player_rolled_armour(world);
     let damage = (base_damage - mitigation).max(1);
     let due_tick = tick + combat_delay_ticks(500);
 
@@ -1974,10 +1983,7 @@ pub(super) fn cast_general_meow_meow_mass_thunder(
     let monster_name = entity_name(world, entity).unwrap_or_else(|| "GeneralMeowMeow".to_string());
     let base_damage = crystal_monster_raw_magic_damage(&monster_name);
     let damage = if base_damage > 0 {
-        let mitigation = total_defence_bonus(
-            world.resource::<InventoryResource>(),
-            world.resource::<BuffResource>(),
-        );
+        let mitigation = crystal_player_rolled_armour(world);
         (base_damage - mitigation).max(1)
     } else {
         0
@@ -2349,6 +2355,88 @@ pub(super) fn schedule_snow_wolf_king_death_explosion(
     ) {
         schedule_damage_to_monster(world, due_tick, attacker_id, target, damage, None, None);
     }
+}
+
+// Crystal `TownArcher` (AI 57): ranged guard that targets ONLY red-name
+// players (`PKPoints >= 200`) within view, fires `ObjectRangeAttack`, and
+// schedules projectile damage. Inert against monsters and non-PK players.
+// Crystal/Server/MirObjects/Monsters/TownArcher.cs — FindTarget filters
+// `playerob.PKPoints < 200`, Attack broadcasts ObjectRangeAttack +
+// ProjectileAttack(GetAttackPower(MinDC, MaxDC)).
+pub(super) fn update_town_archer_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) {
+        return false;
+    }
+    if tick < agent.next_attack_tick {
+        return false;
+    }
+
+    let pk_points = world.resource::<PlayerRuntimeResource>().pk_points;
+    if pk_points < CRYSTAL_RED_NAME_PK_POINTS {
+        return false;
+    }
+
+    if current_player_is_dead(world) {
+        return false;
+    }
+
+    if !monster_in_attack_range(agent, position, player_position) {
+        return false;
+    }
+
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let Some(attacker_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+    let Some(direction) = direction_toward(position, player_position) else {
+        return false;
+    };
+
+    let monster_name = entity_name(world, entity).unwrap_or_default();
+    if let Some(current_direction) = world.entity(entity).get::<Facing>().map(|facing| facing.0) {
+        if current_direction != direction {
+            world.entity_mut(entity).insert(Facing(direction));
+        }
+    }
+
+    if let Some(packet) = monster_typed_ranged_attack_packet(
+        world,
+        entity,
+        position,
+        direction,
+        player,
+        player_position,
+        0,
+    ) {
+        packets.push(packet);
+    }
+
+    let damage =
+        monster_player_attack_damage(world, &monster_name, agent, position, player_position);
+    if damage > 0 {
+        schedule_damage_to_player(
+            world,
+            tick + monster_attack_delay_ticks(agent, position, player_position),
+            attacker_id,
+            monster_name,
+            damage,
+        );
+    }
+
+    agent.tracking_player = true;
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+    true
 }
 
 pub(super) fn update_tucson_general_state(
@@ -3961,8 +4049,11 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     tick_ground_drop_expiry(world, tick);
     tick_stage5_intelligent_creatures(world, tick, &mut packets);
     tick_fishing(world, &mut packets);
+    super::door::tick_doors(world, &mut packets);
+    super::hazard::tick_map_hazards(world, tick, &mut packets);
     resolve_pending_combat_actions(world, tick, &mut packets);
     tick_player_status_effects(world, tick, &mut packets);
+    tick_player_vital_regen(world, tick, &mut packets);
     tick_ground_spell_actions(world, tick, &mut packets);
     tick_monster_poisons(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
@@ -4038,12 +4129,12 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
                         let attack_direction =
                             monster_attack_packet_direction(&agent, current_direction, direction);
-                        if agent.ai != 6 && current_direction != attack_direction {
+                        if !matches!(agent.ai, 6 | 58) && current_direction != attack_direction {
                             world.entity_mut(entity).insert(Facing(attack_direction));
                         }
                         world.entity_mut(entity).insert(agent.clone());
 
-                        if agent.ai == 6 {
+                        if matches!(agent.ai, 6 | 58) {
                             if let Some(attack_packets) =
                                 guard_melee_attack_packets(world, entity, target_entity)
                             {
@@ -4399,7 +4490,22 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             TRAP_ROCK_ATTACK_PARALYSIS_CHANCE_DENOMINATOR,
                         );
                     let dark_wraith_line_branch = agent.ai == 192 && distance > 1;
-                    let spitting_spider_line_branch = matches!(agent.ai, 4 | 35);
+                    // AI 4 SpittingSpider, 29 BoneSpearman, 35 unnamed line —
+                    // Crystal `LineAttack(damage, 2, ...)`: 2-tile line that
+                    // splashes damage along the attack direction.
+                    let spitting_spider_line_branch = matches!(agent.ai, 4 | 29 | 35);
+                    // AI 44 BlackFoxman branches: adjacent → base Attack() 2/3,
+                    // otherwise `Broadcast(ObjectAttack Type=1)` +
+                    // `LineAttack(damage, 2, 250)`. Splash only on the range
+                    // branch (distance > 1) to match Crystal.
+                    let black_foxman_line_branch = agent.ai == 44 && distance > 1;
+                    // AI 116 BlackHammerCat is BlackFoxman-shaped: adjacent +
+                    // 2/3 → DC melee (Type 0). Otherwise → Type 1 MC magic +
+                    // `LineAttack(damage, 2, 300)` (DC). Splash on range only.
+                    let black_hammer_cat_line_branch = agent.ai == 116 && distance > 1;
+                    // AI 26 ShamanZombie: always emits `ObjectRangeAttack` +
+                    // `LineAttack(damage, 6, 300, MACAgility)` — a 6-tile line.
+                    let shaman_zombie_line_branch = agent.ai == 26;
                     let crystal_spider_line_branch = agent.ai == 37 && distance > 1;
                     let king_scorpion_line_targets = if agent.ai == 19 {
                         forward_line_opposing_monster_targets(
@@ -4586,10 +4692,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         if base_damage <= 0 {
                             0
                         } else {
-                            let mitigation = total_defence_bonus(
-                                world.resource::<InventoryResource>(),
-                                world.resource::<BuffResource>(),
-                            );
+                            let mitigation = crystal_player_rolled_armour(world);
                             (base_damage - mitigation).max(1)
                         }
                     } else if yimoogi_poison_branch {
@@ -4601,10 +4704,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         if base_damage <= 0 {
                             0
                         } else {
-                            let mitigation = total_defence_bonus(
-                                world.resource::<InventoryResource>(),
-                                world.resource::<BuffResource>(),
-                            );
+                            let mitigation = crystal_player_rolled_armour(world);
                             (base_damage - mitigation).max(1)
                         }
                     } else if frozen_miner_type_one_branch {
@@ -4621,10 +4721,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     } else if armadillo_type_one_branch && agent.ai == 125 {
                         0
                     } else if cannibal_tentacles_halfmoon_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (CANNIBAL_TENTACLES_HALFMOON_DAMAGE - mitigation).max(1)
                     } else if king_scorpion_range_branch {
                         crystal_monster_magic_damage(&monster_name)
@@ -4633,10 +4730,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     } else if sand_snail_green_area_branch {
                         crystal_monster_magic_damage(&monster_name)
                     } else if seedings_general_close_splash_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
                     } else if man_tree_boulder_branch {
                         crystal_monster_raw_magic_damage(&monster_name)
@@ -4645,22 +4739,13 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     } else if tucson_warrior_adjacent_smash_branch {
                         crystal_monster_magic_damage(&monster_name)
                     } else if general_meow_meow_slam_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_attack_damage(&monster_name) * 3 - mitigation).max(1)
                     } else if tucson_general_type_two_range_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_spell_damage(&monster_name) * 2 - mitigation).max(1)
                     } else if tucson_general_stomp_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
                     } else if white_foxman_slow_branch {
                         0
@@ -4671,23 +4756,14 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         if base_damage <= 0 {
                             0
                         } else {
-                            let mitigation = total_defence_bonus(
-                                world.resource::<InventoryResource>(),
-                                world.resource::<BuffResource>(),
-                            );
+                            let mitigation = crystal_player_rolled_armour(world);
                             (base_damage - mitigation).max(1)
                         }
                     } else if manectric_king_mass_attack_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
                     } else if manectric_king_push_line_branch {
-                        let mitigation = total_defence_bonus(
-                            world.resource::<InventoryResource>(),
-                            world.resource::<BuffResource>(),
-                        );
+                        let mitigation = crystal_player_rolled_armour(world);
                         (crystal_monster_attack_damage(&monster_name) - mitigation).max(1)
                     } else if oma_king_type_one_magic_branch {
                         crystal_monster_magic_damage(&monster_name)
@@ -5369,20 +5445,31 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         } else {
                             Vec::new()
                         };
-                        let spider_line_targets =
-                            if spitting_spider_line_branch || crystal_spider_line_branch {
-                                forward_line_opposing_monster_targets(
-                                    world,
-                                    &monster_entities,
-                                    entity,
-                                    &position,
-                                    attack_direction,
-                                    &agent,
-                                    if crystal_spider_line_branch { 3 } else { 2 },
-                                )
+                        let spider_line_targets = if spitting_spider_line_branch
+                            || crystal_spider_line_branch
+                            || black_foxman_line_branch
+                            || black_hammer_cat_line_branch
+                            || shaman_zombie_line_branch
+                        {
+                            let line_distance = if shaman_zombie_line_branch {
+                                6
+                            } else if crystal_spider_line_branch {
+                                3
                             } else {
-                                Vec::new()
+                                2
                             };
+                            forward_line_opposing_monster_targets(
+                                world,
+                                &monster_entities,
+                                entity,
+                                &position,
+                                attack_direction,
+                                &agent,
+                                line_distance,
+                            )
+                        } else {
+                            Vec::new()
+                        };
                         let red_moon_evil_area_targets = if red_moon_evil_area_branch {
                             nearby_opposing_monster_targets(
                                 world,
@@ -5845,10 +5932,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                                 } else {
                                     crystal_monster_attack_damage(&monster_name)
                                 };
-                                let mitigation = total_defence_bonus(
-                                    world.resource::<InventoryResource>(),
-                                    world.resource::<BuffResource>(),
-                                );
+                                let mitigation = crystal_player_rolled_armour(world);
                                 schedule_damage_to_monster(
                                     world,
                                     due_tick,

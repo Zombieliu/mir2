@@ -5,8 +5,8 @@ use crate::config::{
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_item_by_name, localized_text_or_fallback, CrystalItemTemplate,
-    LanguageCode,
+    crystal_item_by_index, crystal_item_by_name, crystal_recipes, localized_text_or_fallback,
+    CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     ChatType, ClientMagic, ItemInfo, MirClass, MirGender, MirGridType, ServerPacket, UserItem,
@@ -31,7 +31,8 @@ use super::equipment::{
     EquipmentState,
 };
 use super::inventory::{
-    add_minutes_to_binary_datetime, binary_datetime_ticks, consume_item_at_use_location,
+    add_minutes_to_binary_datetime, add_or_increment_item_with_durability_and_stats,
+    binary_datetime_ticks, can_gain_item_quantity, consume_item_at_use_location,
     crystal_duration_label_from_minutes, crystal_duration_label_from_seconds,
     current_binary_datetime, find_use_item_location, future_binary_datetime_minutes,
     item_at_use_location, UseItemLocation,
@@ -81,6 +82,10 @@ pub(super) struct ItemState {
     pub(super) added_defence: i32,
     #[serde(default)]
     pub(super) added_stats: Vec<UserItemStat>,
+    /// Socket items (Crystal `ItemType.Socket`) inserted into this item's
+    /// slots; their stats contribute while the item is worn.
+    #[serde(default)]
+    pub(super) socketed: Vec<ItemState>,
     #[serde(default)]
     pub(super) cursed: bool,
     #[serde(default)]
@@ -532,6 +537,7 @@ pub(super) fn crystal_equipment_added_stat_total(resources: &InventoryResource, 
                 .filter(|entry| entry.stat == stat)
                 .map(|entry| entry.value)
                 .sum::<i32>()
+                + item.socketed_added_stat(stat)
         })
         .sum()
 }
@@ -1212,6 +1218,224 @@ pub(super) fn combine_item_impl(
     }
 }
 
+/// Finds the first offered inventory slot (not already used) holding an item whose
+/// Crystal template index matches `required_index`, mirroring Crystal's
+/// `item.Info != ingredient.Info` comparison. Returns the inventory vector index
+/// and the matched slot.
+fn find_recipe_ingredient_slot(
+    resources: &InventoryResource,
+    slots: &[i32],
+    used_slots: &[i32],
+    required_index: i32,
+) -> Option<(usize, i32)> {
+    for &slot in slots {
+        if slot < 0 || used_slots.contains(&slot) {
+            continue;
+        }
+        let Some(inv_index) = resources.inventory_items.iter().position(|item| {
+            i32::from(item.slot) == slot
+                && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        }) else {
+            continue;
+        };
+        let matches_index =
+            crystal_item_template_for_item_key(&resources.inventory_items[inv_index].key)
+                .map(|template| template.item_index)
+                == Some(required_index);
+        if matches_index {
+            return Some((inv_index, slot));
+        }
+    }
+    None
+}
+
+/// Crystal `NPCScript.Craft`: combine the recipe's ingredients — consuming tool
+/// durability and gold — to attempt producing the output item. Ingredient counts,
+/// gold cost and success chance come straight from the decoded recipe data, so the
+/// transaction stays 1:1 with the original server. Crystal semantics preserved
+/// exactly: a *valid* attempt always consumes the ingredients/gold and returns
+/// `success: true`; the produced item is granted only when the chance roll passes
+/// (a failed roll still consumes everything).
+pub(super) fn craft_item_impl(
+    world: &mut World,
+    unique_id: u64,
+    count: u16,
+    slots: Vec<i32>,
+) -> Vec<ServerPacket> {
+    let fail = || vec![ServerPacket::CraftItem { success: false }];
+    if !is_in_world(world) || current_player_is_dead(world) {
+        return fail();
+    }
+
+    // Locate the recipe by the output item's unique id (recipe.Item.UniqueID).
+    let Some(recipe) = crystal_recipes()
+        .into_iter()
+        .find(|recipe| recipe.output_unique_id == unique_id)
+    else {
+        return fail();
+    };
+    let Some(goods_template) = crystal_item_by_index(recipe.output.item_index) else {
+        return fail();
+    };
+
+    let goods_stack = u32::from(goods_template.stack_size.max(1));
+    let goods_count = u32::from(recipe.output.count.max(1));
+    let craft_count = u32::from(count);
+
+    // goods == null || count == 0 || count > goods.Info.StackSize
+    if count == 0 || craft_count > goods_stack {
+        return fail();
+    }
+    // Account.Gold < recipe.Gold * count
+    let needed_gold = recipe.gold.saturating_mul(craft_count);
+    if world.resource::<PlayerRuntimeResource>().gold < needed_gold {
+        return fail();
+    }
+    // count > goods.Info.StackSize / goods.Count
+    if craft_count > goods_stack / goods_count {
+        return fail();
+    }
+
+    // Resolve every required tool/ingredient against the offered slots and build the
+    // consumption plan before mutating anything.
+    let mut used_slots: Vec<i32> = Vec::new();
+    let mut tool_indexes: Vec<usize> = Vec::new();
+    let mut ingredient_plan: Vec<(usize, u32)> = Vec::new();
+    {
+        let resources = world.resource::<InventoryResource>();
+
+        // Tools: present with floor(CurrentDura / 1000) >= count.
+        for tool in &recipe.tools {
+            let Some((inv_index, slot)) =
+                find_recipe_ingredient_slot(&resources, &slots, &used_slots, tool.item_index)
+            else {
+                return fail();
+            };
+            used_slots.push(slot);
+            let current_dura = u32::from(
+                resources.inventory_items[inv_index]
+                    .durability_current
+                    .unwrap_or(0),
+            );
+            if current_dura / 1000 < craft_count {
+                return fail();
+            }
+            tool_indexes.push(inv_index);
+        }
+
+        // Ingredients: a single matching stack must supply Count * count.
+        for ingredient in &recipe.ingredients {
+            let Some(ingredient_template) = crystal_item_by_index(ingredient.item_index) else {
+                return fail();
+            };
+            let ingredient_stack = u32::from(ingredient_template.stack_size.max(1));
+            let amount = u32::from(ingredient.count).saturating_mul(craft_count);
+            // ingredient.Count * count > ingredient.Info.StackSize
+            if amount > ingredient_stack {
+                return fail();
+            }
+
+            let Some((inv_index, slot)) =
+                find_recipe_ingredient_slot(&resources, &slots, &used_slots, ingredient.item_index)
+            else {
+                return fail();
+            };
+            used_slots.push(slot);
+
+            let item = &resources.inventory_items[inv_index];
+            // Durability requirement: ingredient.CurrentDura < MaxDura && > item.CurrentDura.
+            if ingredient.current_dura < ingredient.max_dura
+                && u32::from(ingredient.current_dura)
+                    > u32::from(item.durability_current.unwrap_or(0))
+            {
+                return fail();
+            }
+            if amount > item.quantity {
+                return fail();
+            }
+            ingredient_plan.push((inv_index, amount));
+        }
+
+        // usedSlots.Count != Tools.Count + Ingredients.Count
+        if used_slots.len() != recipe.tools.len() + recipe.ingredients.len() {
+            return fail();
+        }
+
+        // CanGainItem(craftedItem)
+        let key = crystal_item_key_for_template(&goods_template);
+        let produced = goods_count.saturating_mul(craft_count);
+        if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, produced) {
+            return fail();
+        }
+    }
+
+    // Validation passed — apply consumption (tool durability, ingredients, gold).
+    let current_tick = runtime_tick(world);
+    {
+        let mut resources = world.resource_mut::<InventoryResource>();
+        for &inv_index in &tool_indexes {
+            let item = &mut resources.inventory_items[inv_index];
+            let remaining = u32::from(item.durability_current.unwrap_or(0))
+                .saturating_sub(craft_count.saturating_mul(1000));
+            item.durability_current = Some(u16::try_from(remaining).unwrap_or(u16::MAX));
+        }
+
+        let mut removals: Vec<usize> = Vec::new();
+        for &(inv_index, amount) in &ingredient_plan {
+            let item = &mut resources.inventory_items[inv_index];
+            if item.quantity > amount {
+                item.quantity -= amount;
+            } else {
+                removals.push(inv_index);
+            }
+        }
+        removals.sort_unstable_by(|a, b| b.cmp(a));
+        removals.dedup();
+        for inv_index in removals {
+            resources.inventory_items.remove(inv_index);
+        }
+    }
+
+    world.resource_mut::<PlayerRuntimeResource>().gold -= needed_gold;
+    let mut packets = vec![ServerPacket::LoseGold { gold: needed_gold }];
+
+    // Success roll mirrors `Random.Next(100) >= Chance` (no CraftRatePercent source).
+    let roll = deterministic_roll(
+        current_tick,
+        recipe.output.item_index.max(0) as usize,
+        unique_id as usize,
+        100,
+    );
+    if roll < u64::from(recipe.chance) {
+        let key = crystal_item_key_for_template(&goods_template);
+        let produced = goods_count.saturating_mul(craft_count);
+        let durability = (goods_template.durability > 0).then_some(goods_template.durability);
+        let gained = add_or_increment_item_with_durability_and_stats(
+            world,
+            ItemContainer::Bag1,
+            &key,
+            &goods_template.name,
+            goods_template
+                .tooltip
+                .as_deref()
+                .unwrap_or("Crystal crafted item."),
+            8,
+            produced,
+            u16::from(goods_template.weight.max(1)),
+            durability,
+            durability,
+            0,
+            0,
+        );
+        packets.push(ServerPacket::GainedItem {
+            item: user_item_from_item_state(&gained),
+        });
+    }
+
+    packets.push(ServerPacket::CraftItem { success: true });
+    packets
+}
+
 pub(super) fn revive_current_player_from_resurrection_scroll(
     world: &mut World,
 ) -> Vec<ServerPacket> {
@@ -1223,7 +1447,7 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         let mut entry = world.entity_mut(player);
         let mut vitals = entry.get_mut::<PlayerVitals>().expect("player vitals");
         vitals.hp = vitals.max_hp.max(1);
-        vitals.mp = 100;
+        vitals.mp = vitals.max_mp;
         *vitals
     };
 
@@ -2056,6 +2280,14 @@ pub(super) fn crystal_item_template_for_item_key(key: &str) -> Option<CrystalIte
         return Some(template);
     }
     crystal_item_name_for_item_key(key).and_then(crystal_item_by_name)
+}
+
+/// Whether an item is a Crystal `ItemType.Socket` insert (the gem that goes into
+/// an item's socket via `EquipSlotItem`).
+pub(super) fn item_is_socket_type(item: &ItemState) -> bool {
+    crystal_item_template_for_item_key(&item.key)
+        .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_SOCKET)
+        .unwrap_or(false)
 }
 
 pub(super) fn crystal_item_template_for_dynamic_key(key: &str) -> Option<CrystalItemTemplate> {

@@ -35,8 +35,10 @@ use crate::config::{
     CharacterRecord, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
     WorldSnapshot,
 };
-use crate::runtime::zone::{SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterSpawn};
-use mir2_game_data::{crystal_monster_by_name, LanguageCode};
+use crate::runtime::zone::{
+    SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
+};
+use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
     ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
@@ -47,7 +49,7 @@ use mir2_protocol::{
 pub(super) use super::{
     buffs::*, combat::*, components::*, crystal_compat::*, drops::*, equipment::*, fishing::*,
     inventory::*, items::*, map::*, monster_ai::*, monsters::*, movement::*, npc::*, npc_script::*,
-    packets::*, quests::*, rental::*, resources::*, save::*, skills::*, stage5::*,
+    packets::*, quests::*, rental::*, resources::*, save::*, skills::*, stage5::*, stats::*,
 };
 #[cfg(test)]
 #[allow(unused_imports)]
@@ -162,12 +164,19 @@ impl SimulationSession {
         app.insert_resource(RuntimeConfigResource::new(&config));
         app.insert_resource(SessionResource::new(&config));
         app.insert_resource(PlayerRuntimeResource::new(&config));
+        let initial_doors =
+            super::resources::DoorRegistry::from_templates(&initial_collision.collision.doors);
         app.insert_resource(MapRuntimeResource::new(
             &config,
             initial_collision.collision.region_bounds,
             initial_collision.blocked_set,
             initial_collision.closed_door_set,
+            initial_doors,
+            initial_collision.fishing_cells,
         ));
+        app.insert_resource(super::mining::MiningResource::with_builtin_sets());
+        super::mining::rebuild_mine_spots(app.world_mut());
+        app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
@@ -455,6 +464,7 @@ impl SimulationSession {
                 free_map_shout: permissions.free_map_shout,
                 free_server_shout: permissions.free_server_shout,
             },
+            combat_stats: self.zone_player_combat_stats(),
         })
     }
 
@@ -733,12 +743,27 @@ impl SimulationSession {
             level: template.as_ref().map(|monster| monster.level).unwrap_or(1),
             max_hp,
             hp: vitals.hp.clamp(0, max_hp),
-            experience: template.map(|monster| monster.experience).unwrap_or(0),
+            experience: template
+                .as_ref()
+                .map(|monster| monster.experience)
+                .unwrap_or(0),
+            defense: template
+                .as_ref()
+                .map(zone_monster_defense_from_template)
+                .unwrap_or_default(),
             position,
             direction,
             drops: zone_ground_drop_snapshots_for_monster(world, object_id, &name),
         })
     }
+}
+
+/// Project a Crystal monster template's authoritative defensive stats into the
+/// shared-zone snapshot so the zone can resolve incoming player damage itself.
+pub(super) fn zone_monster_defense_from_template(
+    template: &CrystalMonsterTemplate,
+) -> ZoneMonsterDefense {
+    ZoneMonsterDefense::from_crystal_template(template)
 }
 
 fn zone_player_buff_targets_self(

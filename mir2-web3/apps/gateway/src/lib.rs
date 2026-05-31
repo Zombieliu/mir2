@@ -6,6 +6,7 @@ pub mod routing;
 mod session;
 pub mod tcp;
 pub mod web;
+pub mod zone_lease;
 
 pub use cache::{
     default_gateway_session_cache_from_env, fresh_route_request_for_character,
