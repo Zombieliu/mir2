@@ -1150,6 +1150,7 @@ dependencies = [
  "mir2-game-data",
  "mir2-protocol",
  "mir2-simulation",
+ "postgres",
  "serde",
  "serde_json",
  "sha2",

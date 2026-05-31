@@ -5755,6 +5755,20 @@ impl ZoneRegistry {
         )
     }
 
+    /// In-process zone runtime + router, but with a caller-chosen owner-lease
+    /// authority (e.g. the Postgres failover authority selected from the
+    /// environment). Used by the production gateway bootstrap.
+    pub fn in_process_with_owner_lease_authority(
+        owner_lease_authority: SharedZoneOwnerLeaseAuthority,
+    ) -> Self {
+        Self::with_router_and_owner_lease_authority(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(SingleZoneSessionRouter) as SharedSessionRouter,
+            owner_lease_authority,
+        )
+    }
+
     pub fn new(default_zone_id: ZoneId, runtime_factory: SharedZoneRuntimeFactory) -> Self {
         Self::with_router(
             default_zone_id,
@@ -6346,7 +6360,10 @@ mod tests {
         assert_eq!(entity.kind, WorldEntityKind::Monster);
         assert_eq!((entity.x, entity.y), (331, 270));
         assert_eq!(entity.direction, MirDirection::Down);
-        assert_eq!(entity.disposition, WorldEntityDisposition::Hostile);
+        // ai 6 is a Crystal Neutral AI (see monster_disposition_for_ai /
+        // world_entity_disposition_for_monster_ai); the shared-zone packet path
+        // must record it as Neutral, matching world_entity_from_monster_info.
+        assert_eq!(entity.disposition, WorldEntityDisposition::Neutral);
         assert_eq!(
             entity
                 .sprite
