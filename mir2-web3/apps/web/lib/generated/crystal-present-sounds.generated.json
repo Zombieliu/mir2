@@ -2,10 +2,15 @@
   "schemaVersion": 1,
   "kind": "mir2-present-sound-manifest",
   "soundDir": "public/original-ui/Sound",
-  "presentSoundCount": 4,
+  "presentSoundCount": 9,
   "files": [
     "100.wav",
+    "900-0.wav",
+    "900-3.wav",
     "Login2.wav",
+    "M8-0.wav",
+    "M83-0.wav",
+    "M9-0.wav",
     "NewChar.wav",
     "Select2.wav"
   ]

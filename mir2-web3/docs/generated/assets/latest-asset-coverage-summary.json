@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-30T23:41:36.475Z",
+  "generatedAt": "2026-05-31T01:14:22.617Z",
   "sections": {
     "originalAssets": {
       "available": true,
@@ -22,9 +22,9 @@
     },
     "soundCoverage": {
       "available": true,
-      "presentSounds": 4,
+      "presentSounds": 9,
       "indexedSounds": 450,
-      "coveragePercent": 0.89,
+      "coveragePercent": 2,
       "note": "remaining sounds are raw-asset-limited (need the Crystal client)"
     }
   },
