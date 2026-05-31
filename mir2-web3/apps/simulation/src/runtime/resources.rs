@@ -551,6 +551,8 @@ pub(super) struct MapRuntimeResource {
     /// Cells flagged fishable in the `.map` file → their fishing attribute.
     pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → owning guild name (gates conquest movements).
+    pub(super) conquest_owners: BTreeMap<i32, String>,
 }
 
 impl MapRuntimeResource {
@@ -570,6 +572,7 @@ impl MapRuntimeResource {
             doors,
             fishing_cells,
             conquest_wars: config.conquest_wars.clone(),
+            conquest_owners: config.conquest_owners.clone(),
         }
     }
 }

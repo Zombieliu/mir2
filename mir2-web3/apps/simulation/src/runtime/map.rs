@@ -262,6 +262,7 @@ pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapT
         .chain(crystal_movement_transfer_records_for_map(
             &map.current_map.file_name,
         ))
+        .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
         .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
 }
 
@@ -277,6 +278,7 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
         .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_movement_transfer_records_for_map(&map.current_map.file_name)
             .iter()
+            .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
 }
 
@@ -298,7 +300,11 @@ pub(super) fn crystal_movement_transfer_records_for_map(
     map.movements
         .iter()
         .filter_map(|movement| {
-            if movement.need_hole || movement.need_move || movement.conquest_index > 0 {
+            // NeedHole movements require a dig hole and NeedMove movements are
+            // driven by the NPC `ENTERMAP` command, so neither is a step-on
+            // auto-transfer. Conquest movements ARE included (tagged with their
+            // index) and gated on guild ownership at application time.
+            if movement.need_hole || movement.need_move {
                 return None;
             }
             let target = crystal_map_respawns_by_index(movement.map_index)?;
@@ -328,9 +334,35 @@ pub(super) fn crystal_movement_transfer_records_for_map(
                 to_map_title: target.map_title,
                 to_position: movement.destination.clone(),
                 to_direction: MirDirection::Down,
+                conquest_index: movement.conquest_index,
             })
         })
         .collect()
+}
+
+/// Whether the current player may use a conquest movement of the given index
+/// (Crystal: `MyGuild.Conquest.Info.Index == ConquestIndex`). Ordinary
+/// movements (`conquest_index <= 0`) are always allowed.
+pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> bool {
+    if conquest_index <= 0 {
+        return true;
+    }
+    let guild = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .name
+        .trim()
+        .to_string();
+    if guild.is_empty() {
+        return false;
+    }
+    world
+        .resource::<MapRuntimeResource>()
+        .conquest_owners
+        .get(&conquest_index)
+        .map(|owner| owner.eq_ignore_ascii_case(&guild))
+        .unwrap_or(false)
 }
 
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
@@ -470,6 +502,16 @@ pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPack
             "server.NotFound",
         ))];
     };
+
+    // A conquest movement only fires for a member of the owning guild.
+    if !conquest_movement_allowed(world, transfer.conquest_index) {
+        let language = super::session::current_language(world);
+        return vec![super::session::system_message(&localized_text_or_fallback(
+            language,
+            "server.CannotPositionMoveOnMap",
+            "server.CannotPositionMoveOnMap",
+        ))];
+    }
 
     let Some(player) = player_entity(world) else {
         let language = super::session::current_language(world);

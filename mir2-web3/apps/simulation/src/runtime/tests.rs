@@ -54404,3 +54404,122 @@ fn crystal_fishing_rejected_when_no_fishing_cell_ahead() {
     assert!(!fishing.fishing, "fishing must not begin away from a fishing cell");
     assert_eq!(fishing.fishing_attribute, -1);
 }
+
+// ---------------------------------------------------------------------------
+// Map system: conquest movement gating (Crystal MyGuild.Conquest.Info.Index)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_conquest_movement_allowed_only_for_owning_guild() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Ordinary movements (index 0) are always allowed.
+    assert!(super::super::map::conquest_movement_allowed(
+        session.app.world(),
+        0
+    ));
+    // Without a guild, a conquest movement is denied.
+    assert!(!super::super::map::conquest_movement_allowed(
+        session.app.world(),
+        5
+    ));
+
+    {
+        let mut s5 = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        s5.stage5_systems.guild.name = "Wolves".to_string();
+    }
+    {
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        map.conquest_owners.insert(5, "Wolves".to_string());
+    }
+    // Owning guild may use conquest 5, but not conquest 6 (unowned).
+    assert!(super::super::map::conquest_movement_allowed(
+        session.app.world(),
+        5
+    ));
+    assert!(!super::super::map::conquest_movement_allowed(
+        session.app.world(),
+        6
+    ));
+
+    // A rival owner denies the movement.
+    {
+        let mut map = session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>();
+        map.conquest_owners.insert(5, "Tigers".to_string());
+    }
+    assert!(!super::super::map::conquest_movement_allowed(
+        session.app.world(),
+        5
+    ));
+}
+
+#[test]
+fn crystal_conquest_movement_transfer_gated_by_ownership() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let source = Point { x: 200, y: 200 };
+    set_player_position(&mut session, source.clone());
+    let current_map = session
+        .app
+        .world()
+        .resource::<super::MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    {
+        let mut config = session
+            .app
+            .world_mut()
+            .resource_mut::<RuntimeConfigResource>();
+        config.config.map_transfers.push(crate::MapTransferRecord {
+            key: "conquest-test-move".to_string(),
+            from_map_file_name: current_map.clone(),
+            from_bounds: mir2_game_data::MapBounds {
+                min_x: source.x,
+                max_x: source.x,
+                min_y: source.y,
+                max_y: source.y,
+            },
+            to_map_file_name: current_map,
+            to_map_title: "Conquest Keep".to_string(),
+            to_position: Point { x: 5, y: 5 },
+            to_direction: MirDirection::Down,
+            conquest_index: 7,
+        });
+    }
+
+    // Standing on the source without owning conquest 7 → no transfer fires.
+    assert!(
+        super::super::map::transfer_for_current_player_position(session.app.world()).is_none(),
+        "conquest movement must not fire for a non-owner"
+    );
+
+    // Own conquest 7 → the movement is selected.
+    {
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .guild
+            .name = "Owners".to_string();
+        session
+            .app
+            .world_mut()
+            .resource_mut::<super::MapRuntimeResource>()
+            .conquest_owners
+            .insert(7, "Owners".to_string());
+    }
+    let found = super::super::map::transfer_for_current_player_position(session.app.world());
+    assert_eq!(found.map(|transfer| transfer.conquest_index), Some(7));
+}

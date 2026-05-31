@@ -1746,6 +1746,10 @@ pub struct MapTransferRecord {
     pub to_map_title: String,
     pub to_position: Point,
     pub to_direction: MirDirection,
+    /// Crystal `MovementInfo.ConquestIndex`. `0` means an ordinary movement;
+    /// `> 0` means the movement only fires for a player whose guild owns the
+    /// conquest with that index.
+    pub conquest_index: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1877,6 +1881,9 @@ pub struct SimulationConfig {
     pub visible_monsters: Vec<VisibleMonsterRecord>,
     pub visible_npcs: Vec<VisibleNpcRecord>,
     pub conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → name of the guild that currently owns it. Gates
+    /// conquest movements (Crystal `MyGuild.Conquest.Info.Index`).
+    pub conquest_owners: BTreeMap<i32, String>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
@@ -1966,6 +1973,7 @@ impl SimulationConfig {
                 })
                 .collect(),
             conquest_wars: BTreeMap::new(),
+            conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
@@ -2624,6 +2632,7 @@ fn starter_map_transfers() -> Vec<MapTransferRecord> {
         to_map_title: "BichonProvince".to_string(),
         to_position: Point { x: 330, y: 270 },
         to_direction: MirDirection::Down,
+        conquest_index: 0,
     }]
 }
 

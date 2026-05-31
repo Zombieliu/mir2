@@ -1308,13 +1308,25 @@ impl SimulationSession {
                     .then(|| resources.stage5_systems.guild.name.clone())
             })
             .unwrap_or_else(|| "Independent".to_string());
-        let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
-        resources.stage5_systems.conquest.castle_owner = owner.clone();
-        resources
-            .stage5_systems
-            .conquest
-            .event_log
-            .push(format!("Castle owner: {owner}"));
+        // Optional second arg: the conquest index this owner now controls, used
+        // to gate conquest movements (Crystal `MyGuild.Conquest.Info.Index`).
+        let conquest_index = args.get(1).and_then(|value| value.parse::<i32>().ok());
+        {
+            let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
+            resources.stage5_systems.conquest.castle_owner = owner.clone();
+            resources
+                .stage5_systems
+                .conquest
+                .event_log
+                .push(format!("Castle owner: {owner}"));
+        }
+        if let Some(index) = conquest_index {
+            self.app
+                .world_mut()
+                .resource_mut::<MapRuntimeResource>()
+                .conquest_owners
+                .insert(index, owner.clone());
+        }
         Vec::new()
     }
 

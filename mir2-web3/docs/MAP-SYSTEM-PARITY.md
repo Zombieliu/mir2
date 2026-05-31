@@ -26,7 +26,9 @@ Tick model: 1 runtime tick = 1000 ms (`combat_delay_ticks(ms) = ceil(ms/1000)`).
 | 10 | **Environmental hazards (lightning/fire)** | `Map.Process` | ❌ | ✅ |
 | 11 | **Fishing cell attributes from map** | `LoadMapCells*` (light 100–119) | ❌ | ✅ |
 | 12 | Cell attribute fidelity (fishing) | `Cell.FishingAttribute` | 🟡 | ✅ |
-| 13 | Conquest / siege movement gating | `ConquestObject`, movements | ❌ | 🟡 |
+| 13 | Conquest / siege movement gating | `ConquestObject`, movements | ❌ | ✅ |
+| 14 | Safe-zone healing/border | `CreateSafeZone` + `Settings` | n/a | ✅ (off by default, 1:1) |
+| 15 | NeedMove / NeedHole movements | `PlayerObject` movement loop | 🟡 | ✅ |
 
 ## Implementation log
 
@@ -84,8 +86,37 @@ Tick model: 1 runtime tick = 1000 ms (`combat_delay_ticks(ms) = ceil(ms/1000)`).
 - Tests: v0 parser (in/out of range), cast over a fishing cell, cast rejected
   off a fishing cell.
 
+### Phase 5 — Conquest movement gating + movement completeness ✅
+- `MapTransferRecord` carries `conquest_index`; `crystal_movement_transfer_records_for_map`
+  now includes conquest movements (no longer filtered) tagged with their index.
+- `conquest_movement_allowed(world, index)`: ordinary movements always allowed;
+  a conquest movement fires only for a player whose guild owns that conquest
+  index (Crystal `MyGuild.Conquest.Info.Index == ConquestIndex`). Ownership is
+  `MapRuntimeResource.conquest_owners` (config-seeded; populated in-game by the
+  `conquest.owner <guild> <index>` script command).
+- Gating applied at `transfer_for_current_player_position`,
+  `is_current_map_transfer_source`, and `apply_map_transfer`.
+- NeedMove movements stay NPC-driven (the sim's NPC scripts move maps directly);
+  NeedHole movements remain excluded from step-on auto-transfer (require a dig
+  hole). Both match Crystal's movement loop semantics.
+- Tests: ownership matrix (no guild / owner / rival / wrong index), and the
+  transfer selection gated by ownership.
+
+### Safe-zone healing/border
+`Settings.SafeZoneBorder` and `Settings.SafeZoneHealing` both default to `false`
+in Crystal, so the sim (no safe-zone healing) already matches the default — no
+change required for 1:1.
+
 ## Outcome
-Map system raised well past 90% for cell-/map-level mechanics: doors, mining,
-hazards and fishing cells now match Crystal. Remaining (tracked, lower
-priority): conquest/siege movement gating (depends on the guild-war system) and
-zone-shared door/hazard authority (part of the broader world-authority work).
+The map system is at semantic 1:1 with Crystal's `Map.cs` for the per-session
+authority model the rest of the engine uses: map formats, walls/bounds, safe
+zones (+ correct default no-heal), rule flags, spawning, respawn-over-time,
+transfers, **dynamic doors**, **mining**, **lightning/fire hazards**, **fishing
+cells**, and **conquest movement gating**.
+
+The one remaining item is **zone-shared authority for doors/hazards** — i.e.
+two players on the same map seeing one shared door/strike rather than
+per-session state. This is deliberately cross-cutting: combat, monster AI and
+NPC state are all per-session today, so promoting only doors to shared authority
+would be inconsistent. It belongs to the broader world-authority migration
+(tracked in `PRODUCTION-GAP-ASSESSMENT.md`), not to map-mechanics parity.
