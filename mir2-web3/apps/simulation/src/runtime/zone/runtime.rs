@@ -13,6 +13,7 @@ use mir2_protocol::{
 use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
+use super::ecs::ZoneEcs;
 use super::movement::{
     movement_delay_ms, offset_point, ZONE_MOVE_READY_GRACE_MS, ZONE_RUN_GRACE_MS,
     ZONE_TURN_DELAY_MS,
@@ -65,7 +66,10 @@ const CRYSTAL_SPELL_EFFECT_HEALING: u8 = 3;
 const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP: u8 = 6;
 const CRYSTAL_SPELL_EFFECT_BLEEDING: u8 = 18;
 
-#[derive(Debug, Clone)]
+// Note: ZoneRuntime is intentionally not `Clone`. It owns a `bevy_ecs::World`
+// (see `ecs`), which is not cloneable, and nothing ever cloned a zone runtime
+// (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
+#[derive(Debug)]
 pub struct ZoneRuntime {
     key: ZoneKey,
     collision: ZoneCollision,
@@ -93,6 +97,11 @@ pub struct ZoneRuntime {
     // Spatial index of zone-object positions (NPCs, owner-generated objects).
     // Objects do not move after insert, so this is synced only at insert/remove.
     object_grid: AoiGrid<u32>,
+    // ECS mirror of player entities (L2 step 1). Additive: the `players` map
+    // above is still the source of truth; this World mirrors players at the
+    // same join/leave/move sites so later L2 slices can flip systems to read
+    // from it. Nothing in the tick reads it yet. See docs/L2-ECS-ZONE-DESIGN.md.
+    ecs: ZoneEcs,
     next_object_id: u32,
 }
 
@@ -227,6 +236,28 @@ impl ZoneRuntime {
         Self::new_with_collision(key, collision)
     }
 
+    /// L2 step-1 invariant: the ECS player mirror must exactly match the
+    /// authoritative `players` map (same sessions, object ids, and positions).
+    /// Returns true when they agree. Test-only; the mirror is not yet read by
+    /// gameplay. See docs/L2-ECS-ZONE-DESIGN.md.
+    #[cfg(test)]
+    pub(crate) fn ecs_mirror_matches_players(&mut self) -> bool {
+        let mut expected: Vec<(SessionId, u32, i32, i32)> = self
+            .players
+            .iter()
+            .map(|(session_id, player)| {
+                (
+                    session_id.clone(),
+                    player.object_id,
+                    player.position.x,
+                    player.position.y,
+                )
+            })
+            .collect();
+        expected.sort();
+        self.ecs.mirror_snapshot() == expected
+    }
+
     pub fn new_with_collision(key: ZoneKey, collision: ZoneCollision) -> Self {
         Self {
             key,
@@ -251,6 +282,7 @@ impl ZoneRuntime {
             // point is a superset of everything within AOI range.
             player_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
             object_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
+            ecs: ZoneEcs::new(),
             next_object_id: 1_000_000,
         }
     }
@@ -689,6 +721,8 @@ impl ZoneRuntime {
         self.occupancy.insert(tile, session_id.clone());
         self.player_grid
             .insert(session_id.clone(), &player.position);
+        self.ecs
+            .upsert_player(&session_id, object_id, &player.position);
         self.players.insert(session_id.clone(), player);
         outbounds.extend(self.diff_visibility_for(&session_id));
         outbounds.extend(self.diff_zone_object_visibility_for(&session_id));
@@ -720,6 +754,7 @@ impl ZoneRuntime {
             .retain(|hit| &hit.target_session_id != session_id);
         self.occupancy.remove(&tile_key(&player.position));
         self.player_grid.remove(session_id);
+        self.ecs.remove_player(session_id);
 
         let mut observers = Vec::new();
         for (other_session_id, other) in &mut self.players {
@@ -990,6 +1025,7 @@ impl ZoneRuntime {
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
             self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = Vec::new();
@@ -1166,6 +1202,7 @@ impl ZoneRuntime {
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
             self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = self.diff_visibility_for(session_id);
@@ -6342,6 +6379,7 @@ impl ZoneRuntime {
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
             self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = self.diff_visibility_for(session_id);
@@ -8217,4 +8255,85 @@ fn packets_with_linked_items(
         .collect::<Vec<_>>();
     output.append(&mut packets);
     output
+}
+
+#[cfg(test)]
+mod step1_ecs_mirror_tests {
+    //! L2 step-1 invariant tests: the additive ECS player mirror must stay
+    //! exactly in sync with the authoritative `players` map across join / walk /
+    //! leave. Unit-test layer (not the external `shared_zone` crate) so the
+    //! crate-private `ecs_mirror_matches_players` helper is visible.
+    use super::super::types::{ZoneChatProfile, ZoneJoin, ZonePlayerCombatStats};
+    use super::*;
+    use mir2_protocol::{MirClass, MirDirection, MirGender, Point};
+
+    fn test_join(session: &str, object_id: u32, x: i32, y: i32) -> ZoneJoin {
+        ZoneJoin {
+            session_id: SessionId::new(session),
+            account_id: format!("{session}-acct"),
+            character_index: object_id as i32,
+            object_id,
+            name: format!("P{object_id}"),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 7,
+            hp: 60,
+            max_hp: 60,
+            mp: 100,
+            map_file_name: "0".to_string(),
+            position: Point { x, y },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        }
+    }
+
+    fn test_zone() -> ZoneRuntime {
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded())
+    }
+
+    #[test]
+    fn mirror_matches_players_across_join_walk_leave() {
+        let mut zone = test_zone();
+        let first = SessionId::new("first");
+
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 330, 270)));
+        zone.handle(ZoneCommand::Join(test_join("second", 102, 332, 270)));
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after joins"
+        );
+
+        zone.handle(ZoneCommand::Walk {
+            session_id: first.clone(),
+            direction: MirDirection::Right,
+            seq: 1,
+            now_ms: 0,
+        });
+        let _ = zone.tick(0);
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after a walk commits"
+        );
+
+        zone.handle(ZoneCommand::Leave { session_id: first });
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after a leave"
+        );
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must still match with one player remaining"
+        );
+    }
+
+    #[test]
+    fn mirror_matches_after_rejoin_same_session() {
+        let mut zone = test_zone();
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 330, 270)));
+        // Re-join the same session at a new spot (zone replaces it); mirror must
+        // not leak a stale entity.
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 340, 280)));
+        assert!(zone.ecs_mirror_matches_players());
+    }
 }
