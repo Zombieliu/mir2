@@ -4799,3 +4799,167 @@ body.mir-dragging-item * {
 .options-dialog-toggle-state {
   color: #ffe9a6;
 }
+
+/* ---- Skill bar (F1-F8) ---- */
+.skill-bar {
+  position: absolute;
+  bottom: 158px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+  z-index: 35;
+  pointer-events: auto;
+}
+
+.skill-bar-slot {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #5c4a2a;
+  background: linear-gradient(180deg, rgba(46, 33, 18, 0.92), rgba(20, 14, 8, 0.92));
+  box-shadow: inset 0 0 0 1px rgba(255, 233, 188, 0.05);
+  color: #e9d6ad;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.skill-bar-slot.empty {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.skill-bar-slot.toggle {
+  border-color: #caa24f;
+  box-shadow: inset 0 0 6px rgba(202, 162, 79, 0.45);
+}
+
+.skill-bar-key {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 9px;
+  line-height: 1;
+  color: #b89a63;
+  text-shadow: 0 1px 0 #000;
+}
+
+.skill-bar-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.1;
+  text-shadow: 0 1px 0 #000;
+  pointer-events: none;
+}
+
+.skill-bar-slot.cooldown .skill-bar-name {
+  opacity: 0.5;
+}
+
+.skill-bar-cooldown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffd98a;
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: 0 1px 0 #000;
+}
+
+/* ---- Buff bar (active buffs) ---- */
+.buff-bar {
+  position: absolute;
+  top: 122px;
+  right: 6px;
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 3px;
+  max-width: 120px;
+  z-index: 34;
+}
+
+.buff-chip {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #6b5430;
+  background: linear-gradient(180deg, rgba(58, 41, 24, 0.95), rgba(25, 17, 10, 0.95));
+  box-shadow: inset 0 0 0 1px rgba(255, 233, 188, 0.05);
+}
+
+.buff-chip-icon {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffe2a0;
+  text-shadow: 0 1px 0 #000;
+}
+
+.buff-chip-time {
+  position: absolute;
+  right: -1px;
+  bottom: -2px;
+  font-size: 9px;
+  color: #cfe9a6;
+  text-shadow: 0 1px 0 #000, 0 0 2px #000;
+}
+
+/* ---- Floating combat numbers (damage / heal) ---- */
+.viewport-combat-numbers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.viewport-combat-numbers.hidden {
+  display: none;
+}
+
+.combat-number {
+  position: absolute;
+  transform: translate(-50%, 0);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 #000, 0 0 3px #000, 1px 0 0 #000, -1px 0 0 #000;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: combat-number-rise 900ms ease-out forwards;
+}
+
+.combat-number.damage {
+  color: #ff5a4d;
+}
+
+.combat-number.heal {
+  color: #7dff79;
+}
+
+@keyframes combat-number-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px) scale(0.85);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -30px) scale(1);
+  }
+}

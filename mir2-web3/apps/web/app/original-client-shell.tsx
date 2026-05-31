@@ -34,6 +34,7 @@ import {
   SelectOverlay,
 } from "./components/original-client-overlays";
 import { GameUiScene } from "./components/original-client-game-ui-scene";
+import { buildSkillBarSlots } from "./components/original-client-skill-bar";
 import type {
   BevyEntityRenderState,
   OriginalClientShellProps,
@@ -565,6 +566,16 @@ export function OriginalClientShell({
         return;
       }
 
+      const skillKeyMatch = /^F([1-8])$/.exec(event.key);
+      if (skillKeyMatch) {
+        const skill = buildSkillBarSlots(world.knownSkills)[Number(skillKeyMatch[1]) - 1];
+        if (skill) {
+          event.preventDefault();
+          onCastSkill(skill.key);
+        }
+        return;
+      }
+
       if (selectedEntity && !selectedEntity.dead) {
         if (event.key === " " || event.key === "Enter") {
           event.preventDefault();
@@ -600,7 +611,16 @@ export function OriginalClientShell({
 
     window.addEventListener("keydown", handleShortcutKey);
     return () => window.removeEventListener("keydown", handleShortcutKey);
-  }, [screen, selectedEntity, world.beltItems, onApproachTarget, onPrimaryTargetAction, onUseItem]);
+  }, [
+    screen,
+    selectedEntity,
+    world.beltItems,
+    world.knownSkills,
+    onApproachTarget,
+    onPrimaryTargetAction,
+    onUseItem,
+    onCastSkill,
+  ]);
 
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
     const latest = latestMoveInputRef.current;

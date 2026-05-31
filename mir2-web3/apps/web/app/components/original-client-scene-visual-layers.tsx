@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import type {
@@ -99,6 +99,8 @@ export function OriginalClientSceneVisualLayers({
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
 }) {
+  const floatingNumbers = useFloatingCombatNumbers(viewportEntitySprites);
+  const entityById = new Map(viewportEntitySprites.map((entry) => [entry.entity.objectId, entry]));
   return (
     <>
       <div className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}>
@@ -381,9 +383,99 @@ export function OriginalClientSceneVisualLayers({
           : null}
       </div>
 
+      <div className={`viewport-combat-numbers ${screen !== "game" ? "hidden" : ""}`}>
+        {floatingNumbers.map((number) => {
+          const entry = entityById.get(number.objectId);
+          if (!entry) return null;
+          const { entity } = entry;
+          const isPlayer = player?.objectId === entity.objectId;
+          const entityMotionOffset = isPlayer
+            ? EMPTY_VIEWPORT_OFFSET
+            : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
+          const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
+          const left =
+            VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + VIEWPORT_CELL_WIDTH / 2;
+          const top =
+            VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y - 24;
+          return (
+            <span
+              key={`combat-number-${number.id}`}
+              className={`combat-number ${number.kind}`}
+              style={{
+                left: `${left}px`,
+                top: `${top}px`,
+                zIndex: viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 96),
+              }}
+            >
+              {number.kind === "heal" ? "+" : "-"}
+              {number.amount}
+            </span>
+          );
+        })}
+      </div>
+
       <div className={`viewport-vignette ${screen === "game" && viewportMapSprites.floor.length ? "hidden" : ""}`} />
     </>
   );
+}
+
+type FloatingCombatNumber = {
+  id: number;
+  objectId: string;
+  amount: number;
+  kind: "damage" | "heal";
+};
+
+const FLOATING_COMBAT_NUMBER_DURATION_MS = 900;
+
+// Derive floating damage/heal numbers from per-entity HP deltas between world
+// snapshots (the server does not send discrete combat-text events). A decrease
+// is damage, an increase is a heal. Full-bar swings (respawn, max-HP
+// corrections, first sighting) are ignored so they do not flash as huge hits.
+function useFloatingCombatNumbers(entries: ViewportEntitySpriteEntry[]): FloatingCombatNumber[] {
+  const [numbers, setNumbers] = useState<FloatingCombatNumber[]>([]);
+  const lastHpRef = useRef<Map<string, number>>(new Map());
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    const lastHp = lastHpRef.current;
+    const seen = new Set<string>();
+    const spawned: FloatingCombatNumber[] = [];
+
+    for (const { entity } of entries) {
+      const hp = entity.hp;
+      if (typeof hp !== "number") continue;
+      seen.add(entity.objectId);
+      const previous = lastHp.get(entity.objectId);
+      lastHp.set(entity.objectId, hp);
+      if (previous === undefined) continue;
+      const delta = hp - previous;
+      if (delta === 0) continue;
+      if (entity.maxHp && Math.abs(delta) >= entity.maxHp) continue;
+      idRef.current += 1;
+      spawned.push({
+        id: idRef.current,
+        objectId: entity.objectId,
+        amount: Math.abs(delta),
+        kind: delta < 0 ? "damage" : "heal",
+      });
+    }
+
+    for (const key of Array.from(lastHp.keys())) {
+      if (!seen.has(key)) lastHp.delete(key);
+    }
+
+    if (!spawned.length) return;
+    setNumbers((current) => [...current, ...spawned]);
+    const timers = spawned.map((number) =>
+      window.setTimeout(() => {
+        setNumbers((current) => current.filter((entry) => entry.id !== number.id));
+      }, FLOATING_COMBAT_NUMBER_DURATION_MS),
+    );
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [entries]);
+
+  return numbers;
 }
 
 function entityDisplayName(entity: DisplayEntity): string {

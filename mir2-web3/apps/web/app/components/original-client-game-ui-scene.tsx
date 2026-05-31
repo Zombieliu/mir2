@@ -20,6 +20,8 @@ import { GameShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
 import { OptionsDialog } from "./original-client-options-dialog";
+import { SkillBar } from "./original-client-skill-bar";
+import { BuffBar } from "./original-client-buff-bar";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -322,6 +324,8 @@ export function GameUiScene({
         equipmentItems={world.equipmentItems}
         onToggle={() => setShowDuraPanel((current) => !current)}
       />
+      <BuffBar t={t} buffs={world.activeBuffs} />
+      <SkillBar t={t} knownSkills={world.knownSkills} onCastSkill={onCastSkill} />
       {showBelt ? (
         <BeltDialog
           t={t}
