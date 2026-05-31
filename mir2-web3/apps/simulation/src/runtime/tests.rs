@@ -5972,6 +5972,9 @@ fn player_status_effects_have_gameplay_effects() {
 fn red_poison_increases_player_incoming_damage_and_syncs_runtime_vitals() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Move out of the town safe zone so scheduled monster damage applies
+    // (safe-zone players are immune to combat damage).
+    set_player_position(&mut session, Point { x: 322, y: 277 });
     set_current_player_hp(&mut session, 100);
     let current_tick = runtime_tick(session.app.world());
     super::apply_player_red_poison(session.app.world_mut(), current_tick, 10);
