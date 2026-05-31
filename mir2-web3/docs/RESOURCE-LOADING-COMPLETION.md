@@ -71,10 +71,17 @@ by inputs this environment does not have. Keeping them separate:
 
 1. **Raw sound bytes** — 446 of 450 `.wav` are not committed (proprietary WeMade/Shanda client
    data; the public `Suprcode/Crystal` repo is C# *source*, not game assets). The export
-   pipeline is 100% ready and presence-aware: drop a `CRYSTAL_CLIENT_ROOT` client in and run
-   `npm run export:crystal-sounds && npm run generate:present-sounds` to close it. Until then the
-   system resolves only present sounds and degrades the rest gracefully (no 404s, telemetry).
-   *Fabricating placeholder audio was deliberately rejected — that is not real completeness.*
+   pipeline is 100% ready, presence-aware, and now **proven end-to-end** by
+   `npm run test:sound-export` (synthetic Crystal `Sound/` fixture exercising export → present
+   manifest → resolver → playback, incl. the `22→23` fallback and missing-asset semantics).
+   To close it on a machine with the Crystal `Debug/` folder on disk, follow
+   `docs/SOUND-IMPORT-RUNBOOK.md`:
+   `CRYSTAL_CLIENT_ROOT=<path>/Debug npm run export:crystal-sounds && npm run generate:present-sounds`.
+   Until then the system resolves only present sounds and degrades the rest gracefully (no 404s,
+   telemetry). *Fabricating placeholder audio was deliberately rejected — not real completeness.*
+   (The original Crystal client, including `Debug/Sound/` with `SoundList.lst`, was located in
+   the owner's Drive and the import path verified by decoding real file bytes; bulk pull into
+   this sandbox is blocked only by the network allowlist, hence the local runbook.)
 2. **Entity-atlas GPU breadth** — the single 4096² atlas is at its texture budget (2,631
    sprites: the full starter playable set). Covering *every* entity on the GPU path needs
    **multi-atlas runtime** support in the WebGL2 layer. Entity rendering is already
