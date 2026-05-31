@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
-use mir2_game_data::crystal_monster_by_name;
+use mir2_game_data::{crystal_magic_by_spell, crystal_monster_by_name};
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirDirection, MonsterInfo, ObjectAttackInfo, ObjectDiedInfo,
     ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
@@ -1610,6 +1610,18 @@ impl ZoneRuntime {
         if cast && now_ms < player.next_spell_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
         }
+        // Authoritatively recompute the magic damage from the player's stat block
+        // instead of trusting the gateway-supplied scalar. Value-identical to the
+        // session formula, so it only relocates authority; PoisonCloud keeps the
+        // supplied value because its bonus depends on inventory the zone lacks.
+        let damage = if player.combat_stats.has_authoritative_damage()
+            && !zone_magic_keeps_supplied_damage(spell)
+        {
+            zone_authoritative_magic_damage(spell, level, player.combat_stats.max_dc)
+                .unwrap_or(damage)
+        } else {
+            damage
+        };
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
             return self.player_cast_native_ground_magic(
                 session_id,
@@ -7184,6 +7196,29 @@ fn zone_resolve_player_physical_attack(
         0x0AC,
     );
     Some(base.saturating_sub(armour).max(0))
+}
+
+/// Authoritatively recompute a spell's damage from the Crystal magic template,
+/// so the zone — not the attacker's session — owns the magic damage number.
+///
+/// This mirrors the session's `zone_magic_attack_profile` formula exactly
+/// (`crystal_magic_damage_from_base` over the player's melee base, with the two
+/// pure-control spells dealing 0), so for every spell the recomputed value
+/// matches what the gateway previously supplied. Returns `None` for spells with
+/// no magic template so the caller falls back to the supplied value.
+fn zone_authoritative_magic_damage(spell: Spell, level: u8, base: i32) -> Option<i32> {
+    if matches!(spell, Spell::ElectricShock | Spell::Entrapment) {
+        return Some(0);
+    }
+    let template = crystal_magic_by_spell(&format!("{spell:?}"))?;
+    Some(crate::runtime::combat::crystal_magic_damage_from_base(&template, level, base.max(1)).max(1))
+}
+
+/// Spells whose final damage the gateway adjusts with inventory-dependent item
+/// bonuses (currently only PoisonCloud's amulet bonus), so the zone keeps the
+/// supplied value for them rather than recomputing the base formula.
+fn zone_magic_keeps_supplied_damage(spell: Spell) -> bool {
+    matches!(spell, Spell::PoisonCloud)
 }
 
 fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {

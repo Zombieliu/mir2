@@ -34,7 +34,7 @@ Legend: ✅ authoritative in the zone · 🟡 partial · ❌ still per-session /
 | 8 | Status effects on monsters (poison/freeze/stun/paralysis, controls) | ✅ | `tick_native_monster_damage_poisons`, `expire_native_monster_controls` |
 | 9 | Area/projectile/summon spells resolved in the zone | ✅ | `resolve_pending_native_projectiles`, ground-spell ticks |
 | 10 | Monster → player damage resolved in the zone | ✅ | melee and ranged roll the monster's authoritative Crystal damage (`zone_native_monster_player_attack_damage`), and `zone_player_native_incoming_damage` subtracts the player's authoritative armour — `Random(MinAC..=MaxAC)` for physical hits, `Random(MinMAC..=MaxMAC)` for magic hits (tagged on `PendingNativePlayerHit`), plus buff AC and the reduction buff. |
-| 11 | **Magic/skill damage value** rolled in the zone | 🟡 | spell power is still computed in the attacker's session and passed as a scalar; the zone applies it. Moving the spell-power formulas into the zone overlaps the combat/skills numbers workstream. |
+| 11 | **Magic/skill damage value** computed in the zone | ✅ | `player_cast_native_magic` recomputes the spell damage authoritatively via `zone_authoritative_magic_damage` (= `crystal_magic_damage_from_base` over the player's base) and ignores the gateway scalar when the player has an authoritative stat block. Value-identical to the old session formula, so authority moves without a balance change. Exception: PoisonCloud keeps the supplied value (its amulet bonus depends on inventory the zone lacks). Monster MAC subtraction on magic hits is the remaining defensive refinement. |
 | 12 | NPC state / quest mutation authority | ❌ | NPCs remain session-local (`npc_script.rs`) |
 | 13 | Single-writer tick correctness (in-process) | ✅ | monster think/attack windows (`next_ai_ready_at_ms`, `next_attack_ready_at_ms`) rate-limit actions, so N session-driven ticks per interval do not double-advance a monster |
 | 14 | Cross-process / sharded authority (one owner process per zone) | ❌ | `ZoneOwnerLeaseAuthority` + fencing-token scaffolding exists; RPC handoff is future work |
@@ -66,10 +66,10 @@ regressions; the 70 are pre-existing/environmental).
 
 These are the honest remaining gaps:
 
-1. **Magic/skill damage value authority** — move the per-spell power formula
-   (`crystal_magic_damage_from_base` and friends) into the zone so the zone,
-   not the session, produces the magic damage number, and subtract monster MAC.
-2. **NPC / quest authority** — promote NPC state mutation into the zone.
+1. **NPC / quest authority** — promote NPC state mutation into the zone.
+2. **Monster MAC on magic hits** — subtract the target monster's MAC when a
+   player's magic damages it (the defensive analog of the player-side AC/MAC),
+   across the scattered magic application paths (direct, projectile, ground).
 3. **Spawn-source authority** — let the zone own respawn timers from the map
    manifest instead of mirroring per-session spawns.
 4. **Cross-process distribution** — complete the `ZoneOwner` RPC handoff so a
@@ -77,4 +77,5 @@ These are the honest remaining gaps:
 
 Items 1–3 are individually bounded; item 4 is the large distributed-systems
 effort. The bidirectional combat-resolution authority (scorecard rows 5, 6, 10)
-was the single highest-leverage gap and is now closed and tested.
+plus magic-value authority (row 11) were the highest-leverage gaps and are now
+closed and tested.

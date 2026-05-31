@@ -8396,3 +8396,57 @@ fn zone_player_physical_armour_does_not_reduce_incoming_magic_damage() {
             if *object_id == 101 && *damage == 7
     )));
 }
+
+#[test]
+fn zone_recomputes_authoritative_magic_damage_ignoring_supplied_scalar() {
+    // With an authoritative stat block the zone recomputes the spell's damage
+    // from its Crystal formula and ignores the gateway-supplied scalar; without
+    // one it trusts the supplied value (legacy).
+    fn fireball_damage(stats: ZonePlayerCombatStats) -> i32 {
+        let mut zone = zone();
+        let first = session("first");
+        zone.handle(ZoneCommand::Join(join_with_combat_stats(
+            "first", 101, "Scout", 330, 270, stats,
+        )));
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: first.clone(),
+            monster: native_monster_spawn_with_defense(
+                9100,
+                334,
+                270,
+                1000,
+                ZoneMonsterDefense::default(),
+            ),
+            now_ms: 0,
+        });
+        zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: first.clone(),
+            object_id: 9100,
+            spell: Spell::FireBall,
+            direction: MirDirection::Right,
+            target: Point { x: 334, y: 270 },
+            cast: true,
+            level: 2,
+            damage: 1, // deliberately wrong; the authoritative path must ignore it
+            mp_cost: 7,
+            cooldown_ms: 500,
+            now_ms: 20,
+        });
+        damage_indicator_for(&zone.tick(20), 9100).expect("fireball should strike the monster")
+    }
+
+    // Legacy: no stat block -> the supplied scalar of 1 is applied verbatim.
+    assert_eq!(fireball_damage(ZonePlayerCombatStats::default()), 1);
+
+    // Authoritative: the zone recomputes FireBall damage from the player's base,
+    // far exceeding the bogus supplied 1.
+    let recomputed = fireball_damage(ZonePlayerCombatStats {
+        min_dc: 50,
+        max_dc: 50,
+        ..Default::default()
+    });
+    assert!(
+        recomputed > 1,
+        "zone must recompute magic damage from stats, got {recomputed}"
+    );
+}
