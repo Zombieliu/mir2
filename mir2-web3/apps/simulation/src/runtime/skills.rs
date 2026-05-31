@@ -2862,17 +2862,20 @@ fn schedule_damage_to_hostile_monster_entity(
         return;
     };
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    // Area / hostile-square spells are wizard/taoist magic, so they resolve
+    // against the target's magic armour (MAC).
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         caster_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
 }
 
