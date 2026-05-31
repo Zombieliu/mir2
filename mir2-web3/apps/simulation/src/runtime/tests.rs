@@ -117,9 +117,27 @@ fn attack_until_monster_dies(
     panic!("monster {object_id} should die within {max_rounds} rounds");
 }
 
+/// Deterministically destroy a monster and return its death packets. Used by
+/// fixtures that exercise on-death behaviour (explosions, drop suppression) on
+/// high-armour bosses that faithful starter melee cannot penetrate.
+fn force_kill_monster(session: &mut SimulationSession, object_id: u32) -> Vec<ServerPacket> {
+    let entity = entity_by_object_id(session.app.world(), object_id)
+        .unwrap_or_else(|| panic!("monster {object_id} entity for force kill"));
+    let current_tick = runtime_tick(session.app.world());
+    let mut packets = Vec::new();
+    super::damage_monster_entity(
+        session.app.world_mut(),
+        entity,
+        i32::MAX,
+        current_tick,
+        &mut packets,
+    );
+    packets
+}
+
 fn kill_field_wasp(session: &mut SimulationSession) {
     set_player_position(session, Point { x: 333, y: 267 });
-    let _ = attack_until_monster_dies(session, 3002, 5);
+    let _ = attack_until_monster_dies(session, 3002, 15);
 }
 
 fn add_repair_powder(session: &mut SimulationSession, quantity: u32) {
@@ -2507,7 +2525,7 @@ fn direct_attack_dead_monster_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 333, y: 267 });
-    let _ = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 5);
+    let _ = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 15);
 
     let packets = session.attack(super::FIELD_WASP_ID);
 
@@ -11560,7 +11578,7 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
         },
     );
     sync_visible_objects(&mut session);
-    let death_packets = attack_until_monster_dies(&mut session, yimoogi_object_id, 3);
+    let death_packets = force_kill_monster(&mut session, yimoogi_object_id);
 
     assert!(packet_has_object_died(&death_packets, yimoogi_object_id));
     assert!(!death_packets.iter().any(|packet| {
@@ -17637,7 +17655,7 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
     }
     sync_visible_objects(&mut session);
 
-    let death_packets = attack_until_monster_dies(&mut session, wolf_object_id, 4);
+    let death_packets = force_kill_monster(&mut session, wolf_object_id);
     assert!(packet_has_object_died(&death_packets, wolf_object_id));
     let before_explosion_hp = session.world_snapshot().player_hp.expect("player hp");
     let mut saw_explosion_struck = false;
@@ -22169,7 +22187,7 @@ fn defeating_visible_monster_emits_death_packets() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
 
-    let packets = attack_until_monster_dies(&mut session, 3002, 5);
+    let packets = attack_until_monster_dies(&mut session, 3002, 15);
 
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -22190,7 +22208,7 @@ fn dead_monster_does_not_block_attack_or_die_twice() {
     let monster = entity_by_object_id(session.app.world(), 3002).expect("monster entity");
     let monster_position = entity_position(session.app.world(), monster).expect("monster position");
 
-    let death_packets = attack_until_monster_dies(&mut session, 3002, 5);
+    let death_packets = attack_until_monster_dies(&mut session, 3002, 15);
     assert!(packet_has_object_died(&death_packets, 3002));
     let entry = session.app.world().entity(monster);
     assert!(entry.get::<MonsterAgent>().expect("monster agent").dead);
@@ -27024,7 +27042,7 @@ fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
     );
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
-    let packets = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 5);
+    let packets = attack_until_monster_dies(&mut session, super::FIELD_WASP_ID, 15);
     let snapshot = session.world_snapshot();
     let quest = super::guide_quest_template();
 
@@ -29085,7 +29103,7 @@ fn dropped_item_can_be_picked_up_into_inventory() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 337, y: 272 });
-    let _ = attack_until_monster_dies(&mut session, 3001, 6);
+    let _ = attack_until_monster_dies(&mut session, 3001, 15);
 
     let after_kill = session.world_snapshot();
     let drop = after_kill
@@ -29196,7 +29214,7 @@ fn crystal_pickup_packet_collects_ground_drop_on_current_cell() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_player_position(&mut session, Point { x: 337, y: 272 });
-    let _ = attack_until_monster_dies(&mut session, 3001, 6);
+    let _ = attack_until_monster_dies(&mut session, 3001, 15);
 
     let after_kill = session.world_snapshot();
     let drop = after_kill
@@ -46891,7 +46909,7 @@ fn monster_respawns_after_delay() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
-    let _ = attack_until_monster_dies(&mut session, 3002, 5);
+    let _ = attack_until_monster_dies(&mut session, 3002, 15);
 
     for _ in 0..12 {
         let _ = session.tick();
@@ -46913,7 +46931,7 @@ fn visible_monster_respawn_emits_revive_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     session.move_to(Point { x: 333, y: 267 });
-    let _ = attack_until_monster_dies(&mut session, 3002, 5);
+    let _ = attack_until_monster_dies(&mut session, 3002, 15);
 
     let mut respawn_packets = Vec::new();
     for _ in 0..12 {
@@ -53877,4 +53895,157 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
             && mail.items == vec!["dagger".to_string()]
             && mail.item_states_json.len() == 1
     }));
+}
+
+// --- Crystal combat pipeline integration coverage -------------------------
+
+fn push_player_stat_buff(session: &mut SimulationSession, key: &str, stat: u8, value: i32) {
+    let tick = runtime_tick(session.app.world());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(super::BuffState {
+            key: key.to_string(),
+            name: key.to_string(),
+            description: String::new(),
+            expires_at_tick: tick + 100_000,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![UserItemStat { stat, value }],
+        });
+}
+
+fn set_monster_hp(session: &mut SimulationSession, entity: Entity, hp: i32) {
+    session
+        .app
+        .world_mut()
+        .entity_mut(entity)
+        .insert(MonsterVitals { hp, max_hp: hp });
+}
+
+fn attack_collect(session: &mut SimulationSession, object_id: u32, rounds: usize) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
+    for _ in 0..rounds {
+        packets.extend(session.attack(object_id));
+        packets.extend(session.tick());
+    }
+    packets
+}
+
+#[test]
+fn crystal_high_armour_monster_fully_blocks_starter_melee() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let object_id = 91_001_u32;
+    let wolf = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "FrozenWarewolf",
+        Point { x: origin.x + 1, y: origin.y },
+        MirDirection::Left,
+        true,
+    );
+    set_monster_hp(&mut session, wolf, 400);
+    sync_visible_objects(&mut session);
+
+    let hp_before = session.app.world().entity(wolf).get::<MonsterVitals>().expect("vitals").hp;
+    let packets = attack_collect(&mut session, object_id, 6);
+    let hp_after = session.app.world().entity(wolf).get::<MonsterVitals>().expect("vitals").hp;
+
+    // FrozenWarewolf armour (AC 28-50) dwarfs starter melee (~8), so every blow
+    // is fully absorbed and reported as a miss.
+    assert_eq!(hp_after, hp_before, "high armour must fully block weak melee");
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::DamageIndicator { object_id: id, damage_type: 1, .. } if *id == object_id
+    )));
+}
+
+#[test]
+fn crystal_starter_melee_damages_unarmoured_monster() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    let object_id = 91_005_u32;
+    let scarecrow = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: origin.x + 1, y: origin.y },
+        MirDirection::Left,
+        true,
+    );
+    set_monster_hp(&mut session, scarecrow, 500);
+    sync_visible_objects(&mut session);
+
+    let hp_before = session.app.world().entity(scarecrow).get::<MonsterVitals>().expect("vitals").hp;
+    let _ = attack_collect(&mut session, object_id, 3);
+    let hp_after = session.app.world().entity(scarecrow).get::<MonsterVitals>().expect("vitals").hp;
+
+    // Scarecrow has zero armour, so the rolled DC lands in full each hit.
+    assert!(hp_after < hp_before, "unarmoured monster should take melee damage");
+}
+
+#[test]
+fn crystal_poison_attack_gear_applies_green_poison_on_hit() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    push_player_stat_buff(&mut session, "test-poison-gear", super::CRYSTAL_STAT_POISON_ATTACK, 6);
+    let object_id = 91_002_u32;
+    let scarecrow = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: origin.x + 1, y: origin.y },
+        MirDirection::Left,
+        true,
+    );
+    set_monster_hp(&mut session, scarecrow, 2_000);
+    sync_visible_objects(&mut session);
+
+    let packets = attack_collect(&mut session, object_id, 12);
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectPoisoned { object_id: id, poison } if *id == object_id && (*poison & 1) != 0
+        )),
+        "poison-attack gear should inflict Green poison on a landed melee hit"
+    );
+}
+
+#[test]
+fn crystal_critical_rate_gear_emits_critical_effect() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    push_player_stat_buff(&mut session, "test-crit-rate", super::CRYSTAL_STAT_CRITICAL_RATE, 18);
+    push_player_stat_buff(&mut session, "test-crit-dmg", super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
+    let object_id = 91_003_u32;
+    let scarecrow = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: origin.x + 1, y: origin.y },
+        MirDirection::Left,
+        true,
+    );
+    set_monster_hp(&mut session, scarecrow, 5_000);
+    sync_visible_objects(&mut session);
+
+    let packets = attack_collect(&mut session, object_id, 12);
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info } if info.object_id == object_id && info.effect == 11
+        )),
+        "critical-rate gear should emit the Critical object effect"
+    );
 }

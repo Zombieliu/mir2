@@ -34,7 +34,6 @@ use super::items::{
     user_item_rental_information, ItemState,
 };
 use super::map::{current_map_disallows_mount, current_map_requires_bridle};
-use super::monsters::deterministic_roll;
 use super::npc::{
     active_crystal_storage_service, crystal_npc_script_item_types,
     current_crystal_npc_service_in_range, ActiveNpcServiceState,
@@ -704,9 +703,11 @@ pub(super) fn equipment_can_lose_durability(item: &EquipmentState) -> bool {
     equipment_uses_durability(item) && item.durability_current > 0
 }
 
-pub(super) fn crystal_weapon_durability_loss(current_tick: u64) -> u16 {
-    u16::try_from(deterministic_roll(current_tick, 0, 0, 4) + 1)
-        .expect("weapon durability loss should fit u16")
+pub(super) fn crystal_weapon_durability_loss(_current_tick: u64) -> u16 {
+    // Crystal `HumanObject.DamageWeapon` removes exactly one point of durability
+    // per landed swing. (The previous 1-4 roll degraded starter weapons ~2.5x too
+    // fast, shattering them mid-fight once damage became weapon-dependent.)
+    1
 }
 
 pub(super) fn crystal_worn_durability_loss(_current_tick: u64) -> u16 {

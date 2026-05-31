@@ -1,5 +1,6 @@
 mod buffs;
 mod combat;
+mod combat_engine;
 mod components;
 mod crystal_compat;
 mod drops;
