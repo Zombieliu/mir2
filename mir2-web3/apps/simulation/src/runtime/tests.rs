@@ -1082,6 +1082,30 @@ fn set_current_player_mp(session: &mut SimulationSession, mp: i32) {
         .mp = mp;
 }
 
+/// Register an account directly in the store, seeded with the default character
+/// at index 0 and password "demo". Login no longer auto-creates accounts, so
+/// persistence tests that previously relied on login-as-register must register
+/// up front; seeding the default character keeps `StartGame { character_index: 0 }`
+/// working exactly as it did under the old auto-create behaviour.
+fn register_test_account(session: &SimulationSession, account_id: &str) {
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let mut store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store.accounts.insert(
+        account_id.to_string(),
+        crate::config::AccountRecord::new(config.default_character.clone()),
+    );
+    drop(store);
+    let _ = config.save_account_store_account(account_id);
+}
+
 fn add_rental_mail_target(config: &SimulationConfig, name: &str, index: i32) {
     let character = CharacterRecord {
         index,
@@ -2097,6 +2121,8 @@ fn file_account_store_survives_fresh_config_reload() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut first = SimulationSession::new(config);
+    // Login no longer auto-creates accounts; register "disk" first.
+    register_test_account(&first, "disk");
     let _ = first.handle_packet(ClientPacket::Login {
         account_id: "disk".to_string(),
         password: "demo".to_string(),
@@ -34082,6 +34108,7 @@ fn visible_player_config_shapes_feed_world_sprite_snapshot() {
 #[test]
 fn item_roll_fields_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "roll-save");
     let packets = session.handle_packet(ClientPacket::Login {
         account_id: "roll-save".to_string(),
         password: "demo".to_string(),
@@ -34424,6 +34451,7 @@ fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
 #[test]
 fn storage_items_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "storage-save");
     let packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-save".to_string(),
         password: "demo".to_string(),
@@ -35817,6 +35845,7 @@ fn storage_password_can_exist_without_forcing_lock_when_config_disabled() {
 #[test]
 fn storage_password_set_unlock_remove_updates_crystal_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "storage-password");
     let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-password".to_string(),
         password: "demo".to_string(),
