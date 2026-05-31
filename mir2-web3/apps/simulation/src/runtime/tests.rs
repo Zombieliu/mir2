@@ -124,6 +124,27 @@ fn attack_until_monster_dies(
     panic!("monster {object_id} should die within {max_rounds} rounds");
 }
 
+/// Grants the player a large flat attack bonus. Death-mechanic tests spawn high-AC monsters
+/// (FrozenWarewolf AC 28-50, Yimoogi AC 40) that an unequipped test character cannot scratch once
+/// Crystal armour mitigation is in play; this lets base melee overpower the armour roll so the
+/// monster actually dies, isolating the post-death behaviour under test.
+fn grant_player_attack_bonus(session: &mut SimulationSession, bonus: i32) {
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "test-attack-bonus".to_string(),
+            name: "Test Attack".to_string(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: bonus,
+            defence_bonus: 0,
+            stats: Vec::new(),
+        });
+}
+
 fn kill_field_wasp(session: &mut SimulationSession) {
     set_player_position(session, Point { x: 333, y: 267 });
     let _ = attack_until_monster_dies(session, 3002, 5);
@@ -4451,6 +4472,116 @@ fn frozen_poison_holds_monster_from_chasing() {
     assert!(
         tile_distance(&after, &player_origin) < tile_distance(&start, &player_origin),
         "clearing the freeze lets the monster step toward the player (was {start:?}, now {after:?})"
+    );
+}
+
+#[test]
+fn crystal_monster_armour_subtracts_its_ac_from_player_melee() {
+    // Crystal `MonsterObject.Attacked` mitigates incoming player damage by the target's armour roll
+    // (`GetDefencePower(MinAC, MaxAC)`). Two adjacent targets take the same character's swing: a
+    // literal-named dummy (absent from the manifest, so AC 0) is hit raw, while OmaFighter (fixed
+    // AC 3) soaks exactly 3 off the top. Agility is pinned to 0 so the accuracy roll always lands.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let current_tick = runtime_tick(session.app.world());
+    let passive_agent = |origin: Point| MonsterAgent {
+        image: 43,
+        dead: false,
+        patrol_origin: origin,
+        ai: 0,
+        disposition: WorldEntityDisposition::Neutral,
+        hostile_to_player: false,
+        tracking_player: false,
+        view_range: 7,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: current_tick + 1_000,
+        next_attack_tick: current_tick + 1_000,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: current_tick + 1_000,
+    };
+
+    let raw_id = 70_401_u32;
+    let raw_pos = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let raw = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(raw_id),
+            DisplayName::literal("RawArmourDummy"),
+            Position(raw_pos.clone()),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: 100_000,
+                max_hp: 100_000,
+            },
+            MonsterCombatStats { agility: 0 },
+            passive_agent(raw_pos.clone()),
+        ))
+        .id();
+
+    let armoured_id = 70_402_u32;
+    let armoured_pos = Point {
+        x: player_origin.x - 1,
+        y: player_origin.y,
+    };
+    let armoured = spawn_crystal_monster_for_test(
+        &mut session,
+        armoured_id,
+        "OmaFighter",
+        armoured_pos.clone(),
+        MirDirection::Right,
+        false,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(armoured);
+        entry.insert((
+            MonsterVitals {
+                hp: 100_000,
+                max_hp: 100_000,
+            },
+            MonsterCombatStats { agility: 0 },
+            passive_agent(armoured_pos.clone()),
+        ));
+    }
+    sync_visible_objects(&mut session);
+
+    let monster_hp = |session: &SimulationSession, entity: Entity| {
+        session
+            .app
+            .world()
+            .entity(entity)
+            .get::<MonsterVitals>()
+            .expect("monster vitals")
+            .hp
+    };
+
+    let raw_before = monster_hp(&session, raw);
+    session.attack(raw_id);
+    session.tick();
+    let raw_drop = raw_before - monster_hp(&session, raw);
+
+    let armoured_before = monster_hp(&session, armoured);
+    session.attack(armoured_id);
+    session.tick();
+    let armoured_drop = armoured_before - monster_hp(&session, armoured);
+
+    assert!(raw_drop > 0, "raw dummy should take the full swing");
+    assert!(armoured_drop > 0, "OmaFighter should still take net damage");
+    assert_eq!(
+        raw_drop - armoured_drop,
+        3,
+        "OmaFighter AC 3 should soak exactly 3 off the swing (raw {raw_drop}, armoured {armoured_drop})"
     );
 }
 
@@ -12682,6 +12813,8 @@ fn yimoogi_suppresses_death_drops_while_sister_is_alive() {
             y: yimoogi_position.y,
         },
     );
+    // Yimoogi carries AC 40; arm the test character so base melee overpowers the armour roll.
+    grant_player_attack_bonus(&mut session, 80);
     sync_visible_objects(&mut session);
     let death_packets = attack_until_monster_dies(&mut session, yimoogi_object_id, 3);
 
@@ -18782,6 +18915,8 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
         agent.next_attack_tick = current_tick + 100;
         agent.next_move_tick = current_tick + 100;
     }
+    // FrozenWarewolf carries AC 28-50; arm the test character so base melee overpowers the armour.
+    grant_player_attack_bonus(&mut session, 80);
     sync_visible_objects(&mut session);
 
     let death_packets = attack_until_monster_dies(&mut session, wolf_object_id, 4);

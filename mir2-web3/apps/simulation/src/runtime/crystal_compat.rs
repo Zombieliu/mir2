@@ -18,6 +18,9 @@ pub(super) const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
 pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_DC: u64 = 0xD0_0000;
 pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_MC: u64 = 0xC0_0000;
 pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_SC: u64 = 0x50_0000;
+/// Decorrelates the monster armour roll (`GetDefencePower`) from the accuracy/agility hit roll, which
+/// shares the `(tick, attacker_id, target_index)` seed.
+pub(super) const CRYSTAL_MONSTER_ARMOUR_ROLL_SALT: usize = 0x47_0000;
 pub(super) const MONSTER_REGEN_INTERVAL_TICKS: u64 = 10;
 /// Crystal heals `(MaxHP * 0.022) + 1` each regen pulse (2.2 per-mille of maximum HP, plus one).
 pub(super) const MONSTER_REGEN_PERMILLE: i32 = 22;

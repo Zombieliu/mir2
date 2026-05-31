@@ -341,6 +341,77 @@ fn crystal_player_hit_roll_succeeds(
     roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)
 }
 
+/// True when the monster carries the given Crystal `PoisonType` bit (e.g. Red / Stun).
+fn monster_has_poison_bit(world: &World, monster_entity: Entity, bit: u16) -> bool {
+    world
+        .entity(monster_entity)
+        .get::<MonsterPoisonState>()
+        .map(|poison| poison.poison & bit != 0)
+        .unwrap_or(false)
+}
+
+/// Crystal `MapObject.GetArmour(DefenceType.AC*)` → `GetDefencePower(MinAC, MaxAC)` =
+/// `Random.Next(MinAC, MaxAC + 1)`: the physical armour roll a monster soaks an incoming hit with.
+/// A monster spawned with a literal (non-manifest) name carries no AC, so test fixtures using
+/// `DisplayName::literal` are unaffected. A `Red` poison halves the roll (Crystal `ArmourRate -= 0.5`).
+fn crystal_monster_attacked_armour(
+    world: &World,
+    monster_entity: Entity,
+    attacker_id: u32,
+    current_tick: u64,
+) -> i32 {
+    let Some(name) = entity_name(world, monster_entity) else {
+        return 0;
+    };
+    let Some(template) = crystal_monster_by_name(&name) else {
+        return 0;
+    };
+    let min_ac = template.min_ac.max(0);
+    let max_ac = template.max_ac.max(min_ac);
+    if max_ac <= 0 {
+        return 0;
+    }
+    let span = u64::try_from(max_ac - min_ac + 1).unwrap_or(1);
+    let roll = deterministic_roll(
+        current_tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        (monster_entity.index() as usize).wrapping_add(CRYSTAL_MONSTER_ARMOUR_ROLL_SALT),
+        span,
+    );
+    let armour = min_ac + i32::try_from(roll).unwrap_or(0);
+    if monster_has_poison_bit(world, monster_entity, CRYSTAL_POISON_RED) {
+        (armour as f32 * 0.5) as i32
+    } else {
+        armour
+    }
+}
+
+/// Crystal `MonsterObject.Attacked` damage resolution once the blow has landed: scales the incoming
+/// damage by a `Stun` poison's `DamageRate` (+0.5 → ×1.5), then subtracts the monster's armour roll.
+/// `armour >= damage` is a full block (Crystal returns 0 with a `DamageType.Miss`), surfaced here as
+/// `None`. Only player attacks are mitigated — monster-vs-monster damage is returned unchanged, in
+/// step with the accuracy/agility hit roll, which is also player-only.
+fn crystal_resolve_player_attack_on_monster(
+    world: &World,
+    monster_entity: Entity,
+    attacker_id: u32,
+    raw_damage: i32,
+    current_tick: u64,
+) -> Option<i32> {
+    if Some(attacker_id) != current_player_object_id(world) {
+        return Some(raw_damage);
+    }
+    let mut damage = raw_damage;
+    if monster_has_poison_bit(world, monster_entity, CRYSTAL_POISON_STUN) {
+        damage = (damage as f32 * 1.5) as i32;
+    }
+    let armour = crystal_monster_attacked_armour(world, monster_entity, attacker_id, current_tick);
+    if armour >= damage {
+        return None;
+    }
+    Some((damage - armour).max(1))
+}
+
 fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
     for (spell_name, spell) in [
         ("Fencing", Spell::Fencing),
@@ -1511,6 +1582,31 @@ pub(super) fn resolve_pending_combat_actions(
                     }
                     continue;
                 }
+                // Crystal `MonsterObject.Attacked`: subtract the target's armour roll (AC, softened
+                // by Red / amplified by Stun); a fully-absorbed blow lands as a 0-damage miss.
+                let resolved_damage = if action.damage > 0 {
+                    match crystal_resolve_player_attack_on_monster(
+                        world,
+                        target_entity,
+                        action.attacker_id,
+                        action.damage,
+                        current_tick,
+                    ) {
+                        Some(net) => net,
+                        None => {
+                            if let Some(object_id) = entity_object_id(world, target_entity) {
+                                packets.push(ServerPacket::DamageIndicator {
+                                    damage: 0,
+                                    damage_type: 1,
+                                    object_id,
+                                });
+                            }
+                            continue;
+                        }
+                    }
+                } else {
+                    action.damage
+                };
                 if let Some(packet) = action.due_packet {
                     packets.push(packet);
                 }
@@ -1525,7 +1621,7 @@ pub(super) fn resolve_pending_combat_actions(
                 let monster_dead = damage_monster_entity(
                     world,
                     target_entity,
-                    action.damage,
+                    resolved_damage,
                     current_tick,
                     packets,
                 );
