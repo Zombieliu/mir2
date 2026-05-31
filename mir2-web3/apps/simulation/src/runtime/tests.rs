@@ -13779,12 +13779,11 @@ fn general_meow_meow_close_slam_branch_uses_triple_dc() {
         y: player_origin.y,
     };
     let general_object_id = 98_969_u32;
+    // The triple-DC slam out-damages the seed HP pool and would one-shot the
+    // player, capping the observed damage at the pool. Give HP headroom so the
+    // exact armour-mitigated slam damage is measurable.
+    set_current_player_hp(&mut session, 5_000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_attack_damage("GeneralMeowMeow") * 3
-            - total_defence_bonus(session.app.world()))
-        .max(1)
-    };
     set_player_position(&mut session, player_origin);
     let general = spawn_crystal_monster_for_test(
         &mut session,
@@ -13831,10 +13830,11 @@ fn general_meow_meow_close_slam_branch_uses_triple_dc() {
         packet,
         ServerPacket::Struck { info } if info.attacker_id == general_object_id
     )));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage.min(before_hp - 1),
-        "GeneralMeowMeow slam branch should use triple imported Crystal DC damage after defence"
+    let taken = before_hp - session.world_snapshot().player_hp.expect("player hp");
+    assert_mitigated_by_armour(
+        &session,
+        taken,
+        super::crystal_monster_attack_damage("GeneralMeowMeow") * 3,
     );
 }
 
@@ -15211,6 +15211,10 @@ fn armadillo_type_one_branch_uses_three_half_dc_hits() {
         y: player_origin.y,
     };
     let armadillo_object_id = 98_955_u32;
+    // The half-DC hits are individually lethal to the seed HP pool, so the player
+    // dies mid-combo and later strikes never land. Give HP headroom so all three
+    // hits register.
+    set_current_player_hp(&mut session, 5_000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     set_player_position(&mut session, player_origin.clone());
     let armadillo = spawn_crystal_monster_for_test(
@@ -18406,6 +18410,10 @@ fn snow_yeti_adjacent_branch_uses_crystal_double_hit() {
         y: player_origin.y,
     };
     let yeti_object_id = 98_940_u32;
+    // The double-hit blows are individually lethal to the seed HP pool, so the
+    // player dies after the first and the second never lands. Give HP headroom so
+    // both hits register.
+    set_current_player_hp(&mut session, 5_000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     set_player_position(&mut session, player_origin);
     let yeti = spawn_crystal_monster_for_test(
