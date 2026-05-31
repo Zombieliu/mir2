@@ -63,7 +63,10 @@ for (const fileName of NO_MINI_MAPS) {
 const neededMiniMaps = [
   ...new Set(maps.map((map) => Number(map.mini_map)).filter((index) => Number.isFinite(index) && index > 0)),
 ].sort((left, right) => left - right);
-const missing = neededMiniMaps.filter((index) => !exportedByIndex.has(index));
+const sourceFrameCount = Number(mmapMeta.count ?? mmapMeta.frames?.length ?? 0);
+const sourceUnavailable = neededMiniMaps.filter((index) => !exportedByIndex.has(index) && index >= sourceFrameCount);
+const sourceUnavailableSet = new Set(sourceUnavailable);
+const missing = neededMiniMaps.filter((index) => !exportedByIndex.has(index) && !sourceUnavailableSet.has(index));
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -71,6 +74,8 @@ const summary = {
   noMiniMaps: NO_MINI_MAPS,
   neededMiniMapCount: neededMiniMaps.length,
   exportedMiniMapCount: mmapMeta.frames?.length ?? 0,
+  sourceFrameCount,
+  sourceUnavailableMiniMapIndices: sourceUnavailable,
   missingMiniMapIndices: missing,
   failures,
 };
@@ -82,6 +87,11 @@ console.log(`Wrote ${OUTPUT_PATH}`);
 
 if (missing.length > 0) {
   console.warn(`Warning: ${missing.length} Crystal mini-map indices are not exported: ${missing.join(", ")}`);
+}
+if (sourceUnavailable.length > 0) {
+  console.warn(
+    `Warning: ${sourceUnavailable.length} Crystal mini-map indices are beyond source mmap.Lib frame range: ${sourceUnavailable.join(", ")}`,
+  );
 }
 
 if (failures.length > 0) {

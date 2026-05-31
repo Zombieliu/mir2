@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
+const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
 const DEFAULT_MANIFEST = path.resolve(
   REPO_ROOT,
@@ -23,6 +24,7 @@ const concurrency = numberArg(args.concurrency ?? process.env.MIR2_R2_UPLOAD_CON
 const includeReleaseManifest = booleanArg(args.includeReleaseManifest ?? process.env.MIR2_R2_UPLOAD_RELEASE_MANIFEST, true);
 const remote = booleanArg(args.remote ?? process.env.MIR2_R2_REMOTE, true);
 const maxAttempts = numberArg(args.maxAttempts ?? process.env.MIR2_R2_UPLOAD_ATTEMPTS, 3);
+const progressEvery = numberArg(args.progressEvery ?? process.env.MIR2_R2_UPLOAD_PROGRESS_EVERY, 25);
 const verifyOriginalAssets = booleanArg(
   args.verifyOriginalAssets ?? process.env.MIR2_R2_VERIFY_ORIGINAL_ASSETS,
   false,
@@ -155,7 +157,7 @@ async function main() {
   await runPool(uploads, concurrency, async (upload) => {
     await uploadWithRetry(upload);
     completed += 1;
-    if (completed % 25 === 0 || completed === uploads.length) {
+    if (completed % progressEvery === 0 || completed === uploads.length) {
       console.log(`[mir2-r2] uploaded ${completed}/${uploads.length}`);
     }
   });
@@ -222,23 +224,31 @@ async function buildUploadList(release) {
 
   const uploads = [];
   for (const file of release.files) {
-    if (!file.stagePath || !file.objectKey) {
+    const relativePath = normalizeReleaseFileRelativePath(file);
+    const stagePath = file.stagePath ?? path.join(WEB_ROOT, "public", relativePath);
+    const objectKey = file.objectKey ?? joinObjectKey(release.objectPrefix, relativePath);
+    if (!stagePath || !objectKey) {
       throw new Error(`Invalid release file entry: ${JSON.stringify(file)}`);
     }
-    const stats = await fs.stat(file.stagePath);
-    if (!stats.isFile()) throw new Error(`Not a file: ${file.stagePath}`);
+    const stats = await fs.stat(stagePath);
+    if (!stats.isFile()) throw new Error(`Not a file: ${stagePath}`);
     uploads.push({
-      path: file.path,
-      relativePath: file.relativePath,
-      stagePath: file.stagePath,
-      objectKey: file.objectKey,
+      path: file.path ?? `/${relativePath}`,
+      relativePath,
+      stagePath,
+      objectKey,
       size: stats.size,
-      contentType: file.contentType || "application/octet-stream",
+      contentType: file.contentType ?? file.c ?? "application/octet-stream",
       cacheControl: file.cacheControl || "public, max-age=31536000, immutable",
-      sources: file.sources ?? [],
+      sources: file.sources ?? file.src ?? [],
     });
   }
   return uploads;
+}
+
+function normalizeReleaseFileRelativePath(file) {
+  const value = file.relativePath ?? file.p ?? file.path ?? "";
+  return String(value).replace(/^\/+/, "");
 }
 
 async function uploadWithRetry(upload) {

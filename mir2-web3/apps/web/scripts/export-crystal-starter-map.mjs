@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
@@ -24,6 +24,16 @@ const OUTPUT_JSON_PATH = path.resolve(
   "generated",
   "crystal_starter_map_region.json",
 );
+const WHOLEMAP_SUMMARY_PATH = path.resolve(
+  WORKSPACE_ROOT,
+  "..",
+  "..",
+  "docs",
+  "generated",
+  "map",
+  "wholemap",
+  "_grand-summary.json",
+);
 const DEFAULT_CLIENT_ROOT = "E:\\mir2\\Crystal\\Build\\Client\\Debug";
 
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -40,6 +50,11 @@ async function main() {
   const clientRoot = args.clientRoot ?? args._[0] ?? DEFAULT_CLIENT_ROOT;
   if (args.frames.length > 0) {
     await exportExplicitFrames(clientRoot, args.frames);
+    return;
+  }
+
+  if (args.allMaps) {
+    await exportAllMaps(clientRoot, { overwrite: Boolean(args.overwrite) });
     return;
   }
 
@@ -350,6 +365,172 @@ async function exportFullMap(clientRoot, mapFileNameArg, options = {}) {
   );
 }
 
+async function exportAllMaps(clientRoot, options = {}) {
+  const mapDir = path.join(clientRoot, "Map");
+  const dataDir = path.join(clientRoot, "Data");
+  const mapFiles = (await listFilesRecursive(mapDir))
+    .filter((filePath) => /\.map$/i.test(filePath))
+    .sort((left, right) => left.localeCompare(right, "en"));
+  const wanted = new Map();
+  const maps = [];
+  const skippedMaps = [];
+  const warnings = new Set();
+
+  for (const mapPath of mapFiles) {
+    const relativePath = path.relative(mapDir, mapPath).split(path.sep).join("/");
+    const mapWarnings = new Set();
+    const before = snapshotWantedCounts(wanted);
+    let cellsScanned = 0;
+
+    function want(layer) {
+      if (!layer) return;
+      let frames = wanted.get(layer.libraryKey);
+      if (!frames) {
+        frames = new Set();
+        wanted.set(layer.libraryKey, frames);
+      }
+      for (const frameIndex of layer.frames) {
+        if (Number.isInteger(frameIndex) && frameIndex >= 0) frames.add(frameIndex);
+      }
+    }
+
+    function safeLayer(fn, cell) {
+      try {
+        return fn(cell);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        mapWarnings.add(message);
+        warnings.add(`${relativePath}: ${message}`);
+        return null;
+      }
+    }
+
+    try {
+      forEachMapCell(mapPath, ({ x, y, cell }) => {
+        cellsScanned += 1;
+        if (x % 2 === 0 && y % 2 === 0) {
+          want(safeLayer(backLayerForCell, cell));
+        }
+        want(safeLayer(middleLayerForCell, cell));
+        want(safeLayer(frontLayerForCell, cell));
+        want(safeLayer(tileAnimationLayerForCell, cell));
+      });
+    } catch (error) {
+      skippedMaps.push({
+        path: relativePath,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      continue;
+    }
+
+    const after = snapshotWantedCounts(wanted);
+    maps.push({
+      path: relativePath,
+      fileName: relativePath.replace(/\.map$/i, ""),
+      cellsScanned,
+      librariesReferenced: countMapLibrariesDelta(before.libraries, wanted),
+      framesReferenced: after.frames - before.frames,
+      warnings: [...mapWarnings],
+    });
+  }
+
+  const summary = {
+    generatedAt: new Date().toISOString(),
+    ok: skippedMaps.length === 0,
+    mode: "all-maps",
+    clientRoot,
+    mapDir,
+    outputDir: PUBLIC_DIR,
+    mapCount: maps.length,
+    mapFileCount: mapFiles.length,
+    skippedMaps,
+    maps,
+    warnings: [...warnings],
+    ...snapshotWantedCounts(wanted),
+  };
+
+  if (skippedMaps.length === 0) {
+    Object.assign(summary, await exportWantedMapFrames(dataDir, wanted, options));
+  }
+
+  await mkdir(path.dirname(WHOLEMAP_SUMMARY_PATH), { recursive: true });
+  await writeFile(WHOLEMAP_SUMMARY_PATH, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  console.log(JSON.stringify(summary, null, 2));
+
+  if (skippedMaps.length > 0) {
+    throw new Error(`Failed to parse ${skippedMaps.length}/${mapFiles.length} map(s); see ${WHOLEMAP_SUMMARY_PATH}`);
+  }
+}
+
+async function exportWantedMapFrames(dataDir, wanted, options = {}) {
+  const overwrite = Boolean(options.overwrite);
+  const CONCURRENCY = 64;
+  let framesExported = 0;
+  let framesSkipped = 0;
+  let alreadyPresent = 0;
+  const warnings = [];
+
+  await mkdir(PUBLIC_DIR, { recursive: true });
+
+  for (const [libraryKey, frameSet] of [...wanted.entries()].sort(([left], [right]) =>
+    left.localeCompare(right, "en"),
+  )) {
+    const libraryPath = path.join(dataDir, "Map", ...libraryKey.split("/")) + ".Lib";
+    let library = null;
+    try {
+      library = parseLibraryLazy(libraryPath);
+    } catch (error) {
+      warnings.push(`library ${libraryKey}: ${error instanceof Error ? error.message : String(error)}`);
+      continue;
+    }
+
+    const normalizedKey = normalizeLibraryName(libraryKey);
+    const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
+    await mkdir(exportDir, { recursive: true });
+
+    const indices = [...frameSet].sort((a, b) => a - b);
+    for (let start = 0; start < indices.length; start += CONCURRENCY) {
+      const batch = indices.slice(start, start + CONCURRENCY);
+      await Promise.all(
+        batch.map(async (frameIndex) => {
+          const pngPath = path.join(exportDir, `${frameIndex}.png`);
+          if (!overwrite && existsSync(pngPath)) {
+            alreadyPresent += 1;
+            return;
+          }
+          const frame = libraryFrame(library, frameIndex);
+          if (!frame || frame.width <= 0 || frame.height <= 0) {
+            framesSkipped += 1;
+            return;
+          }
+          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
+          framesExported += 1;
+        }),
+      );
+    }
+
+    library = null;
+  }
+
+  return {
+    framesExported,
+    alreadyPresent,
+    framesSkipped,
+    exportWarnings: warnings,
+  };
+}
+
+function snapshotWantedCounts(wanted) {
+  let frames = 0;
+  for (const frameSet of wanted.values()) frames += frameSet.size;
+  return { libraries: wanted.size, frames };
+}
+
+function countMapLibrariesDelta(previousLibraryCount, wanted) {
+  return Math.max(0, wanted.size - previousLibraryCount);
+}
+
 function exportBoundsForScene(sceneView) {
   const play = playBoundsForScene(sceneView);
   return {
@@ -505,6 +686,11 @@ function resolveDrawMode(layer, library) {
 }
 
 function mapLibraryKeyForIndex(index) {
+  const wemadeMir3 = mapMir3LibraryKey(index, 200, "WemadeMir3");
+  if (wemadeMir3) return wemadeMir3;
+  const shandaMir3 = mapMir3LibraryKey(index, 300, "ShandaMir3");
+  if (shandaMir3) return shandaMir3;
+
   if (index === 0) return "WemadeMir2/Tiles";
   if (index === 1) return "WemadeMir2/SmTiles";
   if (index === 2) return "WemadeMir2/Objects";
@@ -519,7 +705,42 @@ function mapLibraryKeyForIndex(index) {
   if (index >= 121 && index <= 150) return `ShandaMir2/Objects${index - 119}`;
   if (index === 190) return "ShandaMir2/AniTiles1";
 
-  throw new Error(`Unsupported map library index ${index}`);
+  return "WemadeMir2/Tiles";
+}
+
+function mapMir3LibraryKey(index, baseIndex, root) {
+  const offset = index - baseIndex;
+  if (offset < 0 || offset >= 75) return null;
+
+  const stateIndex = Math.floor(offset / 15);
+  const slot = offset % 15;
+  const names = [
+    "Tilesc",
+    "Tiles30c",
+    "Tiles5c",
+    "SmTilesc",
+    "Housesc",
+    "Cliffsc",
+    "Dungeonsc",
+    "Innersc",
+    "Furnituresc",
+    "Wallsc",
+    "SmObjectsc",
+    "Animationsc",
+    "Object1c",
+    "Object2c",
+  ];
+  const name = names[slot];
+  if (!name) return null;
+
+  if (root === "WemadeMir3") {
+    const folders = ["", "Wood", "Sand", "Snow", "Forest"];
+    const folder = folders[stateIndex];
+    return folder ? `${root}/${folder}/${name}` : `${root}/${name}`;
+  }
+
+  const suffixes = ["", "2", "3", "4", "5"];
+  return `${root}/${name}${suffixes[stateIndex] ?? ""}`;
 }
 
 function normalizeLibraryName(libraryName) {
@@ -554,6 +775,10 @@ function parseArgs(values) {
       parsed.full = true;
       continue;
     }
+    if (value === "--all-maps") {
+      parsed.allMaps = true;
+      continue;
+    }
     if (value === "--overwrite") {
       parsed.overwrite = true;
       continue;
@@ -580,6 +805,20 @@ function parseArgs(values) {
     throw new Error(`Unknown argument: ${value}`);
   }
   return parsed;
+}
+
+async function listFilesRecursive(root) {
+  const entries = await readdir(root, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const childPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRecursive(childPath)));
+      continue;
+    }
+    if (entry.isFile()) files.push(childPath);
+  }
+  return files;
 }
 
 function requireValue(values, index, flag) {
@@ -619,52 +858,412 @@ function postProcessFrameRgba(libraryName, frameIndex, rgba) {
 }
 
 function forEachMapCell(mapPath, visit) {
-  const buffer = parseMapBuffer(mapPath);
-  let offset = buffer.offset;
+  const parsedMap = parseMapBytes(path.basename(mapPath), readFileSyncCompat(mapPath));
+  if (!Array.isArray(parsedMap.cells)) {
+    throw new Error(`Unsupported Crystal map type ${parsedMap.type}: ${mapPath}`);
+  }
 
-  for (let x = 0; x < buffer.width; x += 1) {
-    for (let y = 0; y < buffer.height; y += 1) {
-      const cell = {
-        backIndex: buffer.bytes.readInt16LE(offset),
-        backImage: buffer.bytes.readInt32LE(offset + 2),
-        middleIndex: buffer.bytes.readInt16LE(offset + 6),
-        middleImage: buffer.bytes.readInt16LE(offset + 8),
-        frontIndex: buffer.bytes.readInt16LE(offset + 10),
-        frontImage: buffer.bytes.readInt16LE(offset + 12),
-        doorIndex: buffer.bytes.readUInt8(offset + 14),
-        doorOffset: buffer.bytes.readUInt8(offset + 15),
-        frontAnimationFrame: buffer.bytes.readUInt8(offset + 16),
-        frontAnimationTick: buffer.bytes.readUInt8(offset + 17),
-        middleAnimationFrame: buffer.bytes.readUInt8(offset + 18),
-        middleAnimationTick: buffer.bytes.readUInt8(offset + 19),
-        tileAnimationImage: buffer.bytes.readInt16LE(offset + 20),
-        tileAnimationOffset: buffer.bytes.readInt16LE(offset + 22),
-        tileAnimationFrames: buffer.bytes.readUInt8(offset + 24),
-        light: buffer.bytes.readUInt8(offset + 25),
+  for (const cell of parsedMap.cells) {
+    visit({ x: cell.x, y: cell.y, cell });
+  }
+}
+
+function parseMapBytes(fileName, bytes) {
+  const type = detectMapType(bytes);
+  switch (type) {
+    case 100:
+      return parseType100Map(fileName, bytes);
+    case 0:
+      return parseType0Map(fileName, bytes);
+    case 1:
+      return parseType1Map(fileName, bytes);
+    case 2:
+      return parseType2Map(fileName, bytes);
+    case 3:
+      return parseType3Map(fileName, bytes);
+    case 4:
+      return parseType4Map(fileName, bytes);
+    case 5:
+      return parseType5Map(fileName, bytes);
+    case 6:
+      return parseType6Map(fileName, bytes);
+    case 7:
+      return parseType7Map(fileName, bytes);
+    default:
+      return {
+        fileName,
+        width: detectMapWidth(bytes, type),
+        height: detectMapHeight(bytes, type),
+        type,
+        cells: null,
       };
-      offset += 26;
-      visit({ x, y, cell });
+  }
+}
+
+function parseType0Map(fileName, bytes) {
+  const width = bytes.readInt16LE(0);
+  const height = bytes.readInt16LE(2);
+  const cells = [];
+  let offset = 52;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 12 > bytes.length) break;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backIndex: 0,
+        backImage: normalizeBackImage(bytes.readInt16LE(offset)),
+        middleIndex: 1,
+        middleImage: bytes.readInt16LE(offset + 2),
+        frontImage: bytes.readInt16LE(offset + 4),
+        doorIndex: bytes.readUInt8(offset + 6) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 7),
+        frontAnimationFrame: bytes.readUInt8(offset + 8),
+        frontAnimationTick: bytes.readUInt8(offset + 9),
+        frontIndex: bytes.readUInt8(offset + 10) + 2,
+        light: bytes.readUInt8(offset + 11),
+      });
+      offset += 12;
     }
   }
+  return { fileName, width, height, type: 0, cells };
 }
 
-function parseMapBuffer(mapPath) {
-  return {
-    ...parseType100Map(readFileSyncCompat(mapPath)),
-  };
+function parseType1Map(fileName, bytes) {
+  const xor = bytes.readInt16LE(23);
+  const width = bytes.readInt16LE(21) ^ xor;
+  const height = bytes.readInt16LE(25) ^ xor;
+  const cells = [];
+  let offset = 54;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 15 > bytes.length) break;
+      let frontIndex = bytes.readUInt8(offset + 12) + 2;
+      if (frontIndex === 102) frontIndex = 90;
+      if (frontIndex >= 255) frontIndex = -1;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backIndex: 0,
+        backImage: (bytes.readInt32LE(offset) ^ 0xaa38aa38) | 0,
+        middleIndex: 1,
+        middleImage: signed16(bytes.readInt16LE(offset + 4) ^ xor),
+        frontImage: signed16(bytes.readInt16LE(offset + 6) ^ xor),
+        doorIndex: bytes.readUInt8(offset + 8) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 9),
+        frontAnimationFrame: bytes.readUInt8(offset + 10),
+        frontAnimationTick: bytes.readUInt8(offset + 11),
+        frontIndex,
+        light: bytes.readUInt8(offset + 13),
+      });
+      offset += 15;
+    }
+  }
+  return { fileName, width, height, type: 1, cells };
 }
 
-function parseType100Map(bytes) {
-  if (bytes[2] !== 0x43 || bytes[3] !== 0x23) {
-    throw new Error(`Only Crystal type100 maps are supported for now: ${bytes[2].toString(16)} ${bytes[3].toString(16)}`);
+function parseType2Map(fileName, bytes) {
+  const width = bytes.readInt16LE(0);
+  const height = bytes.readInt16LE(2);
+  const cells = [];
+  let offset = 52;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 14 > bytes.length) break;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backImage: normalizeBackImage(bytes.readInt16LE(offset)),
+        middleImage: bytes.readInt16LE(offset + 2),
+        frontImage: bytes.readInt16LE(offset + 4),
+        doorIndex: bytes.readUInt8(offset + 6) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 7),
+        frontAnimationFrame: bytes.readUInt8(offset + 8),
+        frontAnimationTick: bytes.readUInt8(offset + 9),
+        frontIndex: bytes.readUInt8(offset + 10) + 120,
+        light: bytes.readUInt8(offset + 11),
+        backIndex: bytes.readUInt8(offset + 12) + 100,
+        middleIndex: bytes.readUInt8(offset + 13) + 110,
+      });
+      offset += 14;
+    }
+  }
+  return { fileName, width, height, type: 2, cells };
+}
+
+function parseType3Map(fileName, bytes) {
+  const width = bytes.readInt16LE(0);
+  const height = bytes.readInt16LE(2);
+  const cells = [];
+  let offset = 52;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 36 > bytes.length) break;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backImage: normalizeBackImage(bytes.readInt16LE(offset)),
+        middleImage: bytes.readInt16LE(offset + 2),
+        frontImage: bytes.readInt16LE(offset + 4),
+        doorIndex: bytes.readUInt8(offset + 6) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 7),
+        frontAnimationFrame: bytes.readUInt8(offset + 8),
+        frontAnimationTick: bytes.readUInt8(offset + 9),
+        frontIndex: bytes.readUInt8(offset + 10) + 120,
+        light: bytes.readUInt8(offset + 11),
+        backIndex: bytes.readUInt8(offset + 12) + 100,
+        middleIndex: bytes.readUInt8(offset + 13) + 110,
+        tileAnimationImage: bytes.readInt16LE(offset + 14),
+        tileAnimationFrames: bytes.readUInt8(offset + 21),
+        tileAnimationOffset: bytes.readInt16LE(offset + 22),
+      });
+      offset += 36;
+    }
+  }
+  return { fileName, width, height, type: 3, cells };
+}
+
+function parseType4Map(fileName, bytes) {
+  const xor = bytes.readInt16LE(33);
+  const width = bytes.readInt16LE(31) ^ xor;
+  const height = bytes.readInt16LE(35) ^ xor;
+  const cells = [];
+  let offset = 64;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 12 > bytes.length) break;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backIndex: 0,
+        backImage: normalizeBackImage(signed16(bytes.readInt16LE(offset) ^ xor)),
+        middleIndex: 1,
+        middleImage: signed16(bytes.readInt16LE(offset + 2) ^ xor),
+        frontImage: signed16(bytes.readInt16LE(offset + 4) ^ xor),
+        doorIndex: bytes.readUInt8(offset + 6) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 7),
+        frontAnimationFrame: bytes.readUInt8(offset + 8),
+        frontAnimationTick: bytes.readUInt8(offset + 9),
+        frontIndex: bytes.readUInt8(offset + 10) + 2,
+        light: bytes.readUInt8(offset + 11),
+      });
+      offset += 12;
+    }
+  }
+  return { fileName, width, height, type: 4, cells };
+}
+
+function parseType5Map(fileName, bytes) {
+  const width = bytes.readInt16LE(22);
+  const height = bytes.readInt16LE(24);
+  const cells = createEmptyCellGrid(width, height);
+  let offset = 28;
+
+  for (let x = 0; x < Math.floor(width / 2); x += 1) {
+    for (let y = 0; y < Math.floor(height / 2); y += 1) {
+      if (offset + 3 > bytes.length) break;
+      const backIndex = bytes.readUInt8(offset) !== 255 ? bytes.readUInt8(offset) + 200 : -1;
+      const backImage = bytes.readUInt16LE(offset + 1) + 1;
+      for (let index = 0; index < 4; index += 1) {
+        const cell = cells[(x * 2 + (index % 2)) * height + (y * 2 + Math.floor(index / 2))];
+        if (!cell) continue;
+        cell.backIndex = backIndex;
+        cell.backImage = backImage;
+      }
+      offset += 3;
+    }
   }
 
+  offset = 28 + 3 * (Math.floor(width / 2) + (width % 2)) * Math.floor(height / 2);
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 14 > bytes.length) break;
+      const cell = cells[x * height + y];
+      const flag = bytes.readUInt8(offset);
+      cell.middleAnimationFrame = bytes.readUInt8(offset + 1);
+      cell.frontAnimationFrame = bytes.readUInt8(offset + 2) === 255 ? 0 : bytes.readUInt8(offset + 2) & 0x8f;
+      cell.middleAnimationTick = 0;
+      cell.frontAnimationTick = 0;
+      cell.frontIndex = bytes.readUInt8(offset + 3) !== 255 ? bytes.readUInt8(offset + 3) + 200 : -1;
+      cell.middleIndex = bytes.readUInt8(offset + 4) !== 255 ? bytes.readUInt8(offset + 4) + 200 : -1;
+      cell.middleImage = bytes.readUInt16LE(offset + 5) + 1;
+      cell.frontImage = bytes.readUInt16LE(offset + 7) + 1;
+      if (cell.frontImage === 1 && cell.frontIndex === 200) cell.frontIndex = -1;
+      cell.light = (bytes.readUInt8(offset + 12) & 0x0f) * 2;
+      if ((flag & 0x01) !== 1) cell.backImage |= 0x20000000;
+      if ((flag & 0x02) !== 2) cell.frontImage |= 0x8000;
+      offset += 14;
+    }
+  }
+
+  return { fileName, width, height, type: 5, cells };
+}
+
+function parseType6Map(fileName, bytes) {
+  const width = bytes.readInt16LE(16);
+  const height = bytes.readInt16LE(18);
+  const cells = [];
+  let offset = 40;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 20 > bytes.length) break;
+      const flag = bytes.readUInt8(offset);
+      let frontAnimationFrame = bytes.readUInt8(offset + 11) === 255 ? 0 : bytes.readUInt8(offset + 11);
+      if (frontAnimationFrame > 0x0f) frontAnimationFrame &= 0x0f;
+      let frontIndex = bytes.readUInt8(offset + 3) !== 255 ? bytes.readUInt8(offset + 3) + 300 : -1;
+      const baseFrontImage = bytes.readInt16LE(offset + 8) + 1;
+      if (baseFrontImage === 1 && frontIndex === 200) frontIndex = -1;
+      const cell = {
+        ...emptyParsedMapCell(x, y),
+        backIndex: bytes.readUInt8(offset + 1) !== 255 ? bytes.readUInt8(offset + 1) + 300 : -1,
+        middleIndex: bytes.readUInt8(offset + 2) !== 255 ? bytes.readUInt8(offset + 2) + 300 : -1,
+        frontIndex,
+        backImage: bytes.readInt16LE(offset + 4) + 1,
+        middleImage: bytes.readInt16LE(offset + 6) + 1,
+        frontImage: (flag & 0x02) !== 2 ? baseFrontImage | 0x8000 : baseFrontImage,
+        middleAnimationFrame: bytes.readUInt8(offset + 10),
+        frontAnimationFrame,
+        middleAnimationTick: 1,
+        frontAnimationTick: 1,
+        light: (bytes.readUInt8(offset + 12) & 0x0f) * 4,
+      };
+      if ((flag & 0x01) !== 1) cell.backImage |= 0x20000000;
+      cells.push(cell);
+      offset += 20;
+    }
+  }
+  return { fileName, width, height, type: 6, cells };
+}
+
+function parseType7Map(fileName, bytes) {
+  const width = bytes.readInt16LE(21);
+  const height = bytes.readInt16LE(25);
+  const cells = [];
+  let offset = 54;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 15 > bytes.length) break;
+      cells.push({
+        ...emptyParsedMapCell(x, y),
+        backIndex: 0,
+        backImage: normalizeBackImage(bytes.readInt32LE(offset)),
+        middleIndex: 1,
+        middleImage: bytes.readInt16LE(offset + 4),
+        frontImage: bytes.readInt16LE(offset + 6),
+        doorIndex: bytes.readUInt8(offset + 8) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 9),
+        frontAnimationFrame: bytes.readUInt8(offset + 10),
+        frontAnimationTick: bytes.readUInt8(offset + 11),
+        frontIndex: bytes.readUInt8(offset + 12) + 2,
+        light: bytes.readUInt8(offset + 13),
+      });
+      offset += 15;
+    }
+  }
+  return { fileName, width, height, type: 7, cells };
+}
+
+function parseType100Map(fileName, bytes) {
+  const width = bytes.readInt16LE(4);
+  const height = bytes.readInt16LE(6);
+  const cells = [];
+  let offset = 8;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      if (offset + 26 > bytes.length) break;
+      cells.push({
+        x,
+        y,
+        backIndex: bytes.readInt16LE(offset),
+        backImage: bytes.readInt32LE(offset + 2),
+        middleIndex: bytes.readInt16LE(offset + 6),
+        middleImage: bytes.readInt16LE(offset + 8),
+        frontIndex: bytes.readInt16LE(offset + 10),
+        frontImage: bytes.readInt16LE(offset + 12),
+        doorIndex: bytes.readUInt8(offset + 14) & 0x7f,
+        doorOffset: bytes.readUInt8(offset + 15),
+        frontAnimationFrame: bytes.readUInt8(offset + 16),
+        frontAnimationTick: bytes.readUInt8(offset + 17),
+        middleAnimationFrame: bytes.readUInt8(offset + 18),
+        middleAnimationTick: bytes.readUInt8(offset + 19),
+        tileAnimationImage: bytes.readInt16LE(offset + 20),
+        tileAnimationOffset: bytes.readInt16LE(offset + 22),
+        tileAnimationFrames: bytes.readUInt8(offset + 24),
+        light: bytes.readUInt8(offset + 25),
+      });
+      offset += 26;
+    }
+  }
+  return { fileName, width, height, type: 100, cells };
+}
+
+function detectMapType(bytes) {
+  if (bytes[2] === 0x43 && bytes[3] === 0x23) return 100;
+  if (bytes[0] === 0) return 5;
+  if (bytes[0] === 0x0f && bytes[5] === 0x53 && bytes[14] === 0x33) return 6;
+  if (bytes[0] === 0x15 && bytes[4] === 0x32 && bytes[6] === 0x41 && bytes[19] === 0x31) return 4;
+  if (bytes[0] === 0x10 && bytes[2] === 0x61 && bytes[7] === 0x31 && bytes[14] === 0x31) return 1;
+  if (bytes[4] === 0x0f || (bytes[4] === 0x03 && bytes[18] === 0x0d && bytes[19] === 0x0a)) {
+    const width = bytes[0] + (bytes[1] << 8);
+    const height = bytes[2] + (bytes[3] << 8);
+    return bytes.length > 52 + width * height * 14 ? 3 : 2;
+  }
+  if (bytes[0] === 0x0d && bytes[1] === 0x4c && bytes[7] === 0x20 && bytes[11] === 0x6d) return 7;
+  return 0;
+}
+
+function detectMapWidth(bytes, type) {
+  if (type === 1) return bytes.readInt16LE(21) ^ bytes.readInt16LE(23);
+  if (type === 4) return bytes.readInt16LE(31) ^ bytes.readInt16LE(33);
+  if (type === 5) return bytes.readInt16LE(22);
+  if (type === 6) return bytes.readInt16LE(16);
+  if (type === 7) return bytes.readInt16LE(21);
+  return bytes.readInt16LE(0);
+}
+
+function detectMapHeight(bytes, type) {
+  if (type === 1) return bytes.readInt16LE(25) ^ bytes.readInt16LE(23);
+  if (type === 4) return bytes.readInt16LE(35) ^ bytes.readInt16LE(33);
+  if (type === 5) return bytes.readInt16LE(24);
+  if (type === 6) return bytes.readInt16LE(18);
+  if (type === 7) return bytes.readInt16LE(25);
+  return bytes.readInt16LE(2);
+}
+
+function emptyParsedMapCell(x, y) {
   return {
-    bytes,
-    width: bytes.readInt16LE(4),
-    height: bytes.readInt16LE(6),
-    offset: 8,
+    x,
+    y,
+    backIndex: -1,
+    backImage: 0,
+    middleIndex: -1,
+    middleImage: 0,
+    frontIndex: -1,
+    frontImage: 0,
+    doorIndex: 0,
+    doorOffset: 0,
+    frontAnimationFrame: 0,
+    frontAnimationTick: 0,
+    middleAnimationFrame: 0,
+    middleAnimationTick: 0,
+    tileAnimationImage: 0,
+    tileAnimationOffset: 0,
+    tileAnimationFrames: 0,
+    light: 0,
   };
+}
+
+function createEmptyCellGrid(width, height) {
+  const cells = [];
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      cells.push(emptyParsedMapCell(x, y));
+    }
+  }
+  return cells;
+}
+
+function normalizeBackImage(image) {
+  return (image & 0x8000) !== 0 ? (image & 0x7fff) | 0x20000000 : image;
+}
+
+function signed16(value) {
+  return (value << 16) >> 16;
 }
 
 function readFileSyncCompat(filePath) {

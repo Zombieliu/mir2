@@ -86,12 +86,17 @@ function reportMiniMapCoverage() {
   const needed = minimap.neededMiniMapCount;
   const exported = minimap.exportedMiniMapCount ?? 0;
   const missing = Array.isArray(minimap.missingMiniMapIndices) ? minimap.missingMiniMapIndices.length : null;
+  const sourceUnavailable = Array.isArray(minimap.sourceUnavailableMiniMapIndices)
+    ? minimap.sourceUnavailableMiniMapIndices.length
+    : 0;
+  const sourceAvailableNeeded = Math.max(needed - sourceUnavailable, 1);
   return {
     available: true,
     neededMiniMaps: needed,
     exportedMiniMaps: exported,
     missingMiniMaps: missing,
-    coveragePercent: round2((Math.min(exported, needed) / needed) * 100),
+    sourceUnavailableMiniMaps: sourceUnavailable,
+    coveragePercent: round2((Math.min(exported, sourceAvailableNeeded) / sourceAvailableNeeded) * 100),
   };
 }
 
@@ -139,7 +144,7 @@ function printTable(report) {
   );
   console.log(
     miniMapCoverage.available
-      ? `mini-maps                   : ${miniMapCoverage.exportedMiniMaps}/${miniMapCoverage.neededMiniMaps} (${miniMapCoverage.coveragePercent}%, missing=${miniMapCoverage.missingMiniMaps})`
+      ? `mini-maps                   : ${miniMapCoverage.exportedMiniMaps}/${miniMapCoverage.neededMiniMaps} (${miniMapCoverage.coveragePercent}%, missing=${miniMapCoverage.missingMiniMaps}, source-unavailable=${miniMapCoverage.sourceUnavailableMiniMaps})`
       : "mini-maps                   : unavailable (cached coverage absent)",
   );
   console.log(
