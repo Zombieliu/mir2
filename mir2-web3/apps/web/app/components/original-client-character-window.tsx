@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
 import { sameItemDragSource, useItemDrag } from "./original-client-drag-item";
+import type { ViewportEntitySprite } from "./original-client-scene-rendering";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -77,6 +78,7 @@ type CharacterWindowProps = {
   onClose: () => void;
   onTabChange: (tab: CharacterTabKey) => void;
   player: DisplayEntity | null;
+  paperdollSprite?: ViewportEntitySprite | null;
   world: DisplayWorld;
   onRemoveItem: (item: EquipmentActionRef) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
@@ -90,6 +92,7 @@ export function CharacterWindow({
   onClose,
   onTabChange,
   player,
+  paperdollSprite,
   world,
   onRemoveItem,
   onRepairItem,
@@ -163,6 +166,7 @@ export function CharacterWindow({
 
       {activeTab === "char" ? (
         <>
+          {paperdollSprite ? <CharacterPaperdoll sprite={paperdollSprite} /> : null}
           {ORIGINAL_UI.character.equipmentSlots.map((slot) => {
             const item = equipmentBySlot.get(equipmentSlotFromLabel(slot.label));
 
@@ -294,6 +298,50 @@ export function CharacterWindow({
           })}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+const PAPERDOLL_BOX_WIDTH = 92;
+const PAPERDOLL_BOX_HEIGHT = 116;
+
+// Renders the standing self sprite (body + hair + weapon layers from the scene
+// sprite pipeline) centered/scaled to fit the character-dialog paperdoll box.
+function CharacterPaperdoll({ sprite }: { sprite: ViewportEntitySprite }) {
+  const layers = [...sprite.rearWeapons, sprite.body, sprite.hair, ...sprite.frontWeapons].filter(
+    (layer): layer is NonNullable<typeof layer> => Boolean(layer),
+  );
+  if (!layers.length) {
+    return null;
+  }
+
+  const minX = Math.min(...layers.map((layer) => layer.x));
+  const minY = Math.min(...layers.map((layer) => layer.y));
+  const maxX = Math.max(...layers.map((layer) => layer.x + layer.width));
+  const maxY = Math.max(...layers.map((layer) => layer.y + layer.height));
+  const figureWidth = Math.max(1, maxX - minX);
+  const figureHeight = Math.max(1, maxY - minY);
+  const scale = Math.min(1, PAPERDOLL_BOX_WIDTH / figureWidth, PAPERDOLL_BOX_HEIGHT / figureHeight);
+  const offsetX = (PAPERDOLL_BOX_WIDTH - figureWidth * scale) / 2 - minX * scale;
+  const offsetY = (PAPERDOLL_BOX_HEIGHT - figureHeight * scale) / 2 - minY * scale;
+
+  return (
+    <div className="character-paperdoll" aria-hidden>
+      {layers.map((layer, index) => (
+        <img
+          key={`paperdoll-${index}-${layer.path}`}
+          className="character-paperdoll-layer"
+          src={layer.path}
+          alt=""
+          draggable={false}
+          style={{
+            left: layer.x * scale + offsetX,
+            top: layer.y * scale + offsetY,
+            width: layer.width * scale,
+            height: layer.height * scale,
+          }}
+        />
+      ))}
     </div>
   );
 }

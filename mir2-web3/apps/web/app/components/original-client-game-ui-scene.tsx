@@ -33,6 +33,7 @@ import {
   type ItemDragPayload,
   type ItemDropTarget,
 } from "./original-client-drag-item";
+import type { ViewportEntitySprite } from "./original-client-scene-rendering";
 import type {
   DisplayEntity,
   DisplayItem,
@@ -52,6 +53,7 @@ type GameUiSceneProps = {
   runtimeMessage: string;
   world: DisplayWorld;
   player: DisplayEntity | null;
+  paperdollSprite: ViewportEntitySprite | null;
   logs: DisplayLogLine[];
   chatMessage: string;
   showInventory: boolean;
@@ -104,6 +106,7 @@ export function GameUiScene({
   runtimeMessage,
   world,
   player,
+  paperdollSprite,
   logs,
   chatMessage,
   showInventory,
@@ -506,6 +509,7 @@ export function GameUiScene({
           onClose={onCloseCharacter}
           onTabChange={onOpenCharacterTab}
           player={player}
+          paperdollSprite={paperdollSprite}
           world={world}
           onRemoveItem={onRemoveItem}
           onRepairItem={onRepairItem}

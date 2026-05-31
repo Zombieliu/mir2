@@ -5029,3 +5029,19 @@ body.mir-dragging-item * {
 .buff-bar {
   pointer-events: auto;
 }
+
+/* ---- Character dialog paperdoll preview ---- */
+.character-paperdoll {
+  position: absolute;
+  left: 84px;
+  top: 112px;
+  width: 92px;
+  height: 116px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.character-paperdoll-layer {
+  position: absolute;
+  image-rendering: pixelated;
+}

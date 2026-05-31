@@ -951,6 +951,18 @@ export function OriginalClientShell({
         };
       })
     : [];
+  // A standing, forward-facing self sprite for the character-dialog paperdoll
+  // preview, reusing the scene sprite pipeline.
+  const characterPaperdollSprite =
+    player && screen === "game"
+      ? buildViewportEntitySprite(
+          { ...player, direction: "Down" },
+          sceneSpriteLibraries,
+          sceneSpriteFrameIndex,
+          sceneNow,
+          "standing",
+        )
+      : null;
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
@@ -1661,6 +1673,7 @@ export function OriginalClientShell({
               runtimeMessage={runtimeMessageLabel}
               world={world}
               player={player}
+              paperdollSprite={characterPaperdollSprite}
               logs={logs}
               chatMessage={chatMessage}
               showInventory={showInventory}
