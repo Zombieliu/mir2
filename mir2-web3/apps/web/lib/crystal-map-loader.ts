@@ -10,8 +10,8 @@ import { CRYSTAL_MINI_MAP_TRANSFORMS } from "./generated/crystal-minimap-transfo
 import type { OriginalMapRegion, OriginalMapSpriteFrame, SceneBlueprint } from "./scene-types";
 
 const WORKSPACE_ROOT = path.resolve(/* turbopackIgnore: true */ process.cwd());
-const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
-const MIR2_ROOT = path.resolve(REPO_ROOT, "..");
+const REPO_ROOT = path.resolve(/* turbopackIgnore: true */ WORKSPACE_ROOT, "..", "..");
+const MIR2_ROOT = path.resolve(/* turbopackIgnore: true */ REPO_ROOT, "..");
 const PUBLIC_ORIGINAL_MAP_DIR = path.join(WORKSPACE_ROOT, "public", "original-map");
 const PUBLIC_ORIGINAL_ASSET_MANIFEST_PATH = path.join(
   WORKSPACE_ROOT,
