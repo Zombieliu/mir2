@@ -4342,6 +4342,87 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_electric_shock_freezes_targeted_hostile_monster() {
+    // ElectricShock (the Taoist taming skill) shocks a lower-level hostile: it drops its target and
+    // cannot act for (level*5 + 10) seconds. This is the "ShockTime" effect.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 320, y: 240 };
+    set_player_position(&mut session, origin.clone());
+    let monster_object_id = 92_801_u32;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Aggro Test Wasp"),
+            Position(Point {
+                x: origin.x + 1,
+                y: origin.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: origin.clone(),
+                ai: 0,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: true,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    let player = player_entity(session.app.world()).expect("player");
+    let skill = super::crystal_skill_state("ElectricShock", 2).expect("ElectricShock skill");
+    let context = super::SkillCastContext {
+        direction: MirDirection::Right,
+        target_id: monster_object_id,
+        target: Point {
+            x: origin.x + 1,
+            y: origin.y,
+        },
+    };
+    let _ = super::apply_crystal_electric_shock_spell(
+        session.app.world_mut(),
+        player,
+        &skill,
+        Some(&context),
+        current_tick,
+    );
+
+    let agent = session
+        .app
+        .world()
+        .entity(monster_entity)
+        .get::<MonsterAgent>()
+        .expect("monster agent");
+    // release = current_tick + (2*5 + 10) s = +20 ticks.
+    assert!(!agent.tracking_player, "a shocked monster drops its player target");
+    assert!(
+        agent.next_attack_tick >= current_tick + 20,
+        "a shocked monster cannot attack until ShockTime elapses"
+    );
+    assert!(
+        agent.next_move_tick >= current_tick + 20,
+        "a shocked monster cannot move until ShockTime elapses"
+    );
+}
+
+#[test]
 fn crystal_magic_typed_monster_attack_resists_via_mac_not_ac() {
     // Sanity on the defence-type table.
     let here = Point { x: 0, y: 0 };

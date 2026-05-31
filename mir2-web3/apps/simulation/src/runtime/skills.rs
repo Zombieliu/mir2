@@ -3638,7 +3638,7 @@ fn apply_crystal_thunder_bolt_spell(
     Vec::new()
 }
 
-fn apply_crystal_electric_shock_spell(
+pub(super) fn apply_crystal_electric_shock_spell(
     world: &mut World,
     player: Entity,
     skill: &SkillState,
