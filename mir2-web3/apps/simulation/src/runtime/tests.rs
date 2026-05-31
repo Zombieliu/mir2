@@ -977,6 +977,33 @@ fn is_combat_position(session: &SimulationSession, point: &Point) -> bool {
     !is_safe_zone_point(config, map, point)
 }
 
+/// Find an origin tile whose first `tiles` cells in `direction` (the origin plus
+/// `tiles - 1` steps) are all occupiable AND outside any safe zone, so an
+/// offensive spell aimed that way can actually resolve. Searches the starter
+/// map's playable area. Returns the origin.
+fn find_combat_origin_line(
+    session: &SimulationSession,
+    player: Entity,
+    direction: MirDirection,
+    tiles: i32,
+) -> Point {
+    let bounds = session
+        .app
+        .world()
+        .resource::<MapRuntimeResource>()
+        .map_region_bounds;
+    (bounds.min_x..=bounds.max_x)
+        .flat_map(|x| (bounds.min_y..=bounds.max_y).map(move |y| Point { x, y }))
+        .find(|candidate| {
+            (0..tiles.max(1)).all(|step| {
+                let tile = offset_point(candidate, direction, step);
+                can_occupy(session.app.world(), tile.clone(), Some(player))
+                    && is_combat_position(session, &tile)
+            })
+        })
+        .expect("combat-clear line should exist on the starter map")
+}
+
 fn set_current_player_hp(session: &mut SimulationSession, hp: i32) {
     let player = player_entity(session.app.world()).expect("player entity");
     let current = session
@@ -40085,7 +40112,11 @@ fn magic_packet_crystal_poison_shot_applies_green_poison_to_target() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    // PoisonShot requires an equipped poison amulet (see
+    // crystal_spell_required_items_available).
+    equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::Amulet);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_line(&session, player, MirDirection::Right, 5);
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
