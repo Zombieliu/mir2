@@ -119,8 +119,33 @@ crystal-spider). Test:
 friendly-opposite monster 3 tiles in front of the shaman on a 5-tile line and
 asserts its HP drops within 6 ticks).
 
-## Next candidates
-Higher-effort: 28 `ToxicGhoul` (56 spawns — poison is already wired by AI
-table; the AI needs special hooks), 12 `BugBagMaggot` (189 spawns), 7
-`CaveMaggot` (poison already wired by name; the AI uses a paralysis-on-attack
-override).
+### AI 41 → YinDevilNode dispatch fix ✅
+Crystal `MonsterObject.GetMonster` cases 41 AND 42 BOTH return
+`new YinDevilNode(info)` — an immobile support node. The Rust dispatch in
+`update_special_monster_state` only routed `42 => update_yin_devil_node_state`,
+so AI 41 fell through to generic hostile chasing. Extended the arm to
+`41 | 42 => update_yin_devil_node_state`. AI 41 monsters are now immobile and
+do not emit attack packets at the player, matching AI 42. Test:
+`crystal_ai41_yin_devil_node_is_immobile_like_ai42`. (The proactive
+buff-emission Crystal does in `ProcessTarget`/`CompleteAttack` is a separate
+gap noted for future work — both AIs only become immobile here.)
+
+## Verified-already-correct AIs
+Audit of remaining high-spawn AIs found these already at parity in the
+runtime:
+- AI 7 `CaveMaggot` (233 spawns) — paralysis-on-hit wired via
+  `monster_player_status_effect` arm `7 => Paralysis`.
+- AI 12 `BugBagMaggot` (189 spawns) — stationary, summons bug-bats with cap
+  20 and 500ms delay (existing `bug_bag_maggot_spawns_bug_bat_after_delay`).
+- AI 28 `ToxicGhoul` (56 spawns) — green poison wired; the death AoE
+  (`Info.Effect == 1`) is data-inactive because all manifest ToxicGhoul
+  variants carry effect=0.
+- AI 9 `HarvestMonster` (18 spawns) — passive harvest already wired via
+  `HARVEST_MONSTER_SKIN_COUNT`.
+- AI 10 `FlamingWooma` (25 spawns) — plain melee, damage/delay arms keyed.
+- AI 56 `Trainer` (25 spawns) — non-attacking + Neutral.
+- AI 112 `DarkBeast` (15 spawns) — `dark_beast_secondary_branch`.
+
+## Remaining gaps (lower-impact / data-inactive)
+- YinDevilNode (41/42) support-buff emission to friendly targets within 7.
+- ToxicGhoul death-AoE branch (data-inactive in current manifests).

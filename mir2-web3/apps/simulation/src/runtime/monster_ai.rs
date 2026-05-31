@@ -764,7 +764,9 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
-        42 => update_yin_devil_node_state(agent, tick),
+        // Crystal `MonsterObject.GetMonster` cases 41 + 42 both return
+        // `new YinDevilNode(info)` — immobile passive node.
+        41 | 42 => update_yin_devil_node_state(agent, tick),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),

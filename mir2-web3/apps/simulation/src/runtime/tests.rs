@@ -55231,3 +55231,83 @@ fn crystal_ai26_shaman_zombie_splashes_six_tile_line() {
         "AI-26 ShamanZombie 6-tile line should splash a friendly-opposite monster on the forward line (Crystal LineAttack(damage, 6, 300, MACAgility)); before={before_secondary_hp} after={after_secondary_hp}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: Crystal `MonsterObject.GetMonster` cases 41 AND 42 BOTH return
+// `new YinDevilNode(info)` — an immobile passive support node. The Rust
+// runtime only dispatched AI 42 to `update_yin_devil_node_state`, so AI 41
+// fell through to generic-hostile chasing.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let node_object_id = 98_941_u32;
+    let current_tick = runtime_tick(session.app.world());
+
+    set_player_position(&mut session, player_origin.clone());
+
+    let node_position = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let node = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(node_object_id),
+            DisplayName::literal("YinDevilNode AI-41 Test"),
+            Position(node_position.clone()),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: node_position.clone(),
+                ai: 41,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 5,
+                can_wander: true,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    for _ in 0..5 {
+        let packets = session.tick();
+        assert_eq!(
+            entity_position(session.app.world(), node).expect("node position"),
+            node_position,
+            "AI-41 YinDevilNode must be immobile (Crystal CanMove=false)"
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectAttack { info } if info.object_id == node_object_id
+            )),
+            "AI-41 YinDevilNode must not emit ObjectAttack at the player"
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectRangeAttack { info } if info.object_id == node_object_id
+            )),
+            "AI-41 YinDevilNode must not emit ObjectRangeAttack at the player"
+        );
+    }
+}
