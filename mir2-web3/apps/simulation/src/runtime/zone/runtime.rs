@@ -3595,13 +3595,26 @@ impl ZoneRuntime {
                         })
                         .collect::<Vec<_>>();
                     for object_id in affected_object_ids {
+                        // Ground/AoE attack spells mitigate their direct hit with
+                        // the struck monster's magic armour, like the single-target
+                        // cast. The PoisonCloud DoT below is applied separately and
+                        // stays unmitigated (poison is not reduced by MAC).
+                        let hit_damage = match self.native_monsters.get(&object_id) {
+                            Some(monster) => zone_magic_damage_after_monster_armour(
+                                monster,
+                                action.damage,
+                                action.caster_object_id,
+                                now_ms,
+                            ),
+                            None => action.damage,
+                        };
                         outbounds.extend(self.resolve_pending_native_monster_hit(
                             PendingNativeMonsterHit {
                                 ready_at_ms: now_ms,
                                 session_id: action.caster_session_id.clone(),
                                 attacker_object_id: action.caster_object_id,
                                 object_id,
-                                damage: action.damage,
+                                damage: hit_damage,
                             },
                             now_ms,
                         ));

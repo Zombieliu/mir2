@@ -4209,6 +4209,57 @@ fn zone_native_player_firewall_spawns_ground_spell_and_ticks_damage() {
 }
 
 #[test]
+fn zone_native_player_firewall_subtracts_monster_magic_armour() {
+    // Ground/AoE attack spells mitigate their direct hit with monster MAC, just
+    // like the single-target cast. FireWall ticks 4 damage; the monster's flat
+    // MAC 2 leaves 4 - 2 = 2 per tick, so a 20-HP monster drops to 18/20 = 90%
+    // on the first tick (vs 80% with the raw, un-mitigated 4).
+    let mut zone = zone();
+    let first = session("first");
+    let target = Point { x: 334, y: 270 };
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            target.x,
+            target.y,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 2,
+                max_mac: 2,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::FireWall,
+        direction: MirDirection::Right,
+        target: target.clone(),
+        cast: true,
+        level: 2,
+        damage: 4,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+
+    zone.tick(519);
+    let tick = zone.tick(520);
+    assert_eq!(damage_indicator_for(&tick, 9100), Some(2));
+    assert!(has_packet(&tick, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == 9100 && info.percent == 90
+    )));
+}
+
+#[test]
 fn zone_native_player_firewall_accepts_targetless_ground_cast() {
     let mut zone = zone();
     let first = session("first");
