@@ -7017,9 +7017,15 @@ fn zone_native_monster_player_attack_damage(
         88 => (zone_crystal_monster_magic_damage(&monster.name), true),
         126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
         127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
-        188 if distance > 1 => (zone_crystal_monster_raw_attack_damage(&monster.name) * 2, false),
+        188 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
+            false,
+        ),
         189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
-        192 if distance > 1 => (zone_crystal_monster_raw_attack_damage(&monster.name) * 3, false),
+        192 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
+            false,
+        ),
         130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
         131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
         118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
@@ -7211,7 +7217,10 @@ fn zone_authoritative_magic_damage(spell: Spell, level: u8, base: i32) -> Option
         return Some(0);
     }
     let template = crystal_magic_by_spell(&format!("{spell:?}"))?;
-    Some(crate::runtime::combat::crystal_magic_damage_from_base(&template, level, base.max(1)).max(1))
+    Some(
+        crate::runtime::combat::crystal_magic_damage_from_base(&template, level, base.max(1))
+            .max(1),
+    )
 }
 
 /// Spells whose final damage the gateway adjusts with inventory-dependent item
