@@ -325,7 +325,11 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::SummonVampire
         | Spell::SummonToad
         | Spell::SummonSnakes
-        | Spell::PetEnhancer => SkillCastKind::SelfOnly,
+        | Spell::PetEnhancer
+        // Taoist support buffs applied to self/allies (no hostile target).
+        | Spell::SoulShield
+        | Spell::BlessedArmour
+        | Spell::UltimateEnhancer => SkillCastKind::SelfOnly,
         Spell::FireWall
         | Spell::FireBang
         | Spell::IceStorm
