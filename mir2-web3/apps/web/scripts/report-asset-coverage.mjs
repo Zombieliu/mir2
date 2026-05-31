@@ -123,6 +123,7 @@ function computeOverall(sections) {
   return {
     available: true,
     renderCoveragePercent: round2(parts.reduce((sum, value) => sum + value, 0) / parts.length),
+    note: "render coverage = mean of map-sprite + mini-map coverage; excludes sound coverage (raw-asset-limited, tracked separately). Not a measure of total asset completeness.",
   };
 }
 
@@ -148,6 +149,7 @@ function printTable(report) {
   );
   if (report.overall.available) {
     console.log(`render coverage (headline)  : ${report.overall.renderCoveragePercent}%`);
+    console.log("  (= map-sprite + mini-map mean; excludes raw-asset-limited sound coverage above)");
   }
 }
 

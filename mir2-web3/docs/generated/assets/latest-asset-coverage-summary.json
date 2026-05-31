@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T01:34:16.110Z",
+  "generatedAt": "2026-05-31T01:52:28.298Z",
   "sections": {
     "originalAssets": {
       "available": true,
@@ -30,6 +30,7 @@
   },
   "overall": {
     "available": true,
-    "renderCoveragePercent": 99.88
+    "renderCoveragePercent": 99.88,
+    "note": "render coverage = mean of map-sprite + mini-map coverage; excludes sound coverage (raw-asset-limited, tracked separately). Not a measure of total asset completeness."
   }
 }
