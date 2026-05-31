@@ -21,8 +21,7 @@ use super::buffs::{
 use super::combat::{
     apply_monster_poison, combat_delay_ticks, crystal_spell_defence_type, damage_monster_entity,
     queue_due_packet, queued_before_world_tick_due_tick, ranged_attack_delay_ticks,
-    schedule_damage_to_monster, schedule_heal_to_player, schedule_player_magic_on_monster,
-    PendingMonsterDefeatAction,
+    schedule_heal_to_player, schedule_player_magic_on_monster, PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -1593,17 +1592,18 @@ fn apply_manifest_spell_effect(
     let damage = crystal_magic_damage(magic, skill.level);
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
     packets
 }
@@ -2386,17 +2386,18 @@ fn apply_crystal_elemental_shot_spell(
     let orb_power =
         crystal_elemental_orb_power(world.resource::<ElementalResource>().elements_level, false);
     let damage = crystal_magic_damage(magic, skill.level).saturating_add(orb_power);
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::AC,
     );
     if let Some(packet) = clear_crystal_element(world, false) {
         queue_due_packet(world, due_tick, packet);
@@ -2619,17 +2620,18 @@ fn apply_crystal_slashing_burst_spell(
         let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(500));
         let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
         if let Some(target_id) = entity_object_id(world, target_entity) {
-            schedule_damage_to_monster(
+            schedule_player_magic_on_monster(
                 world,
                 due_tick,
                 object_id,
                 target_entity,
                 crystal_magic_damage(magic, skill.level),
-                Some(target_name.clone()),
                 Some(PendingMonsterDefeatAction {
                     object_id: target_id,
                     name: target_name,
                 }),
+                None,
+                super::combat_engine::DefenceType::AC,
             );
         }
     }
@@ -2719,17 +2721,18 @@ fn apply_crystal_flash_dash_spell(
         let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
         if let Some(target_id) = entity_object_id(world, target_entity) {
             hit_target = true;
-            schedule_damage_to_monster(
+            schedule_player_magic_on_monster(
                 world,
                 due_tick,
                 object_id,
                 target_entity,
                 crystal_magic_damage(magic, skill.level),
-                Some(target_name.clone()),
                 Some(PendingMonsterDefeatAction {
                     object_id: target_id,
                     name: target_name,
                 }),
+                None,
+                super::combat_engine::DefenceType::AC,
             );
             apply_monster_poison(
                 world,
@@ -3116,17 +3119,18 @@ fn apply_crystal_storm_escape_spell(
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
         };
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             damage_due_tick,
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: target_id,
                 name: target_name,
             }),
+            None,
+            super::combat_engine::DefenceType::MAC,
         );
     }
 
@@ -3280,17 +3284,18 @@ fn apply_crystal_lightning_spell(
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
         };
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             due_tick,
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: target_id,
                 name: target_name,
             }),
+            None,
+            super::combat_engine::DefenceType::MAC,
         );
     }
 
@@ -3837,17 +3842,18 @@ fn apply_crystal_frost_crunch_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
 
     let freeze_ms = (2_u64 + u64::from(skill.level)).saturating_mul(1_000);
@@ -3915,17 +3921,18 @@ fn apply_crystal_vampirism_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
     schedule_heal_to_player(
         world,
@@ -3994,17 +4001,18 @@ fn apply_crystal_turn_undead_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
 
     Vec::new()
@@ -4037,17 +4045,18 @@ fn apply_crystal_thunder_storm_family_spell(
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
         };
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             due_tick,
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: target_id,
                 name: target_name,
             }),
+            None,
+            super::combat_engine::DefenceType::MAC,
         );
     }
 
@@ -4097,17 +4106,18 @@ fn apply_crystal_napalm_shot_spell(
             continue;
         };
         let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             due_tick,
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: target_id,
                 name: target_name,
             }),
+            None,
+            super::combat_engine::DefenceType::AC,
         );
     }
     Vec::new()
@@ -4155,17 +4165,18 @@ fn apply_crystal_delayed_explosion_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::MAC,
     );
 
     let duration_seconds = damage
@@ -4226,17 +4237,18 @@ fn apply_crystal_delayed_explosion_spell(
         };
         let affected_name =
             entity_name(world, affected_entity).unwrap_or_else(|| "Target".to_string());
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             explosion_tick,
             player_object_id,
             affected_entity,
             damage,
-            Some(affected_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: affected_id,
                 name: affected_name,
             }),
+            None,
+            super::combat_engine::DefenceType::MAC,
         );
     }
     queue_due_packet(
@@ -5564,17 +5576,18 @@ fn apply_crystal_double_slash_spell(
     for delay_ms in [300, 400] {
         let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(delay_ms));
         let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             due_tick,
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: target_id,
                 name: target_name,
             }),
+            None,
+            super::combat_engine::DefenceType::AC,
         );
     }
     Vec::new()
@@ -5608,29 +5621,31 @@ fn apply_crystal_twin_drake_blade_spell(
         .insert(super::components::Facing(direction));
     let damage = crystal_melee_magic_damage(world, skill, magic);
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         queued_before_world_tick_due_tick(tick, combat_delay_ticks(300)),
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: target_id,
             name: target_name.clone(),
         }),
+        None,
+        super::combat_engine::DefenceType::AC,
     );
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         queued_before_world_tick_due_tick(tick, combat_delay_ticks(400)),
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::AC,
     );
     let stun_due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(400));
     let duration_ticks = combat_delay_ticks(
@@ -6334,17 +6349,18 @@ fn apply_crystal_special_arrow_shot(
         tick,
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
-    schedule_damage_to_monster(
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        super::combat_engine::DefenceType::AC,
     );
 
     match magic.spell.as_str() {
@@ -6439,17 +6455,18 @@ fn apply_crystal_archer_basic_shot(
     let damage = crystal_archer_state_damage(world, crystal_magic_damage(magic, skill.level));
     let hit_count = if magic.spell == "DoubleShot" { 2 } else { 1 };
     for hit in 0..hit_count {
-        schedule_damage_to_monster(
+        schedule_player_magic_on_monster(
             world,
             due_tick.saturating_add(hit),
             player_object_id,
             target_entity,
             damage,
-            Some(target_name.clone()),
             Some(PendingMonsterDefeatAction {
                 object_id: context.target_id,
                 name: target_name.clone(),
             }),
+            None,
+            super::combat_engine::DefenceType::AC,
         );
     }
     Vec::new()

@@ -1148,14 +1148,14 @@ pub(super) fn crystal_spell_defence_type(spell: Spell) -> DefenceType {
         | Spell::FlashDash
         | Spell::CrescentSlash
         | Spell::BladeAvalanche
-        | Spell::SlashingBurst => DefenceType::AC,
-        // Archer bow shots are dodged by agility.
-        Spell::StraightShot
+        | Spell::SlashingBurst
+        // Archer bow shots resolve as physical (AC) blows in Crystal.
+        | Spell::StraightShot
         | Spell::DoubleShot
         | Spell::ExplosiveTrap
         | Spell::ElementalShot
         | Spell::BindingShot
-        | Spell::NapalmShot => DefenceType::Agility,
+        | Spell::NapalmShot => DefenceType::AC,
         // Everything else (wizard/taoist magic) is magic-armour mitigated.
         _ => DefenceType::MAC,
     }
