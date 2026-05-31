@@ -2087,6 +2087,15 @@ fn file_account_store_survives_fresh_config_reload() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut first = SimulationSession::new(config);
+    let _ = first.handle_packet(ClientPacket::NewAccount {
+        account_id: "disk".to_string(),
+        password: "demo".to_string(),
+        birth_date_binary: 0,
+        user_name: String::new(),
+        secret_question: String::new(),
+        secret_answer: String::new(),
+        email_address: String::new(),
+    });
     let _ = first.handle_packet(ClientPacket::Login {
         account_id: "disk".to_string(),
         password: "demo".to_string(),
@@ -28970,7 +28979,7 @@ fn sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain() {
 fn stage3_playable_pve_loop_persists_after_reconnect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let login_packets = session.handle_packet(ClientPacket::Login {
-        account_id: "stage3-loop".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(login_packets
@@ -29062,7 +29071,7 @@ fn stage3_playable_pve_loop_persists_after_reconnect() {
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
     let relogin_packets = reloaded.handle_packet(ClientPacket::Login {
-        account_id: "stage3-loop".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(relogin_packets
@@ -34439,7 +34448,7 @@ fn visible_player_config_shapes_feed_world_sprite_snapshot() {
 fn item_roll_fields_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let packets = session.handle_packet(ClientPacket::Login {
-        account_id: "roll-save".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(packets
@@ -34499,7 +34508,7 @@ fn item_roll_fields_persist_through_save_and_reload() {
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
     let login_packets = reloaded.handle_packet(ClientPacket::Login {
-        account_id: "roll-save".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(login_packets
@@ -34781,7 +34790,7 @@ fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
 fn storage_items_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let packets = session.handle_packet(ClientPacket::Login {
-        account_id: "storage-save".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(packets
@@ -34817,7 +34826,7 @@ fn storage_items_persist_through_save_and_reload() {
         .clone();
     let mut reloaded = SimulationSession::new(reloaded_config);
     let login_packets = reloaded.handle_packet(ClientPacket::Login {
-        account_id: "storage-save".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(login_packets
@@ -36174,7 +36183,7 @@ fn storage_password_can_exist_without_forcing_lock_when_config_disabled() {
 fn storage_password_set_unlock_remove_updates_crystal_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     let login_packets = session.handle_packet(ClientPacket::Login {
-        account_id: "storage-password".to_string(),
+        account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
     assert!(login_packets
