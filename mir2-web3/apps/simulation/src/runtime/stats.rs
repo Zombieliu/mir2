@@ -23,7 +23,6 @@ use mir2_protocol::MirClass;
 use super::crystal_compat::*;
 use super::equipment::EquipmentState;
 use super::resources::{BuffResource, InventoryResource, SessionResource, Stage5SystemsResource};
-use crate::config::crystal_base_vitals;
 
 /// Crystal social experience-rate bonuses. Marriage, mentorship, and guild
 /// membership each grant the player a small bonus to experience gained, mirroring
@@ -158,81 +157,137 @@ pub(super) struct PlayerStatsResource {
     pub(super) stats: PlayerStats,
 }
 
-/// Per-class base contribution that is *safe* to feed everywhere because it does
-/// not perturb the legacy combat numbers: weights, base agility, accuracy
-/// display, plus the resistance/recovery/crit caps. Derived from the Crystal
-/// `BaseStats` formula table (`crystal_base_stats_packet_manifest`).
-struct ClassBaseProfile {
-    accuracy: i32,
-    agility: i32,
-    bag_weight_base: i32,
-    bag_weight_gain: i32,
-    hand_weight_base: i32,
-    hand_weight_gain: i32,
-    wear_weight_base: i32,
-    wear_weight_gain: i32,
+/// Crystal `StatFormula` — selects the level-scaling curve for a base stat.
+#[derive(Clone, Copy)]
+enum CrystalStatFormula {
+    Health,
+    Mana,
+    Weight,
+    Stat,
 }
 
-fn class_base_profile(class: MirClass) -> ClassBaseProfile {
+/// One per-class base-stat entry (mirrors Crystal `Shared.BaseStat`).
+struct CrystalBaseStat {
+    stat: u8,
+    formula: CrystalStatFormula,
+    base: i32,
+    gain: f32,
+    gain_rate: f32,
+}
+
+/// Exact port of Crystal `Shared/BaseStats.cs :: BaseStat.Calculate(job, level)`.
+/// `Gain == 0` yields a flat `Base` (accuracy/agility); otherwise the curve
+/// depends on the formula and class.
+fn crystal_base_stat_value(entry: &CrystalBaseStat, class: MirClass, level: i32) -> i32 {
+    if entry.gain == 0.0 {
+        return entry.base;
+    }
+    let l = level.max(0) as f32;
+    let base = entry.base as f32;
+    let gain = entry.gain;
+    let rate = entry.gain_rate;
+    let value = match entry.formula {
+        CrystalStatFormula::Health => match class {
+            MirClass::Warrior => base + (l / gain + rate + l / 20.0) * l,
+            _ => base + (l / gain + rate) * l,
+        },
+        CrystalStatFormula::Mana => match class {
+            MirClass::Wizard => base + ((l / gain + 2.0) * 2.2 * l) + (l * rate),
+            MirClass::Taoist => (base + l / gain * 2.2 * l) + (l * rate),
+            _ => base + (l * gain) + (l * rate),
+        },
+        CrystalStatFormula::Weight => base + (l / gain) * l,
+        CrystalStatFormula::Stat => base + (l / gain),
+    };
+    value as i32
+}
+
+/// Per-class base-stat table. Values match this repository's `BaseStats` packet
+/// manifest (the contract the client computes its own display from), which is
+/// in turn Crystal's `Settings.ClassBaseStats` for this build.
+fn class_base_stats(class: MirClass) -> &'static [CrystalBaseStat] {
+    use CrystalStatFormula::{Health, Mana, Stat, Weight};
+    macro_rules! s {
+        ($stat:expr, $f:expr, $b:expr, $g:expr, $r:expr) => {
+            CrystalBaseStat {
+                stat: $stat,
+                formula: $f,
+                base: $b,
+                gain: $g,
+                gain_rate: $r,
+            }
+        };
+    }
     match class {
-        MirClass::Warrior => ClassBaseProfile {
-            accuracy: 5,
-            agility: 15,
-            bag_weight_base: 50,
-            bag_weight_gain: 3,
-            hand_weight_base: 12,
-            hand_weight_gain: 13,
-            wear_weight_base: 15,
-            wear_weight_gain: 20,
-        },
-        MirClass::Wizard => ClassBaseProfile {
-            accuracy: 5,
-            agility: 15,
-            bag_weight_base: 50,
-            bag_weight_gain: 5,
-            hand_weight_base: 12,
-            hand_weight_gain: 90,
-            wear_weight_base: 15,
-            wear_weight_gain: 100,
-        },
-        MirClass::Taoist => ClassBaseProfile {
-            accuracy: 5,
-            agility: 18,
-            bag_weight_base: 50,
-            bag_weight_gain: 4,
-            hand_weight_base: 12,
-            hand_weight_gain: 42,
-            wear_weight_base: 15,
-            wear_weight_gain: 50,
-        },
-        MirClass::Assassin => ClassBaseProfile {
-            accuracy: 7,
-            agility: 18,
-            bag_weight_base: 50,
-            bag_weight_gain: 3,
-            hand_weight_base: 12,
-            hand_weight_gain: 30,
-            wear_weight_base: 15,
-            wear_weight_gain: 33,
-        },
-        MirClass::Archer => ClassBaseProfile {
-            accuracy: 8,
-            agility: 15,
-            bag_weight_base: 50,
-            bag_weight_gain: 4,
-            hand_weight_base: 12,
-            hand_weight_gain: 30,
-            wear_weight_base: 15,
-            wear_weight_gain: 33,
-        },
+        MirClass::Warrior => &[
+            s!(CRYSTAL_STAT_HP, Health, 14, 4.0, 4.5),
+            s!(CRYSTAL_STAT_MP, Mana, 11, 3.5, 0.0),
+            s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 3.0, 0.0),
+            s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 20.0, 0.0),
+            s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 13.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_AC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
+            s!(CRYSTAL_STAT_ACCURACY, Stat, 5, 0.0, 0.0),
+        ],
+        MirClass::Wizard => &[
+            s!(CRYSTAL_STAT_HP, Health, 14, 15.0, 1.8),
+            s!(CRYSTAL_STAT_MP, Mana, 13, 5.0, 0.0),
+            s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 5.0, 0.0),
+            s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 100.0, 0.0),
+            s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 90.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_MC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_MC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
+            s!(CRYSTAL_STAT_ACCURACY, Stat, 5, 0.0, 0.0),
+        ],
+        MirClass::Taoist => &[
+            s!(CRYSTAL_STAT_HP, Health, 14, 6.0, 2.5),
+            s!(CRYSTAL_STAT_MP, Mana, 13, 8.0, 0.0),
+            s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 4.0, 0.0),
+            s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 50.0, 0.0),
+            s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 42.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_MAC, Stat, 0, 12.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_MAC, Stat, 0, 6.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_SC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_SC, Stat, 0, 7.0, 0.0),
+            s!(CRYSTAL_STAT_AGILITY, Stat, 18, 0.0, 0.0),
+            s!(CRYSTAL_STAT_ACCURACY, Stat, 5, 0.0, 0.0),
+        ],
+        MirClass::Assassin => &[
+            s!(CRYSTAL_STAT_HP, Health, 14, 4.0, 3.25),
+            s!(CRYSTAL_STAT_MP, Mana, 11, 5.0, 0.0),
+            s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 3.5, 0.0),
+            s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 33.0, 0.0),
+            s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 30.0, 0.0),
+            s!(CRYSTAL_STAT_AGILITY, Stat, 18, 0.0, 0.0),
+            s!(CRYSTAL_STAT_ACCURACY, Stat, 7, 0.0, 0.0),
+        ],
+        MirClass::Archer => &[
+            s!(CRYSTAL_STAT_HP, Health, 14, 4.0, 3.25),
+            s!(CRYSTAL_STAT_MP, Mana, 11, 4.0, 0.0),
+            s!(CRYSTAL_STAT_BAG_WEIGHT, Weight, 50, 4.0, 0.0),
+            s!(CRYSTAL_STAT_WEAR_WEIGHT, Weight, 15, 33.0, 0.0),
+            s!(CRYSTAL_STAT_HAND_WEIGHT, Weight, 12, 30.0, 0.0),
+            s!(CRYSTAL_STAT_MIN_MC, Stat, 0, 8.0, 0.0),
+            s!(CRYSTAL_STAT_MAX_MC, Stat, 0, 8.0, 0.0),
+            s!(CRYSTAL_STAT_AGILITY, Stat, 15, 0.0, 0.0),
+            s!(CRYSTAL_STAT_ACCURACY, Stat, 8, 0.0, 0.0),
+        ],
     }
 }
 
-/// Crystal weight formula contribution. Weights scale slowly with level and are
-/// only ever used for soft inventory/equip gating, so they do not affect any of
-/// the legacy combat assertions.
-fn weight_value(base: i32, gain: i32, level: i32) -> i32 {
-    base.saturating_add(gain.saturating_mul(level).saturating_div(10))
+/// Per-class stat caps (`Shared/BaseStats.cs :: Caps`). Applied after assembly,
+/// mirroring Crystal `RefreshStatCaps`.
+fn class_stat_caps() -> &'static [(u8, i32)] {
+    &[
+        (CRYSTAL_STAT_MAGIC_RESIST, 2),
+        (CRYSTAL_STAT_POISON_RESIST, 6),
+        (CRYSTAL_STAT_CRITICAL_RATE, 18),
+        (CRYSTAL_STAT_CRITICAL_DAMAGE, 10),
+        (CRYSTAL_STAT_HEALTH_RECOVERY, 8),
+        (CRYSTAL_STAT_SPELL_RECOVERY, 8),
+        (CRYSTAL_STAT_POISON_RECOVERY, 6),
+    ]
 }
 
 /// Sum of an equipped item's explicit `added_stats` for a single Crystal stat
@@ -356,31 +411,20 @@ pub(super) fn compute_player_stats(world: &World) -> PlayerStats {
         .as_ref()
         .map(|character| (character.class, i32::from(character.level)))
         .unwrap_or((MirClass::Warrior, 1));
-    let profile = class_base_profile(class);
-
     let mut stats = PlayerStats::default();
 
-    // --- Base class / level vitals + flat profile. ---
-    let (base_hp, base_mp) = crystal_base_vitals(class, level.max(0) as u16);
-    stats.add(CRYSTAL_STAT_HP, base_hp);
-    stats.add(CRYSTAL_STAT_MP, base_mp);
-    stats.add(CRYSTAL_STAT_AGILITY, profile.agility);
-    stats.add(CRYSTAL_STAT_ACCURACY, profile.accuracy);
-    stats.add(
-        CRYSTAL_STAT_BAG_WEIGHT,
-        weight_value(profile.bag_weight_base, profile.bag_weight_gain, level),
-    );
-    stats.add(
-        CRYSTAL_STAT_HAND_WEIGHT,
-        weight_value(profile.hand_weight_base, profile.hand_weight_gain, level),
-    );
-    stats.add(
-        CRYSTAL_STAT_WEAR_WEIGHT,
-        weight_value(profile.wear_weight_base, profile.wear_weight_gain, level),
-    );
+    // --- Base class / level stats (Crystal RefreshLevelStats via BaseStat.Calculate). ---
+    // HP/MP/AC/MAC/MC/SC/Accuracy/Agility/weights scale per the Crystal formula.
+    // (MinDC/MaxDC are intentionally driven by the melee floor below rather than
+    // the class table — see CRYSTAL_MELEE_BASE_FLOOR.)
+    for entry in class_base_stats(class) {
+        stats.add(entry.stat, crystal_base_stat_value(entry, class, level));
+    }
 
     // Melee floor: the historical `18 + level/2` physical base, applied to both
-    // bounds so the seed range stays collapsed.
+    // bounds so the seed range stays collapsed. This is the one retained
+    // non-Crystal compatibility shim (Crystal derives MinDC/MaxDC from the class
+    // table + equipment with no flat floor); see docs/PLAYER-STATE-ENGINE.md.
     let melee_floor = CRYSTAL_MELEE_BASE_FLOOR + level / 2;
     stats.add(CRYSTAL_STAT_MAX_DC, melee_floor);
     stats.add(CRYSTAL_STAT_MIN_DC, melee_floor);
@@ -393,10 +437,43 @@ pub(super) fn compute_player_stats(world: &World) -> PlayerStats {
     let buffs = world.resource::<BuffResource>();
     accumulate_buffs(&mut stats, buffs);
 
-    // --- Percent multipliers applied to the assembled totals. ---
+    // --- Percent multipliers, then caps (Crystal RefreshStats tail + RefreshStatCaps). ---
     apply_rate_multipliers(&mut stats);
+    apply_stat_caps(&mut stats);
 
     stats
+}
+
+/// Crystal `RefreshStatCaps`: clamp capped stats to their per-class maximum,
+/// floor the combat bounds at 0, and keep each `Min*` no greater than its `Max*`.
+fn apply_stat_caps(stats: &mut PlayerStats) {
+    for (stat, cap) in class_stat_caps() {
+        let capped = stats.get(*stat).min(*cap);
+        stats.values.insert(*stat, capped);
+    }
+    for stat in [
+        CRYSTAL_STAT_MIN_AC,
+        CRYSTAL_STAT_MAX_AC,
+        CRYSTAL_STAT_MIN_MAC,
+        CRYSTAL_STAT_MAX_MAC,
+        CRYSTAL_STAT_MIN_DC,
+        CRYSTAL_STAT_MAX_DC,
+        CRYSTAL_STAT_MIN_MC,
+        CRYSTAL_STAT_MAX_MC,
+        CRYSTAL_STAT_MIN_SC,
+        CRYSTAL_STAT_MAX_SC,
+    ] {
+        let floored = stats.get(stat).max(0);
+        stats.values.insert(stat, floored);
+    }
+    for (min_stat, max_stat) in [
+        (CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MAX_DC),
+        (CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC),
+        (CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MAX_SC),
+    ] {
+        let clamped = stats.get(min_stat).min(stats.get(max_stat));
+        stats.values.insert(min_stat, clamped);
+    }
 }
 
 fn accumulate_equipment(stats: &mut PlayerStats, inventory: &InventoryResource) {
@@ -509,35 +586,27 @@ fn accumulate_buffs(stats: &mut PlayerStats, buffs: &BuffResource) {
     }
 }
 
-/// Apply Crystal `*RatePercent` multipliers to the assembled base+gear totals.
+/// Apply Crystal `*RatePercent` multipliers. Per `RefreshStats`, the percent is
+/// applied to the `Max`/pool stats only (`HP, MP, MaxAC, MaxMAC, MaxDC, MaxMC,
+/// MaxSC, AttackSpeed`), never to the `Min*` bounds.
 fn apply_rate_multipliers(stats: &mut PlayerStats) {
-    let scale = |value: i32, percent: i32| -> i32 {
+    for (value_stat, rate_stat) in [
+        (CRYSTAL_STAT_HP, CRYSTAL_STAT_HP_RATE_PERCENT),
+        (CRYSTAL_STAT_MP, CRYSTAL_STAT_MP_RATE_PERCENT),
+        (CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_AC_RATE_PERCENT),
+        (CRYSTAL_STAT_MAX_MAC, CRYSTAL_STAT_MAX_MAC_RATE_PERCENT),
+        (CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
+        (CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_MC_RATE_PERCENT),
+        (CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MAX_SC_RATE_PERCENT),
+        (CRYSTAL_STAT_ATTACK_SPEED, CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT),
+    ] {
+        let percent = stats.get(rate_stat);
         if percent == 0 {
-            return value;
+            continue;
         }
-        value.saturating_add(value.saturating_mul(percent).div_euclid(100))
-    };
-
-    let dc_rate = stats.get(CRYSTAL_STAT_MAX_DC_RATE_PERCENT);
-    if dc_rate != 0 {
-        let new_max = scale(stats.get(CRYSTAL_STAT_MAX_DC), dc_rate);
-        let new_min = scale(stats.get(CRYSTAL_STAT_MIN_DC), dc_rate);
-        stats.values.insert(CRYSTAL_STAT_MAX_DC, new_max);
-        stats.values.insert(CRYSTAL_STAT_MIN_DC, new_min);
-    }
-    let mc_rate = stats.get(CRYSTAL_STAT_MAX_MC_RATE_PERCENT);
-    if mc_rate != 0 {
-        let new_max = scale(stats.get(CRYSTAL_STAT_MAX_MC), mc_rate);
-        let new_min = scale(stats.get(CRYSTAL_STAT_MIN_MC), mc_rate);
-        stats.values.insert(CRYSTAL_STAT_MAX_MC, new_max);
-        stats.values.insert(CRYSTAL_STAT_MIN_MC, new_min);
-    }
-    let sc_rate = stats.get(CRYSTAL_STAT_MAX_SC_RATE_PERCENT);
-    if sc_rate != 0 {
-        let new_max = scale(stats.get(CRYSTAL_STAT_MAX_SC), sc_rate);
-        let new_min = scale(stats.get(CRYSTAL_STAT_MIN_SC), sc_rate);
-        stats.values.insert(CRYSTAL_STAT_MAX_SC, new_max);
-        stats.values.insert(CRYSTAL_STAT_MIN_SC, new_min);
+        let value = stats.get(value_stat);
+        let scaled = value.saturating_add(value.saturating_mul(percent).div_euclid(100));
+        stats.values.insert(value_stat, scaled);
     }
 }
 
