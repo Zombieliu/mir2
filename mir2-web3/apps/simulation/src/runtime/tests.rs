@@ -4666,6 +4666,38 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn noncombatant_data_only_families_cannot_attack() {
+    // Crystal `CanAttack { return false; }` props that the runtime now treats as non-combatants:
+    // EvilMirBody (53), Football (68), Wall (82), CaveStatue (151), BoulderSpirit (170).
+    let ai_state = super::initial_monster_ai_state(0, 0);
+    for ai in [53u8, 68, 82, 151, 170] {
+        let agent = MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: Point { x: 0, y: 0 },
+            ai,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: 0,
+            next_attack_tick: 0,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: 0,
+        };
+        assert!(
+            !super::monster_can_attack(&agent, &ai_state),
+            "ai {ai} (CanAttack=false) must not attack"
+        );
+    }
+}
+
+#[test]
 fn stationary_data_only_families_neither_chase_nor_patrol() {
     // These data-only families override Crystal `CanMove` to false (turrets, statues, eggs, the
     // EvilMir body parts, the rooted boss flowers). With can_wander true they must still neither

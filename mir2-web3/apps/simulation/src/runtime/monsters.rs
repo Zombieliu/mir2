@@ -758,7 +758,9 @@ pub(super) fn monster_can_attack(agent: &MonsterAgent, ai_state: &MonsterAiState
     match agent.ai {
         18 => ai_state.mode,
         48 => ai_state.mode,
-        1 | 2 | 3 | 56 | 98 | 99 | 128 | 255 => false,
+        // Crystal `CanAttack { return false; }` non-combatants: gates, training dummies, props, the
+        // EvilMir body parts (53), Wall (82), Football (68), CaveStatue (151), BoulderSpirit (170).
+        1 | 2 | 3 | 53 | 56 | 68 | 82 | 98 | 99 | 128 | 151 | 170 | 255 => false,
         _ => true,
     }
 }

@@ -1062,10 +1062,10 @@ pub(super) fn tick_monster_regen(
             .iter_entities()
             .filter_map(|entity| {
                 let agent = entity.get::<MonsterAgent>()?;
-                // ai 56 is the training dummy; ai 89 (IcePillar) overrides `CanRegen` to false.
+                // ai 56 is the training dummy; 89 IcePillar / 151 CaveStatue / 170 BoulderSpirit
+                // override Crystal `CanRegen` to false.
                 if agent.dead
-                    || agent.ai == 56
-                    || agent.ai == ICE_PILLAR_AI
+                    || matches!(agent.ai, 56 | ICE_PILLAR_AI | 151 | 170)
                     || ignores_monster_damage(agent)
                 {
                     return None;
