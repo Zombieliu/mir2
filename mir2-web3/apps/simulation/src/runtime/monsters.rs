@@ -14,8 +14,8 @@ use mir2_protocol::{
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
 use super::combat::{
-    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
-    ranged_attack_delay_ticks, PendingPlayerStatusEffect,
+    combat_delay_ticks, crystal_attack_power_roll, deterministic_chance_roll,
+    melee_attack_delay_ticks, ranged_attack_delay_ticks, PendingPlayerStatusEffect,
 };
 use super::components::{
     entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
@@ -1176,6 +1176,85 @@ pub(super) fn crystal_monster_raw_attack_damage(name: &str) -> i32 {
         .unwrap_or(0)
 }
 
+// Crystal's `GetAttackPower(MinDC, MaxDC)` rolls a fresh value in the range for every swing; these
+// are the rolled counterparts of the `*_damage` leaves above, seeded by (tick, attacker object id).
+pub(super) fn crystal_monster_attack_damage_rolled(name: &str, tick: u64, attacker_id: u32) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            crystal_attack_power_roll(
+                monster.min_dc,
+                monster.max_dc,
+                tick,
+                attacker_id,
+                CRYSTAL_DAMAGE_ROLL_SALT_DC,
+            )
+            .max(1)
+        })
+        .unwrap_or(7)
+}
+
+pub(super) fn crystal_monster_magic_damage_rolled(name: &str, tick: u64, attacker_id: u32) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            crystal_attack_power_roll(
+                monster.min_mc,
+                monster.max_mc,
+                tick,
+                attacker_id,
+                CRYSTAL_DAMAGE_ROLL_SALT_MC,
+            )
+            .max(1)
+        })
+        .unwrap_or(7)
+}
+
+pub(super) fn crystal_monster_raw_magic_damage_rolled(name: &str, tick: u64, attacker_id: u32) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            crystal_attack_power_roll(
+                monster.min_mc,
+                monster.max_mc,
+                tick,
+                attacker_id,
+                CRYSTAL_DAMAGE_ROLL_SALT_MC,
+            )
+        })
+        .unwrap_or(0)
+}
+
+pub(super) fn crystal_monster_raw_attack_damage_rolled(
+    name: &str,
+    tick: u64,
+    attacker_id: u32,
+) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            crystal_attack_power_roll(
+                monster.min_dc,
+                monster.max_dc,
+                tick,
+                attacker_id,
+                CRYSTAL_DAMAGE_ROLL_SALT_DC,
+            )
+        })
+        .unwrap_or(0)
+}
+
+pub(super) fn crystal_monster_spell_damage_rolled(name: &str, tick: u64, attacker_id: u32) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            crystal_attack_power_roll(
+                monster.min_sc,
+                monster.max_sc,
+                tick,
+                attacker_id,
+                CRYSTAL_DAMAGE_ROLL_SALT_SC,
+            )
+            .max(1)
+        })
+        .unwrap_or(7)
+}
+
 pub(super) fn crystal_monster_effect_for_name(name: &str) -> u8 {
     crystal_monster_by_name(name)
         .map(|monster| monster.effect)
@@ -1971,78 +2050,80 @@ pub(super) fn monster_player_attack_damage(
     agent: &MonsterAgent,
     source: &Point,
     target: &Point,
+    attacker_id: u32,
 ) -> i32 {
+    let tick = super::session::runtime_tick(world);
     let base_damage = match agent.ai {
         7 | 10 | 11 | 13 | 14 | 17 | 22 | 28 | 30 | 33 | 35 | 36 | 37 | 38 | 49 | 51 | 54 | 79
-        | 112 | 115 | 173 => crystal_monster_attack_damage(monster_name),
+        | 112 | 115 | 173 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         48 => 0,
-        16 => crystal_monster_raw_attack_damage(monster_name),
-        19 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        19 => crystal_monster_attack_damage(monster_name),
-        20 if tile_distance(source, target) > 1 => crystal_monster_attack_damage(monster_name) * 3,
-        20 => crystal_monster_attack_damage(monster_name),
-        43 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        43 => crystal_monster_attack_damage(monster_name),
+        16 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        19 if tile_distance(source, target) > 1 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        19 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        20 if tile_distance(source, target) > 1 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id) * 3,
+        20 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        43 if tile_distance(source, target) > 2 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        43 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         47 => 0,
-        50 => crystal_monster_attack_damage(monster_name),
+        50 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         27 if tile_distance(source, target) > 1 => 0,
-        27 => crystal_monster_attack_damage(monster_name),
-        34 => crystal_monster_raw_attack_damage(monster_name),
-        174 => crystal_monster_raw_attack_damage(monster_name),
-        179 => crystal_monster_raw_attack_damage(monster_name),
-        180 => crystal_monster_attack_damage(monster_name),
-        186 => crystal_monster_attack_damage(monster_name),
-        120 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        119 | 120 => crystal_monster_attack_damage(monster_name),
-        121 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        121 => crystal_monster_attack_damage(monster_name),
-        122 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        122 => crystal_monster_attack_damage(monster_name),
-        123 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        123 => crystal_monster_attack_damage(monster_name),
-        124 => crystal_monster_attack_damage(monster_name),
-        125 => crystal_monster_attack_damage(monster_name) * 2,
-        102 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        102 => crystal_monster_raw_attack_damage(monster_name),
-        86 if tile_distance(source, target) > 2 => crystal_monster_magic_damage(monster_name),
-        86 => crystal_monster_attack_damage(monster_name),
-        88 => crystal_monster_magic_damage(monster_name),
-        126 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        126 => crystal_monster_raw_attack_damage(monster_name),
-        127 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        127 => crystal_monster_attack_damage(monster_name),
-        187 => crystal_monster_raw_attack_damage(monster_name),
+        27 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        34 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        174 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        179 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        180 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        186 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        120 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        119 | 120 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        121 if tile_distance(source, target) > 1 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        121 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        122 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        122 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        123 if tile_distance(source, target) > 2 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        123 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        124 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        125 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id) * 2,
+        102 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        102 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        86 if tile_distance(source, target) > 2 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        86 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        88 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        126 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        126 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        127 if tile_distance(source, target) > 1 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        127 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        187 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
         188 if tile_distance(source, target) > 1 => {
-            crystal_monster_raw_attack_damage(monster_name) * 2
+            crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id) * 2
         }
-        188 => crystal_monster_raw_attack_damage(monster_name),
-        189 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        189 => crystal_monster_raw_attack_damage(monster_name),
-        190 => crystal_monster_raw_attack_damage(monster_name),
+        188 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        189 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        189 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        190 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
         192 if tile_distance(source, target) > 1 => {
-            crystal_monster_raw_attack_damage(monster_name) * 3
+            crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id) * 3
         }
-        192 => crystal_monster_raw_attack_damage(monster_name),
-        130 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        130 => crystal_monster_attack_damage(monster_name),
-        131 if tile_distance(source, target) > 2 => crystal_monster_spell_damage(monster_name),
-        131 => crystal_monster_attack_damage(monster_name),
-        118 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        118 => crystal_monster_attack_damage(monster_name),
-        181 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
-        181 => crystal_monster_attack_damage(monster_name),
-        182 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        182 => crystal_monster_attack_damage(monster_name),
-        45 | 46 => crystal_monster_attack_damage(monster_name),
-        117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
-        117 => crystal_monster_attack_damage(monster_name),
+        192 => crystal_monster_raw_attack_damage_rolled(monster_name, tick, attacker_id),
+        130 if tile_distance(source, target) > 1 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        130 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        131 if tile_distance(source, target) > 2 => crystal_monster_spell_damage_rolled(monster_name, tick, attacker_id),
+        131 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        118 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        118 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        181 if tile_distance(source, target) > 1 => crystal_monster_magic_damage_rolled(monster_name, tick, attacker_id),
+        181 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        182 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        182 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        45 | 46 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
+        117 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         // Crystal `MonsterObject.Attack` deals `GetAttackPower(MinDC, MaxDC)` for every family that
         // does not override it (SpittingSpider, ShamanZombie, BoneSpearman, VampireSpider,
         // SpittingToad, the plain MonsterObject, …). The previous flat `7` placeholder made those
         // monsters deal a fixed 7 to players regardless of their stats; fall back to the monster's
         // real damage-class instead. Families that never strike players (guards, training dummy,
         // egg, devil node) never reach this path.
-        _ => crystal_monster_attack_damage(monster_name),
+        _ => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
     };
     let mitigation = total_defence_bonus(
         world.resource::<InventoryResource>(),

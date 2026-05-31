@@ -1,6 +1,7 @@
 use super::super::resources::ObjectIdAllocatorResource;
 use super::{
     bomb_spider_template, bug_bat_template, build_crystal_current_map_spawn_table,
+    crystal_monster_attack_damage_rolled,
     build_spawn_table, can_occupy, combat_delay_ticks, crystal_dynamic_monster_template,
     crystal_local_time_snapshot, crystal_npc_free_bag_slots, crystal_packet_move_delay_ticks,
     current_location, current_player_object_id, entity_by_object_id, entity_facing,
@@ -4314,6 +4315,29 @@ fn crystal_reviving_zombie_life_count_is_randomised_zero_to_two() {
     assert!(
         counts[0] > 0 && counts[1] > 0 && counts[2] > 0,
         "life counts should span 0, 1 and 2 across zombies: {counts:?}"
+    );
+}
+
+#[test]
+fn crystal_monster_attack_damage_rolls_across_its_class_range() {
+    // BoneSpearman carries DC 17-30. Crystal's GetAttackPower rolls a fresh value per swing rather
+    // than always returning the maximum.
+    let mut saw_min = false;
+    let mut saw_max = false;
+    let mut saw_mid = false;
+    for tick in 0..4_000u64 {
+        let value = crystal_monster_attack_damage_rolled("BoneSpearman", tick, 77_000);
+        assert!(
+            (17..=30).contains(&value),
+            "rolled damage {value} outside DC range 17..=30"
+        );
+        saw_min |= value == 17;
+        saw_max |= value == 30;
+        saw_mid |= value > 17 && value < 30;
+    }
+    assert!(
+        saw_min && saw_mid && saw_max,
+        "rolled damage should span the whole DC range, not pin to the maximum"
     );
 }
 

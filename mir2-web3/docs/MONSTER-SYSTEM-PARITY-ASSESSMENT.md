@@ -4,14 +4,14 @@ _Last updated: 2026-05-30. Scope: `apps/simulation/src/runtime/{monster_ai,monst
 
 ## TL;DR — the monster AI module is far more complete than earlier audits claimed
 
-A prior gap note estimated monster AI at "~16–20% (绝大多数怪走同一套通用状态机)". A direct file-by-file comparison against the Crystal source (submodule pulled, 212 monster subclasses) does **not** support that number. The monster AI module is approximately **78–85%** complete for the **87 spawned AI families** (the families that the stock respawn manifests actually place on maps). The remaining work is a long tail of per-family nuances plus a few base-loop behaviors — not a wholesale rewrite.
+A prior gap note estimated monster AI at "~16–20% (绝大多数怪走同一套通用状态机)". A direct file-by-file comparison against the Crystal source (submodule pulled, 212 monster subclasses) does **not** support that number. Coming into this session the monster-AI module was already ~78–85% complete for the **87 spawned AI families** (the families the stock respawn manifests actually place on maps); the session's fixes — notably correcting the base `MonsterObject` damage (it was a flat 7), adding `GetAttackPower` variance, regen, and several per-family behaviours — bring it to roughly **86–90%**. The remaining work is the special-attack-branch variance, a few complex boss mechanics, and combat-module fidelity (MAC mitigation).
 
 Two completeness lenses, kept separate on purpose:
 
 | Lens | Estimate | Notes |
 | --- | --- | --- |
-| Spawned families (87 of 212) — playable content | ~78–85% | Deep per-family handling already exists |
-| All 212 Crystal monster classes | ~40% | 117 "data-only" classes are defined but never placed by stock respawns (no gameplay impact until spawned by GM/quests/custom content) |
+| Spawned families (87 of 212) — playable content | ~86–90% | Deep per-family handling; base damage + variance now corrected |
+| All 212 Crystal monster classes | ~42% | 117 "data-only" classes are defined but never placed by stock respawns (no gameplay impact until spawned by GM/quests/custom content) |
 
 ## What is already implemented faithfully (verified against Crystal source)
 
@@ -27,17 +27,37 @@ Two completeness lenses, kept separate on purpose:
 
 ## Changes made this session
 
-1. **Monster HP regeneration (`ProcessRegen`)** — _new_. Living, damaged monsters recover `≈2.2%·MaxHP + 1` every 10 ticks (Crystal `RegenDelay = 10000ms`), with object-id phasing reproducing Crystal's randomised `RegenTime`. Non-combat props (gates/traps/elementals that ignore damage) and training dummies are excluded. `combat.rs::tick_monster_regen`, wired into `advance_world`. Deterministic tests added.
+All landed with deterministic tests and verified against the CI-style suite
+(`cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`): the
+pre-existing flaky baseline stayed at 70 failures with **zero new failures** and
++8 new passing tests.
 
-_(Further per-family fixes from the in-progress audit will be appended here as they land.)_
+1. **Monster HP regeneration (`ProcessRegen`)** — living, damaged monsters recover `≈2.2%·MaxHP + 1` every 10 ticks (Crystal `RegenDelay`), object-id phased. Non-combat props and training dummies excluded. `combat.rs::tick_monster_regen`.
+2. **`PoisonStopRegen`** — a monster with an active green/bleeding poison no longer regenerates (Crystal's default for every monster bar the training dummy).
+3. **Real damage class instead of a flat `7`** — `monster_player_attack_damage` fell through to a hardcoded `7` for every family without an explicit case, so the plain `MonsterObject` plus SpittingSpider, ShamanZombie, BoneSpearman, VampireSpider, SpittingToad, … all dealt exactly 7 to players regardless of stats. They now use their damage class.
+4. **Monster attack damage variance** — monster DC/MC/SC damage now rolls `Random(MinDC..MaxDC)` (Crystal `GetAttackPower`, Luck 0) per swing instead of always-max, deterministically seeded by `(tick, attacker object id)`. Applied to the base attack path (`monster_player_attack_damage`) and monster-vs-monster (`summon_attack_damage`); 473 of 555 monsters have a DC range.
+5. **SpittingSpider green poison-on-hit** — `PoisonTarget(8, 5, Green)` was missing.
+6. **RevivingZombie** — `LifeCount` is now a per-zombie `Random.Next(3)` (0–2 revivals, ~1/3 stay dead) on a randomised 4–24 s `RevivalTime`, instead of a guaranteed two revivals on a fixed 4 s timer.
+7. **WaterDragon (ai 181)** — routed through the shared EvilCentipede ambush cycle (invisible until a target is within 3 tiles, HP restored while buried); 425 spawned ambushers previously stood permanently visible.
 
 ## Genuine remaining gaps (to reach ≥90% on spawned families)
 
-- **Damage variance** — monster melee/magic damage currently returns `max(MinDC, MaxDC)` (always-max) rather than Crystal's `GetAttackPower = Random(MinDC, MaxDC+1)`. 473 of 555 monsters have a DC range, so this is a broad lethality-curve gap. **Belongs to the combat module** (not monster-AI), but it is the single biggest fidelity item and it makes high-level monsters one/two-shot low-HP characters (visible in `armadillo_*`/`snow_yeti_*` test expectations).
-- **Magic vs physical mitigation** — all monster damage is mitigated by player AC (`total_defence_bonus`); magic-typed monster attacks (`DefenceType.MAC*`) should be mitigated by player MAC. Combat-module-adjacent.
-- **`ShockTime`** — the player-skill-induced "stop attacking / drop target" timer is a stub (`shock_time = 0`); the few skills that set it on monsters do not yet suppress monster targeting.
-- **Long tail of per-family nuances** — being enumerated by an automated Crystal-vs-Rust audit; fixes tracked in follow-up commits.
+- **Variance on the special-attack branches** — the ~22 boss/AoE special-attack damage branches in `advance_world` (rage stomps, triple-DC slams, wide-line magic, …) still use always-max; only the base attack path was rolled this session.
+- **Magic vs physical mitigation** — all monster damage is mitigated by player AC (`total_defence_bonus`); magic-typed monster attacks (`DefenceType.MAC*`) should use player MAC. Combat-module-adjacent.
+- **`ShockTime`** — the player-skill-induced "stop attacking / drop target" timer is a stub (`shock_time = 0`).
+- **Complex boss mechanics (1–2 entities each, need new infra)** — HellLord `SpawnQuakes` (player-damaging ground hazards), SnowWolfKing `FindWeakerTarget` teleport-on-hit, YinDevilNode friendly-DC buff aura.
 - **Data-only families (117)** — AI exists in Crystal but the families are never placed by stock respawns; no gameplay impact until spawned.
+
+## Note on the automated audit
+
+A parallel Crystal-vs-Rust audit (three agents over all 87 spawned families)
+surfaced candidate gaps, but ~40% were false positives on verification — e.g.
+BugBagMaggot/RootSpider range (already `CRYSTAL_DATA_RANGE`), WoomaTaurus rage
+duration (correct once 1 tick = 1 s is accounted for), ManectricClaw/DarkWraith
+cooldowns/ranges (already approximated), Armadillo dig-out cycle (already routed
+through `update_dig_out_zombie_state`), SnakeTotem/StoneTrap taunt (already
+covered by friendly-summon targeting). Every finding above was re-verified
+against the Crystal source before any change.
 
 ## Test-harness note (pre-existing, not introduced here)
 

@@ -1032,6 +1032,23 @@ pub(super) fn deterministic_value(
     value % modulo
 }
 
+/// Crystal `MapObject.GetAttackPower(min, max)` with `Luck = 0` (the generated monster manifest
+/// carries no per-monster Luck): a uniform integer in `[min, max]`, clamped the way Crystal clamps
+/// (`min` floored at 0, `max` raised to `min` when inverted). Deterministic so the shared world
+/// simulation stays reproducible across the authority.
+pub(super) fn crystal_attack_power_roll(
+    min: i32,
+    max: i32,
+    current_tick: u64,
+    attacker_id: u32,
+    salt: u64,
+) -> i32 {
+    let min = min.max(0);
+    let max = max.max(min);
+    let span = (max - min) as u64 + 1;
+    min + deterministic_value(current_tick, attacker_id, salt, span) as i32
+}
+
 pub(super) fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: u64) {
     apply_or_refresh_buff(
         world,

@@ -13,6 +13,11 @@ pub(super) const CRYSTAL_GOODS_MAX_STORED_PER_ITEM: usize = 20;
 pub(super) const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
 /// Crystal `MonsterObject.RegenDelay` is 10000ms; at 1 tick/second a damaged monster heals on a
 /// 10-tick cadence. Object-id phasing reproduces the randomised `RegenTime` set on spawn.
+/// Per-damage-class salts for the deterministic GetAttackPower roll, so a monster's DC, MC and SC
+/// rolls on the same tick are decorrelated.
+pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_DC: u64 = 0xD0_0000;
+pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_MC: u64 = 0xC0_0000;
+pub(super) const CRYSTAL_DAMAGE_ROLL_SALT_SC: u64 = 0x50_0000;
 pub(super) const MONSTER_REGEN_INTERVAL_TICKS: u64 = 10;
 /// Crystal heals `(MaxHP * 0.022) + 1` each regen pulse (2.2 per-mille of maximum HP, plus one).
 pub(super) const MONSTER_REGEN_PERMILLE: i32 = 22;

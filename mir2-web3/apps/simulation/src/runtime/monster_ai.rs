@@ -126,14 +126,12 @@ pub(super) fn summon_attack_damage(
     attacker_name: &str,
     attacker_agent: &MonsterAgent,
     target_distance: i32,
+    tick: u64,
+    attacker_id: u32,
 ) -> i32 {
     match attacker_agent.ai {
-        63 => crystal_monster_attack_damage(attacker_name),
-        60 => crystal_monster_attack_damage(attacker_name),
-        61 => crystal_monster_attack_damage(attacker_name),
-        18 => crystal_monster_attack_damage(attacker_name),
         _ if attacker_agent.ai == 62 => 0,
-        _ => crystal_monster_attack_damage(attacker_name),
+        _ => crystal_monster_attack_damage_rolled(attacker_name, tick, attacker_id),
     }
     .max(if attacker_agent.ai == 61 && target_distance > 0 {
         1
@@ -1024,6 +1022,7 @@ pub(super) fn update_thunder_element_state(
         agent,
         &attack_position,
         player_position,
+        entity_object_id(world, entity).unwrap_or_default(),
     );
     if damage <= 0 {
         return true;
@@ -4051,6 +4050,8 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                                 &monster_name,
                                 &agent,
                                 tile_distance(&position, &target_position),
+                                tick,
+                                attacker_id,
                             );
                             if damage > 0 {
                                 schedule_damage_to_monster(
@@ -4668,6 +4669,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             &agent,
                             &position,
                             &player_position,
+                            attacker_id,
                         )
                     };
                     let attack_type = if armadillo_type_one_branch
