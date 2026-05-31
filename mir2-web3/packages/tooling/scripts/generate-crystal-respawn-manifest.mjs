@@ -137,6 +137,7 @@ function main() {
           monster_auto_rev: monster?.auto_rev ?? false,
           monster_undead: monster?.undead ?? false,
           monster_agility: monster?.agility ?? 0,
+          monster_accuracy: monster?.accuracy ?? 0,
           route: loadRoute(respawn.route_path),
         };
       });
@@ -541,6 +542,10 @@ function parseMonsters(reader) {
     const max_mc = stats.get(7) ?? 0;
     const min_sc = stats.get(8) ?? 0;
     const max_sc = stats.get(9) ?? 0;
+    // Crystal Stat enum: Accuracy = 10, Agility = 11
+    // (Crystal/Shared/Data/Stat.cs). Both drive the GetArmour(ACAgility) hit
+    // roll between attacker.Accuracy and target.Agility.
+    const accuracy = stats.get(10) ?? 0;
     const agility = stats.get(11) ?? 0;
     const light = reader.readUInt8();
     const attack_speed = reader.readUInt16();
@@ -575,6 +580,7 @@ function parseMonsters(reader) {
       min_sc,
       max_sc,
       agility,
+      accuracy,
       light,
       attack_speed,
       move_speed,

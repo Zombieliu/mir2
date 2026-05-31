@@ -219,6 +219,16 @@ the manifest the dodge activates 1:1 with Crystal. Test:
 `crystal_monster_player_hit_roll_is_inert_at_zero_accuracy_and_dodges_with_accuracy`
 (accuracy=0 → always hit; accuracy=1 + huge agility → dodge + Miss indicator).
 
+**Data pipeline:** the manifest generator
+(`generate-crystal-respawn-manifest.mjs`) now extracts monster Accuracy
+(`Stat.Accuracy = 10`) alongside the already-extracted Agility
+(`Stat.Agility = 11`) from `Server.MirDB`, and emits `monster_accuracy` on
+each respawn. The only remaining step to activate BOTH hit rolls (player→
+monster, which gates on monster Agility, and monster→player, which gates on
+monster Accuracy) is to regenerate the committed manifest JSON with the
+binary `Server.MirDB` present (not in-repo — same data constraint as the
+MMap.Lib art). No further runtime code is required.
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:
