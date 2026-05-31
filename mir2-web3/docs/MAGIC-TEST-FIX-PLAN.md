@@ -1,9 +1,44 @@
 # Magic / combat test failures → green: diagnosis & plan
 
-Status: **40 of 50 magic tests fixed** on branch `claude/optimistic-mayer-gswKV`
-(PR #8). `magic_packet_*` went from 50 failing → **10 failing / 67 passing**.
-The dominant safe-zone root cause is fully resolved; the remaining 10 are a
-behaviour/fixture long-tail (below).
+Status: **ALL 50 magic_packet_* tests fixed** on branch
+`claude/optimistic-mayer-gswKV` (PR #8). Full single-threaded lib failures went
+from 70 → 19, with **zero regressions** (baseline failure set is a strict
+subset; verified by `comm`). The 19 remaining are unrelated to magic: combat
+damage-branch tests, storage/persistence, soak, and a manifest-drift transfer.
+
+## Root causes fixed (all engine-correct, no behaviour hacks)
+
+1. **Safe-zone origins (dominant).** Offensive-magic preflight forbids casting
+   from/onto a safe-zone tile; tests used coordinates (notably `(333,267)` and
+   open-tile searches) that the Bichon manifest safe zones now cover. Fixed with
+   `find_combat_origin_box` / `find_combat_origin_line` / `is_combat_position`
+   test helpers and `is_combat_position` guards on search idioms.
+2. **Required items.** PoisonShot/CrippleShot need a poison amulet; binding_shot
+   / delayed_explosion / explosive_trap / trap need an Amulet. Added equips.
+3. **Duplicate object ids.** Two tests cast at `target_id 3002`, which resolved
+   to the starter-scene monster inside the safe zone (out of range from the
+   relocated caster). Spawn an own target with a unique id.
+4. **Cast-kind / offensive misclassification (engine).** Several spells defaulted
+   to single-target `Target` (or `offensive`) and bailed:
+   - SelfOnly buffs: `SoulShield`, `BlessedArmour`, `UltimateEnhancer`,
+     `MoonMist`.
+   - Non-offensive cleanse: `Purification` (Target-kind, may target an ally, but
+     must not require a hostile target).
+   - Directional/self-centred AoE: `IceThrust`, `HeavenlySword`, `ThunderStorm`
+     (cast with `target_id 0` + a facing) → `Direction`.
+
+These were genuine engine bugs (the spells were uncastable as designed), fixed
+in `skills.rs::crystal_spell_cast_kind` / `crystal_spell_is_offensive`.
+
+## Remaining 19 (NOT magic — separate follow-up)
+9 combat damage-branch (armadillo/snow_yeti/general_meow/shinsu/stonetrap/
+water_dragon — likely the same safe-zone-origin fix), 4 persistence/soak, 2
+storage, 2 movement/manifest (incl. the manifest-drift `walk_onto_blocked_...`),
+and `crystal_current_map_spawn_table` / `mental_state_trickshot`.
+
+---
+
+## Historical diagnosis (kept for reference)
 
 ## Remaining 10 (need per-test work, not the safe-zone template)
 
