@@ -4586,6 +4586,45 @@ fn crystal_monster_armour_subtracts_its_ac_from_player_melee() {
 }
 
 #[test]
+fn crystal_spell_magic_defence_classification_matches_crystal() {
+    // The audit: Wizard/Taoist offensive spells (MinMC/MinSC damage) resolve MAC; warrior/assassin
+    // melee skills (MinDC damage) resolve AC, with BladeAvalanche the lone DC-damage MAC exception.
+    for magic in [
+        "FireBall",
+        "GreatFireBall",
+        "ThunderBolt",
+        "ThunderStorm",
+        "SoulFireBall",
+        "FlameDisruptor",
+        "IceThrust",
+        "Plague",
+        "OneWithNature",
+        "BladeAvalanche",
+    ] {
+        assert!(
+            super::crystal_spell_name_uses_magic_defence(magic),
+            "{magic} should resolve against MAC"
+        );
+    }
+    for physical in [
+        "HalfMoon",
+        "CrossHalfMoon",
+        "CrescentSlash",
+        "HeavenlySword",
+        "CatTongue",
+        "MoonMist",
+        "Thrusting",
+        "Slaying",
+        "",
+    ] {
+        assert!(
+            !super::crystal_spell_name_uses_magic_defence(physical),
+            "{physical} should resolve against AC"
+        );
+    }
+}
+
+#[test]
 fn crystal_unhandled_family_deals_real_damage_class_not_flat_seven() {
     // BoneSpearman (ai 29) carries DC 17-30. Before the fix every family missing an explicit
     // damage case fell through to a flat `7`; it must now deal its real damage class.

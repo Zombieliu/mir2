@@ -350,15 +350,17 @@ fn monster_has_poison_bit(world: &World, monster_entity: Entity, bit: u16) -> bo
         .unwrap_or(false)
 }
 
-/// Crystal `MapObject.GetArmour(DefenceType.AC*)` → `GetDefencePower(MinAC, MaxAC)` =
-/// `Random.Next(MinAC, MaxAC + 1)`: the physical armour roll a monster soaks an incoming hit with.
-/// A monster spawned with a literal (non-manifest) name carries no AC, so test fixtures using
-/// `DisplayName::literal` are unaffected. A `Red` poison halves the roll (Crystal `ArmourRate -= 0.5`).
+/// Crystal `MapObject.GetArmour` → `GetDefencePower(min, max)` = `Random.Next(min, max + 1)`: the
+/// armour roll a monster soaks an incoming hit with — physical `MinAC..MaxAC` for an AC-typed hit,
+/// magic `MinMAC..MaxMAC` for a magic (Wizard/Taoist) hit. A monster spawned with a literal
+/// (non-manifest) name carries no armour, so `DisplayName::literal` test fixtures are unaffected. A
+/// `Red` poison halves the roll (Crystal `ArmourRate -= 0.5`).
 fn crystal_monster_attacked_armour(
     world: &World,
     monster_entity: Entity,
     attacker_id: u32,
     current_tick: u64,
+    magic_defence: bool,
 ) -> i32 {
     let Some(name) = entity_name(world, monster_entity) else {
         return 0;
@@ -366,8 +368,13 @@ fn crystal_monster_attacked_armour(
     let Some(template) = crystal_monster_by_name(&name) else {
         return 0;
     };
-    let min_ac = template.min_ac.max(0);
-    let max_ac = template.max_ac.max(min_ac);
+    let (min_raw, max_raw) = if magic_defence {
+        (template.min_mac, template.max_mac)
+    } else {
+        (template.min_ac, template.max_ac)
+    };
+    let min_ac = min_raw.max(0);
+    let max_ac = max_raw.max(min_ac);
     if max_ac <= 0 {
         return 0;
     }
@@ -397,6 +404,7 @@ fn crystal_resolve_player_attack_on_monster(
     attacker_id: u32,
     raw_damage: i32,
     current_tick: u64,
+    magic_defence: bool,
 ) -> Option<i32> {
     if Some(attacker_id) != current_player_object_id(world) {
         return Some(raw_damage);
@@ -405,7 +413,8 @@ fn crystal_resolve_player_attack_on_monster(
     if monster_has_poison_bit(world, monster_entity, CRYSTAL_POISON_STUN) {
         damage = (damage as f32 * 1.5) as i32;
     }
-    let armour = crystal_monster_attacked_armour(world, monster_entity, attacker_id, current_tick);
+    let armour =
+        crystal_monster_attacked_armour(world, monster_entity, attacker_id, current_tick, magic_defence);
     if armour >= damage {
         return None;
     }
@@ -696,6 +705,9 @@ pub(super) struct PendingCombatAction {
     pub(super) due_packet: Option<ServerPacket>,
     pub(super) player_movement: Option<PendingPlayerMovement>,
     pub(super) on_monster_defeat: Option<PendingMonsterDefeatAction>,
+    /// Crystal `DefenceType`: a magic-typed player hit (Wizard/Taoist spell) resolves against the
+    /// target monster's MAC instead of its physical AC. Physical attacks leave this `false`.
+    pub(super) monster_magic_defence: bool,
 }
 
 pub(super) fn queue_pending_combat_action(world: &mut World, action: PendingCombatAction) {
@@ -717,6 +729,7 @@ pub(super) fn queue_due_packet(world: &mut World, due_tick: u64, packet: ServerP
             due_packet: Some(packet),
             player_movement: None,
             on_monster_defeat: None,
+            monster_magic_defence: false,
         },
     );
 }
@@ -737,6 +750,7 @@ pub(super) fn schedule_heal_to_player(world: &mut World, due_tick: u64, heal: i3
             due_packet: None,
             player_movement: None,
             on_monster_defeat: None,
+            monster_magic_defence: false,
         },
     );
 }
@@ -819,6 +833,7 @@ pub(super) fn schedule_damage_to_player_with_effect_due_packet_and_movement(
             due_packet,
             player_movement,
             on_monster_defeat: None,
+            monster_magic_defence: false,
         },
     );
 }
@@ -840,6 +855,7 @@ pub(super) fn schedule_player_status_effect(
             due_packet: None,
             player_movement: None,
             on_monster_defeat: None,
+            monster_magic_defence: false,
         },
     );
 }
@@ -865,6 +881,29 @@ pub(super) fn schedule_damage_to_monster(
     );
 }
 
+/// A magic-typed (Wizard/Taoist spell) hit on a monster: resolves against the target's MAC rather
+/// than its physical AC (Crystal `DefenceType.MAC`). Otherwise identical to `schedule_damage_to_monster`.
+pub(super) fn schedule_magic_damage_to_monster(
+    world: &mut World,
+    due_tick: u64,
+    attacker_id: u32,
+    target_entity: Entity,
+    damage: i32,
+    _target_name: Option<String>,
+    defeat_action: Option<PendingMonsterDefeatAction>,
+) {
+    schedule_monster_combat_action(
+        world,
+        due_tick,
+        attacker_id,
+        target_entity,
+        damage,
+        defeat_action,
+        None,
+        true,
+    );
+}
+
 pub(super) fn schedule_damage_to_monster_with_due_packet(
     world: &mut World,
     due_tick: u64,
@@ -874,6 +913,29 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
     _target_name: Option<String>,
     defeat_action: Option<PendingMonsterDefeatAction>,
     due_packet: Option<ServerPacket>,
+) {
+    schedule_monster_combat_action(
+        world,
+        due_tick,
+        attacker_id,
+        target_entity,
+        damage,
+        defeat_action,
+        due_packet,
+        false,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn schedule_monster_combat_action(
+    world: &mut World,
+    due_tick: u64,
+    attacker_id: u32,
+    target_entity: Entity,
+    damage: i32,
+    defeat_action: Option<PendingMonsterDefeatAction>,
+    due_packet: Option<ServerPacket>,
+    magic_defence: bool,
 ) {
     queue_pending_combat_action(
         world,
@@ -886,6 +948,7 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
             due_packet,
             player_movement: None,
             on_monster_defeat: defeat_action,
+            monster_magic_defence: magic_defence,
         },
     );
 }
@@ -1591,6 +1654,7 @@ pub(super) fn resolve_pending_combat_actions(
                         action.attacker_id,
                         action.damage,
                         current_tick,
+                        action.monster_magic_defence,
                     ) {
                         Some(net) => net,
                         None => {

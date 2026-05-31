@@ -21,7 +21,8 @@ use super::buffs::{
 use super::combat::{
     apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
     queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_damage_to_player, schedule_heal_to_player, PendingMonsterDefeatAction,
+    schedule_damage_to_player, schedule_heal_to_player, schedule_magic_damage_to_monster,
+    PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -2832,12 +2833,49 @@ fn hostile_monsters_in_square(world: &World, center: &Point, radius: i32) -> Vec
         .collect()
 }
 
+/// Crystal `DefenceType` per skill: Wizard/Taoist offensive spells (MinMC/MinSC damage) resolve a
+/// monster's MAC; warrior/assassin melee skills (MinDC damage) resolve its AC. Classified from each
+/// skill's damage stat in the Crystal source, with `BladeAvalanche` the one DC-damage skill Crystal
+/// still resolves against MAC. Ambiguous / unlisted spells default to physical (AC) — the prior
+/// behaviour — so only confidently-magic spells switch.
+pub(super) fn crystal_spell_name_uses_magic_defence(spell: &str) -> bool {
+    matches!(
+        spell,
+        "FireBall"
+            | "GreatFireBall"
+            | "HellFire"
+            | "ThunderBolt"
+            | "FireBang"
+            | "FireWall"
+            | "Lightning"
+            | "FrostCrunch"
+            | "ThunderStorm"
+            | "IceStorm"
+            | "FlameDisruptor"
+            | "FlameField"
+            | "Blizzard"
+            | "MeteorStrike"
+            | "MeteorShower"
+            | "FireBurst"
+            | "IceThrust"
+            | "FireBounce"
+            | "SoulFireBall"
+            | "Plague"
+            | "PoisonCloud"
+            | "Poisoning"
+            | "OneWithNature"
+            | "BladeAvalanche"
+            | "StraightShot"
+            | "DoubleShot"
+    )
+}
 fn schedule_damage_to_hostile_monsters_at(
     world: &mut World,
     position: &Point,
     due_tick: u64,
     caster_object_id: u32,
     damage: i32,
+    magic_defence: bool,
 ) {
     for target_entity in hostile_monsters_at_position(world, position) {
         schedule_damage_to_hostile_monster_entity(
@@ -2846,6 +2884,7 @@ fn schedule_damage_to_hostile_monsters_at(
             due_tick,
             caster_object_id,
             damage,
+            magic_defence,
         );
     }
 }
@@ -2856,23 +2895,37 @@ fn schedule_damage_to_hostile_monster_entity(
     due_tick: u64,
     caster_object_id: u32,
     damage: i32,
+    magic_defence: bool,
 ) {
     let Some(target_id) = entity_object_id(world, target_entity) else {
         return;
     };
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
-        world,
-        due_tick,
-        caster_object_id,
-        target_entity,
-        damage,
-        Some(target_name.clone()),
-        Some(PendingMonsterDefeatAction {
-            object_id: target_id,
-            name: target_name,
-        }),
-    );
+    let defeat_action = Some(PendingMonsterDefeatAction {
+        object_id: target_id,
+        name: target_name.clone(),
+    });
+    if magic_defence {
+        schedule_magic_damage_to_monster(
+            world,
+            due_tick,
+            caster_object_id,
+            target_entity,
+            damage,
+            Some(target_name),
+            defeat_action,
+        );
+    } else {
+        schedule_damage_to_monster(
+            world,
+            due_tick,
+            caster_object_id,
+            target_entity,
+            damage,
+            Some(target_name),
+            defeat_action,
+        );
+    }
 }
 
 fn monster_is_undead(world: &World, entity: Entity) -> bool {
@@ -3277,7 +3330,7 @@ fn apply_crystal_lightning_spell(
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
         };
-        schedule_damage_to_monster(
+        schedule_magic_damage_to_monster(
             world,
             due_tick,
             player_object_id,
@@ -3333,6 +3386,7 @@ fn apply_crystal_hell_fire_spell(
                 due_tick,
                 player_object_id,
                 damage,
+                crystal_spell_name_uses_magic_defence(&magic.spell),
             );
         }
     }
@@ -3363,6 +3417,7 @@ fn apply_crystal_fire_bang_family_spell(
             due_tick,
             player_object_id,
             damage,
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
     }
     Vec::new()
@@ -3458,6 +3513,7 @@ fn apply_crystal_meteor_shower_spell(
         due_tick,
         player_object_id,
         damage,
+        crystal_spell_name_uses_magic_defence(&magic.spell),
     );
 
     let mut secondary_targets = hostile_monsters_in_square(world, &target_position, 4)
@@ -3487,6 +3543,7 @@ fn apply_crystal_meteor_shower_spell(
             due_tick,
             player_object_id,
             damage.saturating_div(2).max(1),
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
     }
 
@@ -3598,6 +3655,7 @@ fn apply_crystal_fire_bounce_spell(
             due_tick,
             player_object_id,
             damage,
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
         source_object_id = target_object_id;
         source_position = target_position;
@@ -3636,6 +3694,7 @@ fn apply_crystal_thunder_bolt_spell(
         due_tick,
         player_object_id,
         damage,
+        crystal_spell_name_uses_magic_defence(&magic.spell),
     );
     Vec::new()
 }
@@ -3722,6 +3781,7 @@ fn apply_crystal_flame_disruptor_spell(
         due_tick,
         player_object_id,
         damage,
+        crystal_spell_name_uses_magic_defence(&magic.spell),
     );
     Vec::new()
 }
@@ -3767,6 +3827,7 @@ fn apply_crystal_ice_thrust_spell(
                     due_tick,
                     player_object_id,
                     damage,
+                    crystal_spell_name_uses_magic_defence(&magic.spell),
                 );
                 if monster_level(world, target_entity) <= crystal_player_level(world, player) + 10 {
                     if let Some(object_id) = entity_object_id(world, target_entity) {
@@ -3835,7 +3896,7 @@ fn apply_crystal_frost_crunch_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_magic_damage_to_monster(
         world,
         due_tick,
         player_object_id,
@@ -4035,7 +4096,7 @@ fn apply_crystal_thunder_storm_family_spell(
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
         };
-        schedule_damage_to_monster(
+        schedule_magic_damage_to_monster(
             world,
             due_tick,
             player_object_id,
@@ -4806,6 +4867,7 @@ fn apply_crystal_plague_spell(
             due_tick,
             player_object_id,
             direct_damage,
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
         let Some(object_id) = entity_object_id(world, target_entity) else {
             continue;
@@ -5259,7 +5321,7 @@ fn apply_crystal_projectile_damage_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    schedule_magic_damage_to_monster(
         world,
         due_tick,
         player_object_id,
@@ -5439,6 +5501,7 @@ fn apply_crystal_blade_avalanche_spell(
                     due_tick,
                     player_object_id,
                     row_damage,
+                    crystal_spell_name_uses_magic_defence(&magic.spell),
                 );
             }
         }
@@ -5491,6 +5554,7 @@ fn apply_crystal_crescent_slash_spell(
                 due_tick,
                 player_object_id,
                 damage,
+                crystal_spell_name_uses_magic_defence(&magic.spell),
             );
         }
     }
@@ -5540,6 +5604,7 @@ fn apply_crystal_half_moon_family_spell(
                 due_tick,
                 player_object_id,
                 damage,
+                crystal_spell_name_uses_magic_defence(&magic.spell),
             );
         }
     }
@@ -5715,6 +5780,7 @@ fn apply_crystal_heavenly_sword_spell(
                 due_tick,
                 player_object_id,
                 damage,
+                crystal_spell_name_uses_magic_defence(&magic.spell),
             );
         }
     }
@@ -5980,6 +6046,7 @@ fn apply_crystal_moon_mist_spell(
             due_tick,
             player_object_id,
             damage,
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
         if monster_is_undead(world, target_entity) {
             if let Some(object_id) = entity_object_id(world, target_entity) {
@@ -6051,6 +6118,7 @@ fn apply_crystal_cat_tongue_spell(
         due_tick,
         player_object_id,
         damage,
+        crystal_spell_name_uses_magic_defence(&magic.spell),
     );
     let roll = deterministic_roll(
         tick,
@@ -6142,6 +6210,7 @@ fn apply_crystal_one_with_nature_spell(
             due_tick,
             player_object_id,
             damage,
+            crystal_spell_name_uses_magic_defence(&magic.spell),
         );
         if has_poison {
             if let Some(object_id) = entity_object_id(world, target_entity) {
