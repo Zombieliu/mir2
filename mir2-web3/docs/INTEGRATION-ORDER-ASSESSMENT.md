@@ -50,11 +50,20 @@ system + world-authority work, not combat.
    *silently green* (the `changes` job 403s and skips the Rust build + web gate),
    so every "CI passing" below is currently meaningless. Landing it makes the
    signal real for everything after. **Decision point (yours):** it will turn the
-   gate **red**, because it exposes the ~46 pre-existing `mir2-simulation` parity
-   failures already on `main` (combat/stat/magic, e.g. `casting_summon_shinsu…`).
-   That red is *honest*, not new breakage. Either (a) land it and accept
-   red-but-honest CI while a gameplay-owned session triages the 46, or (b) land it
-   together with a triage plan. Don't keep the false green.
+   gate **red**, because it exposes the pre-existing `mir2-simulation` parity
+   failures already on `main`. **Measured 2026-05-31** on this branch (which adds
+   zero simulation source — docs/tests only — so the count is `main`'s):
+   `cargo +1.89.0 test -p mir2-simulation --lib` → **906 passed / 46 failed**
+   (249 s). All 46 live in **one place — `runtime::session::tests`** (the
+   per-session path), and all are Crystal combat/magic parity: **26 magic**, 9
+   shot/arrow, 4 stat, 3 poison, 2 summon, 1 armadillo (e.g.
+   `casting_summon_shinsu_recalls_existing_pet`,
+   `armadillo_type_one_branch_uses_three_half_dc_hits`). The zone path,
+   persistence, and map suites are **not** among them. So the red is *honest*,
+   *concentrated*, and *single-owner* (the combat/magic session track), not
+   scattered rot — low-risk to coordinate. Either (a) land it and accept
+   red-but-honest CI while the combat/magic session triages those 46, or (b) land
+   it together with that triage plan. Don't keep the false green.
 2. **Clean batch, any order: #21, #17, #22.** Conflict-free, recent, each verified
    green on its own track (#21 zone-combat parity, #17 persistence on live PG, #22
    architect docs/tests). #21 should precede #13 (see below) so combat-crit
