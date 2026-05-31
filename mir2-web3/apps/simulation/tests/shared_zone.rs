@@ -3771,6 +3771,57 @@ fn zone_native_player_magic_damages_monster_and_projects_authoritatively() {
 }
 
 #[test]
+fn zone_native_player_magic_subtracts_monster_magic_armour() {
+    // A monster with authoritative MAC must mitigate incoming attack-magic with
+    // Random(MinMAC,MaxMAC) — mirroring how the physical path subtracts AC. Here
+    // FireBall deals 9, the monster's MAC range is a flat 3, so the zone applies
+    // 9 - 3 = 6 against a 20-HP monster -> 70% health, not the raw 9 (= 55%).
+    let mut zone = zone();
+    let first = session("first");
+    let attacker = first.clone();
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            334,
+            270,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 3,
+                max_mac: 3,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 7,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    let struck = zone.tick(20);
+
+    // 9 (spell) - 3 (rolled MAC) = 6 damage, leaving 14/20 HP = 70%.
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(6));
+    assert!(has_packet(&struck, &attacker, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info }
+            if info.object_id == 9100 && info.percent == 70
+    )));
+}
+
+#[test]
 fn zone_native_player_area_magic_damages_secondary_monsters_authoritatively() {
     let mut zone = zone();
     let first = session("first");

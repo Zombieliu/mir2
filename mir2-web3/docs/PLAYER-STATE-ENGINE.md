@@ -104,7 +104,15 @@ path. `crystal_player_zone_base_melee_damage` (the non-authoritative fallback +
 range/magic base) is unified with the engine. This closes the session↔zone
 combat divergence.
 
+On the defensive side, a player's direct attack-magic against a monster now
+subtracts the target's `Random(MinMAC,MaxMAC)` (`zone_magic_damage_after_monster_armour`),
+mirroring the AC subtraction the physical path applies — so the ~404/555 monsters
+with non-zero template MAC mitigate spell damage authoritatively.
+
 Remaining minor items: the physical `Random(Agility+1) > attacker.Accuracy` miss
-check on monster melee (monster accuracy is not yet modelled server-side),
-`MinMAC..MaxMAC` magic armour rolls (magic currently uses the AC roll + resist
-miss), and proximity-gating the lover/mentor experience bonus.
+check on monster melee (monster accuracy is **not** present in the extracted data —
+the `generate-crystal-respawn-manifest.mjs` extractor reads `Agility` but drops it
+from the monster output and never reads `Accuracy`, so this needs a data-pipeline
+change before it can fire), `MinMAC..MaxMAC` mitigation for ground/DOT attack spells
+(FireWall/Blizzard/etc. still tick raw damage), and proximity-gating the lover/mentor
+experience bonus.

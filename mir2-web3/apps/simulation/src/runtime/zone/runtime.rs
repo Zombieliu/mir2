@@ -1834,6 +1834,18 @@ impl ZoneRuntime {
             for hit_object_id in std::iter::once(object_id).chain(secondary_target_ids.clone()) {
                 let hit_damage =
                     zone_magic_hit_damage(spell, hit_object_id != object_id, native_damage);
+                // Subtract the struck monster's magic armour, mirroring the AC
+                // subtraction the physical path applies. Each secondary target
+                // rolls against its own MAC.
+                let hit_damage = match self.native_monsters.get(&hit_object_id) {
+                    Some(target_monster) => zone_magic_damage_after_monster_armour(
+                        target_monster,
+                        hit_damage,
+                        player.object_id,
+                        now_ms,
+                    ),
+                    None => hit_damage,
+                };
                 self.pending_native_hits.push(PendingNativeMonsterHit {
                     ready_at_ms: now_ms,
                     session_id: session_id.clone(),
@@ -2883,12 +2895,23 @@ impl ZoneRuntime {
                     source_id: source_object_id,
                     destination_id: target_object_id,
                 });
+            // Each bounce target mitigates with its own magic armour, like the
+            // primary attack-magic hit.
+            let bounce_damage = match self.native_monsters.get(&target_object_id) {
+                Some(target_monster) => zone_magic_damage_after_monster_armour(
+                    target_monster,
+                    damage,
+                    player_object_id,
+                    due_ms,
+                ),
+                None => damage,
+            };
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: due_ms,
                 session_id: session_id.clone(),
                 attacker_object_id: player_object_id,
                 object_id: target_object_id,
-                damage,
+                damage: bounce_damage,
             });
             source_object_id = target_object_id;
             source_position = target_position;
@@ -7291,6 +7314,31 @@ fn zone_apply_player_critical(
     }
     let bonus_steps = stats.critical_damage.max(1);
     damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+}
+
+/// Subtract a target monster's authoritative magic armour `Random(MinMAC,MaxMAC)`
+/// from an attack spell's damage, mirroring how `zone_resolve_player_physical_attack`
+/// subtracts the monster's `Random(MinAC,MaxAC)` for melee/range. Crystal attack
+/// spells mitigate via the target's MAC, so the zone — not the gateway — owns the
+/// reduction. Floors at 0 (matching the physical path), and is a no-op for the many
+/// monsters whose template MAC is 0.
+fn zone_magic_damage_after_monster_armour(
+    monster: &ZoneNativeMonster,
+    damage: i32,
+    attacker_object_id: u32,
+    now_ms: u64,
+) -> i32 {
+    if damage <= 0 {
+        return damage;
+    }
+    let armour = zone_roll_stat_range(
+        monster.defense.min_mac,
+        monster.defense.max_mac,
+        now_ms,
+        attacker_object_id,
+        0x2AC,
+    );
+    damage.saturating_sub(armour).max(0)
 }
 
 /// Authoritatively recompute a spell's damage from the Crystal magic template,
