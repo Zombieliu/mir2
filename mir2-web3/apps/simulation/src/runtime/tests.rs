@@ -54807,3 +54807,74 @@ fn crystal_ai57_town_archer_attacks_red_name_player() {
         "AI-57 town archer should fire ObjectRangeAttack at red-name player, got {attack_packets:?}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 4 is Crystal's `SpittingSpider` — line attacker that applies
+// green poison on every line hit (Crystal CompleteAttack:
+// `PoisonTarget(target, 8, 5, PoisonType.Green, 2000)`). The existing
+// `spitting_spider_ai_attacks_from_two_tiles_with_line_timing` test covers the
+// line geometry + damage timing; this one proves the green-poison status
+// effect lands on the player (chance_denominator=1 — Crystal's poison is
+// deterministic on hit).
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai4_spitting_spider_poisons_player_on_hit() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_origin = Point { x: 900, y: 900 };
+    let spider_object_id = 98_904_u32;
+    set_player_position(&mut session, player_origin.clone());
+    let current_tick = runtime_tick(session.app.world());
+
+    session.app.world_mut().spawn((
+        ObjectId(spider_object_id),
+        DisplayName::literal("Spitting Spider AI-4 Test"),
+        Position(Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        }),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals { hp: 50, max_hp: 50 },
+        MonsterAgent {
+            image: 43,
+            dead: false,
+            patrol_origin: player_origin.clone(),
+            ai: 4,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+    sync_visible_objects(&mut session);
+
+    let mut saw_poison = false;
+    for _ in 0..10 {
+        let _ = session.tick();
+        if session
+            .world_snapshot()
+            .active_buffs
+            .iter()
+            .any(|buff| buff.key == super::TOXIC_GHOUL_GREEN_POISON_BUFF_KEY)
+        {
+            saw_poison = true;
+            break;
+        }
+    }
+    assert!(
+        saw_poison,
+        "AI-4 SpittingSpider should apply GreenPoison on hit (Crystal CompleteAttack: PoisonTarget Green)"
+    );
+}

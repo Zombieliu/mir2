@@ -57,7 +57,20 @@ matches Crystal `GetAttackPower(MinDC, MaxDC)`). Inert against non-PK players
 FindTarget). Test: `crystal_ai57_town_archer_attacks_red_name_player` (no
 attack when PKPoints=0; ObjectRangeAttack fires after `pk_points = 250`).
 
-## Next candidates (line/AoE attackers — higher effort)
-4 `SpittingSpider` (line+poison), 29 `BoneSpearman` (line),
-44 `BlackFoxman` (close+line). These need a line/area attack pattern beyond the
-generic ranged path.
+### AI 4 → SpittingSpider green-poison-on-hit ✅
+Crystal `SpittingSpider.CompleteAttack` applies
+`PoisonTarget(target, 8, 5, PoisonType.Green, 2000)` to every line target it
+strikes. The Rust runtime already covered the 2-tile line geometry + 300ms
+delay (`spitting_spider_line_branch` + `forward_line_opposing_monster_targets`),
+but the matching green-poison status effect on the *player* was missing — only
+the line geometry hit. Added arm `4 => GreenPoison { chance_denominator: 1,
+duration_ticks: SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS (5) }` to
+`monster_player_status_effect`. `chance_denominator=1` matches Crystal's
+deterministic `PoisonTarget` (no chance roll). Test:
+`crystal_ai4_spitting_spider_poisons_player_on_hit` (asserts the player picks
+up `TOXIC_GHOUL_GREEN_POISON_BUFF_KEY` within 10 ticks of an adjacent AI-4
+spider).
+
+## Next candidates (line attackers — higher effort)
+29 `BoneSpearman` (line), 44 `BlackFoxman` (close+line). These need additional
+line/area patterns beyond the generic ranged + line path.

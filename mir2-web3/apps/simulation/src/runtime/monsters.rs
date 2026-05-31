@@ -2047,6 +2047,10 @@ pub(super) fn monster_player_status_effect(
             chance_denominator: INCARNATED_ZT_PARALYSIS_CHANCE_DENOMINATOR,
             duration_ticks: INCARNATED_ZT_PARALYSIS_DURATION_TICKS,
         }),
+        4 => Some(PendingPlayerStatusEffect::GreenPoison {
+            chance_denominator: 1,
+            duration_ticks: SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS,
+        }),
         28 => Some(PendingPlayerStatusEffect::GreenPoison {
             chance_denominator: TOXIC_GHOUL_GREEN_POISON_CHANCE_DENOMINATOR,
             duration_ticks: TOXIC_GHOUL_GREEN_POISON_DURATION_TICKS,

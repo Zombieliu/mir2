@@ -12,6 +12,7 @@ pub(super) const CRYSTAL_GOODS_BUY_BACK_MAX_STORED: usize = 20;
 pub(super) const CRYSTAL_GOODS_MAX_STORED_PER_ITEM: usize = 20;
 pub(super) const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
 pub(super) const CRYSTAL_RED_NAME_PK_POINTS: i32 = 200;
+pub(super) const SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS: u64 = 5;
 pub(super) const BUG_BAT_IMAGE: u16 = 42;
 pub(super) const BUG_BAT_FALLBACK_VIEW_RANGE: u8 = 7;
 pub(super) const BUG_BAT_FALLBACK_HP: i32 = 3;
