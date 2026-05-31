@@ -371,10 +371,11 @@ pub(super) fn move_distance_for_mode(running: bool) -> i32 {
 /// using the server-side A* search so click-to-move paths around static
 /// blockers and other occupants instead of stalling against them.
 ///
-/// Returns `None` when no route to `to` exists (for example the destination
-/// tile is itself occupied — the common "click a monster to approach it" case),
-/// letting the caller fall back to straight-line stepping which still advances
-/// partway toward the target.
+/// Tries an exact-tile route first; if `to` is unreachable because it is itself
+/// occupied (the common "click a monster to approach it" case), falls back to a
+/// route that stops on a tile *adjacent* to `to`. Returns `None` only when not
+/// even an adjacent tile is reachable, letting the caller fall back to
+/// straight-line stepping.
 fn pathfind_next_step(
     world: &World,
     from: &Point,
@@ -382,7 +383,12 @@ fn pathfind_next_step(
     max_step: i32,
     ignore_entity: Entity,
 ) -> Option<Point> {
-    let path = pathfind::find_path(world, from, to, Some(ignore_entity))?;
+    let path = pathfind::find_path(world, from, to, Some(ignore_entity))
+        .filter(|path| !path.is_empty())
+        .or_else(|| {
+            pathfind::find_path_adjacent(world, from, to, Some(ignore_entity))
+                .filter(|path| !path.is_empty())
+        })?;
     let first = path.first()?.clone();
     if max_step <= 1 {
         return Some(first);

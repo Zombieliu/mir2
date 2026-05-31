@@ -2467,6 +2467,68 @@ fn crystal_packet_attack_timing_rejects_repeat_until_world_tick_advances() {
 }
 
 #[test]
+fn click_to_move_onto_occupied_tile_approaches_adjacent() {
+    // Clicking directly on a monster (an occupied tile) must walk the player up
+    // to it and stop adjacent, rather than stalling in place because the exact
+    // destination tile is unreachable. This exercises the A* adjacency fallback.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player = player_entity(session.app.world()).expect("player entity");
+
+    // Find a clear west-to-east lane of five open tiles on the starter map.
+    let start = (320..=345)
+        .find_map(|x| {
+            let lane: Vec<Point> = (0..5).map(|i| Point { x: x + i, y: 270 }).collect();
+            lane.iter()
+                .all(|p| can_occupy(session.app.world(), p.clone(), Some(player)))
+                .then(|| lane[0].clone())
+        })
+        .expect("test should find five clear horizontal cells");
+    set_player_position(&mut session, start.clone());
+    let monster_tile = Point {
+        x: start.x + 4,
+        y: start.y,
+    };
+    spawn_crystal_monster_for_test(
+        &mut session,
+        98_771,
+        "Trainer",
+        monster_tile.clone(),
+        MirDirection::Left,
+        true,
+    );
+
+    // Click onto the monster's (occupied) tile repeatedly, as an auto-walking
+    // client would, ticking between requests to clear the movement cadence.
+    let mut moved_at_all = false;
+    for _ in 0..8 {
+        session.move_to(monster_tile.clone());
+        let here = player_position(&session);
+        if here != start {
+            moved_at_all = true;
+        }
+        if tile_distance(&here, &monster_tile) <= 1 {
+            break;
+        }
+        session.tick();
+    }
+
+    let final_position = player_position(&session);
+    assert!(
+        moved_at_all,
+        "player should advance toward a clicked occupied tile, stayed at {start:?}"
+    );
+    assert_ne!(
+        final_position, monster_tile,
+        "player must not stand on the occupied monster tile"
+    );
+    assert!(
+        tile_distance(&final_position, &monster_tile) <= 1,
+        "player should end adjacent to the clicked monster, ended at {final_position:?}"
+    );
+}
+
+#[test]
 fn direct_attack_missing_target_rejects_without_runtime_chat() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
