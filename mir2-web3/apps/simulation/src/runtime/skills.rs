@@ -19,9 +19,10 @@ use super::buffs::{
     BuffState,
 };
 use super::combat::{
-    apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
-    queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_heal_to_player, PendingMonsterDefeatAction,
+    apply_monster_poison, combat_delay_ticks, crystal_spell_defence_type, damage_monster_entity,
+    queue_due_packet, queued_before_world_tick_due_tick, ranged_attack_delay_ticks,
+    schedule_damage_to_monster, schedule_heal_to_player, schedule_player_magic_on_monster,
+    PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -5239,17 +5240,21 @@ fn apply_crystal_projectile_damage_spell(
         ranged_attack_delay_ticks(&player_position, &target_position),
     );
     let target_name = entity_name(world, target_entity).unwrap_or_else(|| "Target".to_string());
-    schedule_damage_to_monster(
+    let defence_type = Spell::from_crystal_name(&magic.spell)
+        .map(crystal_spell_defence_type)
+        .unwrap_or(super::combat_engine::DefenceType::MAC);
+    schedule_player_magic_on_monster(
         world,
         due_tick,
         player_object_id,
         target_entity,
         damage,
-        Some(target_name.clone()),
         Some(PendingMonsterDefeatAction {
             object_id: context.target_id,
             name: target_name,
         }),
+        None,
+        defence_type,
     );
     packets
 }

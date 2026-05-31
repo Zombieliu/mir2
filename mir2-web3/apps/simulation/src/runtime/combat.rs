@@ -1096,6 +1096,71 @@ pub(super) fn schedule_heal_to_player(world: &mut World, due_tick: u64, heal: i3
     );
 }
 
+/// Queue a player spell/skill blow against a monster that resolves through the
+/// Crystal `Attacked` pipeline with the given defence type (usually `MAC` for
+/// magic). `raw_damage` is the already-computed spell damage; the resolver
+/// subtracts the target's armour of that type and applies crit. The attacker
+/// snapshot is the caster's full combat stats.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn schedule_player_magic_on_monster(
+    world: &mut World,
+    due_tick: u64,
+    attacker_id: u32,
+    target_entity: Entity,
+    raw_damage: i32,
+    defeat_action: Option<PendingMonsterDefeatAction>,
+    due_packet: Option<ServerPacket>,
+    defence_type: DefenceType,
+) {
+    let attacker = player_combat_stats(world);
+    queue_pending_combat_action(
+        world,
+        PendingCombatAction {
+            due_tick,
+            attacker_id,
+            target: PendingCombatTarget::Monster(target_entity),
+            damage: raw_damage,
+            player_status_effect: None,
+            due_packet,
+            player_movement: None,
+            on_monster_defeat: defeat_action,
+            attack_profile: Some(CombatAttackProfile {
+                attacker,
+                defence_type,
+            }),
+        },
+    );
+}
+
+/// The Crystal `DefenceType` for a player spell, used when routing skill damage
+/// through the combat pipeline. Most offensive magic resolves as `MAC`; warrior
+/// physical skills and a few hybrids use `AC` / `Agility`.
+pub(super) fn crystal_spell_defence_type(spell: Spell) -> DefenceType {
+    match spell {
+        // Warrior weapon skills land as physical blows.
+        Spell::Slaying
+        | Spell::DoubleSlash
+        | Spell::Thrusting
+        | Spell::HalfMoon
+        | Spell::CrossHalfMoon
+        | Spell::FlamingSword
+        | Spell::TwinDrakeBlade
+        | Spell::FlashDash
+        | Spell::CrescentSlash
+        | Spell::BladeAvalanche
+        | Spell::SlashingBurst => DefenceType::AC,
+        // Archer bow shots are dodged by agility.
+        Spell::StraightShot
+        | Spell::DoubleShot
+        | Spell::ExplosiveTrap
+        | Spell::ElementalShot
+        | Spell::BindingShot
+        | Spell::NapalmShot => DefenceType::Agility,
+        // Everything else (wizard/taoist magic) is magic-armour mitigated.
+        _ => DefenceType::MAC,
+    }
+}
+
 pub(super) fn schedule_damage_to_player(
     world: &mut World,
     due_tick: u64,
