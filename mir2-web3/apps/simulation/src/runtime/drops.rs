@@ -2455,6 +2455,9 @@ impl SimulationSession {
             );
         }
         if experience > 0 {
+            // Marriage / mentorship / guild membership grant a Crystal-style
+            // experience-rate bonus (no-op for an unattached player).
+            let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
             let gained_experience = {
                 let mut player = world.resource_mut::<PlayerRuntimeResource>();
                 let before = player.experience;

@@ -1,0 +1,116 @@
+name: mir2 CI
+
+# PR gate for the mir2-web3 rewrite. The repo's other workflows are manual
+# (workflow_dispatch) or push-to-main only, so PRs currently merge with no check.
+# This adds a durable green gate on every PR into main:
+#   - web-resource-gate: typecheck + the offline resource/audio verification suite
+#   - rust-workspace:    workspace build + the deterministic gameplay-logic tests
+# Jobs are path-gated so web-only PRs don't pay for a cold Rust build and vice versa.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, claude/sweet-johnson-v9lEB]
+  workflow_dispatch:
+
+concurrency:
+  group: mir2-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  # dorny/paths-filter lists changed files via the PR API on pull_request events;
+  # without this it 403s and the `changes` job fails, which previously caused the
+  # real gates to be skipped (false green). Keep this so change-detection works.
+  pull-requests: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      rust: ${{ steps.filter.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - 'mir2-web3/apps/web/**'
+              - '.github/workflows/mir2-ci.yml'
+            rust:
+              - 'mir2-web3/apps/**'
+              - 'mir2-web3/packages/**'
+              - 'mir2-web3/Cargo.toml'
+              - 'mir2-web3/Cargo.lock'
+              - '.github/workflows/mir2-ci.yml'
+
+  web-resource-gate:
+    needs: changes
+    # Fail-safe: run when web paths changed OR when change-detection did not
+    # succeed, so a broken `changes` job can never silently skip the real gate.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.web == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mir2-web3/apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      # generate manifests + minimap smoke + coverage report + release preflight +
+      # resource/audio/sound-export tests. Pure offline: no server, no CRYSTAL_CLIENT_ROOT.
+      - name: Offline resource/audio gate
+        run: npm run assets:verify:offline
+      - name: Verify committed generated artifacts are in sync
+        # The present-sound manifest is a committed, deterministic build input; the gate
+        # regenerates it, so any drift here means it was not regenerated before commit.
+        run: git diff --exit-code -- lib/generated/crystal-present-sounds.generated.json
+
+  rust-workspace:
+    needs: changes
+    # Fail-safe: run when rust paths changed OR when change-detection did not
+    # succeed, so a broken `changes` job can never silently skip the real gate.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.rust == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mir2-web3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('mir2-web3/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Build workspace
+        run: cargo build --workspace --locked
+      # Deterministic gameplay-logic crates. mir2-simulation's integration tests
+      # (hero_ai, ranking, security_lifecycle, shared_zone, social_economy_integration,
+      # vertical_slice) plus protocol/game-data unit tests; none require Postgres/Redis/network.
+      # admin-api/gateway tests that need external services are intentionally excluded.
+      - name: Test core crates
+        run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture
+        env:
+          RUST_BACKTRACE: "1"
+          CARGO_TERM_COLOR: always

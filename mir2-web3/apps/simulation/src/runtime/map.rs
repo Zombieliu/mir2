@@ -792,6 +792,7 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
                     hp: max_hp,
                     max_hp,
                     mp: max_mp,
+                    max_mp,
                 },
             ))
             .id(),
@@ -1684,6 +1685,9 @@ pub(super) fn rebuild_world(world: &mut World) {
             },
             runtime_state.vitals,
         ));
+        // Reconcile the freshly spawned player's pools/stat block with the
+        // current class/level/equipment (Crystal `RefreshStats`).
+        super::stats::refresh_player_stats(world);
     }
 
     for record in &config.visible_players {

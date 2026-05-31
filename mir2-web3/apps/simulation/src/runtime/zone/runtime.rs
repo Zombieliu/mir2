@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
-use mir2_game_data::crystal_monster_by_name;
+use mir2_game_data::{crystal_magic_by_spell, crystal_monster_by_name};
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirDirection, MonsterInfo, ObjectAttackInfo, ObjectDiedInfo,
     ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo,
@@ -10,8 +10,10 @@ use mir2_protocol::{
     Point, ServerPacket, Spell, UserItem, UserItemStat,
 };
 
-use super::aoi::{players_visible, points_visible};
+use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
+use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
+use super::ecs::ZoneEcs;
 use super::movement::{
     movement_delay_ms, offset_point, ZONE_MOVE_READY_GRACE_MS, ZONE_RUN_GRACE_MS,
     ZONE_TURN_DELAY_MS,
@@ -66,7 +68,10 @@ const CRYSTAL_SPELL_EFFECT_HEALING: u8 = 3;
 const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP: u8 = 6;
 const CRYSTAL_SPELL_EFFECT_BLEEDING: u8 = 18;
 
-#[derive(Debug, Clone)]
+// Note: ZoneRuntime is intentionally not `Clone`. It owns a `bevy_ecs::World`
+// (see `ecs`), which is not cloneable, and nothing ever cloned a zone runtime
+// (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
+#[derive(Debug)]
 pub struct ZoneRuntime {
     key: ZoneKey,
     collision: ZoneCollision,
@@ -92,6 +97,19 @@ pub struct ZoneRuntime {
     /// Shared environmental hazard state for the map (Crystal `Map.Process`
     /// lightning/fire), authoritative for every player on the map.
     hazard: ZoneHazardState,
+    // Spatial index of player positions for area-of-interest candidate lookup.
+    // Kept in sync with `players` at every position change (join/leave/move/
+    // sync) so visibility diffs scan a local neighborhood instead of all
+    // players. See `aoi_grid` and `recompute_player_visibility`.
+    player_grid: AoiGrid<SessionId>,
+    // Spatial index of zone-object positions (NPCs, owner-generated objects).
+    // Objects do not move after insert, so this is synced only at insert/remove.
+    object_grid: AoiGrid<u32>,
+    // ECS mirror of player entities (L2 step 1). Additive: the `players` map
+    // above is still the source of truth; this World mirrors players at the
+    // same join/leave/move sites so later L2 slices can flip systems to read
+    // from it. Nothing in the tick reads it yet. See docs/L2-ECS-ZONE-DESIGN.md.
+    ecs: ZoneEcs,
     next_object_id: u32,
 }
 
@@ -139,6 +157,8 @@ struct PendingNativePlayerHit {
     target_session_id: SessionId,
     target_object_id: u32,
     damage: i32,
+    /// Whether the incoming hit is magical (mitigated by MAC) or physical (AC).
+    magic: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -236,6 +256,28 @@ impl ZoneRuntime {
         Self::new_with_collision(key, collision)
     }
 
+    /// L2 step-1 invariant: the ECS player mirror must exactly match the
+    /// authoritative `players` map (same sessions, object ids, and positions).
+    /// Returns true when they agree. Test-only; the mirror is not yet read by
+    /// gameplay. See docs/L2-ECS-ZONE-DESIGN.md.
+    #[cfg(test)]
+    pub(crate) fn ecs_mirror_matches_players(&mut self) -> bool {
+        let mut expected: Vec<(SessionId, u32, i32, i32)> = self
+            .players
+            .iter()
+            .map(|(session_id, player)| {
+                (
+                    session_id.clone(),
+                    player.object_id,
+                    player.position.x,
+                    player.position.y,
+                )
+            })
+            .collect();
+        expected.sort();
+        self.ecs.mirror_snapshot() == expected
+    }
+
     pub fn new_with_collision(key: ZoneKey, collision: ZoneCollision) -> Self {
         Self {
             key,
@@ -258,6 +300,11 @@ impl ZoneRuntime {
             occupancy: BTreeMap::new(),
             open_doors: BTreeMap::new(),
             hazard: ZoneHazardState::default(),
+            // Cells are sized to the AOI range so the 3x3 neighborhood of any
+            // point is a superset of everything within AOI range.
+            player_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
+            object_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
+            ecs: ZoneEcs::new(),
             next_object_id: 1_000_000,
         }
     }
@@ -353,6 +400,9 @@ impl ZoneRuntime {
                 session_id,
                 profile,
             } => self.update_chat_profile(&session_id, profile),
+            ZoneCommand::UpdatePlayerCombatStats { session_id, stats } => {
+                self.update_player_combat_stats(&session_id, stats)
+            }
             ZoneCommand::SyncPlayerTransform {
                 session_id,
                 position,
@@ -905,6 +955,10 @@ impl ZoneRuntime {
         let player = ZonePlayer::from_join(join, object_id);
 
         self.occupancy.insert(tile, session_id.clone());
+        self.player_grid
+            .insert(session_id.clone(), &player.position);
+        self.ecs
+            .upsert_player(&session_id, object_id, &player.position);
         self.players.insert(session_id.clone(), player);
         outbounds.extend(self.diff_visibility_for(&session_id));
         outbounds.extend(self.diff_zone_object_visibility_for(&session_id));
@@ -935,6 +989,8 @@ impl ZoneRuntime {
         self.pending_native_player_hits
             .retain(|hit| &hit.target_session_id != session_id);
         self.occupancy.remove(&tile_key(&player.position));
+        self.player_grid.remove(session_id);
+        self.ecs.remove_player(session_id);
 
         let mut observers = Vec::new();
         for (other_session_id, other) in &mut self.players {
@@ -976,6 +1032,7 @@ impl ZoneRuntime {
         let mut outbounds = Vec::new();
         for object_id in object_ids {
             self.objects.remove(&object_id);
+            self.object_grid.remove(&object_id);
             self.native_monsters.remove(&object_id);
             self.dead_object_ids.remove(&object_id);
             self.revived_object_ids.remove(&object_id);
@@ -1202,6 +1259,9 @@ impl ZoneRuntime {
             player.run_step_until_ms = now_ms.saturating_add(ZONE_RUN_GRACE_MS);
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
+            let moved_position = player.position.clone();
+            self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = Vec::new();
@@ -1376,6 +1436,9 @@ impl ZoneRuntime {
             player.run_step_until_ms = 0;
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
+            let moved_position = player.position.clone();
+            self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = self.diff_visibility_for(session_id);
@@ -1403,6 +1466,17 @@ impl ZoneRuntime {
     ) -> Vec<ZoneOutbound> {
         if let Some(player) = self.players.get_mut(session_id) {
             player.chat_profile = profile;
+        }
+        Vec::new()
+    }
+
+    fn update_player_combat_stats(
+        &mut self,
+        session_id: &SessionId,
+        stats: super::types::ZonePlayerCombatStats,
+    ) -> Vec<ZoneOutbound> {
+        if let Some(player) = self.players.get_mut(session_id) {
+            player.combat_stats = stats;
         }
         Vec::new()
     }
@@ -1675,13 +1749,17 @@ impl ZoneRuntime {
                 attack_type,
             },
         };
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(std::slice::from_ref(&attack_packet), now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -1774,13 +1852,17 @@ impl ZoneRuntime {
                 },
             },
         ];
-        self.pending_native_hits.push(PendingNativeMonsterHit {
-            ready_at_ms: now_ms,
-            session_id: session_id.clone(),
-            attacker_object_id: player.object_id,
-            object_id,
-            damage: zone_player_native_damage(&player, damage),
-        });
+        if let Some(resolved_damage) =
+            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+        {
+            self.pending_native_hits.push(PendingNativeMonsterHit {
+                ready_at_ms: now_ms,
+                session_id: session_id.clone(),
+                attacker_object_id: player.object_id,
+                object_id,
+                damage: resolved_damage,
+            });
+        }
         self.apply_zone_object_packets(&action_packets, now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -1822,6 +1904,18 @@ impl ZoneRuntime {
         if cast && now_ms < player.next_spell_ready_at_ms {
             return self.correct_player_location(session_id, now_ms);
         }
+        // Authoritatively recompute the magic damage from the player's stat block
+        // instead of trusting the gateway-supplied scalar. Value-identical to the
+        // session formula, so it only relocates authority; PoisonCloud keeps the
+        // supplied value because its bonus depends on inventory the zone lacks.
+        let damage = if player.combat_stats.has_authoritative_damage()
+            && !zone_magic_keeps_supplied_damage(spell)
+        {
+            zone_authoritative_magic_damage(spell, level, player.combat_stats.max_dc)
+                .unwrap_or(damage)
+        } else {
+            damage
+        };
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
             return self.player_cast_native_ground_magic(
                 session_id,
@@ -2013,6 +2107,18 @@ impl ZoneRuntime {
             for hit_object_id in std::iter::once(object_id).chain(secondary_target_ids.clone()) {
                 let hit_damage =
                     zone_magic_hit_damage(spell, hit_object_id != object_id, native_damage);
+                // Subtract the struck monster's magic armour, mirroring the AC
+                // subtraction the physical path applies. Each secondary target
+                // rolls against its own MAC.
+                let hit_damage = match self.native_monsters.get(&hit_object_id) {
+                    Some(target_monster) => zone_magic_damage_after_monster_armour(
+                        target_monster,
+                        hit_damage,
+                        player.object_id,
+                        now_ms,
+                    ),
+                    None => hit_damage,
+                };
                 self.pending_native_hits.push(PendingNativeMonsterHit {
                     ready_at_ms: now_ms,
                     session_id: session_id.clone(),
@@ -3062,12 +3168,23 @@ impl ZoneRuntime {
                     source_id: source_object_id,
                     destination_id: target_object_id,
                 });
+            // Each bounce target mitigates with its own magic armour, like the
+            // primary attack-magic hit.
+            let bounce_damage = match self.native_monsters.get(&target_object_id) {
+                Some(target_monster) => zone_magic_damage_after_monster_armour(
+                    target_monster,
+                    damage,
+                    player_object_id,
+                    due_ms,
+                ),
+                None => damage,
+            };
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: due_ms,
                 session_id: session_id.clone(),
                 attacker_object_id: player_object_id,
                 object_id: target_object_id,
-                damage,
+                damage: bounce_damage,
             });
             source_object_id = target_object_id;
             source_position = target_position;
@@ -3751,13 +3868,26 @@ impl ZoneRuntime {
                         })
                         .collect::<Vec<_>>();
                     for object_id in affected_object_ids {
+                        // Ground/AoE attack spells mitigate their direct hit with
+                        // the struck monster's magic armour, like the single-target
+                        // cast. The PoisonCloud DoT below is applied separately and
+                        // stays unmitigated (poison is not reduced by MAC).
+                        let hit_damage = match self.native_monsters.get(&object_id) {
+                            Some(monster) => zone_magic_damage_after_monster_armour(
+                                monster,
+                                action.damage,
+                                action.caster_object_id,
+                                now_ms,
+                            ),
+                            None => action.damage,
+                        };
                         outbounds.extend(self.resolve_pending_native_monster_hit(
                             PendingNativeMonsterHit {
                                 ready_at_ms: now_ms,
                                 session_id: action.caster_session_id.clone(),
                                 attacker_object_id: action.caster_object_id,
                                 object_id,
-                                damage: action.damage,
+                                damage: hit_damage,
                             },
                             now_ms,
                         ));
@@ -4000,7 +4130,7 @@ impl ZoneRuntime {
             if target.object_id != hit.target_object_id || target.dead {
                 return Vec::new();
             }
-            let damage = zone_player_native_incoming_damage(target, hit.damage)
+            let damage = zone_player_native_incoming_damage(target, hit.damage, hit.magic, now_ms)
                 .min(target.hp.saturating_sub(1));
             if damage <= 0 {
                 return Vec::new();
@@ -4283,6 +4413,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position,
             direction: summon.direction,
             drops: Vec::new(),
@@ -5033,6 +5164,7 @@ impl ZoneRuntime {
             max_hp: template.hp.max(1),
             hp: template.hp.max(1),
             experience: 0,
+            defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
             position: spawn_position,
             direction,
             drops: Vec::new(),
@@ -5134,15 +5266,23 @@ impl ZoneRuntime {
         }
         monster.next_attack_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_ATTACK_MS);
         let monster_position = monster.position.clone();
-        self.pending_native_player_hits
-            .push(PendingNativePlayerHit {
-                ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
-                attacker_object_id: object_id,
-                attacker_ai: monster.ai,
-                target_session_id: target.session_id.clone(),
-                target_object_id: target.object_id,
-                damage: 1,
-            });
+        // Roll the monster's melee damage from its Crystal stats (matching the
+        // ranged path) instead of a fixed placeholder of 1, so monster→player
+        // damage is the zone's authoritative, data-driven value.
+        let (damage, magic) = zone_native_monster_player_attack_damage(monster, &target.position);
+        let attacker_ai = monster.ai;
+        if damage > 0 {
+            self.pending_native_player_hits
+                .push(PendingNativePlayerHit {
+                    ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
+                    attacker_object_id: object_id,
+                    attacker_ai,
+                    target_session_id: target.session_id.clone(),
+                    target_object_id: target.object_id,
+                    damage,
+                    magic,
+                });
+        }
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
                 object_id,
@@ -5172,7 +5312,7 @@ impl ZoneRuntime {
         direction: MirDirection,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some((monster_position, attack_type, damage, attacker_ai)) = ({
+        let Some((monster_position, attack_type, (damage, magic), attacker_ai)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -5204,6 +5344,7 @@ impl ZoneRuntime {
                     target_session_id: target.session_id.clone(),
                     target_object_id: target.object_id,
                     damage,
+                    magic,
                 });
         }
         let packet = ServerPacket::ObjectRangeAttack {
@@ -6224,6 +6365,7 @@ impl ZoneRuntime {
                 if retained_zone_object_is_drop(packet) {
                     object.expires_at_ms = Some(now_ms.saturating_add(ZONE_DROP_EXPIRE_MS));
                 }
+                self.object_grid.insert(object.object_id, &object.position);
                 self.objects.insert(object.object_id, object);
                 continue;
             }
@@ -6249,6 +6391,7 @@ impl ZoneRuntime {
 
     fn remove_ground_drop_object_for_claim(&mut self, object_id: u32) -> Vec<ZoneOutbound> {
         self.objects.remove(&object_id);
+        self.object_grid.remove(&object_id);
         self.dead_object_ids.remove(&object_id);
         self.revived_object_ids.remove(&object_id);
         self.harvested_object_ids.remove(&object_id);
@@ -6338,6 +6481,7 @@ impl ZoneRuntime {
         }
         for object_id in expired_object_ids {
             self.objects.remove(&object_id);
+            self.object_grid.remove(&object_id);
             self.native_monsters.remove(&object_id);
             self.ground_drops.remove(&object_id);
             self.claimed_ground_drops.remove(&object_id);
@@ -6379,6 +6523,7 @@ impl ZoneRuntime {
 
     fn remove_retained_zone_object(&mut self, object_id: u32) {
         self.objects.remove(&object_id);
+        self.object_grid.remove(&object_id);
         self.native_monsters.remove(&object_id);
         self.pending_native_hits
             .retain(|hit| hit.object_id != object_id && hit.attacker_object_id != object_id);
@@ -6397,15 +6542,30 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id).cloned() else {
             return Vec::new();
         };
-        let comparisons = self
-            .objects
-            .values()
-            .map(|object| {
-                (
-                    object.object_id,
-                    points_visible(&player.position, &object.position),
-                    player.visible_object_ids.contains(&object.object_id),
-                )
+        // Candidate object ids = AOI-grid neighbors (superset of everything in
+        // range) UNION objects already visible to this player (so an object that
+        // just left range still gets its ObjectRemove). Filter to live objects;
+        // the exact points_visible test below preserves full-scan output.
+        let mut candidate_object_ids: BTreeSet<u32> = self
+            .object_grid
+            .neighbors(&player.position)
+            .into_iter()
+            .collect();
+        for object_id in &player.visible_object_ids {
+            if self.objects.contains_key(object_id) {
+                candidate_object_ids.insert(*object_id);
+            }
+        }
+        let comparisons = candidate_object_ids
+            .into_iter()
+            .filter_map(|object_id| {
+                self.objects.get(&object_id).map(|object| {
+                    (
+                        object.object_id,
+                        points_visible(&player.position, &object.position),
+                        player.visible_object_ids.contains(&object.object_id),
+                    )
+                })
             })
             .collect::<Vec<_>>();
         let mut packets = Vec::new();
@@ -6489,6 +6649,9 @@ impl ZoneRuntime {
             player.movement_actions.clear();
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
+            let moved_position = player.position.clone();
+            self.player_grid.moved(session_id, &moved_position);
+            self.ecs.move_player(session_id, &moved_position);
         }
 
         let mut outbounds = self.diff_visibility_for(session_id);
@@ -6910,17 +7073,36 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id).cloned() else {
             return Vec::new();
         };
-        let comparisons = self
-            .players
-            .iter()
-            .filter(|(other_session_id, _)| *other_session_id != session_id)
-            .map(|(other_session_id, other)| {
-                (
-                    other_session_id.clone(),
-                    other.object_id,
-                    players_visible(&player, other),
-                    player.visible_object_ids.contains(&other.object_id),
-                )
+        // Candidate set = players in the AOI grid neighborhood (a superset of
+        // everyone newly/still visible) UNION the players already marked visible
+        // (so someone who just left AOI range still gets an ObjectRemove). The
+        // grid bounds this by local density; the exact players_visible test
+        // below preserves identical output to a full scan.
+        let mut candidate_sessions: BTreeSet<SessionId> = self
+            .player_grid
+            .neighbors(&player.position)
+            .into_iter()
+            .collect();
+        for (other_session_id, other) in &self.players {
+            if other_session_id != session_id
+                && player.visible_object_ids.contains(&other.object_id)
+            {
+                candidate_sessions.insert(other_session_id.clone());
+            }
+        }
+        candidate_sessions.remove(session_id);
+
+        let comparisons = candidate_sessions
+            .into_iter()
+            .filter_map(|other_session_id| {
+                self.players.get(&other_session_id).map(|other| {
+                    (
+                        other_session_id.clone(),
+                        other.object_id,
+                        players_visible(&player, other),
+                        player.visible_object_ids.contains(&other.object_id),
+                    )
+                })
             })
             .collect::<Vec<_>>();
 
@@ -7186,29 +7368,40 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
     }
 }
 
-fn zone_native_monster_player_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
+/// Returns the monster's authoritative attack damage and whether it is a magic
+/// attack (so the zone can mitigate with the target's MAC instead of AC).
+fn zone_native_monster_player_attack_damage(
+    monster: &ZoneNativeMonster,
+    target: &Point,
+) -> (i32, bool) {
     let distance = zone_tile_distance(&monster.position, target);
     match monster.ai {
-        19 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        20 if distance > 1 => zone_crystal_monster_attack_damage(&monster.name) * 3,
-        43 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        120 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        121 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        122 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        123 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        102 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        86 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        88 => zone_crystal_monster_magic_damage(&monster.name),
-        126 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        127 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        188 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
-        189 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        192 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
-        130 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        131 if distance > 2 => zone_crystal_monster_spell_damage(&monster.name),
-        118 | 181 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        182 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        _ => zone_crystal_monster_attack_damage(&monster.name),
+        19 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        20 if distance > 1 => (zone_crystal_monster_attack_damage(&monster.name) * 3, false),
+        43 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        120 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        121 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        122 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        123 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        102 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        86 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        88 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        188 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
+            false,
+        ),
+        189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        192 if distance > 1 => (
+            zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
+            false,
+        ),
+        130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
+        118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        182 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        _ => (zone_crystal_monster_attack_damage(&monster.name), false),
     }
 }
 
@@ -7310,6 +7503,157 @@ fn zone_player_native_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
         .max(1)
 }
 
+/// Deterministically roll an inclusive `[min, max]` stat range using the shared
+/// zone RNG so every observer of the zone derives the same value.
+fn zone_roll_stat_range(min: i32, max: i32, tick: u64, actor_id: u32, salt: u64) -> i32 {
+    let lo = min.min(max).max(0);
+    let hi = max.max(min).max(0);
+    if hi <= lo {
+        return lo;
+    }
+    let span = u64::try_from(hi - lo + 1).unwrap_or(1);
+    let roll = zone_deterministic_roll(
+        tick,
+        usize::try_from(actor_id).unwrap_or_default(),
+        usize::try_from(salt).unwrap_or_default(),
+        span,
+    );
+    lo.saturating_add(i32::try_from(roll).unwrap_or_default())
+}
+
+/// Authoritatively resolve a player's physical (melee/range) attack against a
+/// shared-zone monster.
+///
+/// Historically the attacker's *personal* session pre-rolled the damage and the
+/// zone trusted that scalar — there was no hit/miss check and no armour applied
+/// inside the zone, so the shared world was not the combat authority. This rolls
+/// `Random(MinDC..=MaxDC)` (+ buff DC), runs the Crystal accuracy-vs-agility hit
+/// check, and subtracts `Random(MinAC..=MaxAC)` using the monster's own
+/// authoritative defensive stats.
+///
+/// Returns `None` on a miss (only the already-broadcast swing animation is
+/// shown), or `Some(damage)` on a hit. `damage` may be `0` when armour fully
+/// absorbs the blow (a Crystal "block").
+///
+/// When the attacker has no authoritative stat block yet
+/// (`combat_stats.has_authoritative_damage() == false`) this falls back to the
+/// legacy trusted scalar so existing callers keep working unchanged.
+fn zone_resolve_player_physical_attack(
+    player: &ZonePlayer,
+    monster: &ZoneNativeMonster,
+    monster_object_id: u32,
+    fallback_damage: i32,
+    now_ms: u64,
+) -> Option<i32> {
+    let stats = player.combat_stats;
+    if !stats.has_authoritative_damage() {
+        return Some(zone_player_native_damage(player, fallback_damage));
+    }
+
+    let agility = monster.defense.agility.max(0);
+    if agility > 0 {
+        let roll = zone_deterministic_roll(
+            now_ms,
+            usize::try_from(player.object_id).unwrap_or_default(),
+            usize::try_from(monster_object_id).unwrap_or_default(),
+            u64::try_from(agility.saturating_add(1)).unwrap_or(1),
+        );
+        if roll > u64::try_from(stats.accuracy.max(0)).unwrap_or(0) {
+            return None;
+        }
+    }
+
+    let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
+        .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
+    let armour = zone_roll_stat_range(
+        monster.defense.min_ac,
+        monster.defense.max_ac,
+        now_ms,
+        player.object_id,
+        0x0AC,
+    );
+    Some(base.saturating_sub(armour).max(0))
+}
+
+/// Crystal critical hit: with a `CriticalRate`/100 chance the blow is amplified
+/// by `CriticalDamage * 10%`. Resolved deterministically off the tick (mirrors
+/// the per-session `crystal_apply_player_critical`). Inert when the player has
+/// no crit gear.
+fn zone_apply_player_critical(
+    damage: i32,
+    stats: &super::types::ZonePlayerCombatStats,
+    object_id: u32,
+    now_ms: u64,
+) -> i32 {
+    let rate = stats.critical_rate.clamp(0, 100);
+    if rate <= 0 || damage <= 0 {
+        return damage;
+    }
+    let roll = zone_deterministic_roll(
+        now_ms,
+        usize::try_from(object_id).unwrap_or_default(),
+        0xC817,
+        100,
+    );
+    if roll >= u64::try_from(rate).unwrap_or(0) {
+        return damage;
+    }
+    let bonus_steps = stats.critical_damage.max(1);
+    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+}
+
+/// Subtract a target monster's authoritative magic armour `Random(MinMAC,MaxMAC)`
+/// from an attack spell's damage, mirroring how `zone_resolve_player_physical_attack`
+/// subtracts the monster's `Random(MinAC,MaxAC)` for melee/range. Crystal attack
+/// spells mitigate via the target's MAC, so the zone — not the gateway — owns the
+/// reduction. Floors at 0 (matching the physical path), and is a no-op for the many
+/// monsters whose template MAC is 0.
+fn zone_magic_damage_after_monster_armour(
+    monster: &ZoneNativeMonster,
+    damage: i32,
+    attacker_object_id: u32,
+    now_ms: u64,
+) -> i32 {
+    if damage <= 0 {
+        return damage;
+    }
+    let armour = zone_roll_stat_range(
+        monster.defense.min_mac,
+        monster.defense.max_mac,
+        now_ms,
+        attacker_object_id,
+        0x2AC,
+    );
+    damage.saturating_sub(armour).max(0)
+}
+
+/// Authoritatively recompute a spell's damage from the Crystal magic template,
+/// so the zone — not the attacker's session — owns the magic damage number.
+///
+/// This mirrors the session's `zone_magic_attack_profile` formula exactly
+/// (`crystal_magic_damage_from_base` over the player's melee base, with the two
+/// pure-control spells dealing 0), so for every spell the recomputed value
+/// matches what the gateway previously supplied. Returns `None` for spells with
+/// no magic template so the caller falls back to the supplied value.
+fn zone_authoritative_magic_damage(spell: Spell, level: u8, base: i32) -> Option<i32> {
+    if matches!(spell, Spell::ElectricShock | Spell::Entrapment) {
+        return Some(0);
+    }
+    let template = crystal_magic_by_spell(&format!("{spell:?}"))?;
+    Some(
+        crate::runtime::combat::crystal_magic_damage_from_base(&template, level, base.max(1))
+            .max(1),
+    )
+}
+
+/// Spells whose final damage the gateway adjusts with inventory-dependent item
+/// bonuses (currently only PoisonCloud's amulet bonus), so the zone keeps the
+/// supplied value for them rather than recomputing the base formula.
+fn zone_magic_keeps_supplied_damage(spell: Spell) -> bool {
+    matches!(spell, Spell::PoisonCloud)
+}
+
 fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     if secondary && spell == Spell::MeteorShower {
         return damage.saturating_div(2).max(1);
@@ -7317,10 +7661,32 @@ fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     damage
 }
 
-fn zone_player_native_incoming_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
+fn zone_player_native_incoming_damage(
+    player: &ZonePlayer,
+    base_damage: i32,
+    magic: bool,
+    now_ms: u64,
+) -> i32 {
+    let buff_ac = zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0);
+    // Subtract the player's authoritative base armour, rolled from their stat
+    // block: MAC for magical hits, AC for physical hits. With no stat block the
+    // range is 0..0 and only buff AC + the reduction buff apply (legacy).
+    let (min_armour, max_armour) = if magic {
+        (player.combat_stats.min_mac, player.combat_stats.max_mac)
+    } else {
+        (player.combat_stats.min_ac, player.combat_stats.max_ac)
+    };
+    let base_armour = zone_roll_stat_range(
+        min_armour,
+        max_armour,
+        now_ms,
+        player.object_id,
+        if magic { 0x3AC } else { 0x4AC },
+    );
     let mitigated = base_damage
         .max(0)
-        .saturating_sub(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0));
+        .saturating_sub(buff_ac)
+        .saturating_sub(base_armour);
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated
@@ -8294,7 +8660,7 @@ mod door_tests {
 mod hazard_tests {
     use super::*;
     use crate::runtime::zone::collision::ZoneBounds;
-    use crate::runtime::zone::types::ZoneChatProfile;
+    use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
     use mir2_protocol::{MirClass, MirGender};
 
     fn join_player(zone: &mut ZoneRuntime, id: &str, position: Point) -> SessionId {
@@ -8315,6 +8681,7 @@ mod hazard_tests {
             position,
             direction: MirDirection::Down,
             chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
         }));
         session_id
     }
@@ -8379,5 +8746,86 @@ mod hazard_tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod step1_ecs_mirror_tests {
+    //! L2 step-1 invariant tests: the additive ECS player mirror must stay
+    //! exactly in sync with the authoritative `players` map across join / walk /
+    //! leave. Unit-test layer (not the external `shared_zone` crate) so the
+    //! crate-private `ecs_mirror_matches_players` helper is visible.
+    use super::super::types::{ZoneChatProfile, ZoneJoin, ZonePlayerCombatStats};
+    use super::*;
+    use mir2_protocol::{MirClass, MirDirection, MirGender, Point};
+
+    fn test_join(session: &str, object_id: u32, x: i32, y: i32) -> ZoneJoin {
+        ZoneJoin {
+            session_id: SessionId::new(session),
+            account_id: format!("{session}-acct"),
+            character_index: object_id as i32,
+            object_id,
+            name: format!("P{object_id}"),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 7,
+            hp: 60,
+            max_hp: 60,
+            mp: 100,
+            map_file_name: "0".to_string(),
+            position: Point { x, y },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        }
+    }
+
+    fn test_zone() -> ZoneRuntime {
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded())
+    }
+
+    #[test]
+    fn mirror_matches_players_across_join_walk_leave() {
+        let mut zone = test_zone();
+        let first = SessionId::new("first");
+
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 330, 270)));
+        zone.handle(ZoneCommand::Join(test_join("second", 102, 332, 270)));
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after joins"
+        );
+
+        zone.handle(ZoneCommand::Walk {
+            session_id: first.clone(),
+            direction: MirDirection::Right,
+            seq: 1,
+            now_ms: 0,
+        });
+        let _ = zone.tick(0);
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after a walk commits"
+        );
+
+        zone.handle(ZoneCommand::Leave { session_id: first });
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must match players after a leave"
+        );
+        assert!(
+            zone.ecs_mirror_matches_players(),
+            "mirror must still match with one player remaining"
+        );
+    }
+
+    #[test]
+    fn mirror_matches_after_rejoin_same_session() {
+        let mut zone = test_zone();
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 330, 270)));
+        // Re-join the same session at a new spot (zone replaces it); mirror must
+        // not leak a stale entity.
+        zone.handle(ZoneCommand::Join(test_join("first", 101, 340, 280)));
+        assert!(zone.ecs_mirror_matches_players());
     }
 }

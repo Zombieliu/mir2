@@ -50,6 +50,13 @@ for (const pass of ["first", "warm"]) {
       if (result.sprites <= 0) {
         failures.push(`${pass} ${target.map} returned no sprites`);
       }
+      if (result.missing > 0) {
+        const sample = result.missingAssets
+          .slice(0, 5)
+          .map((asset) => asset.path)
+          .join(", ");
+        failures.push(`${pass} ${target.map} degraded with ${result.missing} missing asset(s): ${sample}`);
+      }
     } catch (error) {
       failures.push(`${pass} ${target.map} failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -111,6 +118,9 @@ async function requestMap(target, pass) {
       mini: body?.miniMapIndex ?? "",
       cells: Array.isArray(region?.cells) ? region.cells.length : 0,
       sprites: region?.sprites && typeof region.sprites === "object" ? Object.keys(region.sprites).length : 0,
+      missing: Array.isArray(region?.missingAssets) ? region.missingAssets.length : 0,
+      missingAssets: Array.isArray(region?.missingAssets) ? region.missingAssets : [],
+      headerMissing: Number.parseInt(response.headers.get("x-mir2-missing-asset-count") ?? "0", 10) || 0,
       width: region?.mapWidth ?? "",
       height: region?.mapHeight ?? "",
     };
@@ -152,6 +162,13 @@ async function runCriticalCrystalSceneRegression() {
   if (result.sprites <= 0 || result.cells <= 0) {
     failures.push("critical scene (0,307,232 56x68) returned no cells or sprites");
     return;
+  }
+  if (result.missing > 0) {
+    const sample = result.missingAssets
+      .slice(0, 10)
+      .map((asset) => asset.path)
+      .join(", ");
+    failures.push(`critical scene degraded with ${result.missing} missing asset(s): ${sample}`);
   }
   if (!result.title) {
     failures.push("critical scene regression returned empty map title");

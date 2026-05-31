@@ -120,6 +120,17 @@ impl ZoneCollision {
     }
 
     pub(crate) fn is_player_movement_blocked(&self, point: &Point) -> bool {
+        // A direct-movement transfer source is always steppable by a player:
+        // stepping onto it immediately fires the map transfer, so it must bypass
+        // both the region-bounds and static-collision checks. The full original
+        // Crystal collision for some maps (e.g. Bichon map "0") is not always
+        // available at runtime, which leaves the embedded region fragment too
+        // small to contain entrance doorways such as the Library source at
+        // (322, 247) on the northern edge.
+        if self.transfer_source_cells.contains(&(point.x, point.y)) {
+            return false;
+        }
+
         if self
             .bounds
             .map(|bounds| !bounds.contains(point))
@@ -129,6 +140,5 @@ impl ZoneCollision {
         }
 
         self.blocked_cells.contains(&(point.x, point.y))
-            && !self.transfer_source_cells.contains(&(point.x, point.y))
     }
 }

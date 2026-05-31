@@ -1851,6 +1851,7 @@ impl SimulationSession {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,

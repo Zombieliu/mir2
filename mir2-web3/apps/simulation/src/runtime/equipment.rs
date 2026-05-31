@@ -28,7 +28,7 @@ use super::items::{
     crystal_default_identified_for_item_key, crystal_item_has_bind_flag,
     crystal_item_needs_identify, crystal_item_requirement_rejection_key,
     crystal_item_template_for_dynamic_key, crystal_item_template_for_item_key,
-    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag,
+    default_item_unique_id, equipment_has_crystal_or_rental_bind_flag, item_is_socket_type,
     item_state_can_equip_to_slot, item_state_identified, item_state_soul_bound_id,
     merged_user_item_stats, upsert_user_item_stat, user_item_from_item_state,
     user_item_rental_information, ItemState,
@@ -63,6 +63,10 @@ pub(super) struct EquipmentState {
     pub(super) added_luck: i32,
     #[serde(default)]
     pub(super) added_stats: Vec<UserItemStat>,
+    /// Socket items (Crystal `ItemType.Socket`) inserted into this worn item's
+    /// slots; their stats contribute to the wearer (RefreshSocketStats).
+    #[serde(default)]
+    pub(super) socketed: Vec<ItemState>,
     #[serde(default)]
     pub(super) cursed: bool,
     #[serde(default)]
@@ -127,7 +131,7 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.attack + self.added_attack
+            self.attack + self.added_attack + self.socketed_attack()
         }
     }
 
@@ -135,8 +139,39 @@ impl EquipmentState {
         if self.is_broken() {
             0
         } else {
-            self.defence + self.added_defence
+            self.defence + self.added_defence + self.socketed_defence()
         }
+    }
+
+    /// DC contributed by socketed gems (Crystal RefreshSocketStats folds the
+    /// socketed items' stats into the wearer's totals).
+    fn socketed_attack(&self) -> i32 {
+        self.socketed
+            .iter()
+            .map(|gem| gem.attack + gem.added_attack)
+            .sum()
+    }
+
+    /// AC contributed by socketed gems.
+    fn socketed_defence(&self) -> i32 {
+        self.socketed
+            .iter()
+            .map(|gem| gem.defence + gem.added_defence)
+            .sum()
+    }
+
+    /// `stat` contributed by socketed gems' added stats (accuracy/agility/etc.).
+    pub(super) fn socketed_added_stat(&self, stat: u8) -> i32 {
+        self.socketed
+            .iter()
+            .flat_map(|gem| gem.added_stats.iter())
+            .filter(|entry| entry.stat == stat)
+            .map(|entry| entry.value)
+            .sum()
+    }
+
+    pub(super) fn socketed_count(&self) -> usize {
+        self.socketed.len()
     }
 }
 
@@ -341,6 +376,7 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
         added_defence: 0,
         added_luck: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -413,6 +449,9 @@ pub(super) fn equipment_shape(
     })
 }
 
+// Retained as test-introspection helpers (combat mitigation now rolls armour
+// from the stat block rather than summing these flat totals).
+#[allow(dead_code)]
 pub(super) fn total_attack_bonus(resources: &InventoryResource, buffs: &BuffResource) -> i32 {
     resources
         .equipment_items
@@ -423,6 +462,7 @@ pub(super) fn total_attack_bonus(resources: &InventoryResource, buffs: &BuffReso
         + buffs.buffs.iter().map(buff_attack_bonus).sum::<i32>()
 }
 
+#[allow(dead_code)]
 pub(super) fn total_defence_bonus(resources: &InventoryResource, buffs: &BuffResource) -> i32 {
     resources
         .equipment_items
@@ -461,6 +501,7 @@ fn seed_equipment(
         added_defence,
         added_luck: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -478,7 +519,11 @@ fn seed_equipment(
 }
 
 pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
-    vec![
+    // Starter gear carries Crystal-accurate stat ranges (from the item manifest):
+    // WoodenSword MinDC 2/MaxDC 4, LightLeatherArmour MinAC 3/MaxAC 5 +
+    // MinMAC 3/MaxMAC 4. Combat stats live in `added_stats` (the Crystal shape),
+    // so the scalar attack/defence are 0.
+    let mut items = vec![
         seed_equipment(
             "wooden-sword",
             EquipmentSlot::Weapon,
@@ -487,7 +532,7 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             18,
             20,
             ItemGrade::Common,
-            2,
+            0,
             0,
             4,
             0,
@@ -501,9 +546,9 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             14,
             ItemGrade::Common,
             0,
-            1,
             0,
-            3,
+            0,
+            5,
         ),
         seed_equipment(
             "copper-necklace",
@@ -557,7 +602,17 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             0,
             0,
         ),
-    ]
+    ];
+
+    // WoodenSword (slot 0): MaxDC 4 (scalar) + MinDC 2.
+    items[0].added_stats = vec![UserItemStat { stat: 4, value: 2 }];
+    // LightLeatherArmour (slot 1): MaxAC 5 (scalar) + MinAC 3, MinMAC 3, MaxMAC 4.
+    items[1].added_stats = vec![
+        UserItemStat { stat: 0, value: 3 },
+        UserItemStat { stat: 2, value: 3 },
+        UserItemStat { stat: 3, value: 4 },
+    ];
+    items
 }
 
 pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
@@ -605,16 +660,19 @@ pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<Us
 }
 
 pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
-    let mut resources = world.resource_mut::<InventoryResource>();
-    if let Some(existing) = resources
-        .equipment_items
-        .iter_mut()
-        .find(|item| item.slot == next.slot)
     {
-        *existing = next;
-    } else {
-        resources.equipment_items.push(next);
+        let mut resources = world.resource_mut::<InventoryResource>();
+        if let Some(existing) = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == next.slot)
+        {
+            *existing = next;
+        } else {
+            resources.equipment_items.push(next);
+        }
     }
+    super::stats::refresh_player_stats(world);
 }
 
 pub(super) fn item_state_from_equipment_state(
@@ -642,6 +700,7 @@ pub(super) fn item_state_from_equipment_state(
         added_attack: equipment.added_attack,
         added_defence: equipment.added_defence,
         added_stats,
+        socketed: equipment.socketed,
         cursed: equipment.cursed,
         socket_slots: equipment.socket_slots,
         gem_count: equipment.gem_count,
@@ -680,6 +739,7 @@ pub(super) fn equipment_state_from_item_state(
         added_defence: item.added_defence,
         added_luck: 0,
         added_stats: item.added_stats.clone(),
+        socketed: item.socketed.clone(),
         cursed: item.cursed,
         socket_slots: item.socket_slots,
         gem_count: item.gem_count,
@@ -1141,6 +1201,7 @@ pub(super) fn equip_item_impl(
         to,
         success: true,
     });
+    super::stats::refresh_player_stats(world);
     packets
 }
 
@@ -1214,10 +1275,82 @@ pub(super) fn remove_equipped_item_impl(
         }
     }
 
+    super::stats::refresh_player_stats(world);
     vec![ServerPacket::RemoveItem {
         grid,
         unique_id,
         to,
+        success: true,
+    }]
+}
+
+/// Insert a socket gem (Crystal `ItemType.Socket`) from the inventory into a
+/// free socket of an inventory host item, mirroring `PlayerObject.EquipSlotItem`.
+/// v1 targets inventory hosts; the socketed gems then travel onto the equipped
+/// `EquipmentState` via the equip carry-through and contribute to the wearer's
+/// stats (socketing an already-equipped item is the documented follow-on).
+pub(super) fn equip_slot_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    unique_id: u64,
+    to: i32,
+    grid_to: MirGridType,
+    to_unique_id: u64,
+) -> Vec<ServerPacket> {
+    let failed = ServerPacket::EquipSlotItem {
+        grid,
+        unique_id,
+        to,
+        grid_to,
+        success: false,
+    };
+    if !super::resources::is_in_world(world) {
+        return vec![failed];
+    }
+    if grid != MirGridType::Inventory || grid_to != MirGridType::Inventory {
+        return vec![failed];
+    }
+    let mut inventory = world.resource_mut::<InventoryResource>();
+    let Some(gem_index) = inventory
+        .inventory_items
+        .iter()
+        .position(|item| item_matches_inventory_unique_id(item, unique_id))
+    else {
+        return vec![failed];
+    };
+    if !item_is_socket_type(&inventory.inventory_items[gem_index]) {
+        return vec![failed];
+    }
+    let Some(host_index) = inventory
+        .inventory_items
+        .iter()
+        .position(|item| item_matches_inventory_unique_id(item, to_unique_id))
+    else {
+        return vec![failed];
+    };
+    if host_index == gem_index {
+        return vec![failed];
+    }
+    {
+        let host = &inventory.inventory_items[host_index];
+        // Host must still have a free socket (Crystal checks `item.Slots[to] == null`).
+        if host.socketed.len() >= usize::from(host.socket_slots) {
+            return vec![failed];
+        }
+    }
+    let gem = inventory.inventory_items.remove(gem_index);
+    // The host index may shift if the gem preceded it in the bag.
+    let host_index = inventory
+        .inventory_items
+        .iter()
+        .position(|item| item_matches_inventory_unique_id(item, to_unique_id))
+        .expect("host item is still present after removing the gem");
+    inventory.inventory_items[host_index].socketed.push(gem);
+    vec![ServerPacket::EquipSlotItem {
+        grid,
+        unique_id,
+        to,
+        grid_to,
         success: true,
     }]
 }
@@ -1228,9 +1361,8 @@ pub(super) fn remove_equipped_slot_item_impl(
     grid_to: MirGridType,
     unique_id: u64,
     to: i32,
-    _from_unique_id: u64,
+    from_unique_id: u64,
 ) -> Vec<ServerPacket> {
-    let _ = world;
     let failed_packet = ServerPacket::RemoveSlotItem {
         grid,
         grid_to,
@@ -1247,6 +1379,41 @@ pub(super) fn remove_equipped_slot_item_impl(
     ) {
         return vec![failed_packet];
     }
+    // Extract a socketed gem from an inventory host back into the inventory
+    // (Crystal `PlayerObject.RemoveSlotItem`); cursed gems cannot be removed.
+    if super::resources::is_in_world(world)
+        && matches!(grid, MirGridType::Socket)
+        && matches!(grid_to, MirGridType::Inventory)
+    {
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        if let Some(host_index) = inventory
+            .inventory_items
+            .iter()
+            .position(|item| item_matches_inventory_unique_id(item, from_unique_id))
+        {
+            if let Some(socket_pos) = inventory.inventory_items[host_index]
+                .socketed
+                .iter()
+                .position(|gem| gem.unique_id == unique_id)
+            {
+                if inventory.inventory_items[host_index].socketed[socket_pos].cursed {
+                    return vec![failed_packet];
+                }
+                let gem = inventory.inventory_items[host_index]
+                    .socketed
+                    .remove(socket_pos);
+                inventory.inventory_items.push(gem);
+                return vec![ServerPacket::RemoveSlotItem {
+                    grid,
+                    grid_to,
+                    unique_id,
+                    to,
+                    success: true,
+                }];
+            }
+        }
+        return vec![failed_packet];
+    }
     if !matches!(
         grid,
         MirGridType::Mount | MirGridType::Fishing | MirGridType::Socket
@@ -1257,9 +1424,8 @@ pub(super) fn remove_equipped_slot_item_impl(
         return vec![failed_packet];
     }
 
-    // Current runtime does not model embedded mount/fishing/socket slot items yet.
-    // Keep Crystal's RemoveSlotItem source-grid envelope, but do not fall through
-    // into whole-equipment RemoveItem semantics for unmodeled slot-item requests.
+    // Mount/fishing embedded slot items are not modeled yet; keep Crystal's
+    // RemoveSlotItem envelope without falling through to whole-item removal.
     vec![failed_packet]
 }
 
