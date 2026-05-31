@@ -9,9 +9,13 @@
 - 独立通读了 `apps/simulation/src/runtime/`(战斗/技能/移动/地图/AI/会话/共享 Zone,
   约 6.6 万行非测试代码)、`packages/protocol`、`apps/web` 资源管线,并按模块派只读
   子代理深挖,再亲自抽验了伤害公式、属性体系、封包计数等关键结论。
-- **局限**: 本地 `Crystal` 子模块为空、GitHub API 限流,未能逐行 diff C# 源码。
-  Crystal 侧对照基于对该引擎结构的既有认知 + 仓库自带的 Crystal 导入清单 + Rust 实际代码。
-  如需更精确的逐文件/逐封包 diff,请先 `git submodule update --init`。
+- **Crystal C# 源已核对**(2026-05-31 更新): `git submodule update --init Crystal`
+  可正常拉取 `Suprcode/Crystal`(亦镜像于 `Zombieliu/Crystal`),据此**用真实 C# 源**
+  校准了以下数字 —— `Server/MirObjects/Monsters/` 实测 **212 个逐怪 AI 子类**、
+  `Server/MirObjects/PlayerObject.cs` **14,682 行**、`MonsterObject.cs` **3,870 行**、
+  `Shared/` 21 个 .cs(封包/枚举/Stats)。这把"怪物 AI 是最大缺口"从估计变成了实锤。
+- 早前初评时该子模块尚未初始化,本文已据真实源更新;如需逐文件/逐封包 diff 可直接读
+  `Crystal/` 工作树。
 - 本文的百分比是**生产级 gameplay 深度**口径,**不等于**仓库 `PARITY-TRUTH-AUDIT.md`
   里的 "Candidate 自动化证据" 口径。后者偏宽松(自评 ~90%),本文偏严格。
 
@@ -32,7 +36,7 @@
 | 移动 | ~35–40% | 8 向走/跑、阻挡、推人、地图切换、英雄跟随;共享 Zone 同步有测试 | AOI 写死矩形;无坐骑速度/地形代价/被击退打断;conquest 传送被过滤 |
 | 战斗 | ~35% | Accuracy vs Agility 命中掷骰;状态效果有效;死亡/复活链路完整 | 伤害=`18+lvl/2+装备`,无 MinDC~MaxDC 区间;**受击不扣 AC/MAC**;无暴击 |
 | 技能/魔法 | 广度~85% / 深度~40% | Spell 枚举 ~130(近全量),112 项被匹配,约 67 项有专属逻辑 | 约半数走通用伤害 fallback;缺职业修正/AoE 衰减/部分召唤 |
-| 怪物 AI | ~16–20% | ~35–40 种怪有专属 AI;阵营/召唤敌我判定 | Crystal 是逐怪 200+ 子类;此处绝大多数走同一套通用状态机 |
+| 怪物 AI | ~16–20% | ~35–40 种怪有专属 AI;阵营/召唤敌我判定 | Crystal 实测 **212 个逐怪子类**(`Server/MirObjects/Monsters/`);此处绝大多数走同一套通用状态机 |
 | 人物状态 | ~40–50% | HP/MP/经验/装备(耐久/宝石/封印)/buff/任务/技能/PK 持久化;开局下发 BaseStats | AC/MAC 不参与减伤;无 min-max 随机;换装不动态重算;饥饿/元素抗缺;婚姻/行会/师徒只存不生效 |
 | 地图 | ~40% | 8 种 `.map` 格式解析、阻挡/门/安全区、按 manifest 刷怪刷 NPC、地图规则标志 | 动态门不切换;攻城/占领区被过滤;采矿采药缺;区域怪状态随会话刷新 |
 | 资源加载 | ~85–88% | 真实 `.Lib`/`.map` 解析;真 Bevy WebGL2/WebGPU 渲染;R2 CDN+SW+版本化;~1.5 万 PNG 上线 | 缺 Objects/209 等零星原图、小地图 450/451、音效仅 4 个;移动端默认关 Bevy |
@@ -45,7 +49,8 @@
 1. **世界权威统一进 Zone**: 把战斗/怪物 AI/技能结算/NPC 变更/拾取从 per-session
    提升为单一权威 tick。否则真多人同屏打同一只怪会不一致。**(工作量最大)**
 2. **战斗数值引擎重写**: 补 `Random(MinDC~MaxDC)`、AC/MAC 减伤、暴击、完整中毒/元素。
-3. **怪物 AI 从通用机扩到逐怪行为**: 决定"手感像不像传奇",缺口最大、最吃量。
+3. **怪物 AI 从通用机扩到逐怪行为**: 决定"手感像不像传奇",缺口最大、最吃量
+   (Crystal 实测 212 个子类 vs 此处 ~38)。
 4. **持久化归一化 + 并发/事务安全**: 背包/经济入库,去掉单进程串行依赖。
 5. **零星资产补齐**(Objects/209、小地图、音效): 工作量小但卡 `/api/scene/crystal` 绿灯。
 

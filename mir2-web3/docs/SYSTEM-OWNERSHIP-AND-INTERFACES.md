@@ -10,8 +10,12 @@
   contracts below; does not implement individual game systems.
 - **Each game-system session**: implements one system on its own branch,
   opens a PR to `main`, and is reviewed here.
-- **Base branch**: `main` (currently `5f47c3d9`). Always branch off the latest
-  `main` and rebase before merge.
+- **Base branch**: `main`. Always branch off the latest `main` and rebase
+  before merge. This branch is tracked as **PR #7**.
+- **Crystal C# source is available** via the `Crystal` submodule
+  (`git submodule update --init Crystal`) — use it as the parity spec when
+  reviewing (e.g. `Server/MirObjects/Monsters/*.cs` = 212 monster AIs,
+  `Server/MirObjects/PlayerObject.cs` for the stat/damage formulas).
 
 ## Session → module ownership
 
@@ -35,6 +39,9 @@ Files marked *shared* require coordination through the architect.
    `min..max`, Accuracy/Agility/Luck) derived from `base(class, level) +
    equipment + buffs`; damage = `Random(minX, maxX)`; AC/MAC absorb a random
    share; crit/accuracy-vs-agility. One definition; nobody forks it.
+   **Spec source**: derive this verbatim from Crystal
+   `Server/MirObjects/PlayerObject.cs` / `MonsterObject.cs` (`Stats`,
+   `GetAttackPower`, `Struck`/damage application), not from memory.
    *(Directly fixes the audit finding: combat currently uses flat
    `18 + level/2 + equip` with no AC/MAC mitigation — see
    `PRODUCTION-GAP-ASSESSMENT.md`.)*
@@ -96,6 +103,7 @@ Files marked *shared* require coordination through the architect.
 
 | PR | Branch | Area | Status |
 | --- | --- | --- | --- |
-| #4 | `claude/keen-hawking-ALdqD` | Movement/Map — collision transfer (Bichon Library door) | architect review |
+| #7 | `claude/optimistic-gates-hMc7O` | Architect — these docs + full-map export tool | architect (self) |
+| #4 | `claude/keen-hawking-ALdqD` | Movement/Map — collision transfer (Bichon Library door) | reviewed: code LGTM; gate red is shared CI, not the change |
 | #2 | `fix/vercel-scene-bundle` | Web infra — Turbopack bundle size | triage |
-| #3 | `fix/candidate-gate-submodule` | CI — checkout unblock | triage |
+| #3 | `fix/candidate-gate-submodule` | CI — removes stray `refactor-pwa` gitlink (necessary; a 2nd gate failure remains) |
