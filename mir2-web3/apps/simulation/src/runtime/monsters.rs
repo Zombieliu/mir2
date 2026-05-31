@@ -1944,8 +1944,14 @@ pub(super) fn monster_attack_delay_ticks(
         181 if tile_distance(source, target) <= 1 => combat_delay_ticks(600),
         33 if tile_distance(source, target) > 1 => combat_delay_ticks(500),
         33 => combat_delay_ticks(300),
-        31 => combat_delay_ticks(500),
-        32 => ranged_attack_delay_ticks(source, target),
+        // Crystal RightGuard/LeftGuard.Attack: adjacent melee uses
+        // `DelayedType.Damage, Envir.Time + 300`; ranged uses
+        // `DelayedType.RangeDamage, Envir.Time + 500` (RightGuard) or
+        // `distance * 50 + 500` (LeftGuard).
+        31 if tile_distance(source, target) > 1 => combat_delay_ticks(500),
+        31 => combat_delay_ticks(300),
+        32 if tile_distance(source, target) > 1 => ranged_attack_delay_ticks(source, target),
+        32 => combat_delay_ticks(300),
         _ if monster_uses_ranged_attack(agent) => ranged_attack_delay_ticks(source, target),
         _ => melee_attack_delay_ticks(),
     }
