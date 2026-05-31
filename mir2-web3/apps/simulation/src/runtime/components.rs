@@ -77,6 +77,11 @@ pub(super) struct MonsterVitals {
 #[derive(Component, Clone, Copy, Default)]
 pub(super) struct MonsterCombatStats {
     pub(super) agility: i32,
+    /// Crystal `Stats[Stat.Accuracy]` for the monster — used for the
+    /// monster→player hit roll (`Random.Next(playerAgility+1) > accuracy`).
+    /// Sourced from the Crystal monster manifest (currently `#[serde(default)]`
+    /// → 0 until accuracy is extracted, keeping the roll inert).
+    pub(super) accuracy: i32,
 }
 
 #[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]

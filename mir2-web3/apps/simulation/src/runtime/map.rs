@@ -719,6 +719,7 @@ pub(super) fn spawn_visible_world_for_current_map(world: &mut World) {
                     },
                     MonsterCombatStats {
                         agility: rule.agility,
+                        accuracy: rule.accuracy,
                     },
                 ))
                 .id();
@@ -1748,6 +1749,7 @@ pub(super) fn rebuild_world(world: &mut World) {
                     },
                     MonsterCombatStats {
                         agility: rule.agility,
+                        accuracy: rule.accuracy,
                     },
                 ))
                 .id();

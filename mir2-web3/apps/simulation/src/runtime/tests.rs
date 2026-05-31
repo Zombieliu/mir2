@@ -1158,6 +1158,7 @@ fn spawn_crystal_respawn_for_test(
             },
             MonsterCombatStats {
                 agility: template.monster_agility,
+                accuracy: template.monster_accuracy,
             },
         ))
         .id();
@@ -21608,6 +21609,7 @@ fn respawn_restores_special_monster_initial_ai_state() {
                 attack_interval_ticks: 1,
                 max_hp: 50,
                 agility: 0,
+                accuracy: 0,
                 route: Vec::new(),
                 slots: vec![MonsterSpawnSlot {
                     entity: Some(zuma_entity),
@@ -21633,6 +21635,7 @@ fn respawn_restores_special_monster_initial_ai_state() {
                 attack_interval_ticks: 1,
                 max_hp: 50,
                 agility: 0,
+                accuracy: 0,
                 route: Vec::new(),
                 slots: vec![MonsterSpawnSlot {
                     entity: Some(plant_entity),
@@ -54589,7 +54592,10 @@ fn crystal_critical_hit_emits_effect_with_crit_gear() {
             .app
             .world_mut()
             .entity_mut(wasp)
-            .insert(MonsterCombatStats { agility: 0 });
+            .insert(MonsterCombatStats {
+                agility: 0,
+                accuracy: 0,
+            });
     }
 
     let packets = session.attack(3002);
@@ -54612,7 +54618,10 @@ fn crystal_no_critical_effect_without_crit_gear() {
             .app
             .world_mut()
             .entity_mut(wasp)
-            .insert(MonsterCombatStats { agility: 0 });
+            .insert(MonsterCombatStats {
+                agility: 0,
+                accuracy: 0,
+            });
     }
 
     let packets = session.attack(3002);
@@ -55524,5 +55533,125 @@ fn crystal_ai116_black_hammer_cat_splashes_line_target_at_range() {
     assert!(
         after_secondary_hp < before_secondary_hp,
         "AI-116 BlackHammerCat at distance 2 should splash a friendly-opposite monster on the line (Crystal LineAttack(damage, 2, 300) on the Type=1 branch); before={before_secondary_hp} after={after_secondary_hp}"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Combat numerics: monster→player hit roll — Crystal `MapObject.GetArmour`
+// (ACAgility) misses an attack when `Random.Next(playerAgility + 1) >
+// attackerAccuracy`. The roll is forward-compatible / inert until monster
+// Accuracy is extracted into the manifest (defaults to 0). When accuracy is 0
+// the player is always hit (no regression even for agile players); when
+// accuracy is present, an agile player can dodge.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_monster_player_hit_roll_is_inert_at_zero_accuracy_and_dodges_with_accuracy() {
+    fn run_scenario(accuracy: i32, player_agility: i32) -> (i32, i32, u32, Vec<ServerPacket>) {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+        let player_origin = Point { x: 900, y: 900 };
+        let player_object_id =
+            current_player_object_id(session.app.world()).expect("player object id");
+        set_player_position(&mut session, player_origin.clone());
+
+        // Grant the player a (large) Agility via a buff so the dodge roll has
+        // something to work with.
+        if player_agility > 0 {
+            session
+                .app
+                .world_mut()
+                .resource_mut::<BuffResource>()
+                .buffs
+                .push(super::BuffState {
+                    key: "test-agility".to_string(),
+                    name: "Test Agility".to_string(),
+                    description: "Synthetic agility for the dodge roll test.".to_string(),
+                    expires_at_tick: u64::MAX,
+                    attack_bonus: 0,
+                    defence_bonus: 0,
+                    stats: vec![UserItemStat {
+                        stat: super::CRYSTAL_STAT_AGILITY,
+                        value: player_agility,
+                    }],
+                });
+        }
+
+        let current_tick = runtime_tick(session.app.world());
+        let attacker_object_id = 91_500_u32;
+        let attacker = session
+            .app
+            .world_mut()
+            .spawn((
+                ObjectId(attacker_object_id),
+                DisplayName::literal("Hit Roll Test Mob"),
+                Position(Point {
+                    x: player_origin.x + 1,
+                    y: player_origin.y,
+                }),
+                Facing(MirDirection::Left),
+                Monster,
+                MonsterVitals { hp: 80, max_hp: 80 },
+                MonsterAgent {
+                    image: 0,
+                    dead: false,
+                    patrol_origin: player_origin.clone(),
+                    ai: 0,
+                    disposition: WorldEntityDisposition::Hostile,
+                    hostile_to_player: true,
+                    tracking_player: true,
+                    view_range: 7,
+                    can_wander: false,
+                    move_interval_ticks: 1,
+                    attack_interval_ticks: 1,
+                    next_move_tick: current_tick,
+                    next_attack_tick: current_tick,
+                    route: Vec::new(),
+                    route_index: 0,
+                    route_waiting: false,
+                    next_route_tick: current_tick,
+                },
+                MonsterCombatStats {
+                    agility: 0,
+                    accuracy,
+                },
+            ))
+            .id();
+        let _ = attacker;
+        sync_visible_objects(&mut session);
+
+        let before = session.world_snapshot().player_hp.expect("player hp");
+        let mut packets = Vec::new();
+        for _ in 0..6 {
+            packets.extend(session.tick());
+        }
+        let after = session.world_snapshot().player_hp.expect("player hp");
+        (before, after, player_object_id, packets)
+    }
+
+    // Inert: accuracy 0 (the manifest default) → the agile player is still hit
+    // (no balance change while accuracy data is absent).
+    let (before_inert, after_inert, _, _) = run_scenario(0, 100_000);
+    assert!(
+        after_inert < before_inert,
+        "monster with accuracy=0 must always hit (inert); before={before_inert} after={after_inert}"
+    );
+
+    // Active: accuracy 1 vs a hugely agile player → the player dodges; HP stays
+    // and a Miss DamageIndicator (damage_type 1) is broadcast for the player.
+    let (before_dodge, after_dodge, player_object_id, dodge_packets) = run_scenario(1, 100_000);
+    assert_eq!(
+        after_dodge, before_dodge,
+        "agile player vs low-accuracy monster should dodge every hit; before={before_dodge} after={after_dodge}"
+    );
+    assert!(
+        dodge_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DamageIndicator { damage_type: 1, object_id, .. }
+                if *object_id == player_object_id
+        )),
+        "dodged monster hit should broadcast a Miss DamageIndicator for the player, got {dodge_packets:?}"
     );
 }

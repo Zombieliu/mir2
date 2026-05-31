@@ -197,6 +197,28 @@ arm fell through to the default `7` — so a real Crystal RightGuard
 `crystal_ai31_right_guard_uses_imported_dc_damage` (spawns a Crystal
 RightGuard and asserts damage dealt is well above the 7 fallback).
 
+## Combat numerics: monster→player hit roll ✅ (forward-compatible)
+Crystal `MapObject.GetArmour(ACAgility)` lets a target dodge an incoming hit:
+`miss if Random.Next(targetAgility + 1) > attackerAccuracy`. The runtime
+already had the **player→monster** direction (`crystal_player_hit_roll_succeeds`,
+inert while monster Agility is absent from the manifest). Added the symmetric
+**monster→player** roll: `crystal_monster_hit_roll_succeeds` reads the
+attacker monster's `MonsterCombatStats.accuracy` and rolls against the
+player's Agility (equipment + buffs via `crystal_player_agility`). On a miss
+it broadcasts a Miss `DamageIndicator` (damage_type 1) for the player and
+applies no damage — exactly mirroring the player-side path.
+
+Forward-compatible / inert: monster `accuracy` is a new
+`#[serde(default)]` field on `CrystalMonsterTemplate` /
+`CrystalRespawnTemplate` / `MonsterSpawnRule` / `MonsterCombatStats`,
+threaded through every spawn site. Until the manifest carries real Accuracy
+values it defaults to 0, and the roll short-circuits to "always hit" when
+attacker accuracy ≤ 0 — so current balance is unchanged (verified: an agile
+player vs an accuracy-0 monster is still always hit). Once Accuracy lands in
+the manifest the dodge activates 1:1 with Crystal. Test:
+`crystal_monster_player_hit_roll_is_inert_at_zero_accuracy_and_dodges_with_accuracy`
+(accuracy=0 → always hit; accuracy=1 + huge agility → dodge + Miss indicator).
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:

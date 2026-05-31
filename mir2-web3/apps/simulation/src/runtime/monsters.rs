@@ -82,6 +82,7 @@ pub(super) struct MonsterSpawnRule {
     pub(super) attack_interval_ticks: u64,
     pub(super) max_hp: i32,
     pub(super) agility: i32,
+    pub(super) accuracy: i32,
     pub(super) route: Vec<RouteStep>,
     pub(super) slots: Vec<MonsterSpawnSlot>,
 }
@@ -153,6 +154,7 @@ pub(super) fn build_crystal_current_map_spawn_table(
                 attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
                 max_hp: respawn.monster_hp.max(1),
                 agility: respawn.monster_agility,
+                accuracy: respawn.monster_accuracy,
                 route,
                 slots,
             }
@@ -197,6 +199,7 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
                     attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
                     max_hp: respawn.monster_hp.max(1),
                     agility: respawn.monster_agility,
+                    accuracy: respawn.monster_accuracy,
                     route,
                     slots: vec![MonsterSpawnSlot {
                         entity: None,
@@ -257,6 +260,7 @@ pub(super) fn build_starter_spawn_table(config: &SimulationConfig) -> MonsterSpa
                 attack_interval_ticks: 1,
                 max_hp: spawn.max_hp,
                 agility: 0,
+                accuracy: 0,
                 route: Vec::new(),
                 slots,
             }
@@ -313,6 +317,7 @@ pub(super) fn build_crystal_starter_region_spawn_table(
                 attack_interval_ticks: crystal_speed_to_ticks(respawn.monster_attack_speed),
                 max_hp: respawn.monster_hp.max(1),
                 agility: respawn.monster_agility,
+                accuracy: respawn.monster_accuracy,
                 route,
                 slots,
             }
@@ -487,6 +492,7 @@ pub(super) fn crystal_respawn_template_from_monster(
         monster_auto_rev: monster.auto_rev,
         monster_undead: monster.undead,
         monster_agility: monster.agility,
+        monster_accuracy: monster.accuracy,
         route: Vec::new(),
     }
 }
@@ -523,6 +529,7 @@ pub(super) fn bug_bat_template() -> Option<CrystalRespawnTemplate> {
             monster_auto_rev: true,
             monster_undead: false,
             monster_agility: 0,
+            monster_accuracy: 0,
             route: Vec::new(),
         }),
     )
@@ -554,6 +561,7 @@ pub(super) fn bomb_spider_template() -> Option<CrystalRespawnTemplate> {
             monster_auto_rev: true,
             monster_undead: false,
             monster_agility: 0,
+            monster_accuracy: 0,
             route: Vec::new(),
         }),
     )
@@ -947,6 +955,7 @@ pub(super) fn spawn_runtime_monster(
         },
         MonsterCombatStats {
             agility: template.monster_agility,
+            accuracy: template.monster_accuracy,
         },
     ));
     if let Some(summoned) = summoned {
@@ -1203,6 +1212,7 @@ pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
                     rule.move_interval_ticks,
                     rule.attack_interval_ticks,
                     rule.agility,
+                    rule.accuracy,
                     rule.route.clone(),
                 ));
             }
@@ -1228,6 +1238,7 @@ pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
         move_interval_ticks,
         attack_interval_ticks,
         agility,
+        accuracy,
         route,
     ) in due_respawns
     {
@@ -1255,7 +1266,7 @@ pub(super) fn tick_respawns(world: &mut World) -> Vec<Entity> {
                 next_route_tick: tick,
             },
             initial_monster_ai_state_for_object(ai, tick, object_id),
-            MonsterCombatStats { agility },
+            MonsterCombatStats { agility, accuracy },
             SpawnSlotRef {
                 rule_index,
                 slot_index,

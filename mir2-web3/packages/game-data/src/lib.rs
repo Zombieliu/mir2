@@ -818,6 +818,8 @@ pub struct CrystalMonsterTemplate {
     pub max_sc: i32,
     #[serde(default)]
     pub agility: i32,
+    #[serde(default)]
+    pub accuracy: i32,
     pub light: u8,
     pub attack_speed: u16,
     pub move_speed: u16,
@@ -989,6 +991,8 @@ pub struct CrystalRespawnTemplate {
     pub monster_undead: bool,
     #[serde(default)]
     pub monster_agility: i32,
+    #[serde(default)]
+    pub monster_accuracy: i32,
     pub route: Vec<CrystalRoutePoint>,
 }
 

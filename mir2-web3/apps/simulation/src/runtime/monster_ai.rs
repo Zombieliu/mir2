@@ -1302,6 +1302,7 @@ pub(super) fn spawn_yimoogi_runtime_monster(
         },
         MonsterCombatStats {
             agility: template.monster_agility,
+            accuracy: template.monster_accuracy,
         },
     ));
     if template.monster_ai == 36 {
@@ -3282,6 +3283,7 @@ pub(super) fn spawn_trap_rock_child_rocks(
                 },
                 MonsterCombatStats {
                     agility: template.monster_agility,
+                    accuracy: template.monster_accuracy,
                 },
                 SummonedMonster {
                     summoner_object_id: parent_object_id,

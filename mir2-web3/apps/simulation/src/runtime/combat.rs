@@ -20,7 +20,7 @@ use super::drops::{
     HarvestTargetSelection,
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability, total_attack_bonus};
-use super::items::crystal_equipment_added_stat_total;
+use super::items::{crystal_equipment_added_stat_total, user_item_stat_total};
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
 };
@@ -380,6 +380,60 @@ fn crystal_player_hit_roll_succeeds(
         u64::try_from(agility.saturating_add(1)).unwrap_or(1),
     );
     roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)
+}
+
+/// Player's effective Agility (Crystal `Stats[Stat.Agility]`) from equipment
+/// plus active buffs (e.g. LightBody). Mirrors `crystal_player_accuracy`.
+fn crystal_player_agility(world: &World) -> i32 {
+    let equipment = crystal_equipment_added_stat_total(
+        world.resource::<InventoryResource>(),
+        CRYSTAL_STAT_AGILITY,
+    );
+    let buffs: i32 = world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .map(|buff| user_item_stat_total(&buff.stats, CRYSTAL_STAT_AGILITY))
+        .sum();
+    equipment.saturating_add(buffs)
+}
+
+fn crystal_monster_accuracy(world: &World, monster_entity: Entity) -> i32 {
+    world
+        .entity(monster_entity)
+        .get::<MonsterCombatStats>()
+        .map(|stats| stats.accuracy.max(0))
+        .unwrap_or(0)
+}
+
+/// Crystal `MapObject.GetArmour(ACAgility)` hit roll for an attack landing on
+/// the player: `miss if Random.Next(playerAgility + 1) > attackerAccuracy`.
+///
+/// Forward-compatible / inert until monster Accuracy is present in the
+/// manifest: when the attacker's accuracy is 0 (the `#[serde(default)]`
+/// fallback for monsters whose Accuracy hasn't been extracted from the Crystal
+/// DB), the roll is skipped (always hit), preserving current balance. Once
+/// accuracy data lands, agile players contest hits exactly as Crystal does.
+/// Mirrors the (also currently data-inert) player→monster
+/// `crystal_player_hit_roll_succeeds`.
+fn crystal_monster_hit_roll_succeeds(world: &World, attacker_id: u32, current_tick: u64) -> bool {
+    let Some(attacker) = entity_by_object_id(world, attacker_id) else {
+        return true;
+    };
+    let accuracy = crystal_monster_accuracy(world, attacker);
+    if accuracy <= 0 {
+        return true;
+    }
+
+    let agility = crystal_player_agility(world).max(0);
+    let roll = deterministic_roll(
+        current_tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        attacker.index() as usize,
+        u64::try_from(agility.saturating_add(1)).unwrap_or(1),
+    );
+    // miss when roll > accuracy; hit otherwise.
+    roll <= u64::try_from(accuracy).unwrap_or(0)
 }
 
 fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
@@ -1396,6 +1450,19 @@ pub(super) fn resolve_pending_combat_actions(
                     continue;
                 };
                 if action.damage > 0 {
+                    // Crystal GetArmour(ACAgility) hit roll: an agile player can
+                    // dodge a monster hit (`Random.Next(agility+1) > accuracy`).
+                    // Inert until monster Accuracy lands in the manifest.
+                    if !crystal_monster_hit_roll_succeeds(world, action.attacker_id, current_tick) {
+                        if let Some(object_id) = current_player_object_id(world) {
+                            packets.push(ServerPacket::DamageIndicator {
+                                damage: 0,
+                                damage_type: 1,
+                                object_id,
+                            });
+                        }
+                        continue;
+                    }
                     let outcome = apply_damage_to_current_player(world, action.damage, packets);
                     if outcome.applied {
                         packets.push(player_struck_packet(action.attacker_id));
