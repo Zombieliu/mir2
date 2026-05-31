@@ -20938,7 +20938,11 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let player = player_entity(session.app.world());
 
+    let _ = player;
     set_player_position(&mut session, player_origin.clone());
+    // Spawn a HOSTILE (non-summoned) bomb spider: owner-summoned bomb spiders
+    // are friendly and detonate on hostile monsters, not the player, so a
+    // summoned one would (correctly) never damage the player.
     let _summoned = spawn_runtime_monster(
         session.app.world_mut(),
         &bomb_spider,
@@ -20947,17 +20951,9 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
             y: player_origin.y,
         },
         MirDirection::Left,
-        player,
-        Some(SummonedMonster {
-            summoner_object_id: 77_779,
-            visible_extra: false,
-            expire_tick: None,
-            require_summoner_within: None,
-            despawn_tick_after_death: None,
-            totem_master_object_id: None,
-            max_minions: None,
-        }),
         None,
+        None,
+        Some(true),
         None,
         0,
     )
