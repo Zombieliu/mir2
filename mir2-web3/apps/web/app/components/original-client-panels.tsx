@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
+import { sameItemDragSource, useItemDrag, type ItemDragPayload } from "./original-client-drag-item";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -364,6 +365,7 @@ export type BeltDialogProps = {
 };
 
 export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }: BeltDialogProps) {
+  const itemDrag = useItemDrag();
   const itemBySlot = new Map(items.map((item) => [item.slot, item]));
   const useBeltItem = (item: DisplayItemLike) => {
     (window as typeof window & { __mir2LastBeltActivation?: Record<string, unknown> }).__mir2LastBeltActivation = {
@@ -403,6 +405,8 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
           <div
             key={slot.key}
             className="belt-slot"
+            data-item-drop-kind="belt"
+            data-item-drop-slot={index}
             style={{
               left: vertical ? slot.verticalX : slot.horizontalX,
               top: vertical ? slot.verticalY : slot.horizontalY,
@@ -420,15 +424,15 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
             {item ? (
               <button
                 type="button"
-                className={`belt-item ${vertical ? "vertical" : "horizontal"}`}
+                className={`belt-item ${vertical ? "vertical" : "horizontal"} ${
+                  itemDrag && sameItemDragSource(itemDrag.draggingSource, { kind: "belt", slot: item.slot }) ? "item-dragging" : ""
+                }`}
                 aria-label={item.name}
-                onMouseDown={(event) => {
-                  if (event.button !== 0) return;
-                  event.preventDefault();
-                  useBeltItem(item);
-                }}
+                onPointerDown={(event) =>
+                  itemDrag?.beginDrag(event, beltItemPayload(item), () => useBeltItem(item))
+                }
                 onClick={(event) => {
-                  if (event.detail !== 0) return;
+                  if (event.detail !== 0 && itemDrag) return;
                   useBeltItem(item);
                 }}
               >
@@ -578,6 +582,17 @@ function matchesChatVisibility(line: DisplayLogLineLike, hiddenFilters: ChatOpti
     default:
       return true;
   }
+}
+
+function beltItemPayload(item: DisplayItemLike): ItemDragPayload {
+  return {
+    uniqueId: item.uniqueId,
+    key: item.key,
+    name: item.name,
+    icon: item.icon,
+    quantity: item.quantity,
+    source: { kind: "belt", slot: item.slot },
+  };
 }
 
 function originalItemIconPath(icon: number) {

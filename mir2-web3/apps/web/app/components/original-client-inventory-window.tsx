@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
+  sameItemDragSource,
+  useItemDrag,
+  type InventoryDragContainer,
+  type ItemDragPayload,
+  type ItemDragSource,
+} from "./original-client-drag-item";
+import {
   InventoryDeletePanel,
   InventoryGoldDropPanel,
   InventorySellPanel,
@@ -74,6 +81,7 @@ export function InventoryWindow({
   onSellItem,
   onDropGold,
 }: InventoryWindowProps) {
+  const itemDrag = useItemDrag();
   const [deleteMode, setDeleteMode] = useState(false);
   const [sellMode, setSellMode] = useState(false);
   const [storageMode, setStorageMode] = useState<"store" | "takeBack" | null>(null);
@@ -564,6 +572,9 @@ export function InventoryWindow({
             key={slot.key}
             className={`inventory-slot ${activeTab === "quest" ? "quest" : ""}`}
             style={{ left: slot.x, top: slot.y }}
+            data-item-drop-kind="inventory"
+            data-item-drop-container={activeTab}
+            data-item-drop-slot={slotIndex}
 	            title={slot.key}
 	            onClick={() => {
 	              const takeBackItem =
@@ -611,16 +622,19 @@ export function InventoryWindow({
             <button
               key={`${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
               type="button"
-              className="inventory-item-card"
+              className={`inventory-item-card ${
+                itemDrag && sameItemDragSource(itemDrag.draggingSource, inventoryItemSource(item)) ? "item-dragging" : ""
+              }`}
               style={{ left: slot.x, top: slot.y }}
               aria-label={item.name}
-              onMouseDown={(event) => {
-                if (event.button !== 0) return;
-                event.preventDefault();
-                activateInventoryItem(item);
-              }}
+              data-item-drop-kind="inventory"
+              data-item-drop-container={item.container}
+              data-item-drop-slot={item.slot}
+              onPointerDown={(event) =>
+                itemDrag?.beginDrag(event, inventoryItemPayload(item), () => activateInventoryItem(item))
+              }
               onClick={(event) => {
-                if (event.detail !== 0) return;
+                if (event.detail !== 0 && itemDrag) return;
                 activateInventoryItem(item);
               }}
 	              onContextMenu={(event) => {
@@ -839,7 +853,7 @@ export function InventoryWindow({
 	                <button
 	                  key={slot.key}
 	                  type="button"
-	                  className="storage-slot"
+	                  className="storage-slot" data-item-drop-kind="storage" data-item-drop-slot={absoluteSlot}
 	                  style={{ left: slot.x, top: slot.y }}
 	                  onClick={() => {
 	                    const slotItem = visibleStorageItems.find((entry) => entry.slot === absoluteSlot);
@@ -919,13 +933,16 @@ export function InventoryWindow({
 	                      <button
 	                        key={`storage-${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
                   type="button"
-                  className={`storage-item-card ${
+                  className={`storage-item-card ${itemDrag && sameItemDragSource(itemDrag.draggingSource, storageItemSource(item)) ? "item-dragging " : ""}${
                     pendingMoveItem?.container === "storage" && pendingMoveItem.slot === item.slot
                       ? "selected"
                       : ""
                   }`}
                   style={{ left: slot.x, top: slot.y }}
                   aria-label={item.name}
+                  data-item-drop-kind="storage"
+                  data-item-drop-slot={item.slot}
+                  onPointerDown={(event) => itemDrag?.beginDrag(event, storageItemPayload(item))}
 	                  onClick={() => {
 	                    if (storageLocked || storagePageLocked) {
 	                      return;
@@ -1069,4 +1086,38 @@ export function InventoryWindow({
       {deleteFeedback ? <div className="inventory-delete-feedback">{deleteFeedback}</div> : null}
     </div>
   );
+}
+
+function inventoryItemSource(item: DisplayItem): ItemDragSource {
+  return {
+    kind: "inventory",
+    container: item.container as InventoryDragContainer,
+    slot: item.slot,
+  };
+}
+
+function inventoryItemPayload(item: DisplayItem): ItemDragPayload {
+  return {
+    uniqueId: item.uniqueId,
+    key: item.key,
+    name: item.name,
+    icon: item.icon,
+    quantity: item.quantity,
+    source: inventoryItemSource(item),
+  };
+}
+
+function storageItemSource(item: DisplayItem): ItemDragSource {
+  return { kind: "storage", slot: item.slot };
+}
+
+function storageItemPayload(item: DisplayItem): ItemDragPayload {
+  return {
+    uniqueId: item.uniqueId,
+    key: item.key,
+    name: item.name,
+    icon: item.icon,
+    quantity: item.quantity,
+    source: storageItemSource(item),
+  };
 }

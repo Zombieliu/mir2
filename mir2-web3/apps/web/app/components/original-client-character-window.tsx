@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
+import { sameItemDragSource, useItemDrag } from "./original-client-drag-item";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -95,6 +96,7 @@ export function CharacterWindow({
   onSpecialRepairItem,
   onCastSkill,
 }: CharacterWindowProps) {
+  const itemDrag = useItemDrag();
   const activePage = ORIGINAL_UI.character.pages[activeTab];
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
@@ -167,15 +169,25 @@ export function CharacterWindow({
             return (
               <div
                 key={slot.label}
-                className="character-slot"
+                className="character-slot" data-item-drop-kind="equipment" data-item-drop-equip={equipmentSlotFromLabel(slot.label)}
                 style={{ left: slot.x + 8, top: slot.y + 90 }}
                 aria-label={slot.label}
               >
 	                {item ? (
 	                  <button
 	                    type="button"
-	                    className="character-slot-card"
+	                    className={`character-slot-card ${itemDrag && sameItemDragSource(itemDrag.draggingSource, { kind: "equipment", equipmentSlot: item.slot }) ? "item-dragging" : ""}`}
 	                    aria-label={item.name}
+                    onPointerDown={(event) =>
+                      itemDrag?.beginDrag(event, {
+                        uniqueId: -1,
+                        key: `equip:${item.slot}`,
+                        name: item.name,
+                        icon: item.icon,
+                        quantity: 1,
+                        source: { kind: "equipment", equipmentSlot: item.slot },
+                      })
+                    }
 	                    onClick={() => {
 	                      if (repairMode === "normal") {
 	                        onRepairItem({ slot: item.slot });

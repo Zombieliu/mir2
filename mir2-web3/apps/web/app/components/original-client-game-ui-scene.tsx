@@ -25,8 +25,14 @@ import {
   type SystemMenuSurfacePanel,
   type SystemMenuTransferOption,
 } from "./original-client-system-menu";
+import {
+  ItemDragProvider,
+  type ItemDragPayload,
+  type ItemDropTarget,
+} from "./original-client-drag-item";
 import type {
   DisplayEntity,
+  DisplayItem,
   DisplayLogLine,
   DisplayWorld,
   EquipmentActionRef,
@@ -208,7 +214,96 @@ export function GameUiScene({
     }
   }, [dialogKey, dismissedDialogKey]);
 
+  // Map a completed drag (source -> drop target) onto the existing Crystal item
+  // commands. Stacks of the same item key merge; everything else moves/equips/
+  // stores/unequips. Unsupported source/target combinations are a no-op so the
+  // dragged item simply snaps back, matching Crystal's reject-on-invalid-drop.
+  function findInventoryItemAt(container: DisplayItem["container"], slot: number) {
+    return world.inventoryItems.find((item) => item.container === container && item.slot === slot) ?? null;
+  }
+
+  function resolveItemDrop(payload: ItemDragPayload, target: ItemDropTarget) {
+    const source = payload.source;
+
+    if (target.kind === "inventory") {
+      if (source.kind === "equipment") {
+        onRemoveItem({ slot: source.equipmentSlot });
+        return;
+      }
+      if (source.kind === "storage") {
+        onTakeBackItem({ uniqueId: payload.uniqueId, slot: source.slot, container: "storage" }, target.slot);
+        return;
+      }
+      if (source.kind === "inventory") {
+        if (source.container !== target.container || source.slot === target.slot) return;
+        const occupant = findInventoryItemAt(target.container, target.slot);
+        if (occupant && occupant.key === payload.key && occupant.uniqueId !== payload.uniqueId) {
+          onMergeItem(
+            { uniqueId: payload.uniqueId, slot: source.slot, container: source.container },
+            { uniqueId: occupant.uniqueId, slot: occupant.slot, container: occupant.container },
+          );
+          return;
+        }
+        onMoveItem({ uniqueId: payload.uniqueId, slot: source.slot, container: source.container }, target.slot);
+      }
+      return;
+    }
+
+    if (target.kind === "storage") {
+      if (source.kind === "inventory") {
+        onStoreItem({ uniqueId: payload.uniqueId, slot: source.slot, container: source.container }, target.slot);
+        return;
+      }
+      if (source.kind === "storage") {
+        if (source.slot === target.slot) return;
+        const occupant = world.storageItems.find((item) => item.slot === target.slot) ?? null;
+        if (occupant && occupant.key === payload.key && occupant.uniqueId !== payload.uniqueId) {
+          onMergeItem(
+            { uniqueId: payload.uniqueId, slot: source.slot, container: "storage" },
+            { uniqueId: occupant.uniqueId, slot: occupant.slot, container: "storage" },
+          );
+          return;
+        }
+        onMoveItem({ uniqueId: payload.uniqueId, slot: source.slot, container: "storage" }, target.slot);
+      }
+      return;
+    }
+
+    if (target.kind === "equipment") {
+      if (source.kind === "inventory") {
+        onEquipItem(
+          { key: payload.key, uniqueId: payload.uniqueId, slot: source.slot, container: source.container },
+          target.equipmentSlot,
+        );
+      }
+      return;
+    }
+
+    if (target.kind === "belt") {
+      if (source.kind === "belt") {
+        if (source.slot === target.slot) return;
+        const occupant = world.beltItems.find((item) => item.slot === target.slot) ?? null;
+        if (occupant && occupant.key === payload.key && occupant.uniqueId !== payload.uniqueId) {
+          onMergeItem(
+            { uniqueId: payload.uniqueId, slot: source.slot, container: "belt" },
+            { uniqueId: occupant.uniqueId, slot: occupant.slot, container: "belt" },
+          );
+          return;
+        }
+        onMoveItem({ uniqueId: payload.uniqueId, slot: source.slot, container: "belt" }, target.slot);
+      }
+      return;
+    }
+
+    if (target.kind === "ground") {
+      if (source.kind === "inventory" || source.kind === "belt") {
+        onDropItem({ key: payload.key, uniqueId: payload.uniqueId, slot: source.slot, container: source.kind === "belt" ? "belt" : source.container });
+      }
+    }
+  }
+
   return (
+    <ItemDragProvider onResolveDrop={resolveItemDrop}>
     <div className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}>
       <MiniMapPanel
         t={t}
@@ -400,5 +495,6 @@ export function GameUiScene({
         />
       ) : null}
     </div>
+    </ItemDragProvider>
   );
 }
