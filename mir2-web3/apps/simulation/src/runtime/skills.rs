@@ -329,7 +329,9 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         // Taoist support buffs applied to self/allies (no hostile target).
         | Spell::SoulShield
         | Spell::BlessedArmour
-        | Spell::UltimateEnhancer => SkillCastKind::SelfOnly,
+        | Spell::UltimateEnhancer
+        // Assassin self-centred hide that also mists nearby tiles.
+        | Spell::MoonMist => SkillCastKind::SelfOnly,
         Spell::FireWall
         | Spell::FireBang
         | Spell::IceStorm
@@ -382,6 +384,9 @@ fn crystal_spell_is_offensive(spell: Spell) -> bool {
             | Spell::BackStep
             | Spell::FlashDash
             | Spell::StormEscape
+            // Cleanse cast on self/allies (Crystal Purification) — Target-kind
+            // but not offensive, so it must not require a hostile target.
+            | Spell::Purification
     )
 }
 
