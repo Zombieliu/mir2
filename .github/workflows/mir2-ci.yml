@@ -110,7 +110,7 @@ jobs:
       # vertical_slice) plus protocol/game-data unit tests; none require Postgres/Redis/network.
       # admin-api/gateway tests that need external services are intentionally excluded.
       - name: Test core crates
-        run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture
+        run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture --test-threads=1
         env:
           RUST_BACKTRACE: "1"
           CARGO_TERM_COLOR: always
