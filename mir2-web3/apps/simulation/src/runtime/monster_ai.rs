@@ -1769,7 +1769,7 @@ pub(super) fn update_kirin_ice_thrust_state(
         return false;
     };
     let monster_name = entity_name(world, entity).unwrap_or_else(|| "Lamia".to_string());
-    let base_damage = crystal_monster_raw_magic_damage(&monster_name);
+    let base_damage = crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id);
     if base_damage <= 0 {
         return false;
     }
@@ -1940,7 +1940,7 @@ pub(super) fn cast_general_meow_meow_mass_thunder(
         return false;
     };
     let monster_name = entity_name(world, entity).unwrap_or_else(|| "GeneralMeowMeow".to_string());
-    let base_damage = crystal_monster_raw_magic_damage(&monster_name);
+    let base_damage = crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id);
     let damage = if base_damage > 0 {
         let mitigation = total_defence_bonus(
             world.resource::<InventoryResource>(),
@@ -4553,7 +4553,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         continue;
                     }
                     let final_damage = if hell_keeper_type_one_branch {
-                        let base_damage = crystal_monster_raw_magic_damage(&monster_name);
+                        let base_damage = crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id);
                         if base_damage <= 0 {
                             0
                         } else {
@@ -4566,9 +4566,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     } else if yimoogi_poison_branch {
                         0
                     } else if dark_beast_secondary_branch {
-                        crystal_monster_raw_magic_damage(&monster_name)
+                        crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if snow_wolf_type_one_branch {
-                        let base_damage = crystal_monster_raw_magic_damage(&monster_name);
+                        let base_damage = crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id);
                         if base_damage <= 0 {
                             0
                         } else {
@@ -4579,16 +4579,16 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             (base_damage - mitigation).max(1)
                         }
                     } else if frozen_miner_type_one_branch {
-                        let damage = crystal_monster_raw_attack_damage(&monster_name);
+                        let damage = crystal_monster_raw_attack_damage_rolled(&monster_name, tick, attacker_id);
                         if damage > 0 {
                             (damage * 8 / 10).max(1)
                         } else {
                             0
                         }
                     } else if frozen_magician_type_one_branch {
-                        crystal_monster_raw_magic_damage(&monster_name) * 3 / 2
+                        crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id) * 3 / 2
                     } else if armadillo_type_one_branch && agent.ai == 124 {
-                        (crystal_monster_attack_damage(&monster_name) / 2).max(1)
+                        (crystal_monster_attack_damage_rolled(&monster_name, tick, attacker_id) / 2).max(1)
                     } else if armadillo_type_one_branch && agent.ai == 125 {
                         0
                     } else if cannibal_tentacles_halfmoon_branch {
@@ -4598,47 +4598,47 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         );
                         (CANNIBAL_TENTACLES_HALFMOON_DAMAGE - mitigation).max(1)
                     } else if king_scorpion_range_branch {
-                        crystal_monster_magic_damage(&monster_name)
+                        crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if jar2_adjacent_range_branch {
-                        crystal_monster_raw_magic_damage(&monster_name)
+                        crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if sand_snail_green_area_branch {
-                        crystal_monster_magic_damage(&monster_name)
+                        crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if seedings_general_close_splash_branch {
                         let mitigation = total_defence_bonus(
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
+                        (crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id) - mitigation).max(1)
                     } else if man_tree_boulder_branch {
-                        crystal_monster_raw_magic_damage(&monster_name)
+                        crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if restless_jar_stomp_branch {
-                        crystal_monster_raw_attack_damage(&monster_name)
+                        crystal_monster_raw_attack_damage_rolled(&monster_name, tick, attacker_id)
                     } else if tucson_warrior_adjacent_smash_branch {
-                        crystal_monster_magic_damage(&monster_name)
+                        crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if general_meow_meow_slam_branch {
                         let mitigation = total_defence_bonus(
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_attack_damage(&monster_name) * 3 - mitigation).max(1)
+                        (crystal_monster_attack_damage_rolled(&monster_name, tick, attacker_id) * 3 - mitigation).max(1)
                     } else if tucson_general_type_two_range_branch {
                         let mitigation = total_defence_bonus(
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_spell_damage(&monster_name) * 2 - mitigation).max(1)
+                        (crystal_monster_spell_damage_rolled(&monster_name, tick, attacker_id) * 2 - mitigation).max(1)
                     } else if tucson_general_stomp_branch {
                         let mitigation = total_defence_bonus(
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
+                        (crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id) - mitigation).max(1)
                     } else if white_foxman_slow_branch {
                         0
                     } else if stray_cat_push_branch {
-                        crystal_monster_raw_magic_damage(&monster_name)
+                        crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else if tucson_mage_wide_line_branch {
-                        let base_damage = crystal_monster_raw_magic_damage(&monster_name);
+                        let base_damage = crystal_monster_raw_magic_damage_rolled(&monster_name, tick, attacker_id);
                         if base_damage <= 0 {
                             0
                         } else {
@@ -4653,15 +4653,15 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_magic_damage(&monster_name) - mitigation).max(1)
+                        (crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id) - mitigation).max(1)
                     } else if manectric_king_push_line_branch {
                         let mitigation = total_defence_bonus(
                             world.resource::<InventoryResource>(),
                             world.resource::<BuffResource>(),
                         );
-                        (crystal_monster_attack_damage(&monster_name) - mitigation).max(1)
+                        (crystal_monster_attack_damage_rolled(&monster_name, tick, attacker_id) - mitigation).max(1)
                     } else if oma_king_type_one_magic_branch {
-                        crystal_monster_magic_damage(&monster_name)
+                        crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id)
                     } else {
                         monster_player_attack_damage(
                             world,
@@ -4767,7 +4767,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             distance: 2,
                         });
                         if agent.ai == 124 {
-                            let retreat_damage = crystal_monster_raw_attack_damage(&monster_name);
+                            let retreat_damage = crystal_monster_raw_attack_damage_rolled(&monster_name, tick, attacker_id);
                             if retreat_damage > 0 {
                                 let due_tick = tick + combat_delay_ticks(900);
                                 if tile_distance(&retreat_position, &player_position) <= 2 {
@@ -5813,9 +5813,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             if let Some(target_position) = entity_position(world, area_target) {
                                 let base_damage = if tile_distance(&position, &target_position) > 2
                                 {
-                                    crystal_monster_magic_damage(&monster_name)
+                                    crystal_monster_magic_damage_rolled(&monster_name, tick, attacker_id)
                                 } else {
-                                    crystal_monster_attack_damage(&monster_name)
+                                    crystal_monster_attack_damage_rolled(&monster_name, tick, attacker_id)
                                 };
                                 let mitigation = total_defence_bonus(
                                     world.resource::<InventoryResource>(),

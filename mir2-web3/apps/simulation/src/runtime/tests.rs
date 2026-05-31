@@ -13150,10 +13150,12 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("Master_DragonYang")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("Master_DragonYang") - mit).max(1),
+            (super::crystal_monster_magic_damage("Master_DragonYang") - mit).max(1),
+        )
     };
     let king = spawn_crystal_monster_for_test(
         &mut session,
@@ -13234,10 +13236,13 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
                 if info.object_id == ally_object_id && info.attacker_id == king_object_id
         )
     }));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
-    );
+    {
+        let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+        assert!(
+            (expected_min..=expected_max).contains(&drop),
+            "rolled special attack should land in its damage class ({expected_min}..={expected_max}, got {drop})"
+        );
+    }
     assert!(
         session
             .app
@@ -13561,10 +13566,12 @@ fn seedings_general_close_splash_branch_uses_type_one_mc() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("SeedingsGeneral")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("SeedingsGeneral") - mit).max(1),
+            (super::crystal_monster_magic_damage("SeedingsGeneral") - mit).max(1),
+        )
     };
     let general = spawn_crystal_monster_for_test(
         &mut session,
@@ -13619,10 +13626,13 @@ fn seedings_general_close_splash_branch_uses_type_one_mc() {
             ServerPacket::Struck { info } if info.attacker_id == general_object_id
         )
     }));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
-    );
+    {
+        let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+        assert!(
+            (expected_min..=expected_max).contains(&drop),
+            "rolled special attack should land in its damage class ({expected_min}..={expected_max}, got {drop})"
+        );
+    }
     assert!(!session.world_snapshot().active_buffs.iter().any(|buff| {
         buff.key == super::ICE_GUARD_SLOW_BUFF_KEY || buff.key == super::ICE_GUARD_FROZEN_BUFF_KEY
     }));
@@ -13813,10 +13823,12 @@ fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_raw_magic_damage("Master_DragonYang")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("Master_DragonYang") - mit).max(1),
+            (super::crystal_monster_raw_magic_damage("Master_DragonYang") - mit).max(1),
+        )
     };
     let keeper = spawn_crystal_monster_for_test(
         &mut session,
@@ -13885,10 +13897,13 @@ fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
                 if info.object_id == ally_object_id && info.attacker_id == keeper_object_id
         )
     }));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
-    );
+    {
+        let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+        assert!(
+            (expected_min..=expected_max).contains(&drop),
+            "rolled special attack should land in its damage class ({expected_min}..={expected_max}, got {drop})"
+        );
+    }
     assert!(session
         .world_snapshot()
         .active_buffs
@@ -14692,10 +14707,12 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_spell_damage("TucsonGeneral") * 2
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_spell_damage("TucsonGeneral") * 2 - mit).max(1),
+            (super::crystal_monster_spell_damage("TucsonGeneral") * 2 - mit).max(1),
+        )
     };
     let general = spawn_crystal_monster_for_test(
         &mut session,
@@ -14750,10 +14767,10 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
         packet,
         ServerPacket::Struck { info } if info.attacker_id == general_object_id
     )));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral type-2 ranged branch should use imported Crystal SC * 2 after defence"
+    let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+    assert!(
+        (expected_min..=expected_max).contains(&drop),
+        "TucsonGeneral type-2 ranged branch should roll Crystal SC * 2 after defence ({expected_min}..={expected_max}, got {drop})"
     );
 }
 
@@ -14785,10 +14802,12 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("TucsonGeneral")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("TucsonGeneral") - mit).max(1),
+            (super::crystal_monster_magic_damage("TucsonGeneral") - mit).max(1),
+        )
     };
     let general = spawn_crystal_monster_for_test(
         &mut session,
@@ -14874,10 +14893,10 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
         ServerPacket::ObjectStruck { info }
             if info.object_id == ally_object_id && info.attacker_id == general_object_id
     )));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral close stomp should use imported Crystal MC after defence"
+    let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+    assert!(
+        (expected_min..=expected_max).contains(&drop),
+        "TucsonGeneral close stomp should roll Crystal MC after defence ({expected_min}..={expected_max}, got {drop})"
     );
     assert!(session
         .world_snapshot()
@@ -17751,10 +17770,12 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_raw_magic_damage("Master_DragonYang")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("Master_DragonYang") - mit).max(1),
+            (super::crystal_monster_raw_magic_damage("Master_DragonYang") - mit).max(1),
+        )
     };
     let wolf = spawn_crystal_monster_for_test(
         &mut session,
@@ -17822,10 +17843,13 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
                 if info.object_id == ally_object_id && info.attacker_id == wolf_object_id
         )
     }));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
-    );
+    {
+        let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+        assert!(
+            (expected_min..=expected_max).contains(&drop),
+            "rolled special attack should land in its damage class ({expected_min}..={expected_max}, got {drop})"
+        );
+    }
     let snapshot = session.world_snapshot();
     assert!(snapshot
         .active_buffs
@@ -18193,10 +18217,12 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
             mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_raw_magic_damage("Master_DragonYang")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
+    let (expected_min, expected_max) = {
+        let mit = total_defence_bonus(session.app.world());
+        (
+            (super::crystal_monster_min_magic_damage("Master_DragonYang") - mit).max(1),
+            (super::crystal_monster_raw_magic_damage("Master_DragonYang") - mit).max(1),
+        )
     };
     let mage = spawn_crystal_monster_for_test(
         &mut session,
@@ -18272,10 +18298,13 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
                 if info.object_id == ally_object_id && info.attacker_id == mage_object_id
         )
     }));
-    assert_eq!(
-        before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage
-    );
+    {
+        let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+        assert!(
+            (expected_min..=expected_max).contains(&drop),
+            "rolled special attack should land in its damage class ({expected_min}..={expected_max}, got {drop})"
+        );
+    }
     assert!(
         session
             .app

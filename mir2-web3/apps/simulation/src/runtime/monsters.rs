@@ -1255,6 +1255,26 @@ pub(super) fn crystal_monster_spell_damage_rolled(name: &str, tick: u64, attacke
         .unwrap_or(7)
 }
 
+// Lower bounds of the damage classes, used by tests to assert that a rolled special attack lands
+// inside `[min_class, max_class]` rather than pinning the (now-variant) maximum.
+pub(super) fn crystal_monster_min_attack_damage(name: &str) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| monster.min_dc.max(0))
+        .unwrap_or(0)
+}
+
+pub(super) fn crystal_monster_min_magic_damage(name: &str) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| monster.min_mc.max(0))
+        .unwrap_or(0)
+}
+
+pub(super) fn crystal_monster_min_spell_damage(name: &str) -> i32 {
+    crystal_monster_by_name(name)
+        .map(|monster| monster.min_sc.max(0))
+        .unwrap_or(0)
+}
+
 pub(super) fn crystal_monster_effect_for_name(name: &str) -> u8 {
     crystal_monster_by_name(name)
         .map(|monster| monster.effect)
