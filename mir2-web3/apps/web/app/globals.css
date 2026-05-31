@@ -5023,3 +5023,9 @@ body.mir-dragging-item * {
   width: 100%;
   accent-color: #caa24f;
 }
+
+/* HUD overlay opts these back into pointer events (parent is pointer-events:none) */
+.options-dialog,
+.buff-bar {
+  pointer-events: auto;
+}

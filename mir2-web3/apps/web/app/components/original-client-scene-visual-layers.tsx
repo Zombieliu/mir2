@@ -436,6 +436,11 @@ function useFloatingCombatNumbers(entries: ViewportEntitySpriteEntry[]): Floatin
   const [numbers, setNumbers] = useState<FloatingCombatNumber[]>([]);
   const lastHpRef = useRef<Map<string, number>>(new Map());
   const idRef = useRef(0);
+  // Pending removal timers are tracked in a ref and cleared only on unmount;
+  // this effect re-runs on every render (entries identity changes), so a
+  // per-render cleanup would cancel the removal timers and leak numbers.
+  const timersRef = useRef<number[]>([]);
+  useEffect(() => () => timersRef.current.forEach((timer) => window.clearTimeout(timer)), []);
 
   useEffect(() => {
     const lastHp = lastHpRef.current;
@@ -470,12 +475,13 @@ function useFloatingCombatNumbers(entries: ViewportEntitySpriteEntry[]): Floatin
 
     if (!spawned.length) return;
     setNumbers((current) => [...current, ...spawned]);
-    const timers = spawned.map((number) =>
-      window.setTimeout(() => {
+    for (const number of spawned) {
+      const timer = window.setTimeout(() => {
         setNumbers((current) => current.filter((entry) => entry.id !== number.id));
-      }, FLOATING_COMBAT_NUMBER_DURATION_MS),
-    );
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
+        timersRef.current = timersRef.current.filter((entry) => entry !== timer);
+      }, FLOATING_COMBAT_NUMBER_DURATION_MS);
+      timersRef.current.push(timer);
+    }
   }, [entries]);
 
   return numbers;
