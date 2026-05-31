@@ -46,6 +46,21 @@ pub(super) const REVIVING_ZOMBIE_REVIVE_DELAY_TICKS: u64 = 4;
 pub(super) const REVIVING_ZOMBIE_MAX_REVIVALS: u8 = 2;
 pub(super) const REVIVING_ZOMBIE_LIFECOUNT_SALT: usize = 25_001;
 pub(super) const REVIVING_ZOMBIE_DELAY_SALT: usize = 25_002;
+// Crystal `PoisonType` bit flags (`Shared/Enums.cs`). `MonsterPoisonState.poison` stores these.
+pub(super) const CRYSTAL_POISON_GREEN: u16 = 1;
+pub(super) const CRYSTAL_POISON_RED: u16 = 2;
+pub(super) const CRYSTAL_POISON_SLOW: u16 = 4;
+pub(super) const CRYSTAL_POISON_FROZEN: u16 = 8;
+pub(super) const CRYSTAL_POISON_STUN: u16 = 16;
+pub(super) const CRYSTAL_POISON_PARALYSIS: u16 = 32;
+pub(super) const CRYSTAL_POISON_LR_PARALYSIS: u16 = 256;
+pub(super) const CRYSTAL_POISON_DAZED: u16 = 1024;
+/// Crystal `MonsterObject.CanMove`: a monster cannot move while Frozen, Stunned, Paralysed or
+/// LR-Paralysed (the Stun-vs-`Info.Light` 10/5 exemption is omitted — no spawned family carries it).
+pub(super) const CRYSTAL_POISON_BLOCKS_MOVE: u16 =
+    CRYSTAL_POISON_FROZEN | CRYSTAL_POISON_STUN | CRYSTAL_POISON_PARALYSIS | CRYSTAL_POISON_LR_PARALYSIS;
+/// Crystal `MonsterObject.CanAttack`: additionally Dazed stops a monster attacking.
+pub(super) const CRYSTAL_POISON_BLOCKS_ATTACK: u16 = CRYSTAL_POISON_BLOCKS_MOVE | CRYSTAL_POISON_DAZED;
 pub(super) const SPITTING_SPIDER_GREEN_POISON_CHANCE_DENOMINATOR: u64 = 8;
 pub(super) const SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS: u64 = 5;
 pub(super) const CAVE_MAGGOT_PARALYSIS_CHANCE_DENOMINATOR: u64 = 20;

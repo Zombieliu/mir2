@@ -21,6 +21,9 @@ use super::{
     PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
     SessionResource, SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource,
     SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState, BASE_STORAGE_SLOTS,
+    CRYSTAL_POISON_BLOCKS_ATTACK, CRYSTAL_POISON_BLOCKS_MOVE, CRYSTAL_POISON_DAZED,
+    CRYSTAL_POISON_FROZEN, CRYSTAL_POISON_GREEN, CRYSTAL_POISON_LR_PARALYSIS,
+    CRYSTAL_POISON_PARALYSIS, CRYSTAL_POISON_RED, CRYSTAL_POISON_SLOW, CRYSTAL_POISON_STUN,
     CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS, MONSTER_REGEN_INTERVAL_TICKS,
     MONSTER_REGEN_PERMILLE,
 };
@@ -4230,6 +4233,225 @@ fn crystal_poisoned_monster_does_not_regenerate() {
         .expect("monster vitals")
         .hp;
     assert_eq!(hp, start_hp, "a poisoned monster must not regenerate HP");
+}
+
+#[test]
+fn crystal_poison_action_masks_match_crystal_can_move_can_attack() {
+    // Crystal `MonsterObject.CanMove` is false for Frozen/Stun/Paralysis/LRParalysis; `CanAttack`
+    // additionally fails on Dazed. Green/Slow/Red never gate action (they DOT / slow / soften armour).
+    for bit in [
+        CRYSTAL_POISON_FROZEN,
+        CRYSTAL_POISON_STUN,
+        CRYSTAL_POISON_PARALYSIS,
+        CRYSTAL_POISON_LR_PARALYSIS,
+    ] {
+        assert_ne!(CRYSTAL_POISON_BLOCKS_MOVE & bit, 0, "{bit:#x} should block move");
+        assert_ne!(CRYSTAL_POISON_BLOCKS_ATTACK & bit, 0, "{bit:#x} should block attack");
+    }
+    assert_eq!(
+        CRYSTAL_POISON_BLOCKS_MOVE & CRYSTAL_POISON_DAZED,
+        0,
+        "Dazed must not block movement"
+    );
+    assert_ne!(
+        CRYSTAL_POISON_BLOCKS_ATTACK & CRYSTAL_POISON_DAZED,
+        0,
+        "Dazed must block attack"
+    );
+    for bit in [
+        CRYSTAL_POISON_GREEN,
+        CRYSTAL_POISON_SLOW,
+        CRYSTAL_POISON_RED,
+    ] {
+        assert_eq!(CRYSTAL_POISON_BLOCKS_MOVE & bit, 0, "{bit:#x} must not gate movement");
+        assert_eq!(CRYSTAL_POISON_BLOCKS_ATTACK & bit, 0, "{bit:#x} must not gate attack");
+    }
+}
+
+#[test]
+fn frozen_poison_holds_monster_from_attacking() {
+    // Crystal `MonsterObject.CanAttack` is false while a Frozen poison is active: an adjacent,
+    // aggroed, off-cooldown monster cannot swing. Clearing the freeze frees it on the next tick.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let monster_object_id = 70_311_u32;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Frozen Hold Test"),
+            Position(Point {
+                x: player_origin.x + 1,
+                y: player_origin.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterPoisonState {
+                poison: CRYSTAL_POISON_FROZEN,
+                green_damage: 0,
+                next_damage_tick: current_tick + 1_000_000,
+                expires_at_tick: current_tick + 1_000_000,
+            },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: player_origin.clone(),
+                ai: 0,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: true,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    // Per-monster assertions (rather than absolute player HP) keep the test immune to any default
+    // world monster that might wander into range over these ticks.
+    for _ in 0..4 {
+        let packets = session.tick();
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectAttack { info } if info.object_id == monster_object_id
+            )),
+            "a frozen monster must not swing"
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::Struck { info } if info.attacker_id == monster_object_id
+            )),
+            "a frozen monster lands no hit"
+        );
+    }
+
+    session
+        .app
+        .world_mut()
+        .entity_mut(monster_entity)
+        .remove::<MonsterPoisonState>();
+    let freed = session.tick();
+    assert!(
+        freed.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { info } if info.object_id == monster_object_id
+        )),
+        "clearing the freeze lets the monster attack again"
+    );
+}
+
+#[test]
+fn frozen_poison_holds_monster_from_chasing() {
+    // Crystal `MonsterObject.CanMove` is false while frozen: an aggroed monster a few tiles away
+    // cannot close on the player. Clearing the freeze lets it step in.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let start = Point {
+        x: player_origin.x + 3,
+        y: player_origin.y,
+    };
+    let monster_object_id = 70_312_u32;
+    let current_tick = runtime_tick(session.app.world());
+    let monster_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(monster_object_id),
+            DisplayName::literal("Frozen Chase Test"),
+            Position(start.clone()),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterPoisonState {
+                poison: CRYSTAL_POISON_FROZEN,
+                green_damage: 0,
+                next_damage_tick: current_tick + 1_000_000,
+                expires_at_tick: current_tick + 1_000_000,
+            },
+            MonsterAgent {
+                image: 43,
+                dead: false,
+                patrol_origin: start.clone(),
+                ai: 0,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: true,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    for _ in 0..4 {
+        let packets = session.tick();
+        assert!(
+            !packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectWalk { movement } if movement.object_id == monster_object_id
+            )),
+            "a frozen monster must not chase"
+        );
+    }
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(monster_entity)
+            .get::<Position>()
+            .expect("monster position")
+            .0,
+        start,
+        "a frozen monster holds its ground"
+    );
+
+    session
+        .app
+        .world_mut()
+        .entity_mut(monster_entity)
+        .remove::<MonsterPoisonState>();
+    session.tick();
+    let after = session
+        .app
+        .world()
+        .entity(monster_entity)
+        .get::<Position>()
+        .expect("monster position")
+        .0
+        .clone();
+    assert!(
+        tile_distance(&after, &player_origin) < tile_distance(&start, &player_origin),
+        "clearing the freeze lets the monster step toward the player (was {start:?}, now {after:?})"
+    );
 }
 
 #[test]

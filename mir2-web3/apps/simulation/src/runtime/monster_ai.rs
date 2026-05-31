@@ -11,8 +11,8 @@ use super::combat::*;
 use super::components::{
     current_player_is_dead, current_player_object_id, entity_facing, entity_name, entity_object_id,
     entity_position, player_entity, DisplayName, Facing, GeneralMeowMeowState, Monster,
-    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterDamageBuff, MonsterVitals, ObjectId,
-    Position, SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
+    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterDamageBuff, MonsterPoisonState,
+    MonsterVitals, ObjectId, Position, SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
 use super::drops::tick_ground_drop_expiry;
@@ -4102,16 +4102,33 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
         let mut agent = original_agent.clone();
         let mut ai_state = original_ai_state;
 
-        if update_special_monster_state(
-            world,
-            entity,
-            &mut agent,
-            &mut ai_state,
-            &position,
-            &player_position,
-            tick,
-            &mut packets,
-        ) {
+        // Crystal `MonsterObject.CanMove` / `CanAttack`: a monster carrying a Frozen / Stun /
+        // Paralysis / LR-Paralysis poison cannot move or attack this cycle; a Dazed poison blocks
+        // only its attack. Held monsters skip every action path (special handler, melee, chase).
+        let (poison_blocks_move, poison_blocks_attack) = world
+            .entity(entity)
+            .get::<MonsterPoisonState>()
+            .map(|poison| {
+                (
+                    poison.poison & CRYSTAL_POISON_BLOCKS_MOVE != 0,
+                    poison.poison & CRYSTAL_POISON_BLOCKS_ATTACK != 0,
+                )
+            })
+            .unwrap_or((false, false));
+        let poison_fully_held = poison_blocks_move && poison_blocks_attack;
+
+        if !poison_fully_held
+            && update_special_monster_state(
+                world,
+                entity,
+                &mut agent,
+                &mut ai_state,
+                &position,
+                &player_position,
+                tick,
+                &mut packets,
+            )
+        {
             persist_monster_runtime_state(
                 world,
                 entity,
@@ -4124,6 +4141,19 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
         }
 
         if agent.dead {
+            continue;
+        }
+
+        if poison_fully_held {
+            // Frozen / stunned / paralysed in place: no chase, no attack, no patrol this tick.
+            persist_monster_runtime_state(
+                world,
+                entity,
+                &original_agent,
+                &agent,
+                original_ai_state,
+                ai_state,
+            );
             continue;
         }
 
@@ -4291,6 +4321,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
         let player_in_aggro_range = agent.tracking_player;
 
         if monster_can_attack(&agent, &ai_state)
+            && !poison_blocks_attack
             && monster_in_attack_range(&agent, &position, &player_position)
             && player_in_aggro_range
             && !(agent.ai == 27 && distance > 1 && ai_state.next_state_tick > tick)
