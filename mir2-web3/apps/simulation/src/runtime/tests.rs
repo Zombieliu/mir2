@@ -54102,3 +54102,59 @@ fn crystal_hp_drain_gear_heals_player_on_melee_hit() {
         "HP-drain gear should heal the player on landed hits (before={hp_before} after={hp_after})"
     );
 }
+
+#[test]
+fn monster_magic_attack_is_mitigated_by_mac_not_physical_ac() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_pos = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_pos.clone());
+
+    let player_ac = super::total_defence_bonus(
+        session.app.world().resource::<InventoryResource>(),
+        session.app.world().resource::<BuffResource>(),
+    );
+    let player_mac = super::current_player_required_stat_total(
+        session.app.world().resource::<InventoryResource>(),
+        session.app.world().resource::<BuffResource>(),
+        super::CRYSTAL_STAT_MAX_MAC,
+    );
+    assert!(
+        player_ac > 0 && player_mac == 0,
+        "starter expected to have physical AC ({player_ac}) but no MAC ({player_mac})"
+    );
+
+    // FrozenMagician (AI 189) casts a ranged magic blow beyond one tile.
+    let mage = spawn_crystal_monster_for_test(
+        &mut session,
+        91_010,
+        "FrozenMagician",
+        Point { x: player_pos.x + 3, y: player_pos.y },
+        MirDirection::Left,
+        true,
+    );
+    let agent = session
+        .app
+        .world()
+        .entity(mage)
+        .get::<MonsterAgent>()
+        .expect("mage agent")
+        .clone();
+    let source = Point { x: player_pos.x + 3, y: player_pos.y };
+
+    let magic_damage = super::monster_player_attack_damage(
+        session.app.world(),
+        "FrozenMagician",
+        &agent,
+        &source,
+        &player_pos,
+    );
+    let raw_magic = super::crystal_monster_raw_magic_damage("FrozenMagician");
+
+    // Magic is reduced by MAC (zero here), never by the physical AC.
+    assert_eq!(magic_damage, (raw_magic - player_mac).max(1));
+    assert!(
+        magic_damage > (raw_magic - player_ac).max(1),
+        "magic blow {magic_damage} must not be reduced by physical AC {player_ac}"
+    );
+}

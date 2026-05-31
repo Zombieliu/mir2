@@ -26,6 +26,7 @@ use super::components::{
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
 use super::equipment::total_defence_bonus;
+use super::items::current_player_required_stat_total;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
     runtime_full_map_collision_data, walkable_point_count_in_rect, walkable_points_in_rect,
@@ -2024,14 +2025,33 @@ pub(super) fn monster_player_attack_damage(
         117 => crystal_monster_attack_damage(monster_name),
         _ => 7,
     };
-    let mitigation = total_defence_bonus(
-        world.resource::<InventoryResource>(),
-        world.resource::<BuffResource>(),
-    );
     if base_damage <= 0 {
         return 0;
     }
+    // Magic/spell blows are mitigated by the player's magic armour (MAC), not the
+    // physical AC, matching Crystal's `DefenceType.MAC` routing. The previous code
+    // wrongly reduced ranged magic by physical defence.
+    let inventory = world.resource::<InventoryResource>();
+    let buffs = world.resource::<BuffResource>();
+    let mitigation = if monster_attack_uses_magic(agent, source, target) {
+        current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_MAX_MAC)
+    } else {
+        total_defence_bonus(inventory, buffs)
+    };
     (base_damage - mitigation).max(1)
+}
+
+/// Whether the monster's blow against `target` resolves as a magic/spell attack
+/// (mitigated by MAC) rather than a physical one (mitigated by AC). Mirrors the
+/// magic branches of [`monster_player_attack_damage`]'s AI dispatch.
+fn monster_attack_uses_magic(agent: &MonsterAgent, source: &Point, target: &Point) -> bool {
+    let distance = tile_distance(source, target);
+    match agent.ai {
+        88 => true,
+        19 | 102 | 117 | 118 | 120 | 121 | 122 | 126 | 127 | 130 | 181 | 182 | 189 => distance > 1,
+        43 | 86 | 123 | 131 => distance > 2,
+        _ => false,
+    }
 }
 
 pub(super) fn monster_player_status_effect(
