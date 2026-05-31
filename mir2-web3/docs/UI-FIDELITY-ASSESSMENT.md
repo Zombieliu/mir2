@@ -12,9 +12,49 @@ the *visual shell* from the *interaction* layer.
 
 "Looks like Crystal" is already high (visual/asset shell ~75-80%, using real
 extracted `Interface.Lib` frames at correct frame indices). "Behaves like
-Crystal" lags (interaction fidelity ~45%). The three system-level gaps are:
-no drag-and-drop, no skill hotbar (F1-F8), and the social dialogs are all
+Crystal" lags (interaction fidelity ~45% at baseline). The three system-level
+gaps were: no drag-and-drop, no skill hotbar (F1-F8), and the social dialogs
 collapsed into one generic tab panel.
+
+> Note: the per-dialog scorecard below is the **baseline** before the
+> 2026-05-31 UI work. See "Update 2026-05-31" for what has since landed.
+
+## Update 2026-05-31 (implemented)
+
+Closed several of the largest interaction gaps (verified by `tsc --noEmit` +
+`next build`; runtime/visual feel remains human-gated):
+
+- **Drag-and-drop (system-level)** - a shared pointer-drag layer
+  (`ItemDragProvider`) with a cursor item ghost. Wired across inventory bag,
+  character paperdoll (equip/unequip by drag), storage (store/take-back/reorder),
+  and belt, plus **drop-to-ground** by releasing over the map. Reuses the
+  existing item commands; click/right-click paths are preserved. Inventory
+  interaction ~62% -> ~80%; the click-staging paradigm gap is closed.
+- **Skill hotbar (F1-F8)** - a real `SkillBar` above the HUD assigned from each
+  skill's server `hotkey`, with cooldown/toggle state; F1-F8 cast the matching
+  slot. ~5% -> ~70% (no MagIcon art, so slots are labelled not icon-art).
+- **Buff row** - active buffs render as a labelled chip row with durations and
+  bonus tooltips (BuffDialog stand-in). ~10% -> ~55%.
+- **Floating combat numbers** - damage/heal numbers rise/fade over entities,
+  derived from per-entity HP deltas. ~0% -> ~70%.
+- **HUD truth** - HP/MP orbs now fill bottom-up (clip-path) like Crystal's
+  liquid orbs; MP is driven by the server's authoritative mana percentage
+  instead of a hardcoded `maxMp=100` + bad ratio. Main HUD ~70% -> ~82%.
+  (A real numeric max MP with stat/gear scaling stays a backend stat-engine
+  item: the server still reports mana as a percentage of a fixed scale, and
+  `mana_percent` divides by a literal 100.)
+- **Options dialog** - the HUD Option button opens a real in-game Options
+  dialog (Sound + Game toggles) instead of jumping to the character stats tab.
+  ~15% -> ~45%.
+- **MirAmountBox** - split / drop-gold use a Crystal-style amount box (spinner
+  with hold-repeat, drag slider, Max button) instead of a bare number input.
+  ~30% -> ~70%.
+
+Still open after this pass: social dialogs remain collapsed (un-collapse is a
+separate work package), character paperdoll preview + full stat block + rich
+item tooltips (need data-model fields), NPC buy/sell/repair dialogs, BigMap
+teleport, mail compose, and skill/buff **icon art** (no MagIcon library
+extracted).
 
 ## Two dimensions
 

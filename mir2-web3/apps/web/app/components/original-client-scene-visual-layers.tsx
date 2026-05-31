@@ -452,6 +452,9 @@ function useFloatingCombatNumbers(entries: ViewportEntitySpriteEntry[]): Floatin
       const delta = hp - previous;
       if (delta === 0) continue;
       if (entity.maxHp && Math.abs(delta) >= entity.maxHp) continue;
+      // Suppress tiny heals (passive HP regen ticks) so they do not spam green
+      // numbers; always show damage.
+      if (delta > 0 && delta < Math.max(3, Math.round((entity.maxHp ?? 0) * 0.03))) continue;
       idRef.current += 1;
       spawned.push({
         id: idRef.current,
