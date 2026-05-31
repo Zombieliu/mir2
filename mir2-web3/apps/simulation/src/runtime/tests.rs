@@ -29076,6 +29076,7 @@ fn sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain() {
 #[test]
 fn stage3_playable_pve_loop_persists_after_reconnect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    register_test_account(&session, "stage3-loop");
     let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "stage3-loop".to_string(),
         password: "demo".to_string(),
