@@ -2327,39 +2327,44 @@ pub(super) fn monster_player_status_effect(
         }),
         // On-hit poisons the generated profile missed (the PoisonTarget lives in CompleteRangeAttack
         // or a non-standard branch), restored 1:1 with each subclass's Crystal call.
-        // LightTurtle.CompleteRangeAttack: Green(5,5).
+        // On-hit poisons the generated profile missed (the PoisonTarget lives in CompleteAttack with
+        // a stat-rolled duration), restored 1:1 with each subclass's Crystal `PoisonTarget(target,
+        // chance, duration, type)`. The chance is faithful; a stat-derived duration (GetAttackPower)
+        // is approximated as a documented fixed tick count.
+        // LightTurtle.CompleteAttack: PoisonTarget(_, 4, GetAttackPower(MinSC,MaxSC), Green).
         74 => Some(PendingPlayerStatusEffect::GreenPoison {
-            chance_denominator: 5,
+            chance_denominator: 4,
             duration_ticks: 5,
         }),
-        // HellCannibal.Attack: Red(5,5).
+        // HellCannibal.Attack: PoisonTarget(_, 1, Random.Next(GetAttackPower(MinSC,MaxSC)/2), Red).
         78 => Some(PendingPlayerStatusEffect::RedPoison {
-            chance_denominator: 5,
+            chance_denominator: 1,
             duration_ticks: 5,
             salt: 780,
         }),
-        // FlameAssassin.Attack: Slow(5,5).
+        // FlameAssassin.Attack: PoisonTarget(_, 1, GetAttackPower(MinMC,MaxMC), Slow).
         95 => Some(PendingPlayerStatusEffect::SlowPoison {
-            chance_denominator: 5,
+            chance_denominator: 1,
             duration_ticks: 5,
             salt: 950,
         }),
-        // Dazed on-hit families (gate the player's next attack), 1:1 with their Crystal PoisonTarget.
-        // HellSlasher.Attack: Dazed(5,5).
+        // Dazed on-hit families (gate the player's next attack), 1:1 with their Crystal PoisonTarget;
+        // each Crystal duration is a `Random.Next` roll, approximated as a fixed tick count.
+        // HellSlasher.CompleteAttack: PoisonTarget(_, 5, Random.Next(1,4), Dazed).
         76 => Some(PendingPlayerStatusEffect::DazedPoison {
             chance_denominator: 5,
-            duration_ticks: 5,
+            duration_ticks: 3,
             salt: 760,
         }),
-        // TrollKing.Attack: Dazed(3,15).
+        // TrollKing.Attack: PoisonTarget(_, 1, Random.Next(MaxMC), Dazed).
         91 => Some(PendingPlayerStatusEffect::DazedPoison {
-            chance_denominator: 3,
-            duration_ticks: 15,
+            chance_denominator: 1,
+            duration_ticks: 5,
             salt: 910,
         }),
-        // StoningStatue.Attack: Dazed(3,5).
+        // StoningStatue.Attack: PoisonTarget(_, 2, Random.Next(5,10), Dazed).
         135 => Some(PendingPlayerStatusEffect::DazedPoison {
-            chance_denominator: 3,
+            chance_denominator: 2,
             duration_ticks: 5,
             salt: 1350,
         }),

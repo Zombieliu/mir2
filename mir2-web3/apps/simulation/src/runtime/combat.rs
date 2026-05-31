@@ -1250,6 +1250,26 @@ pub(super) fn apply_pending_player_status_effect(
                 },
             );
         }
+        PendingPlayerStatusEffect::DazedPoison {
+            chance_denominator,
+            duration_ticks,
+            salt,
+        } => {
+            if deterministic_chance_roll(current_tick, attacker_id, salt, chance_denominator) {
+                apply_or_refresh_buff(
+                    world,
+                    BuffState {
+                        key: HELL_KEEPER_DAZED_BUFF_KEY.to_string(),
+                        name: "Dazed".to_string(),
+                        description: "Crystal dazed poison is active.".to_string(),
+                        expires_at_tick: current_tick + duration_ticks,
+                        attack_bonus: 0,
+                        defence_bonus: 0,
+                        stats: Vec::new(),
+                    },
+                );
+            }
+        }
         PendingPlayerStatusEffect::StunPoison {
             chance_denominator,
             duration_ticks,
