@@ -4342,6 +4342,90 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_magic_typed_monster_attack_resists_via_mac_not_ac() {
+    // Sanity on the defence-type table.
+    let here = Point { x: 0, y: 0 };
+    let far = Point { x: 5, y: 0 };
+    assert!(super::monster_attack_uses_magic_defence(26, &here, &far)); // ShamanZombie: MACAgility
+    assert!(!super::monster_attack_uses_magic_defence(29, &here, &far)); // BoneSpearman: ACAgility
+    assert!(!super::monster_attack_uses_magic_defence(124, &here, &far)); // Armadillo: ACAgility
+    assert!(!super::monster_attack_uses_magic_defence(19, &here, &here.clone())); // KingScorpion melee = AC
+    assert!(super::monster_attack_uses_magic_defence(19, &here, &far)); // KingScorpion ranged = MAC
+
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 320, y: 240 };
+    set_player_position(&mut session, origin.clone());
+    let player = player_entity(session.app.world()).expect("player");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 1_000,
+        max_hp: 1_000,
+        mp: 100,
+    });
+    // Heavy physical armour (AC 50), no magic armour: a MAC-typed hit must ignore it.
+    session
+        .app
+        .world_mut()
+        .resource_mut::<BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "test-heavy-ac".to_string(),
+            name: "Heavy AC".to_string(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            attack_bonus: 0,
+            defence_bonus: 50,
+            stats: Vec::new(),
+        });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let current_tick = runtime_tick(session.app.world());
+    session.app.world_mut().spawn((
+        ObjectId(92_777),
+        DisplayName::literal("ShamanZombie"),
+        Position(Point {
+            x: origin.x + 1,
+            y: origin.y,
+        }),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals {
+            hp: 500,
+            max_hp: 500,
+        },
+        MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: origin.clone(),
+            ai: 26,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+    for _ in 0..6 {
+        session.tick();
+    }
+    let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+    // ShamanZombie DC is 6-17; reduced by the player's MAC (0) it lands intact. Were the 50 AC
+    // applied, it would floor to 1.
+    assert!(
+        drop > 1,
+        "MAC-typed ShamanZombie hit should bypass the player's physical AC; drop was {drop}"
+    );
+}
+
+#[test]
 fn crystal_water_dragon_ambushes_like_evil_centipede() {
     // WaterDragon (ai 181, EvilCentipede subclass) stays invisible until a target steps within 3.
     let mut session = SimulationSession::new(SimulationConfig::default());

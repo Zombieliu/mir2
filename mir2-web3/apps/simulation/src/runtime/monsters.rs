@@ -26,6 +26,7 @@ use super::components::{
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
 use super::equipment::total_defence_bonus;
+use super::items::current_player_required_stat_total;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
     runtime_full_map_collision_data, walkable_point_count_in_rect, walkable_points_in_rect,
@@ -2064,6 +2065,38 @@ pub(super) fn monster_attack_delay_ticks(
     }
 }
 
+/// Crystal tags each monster attack with a `DefenceType`; `MAC`/`MACAgility` attacks are reduced by
+/// the target's magic armour rather than physical AC. This captures, per AI family, whether the
+/// attack at the given range resolves against the player's magic defence (extracted from each
+/// subclass's `Attack()`/range-attack `DefenceType`).
+pub(super) fn monster_attack_uses_magic_defence(ai: u8, source: &Point, target: &Point) -> bool {
+    match ai {
+        // Normal attack always carries a MAC* defence type.
+        7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 102 | 120
+        | 122 => true,
+        // Physical in melee, magic at range (KingScorpion, CrystalSpider, ThunderElement bolt).
+        19 | 37 | 49 => tile_distance(source, target) > 1,
+        _ => false,
+    }
+}
+
+/// The player armour that mitigates a given monster attack: magic defence (`Stat.MaxMAC`) for
+/// MAC-typed attacks, physical AC (`total_defence_bonus`) otherwise.
+pub(super) fn monster_player_damage_mitigation(
+    world: &World,
+    ai: u8,
+    source: &Point,
+    target: &Point,
+) -> i32 {
+    let resources = world.resource::<InventoryResource>();
+    let buffs = world.resource::<BuffResource>();
+    if monster_attack_uses_magic_defence(ai, source, target) {
+        current_player_required_stat_total(resources, buffs, CRYSTAL_STAT_MAX_MAC)
+    } else {
+        total_defence_bonus(resources, buffs)
+    }
+}
+
 pub(super) fn monster_player_attack_damage(
     world: &World,
     monster_name: &str,
@@ -2145,10 +2178,7 @@ pub(super) fn monster_player_attack_damage(
         // egg, devil node) never reach this path.
         _ => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
     };
-    let mitigation = total_defence_bonus(
-        world.resource::<InventoryResource>(),
-        world.resource::<BuffResource>(),
-    );
+    let mitigation = monster_player_damage_mitigation(world, agent.ai, source, target);
     if base_damage <= 0 {
         return 0;
     }
