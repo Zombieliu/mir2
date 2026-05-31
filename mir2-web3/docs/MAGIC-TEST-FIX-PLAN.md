@@ -18,14 +18,31 @@ The **3 remaining** are map-data (manifest) drift, not code bugs:
 
 ## Safe-zone player damage immunity (engine, Crystal parity)
 Added `combat::current_player_in_safe_zone`; `resolve_pending_combat_actions`
-skips incoming monster combat damage (no Struck) while the player stands in a
-safe zone. Poison/bleeding DOT still ticks (Crystal-accurate). The 11 combat
-tests that fought at the town spawn (a safe zone) were relocated to a
-combat-clear origin (~(305,277), shift -30x/+10y) so they still exercise real
-damage. Verified engine+tests together: zero regressions.
+skips incoming monster/PvP combat damage (no Struck) while the player stands in
+a safe zone. Poison/bleeding DOT still ticks (Crystal-accurate). The combat
+tests that fought at/near the town spawn (a safe zone) were relocated to the
+in-bounds, confirmed-non-safe tile `(322,277)` so they still exercise real
+damage. NOTE: the live runtime's safe zones (config + Crystal manifest) are
+larger than a naive bounds estimate, and the map playBounds is x318–342 /
+y261–279 — probe `is_combat_position` rather than guessing tiles. `(343,281)`
+is out of bounds; `(322,277)` is valid.
+
+`bomb_spider_explodes_when_adjacent_and_damages_player` was a genuine *test*
+bug surfaced (not caused) by the immunity: it spawned an owner-*summoned* bomb
+spider, which the engine correctly treats as friendly (detonates on hostile
+monsters, never the player), so it never damaged the player. The test only
+passed at baseline because the idle town player was being hit by ambient
+Royal_Archers — masking the bug — which safe-zone immunity removed. Fixed by
+spawning a hostile bomb spider (owner `None`, summoned `None`, hostile
+override `Some(true)`).
+
+Verified engine+tests together: **70 → 3** single-threaded lib failures, zero
+regressions (each remaining failure was already failing at baseline), zero
+warnings, full workspace builds.
 
 ## (historical) magic-test status
-damage-branch tests, storage/persistence, soak, and a manifest-drift transfer.
+The 19 remaining (at that earlier checkpoint) were unrelated to magic: combat
+damage-branch tests, storage/persistence, soak, and manifest-drift transfers.
 
 ## Root causes fixed (all engine-correct, no behaviour hacks)
 
