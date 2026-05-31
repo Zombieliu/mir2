@@ -10,10 +10,13 @@
   --danger: #b43e2a;
   --mana: #2d6fa1;
   --hp: #8f2e25;
-  --mir-cursor-default: url("/original-ui/Cursors/Cursor_Default.CUR"), default;
-  --mir-cursor-attack: url("/original-ui/Cursors/Cursor_Normal_Atk.CUR"), pointer;
+  --mir-cursor-default: url("/original-ui/Cursors/Cursor_Default.cur"), default;
+  --mir-cursor-attack: url("/original-ui/Cursors/Cursor_Normal_Atk.cur"), pointer;
+  --mir-cursor-compulsion: url("/original-ui/Cursors/Cursor_Compulsion_Atk.cur"), pointer;
   --mir-cursor-npc: url("/original-ui/Cursors/Cursor_Npc.cur"), pointer;
-  --mir-cursor-text: url("/original-ui/Cursors/Cursor_TextPrompt.CUR"), text;
+  --mir-cursor-text: url("/original-ui/Cursors/Cursor_TextPrompt.cur"), text;
+  --mir-cursor-trash: url("/original-ui/Cursors/Cursor_Trash.cur"), pointer;
+  --mir-cursor-upgrade: url("/original-ui/Cursors/Cursor_Upgrade.cur"), pointer;
 }
 
 * {
@@ -5625,4 +5628,14 @@ body.mir-dragging-item * {
   width: 24px;
   height: 24px;
   image-rendering: pixelated;
+}
+
+/* ---- Crystal contextual cursors for delete / repair actions ---- */
+.inventory-delete button:hover,
+.inventory-delete .sprite-button:hover {
+  cursor: var(--mir-cursor-trash);
+}
+
+.character-repair-actions button:hover {
+  cursor: var(--mir-cursor-upgrade);
 }
