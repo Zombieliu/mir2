@@ -6028,6 +6028,90 @@ mod tests {
         assert_eq!(map0.owner_lease.zone_id(), &ZoneId::new("map:0"));
     }
 
+    // --- map=zone integration harness (oracle for the per-zone-tick + handoff steps) ---
+
+    fn open_per_map_session(registry: &ZoneRegistry, map: &str, account: &str) -> GatewaySession {
+        let routed = registry.open_session_for(
+            GatewayConfig::default(),
+            SessionRouteRequest {
+                account_id: Some(account.to_string()),
+                character_index: Some(0),
+                map_file_name: Some(map.to_string()),
+            },
+        );
+        GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime)
+    }
+
+    fn session_sees_player(session: &GatewaySession, name: &str) -> bool {
+        session
+            .world_snapshot()
+            .entities
+            .iter()
+            .any(|entity| entity.kind == WorldEntityKind::Player && entity.name == name)
+    }
+
+    #[test]
+    fn map_zone_two_sessions_on_same_map_share_a_zone_and_see_each_other() {
+        // Baseline that per-zone routing must preserve: two players routed to the
+        // same map share one zone and are mutually visible at the gateway level.
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+
+        let mut scout = open_per_map_session(&registry, "0", "scout-acct");
+        start_new_character(&mut scout, "scout-acct", "Scout");
+        let mut blade = open_per_map_session(&registry, "0", "blade-acct");
+        start_new_character(&mut blade, "blade-acct", "Blade");
+
+        assert_eq!(scout.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(blade.zone_id(), &ZoneId::new("map:0"));
+        assert!(
+            session_sees_player(&blade, "Scout"),
+            "blade should see scout in the shared map:0 zone"
+        );
+        assert!(
+            session_sees_player(&scout, "Blade"),
+            "scout should see blade in the shared map:0 zone"
+        );
+    }
+
+    #[test]
+    fn map_zone_transfer_changes_map_but_not_zone_today() {
+        // Characterizes the handoff GAP: a map transfer moves the player's map but
+        // leaves the session bound to its original zone. The map=zone handoff step
+        // will flip the zone assertion; locking the current behavior makes that
+        // change visible (and guards against an accidental partial handoff).
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let mut session = open_per_map_session(&registry, "0", "wanderer");
+        start_new_character(&mut session, "wanderer", "Wanderer");
+        assert_eq!(session.zone_id(), &ZoneId::new("map:0"));
+
+        // Debug crystal-transfer key relocates the player to map "0102"; mirror
+        // the working transfer test (transfer + a step) to commit it.
+        session.transfer_map("crystal:0:307:264");
+        session.handle_packet(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        });
+
+        let map_after = session.world_snapshot().map_file_name.clone();
+        assert_eq!(
+            map_after.as_deref(),
+            Some("0102"),
+            "transfer should move the player onto map 0102; actual: {map_after:?}"
+        );
+        assert_eq!(
+            session.zone_id(),
+            &ZoneId::new("map:0"),
+            "GAP: a map transfer does NOT yet re-route the zone (map=zone handoff closes this)"
+        );
+    }
+
     #[test]
     fn shared_in_process_factory_isolates_state_by_zone_id() {
         let registry = ZoneRegistry::with_router(
