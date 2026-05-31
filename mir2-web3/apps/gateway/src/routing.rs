@@ -3349,6 +3349,7 @@ impl SharedInProcessZoneSessionRuntime {
             .filter(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
             .filter_map(|entity| self.inner.zone_monster_spawn_snapshot(entity.object_id))
             .collect::<Vec<_>>();
+        let map_hazard_config = self.inner.current_map_hazard_config();
         let shared_entity_ids = shared_entities
             .iter()
             .map(|entity| entity.object_id)
@@ -3460,6 +3461,17 @@ impl SharedInProcessZoneSessionRuntime {
                         monster: monster.clone(),
                         now_ms,
                     }));
+                }
+                if let Some((lightning, fire, lightning_damage, fire_damage)) = map_hazard_config {
+                    outbounds.extend(zone_state.zone_manager.handle(
+                        ZoneCommand::ConfigureHazards {
+                            session_id: session_id.clone(),
+                            lightning,
+                            fire,
+                            lightning_damage,
+                            fire_damage,
+                        },
+                    ));
                 }
                 let (
                     zone_packets,
@@ -4747,6 +4759,19 @@ impl SharedInProcessZoneSessionRuntime {
                 }
                 ChatPacketPreparation::Immediate(packets) => Some(packets),
             },
+            ClientPacket::OpenDoor { door_index } => {
+                // Doors are shared world state: route to the zone, which opens
+                // the door for every co-located player, broadcasts it, and
+                // auto-closes it on a shared timer (Crystal `Map.Doors`).
+                Some(self.dispatch_zone_player_command(
+                    ZoneCommand::OpenDoor {
+                        session_id,
+                        door_index: *door_index,
+                        now_ms: Self::zone_now_ms(),
+                    },
+                    false,
+                ))
+            }
             _ => None,
         }
     }

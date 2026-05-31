@@ -44,6 +44,8 @@ const ZONE_NATIVE_PLAYER_MAGIC_MAX: i32 = 12;
 const ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS: u64 = 600;
 const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 300;
 const ZONE_CRYSTAL_STATUS_TICK_MS: u64 = 1_000;
+/// Crystal auto-closes doors 5000 ms after they are opened (`Map.Process`).
+const ZONE_DOOR_OPEN_MS: u64 = 5_000;
 const ZONE_CRYSTAL_GREEN_POISON_TICK_MS: u64 = 2_000;
 const CRYSTAL_ARROW_BUFF_VAMPIRE_SHOT: u8 = 16;
 const CRYSTAL_ARROW_BUFF_POISON_SHOT: u8 = 17;
@@ -84,7 +86,25 @@ pub struct ZoneRuntime {
     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
     claimed_ground_drops: BTreeMap<u32, ZoneGroundDropClaim>,
     occupancy: BTreeMap<(i32, i32), SessionId>,
+    /// Open doors → the tick (ms) at which they auto-close. Shared across all
+    /// players on the map (Crystal `Map.Doors`).
+    open_doors: BTreeMap<u8, u64>,
+    /// Shared environmental hazard state for the map (Crystal `Map.Process`
+    /// lightning/fire), authoritative for every player on the map.
+    hazard: ZoneHazardState,
     next_object_id: u32,
+}
+
+#[derive(Debug, Clone, Default)]
+struct ZoneHazardState {
+    lightning: bool,
+    fire: bool,
+    lightning_damage: i32,
+    fire_damage: i32,
+    next_lightning_ms: u64,
+    next_fire_ms: u64,
+    lightning_strikes: u64,
+    fire_strikes: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -236,6 +256,8 @@ impl ZoneRuntime {
             ground_drops: BTreeMap::new(),
             claimed_ground_drops: BTreeMap::new(),
             occupancy: BTreeMap::new(),
+            open_doors: BTreeMap::new(),
+            hazard: ZoneHazardState::default(),
             next_object_id: 1_000_000,
         }
     }
@@ -480,6 +502,21 @@ impl ZoneRuntime {
             ZoneCommand::TickPlayerMovement { session_id, now_ms } => {
                 self.tick_player_movement(&session_id, now_ms)
             }
+            ZoneCommand::OpenDoor {
+                session_id,
+                door_index,
+                now_ms,
+            } => self.open_door(&session_id, door_index, now_ms),
+            ZoneCommand::ConfigureHazards {
+                lightning,
+                fire,
+                lightning_damage,
+                fire_damage,
+                ..
+            } => {
+                self.configure_hazards(lightning, fire, lightning_damage, fire_damage);
+                Vec::new()
+            }
             ZoneCommand::Tick { now_ms } => self.tick(now_ms),
         }
     }
@@ -624,9 +661,198 @@ impl ZoneRuntime {
         outbounds.extend(self.expire_native_snake_summons(now_ms));
         outbounds.extend(self.expire_native_vampire_spiders(now_ms));
         outbounds.extend(self.tick_native_monsters(now_ms));
+        outbounds.extend(self.tick_doors(now_ms));
+        outbounds.extend(self.tick_hazards(now_ms));
         outbounds.extend(self.expire_buffs(now_ms));
         self.expire_ground_drop_ownerships(now_ms);
         outbounds.extend(self.expire_zone_objects(now_ms));
+        outbounds
+    }
+
+    /// Open a shared door (Crystal `Map.OpenDoor`): unblock its cells for every
+    /// player on the map, schedule the 5 s auto-close, and broadcast the open.
+    /// Re-opening refreshes the timer and re-broadcasts, matching Crystal.
+    fn open_door(&mut self, _session_id: &SessionId, door_index: u8, now_ms: u64) -> Vec<ZoneOutbound> {
+        let door_index = door_index & 0x7F;
+        if !self.collision.doors().contains_key(&door_index) {
+            return Vec::new();
+        }
+        self.collision.open_door(door_index);
+        self.open_doors
+            .insert(door_index, now_ms.saturating_add(ZONE_DOOR_OPEN_MS));
+        vec![ZoneOutbound::ToAll {
+            packets: vec![ServerPacket::OpenDoor {
+                door_index,
+                close: false,
+            }],
+        }]
+    }
+
+    /// Auto-close shared doors whose timer elapsed (Crystal `Map.Process`).
+    fn tick_doors(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let closing: Vec<u8> = self
+            .open_doors
+            .iter()
+            .filter_map(|(index, close_at)| (now_ms >= *close_at).then_some(*index))
+            .collect();
+        if closing.is_empty() {
+            return Vec::new();
+        }
+        let mut packets = Vec::new();
+        for index in closing {
+            self.collision.close_door(index);
+            self.open_doors.remove(&index);
+            packets.push(ServerPacket::OpenDoor {
+                door_index: index,
+                close: true,
+            });
+        }
+        vec![ZoneOutbound::ToAll { packets }]
+    }
+
+    /// Set the map's shared hazard flags (Crystal `MapInfo.Lightning/Fire`).
+    fn configure_hazards(
+        &mut self,
+        lightning: bool,
+        fire: bool,
+        lightning_damage: i32,
+        fire_damage: i32,
+    ) {
+        self.hazard.lightning = lightning;
+        self.hazard.fire = fire;
+        self.hazard.lightning_damage = lightning_damage;
+        self.hazard.fire_damage = fire_damage;
+    }
+
+    /// Drive shared lightning/fire strikes (Crystal `Map.Process`). Each hazard
+    /// fires every 3–15 s; for every player on the map a 1-in-4 strike lands on
+    /// them for authoritative damage, the rest hit a nearby cell (visual).
+    fn tick_hazards(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut outbounds = Vec::new();
+        if self.hazard.lightning && now_ms >= self.hazard.next_lightning_ms {
+            let strike_index = self.hazard.lightning_strikes;
+            self.hazard.lightning_strikes = strike_index.wrapping_add(1);
+            self.hazard.next_lightning_ms =
+                now_ms.saturating_add(zone_hazard_interval_ms(strike_index, 0xA1));
+            let damage = self.hazard.lightning_damage;
+            outbounds.extend(self.hazard_strike(Spell::MapLightning, damage, strike_index, 0x11));
+        }
+        if self.hazard.fire && now_ms >= self.hazard.next_fire_ms {
+            let strike_index = self.hazard.fire_strikes;
+            self.hazard.fire_strikes = strike_index.wrapping_add(1);
+            self.hazard.next_fire_ms =
+                now_ms.saturating_add(zone_hazard_interval_ms(strike_index, 0xF1));
+            let damage = self.hazard.fire_damage;
+            outbounds.extend(self.hazard_strike(Spell::MapLava, damage, strike_index, 0x22));
+        }
+        outbounds
+    }
+
+    fn hazard_strike(
+        &mut self,
+        spell: Spell,
+        max_damage: i32,
+        strike_index: u64,
+        salt: u64,
+    ) -> Vec<ZoneOutbound> {
+        let targets: Vec<(SessionId, u32, Point)> = self
+            .players
+            .iter()
+            .filter(|(_, player)| !player.dead)
+            .map(|(session_id, player)| {
+                (session_id.clone(), player.object_id, player.position.clone())
+            })
+            .collect();
+
+        let mut outbounds = Vec::new();
+        for (player_index, (session_id, object_id, position)) in targets.into_iter().enumerate() {
+            let on_player = strike_index.wrapping_add(player_index as u64) % 4 == 0;
+            let location = if on_player {
+                position.clone()
+            } else {
+                let dx = (zone_hazard_hash(strike_index, salt ^ u64::from(object_id)) % 21) as i32 - 10;
+                let dy =
+                    (zone_hazard_hash(strike_index, salt.wrapping_mul(7) ^ u64::from(object_id)) % 21)
+                        as i32
+                        - 10;
+                Point {
+                    x: position.x + dx,
+                    y: position.y + dy,
+                }
+            };
+            if self.collision.is_blocked(&location) {
+                continue;
+            }
+            let spell_object_id = self.unique_object_id(0);
+            outbounds.push(ZoneOutbound::ToAll {
+                packets: vec![ServerPacket::ObjectSpell {
+                    info: ObjectSpellInfo {
+                        object_id: spell_object_id,
+                        location: location.clone(),
+                        spell,
+                        direction: MirDirection::Up,
+                        param: false,
+                    },
+                }],
+            });
+            if location == position {
+                outbounds.extend(self.apply_hazard_damage(
+                    &session_id,
+                    object_id,
+                    max_damage,
+                    strike_index,
+                    salt,
+                ));
+            }
+        }
+        outbounds
+    }
+
+    fn apply_hazard_damage(
+        &mut self,
+        session_id: &SessionId,
+        object_id: u32,
+        max_damage: i32,
+        strike_index: u64,
+        salt: u64,
+    ) -> Vec<ZoneOutbound> {
+        let modulo = max_damage.max(1) as u64;
+        let damage = (zone_hazard_hash(strike_index, salt) % modulo) as i32;
+        let (position, health_percent) = {
+            let Some(player) = self.players.get_mut(session_id) else {
+                return Vec::new();
+            };
+            if player.dead {
+                return Vec::new();
+            }
+            let damage = damage.min(player.hp.saturating_sub(1));
+            if damage <= 0 {
+                return Vec::new();
+            }
+            player.hp = player.hp.saturating_sub(damage).max(1);
+            (
+                player.position.clone(),
+                native_player_health_percent(player.hp, player.max_hp),
+            )
+        };
+        let recipients = self.native_monster_visible_recipients(object_id, &position);
+        let mut outbounds = Vec::new();
+        if !recipients.is_empty() {
+            outbounds.push(ZoneOutbound::ToMany {
+                session_ids: recipients,
+                packets: vec![ServerPacket::ObjectHealth {
+                    info: ObjectHealthInfo {
+                        object_id,
+                        percent: health_percent,
+                        expire: 0,
+                    },
+                }],
+            });
+        }
+        outbounds.push(ZoneOutbound::PlayerDamaged {
+            session_id: session_id.clone(),
+            damage,
+        });
         outbounds
     }
 
@@ -7978,4 +8204,168 @@ fn packets_with_linked_items(
         .collect::<Vec<_>>();
     output.append(&mut packets);
     output
+}
+
+/// Deterministic 64-bit mix for shared hazard rolls (splitmix-style).
+fn zone_hazard_hash(a: u64, b: u64) -> u64 {
+    let mut x = a
+        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+        ^ b.wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    x ^= x >> 27;
+    x = x.wrapping_mul(0x94D0_49BB_1331_11EB);
+    x ^ (x >> 31)
+}
+
+/// Crystal reschedules each hazard `Random(3000, 15000)` ms ahead.
+fn zone_hazard_interval_ms(strike_index: u64, salt: u64) -> u64 {
+    3_000 + zone_hazard_hash(strike_index, salt) % 12_000
+}
+
+#[cfg(test)]
+mod door_tests {
+    use super::*;
+    use crate::runtime::zone::collision::ZoneBounds;
+
+    fn door_cell() -> Point {
+        Point { x: 10, y: 10 }
+    }
+
+    #[test]
+    fn shared_door_opens_unblocks_and_auto_closes() {
+        let collision = ZoneCollision::unbounded()
+            .with_bounds(ZoneBounds::new(0, 100, 0, 100))
+            .with_door(7, vec![(10, 10)]);
+        let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+
+        // A closed shared door blocks movement for everyone.
+        assert!(zone.collision.is_player_movement_blocked(&door_cell()));
+
+        // Opening unblocks the cell and broadcasts OpenDoor{close:false} to all.
+        let opened = zone.handle(ZoneCommand::OpenDoor {
+            session_id: SessionId::new("opener"),
+            door_index: 7,
+            now_ms: 1_000,
+        });
+        assert!(opened.iter().any(|outbound| matches!(outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet|
+                    matches!(packet, ServerPacket::OpenDoor { door_index: 7, close: false })))));
+        assert!(!zone.collision.is_player_movement_blocked(&door_cell()));
+
+        // Before the 5 s timer elapses the door stays open.
+        let early = zone.handle(ZoneCommand::Tick { now_ms: 5_000 });
+        assert!(!early.iter().any(|outbound| matches!(outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet|
+                    matches!(packet, ServerPacket::OpenDoor { close: true, .. })))));
+        assert!(!zone.collision.is_player_movement_blocked(&door_cell()));
+
+        // After 5 s it auto-closes: re-blocked and OpenDoor{close:true} to all.
+        let closed = zone.handle(ZoneCommand::Tick { now_ms: 6_000 });
+        assert!(closed.iter().any(|outbound| matches!(outbound,
+            ZoneOutbound::ToAll { packets }
+                if packets.iter().any(|packet|
+                    matches!(packet, ServerPacket::OpenDoor { door_index: 7, close: true })))));
+        assert!(zone.collision.is_player_movement_blocked(&door_cell()));
+    }
+
+    #[test]
+    fn shared_open_door_unknown_index_is_noop() {
+        let collision = ZoneCollision::unbounded().with_bounds(ZoneBounds::new(0, 100, 0, 100));
+        let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+        let out = zone.handle(ZoneCommand::OpenDoor {
+            session_id: SessionId::new("opener"),
+            door_index: 9,
+            now_ms: 1_000,
+        });
+        assert!(out.is_empty(), "opening a non-existent door is a no-op");
+    }
+}
+
+#[cfg(test)]
+mod hazard_tests {
+    use super::*;
+    use crate::runtime::zone::collision::ZoneBounds;
+    use crate::runtime::zone::types::ZoneChatProfile;
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn join_player(zone: &mut ZoneRuntime, id: &str, position: Point) -> SessionId {
+        let session_id = SessionId::new(id);
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: format!("acct-{id}"),
+            character_index: 0,
+            object_id: 0,
+            name: id.to_string(),
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            level: 10,
+            hp: 500,
+            max_hp: 500,
+            mp: 100,
+            map_file_name: "0".to_string(),
+            position,
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+        }));
+        session_id
+    }
+
+    #[test]
+    fn shared_lightning_hazard_strikes_and_damages_players() {
+        let collision = ZoneCollision::unbounded().with_bounds(ZoneBounds::new(0, 100, 0, 100));
+        let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+        let session = join_player(&mut zone, "p1", Point { x: 50, y: 50 });
+        zone.handle(ZoneCommand::ConfigureHazards {
+            session_id: session.clone(),
+            lightning: true,
+            fire: false,
+            lightning_damage: 80,
+            fire_damage: 0,
+        });
+
+        let mut saw_strike = false;
+        let mut saw_damage = false;
+        for i in 0..16u64 {
+            for outbound in zone.handle(ZoneCommand::Tick {
+                now_ms: 1_000 + i * 20_000,
+            }) {
+                match outbound {
+                    ZoneOutbound::ToAll { packets } => {
+                        if packets.iter().any(|packet| matches!(packet,
+                            ServerPacket::ObjectSpell { info } if info.spell == Spell::MapLightning))
+                        {
+                            saw_strike = true;
+                        }
+                    }
+                    ZoneOutbound::PlayerDamaged { session_id, damage }
+                        if session_id == session && damage > 0 =>
+                    {
+                        saw_damage = true;
+                    }
+                    _ => {}
+                }
+            }
+        }
+        assert!(saw_strike, "lightning should strike on a hazard map");
+        assert!(saw_damage, "a direct strike should authoritatively damage the player");
+    }
+
+    #[test]
+    fn no_shared_hazard_strikes_without_configuration() {
+        let collision = ZoneCollision::unbounded().with_bounds(ZoneBounds::new(0, 100, 0, 100));
+        let mut zone = ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), collision);
+        let _session = join_player(&mut zone, "p1", Point { x: 50, y: 50 });
+        for i in 0..8u64 {
+            for outbound in zone.handle(ZoneCommand::Tick {
+                now_ms: 1_000 + i * 20_000,
+            }) {
+                if let ZoneOutbound::ToAll { packets } = &outbound {
+                    assert!(!packets.iter().any(|packet| matches!(packet,
+                        ServerPacket::ObjectSpell { info }
+                            if info.spell == Spell::MapLightning || info.spell == Spell::MapLava)));
+                }
+            }
+        }
+    }
 }

@@ -50,6 +50,10 @@ pub(crate) struct ZoneMapCollisionData {
     pub bounds: MapBounds,
     pub blocked_cells: BTreeSet<(i32, i32)>,
     pub transfer_source_cells: BTreeSet<(i32, i32)>,
+    /// Door index → its cells (deduped, `& 0x7F`). `blocked_cells` already
+    /// includes these (doors start closed); the zone uses this to open/close
+    /// shared doors dynamically.
+    pub doors: BTreeMap<u8, Vec<(i32, i32)>>,
 }
 
 pub(super) fn normalize_map_file_name(file_name: &str) -> String {
@@ -66,10 +70,19 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
     let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    let mut doors: BTreeMap<u8, Vec<(i32, i32)>> = BTreeMap::new();
+    for door in &collision.collision.doors {
+        let cell = (door.x, door.y);
+        let entry = doors.entry(door.index & 0x7F).or_default();
+        if !entry.contains(&cell) {
+            entry.push(cell);
+        }
+    }
     Some(ZoneMapCollisionData {
         bounds: collision.collision.region_bounds,
         blocked_cells,
         transfer_source_cells,
+        doors,
     })
 }
 

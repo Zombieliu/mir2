@@ -14,7 +14,27 @@ use super::combat::apply_damage_to_current_player;
 use super::components::{current_player_object_id, entity_position, player_entity};
 use super::monsters::{allocate_runtime_monster_object_id, deterministic_roll};
 use super::movement::point_in_bounds;
-use super::resources::{MapRuntimeResource, RuntimeConfigResource};
+use super::resources::{is_in_world, MapRuntimeResource, RuntimeConfigResource};
+use super::session::SimulationSession;
+
+impl SimulationSession {
+    /// The active map's shared hazard flags `(lightning, fire, lightning_damage,
+    /// fire_damage)`, for the zone to drive authoritative lightning/fire across
+    /// every co-located player. `None` when the map has no hazards.
+    pub fn current_map_hazard_config(&self) -> Option<(bool, bool, i32, i32)> {
+        if !is_in_world(self.app.world()) {
+            return None;
+        }
+        current_map_hazard(self.app.world()).map(|hazard| {
+            (
+                hazard.lightning,
+                hazard.fire,
+                hazard.lightning_damage,
+                hazard.fire_damage,
+            )
+        })
+    }
+}
 
 /// Crystal reschedules each hazard `Random(3000, 15000)` ms ahead; one tick is
 /// 1000 ms so the interval is 3–15 ticks.
