@@ -5511,3 +5511,28 @@ body.mir-dragging-item * {
   border: 2px dashed #6b5430;
   background: rgba(58, 41, 24, 0.3);
 }
+
+/* ---- Options dialog controls reference ---- */
+.options-controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.options-control-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.options-control-keys {
+  color: #ffe9a6;
+  white-space: nowrap;
+}
+
+.options-control-desc {
+  color: #b89a63;
+  text-align: right;
+}

@@ -46,6 +46,28 @@ export function OptionsDialog({ t, chatTransparent, onToggleChatTransparent, onC
           </span>
         </button>
       </div>
+
+      <div className="options-dialog-section">
+        <div className="options-dialog-section-title">{t("ui.controls", [], "Controls")}</div>
+        <div className="options-controls-list">
+          {CONTROL_ROWS.map((row) => (
+            <div key={row.keys} className="options-control-row">
+              <span className="options-control-keys">{row.keys}</span>
+              <span className="options-control-desc">{t(row.labelKey, [], row.fallback)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
+
+const CONTROL_ROWS: Array<{ keys: string; labelKey: string; fallback: string }> = [
+  { keys: "W A S D / ←↑→↓", labelKey: "ui.controlMove", fallback: "Move" },
+  { keys: "Shift", labelKey: "ui.controlRun", fallback: "Hold to run" },
+  { keys: "F1 – F8", labelKey: "ui.controlSkills", fallback: "Cast skill bar" },
+  { keys: "1 – 6", labelKey: "ui.controlBelt", fallback: "Use belt slot" },
+  { keys: "Space / Enter", labelKey: "ui.controlAttack", fallback: "Attack target" },
+  { keys: "F", labelKey: "ui.controlApproach", fallback: "Approach target" },
+  { keys: "Esc", labelKey: "ui.controlCancelDrag", fallback: "Cancel item drag" },
+];
