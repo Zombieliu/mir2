@@ -41973,7 +41973,8 @@ fn magic_packet_crystal_revelation_queues_target_health_reveal() {
 fn magic_packet_casts_manifest_skill_and_schedules_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let player_origin = Point { x: 333, y: 267 };
+    let player = player_entity(session.app.world()).expect("player entity");
+    let player_origin = find_combat_origin_box(&session, player, 2, 2, 2, 2);
     set_player_position(&mut session, player_origin.clone());
     let wasp = find_monster_entity_by(&session, |name, _, _| name == "Field Wasp");
     set_entity_position(
