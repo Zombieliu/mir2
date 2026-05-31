@@ -620,6 +620,11 @@ pub(super) enum PendingPlayerStatusEffect {
     Dazed {
         duration_ticks: u64,
     },
+    DazedPoison {
+        chance_denominator: u64,
+        duration_ticks: u64,
+        salt: u64,
+    },
     StunPoison {
         chance_denominator: u64,
         duration_ticks: u64,

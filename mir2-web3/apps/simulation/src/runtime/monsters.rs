@@ -2344,6 +2344,25 @@ pub(super) fn monster_player_status_effect(
             duration_ticks: 5,
             salt: 950,
         }),
+        // Dazed on-hit families (gate the player's next attack), 1:1 with their Crystal PoisonTarget.
+        // HellSlasher.Attack: Dazed(5,5).
+        76 => Some(PendingPlayerStatusEffect::DazedPoison {
+            chance_denominator: 5,
+            duration_ticks: 5,
+            salt: 760,
+        }),
+        // TrollKing.Attack: Dazed(3,15).
+        91 => Some(PendingPlayerStatusEffect::DazedPoison {
+            chance_denominator: 3,
+            duration_ticks: 15,
+            salt: 910,
+        }),
+        // StoningStatue.Attack: Dazed(3,5).
+        135 => Some(PendingPlayerStatusEffect::DazedPoison {
+            chance_denominator: 3,
+            duration_ticks: 5,
+            salt: 1350,
+        }),
         // Generated-profile poison fallback: families without a bespoke poison case apply the
         // on-hit poison extracted from their Crystal `PoisonTarget` call (data-only families etc.).
         ai => crystal_monster_profile_poison(ai),
