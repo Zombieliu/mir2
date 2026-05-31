@@ -15259,6 +15259,10 @@ fn armadillo_type_one_branch_uses_three_half_dc_hits() {
         y: player_origin.y,
     };
     let armadillo_object_id = 98_955_u32;
+    // The three half-DC hits all land in the same tick; give the player enough
+    // HP to survive all three so each registers a Struck (a hit applied to an
+    // already-dead player is skipped).
+    set_current_player_hp(&mut session, 9000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     set_player_position(&mut session, player_origin.clone());
     let armadillo = spawn_crystal_monster_for_test(
@@ -18450,6 +18454,9 @@ fn snow_yeti_adjacent_branch_uses_crystal_double_hit() {
         y: player_origin.y,
     };
     let yeti_object_id = 98_940_u32;
+    // Both hits of the double-hit branch land together; keep the player alive
+    // through both so each registers a Struck.
+    set_current_player_hp(&mut session, 9000);
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     set_player_position(&mut session, player_origin);
     let yeti = spawn_crystal_monster_for_test(
