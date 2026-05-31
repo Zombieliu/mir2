@@ -830,6 +830,17 @@ function createPanelText(language: Mir2Language, key: "name" | "gender" | "class
       nameExists: "\u5df2\u5b58\u5728\u540c\u540d\u89d2\u8272\u3002",
       slotsFull: "\u89d2\u8272\u680f\u4f4d\u5df2\u6ee1\u3002",
     },
+    "zh-TW": {
+      name: "\u540d\u7a31",
+      gender: "\u6027\u5225",
+      class: "\u8077\u696d",
+      male: "\u7537",
+      female: "\u5973",
+      create: "\u5efa\u7acb",
+      nameRequired: "\u8acb\u8f38\u5165\u89d2\u8272\u540d\u3002",
+      nameExists: "\u5df2\u5b58\u5728\u540c\u540d\u89d2\u8272\u3002",
+      slotsFull: "\u89d2\u8272\u6b04\u4f4d\u5df2\u6eff\u3002",
+    },
     es: {
       name: "Nombre",
       gender: "Genero",

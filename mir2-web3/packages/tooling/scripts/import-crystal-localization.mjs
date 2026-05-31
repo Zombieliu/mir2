@@ -21,6 +21,30 @@ const spanishCrystalPath = resolve(
 );
 const spanishCrystal = JSON.parse(readFileSync(spanishCrystalPath, "utf8"));
 
+// Traditional Chinese (Taiwan) table, derived from the Simplified Chinese texts
+// by generate-traditional-chinese.mjs (OpenCC `cn -> twp`). Keyed identically to
+// the Simplified entries; missing keys fall back to the Simplified value.
+const chineseTraditionalPath = resolve(
+  repoRoot,
+  "packages",
+  "game-data",
+  "data",
+  "localization",
+  "chinese-traditional.json",
+);
+const chineseTraditional = JSON.parse(
+  readFileSync(chineseTraditionalPath, "utf8"),
+);
+
+function deriveTraditional(chineseTexts) {
+  return Object.fromEntries(
+    Object.entries(chineseTexts).map(([key, value]) => [
+      key,
+      chineseTraditional[key] ?? value,
+    ]),
+  );
+}
+
 const clientEnglish = tryReadCrystalJson("Client", "English.json");
 const clientChinese = tryReadCrystalJson("Client", "Chinese.json");
 const serverEnglish = tryReadCrystalJson("Build/Server/Debug", "English.json");
@@ -808,13 +832,18 @@ const ADDITIONAL_CUSTOM_TEXTS = {
   },
 };
 
-const { englishTexts, chineseTexts, spanishTexts } = haveCrystalSources
-  ? buildFromCrystalSources()
-  : buildFromExistingBundle();
+const { englishTexts, chineseTexts, traditionalTexts, spanishTexts } =
+  haveCrystalSources ? buildFromCrystalSources() : buildFromExistingBundle();
 
 // Full build: derive English/Chinese from the Crystal localisation exports and
 // layer the hand-authored Spanish table on top of the English fallback.
 function buildFromCrystalSources() {
+  const chineseTexts = {
+    ...prefixKeys(clientChinese.Text, "client."),
+    ...prefixKeys(serverChinese.Text, "server."),
+    ...CUSTOM_TEXTS["zh-CN"],
+    ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
+  };
   return {
     englishTexts: {
       ...prefixKeys(clientEnglish.Text, "client."),
@@ -822,12 +851,8 @@ function buildFromCrystalSources() {
       ...CUSTOM_TEXTS.en,
       ...ADDITIONAL_CUSTOM_TEXTS.en,
     },
-    chineseTexts: {
-      ...prefixKeys(clientChinese.Text, "client."),
-      ...prefixKeys(serverChinese.Text, "server."),
-      ...CUSTOM_TEXTS["zh-CN"],
-      ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
-    },
+    chineseTexts,
+    traditionalTexts: deriveTraditional(chineseTexts),
     spanishTexts: {
       ...prefixKeys(clientEnglish.Text, "client."),
       ...prefixKeys(serverEnglish.Text, "server."),
@@ -853,13 +878,15 @@ function buildFromExistingBundle() {
       spanishCrystal[key] ??
       (esExisting[key] !== undefined ? esExisting[key] : en[key]);
   }
+  const chineseTexts = {
+    ...zh,
+    ...CUSTOM_TEXTS["zh-CN"],
+    ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
+  };
   return {
     englishTexts: { ...en, ...CUSTOM_TEXTS.en, ...ADDITIONAL_CUSTOM_TEXTS.en },
-    chineseTexts: {
-      ...zh,
-      ...CUSTOM_TEXTS["zh-CN"],
-      ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
-    },
+    chineseTexts,
+    traditionalTexts: deriveTraditional(chineseTexts),
     spanishTexts: {
       ...spanish,
       ...CUSTOM_TEXTS.es,
@@ -878,6 +905,8 @@ const bundle = {
     serverEnglish: "Crystal/Build/Server/Debug/Localization/English.json",
     serverChinese: "Crystal/Build/Server/Debug/Localization/Chinese.json",
     spanish: "packages/game-data/data/localization/spanish-crystal.json",
+    traditionalChinese:
+      "packages/game-data/data/localization/chinese-traditional.json",
   },
   languages: {
     en: {
@@ -889,6 +918,11 @@ const bundle = {
       nativeName: "\u7b80\u4f53\u4e2d\u6587",
       locale: "zh-CN",
       texts: sortEntries(chineseTexts),
+    },
+    "zh-TW": {
+      nativeName: "\u7e41\u9ad4\u4e2d\u6587",
+      locale: "zh-TW",
+      texts: sortEntries(traditionalTexts),
     },
     es: {
       nativeName: "Espa\u00f1ol",
