@@ -64,7 +64,7 @@ async function main() {
   const releaseVersion = normalizeAssetVersion(release.version ?? "");
   const manifestPathSet = new Set(
     (Array.isArray(release.files) ? release.files : [])
-      .map((file) => normalizePath(file?.path))
+      .map((file) => normalizePath(file?.path ?? file?.p ?? file?.relativePath))
       .filter(Boolean),
   );
 

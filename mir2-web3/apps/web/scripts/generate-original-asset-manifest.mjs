@@ -19,6 +19,10 @@ const MANIFEST_ROOTS = [
 const args = parseArgs(process.argv.slice(2));
 const outputPath = path.resolve(args.output ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_PATH ?? DEFAULT_OUTPUT_PATH);
 const collectionMode = String(args.mode ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_MODE ?? "filesystem");
+const manifestConcurrency = positiveIntegerArg(
+  args.concurrency ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_CONCURRENCY,
+  64,
+);
 
 main().catch((error) => {
   console.error(error);
@@ -31,6 +35,27 @@ async function main() {
   }
 
   const files = collectionMode === "git" ? await collectGitTrackedPngs() : await collectFilesystemPngs();
+  let completed = 0;
+  const hashedFiles = await mapWithConcurrency(files, manifestConcurrency, async (filePath) => {
+    const relativePath = path.relative(PUBLIC_ROOT, filePath).split(path.sep).join("/");
+    const publicPath = `/${relativePath}`;
+    const root = MANIFEST_ROOTS.find((candidate) => relativePath.startsWith(`${candidate.publicRoot}/`));
+    if (!root) return null;
+
+    const file = await fs.readFile(filePath);
+    const sha256 = createHash("sha256").update(file).digest("hex");
+    completed += 1;
+    if (completed % 25000 === 0 || completed === files.length) {
+      console.error(`[original-asset-manifest] hashed ${completed}/${files.length}`);
+    }
+    return {
+      publicPath,
+      source: root.source,
+      size: file.length,
+      sha256,
+    };
+  });
+
   const entries = [];
   const assetHash = createHash("sha256");
   let totalBytes = 0;
@@ -39,28 +64,20 @@ async function main() {
     originalUiPngCount: 0,
   };
 
-  for (const filePath of files) {
-    const relativePath = path.relative(PUBLIC_ROOT, filePath).split(path.sep).join("/");
-    const publicPath = `/${relativePath}`;
-    const root = MANIFEST_ROOTS.find((candidate) => relativePath.startsWith(`${candidate.publicRoot}/`));
-    if (!root) continue;
+  for (const record of hashedFiles.filter(Boolean).sort((left, right) => left.publicPath.localeCompare(right.publicPath))) {
+    totalBytes += record.size;
+    assetHash.update(record.publicPath);
+    assetHash.update(String(record.size));
+    assetHash.update(record.sha256);
 
-    const file = await fs.readFile(filePath);
-    const sha256 = createHash("sha256").update(file).digest("hex");
-    totalBytes += file.length;
-    assetHash.update(publicPath);
-    assetHash.update(String(file.length));
-    assetHash.update(sha256);
-
-    if (root.source === "original-map") stats.originalMapPngCount += 1;
-    if (root.source === "original-ui") stats.originalUiPngCount += 1;
-
+    if (record.source === "original-map") stats.originalMapPngCount += 1;
+    if (record.source === "original-ui") stats.originalUiPngCount += 1;
     entries.push([
-      publicPath,
+      record.publicPath,
       {
-        size: file.length,
-        sha256,
-        source: root.source,
+        size: record.size,
+        sha256: record.sha256,
+        source: record.source,
       },
     ]);
   }
@@ -107,7 +124,9 @@ async function collectFilesystemPngs() {
     if (!(await directoryExists(rootPath))) {
       continue;
     }
-    files.push(...(await listPngFilesRecursive(rootPath)));
+    for (const filePath of await listPngFilesRecursive(rootPath)) {
+      files.push(filePath);
+    }
   }
   return files.sort((left, right) => left.localeCompare(right));
 }
@@ -142,21 +161,44 @@ async function collectGitTrackedPngs() {
 }
 
 async function listPngFilesRecursive(root) {
-  const entries = await fs.readdir(root, { withFileTypes: true });
   const files = [];
+  const stack = [root];
 
-  for (const entry of entries) {
-    const entryPath = path.join(root, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await listPngFilesRecursive(entryPath)));
-      continue;
-    }
-    if (entry.isFile() && TRACKED_ASSET_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
-      files.push(entryPath);
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = await fs.readdir(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(entryPath);
+        continue;
+      }
+      if (entry.isFile() && TRACKED_ASSET_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+        files.push(entryPath);
+      }
     }
   }
 
   return files;
+}
+
+async function mapWithConcurrency(items, concurrency, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(Math.max(1, concurrency), items.length || 1);
+
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (nextIndex < items.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        results[index] = await worker(items[index], index);
+      }
+    }),
+  );
+
+  return results;
 }
 
 async function directoryExists(directoryPath) {
@@ -190,4 +232,10 @@ function parseArgs(argv) {
     index += 1;
   }
   return parsed;
+}
+
+function positiveIntegerArg(value, fallback) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.floor(parsed);
 }

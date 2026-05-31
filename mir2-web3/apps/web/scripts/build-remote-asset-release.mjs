@@ -48,6 +48,7 @@ const PUBLIC_ASSET_EXTENSIONS = new Set([
   ".gif",
   ".jpeg",
   ".jpg",
+  ".json",
   ".mp3",
   ".ogg",
   ".png",
@@ -68,6 +69,7 @@ const baseUrl = normalizeUrl(args.baseUrl ?? process.env.MIR2_WEB_BASE_URL ?? DE
 const runId = String(args.runId ?? new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14));
 const outputDir = path.resolve(args.outDir ?? process.env.MIR2_REMOTE_ASSET_OUTPUT_DIR ?? path.join(DEFAULT_OUTPUT_ROOT, runId));
 const allowMissing = booleanArg(args.allowMissing ?? process.env.MIR2_REMOTE_ASSET_ALLOW_MISSING, false);
+const offlineManifest = booleanArg(args.offlineManifest ?? process.env.MIR2_REMOTE_ASSET_OFFLINE_MANIFEST, false);
 const includeSceneSprites = booleanArg(
   args.includeSceneSprites ?? process.env.MIR2_REMOTE_ASSET_INCLUDE_SCENE_SPRITES,
   true,
@@ -88,10 +90,13 @@ const stageConcurrency = positiveIntegerArg(
   args.stageConcurrency ?? process.env.MIR2_REMOTE_ASSET_STAGE_CONCURRENCY,
   32,
 );
+const stageFileMode = String(args.stageFileMode ?? process.env.MIR2_REMOTE_ASSET_STAGE_FILE_MODE ?? "copy").toLowerCase();
+const hashMode = String(args.hashMode ?? process.env.MIR2_REMOTE_ASSET_HASH_MODE ?? "sha256").toLowerCase();
+const compactFiles = booleanArg(args.compactFiles ?? process.env.MIR2_REMOTE_ASSET_COMPACT_FILES, false);
 
 async function main() {
   const manifestUrl = new URL("/api/asset-manifest", baseUrl);
-  const assetManifest = await fetchJson(manifestUrl);
+  const assetManifest = offlineManifest ? createOfflineAssetManifest() : await fetchJson(manifestUrl);
   const version = String(assetManifest.version || "unknown");
   const objectPrefix = normalizeObjectPrefix(
     resolveTemplate(
@@ -168,7 +173,7 @@ async function main() {
     originalAssetManifest: collected.originalAssetManifest,
     sceneSpriteRoots: collected.sceneSpriteRoots,
     publicAssetRoots: collected.publicAssetRoots,
-    files: staged.files,
+    files: compactFiles ? staged.files.map(compactReleaseFile) : staged.files,
     missing: staged.missing,
     requiredManifestPaths: REQUIRED_MANIFEST_PATHS,
     missingRequiredManifestPaths,
@@ -181,7 +186,7 @@ async function main() {
   await fs.mkdir(outputDir, { recursive: true });
   const releasePath = path.join(outputDir, "remote-asset-release.json");
   const latestPath = path.join(DEFAULT_OUTPUT_ROOT, "latest-remote-asset-release.json");
-  await fs.writeFile(releasePath, `${JSON.stringify(release, null, 2)}\n`, "utf8");
+  await fs.writeFile(releasePath, `${stringifyRelease(release)}\n`, "utf8");
   await fs.mkdir(DEFAULT_OUTPUT_ROOT, { recursive: true });
   await fs.copyFile(releasePath, latestPath);
 
@@ -203,6 +208,37 @@ async function main() {
       2,
     ),
   );
+}
+
+function compactReleaseFile(file) {
+  return {
+    p: file.relativePath,
+    s: file.size,
+    c: file.contentType,
+  };
+}
+
+function stringifyRelease(release) {
+  return compactFiles ? JSON.stringify(release) : JSON.stringify(release, null, 2);
+}
+
+function createOfflineAssetManifest() {
+  const version = normalizeAssetVersion(args.assetVersion ?? process.env.MIR2_ASSET_VERSION ?? runId);
+  if (!version) {
+    throw new Error("Offline asset manifest mode requires --assetVersion, MIR2_ASSET_VERSION, or --runId.");
+  }
+
+  return {
+    schemaVersion: 1,
+    version,
+    versionSource: "offline-build-remote-asset-release",
+    remoteAssets: {
+      enabled: Boolean(args.assetBaseUrl ?? process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL),
+      assetBaseUrl: args.assetBaseUrl ?? process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL ?? null,
+      objectPrefix: args.objectPrefix ?? process.env.MIR2_ASSET_OBJECT_PREFIX ?? "mir2/v/{version}",
+    },
+    resourcePacks: [],
+  };
 }
 
 async function collectReleaseUrls(assetManifest, manifestUrl) {
@@ -343,9 +379,15 @@ function addStaticUrl(staticUrls, value, source) {
 async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissing, concurrency }) {
   await fs.mkdir(stageDir, { recursive: true });
   const entries = [...staticUrls.values()].sort((a, b) => a.path.localeCompare(b.path));
-  const results = await mapWithConcurrency(entries, concurrency, (entry) =>
-    stageOneStaticFile({ entry, stageDir, objectPrefix }),
-  );
+  let completed = 0;
+  const results = await mapWithConcurrency(entries, concurrency, async (entry) => {
+    const result = await stageOneStaticFile({ entry, stageDir, objectPrefix });
+    completed += 1;
+    if (completed % 25000 === 0 || completed === entries.length) {
+      console.error(`[remote-asset-release] staged ${completed}/${entries.length}`);
+    }
+    return result;
+  });
 
   const files = [];
   const missing = [];
@@ -364,7 +406,7 @@ async function stageStaticFiles({ staticUrls, stageDir, objectPrefix, allowMissi
 async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
   const relativePath = decodeAssetRelativePath(entry.path.replace(/^\/+/, ""));
   const localPath = path.join(WEB_ROOT, "public", relativePath);
-  const stagePath = path.join(stageDir, relativePath);
+  const stagePath = stageFileMode === "reference" ? localPath : path.join(stageDir, relativePath);
 
   let stats;
   try {
@@ -393,9 +435,15 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
     };
   }
 
-  const contents = await fs.readFile(localPath);
-  await fs.mkdir(path.dirname(stagePath), { recursive: true });
-  await fs.writeFile(stagePath, contents);
+  if (hashMode !== "sha256" && hashMode !== "skip") {
+    throw new Error(`Unsupported MIR2_REMOTE_ASSET_HASH_MODE: ${hashMode}; expected "sha256" or "skip".`);
+  }
+
+  const contents = hashMode === "sha256" ? await fs.readFile(localPath) : null;
+  if (stageFileMode !== "reference") {
+    await fs.mkdir(path.dirname(stagePath), { recursive: true });
+    await stageFile(localPath, stagePath, contents);
+  }
 
   return {
     file: {
@@ -405,12 +453,37 @@ async function stageOneStaticFile({ entry, stageDir, objectPrefix }) {
       stagePath,
       objectKey: joinObjectKey(objectPrefix, relativePath),
       size: stats.size,
-      sha256: createHash("sha256").update(contents).digest("hex"),
+      sha256: contents ? createHash("sha256").update(contents).digest("hex") : null,
       contentType: contentTypeForPath(relativePath),
       cacheControl: DEFAULT_CACHE_CONTROL,
       sources: [...entry.sources].sort(),
     },
   };
+}
+
+async function stageFile(localPath, stagePath, contents) {
+  if (stageFileMode === "link") {
+    try {
+      await fs.rm(stagePath, { force: true });
+      await fs.link(localPath, stagePath);
+      return;
+    } catch (error) {
+      if (error?.code !== "EXDEV" && error?.code !== "EPERM" && error?.code !== "EOPNOTSUPP") {
+        throw error;
+      }
+    }
+  }
+
+  if (stageFileMode === "copy") {
+    if (contents) {
+      await fs.writeFile(stagePath, contents);
+    } else {
+      await fs.copyFile(localPath, stagePath);
+    }
+    return;
+  }
+
+  throw new Error(`Unsupported MIR2_REMOTE_ASSET_STAGE_FILE_MODE: ${stageFileMode}; expected "copy", "link", or "reference".`);
 }
 
 async function mapWithConcurrency(items, concurrency, worker) {
@@ -577,16 +650,23 @@ async function collectPublicAssetRootStaticUrls(staticUrls, roots) {
 }
 
 async function listFilesRecursive(root) {
-  const entries = await fs.readdir(root, { withFileTypes: true });
   const files = [];
+  const stack = [root];
 
-  for (const entry of entries) {
-    const entryPath = path.join(root, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await listFilesRecursive(entryPath)));
-      continue;
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = await fs.readdir(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(entryPath);
+        continue;
+      }
+      if (entry.isFile()) {
+        files.push(entryPath);
+      }
     }
-    if (entry.isFile()) files.push(entryPath);
   }
 
   return files;
@@ -665,6 +745,12 @@ function makeRange(start, end) {
 
 function normalizeAssetBaseUrl(value) {
   return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function normalizeAssetVersion(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  return trimmed.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
 function normalizeUrl(value) {

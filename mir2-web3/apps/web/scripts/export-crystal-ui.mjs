@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
 
@@ -20,6 +20,7 @@ const RESPAWN_MANIFEST_PATH = path.join(
   "crystal_respawn_manifest.json",
 );
 const DEFAULT_DATA_DIR = "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Data";
+const PNG_DEFLATE_LEVEL = clampInt(process.env.MIR2_CRYSTAL_UI_PNG_DEFLATE_LEVEL ?? "1", 0, 9);
 
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
@@ -31,8 +32,14 @@ main().catch((error) => {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const publicDir = path.resolve(args.outputDir ?? process.env.MIR2_CRYSTAL_UI_OUTPUT_DIR ?? DEFAULT_PUBLIC_DIR);
-  const onlyLibraries = parseLibraryFilter(args.libraries ?? process.env.MIR2_CRYSTAL_UI_LIBRARIES);
-  const fullLibraries = parseLibraryFilter(args.fullLibraries ?? process.env.MIR2_CRYSTAL_UI_FULL_LIBRARIES);
+  const onlyLibrariesInput = args.libraries ?? process.env.MIR2_CRYSTAL_UI_LIBRARIES;
+  const fullLibrariesInput = args.fullLibraries ?? process.env.MIR2_CRYSTAL_UI_FULL_LIBRARIES;
+  const onlyLibraries = parseLibraryFilter(onlyLibrariesInput);
+  const fullLibraries = parseLibraryFilter(fullLibrariesInput);
+  const exportAllLibraries =
+    hasAllLibrarySentinel(onlyLibrariesInput) || hasAllLibrarySentinel(fullLibrariesInput);
+  const skipExisting = parseBoolean(args.skipExisting ?? process.env.MIR2_CRYSTAL_UI_SKIP_EXISTING);
+  const writeConcurrency = clampInt(args.concurrency ?? process.env.MIR2_CRYSTAL_UI_WRITE_CONCURRENCY ?? "32", 1, 256);
   const manifestText = await readFile(MANIFEST_PATH, "utf8");
   const manifest = JSON.parse(manifestText);
   const dataDir =
@@ -53,16 +60,22 @@ async function main() {
   };
   const crystalMiniMapIndices = await loadCrystalMiniMapIndices();
 
-  for (const [libraryName, config] of Object.entries(manifest.libraries)) {
+  const libraryEntries = exportAllLibraries
+    ? (await discoverCrystalUiLibraries(dataDir)).map((libraryName) => [libraryName, {}])
+    : Object.entries(manifest.libraries);
+  let libraryOrdinal = 0;
+
+  for (const [libraryName, config] of libraryEntries) {
     const normalizedLibraryName = normalizeLibraryName(libraryName);
-    if (onlyLibraries && !onlyLibraries.has(normalizedLibraryName)) {
+    if (onlyLibraries && !onlyLibraries.has(normalizedLibraryName) && !exportAllLibraries) {
       continue;
     }
+    libraryOrdinal += 1;
 
     const inputPath = path.join(dataDir, ...normalizedLibraryName.split("/")) + ".Lib";
     const library = await parseLibrary(inputPath);
     const exportDir = path.join(publicDir, ...normalizedLibraryName.split("/"));
-    const indices = fullLibraries?.has(normalizedLibraryName)
+    const indices = exportAllLibraries || fullLibraries?.has(normalizedLibraryName)
       ? allPresentFrameIndices(library)
       : expandIndices(
           config,
@@ -70,44 +83,24 @@ async function main() {
         );
 
     await mkdir(exportDir, { recursive: true });
+    console.log(
+      `[crystal-ui] ${libraryOrdinal}/${libraryEntries.length} ${normalizedLibraryName}: ` +
+        `${indices.length}/${library.count} present frame(s)`,
+    );
 
     const frames = [];
-    for (const index of indices) {
-      const frame = library.frames[index];
-      if (!frame) {
-        const existingPngFrame = await loadExistingPngFrame(exportDir, normalizedLibraryName, index);
-        if (existingPngFrame) {
-          frames.push(existingPngFrame);
-        }
-        continue;
+    let written = 0;
+    let reused = 0;
+    for (let start = 0; start < indices.length; start += writeConcurrency) {
+      const batch = indices.slice(start, start + writeConcurrency);
+      const batchFrames = await Promise.all(batch.map(exportFrameIndex));
+      for (const frameMeta of batchFrames) {
+        if (frameMeta) frames.push(frameMeta);
       }
-
-      const basename = `${index}`;
-      const pngPath = path.join(exportDir, `${basename}.png`);
-      await writeFile(pngPath, encodePng(frame.width, frame.height, frame.rgba));
-
-      if (frame.maskRgba) {
-        await writeFile(
-          path.join(exportDir, `${basename}.mask.png`),
-          encodePng(frame.maskWidth, frame.maskHeight, frame.maskRgba),
-        );
-      }
-
-      frames.push({
-        index,
-        width: frame.width,
-        height: frame.height,
-        x: frame.x,
-        y: frame.y,
-        shadowX: frame.shadowX,
-        shadowY: frame.shadowY,
-        hasMask: Boolean(frame.maskRgba),
-        maskWidth: frame.maskWidth ?? null,
-        maskHeight: frame.maskHeight ?? null,
-        path: `/original-ui/${normalizedLibraryName}/${basename}.png`,
-        maskPath: frame.maskRgba ? `/original-ui/${normalizedLibraryName}/${basename}.mask.png` : null,
-      });
     }
+    console.log(
+      `[crystal-ui] ${normalizedLibraryName}: wrote ${written}, reused ${reused}, meta ${frames.length}`,
+    );
 
     const libraryMeta = {
       version: library.version,
@@ -125,6 +118,45 @@ async function main() {
     );
 
     summary.libraries[normalizedLibraryName] = libraryMeta;
+
+    async function exportFrameIndex(index) {
+      const frame = library.frames[index];
+      if (!frame) {
+        return loadExistingPngFrame(exportDir, normalizedLibraryName, index);
+      }
+
+      const basename = `${index}`;
+      const pngPath = path.join(exportDir, `${basename}.png`);
+      const pngExists = skipExisting && existsSync(pngPath);
+      if (!pngExists) {
+        await writeFile(pngPath, encodePng(frame.width, frame.height, decodeFrameRgba(library, frame)));
+        written += 1;
+      } else {
+        reused += 1;
+      }
+
+      if (frame.maskRgba) {
+        const maskPath = path.join(exportDir, `${basename}.mask.png`);
+        if (!skipExisting || !existsSync(maskPath)) {
+          await writeFile(maskPath, encodePng(frame.maskWidth, frame.maskHeight, decodeMaskFrameRgba(library, frame)));
+        }
+      }
+
+      return {
+        index,
+        width: frame.width,
+        height: frame.height,
+        x: frame.x,
+        y: frame.y,
+        shadowX: frame.shadowX,
+        shadowY: frame.shadowY,
+        hasMask: Boolean(frame.maskRgba),
+        maskWidth: frame.maskWidth ?? null,
+        maskHeight: frame.maskHeight ?? null,
+        path: `/original-ui/${normalizedLibraryName}/${basename}.png`,
+        maskPath: frame.maskRgba ? `/original-ui/${normalizedLibraryName}/${basename}.mask.png` : null,
+      };
+    }
   }
 
   await writeFile(
@@ -169,6 +201,49 @@ function parseLibraryFilter(value) {
     .map((library) => normalizeLibraryName(library))
     .filter(Boolean);
   return libraries.length ? new Set(libraries) : null;
+}
+
+function hasAllLibrarySentinel(value) {
+  return String(value ?? "")
+    .split(",")
+    .map((library) => library.trim().toUpperCase())
+    .includes("ALL");
+}
+
+function parseBoolean(value) {
+  return /^(1|true|yes|on)$/i.test(String(value ?? ""));
+}
+
+function clampInt(value, min, max) {
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed)) return min;
+  return Math.max(min, Math.min(max, parsed));
+}
+
+async function discoverCrystalUiLibraries(dataDir) {
+  const files = await listFilesRecursive(dataDir);
+  return files
+    .filter((filePath) => /\.lib$/i.test(filePath))
+    .map((filePath) => path.relative(dataDir, filePath).split(path.sep).join("/").replace(/\.lib$/i, ""))
+    .filter((libraryName) => !libraryName.toLowerCase().startsWith("map/"))
+    .map((libraryName) => normalizeLibraryName(libraryName))
+    .sort((left, right) => left.localeCompare(right, "en"));
+}
+
+async function listFilesRecursive(root) {
+  const entries = await readdir(root, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const childPath = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRecursive(childPath)));
+      continue;
+    }
+    if (entry.isFile()) {
+      files.push(childPath);
+    }
+  }
+  return files;
 }
 
 function dataDirFromClientRoot(clientRoot) {
@@ -297,13 +372,13 @@ async function parseLibrary(filePath) {
       continue;
     }
 
-    frames[index] = parseFrame(buffer, frameOffset, index);
+    frames[index] = parseFrameHeader(buffer, frameOffset, index);
   }
 
-  return { version, count, frames };
+  return { version, count, frames, buffer };
 }
 
-function parseFrame(buffer, offset, index) {
+function parseFrameHeader(buffer, offset, index) {
   const width = buffer.readInt16LE(offset);
   offset += 2;
   const height = buffer.readInt16LE(offset);
@@ -321,7 +396,7 @@ function parseFrame(buffer, offset, index) {
   const length = buffer.readInt32LE(offset);
   offset += 4;
 
-  const raw = buffer.subarray(offset, offset + length);
+  const dataOffset = offset;
   offset += length;
 
   const hasMask = (shadow >> 7) === 1;
@@ -330,7 +405,7 @@ function parseFrame(buffer, offset, index) {
   let maskX;
   let maskY;
   let maskLength;
-  let maskRaw;
+  let maskDataOffset;
 
   if (hasMask) {
     maskWidth = buffer.readInt16LE(offset);
@@ -343,7 +418,7 @@ function parseFrame(buffer, offset, index) {
     offset += 2;
     maskLength = buffer.readInt32LE(offset);
     offset += 4;
-    maskRaw = buffer.subarray(offset, offset + maskLength);
+    maskDataOffset = offset;
     offset += maskLength;
   }
 
@@ -356,14 +431,32 @@ function parseFrame(buffer, offset, index) {
     shadowX,
     shadowY,
     shadow,
-    rgba: decodeFrame(width, height, raw),
+    dataOffset,
+    dataLength: length,
     maskWidth,
     maskHeight,
     maskX,
     maskY,
     maskLength,
-    maskRgba: hasMask ? decodeFrame(maskWidth, maskHeight, maskRaw) : null,
+    maskDataOffset,
+    maskRgba: hasMask,
   };
+}
+
+function decodeFrameRgba(library, frame) {
+  return decodeFrame(
+    frame.width,
+    frame.height,
+    library.buffer.subarray(frame.dataOffset, frame.dataOffset + frame.dataLength),
+  );
+}
+
+function decodeMaskFrameRgba(library, frame) {
+  return decodeFrame(
+    frame.maskWidth,
+    frame.maskHeight,
+    library.buffer.subarray(frame.maskDataOffset, frame.maskDataOffset + frame.maskLength),
+  );
 }
 
 function decodeFrame(width, height, compressed) {
@@ -403,7 +496,7 @@ function encodePng(width, height, rgba) {
   ihdr[11] = 0;
   ihdr[12] = 0;
 
-  const idat = deflateSync(raw);
+  const idat = deflateSync(raw, { level: PNG_DEFLATE_LEVEL });
   return Buffer.concat([PNG_SIGNATURE, chunk("IHDR", ihdr), chunk("IDAT", idat), chunk("IEND", Buffer.alloc(0))]);
 }
 
