@@ -5562,3 +5562,45 @@ body.mir-dragging-item * {
 .original-item-tooltip-requirements b {
   color: #ff8a7a;
 }
+
+/* ---- Mail compose attachment slots (drag items in) ---- */
+.mail-compose-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px dashed #6b5430;
+  background: rgba(58, 41, 24, 0.25);
+}
+
+.mail-compose-attachments-label {
+  font-size: 11px;
+  color: #b89a63;
+}
+
+.mail-compose-attachment-slots {
+  display: flex;
+  gap: 3px;
+}
+
+.mail-attachment-slot {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(166, 130, 77, 0.4);
+  background: rgba(25, 17, 10, 0.6);
+}
+
+.mail-attachment-item {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mail-attachment-item img {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+}

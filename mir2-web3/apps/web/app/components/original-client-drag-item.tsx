@@ -42,6 +42,7 @@ export type ItemDropTarget =
   | { kind: "belt"; slot: number }
   | { kind: "trade"; slot: number }
   | { kind: "npcSell" }
+  | { kind: "mailAttach" }
   | { kind: "equipment"; equipmentSlot: EquipmentSlot }
   | { kind: "ground" };
 
@@ -247,6 +248,8 @@ function findDropTarget(x: number, y: number): ItemDropTarget | null {
       if (!Number.isFinite(slot)) return null;
       return { kind: "trade", slot };
     }
+    case "mailAttach":
+      return { kind: "mailAttach" };
     case "npcSell":
       return { kind: "npcSell" };
     case "equipment": {

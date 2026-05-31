@@ -4788,15 +4788,20 @@ export default function HomePage() {
     send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
   }
 
-  function sendMailMessage(name: string, message: string, gold: number) {
+  function sendMailMessage(name: string, message: string, gold: number, itemUniqueIds: number[] = []) {
     const amount = Math.max(0, Math.floor(gold));
+    const itemsIdx: [number, number, number, number, number] = [0, 0, 0, 0, 0];
+    for (let i = 0; i < Math.min(5, itemUniqueIds.length); i += 1) {
+      itemsIdx[i] = itemUniqueIds[i];
+    }
+    const hasItems = itemsIdx.some((id) => id > 0);
     send({
       type: "sendMail",
       name,
       message,
       gold: amount,
-      itemsIdx: [0, 0, 0, 0, 0],
-      stamped: amount > 0,
+      itemsIdx,
+      stamped: amount > 0 || hasItems,
     });
   }
 

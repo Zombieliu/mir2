@@ -98,7 +98,7 @@ type GameUiSceneProps = {
   onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
-  onSendMail: (name: string, message: string, gold: number) => void;
+  onSendMail: (name: string, message: string, gold: number, itemUniqueIds?: number[]) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
@@ -328,6 +328,13 @@ export function GameUiScene({
       return;
     }
 
+    if (target.kind === "mailAttach") {
+      if (source.kind === "inventory" && (source.container === "bag1" || source.container === "bag2")) {
+        window.dispatchEvent(new CustomEvent("mir2:mailAttach", { detail: { uniqueId: payload.uniqueId } }));
+      }
+      return;
+    }
+
     if (target.kind === "npcSell") {
       if (source.kind === "inventory" || source.kind === "belt") {
         onSellItem(
@@ -439,6 +446,7 @@ export function GameUiScene({
         <MailPanel
           t={t}
           mail={world.stage5Systems?.mail ?? []}
+          inventoryItems={world.inventoryItems}
           onClaim={onClaimMail}
           onDelete={onDeleteMail}
           onSendMail={onSendMail}

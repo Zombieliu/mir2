@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { SpriteButton } from "./original-client-overlays";
@@ -10,6 +10,20 @@ type TranslateFn = (
   params?: Array<string | number>,
   fallback?: string,
 ) => string;
+
+type MailInventoryItemLike = {
+  uniqueId: number;
+  name: string;
+  icon: number;
+  slot: number;
+  container: "bag1" | "bag2" | "quest" | "belt" | "storage";
+};
+
+type MailAttachment = {
+  uniqueId: number;
+  name: string;
+  icon: number;
+};
 
 type DisplayMailMessageLike = {
   id?: number;
@@ -47,13 +61,16 @@ type DisplayNpcDialogLike = {
 export type MailPanelProps = {
   t: TranslateFn;
   mail: DisplayMailMessageLike[];
+  inventoryItems?: MailInventoryItemLike[];
   onClaim: (mailId: number) => void;
   onDelete: (mailId: number) => void;
-  onSendMail: (name: string, message: string, gold: number) => void;
+  onSendMail: (name: string, message: string, gold: number, itemUniqueIds?: number[]) => void;
   onClose: () => void;
 };
 
-export function MailPanel({ t, mail, onClaim, onDelete, onSendMail, onClose }: MailPanelProps) {
+const MAIL_ATTACHMENT_SLOTS = 5;
+
+export function MailPanel({ t, mail, inventoryItems = [], onClaim, onDelete, onSendMail, onClose }: MailPanelProps) {
   const entries = mail.filter((message) => !message.deleted);
   const visibleEntries = entries.slice(0, 10);
   const selectedEntry = visibleEntries.find((entry) => entry.id !== undefined) ?? visibleEntries[0] ?? null;
@@ -63,19 +80,45 @@ export function MailPanel({ t, mail, onClaim, onDelete, onSendMail, onClose }: M
   const [recipient, setRecipient] = useState("");
   const [composeMessage, setComposeMessage] = useState("");
   const [composeGold, setComposeGold] = useState("0");
+  const [attachments, setAttachments] = useState<MailAttachment[]>([]);
 
   const openCompose = (toName: string) => {
     setRecipient(toName);
     setComposeMessage("");
     setComposeGold("0");
+    setAttachments([]);
     setComposing(true);
+  };
+
+  const attachInventoryItem = (uniqueId: number) => {
+    if (attachments.length >= MAIL_ATTACHMENT_SLOTS) return;
+    if (attachments.some((entry) => entry.uniqueId === uniqueId)) return;
+    const item = inventoryItems.find(
+      (entry) => entry.uniqueId === uniqueId && (entry.container === "bag1" || entry.container === "bag2"),
+    );
+    if (!item) return;
+    setAttachments((current) => [...current, { uniqueId, name: item.name, icon: item.icon }]);
+  };
+
+  useEffect(() => {
+    if (!composing) return;
+    function onAttach(event: Event) {
+      const detail = (event as CustomEvent<{ uniqueId?: number }>).detail;
+      if (detail && typeof detail.uniqueId === "number") attachInventoryItem(detail.uniqueId);
+    }
+    window.addEventListener("mir2:mailAttach", onAttach);
+    return () => window.removeEventListener("mir2:mailAttach", onAttach);
+  });
+
+  const removeAttachment = (uniqueId: number) => {
+    setAttachments((current) => current.filter((entry) => entry.uniqueId !== uniqueId));
   };
 
   const submitCompose = () => {
     const name = recipient.trim();
     if (!name) return;
     const gold = Math.max(0, Number.parseInt(composeGold || "0", 10) || 0);
-    onSendMail(name, composeMessage, gold);
+    onSendMail(name, composeMessage, gold, attachments.map((entry) => entry.uniqueId));
     setComposing(false);
   };
 
@@ -136,6 +179,29 @@ export function MailPanel({ t, mail, onClaim, onDelete, onSendMail, onClose }: M
               onChange={(event) => setComposeGold(event.target.value)}
             />
           </label>
+          <div className="mail-compose-attachments" data-item-drop-kind="mailAttach">
+            <span className="mail-compose-attachments-label">{t("ui.attachments", [], "Items")}</span>
+            <div className="mail-compose-attachment-slots">
+              {Array.from({ length: MAIL_ATTACHMENT_SLOTS }, (_, slot) => {
+                const attachment = attachments[slot] ?? null;
+                return (
+                  <div key={`mail-attach-${slot}`} className="mail-attachment-slot">
+                    {attachment ? (
+                      <button
+                        type="button"
+                        className="mail-attachment-item"
+                        title={attachment.name}
+                        aria-label={attachment.name}
+                        onClick={() => removeAttachment(attachment.uniqueId)}
+                      >
+                        <img src={`/original-ui/Items/${attachment.icon}.png`} alt="" draggable={false} />
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           <div className="mail-compose-actions">
             <button type="button" className="mail-compose-send" disabled={!recipient.trim()} onClick={submitCompose}>
               {t("client.Send", [], "Send")}
