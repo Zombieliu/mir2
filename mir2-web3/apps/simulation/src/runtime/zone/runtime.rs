@@ -55,6 +55,7 @@ const CRYSTAL_POISON_PARALYSIS: u16 = 256;
 const CRYSTAL_SPELL_EFFECT_ENTRAPMENT: u8 = 9;
 const CRYSTAL_STAT_MIN_AC: u8 = 0;
 const CRYSTAL_STAT_MAX_AC: u8 = 1;
+const CRYSTAL_STAT_MAX_MAC: u8 = 3;
 const CRYSTAL_STAT_MIN_DC: u8 = 4;
 const CRYSTAL_STAT_MAX_DC: u8 = 5;
 const CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT: u8 = 124;
@@ -119,6 +120,9 @@ struct PendingNativePlayerHit {
     target_session_id: SessionId,
     target_object_id: u32,
     damage: i32,
+    /// Whether the blow is a magic/spell attack (mitigated by the player's MAC)
+    /// rather than a physical one (mitigated by AC).
+    is_magic: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -3764,7 +3768,7 @@ impl ZoneRuntime {
             if target.object_id != hit.target_object_id || target.dead {
                 return Vec::new();
             }
-            let damage = zone_player_native_incoming_damage(target, hit.damage)
+            let damage = zone_player_native_incoming_damage(target, hit.damage, hit.is_magic)
                 .min(target.hp.saturating_sub(1));
             if damage <= 0 {
                 return Vec::new();
@@ -4906,6 +4910,7 @@ impl ZoneRuntime {
                 target_session_id: target.session_id.clone(),
                 target_object_id: target.object_id,
                 damage: 1,
+                is_magic: false,
             });
         let packet = ServerPacket::ObjectAttack {
             info: ObjectAttackInfo {
@@ -4936,7 +4941,7 @@ impl ZoneRuntime {
         direction: MirDirection,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some((monster_position, attack_type, damage, attacker_ai)) = ({
+        let Some((monster_position, attack_type, damage, attacker_ai, attack_is_magic)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -4955,6 +4960,7 @@ impl ZoneRuntime {
                 ),
                 zone_native_monster_player_attack_damage(monster, &target.position),
                 monster.ai,
+                zone_native_monster_attack_uses_magic(monster.ai, &monster.position, &target.position),
             ))
         }) else {
             return Vec::new();
@@ -4968,6 +4974,7 @@ impl ZoneRuntime {
                     target_session_id: target.session_id.clone(),
                     target_object_id: target.object_id,
                     damage,
+                    is_magic: attack_is_magic,
                 });
         }
         let packet = ServerPacket::ObjectRangeAttack {
@@ -6950,6 +6957,20 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
     }
 }
 
+/// Whether a native monster's blow against `target` resolves as a magic/spell
+/// attack (mitigated by MAC) rather than physical (AC). Mirrors the magic
+/// branches of the AI dispatch in [`zone_native_monster_player_attack_damage`]
+/// and the session-side `monster_attack_uses_magic`.
+fn zone_native_monster_attack_uses_magic(ai: u8, source: &Point, target: &Point) -> bool {
+    let distance = zone_tile_distance(source, target);
+    match ai {
+        88 => true,
+        19 | 102 | 117 | 118 | 120 | 121 | 122 | 126 | 127 | 130 | 181 | 182 | 189 => distance > 1,
+        43 | 86 | 123 | 131 => distance > 2,
+        _ => false,
+    }
+}
+
 fn zone_native_monster_player_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
     let distance = zone_tile_distance(&monster.position, target);
     match monster.ai {
@@ -7081,10 +7102,17 @@ fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     damage
 }
 
-fn zone_player_native_incoming_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
+fn zone_player_native_incoming_damage(player: &ZonePlayer, base_damage: i32, is_magic: bool) -> i32 {
+    // Magic blows are reduced by the player's magic armour (MAC); physical blows
+    // by the physical armour (AC), matching Crystal's `DefenceType` routing.
+    let armour_stat = if is_magic {
+        CRYSTAL_STAT_MAX_MAC
+    } else {
+        CRYSTAL_STAT_MAX_AC
+    };
     let mitigated = base_damage
         .max(0)
-        .saturating_sub(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0));
+        .saturating_sub(zone_player_buff_stat_total(player, armour_stat).max(0));
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated
