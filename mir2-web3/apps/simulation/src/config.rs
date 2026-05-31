@@ -2736,6 +2736,8 @@ pub struct WorldItemSnapshot {
     pub required_class: u8,
     #[serde(default)]
     pub required_amount: u8,
+    #[serde(default)]
+    pub price: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

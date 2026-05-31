@@ -21,6 +21,7 @@ export type OriginalItemTooltipProps = {
   requiredType?: number;
   requiredClass?: number;
   requiredAmount?: number;
+  price?: number;
   align?: ItemTooltipAlign;
 };
 
@@ -101,6 +102,7 @@ export function OriginalItemTooltip({
   requiredType,
   requiredClass,
   requiredAmount,
+  price,
   align = "right",
 }: OriginalItemTooltipProps) {
   const descriptionLines = description
@@ -147,6 +149,9 @@ export function OriginalItemTooltip({
   }
   if (weight !== undefined && weight > 0) {
     rows.push({ label: t("ui.weight", [], "Weight"), value: String(weight) });
+  }
+  if (price !== undefined && price > 0) {
+    rows.push({ label: t("ui.price", [], "Price"), value: String(price) });
   }
 
   // Equip requirements render as their own (red-tinted) rows below the stats.

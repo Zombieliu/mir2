@@ -134,6 +134,7 @@ impl ItemState {
             required_type: template.as_ref().map(|t| t.required_type).unwrap_or(0),
             required_class: template.as_ref().map(|t| t.required_class).unwrap_or(0),
             required_amount: template.as_ref().map(|t| t.required_amount).unwrap_or(0),
+            price: template.as_ref().map(|t| t.price).unwrap_or(0),
         }
     }
 

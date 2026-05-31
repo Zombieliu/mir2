@@ -218,6 +218,7 @@ type GatewayWorldItem = {
   requiredType?: number | null;
   requiredClass?: number | null;
   requiredAmount?: number | null;
+  price?: number | null;
 };
 
 type GatewayEquipmentItem = {
@@ -470,6 +471,7 @@ type WorldItem = {
   requiredType?: number;
   requiredClass?: number;
   requiredAmount?: number;
+  price?: number;
 };
 
 const TRADE_SLOT_COUNT = 10;
@@ -6559,6 +6561,7 @@ export default function HomePage() {
       requiredType: item.requiredType ?? undefined,
       requiredClass: item.requiredClass ?? undefined,
       requiredAmount: item.requiredAmount ?? undefined,
+      price: item.price ?? undefined,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
       key: item.key,
@@ -6582,6 +6585,7 @@ export default function HomePage() {
       requiredType: item.requiredType ?? undefined,
       requiredClass: item.requiredClass ?? undefined,
       requiredAmount: item.requiredAmount ?? undefined,
+      price: item.price ?? undefined,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
       key: item.key,
@@ -6605,6 +6609,7 @@ export default function HomePage() {
       requiredType: item.requiredType ?? undefined,
       requiredClass: item.requiredClass ?? undefined,
       requiredAmount: item.requiredAmount ?? undefined,
+      price: item.price ?? undefined,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,

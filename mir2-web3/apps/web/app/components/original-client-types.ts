@@ -156,6 +156,7 @@ export type DisplayItem = {
   requiredType?: number;
   requiredClass?: number;
   requiredAmount?: number;
+  price?: number;
 };
 
 export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;

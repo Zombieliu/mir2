@@ -686,6 +686,7 @@ export function InventoryWindow({
                 requiredType={item.requiredType}
                 requiredClass={item.requiredClass}
                 requiredAmount={item.requiredAmount}
+                price={item.price}
                 align={slot.x > 210 ? "left" : "right"}
               />
             </button>
@@ -1019,6 +1020,7 @@ export function InventoryWindow({
                 requiredType={item.requiredType}
                 requiredClass={item.requiredClass}
                 requiredAmount={item.requiredAmount}
+                price={item.price}
                     align={slot.x > 270 ? "left" : "right"}
                   />
                 </button>
