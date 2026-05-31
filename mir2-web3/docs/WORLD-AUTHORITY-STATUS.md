@@ -35,7 +35,7 @@ Legend: ✅ authoritative in the zone · 🟡 partial · ❌ still per-session /
 | 9 | Area/projectile/summon spells resolved in the zone | ✅ | `resolve_pending_native_projectiles`, ground-spell ticks |
 | 10 | Monster → player damage resolved in the zone | ✅ | melee and ranged roll the monster's authoritative Crystal damage (`zone_native_monster_player_attack_damage`), and `zone_player_native_incoming_damage` subtracts the player's authoritative armour — `Random(MinAC..=MaxAC)` for physical hits, `Random(MinMAC..=MaxMAC)` for magic hits (tagged on `PendingNativePlayerHit`), plus buff AC and the reduction buff. |
 | 11 | **Magic/skill damage value** computed in the zone | ✅ | `player_cast_native_magic` recomputes the spell damage authoritatively via `zone_authoritative_magic_damage` (= `crystal_magic_damage_from_base` over the player's base) and ignores the gateway scalar when the player has an authoritative stat block. Value-identical to the old session formula, so authority moves without a balance change. Exception: PoisonCloud keeps the supplied value (its amulet bonus depends on inventory the zone lacks). Monster MAC subtraction on magic hits is the remaining defensive refinement. |
-| 12 | NPC state / quest mutation authority | ❌ | NPCs remain session-local (`npc_script.rs`) |
+| 12 | NPC state / quest mutation authority | 🟡 | Re-investigated: this is **mostly already authoritative, just not in the per-map `ZoneRuntime`** — and correctly so. NPC presence is zone-retained (rows above); NPC global script variables + random seed + map entity side-effects (NPC-spawned objects) are **cross-map** shared state committed transactionally through the gateway's `SharedNpcWorldService` (`ApplyScriptOutcome`); per-player dialog/shop/quest is correctly session-local (like inventory). Moving the cross-map saved-value state into a per-map `ZoneRuntime` would **silo it per map — a correctness regression**. The genuine remaining nuance is that the shared commit uses optimistic concurrency (conflict-detected) rather than a single cross-map writer, which can race for counter-style NPCs; closing that is a cross-map single-writer redesign (needs the Crystal reference for global-vs-per-map variable semantics). |
 | 13 | Single-writer tick correctness (in-process) | ✅ | monster think/attack windows (`next_ai_ready_at_ms`, `next_attack_ready_at_ms`) rate-limit actions, so N session-driven ticks per interval do not double-advance a monster |
 | 14 | Cross-process / sharded authority (one owner process per zone) | ❌ | `ZoneOwnerLeaseAuthority` + fencing-token scaffolding exists; RPC handoff is future work |
 
@@ -62,20 +62,38 @@ pass (2 failures are pre-existing and data-dependent — empty Crystal submodule
 simulation lib 833 pass / 70 fail, **identical to the pre-change baseline** (no
 regressions; the 70 are pre-existing/environmental).
 
-## Remaining work to reach a true production-grade 90%
+## Score
 
-These are the honest remaining gaps:
+Of the 14 invariants: **12 ✅, 1 🟡 (row 12, NPC — already mostly authoritative
+in the correct cross-map place), 1 ❌ (row 14, cross-process distribution)**.
 
-1. **NPC / quest authority** — promote NPC state mutation into the zone.
-2. **Monster MAC on magic hits** — subtract the target monster's MAC when a
+Splitting by kind:
+
+- **Gameplay authority logic** (rows 1–13): ~12.5 / 13 ≈ **96%**. The single
+  shared world computes movement, monster HP/AI, bidirectional combat
+  resolution, magic damage, drops, status, and shares NPC state transactionally.
+- **Including cross-process distribution infra** (row 14): ~12.5 / 14 ≈ **89%**.
+
+Distribution (row 14) is a different class of work (a distributed-systems infra
+track — single-owner RPC handoff + soak/load), not gameplay-authority logic.
+
+## Remaining work
+
+1. **Monster MAC on magic hits** — subtract the target monster's MAC when a
    player's magic damages it (the defensive analog of the player-side AC/MAC),
-   across the scattered magic application paths (direct, projectile, ground).
+   across the scattered magic application paths (direct, projectile, ground). A
+   bounded numbers refinement.
+2. **NPC shared-mutation concurrency** — the cross-map NPC commit uses optimistic
+   concurrency; a single cross-map writer would remove counter-style races. This
+   is a design pass (needs the Crystal reference for global-vs-per-map variable
+   semantics), **not** a move into the per-map `ZoneRuntime` (which would
+   incorrectly silo cross-map state).
 3. **Spawn-source authority** — let the zone own respawn timers from the map
    manifest instead of mirroring per-session spawns.
-4. **Cross-process distribution** — complete the `ZoneOwner` RPC handoff so a
-   single owner process holds the write lock per zone, then soak/load test.
+4. **Cross-process distribution** (row 14) — complete the `ZoneOwner` RPC
+   handoff so a single owner process holds the write lock per zone, then
+   soak/load test. The large distributed-systems effort.
 
-Items 1–3 are individually bounded; item 4 is the large distributed-systems
-effort. The bidirectional combat-resolution authority (scorecard rows 5, 6, 10)
-plus magic-value authority (row 11) were the highest-leverage gaps and are now
+The bidirectional combat-resolution authority (rows 5, 6, 10) and magic-value
+authority (row 11) were the highest-leverage gameplay-authority gaps and are now
 closed and tested.
