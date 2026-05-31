@@ -204,6 +204,21 @@ export type DisplayActiveBuff = {
   defenceBonus: number;
 };
 
+export type DisplayCombatStats = {
+  minDc: number;
+  maxDc: number;
+  minMc: number;
+  maxMc: number;
+  minSc: number;
+  maxSc: number;
+  accuracy: number;
+  agility: number;
+  minAc: number;
+  maxAc: number;
+  minMac: number;
+  maxMac: number;
+};
+
 export type DisplayNpcDialog = {
   npcObjectId: string;
   npcName: string;
@@ -303,6 +318,7 @@ export type DisplayWorld = {
   activeNpcDialog: DisplayNpcDialog | null;
   knownSkills: DisplayKnownSkill[];
   activeBuffs: DisplayActiveBuff[];
+  combatStats?: DisplayCombatStats;
   rankings: Record<string, DisplayRankingState>;
   rankingCurrentKey?: string | null;
   stage5Systems?: {

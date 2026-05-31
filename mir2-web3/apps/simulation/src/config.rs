@@ -3496,6 +3496,23 @@ pub struct MapTransferSnapshot {
     pub to_direction: MirDirection,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerCombatStatsSnapshot {
+    pub min_dc: i32,
+    pub max_dc: i32,
+    pub min_mc: i32,
+    pub max_mc: i32,
+    pub min_sc: i32,
+    pub max_sc: i32,
+    pub accuracy: i32,
+    pub agility: i32,
+    pub min_ac: i32,
+    pub max_ac: i32,
+    pub min_mac: i32,
+    pub max_mac: i32,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
@@ -3507,6 +3524,7 @@ pub struct WorldSnapshot {
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub combat_stats: PlayerCombatStatsSnapshot,
     pub player_experience: i64,
     pub player_max_experience: i64,
     pub gold: u32,

@@ -5045,3 +5045,35 @@ body.mir-dragging-item * {
   position: absolute;
   image-rendering: pixelated;
 }
+
+/* ---- Character dialog combat-stat list (Stats I) ---- */
+.character-stat-list {
+  position: absolute;
+  left: 22px;
+  top: 100px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+}
+
+.character-stat-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 2px 8px;
+  font-size: 12px;
+  background: linear-gradient(180deg, rgba(58, 41, 24, 0.5), rgba(25, 17, 10, 0.5));
+  border: 1px solid rgba(112, 89, 50, 0.5);
+}
+
+.character-stat-label {
+  color: #b89a63;
+  letter-spacing: 0.04em;
+}
+
+.character-stat-value {
+  color: #ffe9a6;
+  font-weight: 600;
+}

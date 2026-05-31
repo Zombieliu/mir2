@@ -365,6 +365,20 @@ type GatewayWorldSnapshot = {
   npcScriptDiagnostics?: GatewayNpcScriptDiagnostic[];
   knownSkills: GatewayKnownSkill[];
   activeBuffs: GatewayActiveBuff[];
+  combatStats?: {
+    minDc: number;
+    maxDc: number;
+    minMc: number;
+    maxMc: number;
+    minSc: number;
+    maxSc: number;
+    accuracy: number;
+    agility: number;
+    minAc: number;
+    maxAc: number;
+    minMac: number;
+    maxMac: number;
+  };
   stage5Systems?: Stage5SystemsState;
   mapTransfers: GatewayMapTransfer[];
   interactionHints: string[];
@@ -597,6 +611,20 @@ type WorldState = {
   activeNpcDialog: NpcDialog | null;
   knownSkills: KnownSkill[];
   activeBuffs: ActiveBuff[];
+  combatStats?: {
+    minDc: number;
+    maxDc: number;
+    minMc: number;
+    maxMc: number;
+    minSc: number;
+    maxSc: number;
+    accuracy: number;
+    agility: number;
+    minAc: number;
+    maxAc: number;
+    minMac: number;
+    maxMac: number;
+  };
   rankings: Record<string, RankingState>;
   rankingCurrentKey: string | null;
   stage5Systems: Stage5SystemsState;
@@ -725,6 +753,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   activeNpcDialog: null,
   knownSkills: [],
   activeBuffs: [],
+  combatStats: undefined,
   rankings: {},
   rankingCurrentKey: null,
   stage5Systems: {},
@@ -6352,6 +6381,7 @@ export default function HomePage() {
       attackBonus: buff.attackBonus,
       defenceBonus: buff.defenceBonus,
     }));
+    const combatStats = snapshot.combatStats;
     const mapTransfers = (snapshot.mapTransfers ?? []).map((transfer) => ({
       key: transfer.key,
       mapFileName: transfer.mapFileName,
@@ -6594,6 +6624,7 @@ export default function HomePage() {
         activeNpcDialog,
         knownSkills,
         activeBuffs,
+        combatStats,
         stage5Systems: snapshot.stage5Systems ?? current.stage5Systems,
         mapTransfers,
         interactionHints: snapshot.interactionHints,

@@ -314,7 +314,7 @@ fn crystal_player_accuracy(world: &World) -> i32 {
 /// is intentionally left to that effort so this change does not silently move
 /// the balance curve. Accuracy/agility/armour are populated so the zone can run
 /// the Crystal-style hit check and armour subtraction itself.
-fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatStats {
+pub(super) fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatStats {
     let base = crystal_player_zone_base_melee_damage(world).max(1);
     let accuracy = crystal_player_accuracy(world);
     let resources = world.resource::<InventoryResource>();

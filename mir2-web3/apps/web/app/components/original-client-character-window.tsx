@@ -56,6 +56,21 @@ type DisplayKnownSkill = {
   cooldownRemainingTicks: number;
 };
 
+type DisplayCombatStats = {
+  minDc: number;
+  maxDc: number;
+  minMc: number;
+  maxMc: number;
+  minSc: number;
+  maxSc: number;
+  accuracy: number;
+  agility: number;
+  minAc: number;
+  maxAc: number;
+  minMac: number;
+  maxMac: number;
+};
+
 type DisplayWorld = {
   equipmentItems: DisplayEquipmentItem[];
   playerHp?: number;
@@ -68,6 +83,7 @@ type DisplayWorld = {
   currentWeight: number;
   maxWeight: number;
   knownSkills: DisplayKnownSkill[];
+  combatStats?: DisplayCombatStats;
 };
 
 type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
@@ -111,19 +127,6 @@ export function CharacterWindow({
       : repairMode === "special"
         ? t("ui.specialRepairItem", [], "Special Repair")
         : "";
-  const stats1Values = [
-    displayFieldValue(world.playerHp, world.playerMaxHp),
-    displayFieldValue(world.playerMp, 100),
-    statNumber(totalDefence),
-    "",
-    statNumber(totalAttack),
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ];
   const stats2Values = [
     `${(ratio(world.playerExperience, world.playerMaxExperience) * 100).toFixed(2)}%`,
     statPair(world.freeBagSlots, world.maxBagSlots),
@@ -151,7 +154,9 @@ export function CharacterWindow({
   return (
     <div className="window-shell character-window">
       <img className="window-frame" src={ORIGINAL_UI.character.frame} alt="" draggable={false} />
-      <img className="character-page" src={activePage} alt="" draggable={false} />
+      {activeTab === "stats1" ? null : (
+        <img className="character-page" src={activePage} alt="" draggable={false} />
+      )}
       <div className="character-close">
         <SpriteButton sprite={ORIGINAL_UI.character.closeButton} label={t("ui.closeCharacter")} onClick={onClose} />
       </div>
@@ -253,10 +258,11 @@ export function CharacterWindow({
 	      ) : null}
 
       {activeTab === "stats1" ? (
-        <div className="character-field-values stats1">
-          {stats1Values.map((value, index) => (
-            <div key={`stats1-${index}`} className="character-field-value">
-              {value}
+        <div className="character-stat-list stats1">
+          {buildCombatStatRows(t, world).map((row) => (
+            <div key={row.label} className="character-stat-row" data-stat={row.label}>
+              <span className="character-stat-label">{row.label}</span>
+              <span className="character-stat-value">{row.value}</span>
             </div>
           ))}
         </div>
@@ -344,6 +350,33 @@ function CharacterPaperdoll({ sprite }: { sprite: ViewportEntitySprite }) {
       ))}
     </div>
   );
+}
+
+function buildCombatStatRows(t: TranslateFn, world: DisplayWorld): Array<{ label: string; value: string }> {
+  const rows: Array<{ label: string; value: string }> = [];
+  rows.push({
+    label: t("ui.hp", [], "HP"),
+    value: `${world.playerHp ?? 0}/${world.playerMaxHp ?? 0}`,
+  });
+  rows.push({
+    label: t("ui.mp", [], "MP"),
+    value: `${Math.max(0, Math.min(100, Math.round(world.playerMp ?? 0)))}`,
+  });
+  const cs = world.combatStats;
+  if (cs) {
+    rows.push({ label: t("ui.dc", [], "DC"), value: statRange(cs.minDc, cs.maxDc) });
+    rows.push({ label: t("ui.mc", [], "MC"), value: statRange(cs.minMc, cs.maxMc) });
+    rows.push({ label: t("ui.sc", [], "SC"), value: statRange(cs.minSc, cs.maxSc) });
+    rows.push({ label: t("ui.ac", [], "AC"), value: statRange(cs.minAc, cs.maxAc) });
+    rows.push({ label: t("ui.mac", [], "MAC"), value: statRange(cs.minMac, cs.maxMac) });
+    rows.push({ label: t("ui.accuracy", [], "Accuracy"), value: String(cs.accuracy) });
+    rows.push({ label: t("ui.agility", [], "Agility"), value: String(cs.agility) });
+  }
+  return rows;
+}
+
+function statRange(min: number, max: number) {
+  return min === max ? String(min) : `${min}-${max}`;
 }
 
 function originalItemIconPath(icon: number) {

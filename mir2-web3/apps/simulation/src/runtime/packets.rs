@@ -4581,8 +4581,27 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let mut stage5_systems = stage5.stage5_systems.clone();
     stage5_systems.item_rental = item_rental_snapshot(world);
 
+    let combat_stats = {
+        let stats = super::combat::crystal_zone_player_combat_stats(world);
+        crate::config::PlayerCombatStatsSnapshot {
+            min_dc: stats.min_dc,
+            max_dc: stats.max_dc,
+            min_mc: stats.min_mc,
+            max_mc: stats.max_mc,
+            min_sc: stats.min_sc,
+            max_sc: stats.max_sc,
+            accuracy: stats.accuracy,
+            agility: stats.agility,
+            min_ac: stats.min_ac,
+            max_ac: stats.max_ac,
+            min_mac: stats.min_mac,
+            max_mac: stats.max_mac,
+        }
+    };
+
     WorldSnapshot {
         tick,
+        combat_stats,
         map_title: session
             .selected_character
             .as_ref()
