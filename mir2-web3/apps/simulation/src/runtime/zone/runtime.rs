@@ -119,6 +119,8 @@ struct PendingNativePlayerHit {
     target_session_id: SessionId,
     target_object_id: u32,
     damage: i32,
+    /// Whether the incoming hit is magical (mitigated by MAC) or physical (AC).
+    magic: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -3786,7 +3788,7 @@ impl ZoneRuntime {
             if target.object_id != hit.target_object_id || target.dead {
                 return Vec::new();
             }
-            let damage = zone_player_native_incoming_damage(target, hit.damage)
+            let damage = zone_player_native_incoming_damage(target, hit.damage, hit.magic, now_ms)
                 .min(target.hp.saturating_sub(1));
             if damage <= 0 {
                 return Vec::new();
@@ -4925,7 +4927,7 @@ impl ZoneRuntime {
         // Roll the monster's melee damage from its Crystal stats (matching the
         // ranged path) instead of a fixed placeholder of 1, so monster→player
         // damage is the zone's authoritative, data-driven value.
-        let damage = zone_native_monster_player_attack_damage(monster, &target.position);
+        let (damage, magic) = zone_native_monster_player_attack_damage(monster, &target.position);
         let attacker_ai = monster.ai;
         if damage > 0 {
             self.pending_native_player_hits
@@ -4936,6 +4938,7 @@ impl ZoneRuntime {
                     target_session_id: target.session_id.clone(),
                     target_object_id: target.object_id,
                     damage,
+                    magic,
                 });
         }
         let packet = ServerPacket::ObjectAttack {
@@ -4967,7 +4970,7 @@ impl ZoneRuntime {
         direction: MirDirection,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        let Some((monster_position, attack_type, damage, attacker_ai)) = ({
+        let Some((monster_position, attack_type, (damage, magic), attacker_ai)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -4999,6 +5002,7 @@ impl ZoneRuntime {
                     target_session_id: target.session_id.clone(),
                     target_object_id: target.object_id,
                     damage,
+                    magic,
                 });
         }
         let packet = ServerPacket::ObjectRangeAttack {
@@ -6981,29 +6985,34 @@ fn zone_native_monster_range_attack_type(ai: u8, source: &Point, target: &Point)
     }
 }
 
-fn zone_native_monster_player_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
+/// Returns the monster's authoritative attack damage and whether it is a magic
+/// attack (so the zone can mitigate with the target's MAC instead of AC).
+fn zone_native_monster_player_attack_damage(
+    monster: &ZoneNativeMonster,
+    target: &Point,
+) -> (i32, bool) {
     let distance = zone_tile_distance(&monster.position, target);
     match monster.ai {
-        19 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        20 if distance > 1 => zone_crystal_monster_attack_damage(&monster.name) * 3,
-        43 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        120 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        121 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        122 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        123 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        102 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        86 if distance > 2 => zone_crystal_monster_magic_damage(&monster.name),
-        88 => zone_crystal_monster_magic_damage(&monster.name),
-        126 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        127 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        188 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 2,
-        189 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        192 if distance > 1 => zone_crystal_monster_raw_attack_damage(&monster.name) * 3,
-        130 if distance > 1 => zone_crystal_monster_magic_damage(&monster.name),
-        131 if distance > 2 => zone_crystal_monster_spell_damage(&monster.name),
-        118 | 181 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        182 if distance > 1 => zone_crystal_monster_raw_magic_damage(&monster.name),
-        _ => zone_crystal_monster_attack_damage(&monster.name),
+        19 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        20 if distance > 1 => (zone_crystal_monster_attack_damage(&monster.name) * 3, false),
+        43 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        120 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        121 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        122 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        123 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        102 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        86 if distance > 2 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        88 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        126 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        127 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        188 if distance > 1 => (zone_crystal_monster_raw_attack_damage(&monster.name) * 2, false),
+        189 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        192 if distance > 1 => (zone_crystal_monster_raw_attack_damage(&monster.name) * 3, false),
+        130 if distance > 1 => (zone_crystal_monster_magic_damage(&monster.name), true),
+        131 if distance > 2 => (zone_crystal_monster_spell_damage(&monster.name), true),
+        118 | 181 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        182 if distance > 1 => (zone_crystal_monster_raw_magic_damage(&monster.name), true),
+        _ => (zone_crystal_monster_attack_damage(&monster.name), false),
     }
 }
 
@@ -7184,10 +7193,32 @@ fn zone_magic_hit_damage(spell: Spell, secondary: bool, damage: i32) -> i32 {
     damage
 }
 
-fn zone_player_native_incoming_damage(player: &ZonePlayer, base_damage: i32) -> i32 {
+fn zone_player_native_incoming_damage(
+    player: &ZonePlayer,
+    base_damage: i32,
+    magic: bool,
+    now_ms: u64,
+) -> i32 {
+    let buff_ac = zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0);
+    // Subtract the player's authoritative base armour, rolled from their stat
+    // block: MAC for magical hits, AC for physical hits. With no stat block the
+    // range is 0..0 and only buff AC + the reduction buff apply (legacy).
+    let (min_armour, max_armour) = if magic {
+        (player.combat_stats.min_mac, player.combat_stats.max_mac)
+    } else {
+        (player.combat_stats.min_ac, player.combat_stats.max_ac)
+    };
+    let base_armour = zone_roll_stat_range(
+        min_armour,
+        max_armour,
+        now_ms,
+        player.object_id,
+        if magic { 0x3AC } else { 0x4AC },
+    );
     let mitigated = base_damage
         .max(0)
-        .saturating_sub(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_AC).max(0));
+        .saturating_sub(buff_ac)
+        .saturating_sub(base_armour);
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated

@@ -33,7 +33,7 @@ Legend: ✅ authoritative in the zone · 🟡 partial · ❌ still per-session /
 | 7 | Ground-drop spawn + ownership/contention arbitration | ✅ | `claim_ground_drop`, tombstones |
 | 8 | Status effects on monsters (poison/freeze/stun/paralysis, controls) | ✅ | `tick_native_monster_damage_poisons`, `expire_native_monster_controls` |
 | 9 | Area/projectile/summon spells resolved in the zone | ✅ | `resolve_pending_native_projectiles`, ground-spell ticks |
-| 10 | Monster → player damage **computed** in the zone | 🟡 | both melee and ranged now roll the monster's authoritative Crystal damage (`zone_native_monster_player_attack_damage`); the remaining gap is that the player's base `Min/MaxAC` / `Min/MaxMAC` are not yet subtracted from incoming damage (only buff AC), and incoming hits don't yet distinguish physical vs magic for AC-vs-MAC. |
+| 10 | Monster → player damage resolved in the zone | ✅ | melee and ranged roll the monster's authoritative Crystal damage (`zone_native_monster_player_attack_damage`), and `zone_player_native_incoming_damage` subtracts the player's authoritative armour — `Random(MinAC..=MaxAC)` for physical hits, `Random(MinMAC..=MaxMAC)` for magic hits (tagged on `PendingNativePlayerHit`), plus buff AC and the reduction buff. |
 | 11 | **Magic/skill damage value** rolled in the zone | 🟡 | spell power is still computed in the attacker's session and passed as a scalar; the zone applies it. Moving the spell-power formulas into the zone overlaps the combat/skills numbers workstream. |
 | 12 | NPC state / quest mutation authority | ❌ | NPCs remain session-local (`npc_script.rs`) |
 | 13 | Single-writer tick correctness (in-process) | ✅ | monster think/attack windows (`next_ai_ready_at_ms`, `next_attack_ready_at_ms`) rate-limit actions, so N session-driven ticks per interval do not double-advance a monster |
@@ -64,26 +64,17 @@ regressions; the 70 are pre-existing/environmental).
 
 ## Remaining work to reach a true production-grade 90%
 
-These are the honest gaps. Items 10/11 are partly the **combat-numbers** and
-**skills** workstreams, but they also gate "authoritative":
+These are the honest remaining gaps:
 
-1. **Player armour mitigation for incoming damage** — the monster→player melee
-   placeholder is now fixed (it rolls the monster's Crystal damage), but
-   `zone_player_native_incoming_damage` still subtracts only *buff* AC. Subtract
-   the player's authoritative `Min/MaxAC` / `Min/MaxMAC` (now carried on
-   `ZonePlayerCombatStats`), distinguishing physical hits (AC) from magic hits
-   (MAC) — which needs a damage-type tag on `PendingNativePlayerHit`. The magic
-   shield / defence-buff mitigation semantics should be validated against the
-   Crystal reference when re-baselining.
-2. **Magic/skill damage value authority** — move the per-spell power formulas
+1. **Magic/skill damage value authority** — move the per-spell power formula
    (`crystal_magic_damage_from_base` and friends) into the zone so the zone,
    not the session, produces the magic damage number, and subtract monster MAC.
-3. **NPC / quest authority** — promote NPC state mutation into the zone.
-4. **Spawn-source authority** — let the zone own respawn timers from the map
+2. **NPC / quest authority** — promote NPC state mutation into the zone.
+3. **Spawn-source authority** — let the zone own respawn timers from the map
    manifest instead of mirroring per-session spawns.
-5. **Cross-process distribution** — complete the `ZoneOwner` RPC handoff so a
+4. **Cross-process distribution** — complete the `ZoneOwner` RPC handoff so a
    single owner process holds the write lock per zone, then soak/load test.
 
-Items 1–4 are individually bounded; item 5 is the large distributed-systems
-effort. The combat-resolution authority (#5/#6 in the scorecard) was the
-single highest-leverage gap and is now closed and tested.
+Items 1–3 are individually bounded; item 4 is the large distributed-systems
+effort. The bidirectional combat-resolution authority (scorecard rows 5, 6, 10)
+was the single highest-leverage gap and is now closed and tested.
