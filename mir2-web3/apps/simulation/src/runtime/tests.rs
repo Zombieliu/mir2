@@ -4666,6 +4666,75 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn football_is_kicked_not_damaged_when_attacked() {
+    // Crystal Football (ai 68): a player hit deals 0 damage and rolls the ball up to 4 tiles in the
+    // attacker's facing; it never dies. Place the ball one tile right of the player, attack it (the
+    // player turns to face it, i.e. Right), and assert it moved away with full HP.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    grant_player_attack_bonus(&mut session, 200);
+
+    let ball_id = 70_701_u32;
+    let ball_start = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let ball = spawn_crystal_monster_for_test(
+        &mut session,
+        ball_id,
+        "Football",
+        ball_start.clone(),
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(ball);
+        entry.insert((
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterCombatStats { agility: 0 },
+        ));
+        entry.get_mut::<MonsterAgent>().expect("agent").ai = 68;
+    }
+    sync_visible_objects(&mut session);
+
+    // The kick resolves with the scheduled hit on the following tick, so collect both batches.
+    let mut packets = session.attack(ball_id);
+    packets.extend(session.tick());
+
+    // No damage: HP unchanged, and it emitted ObjectPushed rather than Struck damage.
+    let hp = session
+        .app
+        .world()
+        .entity(ball)
+        .get::<MonsterVitals>()
+        .expect("ball vitals")
+        .hp;
+    assert_eq!(hp, 50, "Football must take no damage from a hit");
+    assert!(
+        packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectPushed { object_id, .. } if *object_id == ball_id
+        )),
+        "a kick should emit ObjectPushed for the ball"
+    );
+
+    let ball_end = session
+        .app
+        .world()
+        .entity(ball)
+        .get::<Position>()
+        .expect("ball position")
+        .0
+        .clone();
+    assert!(
+        tile_distance(&ball_end, &player_origin) > tile_distance(&ball_start, &player_origin),
+        "the ball should roll away from the kicker (start {ball_start:?}, end {ball_end:?})"
+    );
+}
+
+#[test]
 fn noncombatant_data_only_families_cannot_attack() {
     // Crystal `CanAttack { return false; }` props that the runtime now treats as non-combatants:
     // EvilMirBody (53), Football (68), Wall (82), CaveStatue (151), BoulderSpirit (170).

@@ -35,8 +35,8 @@ use super::monsters::{
     schedule_monster_respawn, PendingMonsterSpawnAction,
 };
 use super::movement::{
-    current_location, current_movement, direction_toward, directional_destination, offset_point,
-    push_player_in_direction, tile_distance,
+    can_occupy, current_location, current_movement, direction_toward, directional_destination,
+    offset_point, push_player_in_direction, rotated_direction, tile_distance,
 };
 use super::npc::dismiss_dialog;
 use super::packets::{
@@ -428,6 +428,44 @@ fn crystal_resolve_player_attack_on_monster(
         return Some(1);
     }
     Some((damage - armour).max(1))
+}
+
+/// Crystal `Football.Attacked`: the ball takes no damage and rolls up to `FOOTBALL_KICK_DISTANCE`
+/// tiles in the attacker's facing direction, reversing direction whenever the next tile is blocked
+/// (a wall bounce), and emits an `ObjectPushed` per step so clients see it move.
+fn kick_football(
+    world: &mut World,
+    ball_entity: Entity,
+    attacker_id: u32,
+    packets: &mut Vec<ServerPacket>,
+) {
+    let Some(ball_object_id) = entity_object_id(world, ball_entity) else {
+        return;
+    };
+    // Direction the ball travels = the attacker's facing (the player's, for a player kick).
+    let mut direction = entity_by_object_id(world, attacker_id)
+        .and_then(|attacker| entity_facing(world, attacker))
+        .unwrap_or(MirDirection::Up);
+
+    for _ in 0..FOOTBALL_KICK_DISTANCE {
+        let Some(position) = entity_position(world, ball_entity) else {
+            return;
+        };
+        let next = offset_point(&position, direction, 1);
+        if !can_occupy(world, next.clone(), Some(ball_entity)) {
+            // Bounce: reverse and try the opposite way on the next iteration (Crystal flips `dir`).
+            direction = rotated_direction(direction, 4);
+            continue;
+        }
+        world
+            .entity_mut(ball_entity)
+            .insert((Position(next.clone()), Facing(direction)));
+        packets.push(ServerPacket::ObjectPushed {
+            object_id: ball_object_id,
+            location: next,
+            direction,
+        });
+    }
 }
 
 fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
@@ -1673,6 +1711,16 @@ pub(super) fn resolve_pending_combat_actions(
             }
             PendingCombatTarget::Monster(target_entity) => {
                 if !monster_is_damageable(world, target_entity) {
+                    continue;
+                }
+                // Football (ai 68): invulnerable soccer ball — a player hit deals 0 damage and rolls
+                // it up to 4 tiles in the attacker's facing (bouncing off blocked tiles); never dies.
+                if world
+                    .entity(target_entity)
+                    .get::<MonsterAgent>()
+                    .is_some_and(|agent| agent.ai == FOOTBALL_AI)
+                {
+                    kick_football(world, target_entity, action.attacker_id, packets);
                     continue;
                 }
                 if action.damage > 0

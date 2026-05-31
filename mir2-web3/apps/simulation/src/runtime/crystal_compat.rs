@@ -144,6 +144,10 @@ pub(super) const GENERAL_MEOW_MEOW_SLAVE_NAMES: [&str; 4] =
 /// IcePillar (ai 89): a stationary, regen-less, poison-immune damage sponge that loses exactly 1 HP
 /// per non-blocked hit, counterattacks ~1/3 of the time, and bursts a frozen AoE on death.
 pub(super) const ICE_PILLAR_AI: u8 = 89;
+/// Football (ai 68): an invulnerable soccer-ball monster — a player hit deals no damage and instead
+/// rolls it up to this many tiles in the attacker's facing direction, bouncing off blocked tiles.
+pub(super) const FOOTBALL_AI: u8 = 68;
+pub(super) const FOOTBALL_KICK_DISTANCE: i32 = 4;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The
