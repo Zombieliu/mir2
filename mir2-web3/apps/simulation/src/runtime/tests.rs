@@ -54344,3 +54344,28 @@ fn class_base_stats_scale_with_level_per_crystal_formula() {
     equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
     assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
 }
+
+#[test]
+fn zone_player_combat_stats_use_real_engine_ranges() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // The zone combat block is now sourced from the Crystal-numeric stat engine,
+    // so the seed WoodenSword (MinDC 2/MaxDC 4) and LightLeatherArmour
+    // (MinAC 3/MaxAC 5) yield real Min<Max spreads the zone rolls over — not the
+    // old collapsed floor (min == max) or zero armour floor.
+    let stats = session.zone_player_combat_stats();
+    assert!(
+        stats.max_dc > stats.min_dc,
+        "zone DC should be a real range (min {}, max {})",
+        stats.min_dc,
+        stats.max_dc
+    );
+    assert!(
+        stats.min_ac > 0 && stats.max_ac > stats.min_ac,
+        "zone AC should be a real range (min {}, max {})",
+        stats.min_ac,
+        stats.max_ac
+    );
+    assert!(stats.has_authoritative_damage());
+}
