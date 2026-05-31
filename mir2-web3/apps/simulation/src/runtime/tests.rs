@@ -4096,6 +4096,9 @@ fn player_attack_locks_monster_target_and_uses_runtime_counterattack() {
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
+    // Move out of the town safe zone so the counter-attack actually strikes
+    // (safe-zone players are immune to combat damage).
+    set_player_position(&mut session, Point { x: 339, y: 275 });
     let player_origin = player_position(&session);
     let monster_object_id = 98_766_u32;
     let current_tick = runtime_tick(session.app.world());
@@ -20930,7 +20933,7 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let player_origin = Point { x: 322, y: 277 };
+    let player_origin = Point { x: 339, y: 275 };
     let bomb_spider = bomb_spider_template().expect("bomb spider template");
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let player = player_entity(session.app.world());
