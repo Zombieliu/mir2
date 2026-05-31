@@ -13,6 +13,7 @@ use mir2_protocol::{
 
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
+use super::combat::crystal_player_rolled_armour;
 use super::combat::{
     combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
     ranged_attack_delay_ticks, PendingPlayerStatusEffect,
@@ -25,7 +26,6 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
-use super::combat::crystal_player_rolled_armour;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
     runtime_full_map_collision_data, walkable_point_count_in_rect, walkable_points_in_rect,

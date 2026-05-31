@@ -1087,9 +1087,7 @@ pub(super) fn tick_player_vital_regen(
     }
 
     let last_damaged_tick = world.resource::<PlayerRuntimeResource>().last_damaged_tick;
-    if current_tick
-        < last_damaged_tick.saturating_add(CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS)
-    {
+    if current_tick < last_damaged_tick.saturating_add(CRYSTAL_PLAYER_REGEN_COMBAT_DELAY_TICKS) {
         return;
     }
 
