@@ -83,12 +83,35 @@ add-after-multiplier path. Special bases preserved from Crystal:
   single-session harness) are unchanged and unrelated — see the note in
   `CRYSTAL-SERVER-PARITY.md` about the suite's existing skill-effect failures.
 
-## Known cross-module dependency (out of magic scope)
+## Armour reduction / DefenceType (effective-damage 1:1)
 
-Magic damage **values** are now Crystal-faithful, but the shared combat
-damage-application path (`combat.rs::schedule_damage_to_monster`) does not yet
-subtract the target's armor. Crystal applies `Attacked(value, DefenceType.MAC|AC)`,
-rolling the defender's Min/Max MAC (magic) or AC (physical). Reaching 1:1
-*effective* damage requires threading a `DefenceType` through the combat
-resolution and rolling defender armor — a combat-engine change that affects all
-damage types, tracked separately from the magic-cast system.
+Magic damage now lands 1:1: the combat resolution applies the target's armour the
+way Crystal does in `MapObject.Attacked`/`GetArmour`.
+
+- `CrystalDefence` (combat.rs) mirrors Crystal's `DefenceType`
+  (AcAgility/Ac/MacAgility/Mac/Agility/None).
+- `crystal_spell_defence(spell)` maps each spell to its Crystal DefenceType
+  (extracted from `HumanObject.cs`): wizard/taoist/archer magic + BladeAvalanche/
+  HeavenlySword → **MAC**; FlamingSword/SlashingBurst/CrescentSlash/FlashDash/
+  CatTongue/MoonMist → **AC**; HalfMoon/CrossHalfMoon/DoubleSlash/Thrusting/
+  TwinDrakeBlade → **Agility** (dodge only); control/knockback/poison spells →
+  **None**.
+- Net damage = `max(0, damage - GetDefencePower(MinXAC, MaxXAC))` where the target's
+  AC/MAC range is rolled deterministically (`crystal_defence_power_roll`); `armour >=
+  damage` is a 0-damage miss, exactly as Crystal returns 0.
+- The agility dodge now only fires for the `*Agility` defence types (previously it
+  applied to every hit, including magic).
+
+Threading uses a **cast-scoped** defence (`RuntimeQueueResource.current_spell_defence`)
+captured into each `PendingCombatAction` at schedule time and re-established for the
+deferred ground-spell ticks (FireWall/Blizzard/MeteorStrike/PoisonCloud/ExplosiveTrap),
+so no per-call-site changes were needed. Outside a player cast the value is
+`AcAgility` → zero armour, leaving monster-AI / auto-attack damage byte-for-byte
+unchanged.
+
+### Remaining (separate combat module)
+
+Player-side armour (monster→player `Attacked` with the player's AC/MAC) and the
+auto-attack `ACAgility` AC subtraction are intentionally left on their current path
+to avoid destabilising the melee/monster-AI damage model; they belong to the combat
+damage-engine workstream, not the magic-cast system.

@@ -749,6 +749,9 @@ pub(super) struct RuntimeQueueResource {
     pub(super) pending_monster_spawns: Vec<PendingMonsterSpawnAction>,
     pub(super) pending_ground_spell_actions: Vec<PendingGroundSpellAction>,
     pub(super) pending_movement_command: Option<PendingMovementCommand>,
+    /// Defence type of the spell currently being cast, so scheduled/deferred damage rolls the
+    /// correct target armour (Crystal `DefenceType`). `None` outside a player cast.
+    pub(super) current_spell_defence: Option<super::combat::CrystalDefence>,
 }
 
 impl RuntimeQueueResource {
@@ -758,6 +761,7 @@ impl RuntimeQueueResource {
             pending_monster_spawns: Vec::new(),
             pending_ground_spell_actions: Vec::new(),
             pending_movement_command: None,
+            current_spell_defence: None,
         }
     }
 }

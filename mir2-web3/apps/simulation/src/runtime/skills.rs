@@ -21,7 +21,7 @@ use super::buffs::{
 use super::combat::{
     apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
     queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_heal_to_player, PendingMonsterDefeatAction,
+    schedule_heal_to_player, set_cast_defence, CrystalDefence, PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -983,6 +983,12 @@ pub(super) fn cast_skill_with_context(
     }
 
     if definition.is_none() {
+        // Scope the spell's Crystal DefenceType so scheduled/immediate monster damage rolls the
+        // correct target armour (AC/MAC), then restore the prior value.
+        let cast_defence = crystal_magic
+            .as_ref()
+            .map(|magic| crystal_spell_defence(&magic.spell));
+        let previous_defence = set_cast_defence(world, cast_defence);
         packets.extend(apply_manifest_spell_effect(
             world,
             player,
@@ -993,6 +999,7 @@ pub(super) fn cast_skill_with_context(
             context.as_ref(),
             tick,
         ));
+        set_cast_defence(world, previous_defence);
     }
 
     if let Some(spell) = spell_packet.filter(|_| !override_default_magic_packets) {
@@ -4280,6 +4287,9 @@ pub(super) fn tick_ground_spell_actions(
                     | Spell::PoisonCloud
                     | Spell::ExplosiveTrap
             ) {
+                // Ground-spell ticks are deferred past the cast scope; re-establish the magic
+                // DefenceType so each hit subtracts the target's MAC armour.
+                let previous_ground_defence = set_cast_defence(world, Some(CrystalDefence::Mac));
                 for location in &action.locations {
                     for target_entity in hostile_monsters_at_position(world, location) {
                         if let Some(packet) =
@@ -4309,6 +4319,7 @@ pub(super) fn tick_ground_spell_actions(
                         }
                     }
                 }
+                set_cast_defence(world, previous_ground_defence);
             }
             if detonated_trap {
                 continue;
@@ -6913,6 +6924,24 @@ fn crystal_channel_stats(channel: CrystalDamageChannel) -> (u8, u8) {
     }
 }
 
+/// The Crystal `DefenceType` a spell's damage rolls against, deciding which target armour stat
+/// (AC vs MAC) is subtracted and whether an agility dodge applies. Wizard/Taoist/Archer offensive
+/// magic and the MAC-routed warrior skills use MAC; a handful of assassin/warrior skills use AC;
+/// the HalfMoon family is pure agility dodge; control/knockback/poison spells bypass armour.
+pub(super) fn crystal_spell_defence(spell: &str) -> CrystalDefence {
+    match spell {
+        "FlamingSword" | "SlashingBurst" | "CrescentSlash" | "FlashDash" | "CatTongue"
+        | "MoonMist" => CrystalDefence::Ac,
+        "DoubleSlash" | "Thrusting" | "HalfMoon" | "CrossHalfMoon" | "TwinDrakeBlade" => {
+            CrystalDefence::Agility
+        }
+        "TurnUndead" | "ElectricShock" | "Repulsion" | "EnergyRepulsor" | "FireBurst"
+        | "Poisoning" | "Plague" | "Curse" | "ShoulderDash" | "PoisonSword" => CrystalDefence::None,
+        // Wizard/Taoist/Archer magic + BladeAvalanche/HeavenlySword all roll against MAC.
+        _ => CrystalDefence::Mac,
+    }
+}
+
 fn crystal_spell_salt(spell: &str) -> u64 {
     spell
         .bytes()
@@ -7451,5 +7480,38 @@ mod crystal_damage_formula_tests {
         assert_eq!(crystal_range_min_after_falloff(90, 4), 40);
         // Range above the cap is clamped (no negative penalty / over-damage).
         assert_eq!(crystal_range_min_after_falloff(90, 50), 90);
+    }
+
+    #[test]
+    fn armour_subtracts_and_floors_at_zero() {
+        use crate::runtime::combat::crystal_armour_reduced_damage;
+        // Crystal net = max(0, damage - armour); armour >= damage is a 0-damage miss.
+        assert_eq!(crystal_armour_reduced_damage(100, 30), 70);
+        assert_eq!(crystal_armour_reduced_damage(30, 100), 0);
+        assert_eq!(crystal_armour_reduced_damage(50, 50), 0);
+        // Negative armour is clamped to 0 (never amplifies damage).
+        assert_eq!(crystal_armour_reduced_damage(50, -5), 50);
+    }
+
+    #[test]
+    fn spell_defence_matches_crystal_defence_types() {
+        use crate::runtime::combat::CrystalDefence;
+        // Wizard/Taoist/Archer magic + MAC-routed warrior skills roll against MAC.
+        for spell in ["FireBall", "Lightning", "SoulFireBall", "BladeAvalanche", "StraightShot"] {
+            assert_eq!(crystal_spell_defence(spell), CrystalDefence::Mac, "{spell}");
+        }
+        // Physical skills roll against AC (no agility dodge).
+        for spell in ["CrescentSlash", "FlashDash", "CatTongue", "MoonMist", "FlamingSword"] {
+            assert_eq!(crystal_spell_defence(spell), CrystalDefence::Ac, "{spell}");
+        }
+        // HalfMoon family is pure agility dodge (no armour).
+        for spell in ["HalfMoon", "CrossHalfMoon", "DoubleSlash", "Thrusting", "TwinDrakeBlade"] {
+            assert_eq!(crystal_spell_defence(spell), CrystalDefence::Agility, "{spell}");
+            assert!(crystal_spell_defence(spell).uses_agility_dodge());
+        }
+        // Control / knockback / poison-application spells bypass armour and dodge.
+        for spell in ["Curse", "Repulsion", "Poisoning", "ShoulderDash"] {
+            assert_eq!(crystal_spell_defence(spell), CrystalDefence::None, "{spell}");
+        }
     }
 }
