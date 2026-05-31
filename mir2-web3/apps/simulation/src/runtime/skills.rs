@@ -5587,7 +5587,7 @@ fn apply_crystal_double_slash_spell(
                 name: target_name,
             }),
             None,
-            super::combat_engine::DefenceType::AC,
+            super::combat_engine::DefenceType::Agility,
         );
     }
     Vec::new()
@@ -5632,7 +5632,7 @@ fn apply_crystal_twin_drake_blade_spell(
             name: target_name.clone(),
         }),
         None,
-        super::combat_engine::DefenceType::AC,
+        super::combat_engine::DefenceType::Agility,
     );
     schedule_player_magic_on_monster(
         world,
@@ -5645,7 +5645,7 @@ fn apply_crystal_twin_drake_blade_spell(
             name: target_name,
         }),
         None,
-        super::combat_engine::DefenceType::AC,
+        super::combat_engine::DefenceType::Agility,
     );
     let stun_due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(400));
     let duration_ticks = combat_delay_ticks(

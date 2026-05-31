@@ -1137,19 +1137,20 @@ pub(super) fn schedule_player_magic_on_monster(
 /// physical skills and a few hybrids use `AC` / `Agility`.
 pub(super) fn crystal_spell_defence_type(spell: Spell) -> DefenceType {
     match spell {
-        // Warrior weapon skills land as physical blows.
+        // Warrior weapon skills are dodged by agility in Crystal (`MagicAttack`
+        // resolves these with `DefenceType.Agility`).
         Spell::Slaying
         | Spell::DoubleSlash
         | Spell::Thrusting
         | Spell::HalfMoon
         | Spell::CrossHalfMoon
-        | Spell::FlamingSword
-        | Spell::TwinDrakeBlade
-        | Spell::FlashDash
+        | Spell::TwinDrakeBlade => DefenceType::Agility,
+        // A few weapon / assassin skills land against physical armour, and the
+        // archer bow shots resolve as physical (AC) blows.
+        Spell::FlamingSword
         | Spell::CrescentSlash
-        | Spell::BladeAvalanche
         | Spell::SlashingBurst
-        // Archer bow shots resolve as physical (AC) blows in Crystal.
+        | Spell::FlashDash
         | Spell::StraightShot
         | Spell::DoubleShot
         | Spell::ExplosiveTrap
