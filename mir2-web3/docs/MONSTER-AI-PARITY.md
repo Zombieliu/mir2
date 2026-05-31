@@ -130,6 +130,15 @@ do not emit attack packets at the player, matching AI 42. Test:
 buff-emission Crystal does in `ProcessTarget`/`CompleteAttack` is a separate
 gap noted for future work — both AIs only become immobile here.)
 
+### AIs 24, 25 — DigOutZombie + RevivingZombie DC damage parity ✅
+Crystal `DigOutZombie` and `RevivingZombie` both have *no `Attack()`
+override* — once visible/revived they fall through to base
+`MonsterObject.Attack()`, which uses `GetAttackPower(MinDC, MaxDC)`. The
+runtime had bespoke hooks for the visibility/revival state machines, but
+the damage path went through `monster_player_attack_damage` → default 7.
+Added `24 | 25 => crystal_monster_attack_damage(monster_name)` to use
+imported DC. (Visibility/revival hooks unchanged.)
+
 ### AI 116 BlackHammerCat — DC/MC damage + line splash ✅
 Crystal `BlackHammerCat.Attack` is BlackFoxman-shaped: adjacent + 2/3 chance
 → Type 0 + `GetAttackPower(MinDC, MaxDC)` (DC). Otherwise → Type 1 +
