@@ -81,6 +81,10 @@ pub(super) struct ItemState {
     pub(super) added_defence: i32,
     #[serde(default)]
     pub(super) added_stats: Vec<UserItemStat>,
+    /// Socket items (Crystal `ItemType.Socket`) inserted into this item's
+    /// slots; their stats contribute while the item is worn.
+    #[serde(default)]
+    pub(super) socketed: Vec<ItemState>,
     #[serde(default)]
     pub(super) cursed: bool,
     #[serde(default)]
@@ -532,6 +536,7 @@ pub(super) fn crystal_equipment_added_stat_total(resources: &InventoryResource, 
                 .filter(|entry| entry.stat == stat)
                 .map(|entry| entry.value)
                 .sum::<i32>()
+                + item.socketed_added_stat(stat)
         })
         .sum()
 }
@@ -2056,6 +2061,14 @@ pub(super) fn crystal_item_template_for_item_key(key: &str) -> Option<CrystalIte
         return Some(template);
     }
     crystal_item_name_for_item_key(key).and_then(crystal_item_by_name)
+}
+
+/// Whether an item is a Crystal `ItemType.Socket` insert (the gem that goes into
+/// an item's socket via `EquipSlotItem`).
+pub(super) fn item_is_socket_type(item: &ItemState) -> bool {
+    crystal_item_template_for_item_key(&item.key)
+        .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_SOCKET)
+        .unwrap_or(false)
 }
 
 pub(super) fn crystal_item_template_for_dynamic_key(key: &str) -> Option<CrystalItemTemplate> {
