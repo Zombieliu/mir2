@@ -4705,6 +4705,34 @@ fn data_only_caster_families_resolve_against_mac() {
 }
 
 #[test]
+fn spawned_caster_defence_typing_matches_crystal() {
+    // Spawned/playable families whose primary hit is magic-typed in Crystal (verified against source):
+    //  - WoomaTaurus (11) via FlamingWooma, MinotaurKing (33) via RightGuard: MACAgility/MAC at every
+    //    range -> always magic.
+    //  - DarkDevil (20), ManectricClaw (86), FrozenMagician (189): physical melee (base.Attack /
+    //    ACAgility) + magic ranged AoE (MAC*) -> magic only at distance > 1.
+    let near = Point { x: 30, y: 30 };
+    let far = Point { x: 30, y: 36 };
+    for ai in [11u8, 33] {
+        assert!(
+            super::monster_attack_uses_magic_defence(ai, &near, &near)
+                && super::monster_attack_uses_magic_defence(ai, &near, &far),
+            "ai {ai} (RightGuard/FlamingWooma) resolves against MAC at every range"
+        );
+    }
+    for ai in [20u8, 86, 189] {
+        assert!(
+            !super::monster_attack_uses_magic_defence(ai, &near, &near),
+            "ai {ai} melee is physical (base.Attack ACAgility)"
+        );
+        assert!(
+            super::monster_attack_uses_magic_defence(ai, &near, &far),
+            "ai {ai} ranged AoE is magic (MAC*)"
+        );
+    }
+}
+
+#[test]
 fn mutated_manworm_blinks_with_effect_four_when_struck_hard() {
     // MutatedManworm (ai 65) shares SnowWolfKing's FindWeakerTarget blink, but with teleport effect 4
     // instead of 11. A blow heavier than its own DC (28-55) gives a 50% chance to blink toward the
