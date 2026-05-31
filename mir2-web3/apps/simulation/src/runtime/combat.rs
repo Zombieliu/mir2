@@ -397,7 +397,7 @@ fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick:
     }
 }
 
-fn crystal_magic_damage_from_base(
+pub(crate) fn crystal_magic_damage_from_base(
     magic: &CrystalMagicTemplate,
     level: u8,
     base_damage: i32,
