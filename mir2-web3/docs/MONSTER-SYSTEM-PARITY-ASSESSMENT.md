@@ -4,13 +4,13 @@ _Last updated: 2026-05-31. Scope: `apps/simulation/src/runtime/{monster_ai,monst
 
 ## TL;DR — the monster AI module is far more complete than earlier audits claimed
 
-A prior gap note estimated monster AI at "~16–20% (绝大多数怪走同一套通用状态机)". A direct file-by-file comparison against the Crystal source (submodule pulled, 212 monster subclasses) does **not** support that number. Coming into this session the monster-AI module was already ~78–85% complete for the **87 spawned AI families** (the families the stock respawn manifests actually place on maps); the session's fixes — notably correcting the base `MonsterObject` damage (it was a flat 7), adding `GetAttackPower` variance, regen, and several per-family behaviours — bring it to roughly **88–91%**. The remaining work is the special-attack-branch variance, a few complex boss mechanics, and combat-module fidelity (MAC mitigation).
+A prior gap note estimated monster AI at "~16–20% (绝大多数怪走同一套通用状态机)". A direct file-by-file comparison against the Crystal source (submodule pulled, 212 monster subclasses) does **not** support that number. Coming into this session the monster-AI module was already ~78–85% complete for the **87 spawned AI families** (the families the stock respawn manifests actually place on maps); the session's fixes — notably correcting the base `MonsterObject` damage (it was a flat 7), adding `GetAttackPower` variance, regen, and several per-family behaviours — bring it to roughly **91–93%** for the spawned, playable roster. The remaining work is the special-attack-branch variance, a few complex boss mechanics, and combat-module fidelity (MAC mitigation).
 
 Two completeness lenses, kept separate on purpose:
 
 | Lens | Estimate | Notes |
 | --- | --- | --- |
-| Spawned families (87 of 212) — playable content | ~88–91% | Deep per-family handling; base damage + variance now corrected |
+| Spawned families (87 of 212) — playable content | ~91–93% | Deep per-family handling; base damage + variance now corrected |
 | All 212 Crystal monster classes | ~42% | 117 "data-only" classes are defined but never placed by stock respawns (no gameplay impact until spawned by GM/quests/custom content) |
 
 ## What is already implemented faithfully (verified against Crystal source)
@@ -28,9 +28,10 @@ Two completeness lenses, kept separate on purpose:
 ## Changes made this session
 
 All landed with deterministic tests and verified against the CI-style suite
-(`cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`): the
-pre-existing flaky baseline stayed at 70 failures with **zero new failures** and
-+8 new passing tests.
+(`cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`): every
+change was diffed against the clean baseline (`833 passed; 70 failed`) and added
+**zero new failures** plus 13 new passing tests, while repairing one pre-existing
+failure (`armadillo_type_one_branch_uses_three_half_dc_hits`).
 
 1. **Monster HP regeneration (`ProcessRegen`)** — living, damaged monsters recover `≈2.2%·MaxHP + 1` every 10 ticks (Crystal `RegenDelay`), object-id phased. Non-combat props and training dummies excluded. `combat.rs::tick_monster_regen`.
 2. **`PoisonStopRegen`** — a monster with an active green/bleeding poison no longer regenerates (Crystal's default for every monster bar the training dummy).
@@ -39,13 +40,18 @@ pre-existing flaky baseline stayed at 70 failures with **zero new failures** and
 5. **SpittingSpider green poison-on-hit** — `PoisonTarget(8, 5, Green)` was missing.
 6. **RevivingZombie** — `LifeCount` is now a per-zombie `Random.Next(3)` (0–2 revivals, ~1/3 stay dead) on a randomised 4–24 s `RevivalTime`, instead of a guaranteed two revivals on a fixed 4 s timer.
 7. **WaterDragon (ai 181)** — routed through the shared EvilCentipede ambush cycle (invisible until a target is within 3 tiles, HP restored while buried); 425 spawned ambushers previously stood permanently visible.
+8. **Magic vs physical mitigation (MAC)** — `monster_attack_uses_magic_defence` captures, per AI family (extracted from every subclass's `Attack()` `DefenceType` across the whole roster), whether the hit resolves against magic armour; such attacks now subtract the player's `MaxMAC` instead of physical AC. A high-MAC caster shrugs off magic monsters, a high-AC warrior shrugs off physical ones.
+9. **ShockTime** — confirmed already implemented: `ElectricShock` (the Taoist taming skill's shock path) freezes a lower-level hostile for `(level*5+10)` s — dropping its target and gating attack/move. Exposed and covered with a deterministic test; the earlier "stub" was only an unused packet field.
+10. **YinDevilNode (ai 42) DC aura** — pulses an `UltimateEnhancer` (+`Level/7+4` DC, 5 s) onto every friendly monster within 7 tiles via a new `MonsterDamageBuff` folded into the attacker's rolled damage; previously inert.
+11. **SnowWolfKing (ai 180) FindWeakerTarget** — surviving a blow heavier than its own DC, the king blinks (effect 11) toward the player 50 % of the time, reusing the foxman destination search.
+12. **HellLord (ai 98) SpawnQuakes** — scatters a `MapQuake` cluster within 4 tiles of the player each pulse; a new `damages_player` ground-hazard path damages whoever stands on an erupting tile (reusing the fire-wall/poison-cloud pipeline).
+13. **Data-only families functional** — the ~100 monster classes the stock respawns never place now resolve their physical/magic defence correctly (MAC table covers the full roster) and behave as combat monsters through the generic AI (verified with a spawned `EvilMir`).
 
-## Genuine remaining gaps (to reach ≥90% on spawned families)
+## Genuine remaining gaps
 
-- **Magic vs physical mitigation** — all monster damage is mitigated by player AC (`total_defence_bonus`); magic-typed monster attacks (`DefenceType.MAC*`) should use player MAC. Combat-module-adjacent.
-- **`ShockTime`** — the player-skill-induced "stop attacking / drop target" timer is a stub (`shock_time = 0`).
-- **Complex boss mechanics (1–2 entities each, need new infra)** — HellLord `SpawnQuakes` (player-damaging ground hazards), SnowWolfKing `FindWeakerTarget` teleport-on-hit, YinDevilNode friendly-DC buff aura.
-- **Data-only families (117)** — AI exists in Crystal but the families are never placed by stock respawns; no gameplay impact until spawned.
+- **Distinctive moves of the data-only long tail** — the ~100 never-spawned classes (EvilMir's body-part phases, the Flame/Oma/Horned/Furbolg/Sep PvP-clone families, …) work as basic combat monsters but their bespoke AoE patterns, summons and phase logic are not individually ported. Porting all of them is a multi-week effort with no stock-content impact (they are not placed by any respawn).
+- **Special-attack-branch MAC** — the ~22 boss special-attack branches still mitigate with AC; only the base attack path is MAC-aware so far.
+- **Monster slow/frozen/red-poison receipt** — a monster hit by a player slow/frozen/red poison does not yet change its own MoveSpeed/AttackSpeed or damage-taken (`MonsterPoisonState` models green DOT only).
 
 ## Note on the automated audit
 
@@ -60,4 +66,4 @@ against the Crystal source before any change.
 
 ## Test-harness note (pre-existing, not introduced here)
 
-The simulation suite must be run as CI runs it: `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`. On this checkout the suite has ~70 pre-existing failures that are **flaky / order- and wall-clock-sensitive** (e.g. `current_wall_time_ms()` gating, absolute-tick-phase attack branches such as `tick % 6 == 1`, and high-level monsters dealing always-max damage that kills the low-HP default character faster than a test expects). A clean-tree run measured `833 passed; 70 failed`. Every change in this session was diffed against that baseline: the final state is `841 passed; 69 failed` — **zero** new failures, **+8** new passing tests, and one pre-existing failure repaired (`armadillo_type_one_branch_uses_three_half_dc_hits`, where the rolled hits now leave the player alive for all three strikes). Each fix is validated with deterministic, self-contained tests rather than relying on the flaky full-suite baseline.
+The simulation suite must be run as CI runs it: `cargo +1.89.0 test --locked -p mir2-simulation -- --test-threads=1`. On this checkout the suite has ~70 pre-existing failures that are **flaky / order- and wall-clock-sensitive** (e.g. `current_wall_time_ms()` gating, absolute-tick-phase attack branches such as `tick % 6 == 1`, and high-level monsters dealing always-max damage that kills the low-HP default character faster than a test expects). A clean-tree run measured `833 passed; 70 failed`. Every change in this session was diffed against that baseline: the final state is `847 passed; 69 failed` — **zero** new failures, **+13** new passing tests, and one pre-existing failure repaired (`armadillo_type_one_branch_uses_three_half_dc_hits`, where the rolled hits now leave the player alive for all three strikes). Each fix is validated with deterministic, self-contained tests rather than relying on the flaky full-suite baseline.

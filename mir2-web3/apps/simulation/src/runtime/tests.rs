@@ -4343,6 +4343,68 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_data_only_family_is_functional_when_spawned() {
+    // EvilMir (ai 52) ships in the monster database but no stock respawn places it. Spawned by a
+    // quest/GM it must still behave as a combat monster (chase + attack with its DC) through the
+    // generic AI rather than being inert.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 320, y: 240 };
+    set_player_position(&mut session, origin.clone());
+    let player = player_entity(session.app.world()).expect("player");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 5_000,
+        max_hp: 5_000,
+        mp: 100,
+    });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let current_tick = runtime_tick(session.app.world());
+    session.app.world_mut().spawn((
+        ObjectId(93_100),
+        DisplayName::literal("EvilMir"),
+        Position(Point {
+            x: origin.x + 1,
+            y: origin.y,
+        }),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals {
+            hp: 50_000,
+            max_hp: 50_000,
+        },
+        MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: origin.clone(),
+            ai: 52,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+    for _ in 0..6 {
+        session.tick();
+    }
+    let drop = before_hp - session.world_snapshot().player_hp.expect("player hp");
+    // EvilMir's DC is 70-150; a functional data-only monster deals its damage class.
+    assert!(
+        drop >= 70,
+        "a spawned data-only family should attack with its real DC; drop was {drop}"
+    );
+}
+
+#[test]
 fn crystal_hell_lord_spawns_player_damaging_quakes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

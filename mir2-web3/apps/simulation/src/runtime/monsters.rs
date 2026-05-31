@@ -2071,11 +2071,15 @@ pub(super) fn monster_attack_delay_ticks(
 /// subclass's `Attack()`/range-attack `DefenceType`).
 pub(super) fn monster_attack_uses_magic_defence(ai: u8, source: &Point, target: &Point) -> bool {
     match ai {
-        // Normal attack always carries a MAC* defence type.
-        7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 102 | 120
-        | 122 => true,
-        // Physical in melee, magic at range (KingScorpion, CrystalSpider, ThunderElement bolt).
-        19 | 37 | 49 => tile_distance(source, target) > 1,
+        // Normal attack always carries a MAC* defence type (full Crystal roster, extracted from each
+        // subclass's Attack() override — covers spawned and data-only families alike).
+        7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 52 | 55 | 61
+        | 63 | 73 | 75 | 87 | 92 | 94 | 100 | 102 | 103 | 107 | 108 | 110 | 120 | 122 | 135 | 136
+        | 140 | 142 | 152 | 160 | 210 | 215 | 216 => true,
+        // Physical in melee, magic at range (the Attack() mixes ACAgility and MAC*).
+        19 | 34 | 37 | 43 | 49 | 67 | 72 | 85 | 91 | 105 | 115 | 118 | 121 | 123 | 129 | 130 | 131
+        | 137 | 141 | 143 | 144 | 147 | 148 | 150 | 153 | 155 | 156 | 159 | 162 | 163 | 167 | 178
+        | 181 | 182 | 196 | 200 | 212 | 223 => tile_distance(source, target) > 1,
         _ => false,
     }
 }
