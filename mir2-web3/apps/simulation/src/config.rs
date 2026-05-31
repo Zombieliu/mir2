@@ -1794,6 +1794,115 @@ mod tests {
     }
 
     #[test]
+    fn postgres_projection_drops_deleted_character_rows() {
+        let Some(database_url) = postgres_test_url() else {
+            eprintln!("skipping postgres deleted-character projection test (Postgres unavailable)");
+            return;
+        };
+        let (account_id, mut store) = unique_account_store("projection-delete");
+        cleanup_postgres_account(&database_url, &account_id);
+        let owner_name = store.accounts[&account_id].characters[0].name.clone();
+        projection_sample_save(
+            store
+                .accounts
+                .get_mut(&account_id)
+                .and_then(|account| account.saves.get_mut(&0))
+                .expect("test save should exist"),
+            &owner_name,
+        );
+        // Add a second character so the account is not emptied by the delete.
+        {
+            let account = store.accounts.get_mut(&account_id).expect("account");
+            let mut second = CharacterRecord {
+                index: 1,
+                name: format!("{owner_name}-2"),
+                level: 1,
+                class: MirClass::Taoist,
+                gender: MirGender::Male,
+            };
+            second.index = 1;
+            account.characters.push(second.clone());
+            account.saves.insert(1, CharacterSaveRecord::new(second));
+        }
+
+        let versions = save_account_store_to_postgres(
+            database_url.clone(),
+            store.clone(),
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("initial source write should succeed");
+
+        let mut client = Client::connect(&database_url, NoTls).expect("connect to assert");
+        let before: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_state WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("state count")
+            .get(0);
+        assert_eq!(before, 2);
+
+        // Delete character 0 (with all its items/mail/auctions) and re-save.
+        let mut pruned = store.with_source_versions(versions);
+        {
+            let account = pruned.accounts.get_mut(&account_id).expect("account");
+            account.characters.retain(|character| character.index != 0);
+            account.saves.remove(&0);
+        }
+        save_account_store_to_postgres(
+            database_url.clone(),
+            pruned,
+            AccountStoreDatabaseMode::SourceOfTruth,
+        )
+        .expect("prune source write should succeed");
+
+        let after_state: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_state WHERE account_id = $1",
+                &[&account_id],
+            )
+            .expect("state count")
+            .get(0);
+        assert_eq!(
+            after_state, 1,
+            "deleted character must drop its character_state row"
+        );
+        let after_items: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_items WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("item count")
+            .get(0);
+        assert_eq!(after_items, 0, "deleted character must drop its item rows");
+        let after_auctions: i64 = client
+            .query_one(
+                "SELECT count(*) FROM auction_listings \
+                 WHERE seller_account_id = $1 AND seller_character_index = 0",
+                &[&account_id],
+            )
+            .expect("auction count")
+            .get(0);
+        assert_eq!(
+            after_auctions, 0,
+            "deleted character must drop its auction rows"
+        );
+        let saves: i64 = client
+            .query_one(
+                "SELECT count(*) FROM character_saves WHERE account_id = $1 AND character_index = 0",
+                &[&account_id],
+            )
+            .expect("save count")
+            .get(0);
+        assert_eq!(
+            saves, 0,
+            "deleted character must drop its character_saves mirror row"
+        );
+
+        cleanup_postgres_account(&database_url, &account_id);
+    }
+
+    #[test]
     fn postgres_source_mode_reload_can_save_after_version_refresh() {
         let Some(database_url) = postgres_test_url() else {
             eprintln!("skipping postgres source-mode reload test because Postgres is unavailable");
@@ -2572,6 +2681,23 @@ fn upsert_account_store_to_postgres(
                 .or_default()
                 .insert(*character_index, save_version);
         }
+        // Reconcile deleted characters: the authoritative reload is driven by
+        // accounts.raw_json, so any character_saves / projection rows for indices
+        // no longer present are ghosts that would otherwise inflate aggregates.
+        let present_indices: Vec<i32> = account.saves.keys().copied().collect();
+        transaction
+            .execute(
+                "DELETE FROM character_saves WHERE account_id = $1 AND character_index <> ALL($2)",
+                &[&account_id, &present_indices],
+            )
+            .map_err(|error| {
+                format!("postgres orphan character_saves cleanup failed for {account_id}: {error}")
+            })?;
+        crate::db_projection::retain_character_projections(
+            &mut transaction,
+            account_id,
+            &present_indices,
+        )?;
     }
     transaction
         .commit()

@@ -623,6 +623,39 @@ pub fn write_character_projection(
     Ok(())
 }
 
+/// Delete projection rows for characters of an account that no longer exist
+/// (e.g. after a character delete). `present_indices` are the character indices
+/// still owned by the account; rows for any other index are removed so derived
+/// aggregates (economy totals, item-holder counts) never include ghosts.
+///
+/// An empty `present_indices` removes all projection rows for the account, which
+/// is correct for an account with no characters.
+pub fn retain_character_projections(
+    tx: &mut Transaction<'_>,
+    account_id: &str,
+    present_indices: &[i32],
+) -> Result<(), String> {
+    for table in [
+        "character_items",
+        "character_mail",
+        "character_npc_state",
+        "character_state",
+    ] {
+        tx.execute(
+            &format!("DELETE FROM {table} WHERE account_id = $1 AND character_index <> ALL($2)"),
+            &[&account_id, &present_indices],
+        )
+        .map_err(|error| format!("projection retain {table} failed: {error}"))?;
+    }
+    tx.execute(
+        "DELETE FROM auction_listings \
+         WHERE seller_account_id = $1 AND seller_character_index <> ALL($2)",
+        &[&account_id, &present_indices],
+    )
+    .map_err(|error| format!("projection retain auction_listings failed: {error}"))?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
