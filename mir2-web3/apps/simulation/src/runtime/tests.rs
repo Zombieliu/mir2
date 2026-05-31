@@ -39968,6 +39968,7 @@ fn magic_packet_crystal_binding_shot_queues_center_visual_and_roots_nearby_monst
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 5, 2, 2, 3);
     set_player_position(&mut session, origin.clone());
@@ -40229,6 +40230,7 @@ fn magic_packet_crystal_cripple_shot_consumes_poison_buff_and_spreads_green_pois
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::Amulet);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 7, 2, 2, 2);
     set_player_position(&mut session, origin.clone());
@@ -43450,6 +43452,7 @@ fn magic_packet_crystal_delayed_explosion_marks_explodes_and_removes_marker() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 6, 2, 2, 3);
     set_player_position(&mut session, origin.clone());
@@ -43571,6 +43574,7 @@ fn magic_packet_crystal_trap_roots_lower_level_monster_and_spawns_trap_object() 
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 5, 2, 2, 2);
     set_player_position(&mut session, origin.clone());
@@ -44162,6 +44166,7 @@ fn magic_packet_crystal_explosive_trap_spawns_front_row_and_detonates_on_contact
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
+    equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 3, 2, 3, 2);
     set_player_position(&mut session, origin.clone());
