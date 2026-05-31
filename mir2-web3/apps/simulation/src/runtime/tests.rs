@@ -6,14 +6,15 @@ use super::{
     current_location, current_player_object_id, entity_by_object_id, entity_facing,
     entity_object_id, entity_position, equipment_slot_from_index, equipment_slot_index,
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
-    initial_yimoogi_state, is_static_spawnable_point, mark_crystal_packet_action, offset_point,
-    player_entity, point_in_data_range, respawn_tick_for_schedule, runtime_tick,
+    initial_yimoogi_state, is_safe_zone_point, is_static_spawnable_point, mark_crystal_packet_action,
+    offset_point, player_entity, point_in_data_range, respawn_tick_for_schedule, runtime_tick,
     set_crystal_npc_flag, spawn_positions_for_rule, spawn_runtime_monster,
     start_game_visible_respawn_spawns, tile_distance, BuffResource, BuffState,
     CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing, FishingResource,
     HarvestMonsterState, InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState,
     MonsterCombatStats, MonsterPoisonState, MonsterRespawnSchedule, MonsterSpawnRule,
-    MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, MountResource, NpcInteractionContext,
+    MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, MapRuntimeResource, MountResource,
+    NpcInteractionContext,
     NpcStateResource, ObjectId, PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource,
     PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
     SessionResource, SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource,
@@ -963,6 +964,17 @@ fn set_player_position(session: &mut SimulationSession, position: Point) {
         .world_mut()
         .entity_mut(player)
         .insert(Position(position));
+}
+
+/// True when `point` is a valid offensive-combat tile: not inside a safe zone.
+/// Offensive magic preflight (`crystal_magic_point_in_safe_zone`) rejects casts
+/// from or onto safe-zone tiles, so combat tests must place the caster and
+/// targets outside the Bichon town/manifest safe zones.
+fn is_combat_position(session: &SimulationSession, point: &Point) -> bool {
+    let world = session.app.world();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let map = world.resource::<MapRuntimeResource>();
+    !is_safe_zone_point(config, map, point)
 }
 
 fn set_current_player_hp(session: &mut SimulationSession, hp: i32) {
@@ -39490,12 +39502,11 @@ fn magic_packet_crystal_lightning_scans_six_tiles_in_facing_line() {
             let near = offset_point(&candidate, MirDirection::Right, 1);
             let far = offset_point(&candidate, MirDirection::Right, 3);
             (can_occupy(session.app.world(), candidate.clone(), Some(player))
+                && is_combat_position(&session, &candidate)
                 && (1..=6).all(|distance| {
-                    can_occupy(
-                        session.app.world(),
-                        offset_point(&candidate, MirDirection::Right, distance),
-                        None,
-                    )
+                    let tile = offset_point(&candidate, MirDirection::Right, distance);
+                    can_occupy(session.app.world(), tile.clone(), None)
+                        && is_combat_position(&session, &tile)
                 }))
             .then_some((candidate, near, far))
         })
