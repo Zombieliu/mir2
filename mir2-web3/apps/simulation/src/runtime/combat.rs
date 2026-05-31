@@ -30,7 +30,8 @@ use super::monsters::{
     crystal_respawn_template_from_monster, deterministic_roll, ignores_monster_damage,
     is_hidden_or_sleeping_target, monster_ignores_damage, monster_is_damageable,
     monster_is_stoned_zuma, monster_locks_player_target_on_hit, monster_melee_attack_packet,
-    queue_pending_monster_spawn, schedule_monster_respawn, PendingMonsterSpawnAction,
+    queue_pending_monster_spawn, reviving_zombie_life_count, reviving_zombie_revive_delay_ticks,
+    schedule_monster_respawn, PendingMonsterSpawnAction,
 };
 use super::movement::{
     current_location, current_movement, direction_toward, directional_destination, offset_point,
@@ -1764,11 +1765,15 @@ pub(super) fn damage_monster_entity(
         if let Some(spawn_ref) = spawn_ref {
             schedule_monster_respawn(world, spawn_ref, current_tick);
         }
-        if dead_ai == 25 && ai_state.extra_byte < REVIVING_ZOMBIE_MAX_REVIVALS {
-            let mut revival_state = ai_state;
-            revival_state.mode = true;
-            revival_state.next_state_tick = current_tick + REVIVING_ZOMBIE_REVIVE_DELAY_TICKS;
-            world.entity_mut(monster_entity).insert(revival_state);
+        if dead_ai == 25 {
+            let object_id = entity_object_id(world, monster_entity).unwrap_or_default();
+            if ai_state.extra_byte < reviving_zombie_life_count(object_id) {
+                let mut revival_state = ai_state;
+                revival_state.mode = true;
+                revival_state.next_state_tick =
+                    current_tick + reviving_zombie_revive_delay_ticks(object_id, current_tick);
+                world.entity_mut(monster_entity).insert(revival_state);
+            }
         }
     }
 

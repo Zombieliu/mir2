@@ -8,7 +8,8 @@ use super::{
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
     initial_yimoogi_state, is_static_spawnable_point, mark_crystal_packet_action, offset_point,
     player_entity, point_in_data_range, respawn_tick_for_schedule, runtime_tick,
-    set_crystal_npc_flag, spawn_positions_for_rule, spawn_runtime_monster,
+    reviving_zombie_life_count, reviving_zombie_revive_delay_ticks, set_crystal_npc_flag,
+    spawn_positions_for_rule, spawn_runtime_monster,
     start_game_visible_respawn_spawns, tile_distance, BuffResource, BuffState,
     CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing, FishingResource,
     HarvestMonsterState, InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState,
@@ -4292,6 +4293,31 @@ fn crystal_unhandled_family_deals_real_damage_class_not_flat_seven() {
 }
 
 #[test]
+fn crystal_reviving_zombie_life_count_is_randomised_zero_to_two() {
+    // Crystal rolls LifeCount = Random.Next(3); the port previously hard-coded two revivals.
+    let mut counts = [0usize; 3];
+    for object_id in 90_000u32..90_600 {
+        let lives = reviving_zombie_life_count(object_id);
+        assert!(lives <= 2, "life count must be 0..=2, got {lives}");
+        counts[lives as usize] += 1;
+
+        // Revival delay is (4 + Random.Next(20)) seconds -> 4..=23 ticks.
+        for tick in [0u64, 7, 41, 5_000] {
+            let delay = reviving_zombie_revive_delay_ticks(object_id, tick);
+            assert!(
+                (4..=23).contains(&delay),
+                "revive delay must be 4..=23 ticks, got {delay}"
+            );
+        }
+    }
+    // Every bucket should be populated, proving the count is no longer a constant 2.
+    assert!(
+        counts[0] > 0 && counts[1] > 0 && counts[2] > 0,
+        "life counts should span 0, 1 and 2 across zombies: {counts:?}"
+    );
+}
+
+#[test]
 fn crystal_attack_packet_targets_adjacent_tile_in_direction() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -5438,7 +5464,9 @@ fn reviving_zombie_revives_twice_with_reduced_health() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let player_origin = Point { x: 900, y: 900 };
-    let zombie_object_id = 98_952_u32;
+    // Object id chosen so the (now randomised) LifeCount roll yields the maximum of two revivals,
+    // exercising the 75%/50% reduced-health revival path.
+    let zombie_object_id = 98_902_u32;
     set_player_position(&mut session, player_origin.clone());
     let zombie = spawn_crystal_monster_for_test(
         &mut session,
@@ -5474,7 +5502,8 @@ fn reviving_zombie_revives_twice_with_reduced_health() {
         assert!(packet_has_object_died(&death_packets, zombie_object_id));
 
         let mut revive_packets = Vec::new();
-        for _ in 0..=super::REVIVING_ZOMBIE_REVIVE_DELAY_TICKS {
+        // The revival delay is now randomised in 4..=23 ticks (Crystal RevivalTime).
+        for _ in 0..25 {
             let packets = session.tick();
             if packets.iter().any(|packet| {
                 matches!(

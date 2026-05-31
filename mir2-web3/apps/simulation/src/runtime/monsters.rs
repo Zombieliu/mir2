@@ -1132,6 +1132,20 @@ pub(super) fn deterministic_roll(
     salt % modulo
 }
 
+/// Crystal `RevivingZombie` rolls `LifeCount = Random.Next(3)` in its constructor — every zombie
+/// gets 0, 1 or 2 revivals, not a guaranteed 2. Keyed by object id so the value is stable for a
+/// given zombie slot.
+pub(super) fn reviving_zombie_life_count(object_id: u32) -> u8 {
+    deterministic_roll(0, object_id as usize, REVIVING_ZOMBIE_LIFECOUNT_SALT, 3) as u8
+}
+
+/// Crystal `RevivingZombie.Die` sets `RevivalTime = (4 + Random.Next(20)) * 1000`, i.e. a 4–23
+/// second wait before the zombie claws back up.
+pub(super) fn reviving_zombie_revive_delay_ticks(object_id: u32, current_tick: u64) -> u64 {
+    REVIVING_ZOMBIE_REVIVE_DELAY_TICKS
+        + deterministic_roll(current_tick, object_id as usize, REVIVING_ZOMBIE_DELAY_SALT, 20)
+}
+
 pub(super) fn crystal_monster_attack_damage(name: &str) -> i32 {
     crystal_monster_by_name(name)
         .map(|monster| monster.max_dc.max(monster.min_dc).max(1))
