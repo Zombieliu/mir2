@@ -131,7 +131,8 @@ impl PlayerStats {
         self.get(CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT).clamp(0, 100)
     }
     pub(super) fn damage_reduction_percent(&self) -> i32 {
-        self.get(CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100)
+        self.get(CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT)
+            .clamp(0, 100)
     }
     pub(super) fn bag_weight(&self) -> i32 {
         self.get(CRYSTAL_STAT_BAG_WEIGHT).max(0)
@@ -566,7 +567,10 @@ fn accumulate_buffs(stats: &mut PlayerStats, buffs: &BuffResource) {
             .filter(|entry| entry.stat == CRYSTAL_STAT_MAX_AC)
             .map(|entry| entry.value)
             .sum::<i32>();
-        stats.add(CRYSTAL_STAT_MAX_DC, buff.attack_bonus.max(attack_from_stats));
+        stats.add(
+            CRYSTAL_STAT_MAX_DC,
+            buff.attack_bonus.max(attack_from_stats),
+        );
         stats.add(
             CRYSTAL_STAT_MAX_AC,
             buff.defence_bonus.max(defence_from_stats),
@@ -594,7 +598,10 @@ fn apply_rate_multipliers(stats: &mut PlayerStats) {
         (CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
         (CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_MC_RATE_PERCENT),
         (CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MAX_SC_RATE_PERCENT),
-        (CRYSTAL_STAT_ATTACK_SPEED, CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT),
+        (
+            CRYSTAL_STAT_ATTACK_SPEED,
+            CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT,
+        ),
     ] {
         let percent = stats.get(rate_stat);
         if percent == 0 {

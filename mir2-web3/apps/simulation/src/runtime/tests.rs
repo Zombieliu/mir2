@@ -103,10 +103,7 @@ fn new_character_success_index(packets: &[ServerPacket]) -> i32 {
 /// outcome use this to keep their bounded attack loops lethal.
 fn ensure_lethal_player_damage(session: &mut SimulationSession) {
     {
-        let mut inventory = session
-            .app
-            .world_mut()
-            .resource_mut::<InventoryResource>();
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         if let Some(weapon) = inventory
             .equipment_items
             .iter_mut()
@@ -53944,10 +53941,7 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
 
 fn equipped_weapon_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
     {
-        let mut inventory = session
-            .app
-            .world_mut()
-            .resource_mut::<InventoryResource>();
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         let weapon = inventory
             .equipment_items
             .iter_mut()
@@ -53960,10 +53954,7 @@ fn equipped_weapon_push_stat(session: &mut SimulationSession, stat: u8, value: i
 
 fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
     {
-        let mut inventory = session
-            .app
-            .world_mut()
-            .resource_mut::<InventoryResource>();
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         let armour = inventory
             .equipment_items
             .iter_mut()
@@ -54216,7 +54207,10 @@ fn magic_resistance_grants_miss_chance_against_incoming_magic() {
             }
         }
     }
-    assert!(misses > 0, "magic resistance should sometimes fully block magic");
+    assert!(
+        misses > 0,
+        "magic resistance should sometimes fully block magic"
+    );
     assert!(hits > 0, "a 2/10 resist must not block every blow");
 }
 
