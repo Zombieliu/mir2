@@ -130,6 +130,19 @@ do not emit attack packets at the player, matching AI 42. Test:
 buff-emission Crystal does in `ProcessTarget`/`CompleteAttack` is a separate
 gap noted for future work — both AIs only become immobile here.)
 
+### AI 31 RightGuard + AI 32 LeftGuard — imported DC damage ✅
+Crystal `RightGuard.Attack` and `LeftGuard.Attack` both compute
+`int damage = GetAttackPower(Stats[Stat.MinDC], Stats[Stat.MaxDC])` for both
+the adjacent ObjectAttack branch and the ranged ObjectRangeAttack branch.
+The Rust runtime had AI 31/32 fully wired for attack range (8), ranged
+preference, ranged delay, and `monster_object_attack_type`, BUT the damage
+arm fell through to the default `7` — so a real Crystal RightGuard
+(min_dc=16, max_dc=39) hit the player for 7 instead of ~39. Added
+`31 | 32 => crystal_monster_attack_damage(monster_name)` to
+`monster_player_attack_damage` to use the imported DC. Test:
+`crystal_ai31_right_guard_uses_imported_dc_damage` (spawns a Crystal
+RightGuard and asserts damage dealt is well above the 7 fallback).
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:

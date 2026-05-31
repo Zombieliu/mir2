@@ -55311,3 +55311,57 @@ fn crystal_ai41_yin_devil_node_is_immobile_like_ai42() {
         );
     }
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 31 `RightGuard` and AI 32 `LeftGuard` — Crystal's
+// `RightGuard.Attack` and `LeftGuard.Attack` both compute
+// `int damage = GetAttackPower(Stats[Stat.MinDC], Stats[Stat.MaxDC])` for both
+// the adjacent ObjectAttack branch and the ranged ObjectRangeAttack branch.
+// Previously the Rust `monster_player_attack_damage` table had no arm for
+// 31/32 and they fell through to the default `7`, so a real RightGuard
+// monster (DC ~16-39) only hit for 7. Added `31 | 32 =>
+// crystal_monster_attack_damage(monster_name)` to use imported DC.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai31_right_guard_uses_imported_dc_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let guard_object_id = 98_931_u32;
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    set_player_position(&mut session, player_origin.clone());
+
+    // Spawn a real Crystal RightGuard (min_dc=16, max_dc=39 — far above the
+    // default-7 fallback) at adjacent range to land a melee hit quickly.
+    let _guard = spawn_crystal_monster_for_test(
+        &mut session,
+        guard_object_id,
+        "RightGuard",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    // Two ticks: tick 1 launches ObjectAttack, tick 2 strikes via the
+    // 300ms scheduled damage (combat_delay_ticks(300) == 1 tick at 1000ms/tick).
+    let _ = session.tick();
+    let _ = session.tick();
+
+    let after_hp = session.world_snapshot().player_hp.expect("player hp");
+    let dealt = before_hp - after_hp;
+    // RightGuard min_dc=16: even with maximum AC mitigation the player should
+    // take noticeably more than the default-7 fallback. Even at AC reduction
+    // we should land > 8 damage.
+    assert!(
+        dealt > 8,
+        "AI-31 RightGuard should hit using imported DC damage (min_dc=16, max_dc=39 in Crystal manifest), got {dealt} from a {before_hp}->{after_hp} delta"
+    );
+}

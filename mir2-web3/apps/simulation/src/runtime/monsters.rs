@@ -2023,6 +2023,9 @@ pub(super) fn monster_player_attack_damage(
         117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage(monster_name),
         117 => crystal_monster_attack_damage(monster_name),
         57 => crystal_monster_attack_damage(monster_name),
+        // Crystal `RightGuard.Attack` / `LeftGuard.Attack`: both
+        // `GetAttackPower(MinDC, MaxDC)` for melee and ranged.
+        31 | 32 => crystal_monster_attack_damage(monster_name),
         _ => 7,
     };
     let mitigation = total_defence_bonus(
