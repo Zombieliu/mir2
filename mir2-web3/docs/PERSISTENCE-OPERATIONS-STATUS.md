@@ -137,9 +137,14 @@ cargo test -p mir2-gateway    --lib zone_lease            # fenced failover leas
 cargo run  -p mir2-admin-api --bin mir2-ops -- status     # applied migrations + row counts
 ```
 
-## Known pre-existing failure (out of scope)
+## Resolved: pre-existing gateway test failure
 
 `mir2-gateway` `routing::tests::shared_zone_state_records_object_monster_spawn_packet`
-fails on a clean tree (monster disposition `Neutral` vs `Hostile`). It is a
-gameplay/AI concern unrelated to persistence/operations and untouched by this
-work.
+previously failed on a clean tree (monster disposition `Neutral` vs `Hostile`).
+Root cause: a stale assertion — the test spawned an `ai = 6` monster but expected
+`Hostile`, contradicting the canonical AI→disposition mapping (`ai = 6` is a
+Crystal *Neutral* AI in both `monster_disposition_for_ai` and the gateway mirror
+`world_entity_disposition_for_monster_ai`, and locked in by
+`world_entity_from_monster_info_preserves_neutral_ai_disposition`). The assertion
+was corrected to `Neutral`. The full `mir2-gateway` lib suite now passes
+(252 passed, 0 failed).
