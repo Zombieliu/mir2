@@ -93,6 +93,22 @@ pub(super) fn find_path(
     })
 }
 
+/// Like [`find_path`] but routes to any walkable tile **adjacent** to `goal`
+/// rather than onto `goal` itself. This is what a monster/hero chasing a player
+/// needs: the target tile is occupied by the player, so we path to a tile next
+/// to them (from which they can attack). The returned path excludes `start` and
+/// ends on the adjacent tile. Returns `Some(vec![])` when already adjacent.
+pub(super) fn find_path_adjacent(
+    world: &World,
+    start: &Point,
+    goal: &Point,
+    ignore_entity: Option<Entity>,
+) -> Option<Vec<Point>> {
+    find_path_adjacent_with(start, goal, |point| {
+        can_occupy(world, point.clone(), ignore_entity)
+    })
+}
+
 /// Pure 8-direction A* core, parameterised over a walkability predicate so it
 /// can be unit-tested without constructing a Bevy `World`. `is_walkable` is
 /// called for the goal tile and every intermediate tile (never for `start`).
@@ -103,15 +119,46 @@ where
     if start == goal {
         return Some(Vec::new());
     }
-    if tile_distance(start, goal) > PATHFIND_MAX_RANGE {
+    if !is_walkable(goal) {
         return None;
     }
-    if !is_walkable(goal) {
+    astar(start, goal, |point| point == goal, &mut is_walkable)
+}
+
+/// Pure adjacency variant: succeeds on reaching any walkable tile within one
+/// Chebyshev tile of `goal`. `goal` itself does not need to be walkable.
+pub(super) fn find_path_adjacent_with<F>(
+    start: &Point,
+    goal: &Point,
+    mut is_walkable: F,
+) -> Option<Vec<Point>>
+where
+    F: FnMut(&Point) -> bool,
+{
+    if tile_distance(start, goal) <= 1 {
+        return Some(Vec::new());
+    }
+    astar(
+        start,
+        goal,
+        |point| tile_distance(point, goal) <= 1,
+        &mut is_walkable,
+    )
+}
+
+/// Shared bounded A* over the 8-connected tile grid. Expands from `start`
+/// toward `goal` (used only by the heuristic) until `is_goal` accepts a tile.
+/// `start` is never passed to `is_walkable`; every other expanded tile is.
+fn astar<G, F>(start: &Point, goal: &Point, mut is_goal: G, is_walkable: &mut F) -> Option<Vec<Point>>
+where
+    G: FnMut(&Point) -> bool,
+    F: FnMut(&Point) -> bool,
+{
+    if tile_distance(start, goal) > PATHFIND_MAX_RANGE {
         return None;
     }
 
     let start_key = (start.x, start.y);
-    let goal_key = (goal.x, goal.y);
 
     let mut open: BinaryHeap<Frontier> = BinaryHeap::new();
     let mut g_score: HashMap<(i32, i32), i32> = HashMap::new();
@@ -126,8 +173,12 @@ where
 
     let mut expansions = 0usize;
     while let Some(current) = open.pop() {
-        if current.key == goal_key {
-            return Some(reconstruct_path(&came_from, start_key, goal_key));
+        let current_point = Point {
+            x: current.key.0,
+            y: current.key.1,
+        };
+        if current.key != start_key && is_goal(&current_point) {
+            return Some(reconstruct_path(&came_from, start_key, current.key));
         }
         // Skip stale heap entries left over from a cheaper path being found.
         if current.g > *g_score.get(&current.key).unwrap_or(&i32::MAX) {
@@ -139,16 +190,10 @@ where
             return None;
         }
 
-        let current_point = Point {
-            x: current.key.0,
-            y: current.key.1,
-        };
         for direction in DIRECTIONS {
             let next = offset_point(&current_point, direction, 1);
             let next_key = (next.x, next.y);
-            // The goal tile is validated above, so reuse it without a redundant
-            // predicate call; intermediate tiles must be walkable.
-            if next_key != goal_key && !is_walkable(&next) {
+            if !is_walkable(&next) {
                 continue;
             }
             let tentative_g = current.g + 1;
@@ -280,5 +325,57 @@ mod tests {
         let goal = point(PATHFIND_MAX_RANGE + 1, 0);
         let path = find_path_with(&start, &goal, |_| true);
         assert!(path.is_none(), "targets beyond max range are rejected");
+    }
+
+    #[test]
+    fn adjacent_path_reaches_a_tile_next_to_an_occupied_goal() {
+        // Goal tile is occupied (e.g. the player); a chaser must stop next to it.
+        let start = point(0, 0);
+        let goal = point(5, 0);
+        let path = find_path_adjacent_with(&start, &goal, |p| (p.x, p.y) != (goal.x, goal.y))
+            .expect("a tile adjacent to the goal is reachable");
+        let last = path.last().expect("non-empty path");
+        assert!(
+            (last.x - goal.x).abs() <= 1 && (last.y - goal.y).abs() <= 1,
+            "path must end adjacent to the goal, ended at {last:?}"
+        );
+        assert_ne!((last.x, last.y), (goal.x, goal.y), "must not enter the goal");
+        // Steps are single-tile and never the occupied goal tile.
+        let mut prev = start.clone();
+        for step in &path {
+            assert!((step.x - prev.x).abs() <= 1 && (step.y - prev.y).abs() <= 1);
+            assert_ne!((step.x, step.y), (goal.x, goal.y));
+            prev = step.clone();
+        }
+    }
+
+    #[test]
+    fn adjacent_path_is_empty_when_already_adjacent() {
+        let start = point(4, 0);
+        let goal = point(5, 0);
+        let path = find_path_adjacent_with(&start, &goal, |_| true)
+            .expect("already adjacent should succeed");
+        assert!(path.is_empty(), "no step needed when already adjacent");
+    }
+
+    #[test]
+    fn adjacent_path_routes_around_a_wall_to_reach_the_target() {
+        // Wall at x==2 (y in 0..=4) with the chaser left of it and the target
+        // tile (occupied) on the right; the only approach is around the bottom.
+        let mut blocked: HashSet<(i32, i32)> = HashSet::new();
+        for y in 0..=4 {
+            blocked.insert((2, y));
+        }
+        let start = point(0, 2);
+        let goal = point(4, 2);
+        let path = find_path_adjacent_with(&start, &goal, |p| {
+            (p.x, p.y) != (goal.x, goal.y) && !blocked.contains(&(p.x, p.y))
+        })
+        .expect("a detour to a tile adjacent to the target exists");
+        let last = path.last().expect("non-empty path");
+        assert!((last.x - goal.x).abs() <= 1 && (last.y - goal.y).abs() <= 1);
+        for step in &path {
+            assert!(!blocked.contains(&(step.x, step.y)), "stepped into wall {step:?}");
+        }
     }
 }

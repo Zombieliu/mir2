@@ -44,6 +44,9 @@ pub(super) fn monster_step_toward_with_fallback(
     let base_direction = direction_toward(position, target)?;
     let prefer_next = deterministic_roll(tick, entity.index() as usize, salt, 2) == 0;
 
+    let current_distance = tile_distance(position, target);
+    let mut sidestep: Option<(Point, MirDirection)> = None;
+
     for step in 0..8_i32 {
         let offset = if step == 0 {
             0
@@ -55,11 +58,42 @@ pub(super) fn monster_step_toward_with_fallback(
         let direction = rotated_direction(base_direction, offset);
         let destination = offset_point(position, direction, 1);
         if can_occupy(world, destination.clone(), Some(entity)) {
-            return Some((destination, direction));
+            // Greedy step that actually closes the gap: keep Crystal's cheap,
+            // deterministic behaviour for the common open-field case.
+            if tile_distance(&destination, target) < current_distance {
+                return Some((destination, direction));
+            }
+            // Otherwise it's a sidestep/stall (a blocker sits between us and the
+            // target). Remember the first such option but prefer a real route.
+            sidestep.get_or_insert((destination, direction));
         }
     }
 
-    None
+    // Greedy could not make progress toward the target — a wall or other
+    // obstacle is in the way. Route around it with A* so monsters/heroes chase
+    // through doorways and around corners instead of grinding into the wall.
+    if let Some(routed) = monster_pathfind_step(world, entity, position, target) {
+        return Some(routed);
+    }
+
+    sidestep
+}
+
+/// A* next-step for a chasing monster/hero. Routes toward a tile *adjacent* to
+/// `target` (the target tile itself is typically occupied by the player/monster
+/// being chased), returning the first tile of the shortest route together with
+/// the facing for that step, or `None` when no route exists within the
+/// pathfinder's bounds.
+fn monster_pathfind_step(
+    world: &World,
+    entity: Entity,
+    position: &Point,
+    target: &Point,
+) -> Option<(Point, MirDirection)> {
+    let path = super::pathfind::find_path_adjacent(world, position, target, Some(entity))?;
+    let next = path.into_iter().next()?;
+    let direction = direction_toward(position, &next)?;
+    Some((next, direction))
 }
 
 pub(super) fn summoned_monster_entity_target(
