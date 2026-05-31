@@ -185,3 +185,59 @@ registry tests (`shared_in_process_registry_*`).
 - This is L4-adjacent gateway work; it should be serialized through the architect
   with whoever owns `routing.rs`, and interleaved with L3 authority promotion for
   full payoff.
+
+## Integration harness — implementation-ready spec (verified API)
+
+The oracle for Steps 2–3 is a gateway-level multi-session/multi-map test that
+drives real `GatewaySession`s through the registry (no sockets). API confirmed
+by reading the code (line numbers drift; symbols are stable):
+
+- **Construct routed sessions** — mirror the existing
+  `shared_in_process_factory_isolates_state_by_zone_id` test (in `routing.rs`):
+  ```rust
+  let registry = ZoneRegistry::with_router(
+      ZoneId::primary(),
+      Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+      Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+  );
+  let routed = registry.open_session_for(GatewayConfig::default(),
+      SessionRouteRequest { account_id: Some(a.into()), character_index: Some(0),
+                            map_file_name: Some(map.into()) });
+  let mut sess = GatewaySession::with_routed_world_runtime(routed.zone_id, routed.runtime);
+  // then start_demo_character / start_new_character(&mut sess, account, name)
+  ```
+- **Drive actions** — `GatewaySession` exposes (all `-> Vec<ServerPacket>`):
+  `transfer_map(key)` (`session.rs:377` → `WorldCommand::TransferMap`), `tick()`
+  (`:390`), plus the client-action helpers used by existing tests. `world_snapshot()`
+  (`:401`) returns a `WorldSnapshot` whose visible entities are filtered by the
+  session's current map — the observation surface for "who sees whom".
+- **Two transfer layers to cover:** (1) `GatewaySession::transfer_map` — a direct
+  command on the session's *own* runtime; (2) `apply_zone_current_position_map_transfer`
+  in `routing.rs` — the *automatic* transfer fired when a player walks onto a
+  transfer tile. **Confirmed gap:** neither changes the session's `zone_id` today;
+  the session stays bound to its original zone after a map change.
+
+### Tests the harness should hold
+
+Baseline (characterize current behavior — should pass *before* any handoff work):
+- `same_map_sessions_see_each_other` — two sessions on map `"0"` appear in each
+  other's `world_snapshot`.
+- `map_transfer_keeps_session_in_original_zone` — after `transfer_map("1")`, the
+  session's `zone_id` is **unchanged** (the gap this design closes). Lock it so a
+  regression is visible when Step 3 flips it.
+
+Step 3 target (should fail until handoff lands, then pass):
+- `cross_zone_transfer_moves_zone_and_cleans_old_observers` — after a transfer to
+  a different-zone map: mover's `zone_id == route(new_map)`; an observer left on
+  the old map/zone received an `ObjectRemove` for the mover; an observer already
+  on the new map/zone received an `ObjectPlayer` for the mover; mover's snapshot
+  shows the new zone's entities, not the old.
+
+Step 2 target:
+- a per-zone tick driver test: with ≥2 zones, one tick advances each zone exactly
+  once and each session receives only its own zone's outbounds.
+
+> Status note: this spec was written during a window where the build/test loop
+> was unavailable; it is grounded in the read-verified API above, not in compiled
+> tests. Implement + verify (`cargo test -p mir2-gateway`) before relying on it.
+
