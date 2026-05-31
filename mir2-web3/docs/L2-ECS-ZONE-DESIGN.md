@@ -166,3 +166,45 @@ cross-process sharding builds on.
    (from step 5) demonstrates multi-zone parallel speedup.
 4. No silent behavior/packet change vs. Crystal; any intentional change called
    out in the PR per the parity-bar rule.
+
+---
+
+## Implementation status & evidence-based re-prioritization (2026-05-31)
+
+Built and verified (all on `main` via the architect branch; `shared_zone`
+141/141 held at every step):
+
+- **Step 1 — ECS World mirror: DONE.** `zone/ecs.rs` stands up a `bevy_ecs::World`
+  in `ZoneRuntime` and mirrors player entities at the join/leave/move sites.
+  `players` is still source of truth; an invariant test asserts the mirror
+  matches it across join/walk/leave. Dropped the vestigial `derive(Clone)` from
+  `ZoneRuntime`/`ZoneManager` (a `World` isn't `Clone`; nothing cloned them).
+- **Stage A — parallel multi-zone tick: DONE.** `ZoneManager::tick_all` ticks
+  independent zones in parallel on a persistent `ComputeTaskPool` above a
+  measured break-even (4 zones); deterministic (parallel == sequential, proven).
+  Measured 4-core speedup: 1.44×@4z, 1.57×@8z, 1.88×@16z; neutral below
+  threshold. `examples/zone_load.rs` has a multi-zone mode that reproduces this.
+
+**What the load harness (its whole purpose) revealed, and how it changes the plan:**
+
+1. **The ECS *storage* migration (steps 2–4) is now low-value.** It was meant to
+   kill the per-tick O(N²) full-collection scans — but L1's spatial grids
+   already did that. The harness shows single-zone cost is now *super-linear in
+   the per-player combat-authority work* (PR #11's zone-side damage), not in
+   `BTreeMap` iteration. Converting the maps to ECS components would be weeks of
+   high-risk edits to the 8k-line hot file for a modest constant-factor gain.
+   **Deprioritized** unless a profiler shows storage iteration is a real cost.
+2. **The real single-zone lever is the combat-authority code**, which is the
+   combat/多人 session's domain — an algorithmic optimization, not a storage one.
+3. **The real production multi-core win is gateway map=zone routing**, not
+   `tick_all`. Today the gateway runs a single `"primary"` zone behind the
+   ZoneOwner lock and never calls `tick_all`. Stage A is ready and proven, but
+   it is *dormant groundwork* until the gateway routes sessions to per-map zones
+   (an L4-adjacent change entangled with the ZoneOwner lease/RPC machinery —
+   large, and best done deliberately, not bundled into L2).
+
+**Recommendation:** treat L2 as **done for its high-value parts** (ECS World
+foundation + proven parallel multi-zone tick). Do **not** grind the ECS storage
+rewrite (steps 2–4) — the evidence says it isn't worth the risk post-L1. The
+next real capacity step is **gateway map=zone routing** (so Stage A's
+parallelism actually runs in production), which deserves its own design pass.

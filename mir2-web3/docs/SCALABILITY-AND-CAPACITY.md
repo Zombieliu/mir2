@@ -68,7 +68,7 @@ risk is integration/debugging, not code generation.
 | Lvl | Work | Difficulty | Effort | Unlocks |
 | --- | --- | --- | --- | --- |
 | **L1** | Grid AOI for players ✅ + objects ✅ | 🟢 easy, local | done | measured knee ~600/zone/core (see below) |
-| **L2** | Move `ZoneRuntime` onto a real Bevy ECS `World` + `Schedule`; drop the global `Mutex`; per-zone parallel tick — **design: `L2-ECS-ZONE-DESIGN.md`** | 🟡 hard, core rewrite (~8k lines) | ~2–4 wks | lower per-player constant + N-zone→N-core |
+| **L2** | ECS World foundation ✅ + parallel multi-zone tick ✅; ECS *storage* rewrite deprioritized (L1 grids already solved its target) — **see `L2-ECS-ZONE-DESIGN.md` status** | 🟡 | high-value parts done | proven 1.44–1.88× multi-zone speedup (dormant until gateway map=zone routing) |
 | **L3** | Unify world authority: combat/AI/skills/pickup run **once** in the zone tick (not per-session) | 🟡🔴 hard, cross-session, emergent bugs | ~4–8 wks | consistent same-map combat |
 | **L4** | Cross-process zone split: loopback `ZoneOwner` → real RPC/handoff; map=node, walk-between-maps = node handoff | 🔴 distributed systems | ~6–12 wks | global server, horizontal scale |
 | **L5** | Siege specials: Time Dilation, on-screen culling, AoE batch resolution, queue/instancing | 🔴 hardest in the field | ~4–10 wks + tuning | Sabuk-scale same-map |
@@ -134,9 +134,22 @@ without it, optimization is blind.
   full scan; work bounded by local density.
 - **Load harness: shipped** — `examples/zone_load.rs`, with the measured knee
   above (~600/zone/core).
-- **L2: designed** — `L2-ECS-ZONE-DESIGN.md` (ECS-native zone + drop the global
-  lock + per-zone parallel tick), strangler-fig migration, equivalence-gated.
-  Not yet implemented; touches the hot file, so serialized through the architect
-  with the 多人 session.
-- **Next**: L3 authority consolidation is partly underway (PR #11 promoted
-  combat resolution into the zone); L4–L5 are multi-week and tracked here.
+- **L2: high-value parts DONE; storage rewrite deprioritized.** See the
+  "Implementation status" section of `L2-ECS-ZONE-DESIGN.md`.
+  - *Step 1 (ECS World mirror): done* — `zone/ecs.rs` mirrors player entities
+    into a `bevy_ecs::World`; invariant-tested; `shared_zone` 141/141.
+  - *Stage A (parallel multi-zone tick): done* — `ZoneManager::tick_all` runs
+    independent zones on a persistent `ComputeTaskPool` (deterministic; proven
+    parallel == sequential). Measured 4-core speedup **1.44×@4z, 1.57×@8z,
+    1.88×@16z**, neutral below a 4-zone break-even.
+  - *ECS storage migration (steps 2–4): deprioritized* — L1's grids already
+    killed the O(N²) it targeted; the harness shows the residual single-zone
+    cost is per-player combat-authority work, not `BTreeMap` iteration. Weeks of
+    hot-file risk for a modest constant-factor gain — not worth it post-L1.
+- **The real next capacity step is gateway map=zone routing.** Stage A's
+  parallel tick is dormant groundwork: the gateway still runs a single
+  `"primary"` zone and never calls `tick_all`. Routing sessions to per-map zones
+  (L4-adjacent, entangled with the ZoneOwner lease/RPC machinery) is what makes
+  the multi-core win real — it deserves its own design pass, not a bundle into L2.
+- **L3 authority consolidation** is partly underway (PR #11 promoted combat
+  resolution into the zone); the dominant single-zone cost now lives there.
