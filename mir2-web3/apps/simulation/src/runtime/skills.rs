@@ -364,6 +364,11 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::SlashingBurst
         | Spell::CrescentSlash
         | Spell::LionRoar
+        // Forward / self-centred AoE spells aimed by facing (cast with no locked
+        // target), not single-target spells.
+        | Spell::IceThrust
+        | Spell::HeavenlySword
+        | Spell::ThunderStorm
         | Spell::BattleCry => SkillCastKind::Direction,
         _ => SkillCastKind::Target,
     }
