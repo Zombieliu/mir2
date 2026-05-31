@@ -653,6 +653,9 @@ pub(super) struct SkillResource {
     pub(super) mp_eater_count: u16,
     pub(super) hemorrhage_armed: bool,
     pub(super) hemorrhage_attack_count: u16,
+    /// Fractional life-steal accumulator (`HpDrain` in Crystal); whole points are
+    /// healed to the player once it crosses 2.
+    pub(super) hp_drain: f32,
 }
 
 impl SkillResource {
@@ -667,6 +670,7 @@ impl SkillResource {
             mp_eater_count: 0,
             hemorrhage_armed: false,
             hemorrhage_attack_count: 0,
+            hp_drain: 0.0,
         }
     }
 }

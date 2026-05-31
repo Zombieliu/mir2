@@ -54049,3 +54049,56 @@ fn crystal_critical_rate_gear_emits_critical_effect() {
         "critical-rate gear should emit the Critical object effect"
     );
 }
+
+#[test]
+fn crystal_hp_drain_gear_heals_player_on_melee_hit() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, origin.clone());
+    push_player_stat_buff(
+        &mut session,
+        "test-hp-drain",
+        super::CRYSTAL_STAT_HP_DRAIN_RATE_PERCENT,
+        100,
+    );
+    // Wound the player so the life steal is observable.
+    let player = player_entity(session.app.world()).expect("player");
+    let wounded = PlayerVitals { hp: 20, max_hp: 60, mp: 100 };
+    session.app.world_mut().entity_mut(player).insert(wounded);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .player_vitals = wounded;
+
+    let object_id = 91_004_u32;
+    let current_tick = runtime_tick(session.app.world());
+    let scarecrow = spawn_crystal_monster_for_test(
+        &mut session,
+        object_id,
+        "Scarecrow",
+        Point { x: origin.x + 1, y: origin.y },
+        MirDirection::Left,
+        true,
+    );
+    set_monster_hp(&mut session, scarecrow, 5_000);
+    {
+        // Keep the target from hitting back so only the life steal moves player HP.
+        let mut entry = session.app.world_mut().entity_mut(scarecrow);
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("scarecrow agent");
+        agent.tracking_player = false;
+        agent.can_wander = false;
+        agent.next_attack_tick = current_tick + 100_000;
+        agent.next_move_tick = current_tick + 100_000;
+    }
+    sync_visible_objects(&mut session);
+
+    let hp_before = session.world_snapshot().player_hp.expect("hp");
+    let _ = attack_collect(&mut session, object_id, 6);
+    let hp_after = session.world_snapshot().player_hp.expect("hp");
+    assert!(
+        hp_after > hp_before,
+        "HP-drain gear should heal the player on landed hits (before={hp_before} after={hp_after})"
+    );
+}

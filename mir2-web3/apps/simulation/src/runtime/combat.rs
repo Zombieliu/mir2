@@ -489,6 +489,50 @@ fn monster_poison_rates(world: &World, entity: Entity) -> (f32, f32) {
     (armour_rate, damage_rate)
 }
 
+/// Crystal life steal (`HPDrainRatePercent`): a fraction of the net damage dealt
+/// is accumulated and, once it crosses 2, the whole part is healed to the player.
+fn apply_player_hp_drain(
+    world: &mut World,
+    attacker: &CombatStats,
+    net_damage: i32,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if attacker.hp_drain_rate_percent <= 0 || net_damage <= 0 {
+        return;
+    }
+    let heal = {
+        let mut skills = world.resource_mut::<SkillResource>();
+        skills.hp_drain +=
+            (net_damage as f32 / 100.0) * attacker.hp_drain_rate_percent as f32;
+        if skills.hp_drain > 2.0 {
+            let gain = skills.hp_drain.floor();
+            skills.hp_drain -= gain;
+            gain as i32
+        } else {
+            0
+        }
+    };
+    if heal <= 0 {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let restored = {
+        let mut entity = world.entity_mut(player);
+        entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+            vitals.hp = (vitals.hp + heal).min(vitals.max_hp);
+            *vitals
+        })
+    };
+    if let Some(restored) = restored {
+        world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored;
+        if let Some(info) = object_health_info_for_entity(world, player, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+    }
+}
+
 /// Crystal `MapObject.ApplyNegativeEffects` for a player blow landing on a
 /// monster: roll the attacker's Freezing / PoisonAttack gear stats against the
 /// level offset and, on success, apply Slow / Green poison to the target.
@@ -1913,6 +1957,7 @@ pub(super) fn resolve_pending_combat_actions(
                         current_tick,
                         packets,
                     );
+                    apply_player_hp_drain(world, &profile.attacker, net_damage, packets);
                 }
                 let monster_dead = damage_monster_entity(
                     world,
