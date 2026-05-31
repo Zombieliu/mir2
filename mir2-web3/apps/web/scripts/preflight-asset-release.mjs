@@ -143,7 +143,9 @@ function checkRenderCoverage() {
   if (minimap?.available && minimap.missingMiniMaps && minimap.missingMiniMaps > 0) {
     failures.push(`${minimap.missingMiniMaps} mini-map(s) missing`);
   }
-  return pass(`map renderable ${map.renderablePercent}%, mini-map missing ${minimap?.missingMiniMaps ?? "n/a"}`);
+  return pass(
+    `map renderable ${map.renderablePercent}%, mini-map missing ${minimap?.missingMiniMaps ?? "n/a"}, source-unavailable ${minimap?.sourceUnavailableMiniMaps ?? 0}`,
+  );
 }
 
 function readJsonIfExists(filePath) {

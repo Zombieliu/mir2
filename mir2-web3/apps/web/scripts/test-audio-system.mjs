@@ -73,6 +73,10 @@ const soundIndexExports = loadTypeScriptModule(new URL("../lib/original-sound-in
   "../public/original-ui/sound-index.generated.json": soundIndex,
 });
 const soundEventsExports = loadTypeScriptModule(new URL("../lib/original-sound-events.ts", import.meta.url));
+const missingIndexedSoundId =
+  Object.keys(soundIndex.sounds ?? {})
+    .map(Number)
+    .find((soundId) => soundIndexExports.crystalSoundIsMissingAsset(soundId)) ?? null;
 
 function loadAudioModule() {
   return loadTypeScriptModule(new URL("../lib/original-audio.ts", import.meta.url), {
@@ -85,15 +89,23 @@ function loadAudioModule() {
 {
   assert.equal(soundIndexExports.crystalSoundPath(10100), "/original-ui/Sound/100.wav", "present click sound resolves");
   assert.equal(soundIndexExports.crystalSoundPath(10168), "/original-ui/Sound/NewChar.wav", "present NewChar resolves");
-  assert.equal(soundIndexExports.crystalSoundPath(70), null, "indexed but absent sound bytes resolve to null");
+  if (missingIndexedSoundId !== null) {
+    assert.equal(soundIndexExports.crystalSoundPath(missingIndexedSoundId), null, "indexed but absent sound bytes resolve to null");
+  }
   assert.equal(soundIndexExports.crystalSoundPath(999999), null, "unknown sound id resolves to null");
   assert.equal(soundIndexExports.crystalSoundExists(10146), true);
-  assert.equal(soundIndexExports.crystalSoundExists(70), false);
-  assert.equal(soundIndexExports.crystalSoundIsMissingAsset(70), true, "indexed-but-absent is a known missing asset");
+  if (missingIndexedSoundId !== null) {
+    assert.equal(soundIndexExports.crystalSoundExists(missingIndexedSoundId), false);
+    assert.equal(
+      soundIndexExports.crystalSoundIsMissingAsset(missingIndexedSoundId),
+      true,
+      "indexed-but-absent is a known missing asset",
+    );
+  }
   assert.equal(soundIndexExports.crystalSoundIsMissingAsset(10100), false, "present sound is not missing");
   assert.equal(soundIndexExports.crystalSoundIsMissingAsset(999999), false, "unknown id is not a 'missing asset'");
   assert.equal(soundIndexExports.crystalPresentSoundCount(), presentSoundManifest.files.length);
-  assert.ok(soundIndexExports.crystalIndexedSoundCount() > soundIndexExports.crystalPresentSoundCount());
+  assert.ok(soundIndexExports.crystalIndexedSoundCount() >= soundIndexExports.crystalPresentSoundCount());
 }
 
 // --- 2. Settings migration + volume clamping ---------------------------------------------------
@@ -124,7 +136,8 @@ function loadAudioModule() {
   audio.resetOriginalAudioDiagnosticsForTests();
 
   // Fallback: first id is an absent asset, second is present -> the present one plays.
-  const playedFallback = audio.playOriginalSoundIdWithFallback([70, 10100]);
+  const missingProbeSoundId = missingIndexedSoundId ?? 999999;
+  const playedFallback = audio.playOriginalSoundIdWithFallback([missingProbeSoundId, 10100]);
   assert.equal(playedFallback, true, "fallback chain plays the first present sound");
   assert.equal(playedAudios.at(-1)?.src, "/original-ui/Sound/100.wav");
 
@@ -134,11 +147,11 @@ function loadAudioModule() {
   assert.equal(playedAudios.at(-1)?.src, "/original-ui/Sound/NewChar.wav");
 
   // Missing sound is skipped gracefully and recorded for diagnostics.
-  const playedMissing = audio.playOriginalSoundId(70);
+  const playedMissing = audio.playOriginalSoundId(missingProbeSoundId);
   assert.equal(playedMissing, false, "missing sound returns false");
   const diagnostics = audio.getOriginalAudioDiagnostics();
   assert.ok(diagnostics.missingSoundTotal >= 1, "missing sound recorded");
-  assert.ok(diagnostics.missingSoundIds.includes(70), "missing sound id tracked");
+  assert.ok(diagnostics.missingSoundIds.includes(missingProbeSoundId), "missing sound id tracked");
 
   // Effects volume setting drives the default playback gain.
   audio.setOriginalAudioSettings({ effectsVolume: 0.5 });

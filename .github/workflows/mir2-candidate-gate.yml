@@ -19,7 +19,7 @@ jobs:
           submodules: recursive
 
       - name: Install Rust 1.89
-        run: rustup toolchain install 1.89.0 --profile minimal
+        run: rustup toolchain install 1.89.0 --profile minimal --component rustfmt
 
       - name: Setup Node
         uses: actions/setup-node@v4

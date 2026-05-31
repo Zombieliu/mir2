@@ -42,11 +42,12 @@ jobs:
               - 'mir2-web3/apps/web/**'
               - '.github/workflows/mir2-ci.yml'
             rust:
-              - 'mir2-web3/apps/**'
+              - 'mir2-web3/apps/admin-api/**'
+              - 'mir2-web3/apps/gateway/**'
+              - 'mir2-web3/apps/simulation/**'
               - 'mir2-web3/packages/**'
               - 'mir2-web3/Cargo.toml'
               - 'mir2-web3/Cargo.lock'
-              - '.github/workflows/mir2-ci.yml'
 
   web-resource-gate:
     needs: changes
