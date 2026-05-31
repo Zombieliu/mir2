@@ -4468,6 +4468,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     // `LineAttack(damage, 2, 250)`. Splash only on the range
                     // branch (distance > 1) to match Crystal.
                     let black_foxman_line_branch = agent.ai == 44 && distance > 1;
+                    // AI 26 ShamanZombie: always emits `ObjectRangeAttack` +
+                    // `LineAttack(damage, 6, 300, MACAgility)` — a 6-tile line.
+                    let shaman_zombie_line_branch = agent.ai == 26;
                     let crystal_spider_line_branch = agent.ai == 37 && distance > 1;
                     let king_scorpion_line_targets = if agent.ai == 19 {
                         forward_line_opposing_monster_targets(
@@ -5440,7 +5443,15 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         let spider_line_targets = if spitting_spider_line_branch
                             || crystal_spider_line_branch
                             || black_foxman_line_branch
+                            || shaman_zombie_line_branch
                         {
+                            let line_distance = if shaman_zombie_line_branch {
+                                6
+                            } else if crystal_spider_line_branch {
+                                3
+                            } else {
+                                2
+                            };
                             forward_line_opposing_monster_targets(
                                 world,
                                 &monster_entities,
@@ -5448,7 +5459,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                                 &position,
                                 attack_direction,
                                 &agent,
-                                if crystal_spider_line_branch { 3 } else { 2 },
+                                line_distance,
                             )
                         } else {
                             Vec::new()

@@ -104,7 +104,23 @@ Test: `crystal_ai44_black_foxman_splashes_line_target_at_range` (spawns AI-44
 fox at distance 2 + a friendly-opposite secondary monster on the line; asserts
 the secondary's HP drops within 5 ticks).
 
+### AI 26 → ShamanZombie 6-tile line splash ✅
+Crystal `ShamanZombie.Attack` faces the target, broadcasts `ObjectRangeAttack`,
+then runs `LineAttack(damage, 6, 300, MACAgility)` — a 6-tile line splash
+against any friendly-opposite target on the line. The runtime already
+mirrored AI 26's attack range (6 tiles, cardinal/diagonal only via
+`x == 0 || y == 0 || x == y`), the ranged-attack packet, and the player
+strike (existing `shaman_zombie_uses_six_tile_line_range_attack`), but the
+6-tile line splash was missing — only the direct target took damage. Added
+`shaman_zombie_line_branch = agent.ai == 26` to the `spider_line_targets`
+builder with `line_distance = 6` (vs the 2-tile spider default and 3-tile
+crystal-spider). Test:
+`crystal_ai26_shaman_zombie_splashes_six_tile_line` (places a
+friendly-opposite monster 3 tiles in front of the shaman on a 5-tile line and
+asserts its HP drops within 6 ticks).
+
 ## Next candidates
-Higher-effort: 26 `ShamanZombie` (70 spawns), 28 `ToxicGhoul` (56 spawns —
-poison is already wired by name; the AI needs special hooks), 12 `BugBagMaggot`
-(189 spawns).
+Higher-effort: 28 `ToxicGhoul` (56 spawns — poison is already wired by AI
+table; the AI needs special hooks), 12 `BugBagMaggot` (189 spawns), 7
+`CaveMaggot` (poison already wired by name; the AI uses a paralysis-on-attack
+override).
