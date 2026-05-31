@@ -938,6 +938,53 @@ impl SessionRouter for MapZoneSessionRouter {
     }
 }
 
+/// Routes each map to its **own** zone automatically (`ZoneId = "map:<map>"`),
+/// without enumerating every map — the routing primitive for map=zone (see
+/// `docs/GATEWAY-MAP-ZONE-ROUTING-DESIGN.md`). Explicit `group(map, zone)`
+/// overrides let several low-traffic maps share one zone. Sessions with no map
+/// (anonymous / pre-character-select) fall back to the default zone.
+///
+/// NOT yet wired into the live gateway: production still opens sessions
+/// anonymously on the default zone. Turning this on additionally requires the
+/// per-zone tick driver and the map-transfer zone handoff (design steps 2–3),
+/// because routing alone would strand a player in their old zone after a
+/// cross-map transfer.
+#[derive(Debug, Clone, Default)]
+pub struct PerMapSessionRouter {
+    overrides: BTreeMap<String, ZoneId>,
+}
+
+impl PerMapSessionRouter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Pin an explicit map into a shared/override zone (e.g. group many cold
+    /// leveling maps, or give a sieged map a dedicated zone).
+    pub fn group(mut self, map_file_name: impl Into<String>, zone_id: ZoneId) -> Self {
+        self.overrides.insert(map_file_name.into(), zone_id);
+        self
+    }
+
+    /// The default zone id a map routes to under per-map routing.
+    pub fn zone_for_map(map_file_name: &str) -> ZoneId {
+        ZoneId::new(format!("map:{map_file_name}"))
+    }
+}
+
+impl SessionRouter for PerMapSessionRouter {
+    fn route_session(&self, request: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId {
+        match request.map_file_name.as_ref() {
+            Some(map_file_name) => self
+                .overrides
+                .get(map_file_name)
+                .cloned()
+                .unwrap_or_else(|| Self::zone_for_map(map_file_name)),
+            None => default_zone_id.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct InProcessZoneRuntimeFactory;
 
@@ -5796,9 +5843,9 @@ mod tests {
         shared_npc_entity_side_effect_packets, world_entity_from_monster_info,
         zone_monster_spawn_from_shared_entity, InMemoryZoneOwnerLeaseAuthority,
         InProcessAccountInventoryService, InProcessNpcWorldService, InProcessZoneRuntimeFactory,
-        MapZoneSessionRouter, SessionRouteRequest, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryService,
-        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        MapZoneSessionRouter, PerMapSessionRouter, SessionRouteRequest, SessionRouter,
+        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneRuntimeFactory, SharedInProcessZoneSessionRuntime,
         SharedInProcessZoneState, SharedNpcEntitySideEffect, SharedNpcWorldCommand,
         SharedNpcWorldCommandEnvelope, SharedNpcWorldService, SharedNpcWorldServiceHandle,
@@ -5908,6 +5955,63 @@ mod tests {
         assert_eq!(routed.owner_lease.fencing_token(), 1);
         assert_eq!(default_routed.zone_id, ZoneId::primary());
         assert_eq!(default_routed.owner_lease.owner_id(), "in-process:primary");
+    }
+
+    #[test]
+    fn per_map_router_derives_distinct_zone_per_map() {
+        let router = PerMapSessionRouter::new().group("99", ZoneId::new("fields-cluster"));
+        let default_zone = ZoneId::primary();
+        let route = |map: Option<&str>| {
+            router.route_session(
+                &SessionRouteRequest {
+                    account_id: None,
+                    character_index: None,
+                    map_file_name: map.map(str::to_string),
+                },
+                &default_zone,
+            )
+        };
+
+        // Each distinct map derives its own zone; same map is stable.
+        assert_eq!(route(Some("0")), ZoneId::new("map:0"));
+        assert_eq!(route(Some("1")), ZoneId::new("map:1"));
+        assert_ne!(route(Some("0")), route(Some("1")));
+        assert_eq!(route(Some("0")), route(Some("0")));
+        // Explicit override groups a map into a shared zone.
+        assert_eq!(route(Some("99")), ZoneId::new("fields-cluster"));
+        // No map yet (anonymous / pre-character-select) -> default zone.
+        assert_eq!(route(None), default_zone);
+    }
+
+    #[test]
+    fn per_map_routing_assigns_two_maps_to_two_zones_through_registry() {
+        let registry = ZoneRegistry::with_router(
+            ZoneId::primary(),
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter,
+        );
+        let open_on_map = |map: &str, account: &str| {
+            registry.open_session_for(
+                GatewayConfig::default(),
+                SessionRouteRequest {
+                    account_id: Some(account.to_string()),
+                    character_index: Some(0),
+                    map_file_name: Some(map.to_string()),
+                },
+            )
+        };
+
+        let map0 = open_on_map("0", "a");
+        let map1 = open_on_map("1", "b");
+        let map0_again = open_on_map("0", "c");
+
+        // Different maps route to different zones; same map shares one. The
+        // owner lease tracks the routed zone too.
+        assert_eq!(map0.zone_id, ZoneId::new("map:0"));
+        assert_eq!(map1.zone_id, ZoneId::new("map:1"));
+        assert_ne!(map0.zone_id, map1.zone_id);
+        assert_eq!(map0_again.zone_id, ZoneId::new("map:0"));
+        assert_eq!(map0.owner_lease.zone_id(), &ZoneId::new("map:0"));
     }
 
     #[test]

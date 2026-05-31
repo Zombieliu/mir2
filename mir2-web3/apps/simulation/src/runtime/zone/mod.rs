@@ -1,6 +1,7 @@
 mod aoi;
 mod aoi_grid;
 mod collision;
+mod ecs;
 mod manager;
 mod movement;
 mod packets;
