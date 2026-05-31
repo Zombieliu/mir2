@@ -69,14 +69,14 @@ export function ItemDragProvider({
   onResolveDrop: ResolveItemDrop;
   children: ReactNode;
 }) {
-  // `dragging` only flips on drag start/end (two renders per drag); the ghost
-  // position is updated imperatively in pointermove so the heavy scene subtree
-  // is not re-rendered on every cursor move.
-  const [draggingSource, setDraggingSource] = useState<ItemDragSource | null>(null);
+  // The dragged payload lives in state so the ghost can render its icon/count
+  // declaratively; this only flips on drag start/end (two renders per drag).
+  // The ghost *position* is updated imperatively in pointermove so the heavy
+  // scene subtree is not re-rendered on every cursor move.
+  const [dragPayload, setDragPayload] = useState<ItemDragPayload | null>(null);
+  const draggingSource = dragPayload?.source ?? null;
   const candidateRef = useRef<DragCandidate | null>(null);
   const ghostRef = useRef<HTMLDivElement | null>(null);
-  const ghostIconRef = useRef<HTMLImageElement | null>(null);
-  const ghostCountRef = useRef<HTMLSpanElement | null>(null);
   const posRef = useRef({ x: 0, y: 0 });
   const resolveRef = useRef(onResolveDrop);
   resolveRef.current = onResolveDrop;
@@ -85,15 +85,6 @@ export function ItemDragProvider({
     const ghost = ghostRef.current;
     if (!ghost) return;
     ghost.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0) translate(-50%, -50%)`;
-  }
-
-  function paintGhost(payload: ItemDragPayload) {
-    if (ghostIconRef.current) {
-      ghostIconRef.current.src = originalItemIconPath(payload.icon);
-    }
-    if (ghostCountRef.current) {
-      ghostCountRef.current.textContent = payload.quantity > 1 ? String(payload.quantity) : "";
-    }
   }
 
   useEffect(() => {
@@ -106,8 +97,7 @@ export function ItemDragProvider({
         const dy = event.clientY - candidate.startY;
         if (dx * dx + dy * dy < DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) return;
         candidate.dragging = true;
-        paintGhost(candidate.payload);
-        setDraggingSource(candidate.payload.source);
+        setDragPayload(candidate.payload);
       }
       applyGhostPosition();
     }
@@ -120,7 +110,7 @@ export function ItemDragProvider({
         candidate.onActivate?.();
         return;
       }
-      setDraggingSource(null);
+      setDragPayload(null);
       const target = findDropTarget(event.clientX, event.clientY);
       if (target) {
         resolveRef.current(candidate.payload, target);
@@ -130,13 +120,13 @@ export function ItemDragProvider({
     function handleCancel() {
       if (!candidateRef.current) return;
       candidateRef.current = null;
-      setDraggingSource(null);
+      setDragPayload(null);
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && candidateRef.current) {
         candidateRef.current = null;
-        setDraggingSource(null);
+        setDragPayload(null);
       }
     }
 
@@ -180,10 +170,24 @@ export function ItemDragProvider({
   return (
     <ItemDragContext.Provider value={{ beginDrag, draggingSource }}>
       {children}
-      {draggingSource ? (
-        <div className="item-drag-ghost" ref={ghostRef} aria-hidden>
-          <img className="item-drag-ghost-icon" ref={ghostIconRef} alt="" draggable={false} />
-          <span className="item-drag-ghost-count" ref={ghostCountRef} />
+      {dragPayload ? (
+        <div
+          className="item-drag-ghost"
+          ref={ghostRef}
+          aria-hidden
+          style={{
+            transform: `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0) translate(-50%, -50%)`,
+          }}
+        >
+          <img
+            className="item-drag-ghost-icon"
+            src={originalItemIconPath(dragPayload.icon)}
+            alt=""
+            draggable={false}
+          />
+          {dragPayload.quantity > 1 ? (
+            <span className="item-drag-ghost-count">{dragPayload.quantity}</span>
+          ) : null}
         </div>
       ) : null}
     </ItemDragContext.Provider>
