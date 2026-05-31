@@ -7712,7 +7712,7 @@ fn cannibal_tentacles_adjacent_halfmoon_branch_poisons_and_fans_out() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let (player_origin, tentacles_position, ally_position) = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|point| {
             let tentacles_position = Point {
                 x: point.x + 1,
@@ -9171,7 +9171,7 @@ fn oma_king_close_line_branch_pushes_and_can_paralyze_before_line_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let king_position = Point {
                 x: point.x + 1,
@@ -10678,7 +10678,7 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             (0..=5).all(|offset| {
                 can_occupy(
@@ -11854,7 +11854,7 @@ fn khazard_uses_crystal_four_tile_pull_packet_without_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let khazard_position = Point {
                 x: point.x + 4,
@@ -12432,7 +12432,7 @@ fn manectric_claw_range_thrust_can_step_toward_target_instead_of_attacking() {
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             (0..=3).all(|offset| {
                 can_occupy(
@@ -12602,7 +12602,7 @@ fn manectric_king_close_push_line_uses_type_one_dc() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -15950,7 +15950,7 @@ fn restless_jar_low_hp_stomp_branch_pushes_and_hits_area() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -16900,7 +16900,7 @@ fn frozen_axeman_adjacent_pull_branch_uses_type_two_and_pushes_player() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let axeman_position = Point {
                 x: point.x + 1,
@@ -18951,7 +18951,7 @@ fn turtle_grass_type_one_branch_pushes_player_before_delayed_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let grass_position = Point {
                 x: point.x + 1,
@@ -20292,7 +20292,7 @@ fn stray_cat_push_branch_moves_player_and_is_zero_mc_gated() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -38835,7 +38835,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|candidate| {
             can_occupy(session.app.world(), (*candidate).clone(), Some(player))
                 && (1..=5).all(|distance| {
@@ -38910,7 +38910,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     set_current_player_mp(&mut pushed, 500);
     let pushed_player = player_entity(pushed.app.world()).expect("pushed player entity");
     let push_origin = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|candidate| {
             can_occupy(
                 pushed.app.world(),
@@ -39036,7 +39036,7 @@ fn magic_packet_crystal_flash_dash_dashes_hits_and_stuns_front_target() {
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, destination, target_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let destination = offset_point(&candidate, MirDirection::Right, 1);
             let target = offset_point(&candidate, MirDirection::Right, 2);
@@ -39141,7 +39141,7 @@ fn magic_packet_crystal_slashing_burst_leaps_two_tiles_and_delays_front_damage()
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, target_position, destination) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let target = offset_point(&candidate, MirDirection::Right, 1);
             let destination = offset_point(&candidate, MirDirection::Right, 2);
@@ -39229,7 +39229,7 @@ fn magic_packet_crystal_fire_wall_spawns_cross_spell_objects_and_ticks_ground_da
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, target_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let target = offset_point(&candidate, MirDirection::Right, 1);
             let cross = [
@@ -39340,7 +39340,7 @@ fn magic_packet_crystal_lightning_scans_six_tiles_in_facing_line() {
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, near_position, far_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let near = offset_point(&candidate, MirDirection::Right, 1);
             let far = offset_point(&candidate, MirDirection::Right, 3);
@@ -39435,7 +39435,7 @@ fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_l
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, living_position, undead_position, outside_position, requested_target) = (300..370)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let living = offset_point(&candidate, MirDirection::Right, 1);
             let undead = offset_point(&candidate, MirDirection::Left, 1);
@@ -39556,7 +39556,7 @@ fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_t
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, monster_origin) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let monster = offset_point(&candidate, MirDirection::Right, 1);
             let push_1 = offset_point(&candidate, MirDirection::Right, 2);
@@ -39652,7 +39652,7 @@ fn magic_packet_crystal_storm_escape_teleports_buffs_and_damages_nearby_monsters
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, monster_origin, destination) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let monster = offset_point(&candidate, MirDirection::Right, 1);
             let target = offset_point(&candidate, MirDirection::Right, 5);
@@ -43482,7 +43482,7 @@ fn magic_packet_crystal_fire_bang_and_ice_storm_hit_target_three_by_three() {
         set_current_player_mp(&mut session, 500);
         let player = player_entity(session.app.world()).expect("player entity");
         let (origin, target_point) = (300..380)
-            .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+            .flat_map(|x| (278..312).map(move |y| Point { x, y }))
             .find_map(|candidate| {
                 let target = Point {
                     x: candidate.x + 4,
