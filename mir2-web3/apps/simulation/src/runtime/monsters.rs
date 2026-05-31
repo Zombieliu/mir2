@@ -25,6 +25,7 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
+use super::combat_engine::get_defence_power;
 use super::equipment::total_defence_bonus;
 use super::items::current_player_required_stat_total;
 use super::map::{
@@ -34,7 +35,7 @@ use super::map::{
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
 use super::resources::{
-    BuffResource, InventoryResource, MapRuntimeResource, ObjectIdAllocatorResource,
+    runtime_tick, BuffResource, InventoryResource, MapRuntimeResource, ObjectIdAllocatorResource,
     RuntimeConfigResource, RuntimeQueueResource,
 };
 
@@ -2028,16 +2029,21 @@ pub(super) fn monster_player_attack_damage(
     if base_damage <= 0 {
         return 0;
     }
-    // Magic/spell blows are mitigated by the player's magic armour (MAC), not the
-    // physical AC, matching Crystal's `DefenceType.MAC` routing. The previous code
-    // wrongly reduced ranged magic by physical defence.
+    // Crystal rolls the absorbed armour as `GetDefencePower(0, MaxAC)` rather than
+    // subtracting the full value, so incoming damage varies hit-to-hit. Magic/spell
+    // blows are mitigated by the magic armour (MAC), matching `DefenceType.MAC`;
+    // the previous code subtracted the flat physical defence for every attack.
     let inventory = world.resource::<InventoryResource>();
     let buffs = world.resource::<BuffResource>();
-    let mitigation = if monster_attack_uses_magic(agent, source, target) {
+    let max_armour = if monster_attack_uses_magic(agent, source, target) {
         current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_MAX_MAC)
     } else {
         total_defence_bonus(inventory, buffs)
     };
+    let salt = (source.x as usize)
+        .wrapping_mul(1009)
+        .wrapping_add(source.y as usize);
+    let mitigation = get_defence_power(0, max_armour, runtime_tick(world), salt);
     (base_damage - mitigation).max(1)
 }
 

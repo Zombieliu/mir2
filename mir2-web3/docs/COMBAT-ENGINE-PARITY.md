@@ -31,6 +31,9 @@ plus end-to-end integration tests.
 - **Weapon durability** — 1 point per landed swing, matching `DamageWeapon`.
 
 Both melee and physical ranged player attacks resolve through this pipeline.
+Incoming monster damage is reduced by a rolled `GetDefencePower(0, MaxAC)` armour
+(MaxMAC for magic/spell blows), so it varies hit-to-hit and uses the correct
+armour type, matching Crystal's `DefenceType` routing.
 
 ## Deterministic rolling
 
@@ -50,12 +53,10 @@ moduli combat uses).
 - **Monster accuracy.** The generated monster manifest does not export the
   `Accuracy` stat, so monster blows use a fixed accuracy floor (high enough that
   base-agility players are not falsely dodging).
-- **Incoming monster damage** still uses the legacy direct-damage path. The
-  victim-side resolver (`resolve_attack_on_player`, with the player's AC/MAC,
-  agility dodge and reflect) is implemented and unit-covered; wiring monster
-  attacks onto it is the next step. It also needs the armour Min to default to
-  `0` (Crystal armour rolls `[0, MaxAC]`), so that a geared starter does not
-  fully absorb weak early monsters.
+- **Incoming agility dodge / reflect.** Incoming monster damage now subtracts
+  rolled AC/MAC armour, but the full victim-side resolver
+  (`resolve_attack_on_player`, adding the agility dodge and damage reflect) is
+  implemented and unit-covered yet not wired onto the monster attack scheduler.
 - **Skill / magic damage** still uses the legacy direct-damage path (no armour
   subtraction); migrating it onto the pipeline (with the `MAC`/`MACAgility`
   defence types) is part of the same step.
