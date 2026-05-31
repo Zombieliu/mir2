@@ -116,6 +116,10 @@ pub(super) const GENERAL_MEOW_MEOW_THUNDER_RANDOM_COOLDOWN_TICKS: u64 = 4;
 pub(super) const GENERAL_MEOW_MEOW_SLAVE_NAMES: [&str; 4] =
     ["StainHammerCat", "BlackHammerCat", "StrayCat", "CatShaman"];
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
+/// SnowWolfKing FindWeakerTarget: when struck for more than its own DC it blinks (Teleport effect
+/// 11) toward a fresh target, 50% of the time when a player lands the blow.
+pub(super) const SNOW_WOLF_KING_TELEPORT_EFFECT: u8 = 11;
+pub(super) const SNOW_WOLF_KING_TELEPORT_CHANCE_DENOMINATOR: u64 = 2;
 pub(super) const DRAGON_STATUE_SLEEP_DURATION_TICKS: u64 = 15 * 60;
 pub(super) const BUFF_GENERAL_MEOW_MEOW_SHIELD: u8 = 52;
 pub(super) const SPELL_EFFECT_RED_MOON_EVIL: u8 = 4;

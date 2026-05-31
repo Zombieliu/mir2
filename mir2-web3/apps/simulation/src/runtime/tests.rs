@@ -4343,6 +4343,83 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_snow_wolf_king_blinks_to_player_when_struck_hard() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_pos = Point { x: 320, y: 240 };
+    set_player_position(&mut session, player_pos.clone());
+
+    let boss_pos = Point {
+        x: player_pos.x + 5,
+        y: player_pos.y,
+    };
+    let current_tick = runtime_tick(session.app.world());
+    let boss = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(92_950),
+            DisplayName::literal("FrozenWarewolf"),
+            Position(boss_pos.clone()),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: 1_000_000,
+                max_hp: 1_000_000,
+            },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: boss_pos.clone(),
+                ai: 180,
+                disposition: WorldEntityDisposition::Hostile,
+                hostile_to_player: true,
+                tracking_player: true,
+                view_range: 7,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+
+    // FrozenWarewolf DC tops out at 127; a 500-point blow exceeds it, so each hit has a 50% blink.
+    let mut blinked = false;
+    for offset in 0..24 {
+        let mut packets = Vec::new();
+        super::damage_monster_entity(
+            session.app.world_mut(),
+            boss,
+            500,
+            current_tick + offset,
+            &mut packets,
+        );
+        let position = session
+            .app
+            .world()
+            .entity(boss)
+            .get::<Position>()
+            .expect("boss position")
+            .0
+            .clone();
+        if position != boss_pos {
+            blinked = true;
+            break;
+        }
+    }
+    assert!(
+        blinked,
+        "SnowWolfKing should blink toward a fresh target when struck for more than its DC"
+    );
+}
+
+#[test]
 fn crystal_yin_devil_node_enhances_nearby_allies_dc() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

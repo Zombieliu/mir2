@@ -23,6 +23,7 @@ use super::equipment::{damage_weapon_durability, damage_worn_durability, total_a
 use super::items::crystal_equipment_added_stat_total;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
+    snow_wolf_king_teleport_to_player,
 };
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_monster_attack_damage,
@@ -1841,6 +1842,26 @@ pub(super) fn damage_monster_entity(
                 name,
                 current_tick,
             );
+        }
+    }
+    // SnowWolfKing FindWeakerTarget: surviving a blow heavier than its own DC, the king blinks to a
+    // fresh target half the time (player attacker).
+    if !monster_dead && dead_ai == 180 {
+        let own_dc = name
+            .as_deref()
+            .map(crystal_monster_raw_attack_damage)
+            .unwrap_or(0);
+        if applied_damage > own_dc {
+            if let Some(object_id) = entity_object_id(world, monster_entity) {
+                if deterministic_chance_roll(
+                    current_tick,
+                    object_id,
+                    1_800,
+                    SNOW_WOLF_KING_TELEPORT_CHANCE_DENOMINATOR,
+                ) {
+                    snow_wolf_king_teleport_to_player(world, monster_entity, current_tick, packets);
+                }
+            }
         }
     }
     if monster_dead && dead_ai == 63 {

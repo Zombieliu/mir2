@@ -1568,6 +1568,54 @@ pub(super) fn foxman_teleport_destination(
     None
 }
 
+/// SnowWolfKing FindWeakerTarget: blink toward the player (its only target in the single-player
+/// authority) and re-acquire, mirroring Crystal's TeleportToTarget with the snow-blink effect.
+pub(super) fn snow_wolf_king_teleport_to_player(
+    world: &mut World,
+    entity: Entity,
+    current_tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return false;
+    };
+    let Some(destination) =
+        foxman_teleport_destination(world, entity, &player_position, current_tick)
+    else {
+        return false;
+    };
+    let direction = direction_toward(&destination, &player_position).unwrap_or(MirDirection::Down);
+    if let Some(mut agent) = world.entity_mut(entity).get_mut::<MonsterAgent>() {
+        agent.tracking_player = true;
+        agent.next_move_tick = current_tick + 1;
+        agent.next_attack_tick = current_tick + 1;
+    }
+    world
+        .entity_mut(entity)
+        .insert((Position(destination.clone()), Facing(direction)));
+    if let Some(object_id) = entity_object_id(world, entity) {
+        packets.push(ServerPacket::ObjectTeleportOut {
+            object_id,
+            effect_type: SNOW_WOLF_KING_TELEPORT_EFFECT,
+        });
+        packets.push(ServerPacket::ObjectWalk {
+            movement: ObjectMovement {
+                object_id,
+                position: destination,
+                direction,
+            },
+        });
+        packets.push(ServerPacket::ObjectTeleportIn {
+            object_id,
+            effect_type: SNOW_WOLF_KING_TELEPORT_EFFECT,
+        });
+    }
+    true
+}
+
 pub(super) fn update_deer_run_away_state(
     world: &mut World,
     entity: Entity,
