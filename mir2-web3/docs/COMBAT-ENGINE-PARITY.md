@@ -31,9 +31,11 @@ plus end-to-end integration tests.
 - **Weapon durability** — 1 point per landed swing, matching `DamageWeapon`.
 
 Both melee and physical ranged player attacks resolve through this pipeline.
-Incoming monster damage is reduced by a rolled `GetDefencePower(0, MaxAC)` armour
-(MaxMAC for magic/spell blows), so it varies hit-to-hit and uses the correct
-armour type, matching Crystal's `DefenceType` routing.
+Incoming monster damage is reduced by the player's physical defence (AC), or the
+magic armour (MAC) for magic/spell blows, matching Crystal's `DefenceType`
+routing; it can also miss via the agility dodge (physical) or magic resist
+(magic) from `GetArmour`. Vampiric gear (`HPDrainRatePercent`) heals the player a
+fraction of the damage dealt.
 
 ## Deterministic rolling
 
@@ -53,10 +55,15 @@ moduli combat uses).
 - **Monster accuracy.** The generated monster manifest does not export the
   `Accuracy` stat, so monster blows use a fixed accuracy floor (high enough that
   base-agility players are not falsely dodging).
-- **Incoming agility dodge / reflect.** Incoming monster damage now subtracts
-  rolled AC/MAC armour, but the full victim-side resolver
-  (`resolve_attack_on_player`, adding the agility dodge and damage reflect) is
-  implemented and unit-covered yet not wired onto the monster attack scheduler.
+- **Incoming armour is flat, not rolled.** Incoming monster damage subtracts the
+  full AC/MAC rather than a `GetDefencePower(0, MaxAC)` roll. Rolling only the
+  armour (while the monster damage stays a flat max instead of a
+  `GetAttackPower(MinDC,MaxDC)` roll) roughly doubles effective damage taken and
+  unbalances early fights, so the faithful version needs the paired monster-side
+  damage roll first.
+- **Incoming reflect.** The player's `Reflect` stat is honoured by the
+  victim-side resolver (`resolve_attack_on_player`) but not by the monster attack
+  scheduler, which lacks the attacker entity needed to bounce damage back.
 - **Skill / magic damage** still uses the legacy direct-damage path (no armour
   subtraction); migrating it onto the pipeline (with the `MAC`/`MACAgility`
   defence types) is part of the same step.
@@ -64,4 +71,3 @@ moduli combat uses).
   broadcast, but the monster AI does not yet act on it.
 - **Zone (shared-world) path** resolves damage with its own simplified math and
   has not yet been moved onto the engine.
-- **HP drain (life steal)** gear stat is parsed but not yet applied.
