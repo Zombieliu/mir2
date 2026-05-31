@@ -229,6 +229,21 @@ monster Accuracy) is to regenerate the committed manifest JSON with the
 binary `Server.MirDB` present (not in-repo — same data constraint as the
 MMap.Lib art). No further runtime code is required.
 
+## Combat numerics: MagicShield / ElementalBarrier damage reduction ✅
+Crystal `HumanObject.Attacked` reduces incoming damage by
+`Stats[Stat.DamageReductionPercent]` (`damage -= damage * pct / 100`) before
+subtracting armour. The player already gained a
+`CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT` buff from casting MagicShield, but the
+stat was never consumed — the buff was cosmetic. Added
+`crystal_player_damage_reduction_percent` (sums the stat from equipment +
+buffs) and applied it inside `monster_player_attack_damage` between the raw
+DC/MC damage and the AC subtraction, matching Crystal's
+`ChangeHP(armour - damage)` ordering. Data-active whenever the player holds a
+DamageReductionPercent buff (e.g. MagicShield); no effect otherwise, so the
+70-failure baseline is unchanged. Test:
+`crystal_player_damage_reduction_percent_reduces_incoming_monster_damage`
+(a RightGuard hit lands for less with a 50% buff than without).
+
 ## Verified-already-correct AIs
 Audit of remaining high-spawn AIs found these already at parity in the
 runtime:

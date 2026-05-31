@@ -14,8 +14,8 @@ use mir2_protocol::{
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
 use super::combat::{
-    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
-    ranged_attack_delay_ticks, PendingPlayerStatusEffect,
+    combat_delay_ticks, crystal_player_damage_reduction_percent, deterministic_chance_roll,
+    melee_attack_delay_ticks, ranged_attack_delay_ticks, PendingPlayerStatusEffect,
 };
 use super::components::{
     entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
@@ -2069,7 +2069,16 @@ pub(super) fn monster_player_attack_damage(
     if base_damage <= 0 {
         return 0;
     }
-    (base_damage - mitigation).max(1)
+    // Crystal `HumanObject.Attacked`: incoming damage is reduced by
+    // `Stats[Stat.DamageReductionPercent]` (MagicShield / ElementalBarrier)
+    // before armour is subtracted (`ChangeHP(armour - damage)`).
+    let reduction = crystal_player_damage_reduction_percent(world);
+    let reduced = if reduction > 0 {
+        base_damage - base_damage.saturating_mul(reduction).div_euclid(100)
+    } else {
+        base_damage
+    };
+    (reduced - mitigation).max(1)
 }
 
 pub(super) fn monster_player_status_effect(

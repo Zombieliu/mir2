@@ -55655,3 +55655,86 @@ fn crystal_monster_player_hit_roll_is_inert_at_zero_accuracy_and_dodges_with_acc
         "dodged monster hit should broadcast a Miss DamageIndicator for the player, got {dodge_packets:?}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Combat numerics: MagicShield / ElementalBarrier damage reduction — Crystal
+// `HumanObject.Attacked` reduces incoming damage by
+// `Stats[Stat.DamageReductionPercent]` before subtracting armour. Previously
+// the player's DamageReductionPercent buff was applied but never consumed, so
+// MagicShield did not actually reduce damage.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_player_damage_reduction_percent_reduces_incoming_monster_damage() {
+    // A high-DC monster name so base damage is well above the AC floor and the
+    // percent reduction is unambiguous. AI 49 (ThunderElement) routes through
+    // `monster_player_attack_damage` -> `crystal_monster_attack_damage(name)`.
+    let agent = MonsterAgent {
+        image: 0,
+        dead: false,
+        patrol_origin: Point { x: 0, y: 0 },
+        ai: 49,
+        disposition: WorldEntityDisposition::Hostile,
+        hostile_to_player: true,
+        tracking_player: true,
+        view_range: 7,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: 0,
+        next_attack_tick: 0,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: 0,
+    };
+    let source = Point { x: 0, y: 0 };
+    let target = Point { x: 0, y: 1 };
+
+    fn damage_with_reduction(
+        agent: &MonsterAgent,
+        source: &Point,
+        target: &Point,
+        reduction_percent: i32,
+    ) -> i32 {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        if reduction_percent > 0 {
+            session
+                .app
+                .world_mut()
+                .resource_mut::<BuffResource>()
+                .buffs
+                .push(super::BuffState {
+                    key: "test-magic-shield".to_string(),
+                    name: "Test Magic Shield".to_string(),
+                    description: "Synthetic DamageReductionPercent for the test.".to_string(),
+                    expires_at_tick: u64::MAX,
+                    attack_bonus: 0,
+                    defence_bonus: 0,
+                    stats: vec![UserItemStat {
+                        stat: super::CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
+                        value: reduction_percent,
+                    }],
+                });
+        }
+        super::monster_player_attack_damage(
+            session.app.world(),
+            "RightGuard",
+            agent,
+            source,
+            target,
+        )
+    }
+
+    let unshielded = damage_with_reduction(&agent, &source, &target, 0);
+    let shielded = damage_with_reduction(&agent, &source, &target, 50);
+    assert!(
+        unshielded > 1,
+        "baseline RightGuard hit should be well above the AC floor, got {unshielded}"
+    );
+    assert!(
+        shielded < unshielded,
+        "50% DamageReductionPercent (MagicShield) should reduce incoming damage; unshielded={unshielded} shielded={shielded}"
+    );
+}

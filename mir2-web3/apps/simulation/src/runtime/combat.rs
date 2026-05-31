@@ -398,6 +398,24 @@ fn crystal_player_agility(world: &World) -> i32 {
     equipment.saturating_add(buffs)
 }
 
+/// Player's `Stats[Stat.DamageReductionPercent]` (Crystal stat 124) from
+/// active buffs — primarily MagicShield / ElementalBarrier. Crystal
+/// `HumanObject.Attacked` reduces incoming damage by this percent
+/// (`damage -= damage * pct / 100`) before subtracting armour.
+pub(super) fn crystal_player_damage_reduction_percent(world: &World) -> i32 {
+    let equipment = crystal_equipment_added_stat_total(
+        world.resource::<InventoryResource>(),
+        CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
+    );
+    let buffs: i32 = world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .map(|buff| user_item_stat_total(&buff.stats, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT))
+        .sum();
+    equipment.saturating_add(buffs).clamp(0, 100)
+}
+
 fn crystal_monster_accuracy(world: &World, monster_entity: Entity) -> i32 {
     world
         .entity(monster_entity)
