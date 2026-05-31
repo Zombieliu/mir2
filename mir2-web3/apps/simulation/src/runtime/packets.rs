@@ -6552,7 +6552,6 @@ impl SimulationSession {
             | ClientPacket::TownRevive
             | ClientPacket::RequestUserName { .. }
             | ClientPacket::RequestChatItem { .. }
-            | ClientPacket::EquipSlotItem { .. }
             | ClientPacket::AcceptReincarnation
             | ClientPacket::CancelReincarnation
             | ClientPacket::AwakeningNeedMaterials { .. }
@@ -7060,6 +7059,20 @@ impl SimulationSession {
                 unique_id,
                 to,
                 from_unique_id,
+            ),
+            ClientPacket::EquipSlotItem {
+                grid,
+                unique_id,
+                to,
+                grid_to,
+                to_unique_id,
+            } => equip_slot_item_impl(
+                self.app.world_mut(),
+                grid,
+                unique_id,
+                to,
+                grid_to,
+                to_unique_id,
             ),
             ClientPacket::SplitItem {
                 grid,

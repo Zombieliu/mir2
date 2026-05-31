@@ -188,6 +188,7 @@ fn add_repair_powder(session: &mut SimulationSession, quantity: u32) {
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -226,6 +227,7 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -263,6 +265,7 @@ fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -300,6 +303,7 @@ fn add_weapon_oil(session: &mut SimulationSession, key: &str, name: &str, slot: 
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -344,6 +348,7 @@ fn add_repairable_inventory_item(
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -387,6 +392,7 @@ fn add_inventory_test_item(
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -484,6 +490,7 @@ fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -521,6 +528,7 @@ fn add_socket_source_test_item(session: &mut SimulationSession, slot: u8, quanti
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -564,6 +572,7 @@ fn equip_crystal_item(session: &mut SimulationSession, template_name: &str, slot
         added_defence: 0,
         added_luck: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -600,6 +609,7 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
             added_defence: 0,
             added_luck: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -665,6 +675,7 @@ fn add_inventory_crystal_item_with_metadata(
         added_attack,
         added_defence,
         added_stats,
+        socketed: Vec::new(),
         cursed: false,
         socket_slots,
         gem_count,
@@ -711,6 +722,7 @@ fn fishing_slot_item_state(
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: template.slots,
         gem_count: 0,
@@ -825,6 +837,7 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -861,6 +874,7 @@ fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -905,6 +919,7 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -951,6 +966,7 @@ fn add_equippable_test_item(
         added_attack: 0,
         added_defence: 0,
         added_stats: Vec::new(),
+        socketed: Vec::new(),
         cursed: false,
         socket_slots: 0,
         gem_count: 0,
@@ -23946,6 +23962,7 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -24020,6 +24037,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -25442,6 +25460,7 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -29500,6 +29519,7 @@ fn pickup_allows_overweight_item_like_crystal() {
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -31723,6 +31743,7 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
                 added_defence: 0,
                 added_luck: 0,
                 added_stats: Vec::new(),
+                socketed: Vec::new(),
                 cursed: false,
                 socket_slots: 0,
                 gem_count: 0,
@@ -31804,6 +31825,7 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
             added_defence: 0,
             added_luck: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -32541,6 +32563,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
             added_attack: 0,
             added_defence: 0,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
@@ -33645,6 +33668,266 @@ fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_i
         .any(|item| item.name == "Wooden Sword"));
 }
 
+/// Build a baseline [`ItemState`] for socket tests. Callers tweak the
+/// socket-relevant fields (`attack`, `defence`, `added_stats`, `socketed`,
+/// `socket_slots`, `cursed`, `equip_slot`) on the returned value.
+fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
+    ItemState {
+        key: key.to_string(),
+        name: key.to_string(),
+        icon: super::item_icon_for_key("repair-powder"),
+        slot: 0,
+        unique_id,
+        container: ItemContainer::Bag1,
+        quantity: 1,
+        description: "Socket test item.".to_string(),
+        durability_current: Some(100),
+        durability_max: Some(100),
+        weight: 1,
+        equip_slot: None,
+        grade: ItemGrade::None,
+        added_attack: 0,
+        added_defence: 0,
+        added_stats: Vec::new(),
+        socketed: Vec::new(),
+        cursed: false,
+        socket_slots: 0,
+        gem_count: 0,
+        identified: None,
+        soul_bound_id: None,
+        sealed_expiry_time_binary_datetime: 0,
+        sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
+        attack: 0,
+        defence: 0,
+        heal_hp: 0,
+        heal_mp: 0,
+    }
+}
+
+#[test]
+fn socketed_gems_fold_into_equipment_totals() {
+    // Crystal `RefreshSocketStats` folds each socketed gem's stats into the
+    // wearer's totals; mirror that via `EquipmentState::total_attack/defence`.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let mut gem_power = socket_test_item_state("socket-gem-power", 9101);
+    gem_power.attack = 4;
+    gem_power.added_attack = 1;
+    gem_power.defence = 1;
+    gem_power.added_stats.push(super::UserItemStat {
+        stat: super::CRYSTAL_STAT_ACCURACY,
+        value: 2,
+    });
+    let mut gem_guard = socket_test_item_state("socket-gem-guard", 9102);
+    gem_guard.defence = 3;
+    gem_guard.added_defence = 1;
+    gem_guard.added_stats.push(super::UserItemStat {
+        stat: super::CRYSTAL_STAT_ACCURACY,
+        value: 1,
+    });
+
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = resources
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("default weapon");
+        weapon.attack = 10;
+        weapon.added_attack = 3;
+        weapon.defence = 2;
+        weapon.added_defence = 1;
+        weapon.socket_slots = 2;
+        weapon.socketed = vec![gem_power, gem_guard];
+    }
+
+    let resources = session.app.world().resource::<InventoryResource>();
+    let weapon = resources
+        .equipment_items
+        .iter()
+        .find(|item| item.slot == EquipmentSlot::Weapon)
+        .expect("default weapon");
+    // attack: base 10 + added 3 + socketed (4+1)+(0+0) = 18
+    assert_eq!(weapon.total_attack(), 18);
+    // defence: base 2 + added 1 + socketed (1+0)+(3+1) = 8
+    assert_eq!(weapon.total_defence(), 8);
+    // accuracy folded from both gems' added stats: 2 + 1
+    assert_eq!(weapon.socketed_added_stat(super::CRYSTAL_STAT_ACCURACY), 3);
+    assert_eq!(weapon.socketed_count(), 2);
+}
+
+#[test]
+fn socketed_gems_survive_equip_and_unequip_carry_through() {
+    // Equipping then unequipping must preserve socketed gems in both
+    // directions of the ItemState<->EquipmentState conversion.
+    let mut gem = socket_test_item_state("socket-gem-ac", 9201);
+    gem.defence = 2;
+    gem.added_stats.push(super::UserItemStat {
+        stat: super::CRYSTAL_STAT_MAX_MC,
+        value: 3,
+    });
+
+    let mut host = socket_test_item_state("crystal-host-weapon", 9200);
+    host.equip_slot = Some(EquipmentSlot::Weapon);
+    host.socket_slots = 1;
+    host.socketed = vec![gem];
+
+    // Equip: ItemState -> EquipmentState keeps the socketed gem.
+    let equipped = super::equipment_state_from_item_state(&host, EquipmentSlot::Weapon);
+    assert_eq!(equipped.socketed_count(), 1);
+    assert_eq!(equipped.socketed[0].unique_id, 9201);
+    assert_eq!(equipped.socketed[0].defence, 2);
+
+    // Unequip: EquipmentState -> ItemState keeps the socketed gem.
+    let back = super::item_state_from_equipment_state(equipped, ItemContainer::Bag1, 12);
+    assert_eq!(back.socketed.len(), 1);
+    assert_eq!(back.socketed[0].unique_id, 9201);
+    assert!(back.socketed[0]
+        .added_stats
+        .iter()
+        .any(|stat| stat.stat == super::CRYSTAL_STAT_MAX_MC && stat.value == 3));
+}
+
+#[test]
+fn equip_slot_item_packet_rejects_non_socket_gem() {
+    // The Crystal manifest ships no ItemType.Socket (39) items, so the insert
+    // *success* path is data-gated; this exercises the validation gate that
+    // rejects a non-socket item offered as a gem (PlayerObject.EquipSlotItem).
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    add_inventory_crystal_item(&mut session, "BronzeHelmet", 40);
+    add_inventory_crystal_item_with_socket_slots(&mut session, "BronzeHelmet", 41, 2);
+
+    let packets = session.handle_packet(ClientPacket::EquipSlotItem {
+        grid: MirGridType::Inventory,
+        unique_id: 40,
+        to: 0,
+        grid_to: MirGridType::Inventory,
+        to_unique_id: 41,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::EquipSlotItem {
+            grid: MirGridType::Inventory,
+            unique_id: 40,
+            to: 0,
+            grid_to: MirGridType::Inventory,
+            success: false,
+        }]
+    );
+    let resources = session.app.world().resource::<InventoryResource>();
+    // The rejected gem stays in the bag and no host gained a socketed item.
+    assert!(resources
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == 40));
+    assert!(resources
+        .inventory_items
+        .iter()
+        .all(|item| item.socketed.is_empty()));
+}
+
+#[test]
+fn remove_slot_item_packet_returns_socketed_gem_to_inventory() {
+    // Crystal `PlayerObject.RemoveSlotItem` pops a socketed gem back into the
+    // bag; the socket grid + inventory destination is the supported path.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let mut gem = socket_test_item_state("socket-gem-loose", 9301);
+    gem.attack = 3;
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let mut host = socket_test_item_state("crystal-host", 9300);
+        host.slot = 50;
+        host.socket_slots = 1;
+        host.socketed = vec![gem];
+        resources.inventory_items.push(host);
+    }
+
+    let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Socket,
+        grid_to: MirGridType::Inventory,
+        unique_id: 9301,
+        to: 7,
+        from_unique_id: 9300,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Socket,
+            grid_to: MirGridType::Inventory,
+            unique_id: 9301,
+            to: 7,
+            success: true,
+        }]
+    );
+    let resources = session.app.world().resource::<InventoryResource>();
+    let host = resources
+        .inventory_items
+        .iter()
+        .find(|item| item.unique_id == 9300)
+        .expect("host remains in the bag");
+    assert!(host.socketed.is_empty());
+    assert!(resources
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == 9301));
+}
+
+#[test]
+fn remove_slot_item_packet_rejects_cursed_socketed_gem() {
+    // Crystal refuses to remove cursed socketed gems; the gem stays put.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    {
+        let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+        let mut gem = socket_test_item_state("socket-gem-cursed", 9401);
+        gem.cursed = true;
+        let mut host = socket_test_item_state("crystal-host", 9400);
+        host.slot = 51;
+        host.socket_slots = 1;
+        host.socketed = vec![gem];
+        resources.inventory_items.push(host);
+    }
+
+    let packets = session.handle_packet(ClientPacket::RemoveSlotItem {
+        grid: MirGridType::Socket,
+        grid_to: MirGridType::Inventory,
+        unique_id: 9401,
+        to: 8,
+        from_unique_id: 9400,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::RemoveSlotItem {
+            grid: MirGridType::Socket,
+            grid_to: MirGridType::Inventory,
+            unique_id: 9401,
+            to: 8,
+            success: false,
+        }]
+    );
+    let resources = session.app.world().resource::<InventoryResource>();
+    let host = resources
+        .inventory_items
+        .iter()
+        .find(|item| item.unique_id == 9400)
+        .expect("host remains in the bag");
+    assert_eq!(host.socketed.len(), 1);
+    assert!(host.socketed[0].cursed);
+    assert!(!resources
+        .inventory_items
+        .iter()
+        .any(|item| item.unique_id == 9401));
+}
+
 #[test]
 fn equipping_same_slot_returns_previous_gear_to_bag() {
     let mut session = SimulationSession::new(SimulationConfig::default());
@@ -33668,6 +33951,7 @@ fn equipping_same_slot_returns_previous_gear_to_bag() {
             added_attack: 0,
             added_defence: 2,
             added_stats: Vec::new(),
+            socketed: Vec::new(),
             cursed: false,
             socket_slots: 0,
             gem_count: 0,
