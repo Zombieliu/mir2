@@ -1,6 +1,10 @@
 # Movement System → 90%+ Parity: Plan & Progress
 
-Status: **in progress** on branch `claude/optimistic-mayer-gswKV` (PR #8).
+Status: **movement parity work complete** on branch `claude/optimistic-mayer-gswKV`
+(PR #8). All actionable items done; remaining notes are smaller follow-ups and
+intentional skips. Reviewed for correctness (no bugs found), zero compiler
+warnings, and verified zero test regressions (single-threaded lib failure set is
+byte-identical to baseline; `shared_zone` 130/130, `hero_ai` 28/28 green).
 
 This document captures the full implementation plan to bring the **movement
 system** to production (Crystal/Mir2 1:1) parity, plus the exact edit sites, so
@@ -18,10 +22,11 @@ work can continue without re-deriving the analysis.
 | 6 | Roadmap doc refresh | 🔄 this file kept current |
 | 7 | Monster / hero chase A* (route around walls) | ✅ done + tests |
 
-Commits: `01844886` (A* module + plan), `b6f1c956` (wire A*, conquest, cadence),
-`d9e10ce5` (mount cadence zone test). New unit tests: 6 pathfind + 5 zone
-cadence/status + 3 conquest gate; new integration test: mount cadence. Full
-130-test `shared_zone` suite stays green; whole workspace builds.
+New tests added this work: 9 pathfind (incl. 3 adjacency) + 5 zone cadence/status
++ 3 conquest gate + 2 no_mount transfer (single-session) unit tests, plus the
+`mounted_player_walks_a_step_sooner_than_an_unmounted_player` and click-to-move
+`click_to_move_onto_occupied_tile_approaches_adjacent` integration tests. Whole
+workspace builds with zero warnings; `shared_zone` 130/130 green.
 
 Note on #4 scope: rather than adding `ZoneJoin` mount fields + a dedicated
 `SetMount` command, the mount state rides the existing observer-action path —
