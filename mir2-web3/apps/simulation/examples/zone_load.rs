@@ -29,7 +29,7 @@ use std::time::Instant;
 
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point};
 use mir2_simulation::{
-    SessionId, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
+    SessionId, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager,
     ZonePlayerCombatStats, ZoneRuntime,
 };
 
@@ -211,4 +211,79 @@ fn main() {
         "Sizing: cores_per_map ~= peak_concurrent_players_on_map / knee. \
          Add network/serialization headroom (this harness is in-process only)."
     );
+
+    run_multizone_scaling();
+}
+
+/// Stage-A multi-core proof: build `zones` independent zones (each = one map
+/// with a crowd), and tick them all via `ZoneManager::tick_all` (parallel) vs a
+/// per-zone sequential baseline. Because zones share no state, throughput should
+/// scale with cores — this is the win that map=zone routing unlocks.
+fn run_multizone_scaling() {
+    let zones = env_usize_list("MIR2_LOAD_ZONES", &[1, 2, 4, 8, 16]);
+    let players_per_zone = env_u64("MIR2_LOAD_ZONE_PLAYERS", 150) as usize;
+    let ticks = env_u64("MIR2_LOAD_ZONE_TICKS", 40);
+    let cores = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+
+    println!(
+        "\nMulti-zone scaling: {players_per_zone} players/zone, {ticks} ticks, \
+         {cores} cores available (parallel tick_all vs sequential baseline)\n"
+    );
+    println!(
+        "{:>6}  {:>13}  {:>13}  {:>8}",
+        "zones", "parallel ms", "sequential ms", "speedup"
+    );
+
+    for z in zones {
+        let par = time_multizone(z, players_per_zone, ticks, true);
+        let seq = time_multizone(z, players_per_zone, ticks, false);
+        let speedup = if par > 0.0 { seq / par } else { 0.0 };
+        println!("{z:>6}  {par:>13.2}  {seq:>13.2}  {speedup:>7.2}x");
+    }
+    println!(
+        "\nLinear speedup => zones are truly independent (no shared lock/state). \
+         Production needs map=zone routing in the gateway to USE this; today the \
+         gateway runs a single 'primary' zone. See docs/L2-ECS-ZONE-DESIGN.md."
+    );
+}
+
+fn time_multizone(zones: usize, players_per_zone: usize, ticks: u64, parallel: bool) -> f64 {
+    let mut mgr = ZoneManager::new();
+    for z in 0..zones {
+        let map = format!("loadmap{z}");
+        let block = dense_block_positions(players_per_zone);
+        for (i, pos) in block.iter().enumerate() {
+            let mut j = join_at(z * players_per_zone + i, pos.clone());
+            j.map_file_name = map.clone();
+            mgr.join(j);
+        }
+    }
+    let _ = mgr.tick_all(0); // warm-up
+
+    let start = Instant::now();
+    let mut now_ms = 1;
+    for t in 0..ticks {
+        // Drive a walk in every zone so each has real per-tick work.
+        let dir = DIRECTIONS[(t as usize) % DIRECTIONS.len()];
+        for z in 0..zones {
+            mgr.handle_for_key(
+                ZoneKey::for_map(format!("loadmap{z}")),
+                ZoneCommand::Walk {
+                    session_id: SessionId::new(format!("load-{}", z * players_per_zone)),
+                    direction: dir,
+                    seq: t + 1,
+                    now_ms,
+                },
+            );
+        }
+        if parallel {
+            let _ = mgr.tick_all(now_ms);
+        } else {
+            let _ = mgr.tick_all_sequential(now_ms);
+        }
+        now_ms += 700;
+    }
+    start.elapsed().as_secs_f64() * 1000.0
 }
