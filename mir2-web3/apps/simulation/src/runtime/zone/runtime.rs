@@ -1754,7 +1754,10 @@ impl ZoneRuntime {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
                     object_id: player.object_id,
-                    percent: zone_mana_percent(player.mp),
+                    percent: zone_mana_percent(
+                        player.mp,
+                        crate::config::crystal_base_vitals(player.class, player.level).1,
+                    ),
                 },
             });
         }
@@ -1926,7 +1929,10 @@ impl ZoneRuntime {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
                     object_id: player.object_id,
-                    percent: zone_mana_percent(player.mp),
+                    percent: zone_mana_percent(
+                        player.mp,
+                        crate::config::crystal_base_vitals(player.class, player.level).1,
+                    ),
                 },
             });
             action_packets.extend(self.apply_native_player_ground_spell(
@@ -2083,7 +2089,10 @@ impl ZoneRuntime {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
                     object_id: player.object_id,
-                    percent: zone_mana_percent(player.mp),
+                    percent: zone_mana_percent(
+                        player.mp,
+                        crate::config::crystal_base_vitals(player.class, player.level).1,
+                    ),
                 },
             });
         }
@@ -2172,7 +2181,10 @@ impl ZoneRuntime {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
                     object_id: player.object_id,
-                    percent: zone_mana_percent(player.mp),
+                    percent: zone_mana_percent(
+                        player.mp,
+                        crate::config::crystal_base_vitals(player.class, player.level).1,
+                    ),
                 },
             });
             action_packets.extend(self.apply_native_pet_enhancer(object_id, level, now_ms));
@@ -2264,7 +2276,10 @@ impl ZoneRuntime {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
                     object_id: player.object_id,
-                    percent: zone_mana_percent(player.mp),
+                    percent: zone_mana_percent(
+                        player.mp,
+                        crate::config::crystal_base_vitals(player.class, player.level).1,
+                    ),
                 },
             });
             action_packets.extend(self.apply_native_player_self_magic(
@@ -7119,8 +7134,8 @@ fn zone_crystal_monster_raw_attack_damage(name: &str) -> i32 {
         .unwrap_or(0)
 }
 
-fn zone_mana_percent(mp: i32) -> u8 {
-    ((mp.max(0) * 100) / 100).clamp(0, 100) as u8
+fn zone_mana_percent(mp: i32, max_mp: i32) -> u8 {
+    ((mp.max(0) * 100) / max_mp.max(1)).clamp(0, 100) as u8
 }
 
 fn zone_player_native_damage(player: &ZonePlayer, base_damage: i32) -> i32 {

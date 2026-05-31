@@ -4787,10 +4787,17 @@ pub(super) fn object_mana_info_for_entity(world: &World, entity: Entity) -> Opti
     let entry = world.entity(entity);
     let object_id = entry.get::<ObjectId>()?.0;
     let vitals = entry.get::<PlayerVitals>()?;
+    // Mana is reported as a percentage of the player's real class/level max MP
+    // rather than a fixed 100 scale, so a full-mana low-level character reads
+    // as 100% instead of (e.g.) 17%.
+    let max_mp = entry
+        .get::<CharacterBody>()
+        .map(|body| crate::config::crystal_base_vitals(body.class, body.level).1)
+        .unwrap_or(100);
 
     Some(ObjectManaInfo {
         object_id,
-        percent: mana_percent(vitals.mp, 100),
+        percent: mana_percent(vitals.mp, max_mp),
     })
 }
 
