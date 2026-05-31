@@ -308,7 +308,10 @@ export function GameUiScene({
 
   return (
     <ItemDragProvider onResolveDrop={resolveItemDrop}>
-    <div className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}>
+    <div
+      className={`game-ui-scene ${hasOriginalMiniMapAsset(world.miniMapIndex) ? "with-mini-map" : "without-mini-map"}`}
+      data-item-drop-kind="none"
+    >
       <MiniMapPanel
         t={t}
         world={world}

@@ -1079,6 +1079,7 @@ export function InventoryWindow({
           t={t}
           goldDropAmount={goldDropAmount}
           onGoldDropAmountChange={setGoldDropAmount}
+          availableGold={world.gold}
           onConfirm={confirmGoldDrop}
           onClose={() => setPendingGoldDrop(false)}
         />

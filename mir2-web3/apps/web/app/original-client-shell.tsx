@@ -1470,6 +1470,7 @@ export function OriginalClientShell({
           ref={stageFrameRef}
           className={`client-stage-frame ${screen === "game" && !sceneInteractionReady ? "scene-assets-pending" : ""}`}
           tabIndex={-1}
+          data-item-drop-kind={screen === "game" ? "ground" : undefined}
           onMouseDownCapture={(event) => {
             if (screen === "game") {
               stageFrameRef.current?.focus({ preventScroll: true });

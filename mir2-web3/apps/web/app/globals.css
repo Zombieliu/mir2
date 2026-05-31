@@ -4963,3 +4963,63 @@ body.mir-dragging-item * {
     transform: translate(-50%, -30px) scale(1);
   }
 }
+
+/* ---- MirAmountBox (split / drop-gold spinner + slider) ---- */
+.mir-amount-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  padding: 0 6px;
+}
+
+.mir-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mir-amount-step {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 700;
+  color: #e9d6ad;
+  background: linear-gradient(180deg, #4a3411, #2c1d0c);
+  border: 1px solid #705932;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mir-amount-step:active {
+  background: linear-gradient(180deg, #2c1d0c, #4a3411);
+}
+
+.mir-amount-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  text-align: center;
+  color: #ffe9a6;
+  background: #1a1209;
+  border: 1px solid #6b5430;
+}
+
+.mir-amount-max {
+  flex: 0 0 auto;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  color: #e9d6ad;
+  background: #25190e;
+  border: 1px solid #705932;
+  cursor: pointer;
+}
+
+.mir-amount-slider {
+  width: 100%;
+  accent-color: #caa24f;
+}
