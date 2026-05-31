@@ -39063,12 +39063,11 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
         .flat_map(|x| (240..310).map(move |y| Point { x, y }))
         .find(|candidate| {
             can_occupy(session.app.world(), (*candidate).clone(), Some(player))
+                && is_combat_position(&session, candidate)
                 && (1..=5).all(|distance| {
-                    can_occupy(
-                        session.app.world(),
-                        offset_point(candidate, MirDirection::Right, distance),
-                        None,
-                    )
+                    let tile = offset_point(candidate, MirDirection::Right, distance);
+                    can_occupy(session.app.world(), tile.clone(), None)
+                        && is_combat_position(&session, &tile)
                 })
         })
         .expect("open ShoulderDash lane");
@@ -39141,13 +39140,12 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
                 pushed.app.world(),
                 (*candidate).clone(),
                 Some(pushed_player),
-            ) && (1..=5).all(|distance| {
-                can_occupy(
-                    pushed.app.world(),
-                    offset_point(candidate, MirDirection::Right, distance),
-                    None,
-                )
-            })
+            ) && is_combat_position(&pushed, candidate)
+                && (1..=5).all(|distance| {
+                    let tile = offset_point(candidate, MirDirection::Right, distance);
+                    can_occupy(pushed.app.world(), tile.clone(), None)
+                        && is_combat_position(&pushed, &tile)
+                })
         })
         .expect("open ShoulderDash push lane");
     let monster_origin = offset_point(&push_origin, MirDirection::Right, 1);
