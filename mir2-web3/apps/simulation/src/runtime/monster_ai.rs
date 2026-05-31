@@ -28,7 +28,8 @@ use super::rental::{process_expired_rental_items, return_rented_items_on_player_
 use super::resources::{
     advance_runtime_tick, crystal_packet_move_delay_ticks, current_language, is_in_world,
     mark_crystal_packet_action, runtime_tick, take_crystal_movement_retry_if_ready, BuffResource,
-    InventoryResource, MapRuntimeResource, PlayerActionKind,
+    InventoryResource, MapRuntimeResource, PendingGroundSpellAction, PlayerActionKind,
+    RuntimeQueueResource,
 };
 use super::session::SimulationSession;
 use super::skills::tick_ground_spell_actions;
@@ -3808,6 +3809,47 @@ pub(super) fn update_hell_lord_state(
         return true;
     }
     agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+
+    // SpawnQuakes: erupt a cluster of MapQuake hazards around the player each pulse. Damage rolls
+    // 0..MaxDC (Crystal's Random(Random(MinDC, MaxDC))), so some tiles are duds.
+    let quake_dc = entity_name(world, entity)
+        .map(|name| crystal_monster_raw_attack_damage(&name))
+        .unwrap_or(0);
+    if quake_dc > 0 {
+        let span = (HELL_LORD_QUAKE_SPREAD * 2 + 1) as u64;
+        let mut locations: Vec<Point> = Vec::with_capacity(HELL_LORD_QUAKE_COUNT);
+        for i in 0..HELL_LORD_QUAKE_COUNT as u64 {
+            let dx = deterministic_value(tick, lord_object_id, 9_800 + i, span) as i32
+                - HELL_LORD_QUAKE_SPREAD;
+            let dy = deterministic_value(tick, lord_object_id, 9_900 + i, span) as i32
+                - HELL_LORD_QUAKE_SPREAD;
+            let location = Point {
+                x: player_position.x + dx,
+                y: player_position.y + dy,
+            };
+            if !locations.contains(&location) {
+                locations.push(location);
+            }
+        }
+        let quake_damage = crystal_attack_power_roll(0, quake_dc, tick, lord_object_id, 9_700);
+        world
+            .resource_mut::<RuntimeQueueResource>()
+            .pending_ground_spell_actions
+            .push(PendingGroundSpellAction {
+                spell: if tick % 2 == 0 {
+                    Spell::MapQuake1
+                } else {
+                    Spell::MapQuake2
+                },
+                caster_object_id: lord_object_id,
+                locations,
+                damage: quake_damage,
+                next_tick: tick + 1,
+                expires_at_tick: tick + HELL_LORD_QUAKE_LIFETIME_TICKS,
+                tick_interval: 1,
+                damages_player: true,
+            });
+    }
 
     let target_entity = player_entity(world);
     let mut spawned_knight = false;

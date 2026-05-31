@@ -4343,6 +4343,77 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
 }
 
 #[test]
+fn crystal_hell_lord_spawns_player_damaging_quakes() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_pos = Point { x: 320, y: 240 };
+    set_player_position(&mut session, player_pos.clone());
+
+    let current_tick = runtime_tick(session.app.world());
+    session.app.world_mut().spawn((
+        ObjectId(93_000),
+        DisplayName::literal("HellLord"),
+        Position(Point {
+            x: player_pos.x + 2,
+            y: player_pos.y,
+        }),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        },
+        MonsterAiState {
+            extra_byte: 4,
+            ..Default::default()
+        },
+        MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: player_pos.clone(),
+            ai: 98,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+
+    session.tick();
+
+    let quakes: Vec<_> = session
+        .app
+        .world()
+        .resource::<RuntimeQueueResource>()
+        .pending_ground_spell_actions
+        .iter()
+        .filter(|action| {
+            action.damages_player
+                && matches!(action.spell, Spell::MapQuake1 | Spell::MapQuake2)
+        })
+        .collect();
+    assert!(
+        !quakes.is_empty(),
+        "HellLord should erupt player-damaging MapQuake hazards"
+    );
+    assert!(
+        quakes[0].locations.iter().all(|loc| {
+            (loc.x - player_pos.x).abs() <= 4 && (loc.y - player_pos.y).abs() <= 4
+        }),
+        "quakes should land within the spread of the player"
+    );
+}
+
+#[test]
 fn crystal_snow_wolf_king_blinks_to_player_when_struck_hard() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

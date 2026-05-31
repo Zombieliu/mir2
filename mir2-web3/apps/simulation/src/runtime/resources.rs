@@ -771,6 +771,9 @@ pub(super) struct PendingGroundSpellAction {
     pub(super) next_tick: u64,
     pub(super) expires_at_tick: u64,
     pub(super) tick_interval: u64,
+    /// When true this hazard damages the player standing on it (monster-cast quakes) instead of the
+    /// hostile monsters on it (player-cast ground spells).
+    pub(super) damages_player: bool,
 }
 
 #[derive(Resource, Debug, Clone)]

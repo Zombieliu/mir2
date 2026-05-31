@@ -37,6 +37,11 @@ pub(super) const HELL_BOMB_EXPLOSION_DELAY_TICKS: u64 = 1;
 pub(super) const HELL_BOMB_EXPLOSION_RADIUS: i32 = 4;
 pub(super) const HELL_BOMB_POISON_DURATION_TICKS: u64 = 5;
 pub(super) const HELL_LORD_RAGE_DELAY_TICKS: u64 = 120;
+/// HellLord SpawnQuakes: each pulse erupts up to this many MapQuake hazards within QUAKE_SPREAD
+/// tiles of the player; each hazard ticks for QUAKE_LIFETIME ticks and hits whoever stands on it.
+pub(super) const HELL_LORD_QUAKE_COUNT: usize = 5;
+pub(super) const HELL_LORD_QUAKE_SPREAD: i32 = 4;
+pub(super) const HELL_LORD_QUAKE_LIFETIME_TICKS: u64 = 5;
 pub(super) const REVIVING_ZOMBIE_REVIVE_DELAY_TICKS: u64 = 4;
 pub(super) const REVIVING_ZOMBIE_MAX_REVIVALS: u8 = 2;
 pub(super) const REVIVING_ZOMBIE_LIFECOUNT_SALT: usize = 25_001;

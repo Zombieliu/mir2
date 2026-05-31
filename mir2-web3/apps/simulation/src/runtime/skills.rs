@@ -21,7 +21,7 @@ use super::buffs::{
 use super::combat::{
     apply_monster_poison, combat_delay_ticks, damage_monster_entity, queue_due_packet,
     queued_before_world_tick_due_tick, ranged_attack_delay_ticks, schedule_damage_to_monster,
-    schedule_heal_to_player, PendingMonsterDefeatAction,
+    schedule_damage_to_player, schedule_heal_to_player, PendingMonsterDefeatAction,
 };
 use super::components::{
     current_player_object_id, entity_by_object_id, entity_facing, entity_name, entity_object_id,
@@ -3236,6 +3236,7 @@ fn apply_crystal_fire_wall_spell(
                     ),
                 )),
                 tick_interval: combat_delay_ticks(2_000),
+                damages_player: false,
             });
     }
 
@@ -3416,6 +3417,7 @@ fn apply_crystal_blizzard_family_spell(
             next_tick: due_tick.saturating_add(combat_delay_ticks(800)),
             expires_at_tick: due_tick.saturating_add(combat_delay_ticks(3_000)),
             tick_interval: combat_delay_ticks(440),
+            damages_player: false,
         });
     Vec::new()
 }
@@ -4263,6 +4265,22 @@ pub(super) fn tick_ground_spell_actions(
         }
         if tick >= action.next_tick {
             let mut detonated_trap = false;
+            // Monster-cast quakes (HellLord) damage the player standing on an erupting tile.
+            if action.damages_player && action.damage > 0 {
+                let player_on_quake = player_entity(world)
+                    .and_then(|player| entity_position(world, player))
+                    .map(|player_position| action.locations.contains(&player_position))
+                    .unwrap_or(false);
+                if player_on_quake {
+                    schedule_damage_to_player(
+                        world,
+                        tick.saturating_add(1),
+                        action.caster_object_id,
+                        "MapQuake".to_string(),
+                        action.damage,
+                    );
+                }
+            }
             if matches!(
                 action.spell,
                 Spell::FireWall
@@ -4723,6 +4741,7 @@ fn apply_crystal_poison_cloud_spell(
             next_tick: due_tick,
             expires_at_tick: due_tick.saturating_add(combat_delay_ticks(6_000)),
             tick_interval: combat_delay_ticks(1_000),
+            damages_player: false,
         });
 
     vec![amulet_delete_packet, poison_delete_packet]
@@ -5102,6 +5121,7 @@ fn apply_crystal_explosive_trap_spell(
             next_tick: due_tick,
             expires_at_tick: due_tick.saturating_add(combat_delay_ticks(10_000)),
             tick_interval: combat_delay_ticks(500),
+            damages_player: false,
         });
 
     Vec::new()
