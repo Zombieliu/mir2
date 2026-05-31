@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const repoRoot = resolve(import.meta.dirname, "..", "..", "..");
@@ -8,13 +8,32 @@ const outputPath = resolve(outputDir, "localization_bundle.json");
 const webOutputDir = resolve(repoRoot, "apps", "web", "lib", "generated");
 const webOutputPath = resolve(webOutputDir, "localization_bundle.json");
 
-const clientEnglish = readCrystalJson("Client", "English.json");
-const clientChinese = readCrystalJson("Client", "Chinese.json");
-const serverEnglish = readCrystalJson("Build/Server/Debug", "English.json");
-const serverChinese = readCrystalJson("Build/Server/Debug", "Chinese.json");
+// Full Spanish translation table for the Crystal `client.*` / `server.*` keys.
+// This is the source of truth for Spanish; it is maintained by hand (the Crystal
+// project only ships English + Chinese) and supersedes the legacy inline overrides.
+const spanishCrystalPath = resolve(
+  repoRoot,
+  "packages",
+  "game-data",
+  "data",
+  "localization",
+  "spanish-crystal.json",
+);
+const spanishCrystal = JSON.parse(readFileSync(spanishCrystalPath, "utf8"));
 
-function readCrystalJson(rootRelative, fileName) {
+const clientEnglish = tryReadCrystalJson("Client", "English.json");
+const clientChinese = tryReadCrystalJson("Client", "Chinese.json");
+const serverEnglish = tryReadCrystalJson("Build/Server/Debug", "English.json");
+const serverChinese = tryReadCrystalJson("Build/Server/Debug", "Chinese.json");
+const haveCrystalSources = Boolean(
+  clientEnglish && clientChinese && serverEnglish && serverChinese,
+);
+
+function tryReadCrystalJson(rootRelative, fileName) {
   const filePath = resolve(crystalRoot, rootRelative, "Localization", fileName);
+  if (!existsSync(filePath)) {
+    return null;
+  }
   return JSON.parse(readFileSync(filePath, "utf8"));
 }
 
@@ -29,41 +48,6 @@ function sortEntries(entries) {
     Object.entries(entries).sort(([left], [right]) => left.localeCompare(right)),
   );
 }
-
-const SPANISH_CRYSTAL_OVERRIDES = {
-  "client.GameName": "Legend of Mir 2",
-  "client.Menu": "Menu",
-  "client.GameShopKey": "Tienda ({0})",
-  "client.BigMapKey": "Mapa grande ({0})",
-  "client.DuraPanel": "Durabilidad",
-  "client.Mail": "Correo",
-  "client.LogOutKey": "Cerrar sesión ({0})",
-  "client.Keybinds": "Teclas",
-  "client.Chat_All": "Todo",
-  "client.Chat_Whisper": "Susurro",
-  "client.Chat_Lover": "Pareja",
-  "client.Chat_Mentor": "Mentor",
-  "client.Chat_Group": "Grupo",
-  "client.Chat_Guild": "Gremio",
-  "client.Usrname": "Cuenta",
-  "client.Password": "Contraseña",
-  "client.SelectKey": "Seleccionar",
-  "client.LastOnlineTitle": "Última conexión:",
-  "client.LastOnline": "Última conexión",
-  "client.Never": "Nunca",
-  "client.InventoryKey": "Inventario ({0})",
-  "client.CharacterKey": "Personaje ({0})",
-  "client.SkillsKey": "Habilidades ({0})",
-  "client.QuestsKey": "Misiones ({0})",
-  "client.OptionsKey": "Opciones ({0})",
-  "client.Warrior": "Guerrero",
-  "client.Wizard": "Mago",
-  "client.Taoist": "Taoísta",
-  "client.Assassin": "Asesino",
-  "client.Archer": "Arquero",
-  "server.NoBagSpace": "No tienes espacio suficiente.",
-  "server.GameName": "Legend of Mir 2",
-};
 
 const CUSTOM_TEXTS = {
   en: {
@@ -824,50 +808,76 @@ const ADDITIONAL_CUSTOM_TEXTS = {
   },
 };
 
-const englishTexts = {
-  ...prefixKeys(clientEnglish.Text, "client."),
-  ...prefixKeys(serverEnglish.Text, "server."),
-  ...CUSTOM_TEXTS.en,
-  ...ADDITIONAL_CUSTOM_TEXTS.en,
-};
+const { englishTexts, chineseTexts, spanishTexts } = haveCrystalSources
+  ? buildFromCrystalSources()
+  : buildFromExistingBundle();
 
-const chineseTexts = {
-  ...prefixKeys(clientChinese.Text, "client."),
-  ...prefixKeys(serverChinese.Text, "server."),
-  ...CUSTOM_TEXTS["zh-CN"],
-  ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
-};
+// Full build: derive English/Chinese from the Crystal localisation exports and
+// layer the hand-authored Spanish table on top of the English fallback.
+function buildFromCrystalSources() {
+  return {
+    englishTexts: {
+      ...prefixKeys(clientEnglish.Text, "client."),
+      ...prefixKeys(serverEnglish.Text, "server."),
+      ...CUSTOM_TEXTS.en,
+      ...ADDITIONAL_CUSTOM_TEXTS.en,
+    },
+    chineseTexts: {
+      ...prefixKeys(clientChinese.Text, "client."),
+      ...prefixKeys(serverChinese.Text, "server."),
+      ...CUSTOM_TEXTS["zh-CN"],
+      ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
+    },
+    spanishTexts: {
+      ...prefixKeys(clientEnglish.Text, "client."),
+      ...prefixKeys(serverEnglish.Text, "server."),
+      ...spanishCrystal,
+      ...CUSTOM_TEXTS.es,
+      ...ADDITIONAL_CUSTOM_TEXTS.es,
+    },
+  };
+}
 
-const spanishTexts = {
-  ...prefixKeys(clientEnglish.Text, "client."),
-  ...prefixKeys(serverEnglish.Text, "server."),
-  ...SPANISH_CRYSTAL_OVERRIDES,
-  ...CUSTOM_TEXTS.es,
-  ...ADDITIONAL_CUSTOM_TEXTS.es,
-};
+// Fallback build: the Crystal submodule is not checked out (e.g. CI, cloud
+// sessions). Reuse the committed English/Chinese texts verbatim and re-derive
+// Spanish by overlaying the Spanish table so this stays reproducible.
+function buildFromExistingBundle() {
+  const existingPath = existsSync(webOutputPath) ? webOutputPath : outputPath;
+  const existing = JSON.parse(readFileSync(existingPath, "utf8"));
+  const en = existing.languages.en.texts;
+  const zh = existing.languages["zh-CN"].texts;
+  const esExisting = existing.languages.es.texts;
+  const spanish = {};
+  for (const key of Object.keys(en)) {
+    spanish[key] =
+      spanishCrystal[key] ??
+      (esExisting[key] !== undefined ? esExisting[key] : en[key]);
+  }
+  return {
+    englishTexts: { ...en, ...CUSTOM_TEXTS.en, ...ADDITIONAL_CUSTOM_TEXTS.en },
+    chineseTexts: {
+      ...zh,
+      ...CUSTOM_TEXTS["zh-CN"],
+      ...ADDITIONAL_CUSTOM_TEXTS["zh-CN"],
+    },
+    spanishTexts: {
+      ...spanish,
+      ...CUSTOM_TEXTS.es,
+      ...ADDITIONAL_CUSTOM_TEXTS.es,
+    },
+  };
+}
 
 const bundle = {
   defaultLanguage: "en",
   generatedAt: new Date().toISOString(),
   sources: {
-    clientEnglish: resolve(crystalRoot, "Client", "Localization", "English.json"),
-    clientChinese: resolve(crystalRoot, "Client", "Localization", "Chinese.json"),
-    serverEnglish: resolve(
-      crystalRoot,
-      "Build",
-      "Server",
-      "Debug",
-      "Localization",
-      "English.json",
-    ),
-    serverChinese: resolve(
-      crystalRoot,
-      "Build",
-      "Server",
-      "Debug",
-      "Localization",
-      "Chinese.json",
-    ),
+    mode: haveCrystalSources ? "crystal-sources" : "committed-bundle-fallback",
+    clientEnglish: "Crystal/Client/Localization/English.json",
+    clientChinese: "Crystal/Client/Localization/Chinese.json",
+    serverEnglish: "Crystal/Build/Server/Debug/Localization/English.json",
+    serverChinese: "Crystal/Build/Server/Debug/Localization/Chinese.json",
+    spanish: "packages/game-data/data/localization/spanish-crystal.json",
   },
   languages: {
     en: {
