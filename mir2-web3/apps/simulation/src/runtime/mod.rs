@@ -5,6 +5,7 @@ mod crystal_compat;
 mod drops;
 mod equipment;
 mod fishing;
+mod gm_commands;
 mod hero_ai;
 mod inventory;
 mod items;

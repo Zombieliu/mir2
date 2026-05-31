@@ -4660,6 +4660,15 @@ pub(super) fn handle_chat_packet(
     message: String,
     linked_items: Vec<ChatItem>,
 ) -> Vec<ServerPacket> {
+    // GM `@` commands are intercepted before the normal chat pipeline (and before
+    // the spam guard) so privileged operators can act in-world. Non-GM callers
+    // fall through to normal chat, so command existence never leaks to players.
+    if super::gm_commands::is_gm_command(&message) {
+        if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
+            return packets;
+        }
+    }
+
     let prepared = match prepare_chat_packet(world, message, linked_items) {
         ChatPacketPreparation::Dispatch(prepared) => prepared,
         ChatPacketPreparation::Immediate(packets) => return packets,

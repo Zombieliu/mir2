@@ -22113,6 +22113,91 @@ fn chat_normal_message_emits_crystal_object_chat_only() {
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
 }
 
+fn grant_gm(session: &mut SimulationSession) {
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerPermissionResource>()
+        .gm_level = 1;
+}
+
+#[test]
+fn non_gm_at_message_is_treated_as_normal_chat() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // No GM rank: an "@" message must NOT be intercepted as a command — it goes
+    // to normal chat, so command existence never leaks to ordinary players.
+    let packets = session.handle_packet(ClientPacket::Chat {
+        message: "@level 50".to_string(),
+        linked_items: Vec::new(),
+    });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectChat { text, chat_type: ChatType::Normal, .. }
+            if text.contains("@level 50")
+    )));
+}
+
+#[test]
+fn gm_level_command_sets_level_and_emits_level_changed() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let packets = session.handle_packet(ClientPacket::Chat {
+        message: "@LEVEL 42".to_string(),
+        linked_items: Vec::new(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LevelChanged { level: 42, .. })));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .selected_character
+            .as_ref()
+            .map(|character| character.level),
+        Some(42)
+    );
+}
+
+#[test]
+fn gm_gold_and_move_commands_mutate_runtime() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    grant_gm(&mut session);
+
+    let gold_packets = session.handle_packet(ClientPacket::Chat {
+        message: "@gold 123456".to_string(),
+        linked_items: Vec::new(),
+    });
+    assert!(gold_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 123_456 })));
+    assert_eq!(
+        session.app.world().resource::<PlayerRuntimeResource>().gold,
+        123_456
+    );
+
+    let move_packets = session.handle_packet(ClientPacket::Chat {
+        message: "@MOVE 350 285".to_string(),
+        linked_items: Vec::new(),
+    });
+    assert!(move_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<PlayerRuntimeResource>()
+            .player_position,
+        Point { x: 350, y: 285 }
+    );
+}
+
 #[test]
 fn world_snapshot_includes_scene_and_state_data() {
     let session = SimulationSession::new(SimulationConfig::default());
