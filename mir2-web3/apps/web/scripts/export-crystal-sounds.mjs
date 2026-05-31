@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
@@ -34,16 +35,59 @@ const FALLBACK_SOUND_FILES = new Map([
   ],
 ]);
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// Only auto-run when invoked directly (node scripts/export-crystal-sounds.mjs ...). When the
+// module is imported (e.g. by the e2e test) main() must not fire so tests can call the core
+// function with isolated paths.
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
 
 async function main() {
   const clientRoot = path.resolve(process.argv[2] ?? process.env.CRYSTAL_CLIENT_ROOT ?? DEFAULT_CLIENT_ROOT);
-  const soundDir = path.basename(clientRoot).toLowerCase() === "sound" ? clientRoot : path.join(clientRoot, "Sound");
+  const result = await runCrystalSoundExport({
+    clientRoot,
+    // Output overrides exist mainly for tests; production defaults to the committed asset paths.
+    outputDir: process.env.MIR2_SOUND_OUTPUT_DIR ? path.resolve(process.env.MIR2_SOUND_OUTPUT_DIR) : PUBLIC_SOUND_DIR,
+    indexPath: process.env.MIR2_SOUND_INDEX_PATH ? path.resolve(process.env.MIR2_SOUND_INDEX_PATH) : PUBLIC_SOUND_INDEX_PATH,
+    docPath: process.env.MIR2_SOUND_DOC_INDEX_PATH ? path.resolve(process.env.MIR2_SOUND_DOC_INDEX_PATH) : DOC_SOUND_INDEX_PATH,
+    strict: process.env.MIR2_CRYSTAL_SOUND_STRICT === "1",
+  });
+
+  console.log(
+    `Exported ${result.summary.exportedSoundCount}/${result.summary.soundListEntryCount} SoundList entries from ${result.summary.sourceWavCount} source wavs`,
+  );
+  if (result.summary.missingSoundCount) {
+    console.warn(
+      `Missing ${result.summary.missingSoundCount} SoundList wavs: ${result.summary.missingSounds.map((entry) => entry.fileName).join(", ")}`,
+    );
+  }
+  if (result.summary.fallbackSoundCount) {
+    console.warn(
+      `Fallback ${result.summary.fallbackSoundCount} SoundList wavs: ${result.summary.fallbackSounds
+        .map((entry) => `${entry.fileName}->${entry.fallbackSourceFileName}`)
+        .join(", ")}`,
+    );
+  }
+  if (result.strict && result.summary.missingSoundCount) {
+    process.exitCode = 1;
+  }
+}
+
+// Core export: read SoundList.lst, index the source wavs, copy each referenced clip into
+// outputDir, and write the sound index json (to both indexPath and docPath). Returns the
+// summary so callers (CLI + tests) can react. Pure wrt globals except the filesystem writes it
+// is given, which makes it safe to exercise against temp dirs.
+export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, docPath, strict = false }) {
+  const resolvedClientRoot = path.resolve(clientRoot);
+  const soundDir =
+    path.basename(resolvedClientRoot).toLowerCase() === "sound"
+      ? resolvedClientRoot
+      : path.join(resolvedClientRoot, "Sound");
   const soundListPath = path.join(soundDir, "SoundList.lst");
-  const strict = process.env.MIR2_CRYSTAL_SOUND_STRICT === "1";
 
   if (!existsSync(soundDir)) {
     throw new Error(`Crystal sound directory is missing: ${soundDir}`);
@@ -60,7 +104,7 @@ async function main() {
   let copiedCount = 0;
   let fallbackCount = 0;
 
-  await mkdir(PUBLIC_SOUND_DIR, { recursive: true });
+  await mkdir(outputDir, { recursive: true });
 
   for (const entry of entries) {
     let sourcePath = sourceFiles.get(entry.fileName.toLowerCase());
@@ -82,7 +126,7 @@ async function main() {
       continue;
     }
 
-    const outputPath = path.join(PUBLIC_SOUND_DIR, entry.fileName);
+    const outputPath = path.join(outputDir, entry.fileName);
     await mkdir(path.dirname(outputPath), { recursive: true });
     await copyFile(sourcePath, outputPath);
     copiedCount += 1;
@@ -113,7 +157,7 @@ async function main() {
 
   const summary = {
     generatedAt: new Date().toISOString(),
-    clientRoot,
+    clientRoot: resolvedClientRoot,
     soundDir,
     soundListPath,
     soundListEntryCount: entries.length,
@@ -126,30 +170,17 @@ async function main() {
     sounds,
   };
 
-  await mkdir(path.dirname(PUBLIC_SOUND_INDEX_PATH), { recursive: true });
-  await mkdir(path.dirname(DOC_SOUND_INDEX_PATH), { recursive: true });
-  await writeFile(PUBLIC_SOUND_INDEX_PATH, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
-  await writeFile(DOC_SOUND_INDEX_PATH, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  await mkdir(path.dirname(indexPath), { recursive: true });
+  await writeFile(indexPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  if (docPath) {
+    await mkdir(path.dirname(docPath), { recursive: true });
+    await writeFile(docPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  }
 
-  console.log(
-    `Exported ${summary.exportedSoundCount}/${summary.soundListEntryCount} SoundList entries from ${summary.sourceWavCount} source wavs`,
-  );
-  if (missing.length) {
-    console.warn(`Missing ${missing.length} SoundList wavs: ${missing.map((entry) => entry.fileName).join(", ")}`);
-  }
-  if (fallbackCount) {
-    console.warn(
-      `Fallback ${fallbackCount} SoundList wavs: ${fallbackSounds
-        .map((entry) => `${entry.fileName}->${entry.fallbackSourceFileName}`)
-        .join(", ")}`,
-    );
-  }
-  if (strict && missing.length) {
-    process.exitCode = 1;
-  }
+  return { summary, strict };
 }
 
-function indexSourceWavs(soundDir) {
+export function indexSourceWavs(soundDir) {
   const files = new Map();
   for (const entry of readdirSync(soundDir, { withFileTypes: true })) {
     if (!entry.isFile() || !/\.wav$/i.test(entry.name)) {
@@ -160,7 +191,7 @@ function indexSourceWavs(soundDir) {
   return files;
 }
 
-function parseSoundList(text) {
+export function parseSoundList(text) {
   const entries = [];
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();

@@ -356,6 +356,7 @@ export function OriginalClientShell({
   const [stageScale, setStageScale] = useState(1);
   const [bevyEntityAtlas, setBevyEntityAtlas] = useState<BevyEntityAtlasSnapshot | null>(null);
   const [webGl2EntityTextureReadyKey, setWebGl2EntityTextureReadyKey] = useState<string | null>(null);
+  const [webGl2EntityAtlasFailedKey, setWebGl2EntityAtlasFailedKey] = useState<string | null>(null);
   const previousScreenRef = useRef<ClientScreen>(screen);
   const bevyEntityAtlasRequestRef = useRef<{ key: string; requestId: number } | null>(null);
   const reconnectSeconds =
@@ -1017,10 +1018,24 @@ export function OriginalClientShell({
       debug.renderedLayers > 0
     ) {
       setWebGl2EntityTextureReadyKey(atlasKey);
+      setWebGl2EntityAtlasFailedKey((current) => (current === atlasKey ? null : current));
+      return;
+    }
+    if (debug.reason === "error") {
+      // The WebGL2 atlas renderer could not draw (e.g. an atlas texture failed to fetch or the
+      // GL context was lost). Record the failed atlas key so DOM entity sprites are shown as a
+      // fallback instead of leaving the player with invisible entities.
+      setWebGl2EntityAtlasFailedKey(atlasKey ?? "__webgl2_entity_error__");
     }
   }, []);
+  const webGl2EntityAtlasFailed =
+    useWebGl2EntityAtlasRenderer &&
+    webGl2EntityAtlasFailedKey !== null &&
+    (webGl2EntityAtlasFailedKey === "__webgl2_entity_error__" ||
+      webGl2EntityAtlasFailedKey === (activeBevyEntityAtlas?.key ?? null));
   const hideDomEntitySpritesForBevy =
     useGpuEntityRenderer &&
+    !webGl2EntityAtlasFailed &&
     (!useBevyEntityAtlas || (Boolean(activeBevyEntityAtlas) && webGl2EntityTextureReady));
   const entityRenderState = buildBevyEntityRenderState({
     enabled: useGpuEntityRenderer,
@@ -1041,7 +1056,15 @@ export function OriginalClientShell({
     if (webGl2EntityTextureReadyKey !== activeKey) {
       setWebGl2EntityTextureReadyKey(null);
     }
-  }, [activeBevyEntityAtlas?.key, useWebGl2EntityAtlasRenderer, webGl2EntityTextureReadyKey]);
+    // Give a newly-active atlas a fresh attempt before treating WebGL2 as failed.
+    if (
+      webGl2EntityAtlasFailedKey !== null &&
+      webGl2EntityAtlasFailedKey !== "__webgl2_entity_error__" &&
+      webGl2EntityAtlasFailedKey !== activeKey
+    ) {
+      setWebGl2EntityAtlasFailedKey(null);
+    }
+  }, [activeBevyEntityAtlas?.key, useWebGl2EntityAtlasRenderer, webGl2EntityTextureReadyKey, webGl2EntityAtlasFailedKey]);
   if (typeof window !== "undefined") {
     (
       window as typeof window & {
@@ -1055,6 +1078,8 @@ export function OriginalClientShell({
       rawWebGl2Enabled: useWebGl2EntityAtlasRenderer && entityRenderState.enabled,
       rawWebGl2TextureReady: webGl2EntityTextureReady,
       rawWebGl2TextureReadyKey: webGl2EntityTextureReadyKey,
+      rawWebGl2AtlasFailed: webGl2EntityAtlasFailed,
+      rawWebGl2AtlasFailedKey: webGl2EntityAtlasFailedKey,
       entityCount: entityRenderState.entities.length,
       layerCount: entityRenderState.entities.reduce((count, entity) => count + entity.layers.length, 0),
       atlasMode: useBevyEntityAtlas
@@ -1832,7 +1857,59 @@ function shouldUseDomEntityFallback(isTouchOrMobile: boolean) {
     return true;
   }
 
-  return isTouchOrMobile && params.get("bevyMobileEntities") !== "1";
+  if (!isTouchOrMobile) {
+    return false;
+  }
+  if (params.get("bevyMobileEntities") === "1") {
+    return false;
+  }
+  if (params.get("bevyMobileEntities") === "0") {
+    return true;
+  }
+  // Default for touch/mobile devices: use the GPU entity renderer when the device reports
+  // enough capability (memory, CPU cores, WebGL2 support), otherwise keep the lighter DOM
+  // sprite renderer. This replaces the previous blanket "mobile => DOM" default so capable
+  // phones/tablets get the higher-fidelity renderer, while low-end devices stay protected.
+  return !mobileDeviceCanRunGpuEntities();
+}
+
+// Capability probe for the GPU entity renderer on touch/mobile devices. Memoised because the
+// WebGL2 support check allocates a GL context, and creating one per render would exhaust the
+// browser's live-context budget and break the real renderer. Device capability is stable for
+// the session, so a single probe is sufficient.
+let cachedMobileGpuEntityCapability: boolean | null = null;
+function mobileDeviceCanRunGpuEntities() {
+  if (cachedMobileGpuEntityCapability !== null) {
+    return cachedMobileGpuEntityCapability;
+  }
+  cachedMobileGpuEntityCapability = computeMobileGpuEntityCapability();
+  return cachedMobileGpuEntityCapability;
+}
+
+function computeMobileGpuEntityCapability() {
+  if (typeof navigator === "undefined" || typeof document === "undefined") {
+    return false;
+  }
+  const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+  if (typeof deviceMemory === "number" && deviceMemory > 0 && deviceMemory < 4) {
+    return false;
+  }
+  const cores = navigator.hardwareConcurrency;
+  if (typeof cores === "number" && cores > 0 && cores < 4) {
+    return false;
+  }
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2");
+    if (!gl) {
+      return false;
+    }
+    // Release the probe context immediately so it does not count against the live-context budget.
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function shouldUseBevyEntityAtlas() {

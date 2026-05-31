@@ -93,6 +93,18 @@ const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-c
 const originalAssetManifest = readOriginalAssetManifest();
 const originalAssetPaths = new Set(Object.keys(originalAssetManifest.assets ?? {}));
 
+// The full Bichon map "0" cell data (which references WemadeMir2/Objects23 sprites) only
+// exists when the raw Crystal client map or its packaged form is present. In reduced
+// environments (e.g. web sandboxes without CRYSTAL_CLIENT_ROOT) map "0" falls back to the
+// committed starter region, which is valid but does not include Objects23. Detect that here
+// so the strong region assertion still runs wherever the data exists, without failing the
+// reduced environments where it cannot.
+const packagedMap0Path = fileURLToPath(new URL("../lib/generated/crystal-map-pack/0.map.gz", import.meta.url));
+const crystalClientRoot = process.env.CRYSTAL_CLIENT_ROOT;
+const crystalClientMap0Path = crystalClientRoot ? path.join(crystalClientRoot, "Map", "0.map") : null;
+const fullBichonMapDataAvailable =
+  existsSync(packagedMap0Path) || (crystalClientMap0Path ? existsSync(crystalClientMap0Path) : false);
+
 {
   const tempDir = mkdtempSync(path.join(tmpdir(), "mir2-lib-test-"));
   try {
@@ -181,13 +193,25 @@ const originalAssetPaths = new Set(Object.keys(originalAssetManifest.assets ?? {
   });
   const framePaths = sceneBlueprintOriginalMapFramePaths(blueprint);
   assert.ok(framePaths.length > 0, "Bichon scene blueprint should include original-map frame paths");
-  assert.ok(
-    framePaths.some((framePath) => framePath.startsWith("/original-map/WemadeMir2/Objects23/")),
-    "Bichon production regression region should include Objects23 frames",
-  );
+  if (fullBichonMapDataAvailable) {
+    assert.ok(
+      framePaths.some((framePath) => framePath.startsWith("/original-map/WemadeMir2/Objects23/")),
+      "Bichon production regression region should include Objects23 frames",
+    );
+  } else {
+    console.warn(
+      "resource loading tests: skipping Objects23 region assertion (full Crystal map data absent; starter fallback region in use)",
+    );
+  }
   for (const framePath of framePaths) {
     assert.ok(originalAssetPaths.has(framePath), `scene blueprint frame missing from manifest: ${framePath}`);
   }
+  // Graceful degradation: with all referenced assets present the region must report no misses.
+  assert.deepEqual(
+    blueprint.originalMapRegion?.missingAssets ?? [],
+    [],
+    "fully-resolved scene must not report missing assets",
+  );
 }
 
 {
@@ -196,6 +220,88 @@ const originalAssetPaths = new Set(Object.keys(originalAssetManifest.assets ?? {
   for (const framePath of actorMetaFramePaths) {
     assert.ok(originalAssetPaths.has(framePath), `actor frame path missing from manifest: ${framePath}`);
   }
+}
+
+// Graceful asset degradation: a referenced frame whose PNG is absent locally and not published
+// in the manifest must be skipped and recorded (not throw and abort the scene). Strict mode
+// (MIR2_STRICT_ASSET_RESOLUTION=1) must instead propagate the CrystalResourceMissingError so
+// release gates still catch missing assets.
+{
+  const tempDir = mkdtempSync(path.join(tmpdir(), "mir2-graceful-test-"));
+  try {
+    const libPath = path.join(tempDir, "Fake.Lib");
+    writeFileSync(libPath, buildFakeLib(16));
+    const missingLibraryKey = "ZzMir2GracefulDegradeTest/Fake";
+
+    loaderExports.resetCrystalMapLoaderResourceStatsForTests();
+    const gracefulLib = loaderExports.parseLibrary(libPath);
+    const graceful = loaderExports.resolveLayerSpriteFramesForTests(missingLibraryKey, gracefulLib, [3, 5]);
+    assert.equal(graceful.frames.length, 0, "missing frame PNGs must be skipped, not returned");
+    assert.equal(graceful.missingAssets.length, 2, "each distinct missing frame PNG must be recorded once");
+    assert.ok(
+      graceful.missingAssets.every(
+        (asset) => typeof asset.libraryKey === "string" && asset.path.startsWith("/original-map/"),
+      ),
+      "recorded misses must carry a libraryKey and an original-map public path",
+    );
+    assert.equal(
+      loaderExports.getCrystalMapLoaderResourceStats().recoveredMissingAssetCount,
+      2,
+      "resource stats must count recovered asset misses",
+    );
+
+    const deduped = loaderExports.resolveLayerSpriteFramesForTests(missingLibraryKey, gracefulLib, [3, 3]);
+    assert.equal(deduped.missingAssets.length, 1, "a duplicate frame index must dedupe to a single miss");
+
+    process.env.MIR2_STRICT_ASSET_RESOLUTION = "1";
+    let strictLoader;
+    try {
+      strictLoader = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
+        "server-only": {},
+        "./crystal-minimap-transform": minimapHelperExports,
+        "./generated/crystal-minimap-transforms": minimapTransformExports,
+      });
+    } finally {
+      delete process.env.MIR2_STRICT_ASSET_RESOLUTION;
+    }
+    const strictLib = strictLoader.parseLibrary(libPath);
+    assert.throws(
+      () => strictLoader.resolveLayerSpriteFramesForTests(missingLibraryKey, strictLib, [3]),
+      (error) => strictLoader.isCrystalResourceMissingError(error),
+      "strict mode must propagate the missing-asset error instead of degrading",
+    );
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+// A wholly-missing map degrades to a synthetic empty region (recorded in missingAssets) at
+// runtime, and still hard-fails under strict resolution so missing maps are caught in CI.
+{
+  const missingMapName = "ZzMir2NonexistentMapForTest";
+  const blueprint = await loaderExports.loadCrystalSceneBlueprint({ mapFileName: missingMapName });
+  assert.ok(blueprint.originalMapRegion, "missing map should still yield a (synthetic) region");
+  const mapMisses = (blueprint.originalMapRegion.missingAssets ?? []).filter(
+    (asset) => asset.resourceType === "map",
+  );
+  assert.equal(mapMisses.length, 1, "synthetic map must be recorded as a missing asset");
+
+  process.env.MIR2_STRICT_ASSET_RESOLUTION = "1";
+  let strictLoader;
+  try {
+    strictLoader = loadTypeScriptModule(new URL("../lib/crystal-map-loader.ts", import.meta.url), {
+      "server-only": {},
+      "./crystal-minimap-transform": minimapHelperExports,
+      "./generated/crystal-minimap-transforms": minimapTransformExports,
+    });
+  } finally {
+    delete process.env.MIR2_STRICT_ASSET_RESOLUTION;
+  }
+  await assert.rejects(
+    () => strictLoader.loadCrystalSceneBlueprint({ mapFileName: missingMapName }),
+    (error) => strictLoader.isCrystalResourceMissingError(error),
+    "strict mode must reject a wholly-missing map",
+  );
 }
 
 console.log("resource loading tests passed");

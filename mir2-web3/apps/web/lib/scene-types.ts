@@ -59,6 +59,13 @@ export type OriginalMapCell = {
   closedDoor?: boolean;
 };
 
+export type OriginalMapMissingAsset = {
+  resourceType: "map" | "library" | "frame" | "png";
+  path: string;
+  libraryKey?: string;
+  frameIndex?: number;
+};
+
 export type OriginalMapRegion = {
   mapFileName: string;
   mapWidth: number;
@@ -79,6 +86,14 @@ export type OriginalMapRegion = {
   };
   sprites: Record<string, OriginalMapSprite>;
   cells: OriginalMapCell[];
+  /**
+   * Assets that could not be resolved while building this region. Populated when the loader
+   * runs in graceful mode (the default at runtime): a missing sprite frame or library is
+   * skipped and recorded here instead of failing the whole scene with HTTP 424. Omitted when
+   * every referenced asset resolved. Strict mode (`MIR2_STRICT_ASSET_RESOLUTION=1`) restores
+   * hard-fail behaviour for CI/release gating.
+   */
+  missingAssets?: OriginalMapMissingAsset[];
 };
 
 export type SceneBlueprint = {
