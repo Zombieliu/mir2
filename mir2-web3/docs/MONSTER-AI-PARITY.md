@@ -139,6 +139,12 @@ the damage path went through `monster_player_attack_damage` → default 7.
 Added `24 | 25 => crystal_monster_attack_damage(monster_name)` to use
 imported DC. (Visibility/revival hooks unchanged.)
 
+### AI 97 HellKnight — imported DC damage ✅
+Crystal `HellKnight` has no `Attack()` override — it uses base
+`MonsterObject.Attack()` (DC damage). The runtime had AI 97 wired for the
+`HellLord.KnightKilled` linkage via the death hook but no damage arm.
+Added `97 => crystal_monster_attack_damage(monster_name)`.
+
 ### AI 116 BlackHammerCat — DC/MC damage + line splash ✅
 Crystal `BlackHammerCat.Attack` is BlackFoxman-shaped: adjacent + 2/3 chance
 → Type 0 + `GetAttackPower(MinDC, MaxDC)` (DC). Otherwise → Type 1 +
