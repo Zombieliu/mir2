@@ -42953,7 +42953,8 @@ fn mental_state_trickshot_reduces_crystal_archer_shot_damage() {
             40,
         );
         set_current_player_mp(&mut session, 500);
-        let origin = Point { x: 333, y: 267 };
+        let player = player_entity(session.app.world()).expect("player entity");
+        let origin = find_combat_origin_line(&session, player, MirDirection::Right, 5);
         set_player_position(&mut session, origin.clone());
         let target = spawn_crystal_monster_for_test(
             &mut session,
