@@ -97,11 +97,58 @@ fn new_character_success_index(packets: &[ServerPacket]) -> i32 {
     }
 }
 
+/// Give the seed player overwhelming, always-hitting melee. With Crystal-real
+/// starter gear (WoodenSword 2-4) a level-1 character can no longer one-shot
+/// field monsters, so kill/drop/quest tests that only care about the *defeat*
+/// outcome use this to keep their bounded attack loops lethal.
+fn ensure_lethal_player_damage(session: &mut SimulationSession) {
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        if let Some(weapon) = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+        {
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_MIN_DC,
+                value: 5_000,
+            });
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_MAX_DC,
+                value: 5_000,
+            });
+            weapon.added_stats.push(UserItemStat {
+                stat: super::CRYSTAL_STAT_ACCURACY,
+                value: 1_000,
+            });
+        }
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+/// Assert an inbound blow landed within the Crystal armour-roll range:
+/// `base_damage - Random(MinAC, MaxAC)`, floored at 1. Monster→player physical
+/// mitigation is now a roll, so per-hit damage is a range rather than a fixed
+/// value.
+fn assert_mitigated_by_armour(session: &SimulationSession, taken: i32, base_damage: i32) {
+    let stats = super::player_stats(session.app.world());
+    let lo = (base_damage - stats.max_ac()).max(1);
+    let hi = (base_damage - stats.min_ac()).max(1);
+    assert!(
+        (lo..=hi).contains(&taken),
+        "damage {taken} outside armour-mitigated range [{lo}, {hi}] \
+         (base {base_damage}, AC {}..{})",
+        stats.min_ac(),
+        stats.max_ac()
+    );
+}
+
 fn attack_until_monster_dies(
     session: &mut SimulationSession,
     object_id: u32,
     max_rounds: usize,
 ) -> Vec<ServerPacket> {
+    ensure_lethal_player_damage(session);
     for _ in 0..max_rounds {
         let packets = session.attack(object_id);
         if packet_has_object_died(&packets, object_id) {
@@ -5551,7 +5598,7 @@ fn pending_monster_damage_can_kill_player_and_snapshot_dead_state_syncs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     set_current_player_hp(&mut session, 10);
     let attacker = spawn_crystal_monster_for_test(
@@ -5618,7 +5665,7 @@ fn dead_player_cannot_move_attack_magic_or_use_normal_potion_until_revived() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     set_current_player_hp(&mut session, 0);
     set_current_player_mp(&mut session, 500);
@@ -7289,6 +7336,7 @@ fn thunder_element_can_reposition_before_area_attack() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let thunder = spawn_crystal_monster_for_test(
         &mut session,
@@ -7712,7 +7760,7 @@ fn cannibal_tentacles_adjacent_halfmoon_branch_poisons_and_fans_out() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let (player_origin, tentacles_position, ally_position) = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|point| {
             let tentacles_position = Point {
                 x: point.x + 1,
@@ -9171,7 +9219,7 @@ fn oma_king_close_line_branch_pushes_and_can_paralyze_before_line_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let king_position = Point {
                 x: point.x + 1,
@@ -10678,7 +10726,7 @@ fn guardian_rock_delays_packet_and_pulls_player_toward_rock() {
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             (0..=5).all(|offset| {
                 can_occupy(
@@ -11854,7 +11902,7 @@ fn khazard_uses_crystal_four_tile_pull_packet_without_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let khazard_position = Point {
                 x: point.x + 4,
@@ -12432,7 +12480,7 @@ fn manectric_claw_range_thrust_can_step_toward_target_instead_of_attacking() {
 
     let player = player_entity(session.app.world()).expect("player entity");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             (0..=3).all(|offset| {
                 can_occupy(
@@ -12602,7 +12650,7 @@ fn manectric_king_close_push_line_uses_type_one_dc() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -12722,6 +12770,7 @@ fn manectric_king_low_hp_mass_attack_hits_nearby_targets() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -13133,6 +13182,7 @@ fn seedings_general_close_splash_branch_uses_type_one_mc() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -13385,6 +13435,7 @@ fn hell_keeper_type_one_nonzero_mc_dazes_and_fans_out() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -14264,13 +14315,10 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_spell_damage("TucsonGeneral") * 2
-            - total_defence_bonus(session.app.world()))
-        .max(1)
-    };
+    let base_damage = super::crystal_monster_spell_damage("TucsonGeneral") * 2;
     let general = spawn_crystal_monster_for_test(
         &mut session,
         general_object_id,
@@ -14324,10 +14372,10 @@ fn tucson_general_type_two_range_branch_uses_double_sc() {
         packet,
         ServerPacket::Struck { info } if info.attacker_id == general_object_id
     )));
-    assert_eq!(
+    assert_mitigated_by_armour(
+        &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral type-2 ranged branch should use imported Crystal SC * 2 after defence"
+        base_damage,
     );
 }
 
@@ -14357,13 +14405,10 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("TucsonGeneral")
-            - total_defence_bonus(session.app.world()))
-        .max(1)
-    };
+    let base_damage = super::crystal_monster_magic_damage("TucsonGeneral");
     let general = spawn_crystal_monster_for_test(
         &mut session,
         general_object_id,
@@ -14448,10 +14493,10 @@ fn tucson_general_close_stomp_hits_area_and_applies_paralysis() {
         ServerPacket::ObjectStruck { info }
             if info.object_id == ally_object_id && info.attacker_id == general_object_id
     )));
-    assert_eq!(
+    assert_mitigated_by_armour(
+        &session,
         before_hp - session.world_snapshot().player_hp.expect("player hp"),
-        expected_damage,
-        "TucsonGeneral close stomp should use imported Crystal MC after defence"
+        base_damage,
     );
     assert!(session
         .world_snapshot()
@@ -14489,6 +14534,7 @@ fn tucson_general_rage_spawns_rock_spell_objects_and_targeted_impacts() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let current_tick = runtime_tick(session.app.world());
@@ -15950,7 +15996,7 @@ fn restless_jar_low_hp_stomp_branch_pushes_and_hits_area() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -16900,7 +16946,7 @@ fn frozen_axeman_adjacent_pull_branch_uses_type_two_and_pushes_player() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let axeman_position = Point {
                 x: point.x + 1,
@@ -17323,6 +17369,7 @@ fn snow_wolf_type_one_nonzero_mc_slow_frozen_and_fanout() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -17508,6 +17555,7 @@ fn frozen_warewolf_hp_branch_spawns_snow_wolf_slaves() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let wolf = spawn_crystal_monster_for_test(
         &mut session,
@@ -17611,6 +17659,7 @@ fn frozen_warewolf_death_explosion_hits_adjacent_player() {
             hp: 1_000,
             max_hp: 1_000,
             mp: 200,
+            max_mp: 200,
         });
     let wolf = spawn_crystal_monster_for_test(
         &mut session,
@@ -17765,6 +17814,7 @@ fn tucson_mage_wide_line_fans_out_when_mc_is_available() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -18951,7 +19001,7 @@ fn turtle_grass_type_one_branch_pushes_player_before_delayed_damage() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             let grass_position = Point {
                 x: point.x + 1,
@@ -19950,6 +20000,7 @@ fn water_dragon_range_hit_applies_green_poison() {
             hp: 500,
             max_hp: 500,
             mp: 100,
+            max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
     let expected_damage = {
@@ -20292,7 +20343,7 @@ fn stray_cat_push_branch_moves_player_and_is_zero_mc_gated() {
     let player = player_entity(session.app.world()).expect("player entity");
     let player_object_id = entity_object_id(session.app.world(), player).expect("player object id");
     let player_origin = (320..380)
-        .flat_map(|x| (250..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|point| {
             can_occupy(session.app.world(), point.clone(), Some(player))
                 && can_occupy(
@@ -30930,6 +30981,7 @@ fn use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp() {
         hp: 10,
         max_hp: 120,
         mp: 0,
+        max_mp: 100,
     };
     let player = player_entity(session.app.world()).expect("player entity");
     session
@@ -31090,7 +31142,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
     assert!(!first_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
-    assert_eq!(total_attack_bonus(session.app.world()), 12);
+    assert_eq!(total_attack_bonus(session.app.world()), 10);
 
     add_inventory_crystal_item(&mut session, "ImpactDrug(M)", 32);
     let second_packets = session.handle_packet(ClientPacket::UseItem {
@@ -31114,7 +31166,7 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
             grid: MirGridType::Inventory,
         }
     )));
-    assert_eq!(total_attack_bonus(session.app.world()), 12);
+    assert_eq!(total_attack_bonus(session.app.world()), 10);
 }
 
 #[test]
@@ -31156,7 +31208,7 @@ fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
             .map(|buff| buff.attack_bonus),
         Some(2)
     );
-    assert_eq!(total_attack_bonus(session.app.world()), 9);
+    assert_eq!(total_attack_bonus(session.app.world()), 7);
 }
 
 #[test]
@@ -32199,12 +32251,12 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
     set_current_player_mp(&mut session, 0);
 
     let player_entity = player_entity(session.app.world()).expect("player entity");
-    let max_hp = session
+    let (max_hp, max_mp) = session
         .app
         .world()
         .entity(player_entity)
         .get::<PlayerVitals>()
-        .map(|vitals| vitals.max_hp)
+        .map(|vitals| (vitals.max_hp, vitals.max_mp))
         .expect("player vitals");
     let player_object_id =
         super::current_player_object_id(session.app.world()).expect("player object id");
@@ -32234,7 +32286,7 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
     )));
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.player_hp, Some(max_hp));
-    assert_eq!(snapshot.player_mp, Some(100));
+    assert_eq!(snapshot.player_mp, Some(max_mp));
     assert!(!snapshot
         .inventory_items
         .iter()
@@ -33659,7 +33711,7 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Weapon)
             .map(|item| (item.grade, item.added_attack, item.attack)),
-        Some((ItemGrade::Common, 2, 6))
+        Some((ItemGrade::Common, 0, 4))
     );
     assert_eq!(
         snapshot
@@ -33667,11 +33719,13 @@ fn added_equipment_stats_affect_snapshot_and_combat_totals() {
             .iter()
             .find(|item| item.slot == EquipmentSlot::Armour)
             .map(|item| (item.grade, item.added_defence, item.defence)),
-        Some((ItemGrade::Common, 1, 4))
+        Some((ItemGrade::Common, 0, 5))
     );
 
-    assert_eq!(total_attack_bonus(session.app.world()), 7);
-    assert_eq!(total_defence_bonus(session.app.world()), 6);
+    // WoodenSword MaxDC 4 (+ Copper Necklace 1); LightLeatherArmour MaxAC 5
+    // (+ bracelet/sandals 1 each).
+    assert_eq!(total_attack_bonus(session.app.world()), 5);
+    assert_eq!(total_defence_bonus(session.app.world()), 7);
 }
 
 #[test]
@@ -38445,7 +38499,7 @@ fn magic_packet_crystal_elemental_shot_gathers_then_spends_orb() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 60);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -38640,7 +38694,7 @@ fn magic_packet_crystal_straight_and_double_shot_queue_delayed_damage() {
             40,
         );
         set_current_player_mp(&mut session, 500);
-        let origin = Point { x: 333, y: 267 };
+        let origin = Point { x: 333, y: 300 };
         set_player_position(&mut session, origin.clone());
         let target = spawn_crystal_monster_for_test(
             &mut session,
@@ -38712,7 +38766,7 @@ fn magic_packet_crystal_back_step_moves_opposite_facing_and_reports_blocked_dist
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let expected = offset_point(&origin, MirDirection::Left, 2);
     set_player_position(&mut session, origin.clone());
     session
@@ -38835,7 +38889,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|candidate| {
             can_occupy(session.app.world(), (*candidate).clone(), Some(player))
                 && (1..=5).all(|distance| {
@@ -38910,7 +38964,7 @@ fn magic_packet_crystal_shoulder_dash_moves_pushes_and_reports_blocked_failures(
     set_current_player_mp(&mut pushed, 500);
     let pushed_player = player_entity(pushed.app.world()).expect("pushed player entity");
     let push_origin = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find(|candidate| {
             can_occupy(
                 pushed.app.world(),
@@ -39036,7 +39090,7 @@ fn magic_packet_crystal_flash_dash_dashes_hits_and_stuns_front_target() {
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, destination, target_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let destination = offset_point(&candidate, MirDirection::Right, 1);
             let target = offset_point(&candidate, MirDirection::Right, 2);
@@ -39141,7 +39195,7 @@ fn magic_packet_crystal_slashing_burst_leaps_two_tiles_and_delays_front_damage()
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, target_position, destination) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let target = offset_point(&candidate, MirDirection::Right, 1);
             let destination = offset_point(&candidate, MirDirection::Right, 2);
@@ -39229,7 +39283,7 @@ fn magic_packet_crystal_fire_wall_spawns_cross_spell_objects_and_ticks_ground_da
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, target_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let target = offset_point(&candidate, MirDirection::Right, 1);
             let cross = [
@@ -39340,7 +39394,7 @@ fn magic_packet_crystal_lightning_scans_six_tiles_in_facing_line() {
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, near_position, far_position) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let near = offset_point(&candidate, MirDirection::Right, 1);
             let far = offset_point(&candidate, MirDirection::Right, 3);
@@ -39435,7 +39489,7 @@ fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_l
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, living_position, undead_position, outside_position, requested_target) = (300..370)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let living = offset_point(&candidate, MirDirection::Right, 1);
             let undead = offset_point(&candidate, MirDirection::Left, 1);
@@ -39556,7 +39610,7 @@ fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_t
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, monster_origin) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let monster = offset_point(&candidate, MirDirection::Right, 1);
             let push_1 = offset_point(&candidate, MirDirection::Right, 2);
@@ -39652,7 +39706,7 @@ fn magic_packet_crystal_storm_escape_teleports_buffs_and_damages_nearby_monsters
     set_current_player_mp(&mut session, 500);
     let player = player_entity(session.app.world()).expect("player entity");
     let (origin, monster_origin, destination) = (300..380)
-        .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+        .flat_map(|x| (278..312).map(move |y| Point { x, y }))
         .find_map(|candidate| {
             let monster = offset_point(&candidate, MirDirection::Right, 1);
             let target = offset_point(&candidate, MirDirection::Right, 5);
@@ -39749,7 +39803,7 @@ fn magic_packet_crystal_binding_shot_queues_center_visual_and_roots_nearby_monst
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let center = spawn_crystal_monster_for_test(
         &mut session,
@@ -39848,7 +39902,7 @@ fn magic_packet_crystal_special_arrow_shots_queue_damage_and_apply_visible_buffs
             40,
         );
         set_current_player_mp(&mut session, 500);
-        let origin = Point { x: 333, y: 267 };
+        let origin = Point { x: 333, y: 300 };
         set_player_position(&mut session, origin.clone());
         let target = spawn_crystal_monster_for_test(
             &mut session,
@@ -39929,7 +39983,7 @@ fn magic_packet_crystal_poison_shot_applies_green_poison_to_target() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -40004,7 +40058,7 @@ fn magic_packet_crystal_cripple_shot_consumes_poison_buff_and_spreads_green_pois
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let center = spawn_crystal_monster_for_test(
         &mut session,
@@ -40135,7 +40189,7 @@ fn magic_packet_crystal_mass_healing_queues_delayed_area_heal() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 10);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -40198,7 +40252,7 @@ fn magic_packet_crystal_healing_circle_spawns_spell_and_delayed_heal() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 10);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -40270,7 +40324,7 @@ fn magic_packet_crystal_curse_consumes_amulet_and_debuffs_hostile_area() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -40355,7 +40409,7 @@ fn magic_packet_crystal_trap_hexagon_consumes_amulet_roots_area_and_spawns_spell
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let center = Point {
         x: origin.x + 2,
         y: origin.y,
@@ -40445,7 +40499,7 @@ fn magic_packet_crystal_poisoning_consumes_green_poison_and_ticks_monster_damage
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::BraceletRight);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -40552,7 +40606,7 @@ fn magic_packet_crystal_poisoning_red_poison_marks_monster_without_green_damage(
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "RedPoison", EquipmentSlot::BraceletRight);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -40644,7 +40698,7 @@ fn magic_packet_crystal_poison_cloud_consumes_amulet_and_green_poison_ground_tic
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::BraceletRight);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 2,
         y: origin.y,
@@ -40757,7 +40811,7 @@ fn magic_packet_crystal_plague_consumes_amulet_optional_poison_and_debuffs_area(
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
     equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::BraceletRight);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 2,
         y: origin.y,
@@ -40966,7 +41020,7 @@ fn magic_packet_crystal_dark_body_applies_visible_hidden_buff() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Assassin, MirGender::Male, 46);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41144,7 +41198,7 @@ fn magic_packet_crystal_pet_enhancer_buffs_friendly_monster() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 48);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let pet = spawn_crystal_monster_for_test(
         &mut session,
@@ -41199,7 +41253,7 @@ fn magic_packet_crystal_lion_roar_paralyses_nearby_lower_level_monsters() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41262,7 +41316,7 @@ fn magic_packet_crystal_battle_cry_reacquires_nearby_monsters() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41318,7 +41372,7 @@ fn magic_packet_crystal_frost_crunch_damages_and_freezes_target() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41407,7 +41461,7 @@ fn magic_packet_crystal_vampirism_damages_target_and_heals_player() {
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 20);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41481,7 +41535,7 @@ fn magic_packet_crystal_turn_undead_only_damages_undead_targets() {
         45,
     );
     set_current_player_mp(&mut living_session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut living_session, origin.clone());
     let living = spawn_crystal_monster_for_test(
         &mut living_session,
@@ -41660,7 +41714,7 @@ fn magic_packet_crystal_revelation_queues_target_health_reveal() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41821,7 +41875,7 @@ fn magic_preflight_fireball_without_target_does_not_commit_mp_cooldown_or_action
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     {
         let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
@@ -41895,7 +41949,7 @@ fn magic_preflight_out_of_range_thunderbolt_preserves_mp() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 20);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -41961,7 +42015,7 @@ fn magic_preflight_self_buff_consumes_mp_and_applies_buff() {
         .resource_mut::<SkillResource>()
         .skills
         .push(super::crystal_skill_state("MagicShield", 2).expect("MagicShield skill"));
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
     let starting_mp = session.world_snapshot().player_mp.expect("player mp");
@@ -42050,7 +42104,7 @@ fn magic_preflight_healing_self_target_and_action_lock_behave_like_crystal() {
                 ..current
             });
     }
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     {
         let mut skills = session.app.world_mut().resource_mut::<SkillResource>();
@@ -42489,7 +42543,7 @@ fn counter_attack_spell_toggle_applies_crystal_buff_stats() {
 fn magic_packet_crystal_counter_attack_procs_on_adjacent_incoming_hit() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let player = player_entity(session.app.world()).expect("player");
     {
@@ -42617,7 +42671,7 @@ fn mental_state_trickshot_reduces_crystal_archer_shot_damage() {
             40,
         );
         set_current_player_mp(&mut session, 500);
-        let origin = Point { x: 333, y: 267 };
+        let origin = Point { x: 333, y: 300 };
         set_player_position(&mut session, origin.clone());
         let target = spawn_crystal_monster_for_test(
             &mut session,
@@ -42694,7 +42748,7 @@ fn magic_packet_crystal_thrusting_hits_second_tile_from_attack_packet() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 40);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -42761,7 +42815,7 @@ fn magic_packet_crystal_melee_passive_procs_emit_effects_and_gather_element() {
         55,
     );
     set_current_player_mp(&mut session, 20);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -42866,7 +42920,7 @@ fn magic_packet_crystal_imported_agility_drives_melee_hit_roll() {
             MirGender::Male,
             55,
         );
-        let origin = Point { x: 333, y: 267 };
+        let origin = Point { x: 333, y: 300 };
         set_player_position(&mut session, origin.clone());
         let mut template = crystal_dynamic_monster_template("Yob").expect("Yob template");
         template.monster_agility = if with_accuracy_passives { 11 } else { 100_000 };
@@ -42972,7 +43026,7 @@ fn magic_packet_crystal_flaming_sword_and_slaying_attach_attack_spells() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -43049,7 +43103,7 @@ fn magic_packet_crystal_focus_marks_range_attack_and_delays_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target_location = Point {
         x: origin.x + 4,
@@ -43119,7 +43173,7 @@ fn magic_packet_crystal_napalm_shot_hits_target_center_square_not_caster_square(
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let center = spawn_crystal_monster_for_test(
         &mut session,
@@ -43211,7 +43265,7 @@ fn magic_packet_crystal_delayed_explosion_marks_explodes_and_removes_marker() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -43331,7 +43385,7 @@ fn magic_packet_crystal_trap_roots_lower_level_monster_and_spawns_trap_object() 
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Female, 40);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target_position = Point {
         x: origin.x + 3,
@@ -43396,7 +43450,7 @@ fn magic_packet_crystal_hell_fire_hits_forward_and_level_three_side_lanes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let forward = spawn_crystal_monster_for_test(
         &mut session,
@@ -43482,7 +43536,7 @@ fn magic_packet_crystal_fire_bang_and_ice_storm_hit_target_three_by_three() {
         set_current_player_mp(&mut session, 500);
         let player = player_entity(session.app.world()).expect("player entity");
         let (origin, target_point) = (300..380)
-            .flat_map(|x| (240..310).map(move |y| Point { x, y }))
+            .flat_map(|x| (278..312).map(move |y| Point { x, y }))
             .find_map(|candidate| {
                 let target = Point {
                     x: candidate.x + 4,
@@ -43580,7 +43634,7 @@ fn magic_packet_crystal_blizzard_and_meteor_strike_spawn_five_by_five_ground_dam
         let mut session = SimulationSession::new(SimulationConfig::default());
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         set_current_player_mp(&mut session, 500);
-        let origin = Point { x: 333, y: 267 };
+        let origin = Point { x: 333, y: 300 };
         let target_point = Point {
             x: origin.x + 4,
             y: origin.y,
@@ -43681,7 +43735,7 @@ fn magic_packet_crystal_meteor_shower_damages_primary_and_secondary_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 4,
         y: origin.y,
@@ -43791,7 +43845,7 @@ fn magic_packet_crystal_fire_bounce_chains_projectiles_and_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let first = spawn_crystal_monster_for_test(
         &mut session,
@@ -43917,7 +43971,7 @@ fn magic_packet_crystal_explosive_trap_spawns_front_row_and_detonates_on_contact
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let player = player_entity(session.app.world()).expect("player entity");
     session
@@ -44010,7 +44064,7 @@ fn magic_packet_crystal_thunder_bolt_boosts_undead_damage() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let living = spawn_crystal_monster_for_test(
         &mut session,
@@ -44109,7 +44163,7 @@ fn magic_packet_crystal_electric_shock_roots_lower_level_monster_without_damage(
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -44182,7 +44236,7 @@ fn magic_packet_crystal_poison_sword_consumes_poison_and_marks_front_arc() {
     );
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "GreenPoison", EquipmentSlot::BraceletRight);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let player = player_entity(session.app.world()).expect("player entity");
     session
@@ -44303,7 +44357,7 @@ fn magic_packet_crystal_magic_shield_and_teleport_emit_crystal_state() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Female, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let destination = Point { x: 337, y: 267 };
     set_player_position(&mut session, origin.clone());
     session
@@ -44389,7 +44443,7 @@ fn magic_packet_crystal_mirroring_spawns_and_recasts_existing_clone() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -44465,7 +44519,7 @@ fn magic_packet_crystal_moon_mist_hides_and_hits_nearby_targets() {
         55,
     );
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let living = spawn_crystal_monster_for_test(
         &mut session,
@@ -44568,7 +44622,7 @@ fn magic_packet_crystal_cat_tongue_damages_and_controls_target() {
         55,
     );
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 4,
         y: origin.y,
@@ -44644,7 +44698,7 @@ fn magic_packet_crystal_hallucination_consumes_amulet_and_breaks_tracking() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "Amulet", EquipmentSlot::Amulet);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 3,
         y: origin.y,
@@ -44699,7 +44753,7 @@ fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effe
     set_active_character_class_gender_level(&mut session, MirClass::Archer, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 20);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -44823,7 +44877,7 @@ fn magic_packet_crystal_portal_and_reincarnation_spawn_spell_surfaces() {
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
     equip_crystal_item(&mut session, "AmuletOfRevival", EquipmentSlot::Amulet);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let portal_point = Point {
         x: origin.x + 1,
         y: origin.y,
@@ -44911,7 +44965,7 @@ fn magic_packet_crystal_projectile_family_uses_distance_delay_and_amulets() {
         45,
     );
     set_current_player_mp(&mut wizard_session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let target_point = Point {
         x: origin.x + 4,
         y: origin.y,
@@ -45081,7 +45135,7 @@ fn magic_packet_crystal_healing_and_blink_emit_effects() {
             .resource_mut::<PlayerRuntimeResource>()
             .player_vitals = vitals;
     }
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     session
         .app
@@ -45170,7 +45224,7 @@ fn magic_packet_crystal_summon_skeleton_and_holy_deva_consume_amulets() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Taoist, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin);
     session
         .app
@@ -45249,7 +45303,7 @@ fn magic_packet_crystal_blade_avalanche_and_crescent_slash_hit_crystal_arcs() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 55);
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let near = spawn_crystal_monster_for_test(
         &mut session,
@@ -45404,7 +45458,7 @@ fn magic_packet_crystal_blade_avalanche_and_crescent_slash_hit_crystal_arcs() {
 
 #[test]
 fn magic_packet_crystal_halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes() {
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     let hp = |session: &SimulationSession, entity: Entity| {
         session
             .app
@@ -45620,7 +45674,7 @@ fn magic_packet_crystal_halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes() {
 
 #[test]
 fn magic_packet_crystal_double_slash_twin_drake_and_entrapment_control_target() {
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
 
     let mut double_session = SimulationSession::new(SimulationConfig::default());
     double_session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -45831,7 +45885,7 @@ fn magic_packet_crystal_flame_disruptor_boosts_living_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let living = spawn_crystal_monster_for_test(
         &mut session,
@@ -45918,7 +45972,7 @@ fn magic_packet_crystal_ice_thrust_hits_three_column_path_and_freezes() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let near = spawn_crystal_monster_for_test(
         &mut session,
@@ -46134,6 +46188,7 @@ fn casting_stonetrap_spawns_friendly_trap_with_extra() {
             hp: 120,
             max_hp: 120,
             mp: 200,
+            max_mp: 200,
         });
 
     let _ = session.cast_skill("stonetrap");
@@ -46340,7 +46395,7 @@ fn hostile_monster_prefers_stone_trap_over_other_friendly_summon_targets() {
 fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
     let player = player_entity(session.app.world()).expect("player");
     session
@@ -46351,6 +46406,7 @@ fn stonetrap_ignores_incoming_damage_and_keeps_full_health() {
             hp: 120,
             max_hp: 120,
             mp: 200,
+            max_mp: 200,
         });
 
     let _ = session.cast_skill("stonetrap");
@@ -46551,7 +46607,7 @@ fn friendly_spitting_toad_uses_range_attack_against_hostile_monster() {
 fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let origin = Point { x: 333, y: 267 };
+    let origin = Point { x: 333, y: 300 };
     set_player_position(&mut session, origin.clone());
 
     let wasp = find_monster_entity_by(&session, |name, _, _| name == "Field Wasp");
@@ -53877,4 +53933,414 @@ fn dead_player_returns_unexpired_rental_item_before_normal_drop_paths() {
             && mail.items == vec!["dagger".to_string()]
             && mail.item_states_json.len() == 1
     }));
+}
+
+// ---------------------------------------------------------------------------
+// Player stat engine (stats.rs) — Crystal RefreshStats parity coverage.
+// ---------------------------------------------------------------------------
+
+fn equipped_weapon_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("seed weapon");
+        weapon.added_stats.push(UserItemStat { stat, value });
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+fn equipped_armour_push_stat(session: &mut SimulationSession, stat: u8, value: i32) {
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let armour = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Armour)
+            .expect("seed armour");
+        armour.added_stats.push(UserItemStat { stat, value });
+    }
+    super::refresh_player_stats(session.app.world_mut());
+}
+
+#[test]
+fn player_stats_seed_reflects_real_weapon_dc_range() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    // Crystal-real starter gear: WoodenSword carries a MinDC 2 / MaxDC 4 spread,
+    // so the player's DC is a genuine range (no flat floor), and the melee
+    // figure equals MaxDC.
+    assert!(
+        stats.min_dc() < stats.max_dc(),
+        "real weapon should open a DC spread (min={}, max={})",
+        stats.min_dc(),
+        stats.max_dc()
+    );
+    assert_eq!(stats.max_dc() - stats.min_dc(), 2);
+    assert_eq!(
+        stats.max_dc(),
+        super::crystal_player_melee_damage(session.app.world())
+    );
+    // Level-1 melee is now single digits (Crystal newbie damage), not the old
+    // ~24 floor.
+    assert!(stats.max_dc() < 12, "no inflated melee floor remains");
+}
+
+#[test]
+fn player_stats_seed_max_mp_tracks_class_base_not_hardcoded_hundred() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Compute the expected base MP for whatever the seed character actually is.
+    let (class, level) = {
+        let session_res = session.app.world().resource::<SessionResource>();
+        let character = session_res
+            .selected_character
+            .as_ref()
+            .expect("selected character");
+        (character.class, character.level)
+    };
+    let (_, base_mp) = crate::config::crystal_base_vitals(class, level);
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.max_mp(), base_mp);
+
+    let player = super::player_entity(session.app.world()).expect("player");
+    let vitals = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals");
+    // The pool tracks the class/level base, not the legacy hard-coded 100.
+    assert_eq!(vitals.max_mp, base_mp);
+    assert_eq!(vitals.max_mp, stats.max_mp());
+}
+
+#[test]
+fn mana_restore_caps_at_max_mp_not_legacy_hundred() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let max_mp = super::player_stats(session.app.world()).max_mp();
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.mp = 0;
+    }
+    // Attempt to overheal far beyond the real pool.
+    super::restore_current_player_vitals(session.app.world_mut(), 0, 100_000);
+    let player = super::player_entity(session.app.world()).expect("player");
+    let vitals = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals");
+    assert_eq!(vitals.mp, max_mp);
+}
+
+#[test]
+fn equipping_dc_range_weapon_produces_damage_spread() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let flat_before = super::crystal_player_melee_damage(session.app.world());
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 12);
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+
+    let stats = super::player_stats(session.app.world());
+    assert!(
+        stats.max_dc() - stats.min_dc() >= 8,
+        "explicit Min/Max DC should open a spread (min={}, max={})",
+        stats.min_dc(),
+        stats.max_dc()
+    );
+    // MaxDC grows by the added MaxDC stat over the legacy flat value.
+    assert_eq!(stats.max_dc(), flat_before + 12);
+
+    // The rolled damage stays within [min_dc, max_dc] across ticks.
+    for tick in 0..32 {
+        let rolled = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
+        assert!(
+            rolled >= stats.min_dc() && rolled <= stats.max_dc(),
+            "rolled {rolled} outside [{}, {}]",
+            stats.min_dc(),
+            stats.max_dc()
+        );
+    }
+}
+
+#[test]
+fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let player = super::player_entity(session.app.world()).expect("player");
+    let base_max_hp = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals")
+        .max_hp;
+
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_HP, 250);
+    let boosted = session
+        .app
+        .world()
+        .entity(player)
+        .get::<super::PlayerVitals>()
+        .copied()
+        .expect("vitals")
+        .max_hp;
+    assert_eq!(boosted, base_max_hp + 250);
+    assert_eq!(super::player_stats(session.app.world()).max_hp(), boosted);
+}
+
+#[test]
+fn critical_hit_amplifies_melee_when_crit_stats_present() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
+    // (Crystal RefreshStatCaps). So crits land ~18% of the time and each adds
+    // CriticalDamage*10% = +100% (a doubled blow).
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_RATE, 100);
+    equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.critical_rate(), 18);
+    assert_eq!(stats.critical_damage(), 10);
+    let (min, max) = (stats.min_dc(), stats.max_dc());
+
+    let (mut crits, mut normals) = (0, 0);
+    for tick in 0..200 {
+        let d = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
+        if (min..=max).contains(&d) {
+            normals += 1;
+        } else if (2 * min..=2 * max).contains(&d) {
+            // crit: Random(MinDC,MaxDC) doubled by CriticalDamage 10.
+            crits += 1;
+        } else {
+            panic!("rolled {d} is neither a normal [{min},{max}] nor crit hit");
+        }
+    }
+    assert!(crits > 0, "an 18% crit rate should land some crits");
+    assert!(normals > 0, "an 18% crit rate should not crit every swing");
+}
+
+#[test]
+fn poison_resistance_reduces_player_poison_tick_damage() {
+    // Baseline: unresisted green poison applies the full tick.
+    let mut baseline = SimulationSession::new(SimulationConfig::default());
+    baseline.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let player = super::player_entity(baseline.app.world()).expect("player");
+        let mut entity = baseline.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = vitals.max_hp;
+    }
+    let tick = super::runtime_tick(baseline.app.world());
+    super::apply_toxic_ghoul_green_poison(baseline.app.world_mut(), tick, 20);
+    let hp_before = baseline.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_status_effects(baseline.app.world_mut(), tick + 2, &mut packets);
+    let unresisted_loss = hp_before - baseline.world_snapshot().player_hp.expect("hp");
+    assert!(unresisted_loss > 0, "green poison should hurt unresisted");
+
+    // With poison resistance the same tick is mitigated.
+    let mut resisted = SimulationSession::new(SimulationConfig::default());
+    resisted.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equipped_armour_push_stat(&mut resisted, super::CRYSTAL_STAT_POISON_RESIST, 5);
+    {
+        let player = super::player_entity(resisted.app.world()).expect("player");
+        let mut entity = resisted.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = vitals.max_hp;
+    }
+    let tick = super::runtime_tick(resisted.app.world());
+    super::apply_toxic_ghoul_green_poison(resisted.app.world_mut(), tick, 20);
+    let hp_before = resisted.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_status_effects(resisted.app.world_mut(), tick + 2, &mut packets);
+    let resisted_loss = hp_before - resisted.world_snapshot().player_hp.expect("hp");
+    assert!(
+        resisted_loss < unresisted_loss,
+        "poison resist should reduce the tick (resisted {resisted_loss} vs {unresisted_loss})"
+    );
+}
+
+#[test]
+fn magic_resistance_grants_miss_chance_against_incoming_magic() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // No resistance: every magic blow lands in full.
+    for tick in 0..40 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        assert_eq!(
+            super::crystal_player_magic_mitigated(session.app.world(), 100),
+            100
+        );
+    }
+
+    // Gear grants MagicResist 6, but the class cap is 2 → ~2/10 chance to fully
+    // shrug a magic blow (Crystal GetArmour MAC miss check).
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 6);
+    assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
+
+    let (mut misses, mut hits) = (0, 0);
+    for tick in 0..200 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        match super::crystal_player_magic_mitigated(session.app.world(), 100) {
+            0 => misses += 1,
+            other => {
+                assert_eq!(other, 100, "a non-miss magic blow lands in full");
+                hits += 1;
+            }
+        }
+    }
+    assert!(
+        misses > 0,
+        "magic resistance should sometimes fully block magic"
+    );
+    assert!(hits > 0, "a 2/10 resist must not block every blow");
+}
+
+#[test]
+fn passive_regen_restores_pools_after_combat_delay() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = 1;
+        vitals.mp = 0;
+    }
+    // No recent damage (last_damaged_tick stays at its default), so regen is
+    // eligible. Drive the regen system directly at a cadence tick to keep the
+    // assertion independent of nearby monster AI.
+    {
+        let mut runtime = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        runtime.last_damaged_tick = 0;
+    }
+    let hp_before = session.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_vital_regen(session.app.world_mut(), 100, &mut packets);
+    let hp_after = session.world_snapshot().player_hp.expect("hp");
+    assert!(
+        hp_after > hp_before,
+        "idle player should passively regenerate (before {hp_before}, after {hp_after})"
+    );
+}
+
+#[test]
+fn passive_regen_is_paused_immediately_after_taking_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    {
+        let player = super::player_entity(session.app.world()).expect("player");
+        let mut entity = session.app.world_mut().entity_mut(player);
+        let mut vitals = entity.get_mut::<super::PlayerVitals>().expect("vitals");
+        vitals.hp = 1;
+    }
+    // Took damage at tick 95; a cadence tick at 100 is still inside the
+    // post-damage window, so regen must stay paused (gate is the combat delay,
+    // not the cadence: 100 % 10 == 0).
+    {
+        let mut runtime = session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>();
+        runtime.last_damaged_tick = 95;
+    }
+    let hp_before = session.world_snapshot().player_hp.expect("hp");
+    let mut packets = Vec::new();
+    super::tick_player_vital_regen(session.app.world_mut(), 100, &mut packets);
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("hp"),
+        hp_before,
+        "regen must stay paused while the player is in combat"
+    );
+}
+
+#[test]
+fn social_relationships_grant_experience_rate_bonus() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Unattached player: experience is unchanged.
+    assert_eq!(
+        super::crystal_apply_social_exp_rate(session.app.world(), 1_000),
+        1_000
+    );
+    assert_eq!(
+        super::crystal_player_social_exp_rate_percent(session.app.world()),
+        0
+    );
+
+    // Marry, join a guild, and gain a mentor.
+    {
+        let mut systems = session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>();
+        systems.stage5_systems.relationship.partner_name = "Spouse".to_string();
+        systems.stage5_systems.guild.name = "Knights".to_string();
+        systems.stage5_systems.mentor.name = "Sifu".to_string();
+    }
+    let rate = super::crystal_player_social_exp_rate_percent(session.app.world());
+    assert_eq!(
+        rate,
+        super::CRYSTAL_LOVER_EXP_RATE_PERCENT
+            + super::CRYSTAL_GUILD_EXP_RATE_PERCENT
+            + super::CRYSTAL_MENTEE_EXP_RATE_PERCENT
+    );
+    let boosted = super::crystal_apply_social_exp_rate(session.app.world(), 1_000);
+    assert_eq!(boosted, 1_000 + 1_000 * rate as u32 / 100);
+}
+
+#[test]
+fn player_stats_expose_class_weight_capacities() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let stats = super::player_stats(session.app.world());
+    // Crystal base weight capacities are present (bag 50+, hand 12+, wear 15+).
+    assert!(stats.bag_weight() >= 50);
+    assert!(stats.hand_weight() >= 12);
+    assert!(stats.wear_weight() >= 15);
+}
+
+#[test]
+fn class_base_stats_scale_with_level_per_crystal_formula() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 50);
+
+    // Weights are pure class-base (no equipment contributes them), so they
+    // exercise Crystal's StatFormula.Weight: Base + (level/Gain) * level.
+    // Warrior @50: Bag 50+(50/3)*50=883, Wear 15+(50/20)*50=140, Hand 12+(50/13)*50=204.
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.bag_weight(), 883);
+    assert_eq!(stats.wear_weight(), 140);
+    assert_eq!(stats.hand_weight(), 204);
+
+    // Class stat caps (Crystal RefreshStatCaps): MagicResist is capped at 2 even
+    // when gear/level would push it higher.
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
 }

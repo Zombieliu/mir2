@@ -67,7 +67,9 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     priority: 40,
     phase: "background",
     cacheTier: "background",
-    urls: ["/original-ui/MMap/0.png"],
+    // Prewarm the packed entity atlas so the GPU entity renderer has its texture ready on the
+    // first gameplay frame instead of waiting on an on-demand fetch.
+    urls: ["/original-ui/MMap/0.png", "/bevy-entity-atlases/starter-bichon-base.png"],
     scenes: [
       {
         label: "BichonProvince spawn",

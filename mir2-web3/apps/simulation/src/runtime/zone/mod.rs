@@ -1,4 +1,5 @@
 mod aoi;
+mod aoi_grid;
 mod collision;
 mod manager;
 mod movement;

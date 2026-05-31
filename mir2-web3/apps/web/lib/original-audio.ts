@@ -1,21 +1,36 @@
 "use client";
 
 import { crystalSoundPath } from "./original-sound-index";
+import { ORIGINAL_SOUND_EVENT_FALLBACKS, type OriginalSoundEvent } from "./original-sound-events";
 
-const ORIGINAL_MUSIC_VOLUME = 0.72;
-const ORIGINAL_EFFECT_VOLUME = 0.86;
+const DEFAULT_MUSIC_VOLUME = 0.72;
+const DEFAULT_EFFECT_VOLUME = 0.86;
 const MAX_SIMULTANEOUS_EFFECTS = 8;
 const ORIGINAL_AUDIO_SETTINGS_STORAGE_KEY = "mir2.originalAudioSettings";
+const AUDIO_DEBUG_STORAGE_KEY = "mir2-audio-debug";
 
 export type OriginalAudioSettings = {
   musicEnabled: boolean;
   effectsEnabled: boolean;
+  /** Background music gain, 0..1. */
+  musicVolume: number;
+  /** Sound-effect gain, 0..1. */
+  effectsVolume: number;
 };
 
 const DEFAULT_ORIGINAL_AUDIO_SETTINGS: OriginalAudioSettings = {
   musicEnabled: true,
   effectsEnabled: true,
+  musicVolume: DEFAULT_MUSIC_VOLUME,
+  effectsVolume: DEFAULT_EFFECT_VOLUME,
 };
+
+function clampVolume(value: unknown, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.min(1, Math.max(0, value));
+}
 
 let musicAudio: HTMLAudioElement | null = null;
 let activeMusicSrc: string | null = null;
@@ -48,7 +63,7 @@ export function setOriginalMusic(src: string | null) {
     activeMusicSrc = src;
   }
   audio.loop = true;
-  audio.volume = ORIGINAL_MUSIC_VOLUME;
+  audio.volume = loadOriginalAudioSettings().musicVolume;
   void audio.play().catch(() => undefined);
 }
 
@@ -67,8 +82,9 @@ export function stopOriginalAudio() {
   activeEffects.clear();
 }
 
-export function playOriginalSoundPath(src: string | null | undefined, volume = ORIGINAL_EFFECT_VOLUME) {
-  if (!src || typeof window === "undefined" || !loadOriginalAudioSettings().effectsEnabled) {
+export function playOriginalSoundPath(src: string | null | undefined, volume?: number) {
+  const settings = loadOriginalAudioSettings();
+  if (!src || typeof window === "undefined" || !settings.effectsEnabled) {
     return false;
   }
 
@@ -81,7 +97,7 @@ export function playOriginalSoundPath(src: string | null | undefined, volume = O
   }
 
   const audio = new Audio(src);
-  audio.volume = volume;
+  audio.volume = clampVolume(volume, settings.effectsVolume);
   activeEffects.add(audio);
   const cleanup = () => activeEffects.delete(audio);
   audio.addEventListener("ended", cleanup, { once: true });
@@ -90,8 +106,83 @@ export function playOriginalSoundPath(src: string | null | undefined, volume = O
   return true;
 }
 
-export function playOriginalSoundId(sound: number | string | null | undefined, volume = ORIGINAL_EFFECT_VOLUME) {
-  return playOriginalSoundPath(crystalSoundPath(sound), volume);
+export function playOriginalSoundId(sound: number | string | null | undefined, volume?: number) {
+  const path = crystalSoundPath(sound);
+  if (!path) {
+    recordMissingSound(sound);
+    return false;
+  }
+  return playOriginalSoundPath(path, volume);
+}
+
+// Play the first sound in `ids` whose audio is actually present, so a missing preferred sound
+// degrades to a fallback instead of silence. Returns false (and records a miss) if none resolve.
+export function playOriginalSoundIdWithFallback(ids: Array<number | string>, volume?: number) {
+  for (const id of ids) {
+    const path = crystalSoundPath(id);
+    if (path) {
+      return playOriginalSoundPath(path, volume);
+    }
+  }
+  if (ids.length > 0) {
+    recordMissingSound(ids[0]);
+  }
+  return false;
+}
+
+// Play a semantically-named sound event, walking its configured fallback chain.
+export function playOriginalSoundEvent(event: OriginalSoundEvent, volume?: number) {
+  return playOriginalSoundIdWithFallback(ORIGINAL_SOUND_EVENT_FALLBACKS[event], volume);
+}
+
+const missingSoundRequests = new Map<number, number>();
+let missingSoundTotal = 0;
+
+export type OriginalAudioDiagnostics = {
+  missingSoundTotal: number;
+  uniqueMissingSoundIds: number;
+  missingSoundIds: number[];
+};
+
+export function getOriginalAudioDiagnostics(): OriginalAudioDiagnostics {
+  return {
+    missingSoundTotal,
+    uniqueMissingSoundIds: missingSoundRequests.size,
+    missingSoundIds: [...missingSoundRequests.keys()].sort((left, right) => left - right),
+  };
+}
+
+export function resetOriginalAudioDiagnosticsForTests() {
+  missingSoundRequests.clear();
+  missingSoundTotal = 0;
+}
+
+function recordMissingSound(sound: number | string | null | undefined) {
+  const soundId = Number(sound);
+  if (!Number.isFinite(soundId)) {
+    return;
+  }
+  missingSoundTotal += 1;
+  const nextCount = (missingSoundRequests.get(soundId) ?? 0) + 1;
+  missingSoundRequests.set(soundId, nextCount);
+  if (typeof window !== "undefined") {
+    (window as typeof window & { __mir2AudioDiagnostics?: OriginalAudioDiagnostics }).__mir2AudioDiagnostics =
+      getOriginalAudioDiagnostics();
+    if (nextCount === 1 && audioDebugEnabled()) {
+      console.warn(`[mir2] sound asset missing for id ${soundId} (bytes not committed); skipped playback`);
+    }
+  }
+}
+
+function audioDebugEnabled() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(AUDIO_DEBUG_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 export function getOriginalAudioSettings() {
@@ -100,11 +191,19 @@ export function getOriginalAudioSettings() {
 
 export function setOriginalAudioSettings(settings: Partial<OriginalAudioSettings>) {
   const currentSettings = loadOriginalAudioSettings();
-  const nextSettings = {
+  const nextSettings: OriginalAudioSettings = {
     musicEnabled:
       typeof settings.musicEnabled === "boolean" ? settings.musicEnabled : currentSettings.musicEnabled,
     effectsEnabled:
       typeof settings.effectsEnabled === "boolean" ? settings.effectsEnabled : currentSettings.effectsEnabled,
+    musicVolume:
+      settings.musicVolume === undefined
+        ? currentSettings.musicVolume
+        : clampVolume(settings.musicVolume, currentSettings.musicVolume),
+    effectsVolume:
+      settings.effectsVolume === undefined
+        ? currentSettings.effectsVolume
+        : clampVolume(settings.effectsVolume, currentSettings.effectsVolume),
   };
 
   audioSettings = nextSettings;
@@ -113,8 +212,13 @@ export function setOriginalAudioSettings(settings: Partial<OriginalAudioSettings
 
   if (!nextSettings.musicEnabled) {
     musicAudio?.pause();
-  } else if (pendingMusicSrc) {
-    setOriginalMusic(pendingMusicSrc);
+  } else {
+    if (musicAudio) {
+      musicAudio.volume = nextSettings.musicVolume;
+    }
+    if (pendingMusicSrc) {
+      setOriginalMusic(pendingMusicSrc);
+    }
   }
 
   if (!nextSettings.effectsEnabled) {
@@ -166,6 +270,10 @@ function loadOriginalAudioSettings() {
         typeof storedSettings.effectsEnabled === "boolean"
           ? storedSettings.effectsEnabled
           : DEFAULT_ORIGINAL_AUDIO_SETTINGS.effectsEnabled,
+      // Volume fields were added later; older persisted settings omit them and fall back to the
+      // defaults (settings migration).
+      musicVolume: clampVolume(storedSettings.musicVolume, DEFAULT_ORIGINAL_AUDIO_SETTINGS.musicVolume),
+      effectsVolume: clampVolume(storedSettings.effectsVolume, DEFAULT_ORIGINAL_AUDIO_SETTINGS.effectsVolume),
     };
   } catch {
     audioSettings = { ...DEFAULT_ORIGINAL_AUDIO_SETTINGS };

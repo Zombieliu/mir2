@@ -58,6 +58,8 @@ export async function GET(request: Request) {
     throw error;
   }
 
+  const missingAssetCount = result.blueprint.originalMapRegion?.missingAssets?.length ?? 0;
+
   return NextResponse.json(result.blueprint, {
     headers: {
       "Cache-Control": isDevelopment
@@ -69,6 +71,11 @@ export async function GET(request: Request) {
         Object.keys(result.blueprint.originalMapRegion?.sprites ?? {}).length,
       ),
       "X-Mir2-Original-Map-Cell-Count": String(result.blueprint.originalMapRegion?.cells.length ?? 0),
+      // 0 when every referenced asset resolved. Non-zero means the scene rendered with some
+      // sprites skipped (graceful degradation); the missing paths are listed in the blueprint
+      // under originalMapRegion.missingAssets. Release gates run with MIR2_STRICT_ASSET_RESOLUTION=1
+      // so any miss instead surfaces as HTTP 424 above.
+      "X-Mir2-Missing-Asset-Count": String(missingAssetCount),
     },
   });
 }

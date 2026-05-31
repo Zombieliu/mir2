@@ -373,7 +373,13 @@ function loadImage(src: string) {
     const image = new Image();
     image.decoding = "async";
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(`Unable to load WebGL2 atlas image ${src}`));
+    image.onerror = () => {
+      // Logged once per unique src (loadImage is memoised in imagePromiseCache). The shell
+      // watches the "error" debug reason and falls back to DOM entity sprites so entities do
+      // not silently vanish when an atlas texture cannot be fetched.
+      console.warn(`[mir2] WebGL2 entity atlas image failed to load; falling back to DOM sprites: ${src}`);
+      reject(new Error(`Unable to load WebGL2 atlas image ${src}`));
+    };
     image.src = src;
   });
   imagePromiseCache.set(src, promise);
