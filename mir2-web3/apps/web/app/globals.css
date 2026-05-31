@@ -5300,3 +5300,137 @@ body.mir-dragging-item * {
 .system-social-panel[data-system-social-panel="marriage"] { --social-accent: #ff77c6; --social-accent-text: #ffc8e8; }
 .system-social-panel[data-system-social-panel="ranking"] { --social-accent: #c56bff; --social-accent-text: #e3c8ff; }
 .system-social-panel[data-system-social-panel="market"] { --social-accent: #ffd24a; --social-accent-text: #ffe9a6; }
+
+/* ---- NPC vendor shop dialog (buy / sell / repair) ---- */
+.npc-shop-dialog {
+  position: absolute;
+  top: 150px;
+  left: calc(50% - 200px);
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 66;
+  pointer-events: auto;
+  background: rgba(16, 12, 10, 0.97);
+  border: 1px solid #6b5430;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 233, 188, 0.05);
+  color: #e9d6ad;
+  font-size: 12px;
+}
+
+.npc-shop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 6px 0 10px;
+  background: linear-gradient(180deg, #3a2918, #241710);
+  border-bottom: 1px solid #6b5430;
+}
+
+.npc-shop-title {
+  font-weight: 600;
+}
+
+.npc-shop-close {
+  width: 20px;
+  height: 20px;
+  color: #e9d6ad;
+  background: #25190e;
+  border: 1px solid #705932;
+  cursor: pointer;
+}
+
+.npc-shop-grid {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.npc-shop-good {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  text-align: left;
+  color: #e9d6ad;
+  background: rgba(58, 41, 24, 0.4);
+  border: 1px solid rgba(112, 89, 50, 0.5);
+  cursor: pointer;
+}
+
+.npc-shop-good.selected {
+  background: linear-gradient(180deg, #4a3411, #2c1d0c);
+  border-color: #caa24f;
+}
+
+.npc-shop-good-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  flex: 0 0 auto;
+}
+
+.npc-shop-good-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.npc-shop-good-price {
+  flex: 0 0 auto;
+  color: #ffe9a6;
+}
+
+.npc-shop-empty,
+.npc-shop-banner-text {
+  padding: 14px 10px;
+  text-align: center;
+  color: #b89a63;
+}
+
+.npc-shop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  border-top: 1px solid #6b5430;
+}
+
+.npc-shop-gold {
+  color: #b89a63;
+}
+
+.npc-shop-buy-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npc-shop-buy-row input {
+  width: 48px;
+  height: 22px;
+  text-align: right;
+  color: #ffe9a6;
+  background: #1a1209;
+  border: 1px solid #6b5430;
+}
+
+.npc-shop-buy {
+  height: 22px;
+  padding: 0 10px;
+  color: #e9d6ad;
+  background: linear-gradient(180deg, #4a3411, #2c1d0c);
+  border: 1px solid #caa24f;
+  cursor: pointer;
+}
+
+.npc-shop-buy:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

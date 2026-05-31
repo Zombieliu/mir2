@@ -318,6 +318,7 @@ export function OriginalClientShell({
   onRunStage5Command,
   onSendClientCommand,
   tradeHandlers,
+  shopHandlers,
   transferOptions,
   onToggleCharacter,
   onToggleInventory,
@@ -1719,6 +1720,7 @@ export function OriginalClientShell({
               onRunStage5Command={onRunStage5Command}
               onSendClientCommand={onSendClientCommand}
               tradeHandlers={tradeHandlers}
+              shopHandlers={shopHandlers}
               transferOptions={transferOptions}
             />
           ) : null}

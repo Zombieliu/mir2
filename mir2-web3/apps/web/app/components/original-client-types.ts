@@ -244,6 +244,25 @@ export type TradeHandlers = {
   reply: (accept: boolean) => void;
 };
 
+export type DisplayNpcShopGood = {
+  itemIndex: number;
+  name: string;
+  icon: number;
+  price: number;
+};
+
+export type DisplayNpcShop = {
+  mode: "buy" | "sell" | "repair";
+  goods: DisplayNpcShopGood[];
+  rate: number;
+  panelType: number;
+};
+
+export type NpcShopHandlers = {
+  buy: (itemIndex: number, count: number, panelType: number) => void;
+  close: () => void;
+};
+
 export type DisplayNpcDialog = {
   npcObjectId: string;
   npcName: string;
@@ -346,6 +365,7 @@ export type DisplayWorld = {
   combatStats?: DisplayCombatStats;
   trade?: DisplayTradeState | null;
   incomingTradeRequestFrom?: string | null;
+  npcShop?: DisplayNpcShop | null;
   rankings: Record<string, DisplayRankingState>;
   rankingCurrentKey?: string | null;
   stage5Systems?: {

@@ -479,6 +479,22 @@ type TradeState = {
   theirLocked: boolean;
 };
 
+type NpcShopMode = "buy" | "sell" | "repair";
+
+type NpcShopGood = {
+  itemIndex: number;
+  name: string;
+  icon: number;
+  price: number;
+};
+
+type NpcShopState = {
+  mode: NpcShopMode;
+  goods: NpcShopGood[];
+  rate: number;
+  panelType: number;
+};
+
 type ItemCommandRef = {
   key: string;
   uniqueId: number;
@@ -1251,7 +1267,8 @@ export default function HomePage() {
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
   const [tradeState, setTradeState] = useState<TradeState | null>(null);
   const [incomingTradeRequestFrom, setIncomingTradeRequestFrom] = useState<string | null>(null);
-  const itemInfoByIndexRef = useRef<Map<number, { name: string; icon: number }>>(new Map());
+  const [npcShop, setNpcShop] = useState<NpcShopState | null>(null);
+  const itemInfoByIndexRef = useRef<Map<number, { name: string; icon: number; price: number }>>(new Map());
   const [logs, setLogs] = useState<UiLogLine[]>([]);
   const [accountId, setAccountId] = useState("demo");
   const [password, setPassword] = useState("demo");
@@ -4509,6 +4526,7 @@ export default function HomePage() {
     itemInfoByIndexRef.current.set(index, {
       name: stringOrFallback(info.name, `#${index}`),
       icon: typeof image === "number" ? image : 0,
+      price: numberOrUndefined(info.price) ?? 0,
     });
   }
 
@@ -4539,7 +4557,7 @@ export default function HomePage() {
           const raw = tradeItems[index];
           if (!raw || typeof raw !== "object") return null;
           const item = raw as Record<string, unknown>;
-          const itemIndex = numberOrUndefined(item.itemIndex) ?? 0;
+          const itemIndex = numberOrUndefined(item.item_index) ?? 0;
           const count = numberOrUndefined(item.count) ?? 1;
           const info = resolveTradeItemInfo(itemIndex);
           return { icon: info.icon, name: info.name, count };
@@ -4618,6 +4636,36 @@ export default function HomePage() {
   function replyTradeRequest(accept: boolean) {
     send({ type: "tradeReply", acceptInvite: accept });
     setIncomingTradeRequestFrom(null);
+  }
+
+  function applyNpcGoods(payload: Record<string, unknown>) {
+    const list = Array.isArray(payload.list) ? payload.list : [];
+    const rate = numberOrUndefined(payload.rate) ?? 1;
+    const panelType = numberOrUndefined(payload.panelType) ?? 0;
+    const goods: NpcShopGood[] = list.flatMap((raw) => {
+      if (!raw || typeof raw !== "object") return [];
+      const item = raw as Record<string, unknown>;
+      const itemIndex = numberOrUndefined(item.item_index);
+      if (typeof itemIndex !== "number") return [];
+      const info = itemInfoByIndexRef.current.get(itemIndex);
+      return [
+        {
+          itemIndex,
+          name: info?.name ?? `#${itemIndex}`,
+          icon: info?.icon ?? 0,
+          price: Math.max(0, Math.round((info?.price ?? 0) * rate)),
+        },
+      ];
+    });
+    setNpcShop({ mode: "buy", goods, rate, panelType });
+  }
+
+  function buyNpcItem(itemIndex: number, count: number, panelType: number) {
+    send({ type: "buyItem", itemIndex, count: Math.max(1, Math.floor(count)), panelType });
+  }
+
+  function closeNpcShop() {
+    setNpcShop(null);
   }
 
   function sellItem(item: ItemCommandRef, count: number) {
@@ -5683,6 +5731,15 @@ export default function HomePage() {
         applyDepositTradeItemResult(payload);
         break;
       case "RetrieveTradeItem":
+        break;
+      case "NPCGoods":
+        applyNpcGoods(payload);
+        break;
+      case "NPCSell":
+        setNpcShop({ mode: "sell", goods: [], rate: 1, panelType: 0 });
+        break;
+      case "NPCRepair":
+        setNpcShop({ mode: "repair", goods: [], rate: numberOrUndefined(payload.rate) ?? 1, panelType: 0 });
         break;
       case "UseItem": {
         const uniqueId = numberOrUndefined(payload.uniqueId);
@@ -7921,7 +7978,7 @@ export default function HomePage() {
       runtimeMessage={runtimeMessage}
       wsState={wsState}
       reconnectStatus={reconnectStatus}
-      world={{ ...world, trade: tradeState, incomingTradeRequestFrom }}
+      world={{ ...world, trade: tradeState, incomingTradeRequestFrom, npcShop }}
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
@@ -8015,6 +8072,7 @@ export default function HomePage() {
         cancel: cancelTrade,
         reply: replyTradeRequest,
       }}
+      shopHandlers={{ buy: buyNpcItem, close: closeNpcShop }}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onToggleCharacter={() => setShowCharacter((current) => !current)}
       onToggleInventory={() => setShowInventory((current) => !current)}

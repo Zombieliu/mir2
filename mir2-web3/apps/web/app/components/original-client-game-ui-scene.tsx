@@ -23,6 +23,7 @@ import { OptionsDialog } from "./original-client-options-dialog";
 import { SkillBar } from "./original-client-skill-bar";
 import { BuffBar } from "./original-client-buff-bar";
 import { TradeDialog, TradeRequestPrompt } from "./original-client-trade";
+import { NpcShopDialog } from "./original-client-npc-shop";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -45,6 +46,7 @@ import type {
   ItemActionRef,
   MergeItemRef,
   MoveItemRef,
+  NpcShopHandlers,
   TradeHandlers,
   TranslateFn,
 } from "./original-client-types";
@@ -100,6 +102,7 @@ type GameUiSceneProps = {
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   tradeHandlers: TradeHandlers;
+  shopHandlers: NpcShopHandlers;
   transferOptions: SystemMenuTransferOption[];
 };
 
@@ -154,6 +157,7 @@ export function GameUiScene({
   onRunStage5Command,
   onSendClientCommand,
   tradeHandlers,
+  shopHandlers,
   transferOptions,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
@@ -499,6 +503,15 @@ export function GameUiScene({
           t={t}
           fromName={world.incomingTradeRequestFrom}
           onReply={tradeHandlers.reply}
+        />
+      ) : null}
+      {world.npcShop ? (
+        <NpcShopDialog
+          t={t}
+          shop={world.npcShop}
+          gold={world.gold}
+          onBuy={shopHandlers.buy}
+          onClose={shopHandlers.close}
         />
       ) : null}
       {visibleDialog ? (

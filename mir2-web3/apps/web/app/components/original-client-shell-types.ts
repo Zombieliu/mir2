@@ -16,6 +16,7 @@ import type {
   PredictedPlayerMotion,
   SelectCharacterEntry,
   TradeHandlers,
+  NpcShopHandlers,
 } from "./original-client-types";
 
 export type GatewayReconnectStatus = {
@@ -157,6 +158,7 @@ export type OriginalClientShellProps = {
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   tradeHandlers: TradeHandlers;
+  shopHandlers: NpcShopHandlers;
   transferOptions: SystemMenuTransferOption[];
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
