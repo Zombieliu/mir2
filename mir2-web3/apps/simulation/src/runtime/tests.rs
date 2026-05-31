@@ -4666,6 +4666,43 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn stationary_data_only_families_neither_chase_nor_patrol() {
+    // These data-only families override Crystal `CanMove` to false (turrets, statues, eggs, the
+    // EvilMir body parts, the rooted boss flowers). With can_wander true they must still neither
+    // chase the player nor patrol their origin.
+    let stationary = [52u8, 53, 82, 142, 149, 151, 158, 166, 170, 212];
+    for ai in stationary {
+        let agent = MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: Point { x: 0, y: 0 },
+            ai,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: true,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: 0,
+            next_attack_tick: 0,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: 0,
+        };
+        assert!(
+            !super::monster_can_chase_player(&agent),
+            "ai {ai} (CanMove=false) must not chase the player"
+        );
+        assert!(
+            !super::monster_can_patrol_origin(&agent),
+            "ai {ai} (CanMove=false) must not patrol its origin"
+        );
+    }
+}
+
+#[test]
 fn crystal_spell_magic_defence_classification_matches_crystal() {
     // The audit: Wizard/Taoist offensive spells (MinMC/MinSC damage) resolve MAC; warrior/assassin
     // melee skills (MinDC damage) resolve AC, with BladeAvalanche the lone DC-damage MAC exception.

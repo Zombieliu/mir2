@@ -1922,12 +1922,15 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
+                | 53
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
                 | 79
+                | 82
                 | 89
                 | 98
                 | 99
@@ -1936,6 +1939,13 @@ pub(super) fn monster_can_chase_player(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 149
+                | 151
+                | 158
+                | 166
+                | 170
+                | 212
                 | 255
         )
 }
@@ -1955,12 +1965,15 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 47
                 | 48
                 | 50
+                | 52
+                | 53
                 | 54
                 | 56
                 | 57
                 | 58
                 | 61
                 | 79
+                | 82
                 | 89
                 | 98
                 | 99
@@ -1969,6 +1982,13 @@ pub(super) fn monster_can_patrol_origin(agent: &MonsterAgent) -> bool {
                 | 120
                 | 122
                 | 128
+                | 142
+                | 149
+                | 151
+                | 158
+                | 166
+                | 170
+                | 212
                 | 255
         )
 }
