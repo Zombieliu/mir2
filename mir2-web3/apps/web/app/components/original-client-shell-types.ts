@@ -15,6 +15,7 @@ import type {
   MoveItemRef,
   PredictedPlayerMotion,
   SelectCharacterEntry,
+  TradeHandlers,
 } from "./original-client-types";
 
 export type GatewayReconnectStatus = {
@@ -155,6 +156,7 @@ export type OriginalClientShellProps = {
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
+  tradeHandlers: TradeHandlers;
   transferOptions: SystemMenuTransferOption[];
   onToggleCharacter: () => void;
   onToggleInventory: () => void;

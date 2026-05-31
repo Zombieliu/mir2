@@ -22,6 +22,7 @@ import { CharacterWindow } from "./original-client-character-window";
 import { OptionsDialog } from "./original-client-options-dialog";
 import { SkillBar } from "./original-client-skill-bar";
 import { BuffBar } from "./original-client-buff-bar";
+import { TradeDialog, TradeRequestPrompt } from "./original-client-trade";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -44,6 +45,7 @@ import type {
   ItemActionRef,
   MergeItemRef,
   MoveItemRef,
+  TradeHandlers,
   TranslateFn,
 } from "./original-client-types";
 
@@ -97,6 +99,7 @@ type GameUiSceneProps = {
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
+  tradeHandlers: TradeHandlers;
   transferOptions: SystemMenuTransferOption[];
 };
 
@@ -150,6 +153,7 @@ export function GameUiScene({
   onBuyGameShopItem,
   onRunStage5Command,
   onSendClientCommand,
+  tradeHandlers,
   transferOptions,
 }: GameUiSceneProps) {
   const [showDuraPanel, setShowDuraPanel] = useState(false);
@@ -237,6 +241,10 @@ export function GameUiScene({
         onRemoveItem({ slot: source.equipmentSlot });
         return;
       }
+      if (source.kind === "trade") {
+        tradeHandlers.retrieve(source.slot, target.slot);
+        return;
+      }
       if (source.kind === "storage") {
         onTakeBackItem({ uniqueId: payload.uniqueId, slot: source.slot, container: "storage" }, target.slot);
         return;
@@ -298,6 +306,18 @@ export function GameUiScene({
           return;
         }
         onMoveItem({ uniqueId: payload.uniqueId, slot: source.slot, container: "belt" }, target.slot);
+      }
+      return;
+    }
+
+    if (target.kind === "trade") {
+      if (source.kind === "inventory") {
+        const from = source.container === "bag2" ? 40 + source.slot : source.slot;
+        tradeHandlers.deposit(from, target.slot, {
+          icon: payload.icon,
+          name: payload.name,
+          count: payload.quantity,
+        });
       }
       return;
     }
@@ -463,6 +483,22 @@ export function GameUiScene({
           chatTransparent={transparentChat}
           onToggleChatTransparent={() => setTransparentChat((current) => !current)}
           onClose={() => setShowOptions(false)}
+        />
+      ) : null}
+      {world.trade ? (
+        <TradeDialog
+          t={t}
+          trade={world.trade}
+          onSetGold={tradeHandlers.setGold}
+          onSetLocked={tradeHandlers.setLocked}
+          onCancel={tradeHandlers.cancel}
+        />
+      ) : null}
+      {world.incomingTradeRequestFrom ? (
+        <TradeRequestPrompt
+          t={t}
+          fromName={world.incomingTradeRequestFrom}
+          onReply={tradeHandlers.reply}
         />
       ) : null}
       {visibleDialog ? (

@@ -461,6 +461,24 @@ type WorldItem = {
   weight?: number;
 };
 
+const TRADE_SLOT_COUNT = 10;
+
+type TradeItemState = {
+  icon: number;
+  name: string;
+  count: number;
+};
+
+type TradeState = {
+  partnerName: string;
+  myItems: Array<TradeItemState | null>;
+  theirItems: Array<TradeItemState | null>;
+  myGold: number;
+  theirGold: number;
+  myLocked: boolean;
+  theirLocked: boolean;
+};
+
 type ItemCommandRef = {
   key: string;
   uniqueId: number;
@@ -1231,6 +1249,9 @@ export default function HomePage() {
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [screen, setScreen] = useState<ClientScreen>("login");
   const [world, setWorld] = useState<WorldState>(DEFAULT_WORLD_STATE);
+  const [tradeState, setTradeState] = useState<TradeState | null>(null);
+  const [incomingTradeRequestFrom, setIncomingTradeRequestFrom] = useState<string | null>(null);
+  const itemInfoByIndexRef = useRef<Map<number, { name: string; icon: number }>>(new Map());
   const [logs, setLogs] = useState<UiLogLine[]>([]);
   const [accountId, setAccountId] = useState("demo");
   const [password, setPassword] = useState("demo");
@@ -4479,6 +4500,126 @@ export default function HomePage() {
     });
   }
 
+  function registerNewItemInfo(payload: Record<string, unknown>) {
+    const info = payload.info as Record<string, unknown> | undefined;
+    if (!info) return;
+    const index = numberOrUndefined(info.index);
+    if (typeof index !== "number") return;
+    const image = numberOrUndefined(info.image);
+    itemInfoByIndexRef.current.set(index, {
+      name: stringOrFallback(info.name, `#${index}`),
+      icon: typeof image === "number" ? image : 0,
+    });
+  }
+
+  function resolveTradeItemInfo(itemIndex: number): { name: string; icon: number } {
+    return itemInfoByIndexRef.current.get(itemIndex) ?? { name: `#${itemIndex}`, icon: 0 };
+  }
+
+  function openTradeWindow(partnerName: string) {
+    setIncomingTradeRequestFrom(null);
+    setTradeState({
+      partnerName,
+      myItems: Array.from({ length: TRADE_SLOT_COUNT }, () => null),
+      theirItems: Array.from({ length: TRADE_SLOT_COUNT }, () => null),
+      myGold: 0,
+      theirGold: 0,
+      myLocked: false,
+      theirLocked: false,
+    });
+  }
+
+  function applyTradePartnerItems(payload: Record<string, unknown>) {
+    const tradeItems = Array.isArray(payload.tradeItems) ? payload.tradeItems : [];
+    setTradeState((current) => {
+      if (!current) return current;
+      const theirItems: Array<TradeItemState | null> = Array.from(
+        { length: TRADE_SLOT_COUNT },
+        (_, index) => {
+          const raw = tradeItems[index];
+          if (!raw || typeof raw !== "object") return null;
+          const item = raw as Record<string, unknown>;
+          const itemIndex = numberOrUndefined(item.itemIndex) ?? 0;
+          const count = numberOrUndefined(item.count) ?? 1;
+          const info = resolveTradeItemInfo(itemIndex);
+          return { icon: info.icon, name: info.name, count };
+        },
+      );
+      return { ...current, theirItems };
+    });
+  }
+
+  function applyTradePartnerGold(payload: Record<string, unknown>) {
+    const amount = numberOrUndefined(payload.amount) ?? 0;
+    setTradeState((current) => (current ? { ...current, theirGold: amount } : current));
+  }
+
+  function applyTradeCancel(payload: Record<string, unknown>) {
+    if (payload.unlock === true) {
+      setTradeState((current) =>
+        current ? { ...current, myLocked: false, theirLocked: false } : current,
+      );
+      return;
+    }
+    setTradeState(null);
+    setIncomingTradeRequestFrom(null);
+  }
+
+  function applyDepositTradeItemResult(payload: Record<string, unknown>) {
+    if (payload.success === false) {
+      const to = numberOrUndefined(payload.to);
+      if (typeof to === "number") {
+        setTradeState((current) => {
+          if (!current) return current;
+          const myItems = current.myItems.slice();
+          myItems[to] = null;
+          return { ...current, myItems };
+        });
+      }
+    }
+  }
+
+  function depositTradeItem(from: number, to: number, display: TradeItemState) {
+    send({ type: "depositTradeItem", from, to });
+    setTradeState((current) => {
+      if (!current) return current;
+      const myItems = current.myItems.slice();
+      myItems[to] = display;
+      return { ...current, myItems };
+    });
+  }
+
+  function retrieveTradeItem(from: number, to: number) {
+    send({ type: "retrieveTradeItem", from, to });
+    setTradeState((current) => {
+      if (!current) return current;
+      const myItems = current.myItems.slice();
+      myItems[from] = null;
+      return { ...current, myItems };
+    });
+  }
+
+  function setTradeGold(amount: number) {
+    send({ type: "tradeGold", amount: Math.max(0, Math.floor(amount)) });
+    setTradeState((current) => (current ? { ...current, myGold: Math.max(0, Math.floor(amount)) } : current));
+  }
+
+  function setTradeLocked(locked: boolean) {
+    send({ type: "tradeConfirm", locked });
+    setTradeState((current) => (current ? { ...current, myLocked: locked } : current));
+  }
+
+  function cancelTrade() {
+    send({ type: "tradeCancel" });
+    setTradeState(null);
+    setIncomingTradeRequestFrom(null);
+  }
+
+  function replyTradeRequest(accept: boolean) {
+    send({ type: "tradeReply", acceptInvite: accept });
+    setIncomingTradeRequestFrom(null);
+  }
+
   function sellItem(item: ItemCommandRef, count: number) {
     send({
       type: "sellItem",
@@ -5516,6 +5657,32 @@ export default function HomePage() {
         break;
       case "ObjectMana":
         applyObjectManaPacket(payload);
+        break;
+      case "NewItemInfo":
+        registerNewItemInfo(payload);
+        break;
+      case "TradeRequest":
+        setIncomingTradeRequestFrom(stringOrFallback(payload.name, ""));
+        break;
+      case "TradeAccept":
+        openTradeWindow(stringOrFallback(payload.name, ""));
+        break;
+      case "TradeItem":
+        applyTradePartnerItems(payload);
+        break;
+      case "TradeGold":
+        applyTradePartnerGold(payload);
+        break;
+      case "TradeConfirm":
+        setTradeState((current) => (current ? { ...current, theirLocked: true } : current));
+        break;
+      case "TradeCancel":
+        applyTradeCancel(payload);
+        break;
+      case "DepositTradeItem":
+        applyDepositTradeItemResult(payload);
+        break;
+      case "RetrieveTradeItem":
         break;
       case "UseItem": {
         const uniqueId = numberOrUndefined(payload.uniqueId);
@@ -7754,7 +7921,7 @@ export default function HomePage() {
       runtimeMessage={runtimeMessage}
       wsState={wsState}
       reconnectStatus={reconnectStatus}
-      world={world}
+      world={{ ...world, trade: tradeState, incomingTradeRequestFrom }}
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
@@ -7840,6 +8007,14 @@ export default function HomePage() {
       onBuyGameShopItem={buyGameShopItem}
       onRunStage5Command={runStage5Command}
       onSendClientCommand={sendClientCommand}
+      tradeHandlers={{
+        deposit: depositTradeItem,
+        retrieve: retrieveTradeItem,
+        setGold: setTradeGold,
+        setLocked: setTradeLocked,
+        cancel: cancelTrade,
+        reply: replyTradeRequest,
+      }}
       transferOptions={QUICK_TRANSFER_OPTIONS}
       onToggleCharacter={() => setShowCharacter((current) => !current)}
       onToggleInventory={() => setShowInventory((current) => !current)}

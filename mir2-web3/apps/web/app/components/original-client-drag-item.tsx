@@ -24,6 +24,7 @@ export type ItemDragSource =
   | { kind: "inventory"; container: InventoryDragContainer; slot: number }
   | { kind: "storage"; slot: number }
   | { kind: "belt"; slot: number }
+  | { kind: "trade"; slot: number }
   | { kind: "equipment"; equipmentSlot: EquipmentSlot };
 
 export type ItemDragPayload = {
@@ -39,6 +40,7 @@ export type ItemDropTarget =
   | { kind: "inventory"; container: InventoryDragContainer; slot: number }
   | { kind: "storage"; slot: number }
   | { kind: "belt"; slot: number }
+  | { kind: "trade"; slot: number }
   | { kind: "equipment"; equipmentSlot: EquipmentSlot }
   | { kind: "ground" };
 
@@ -238,6 +240,11 @@ function findDropTarget(x: number, y: number): ItemDropTarget | null {
       const slot = Number(dropElement.dataset.itemDropSlot);
       if (!Number.isFinite(slot)) return null;
       return { kind: "belt", slot };
+    }
+    case "trade": {
+      const slot = Number(dropElement.dataset.itemDropSlot);
+      if (!Number.isFinite(slot)) return null;
+      return { kind: "trade", slot };
     }
     case "equipment": {
       const equipmentSlot = dropElement.dataset.itemDropEquip as EquipmentSlot | undefined;

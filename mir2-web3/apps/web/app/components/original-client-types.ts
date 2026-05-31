@@ -219,6 +219,31 @@ export type DisplayCombatStats = {
   maxMac: number;
 };
 
+export type DisplayTradeItem = {
+  icon: number;
+  name: string;
+  count: number;
+};
+
+export type DisplayTradeState = {
+  partnerName: string;
+  myItems: Array<DisplayTradeItem | null>;
+  theirItems: Array<DisplayTradeItem | null>;
+  myGold: number;
+  theirGold: number;
+  myLocked: boolean;
+  theirLocked: boolean;
+};
+
+export type TradeHandlers = {
+  deposit: (from: number, to: number, display: DisplayTradeItem) => void;
+  retrieve: (from: number, to: number) => void;
+  setGold: (amount: number) => void;
+  setLocked: (locked: boolean) => void;
+  cancel: () => void;
+  reply: (accept: boolean) => void;
+};
+
 export type DisplayNpcDialog = {
   npcObjectId: string;
   npcName: string;
@@ -319,6 +344,8 @@ export type DisplayWorld = {
   knownSkills: DisplayKnownSkill[];
   activeBuffs: DisplayActiveBuff[];
   combatStats?: DisplayCombatStats;
+  trade?: DisplayTradeState | null;
+  incomingTradeRequestFrom?: string | null;
   rankings: Record<string, DisplayRankingState>;
   rankingCurrentKey?: string | null;
   stage5Systems?: {

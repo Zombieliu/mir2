@@ -317,6 +317,7 @@ export function OriginalClientShell({
   onBuyGameShopItem,
   onRunStage5Command,
   onSendClientCommand,
+  tradeHandlers,
   transferOptions,
   onToggleCharacter,
   onToggleInventory,
@@ -1717,6 +1718,7 @@ export function OriginalClientShell({
               onBuyGameShopItem={onBuyGameShopItem}
               onRunStage5Command={onRunStage5Command}
               onSendClientCommand={onSendClientCommand}
+              tradeHandlers={tradeHandlers}
               transferOptions={transferOptions}
             />
           ) : null}
