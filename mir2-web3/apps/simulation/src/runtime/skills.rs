@@ -4320,6 +4320,31 @@ pub(super) fn tick_ground_spell_actions(
                                 });
                             }
                         }
+                        if action.spell == Spell::Blizzard
+                            && deterministic_roll(
+                                tick,
+                                action.caster_object_id as usize,
+                                0xB112 + target_entity.index() as usize,
+                                8,
+                            ) == 0
+                        {
+                            if let Some(object_id) = entity_object_id(world, target_entity) {
+                                // Crystal Blizzard: 1/8 chance per tick to apply Slow (type 4,
+                                // ~5 ticks at 2s each = 10s for the common Freezing=0 case).
+                                apply_monster_poison(
+                                    world,
+                                    target_entity,
+                                    4,
+                                    0,
+                                    tick,
+                                    combat_delay_ticks(10_000),
+                                );
+                                packets.push(ServerPacket::ObjectPoisoned {
+                                    object_id,
+                                    poison: 4,
+                                });
+                            }
+                        }
                         if action.spell == Spell::ExplosiveTrap {
                             detonated_trap = true;
                         }
