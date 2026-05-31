@@ -16,6 +16,7 @@ work can continue without re-deriving the analysis.
 | 4 | Mount speed boost (zone) + no_mount force-dismount on transfer | ✅ done + tests |
 | 5 | AOI interest management w/ hysteresis | ⛔ skipped (diverges from Crystal) |
 | 6 | Roadmap doc refresh | 🔄 this file kept current |
+| 7 | Monster / hero chase A* (route around walls) | ✅ done + tests |
 
 Commits: `01844886` (A* module + plan), `b6f1c956` (wire A*, conquest, cadence),
 `d9e10ce5` (mount cadence zone test). New unit tests: 6 pathfind + 5 zone
@@ -149,10 +150,31 @@ Real remaining gaps → the work items below.
 - This file is the living movement-parity record; update the movement section of
   `docs/CRYSTAL-1TO1-ROADMAP.md` when the remaining item-4 follow-ups land.
 
+### 7. Monster / hero chase pathfinding — ✅ DONE
+- `monster_ai.rs::monster_step_toward_with_fallback` (the shared chase helper used
+  by native/summoned monster and hero pursuit) keeps Crystal's cheap greedy
+  fan-out for the common open-field case (a step that closes the gap returns
+  immediately — byte-identical to before), but when greedy can only sidestep or
+  stall against a blocker it consults A* for a real route. Monsters/heroes now
+  chase through doorways and around corners instead of grinding into walls.
+- Added `pathfind::find_path_adjacent` / `find_path_adjacent_with`: routes to a
+  walkable tile *next to* an occupied goal (the chased player), factored onto a
+  shared bounded `astar()` core with the click-to-move variant. Unit tested.
+- Verified zero regressions: single-threaded lib failure set is **byte-identical**
+  to baseline (`diff` of failing test names is empty); `hero_ai` 28/28 and
+  `shared_zone` 130/130 stay green.
+
+## Pre-existing failures (NOT movement, out of scope here)
+A single-threaded `cargo test -p mir2-simulation --lib` shows **70 failures on
+the committed baseline**, unchanged by this work (verified by diffing the failing
+test-name sets with/without these commits). They are magic-family
+(`magic_packet_crystal_*`), storage persistence, stage3 reconnect, and one
+manifest-drift transfer test (`walk_onto_blocked_crystal_manifest_movement_source_
+transfers_map`, whose 322,248→0104 movement isn't in the current respawn
+manifest). These need a separate combat/manifest pass.
+
 ## Remaining movement follow-ups (smaller, lower priority)
 - Zone-side `no_mount` enforcement (authoritative multiplayer) + dismount-on-hit.
-- Route heroes / monster AI through `pathfind::find_path` so they path around
-  obstacles like the player now does.
 - Mounted movement at run distance from a walk intent (Crystal lets mounts move
   faster than on-foot walking), if we want the mount to also extend reach.
 
