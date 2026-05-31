@@ -11,6 +11,8 @@ pub(super) const CRYSTAL_GOODS_BUY_BACK_TIME_MINUTES: u64 = 60;
 pub(super) const CRYSTAL_GOODS_BUY_BACK_MAX_STORED: usize = 20;
 pub(super) const CRYSTAL_GOODS_MAX_STORED_PER_ITEM: usize = 20;
 pub(super) const MONSTER_PLAYER_TARGET_RANGE: i32 = CRYSTAL_DATA_RANGE;
+pub(super) const CRYSTAL_RED_NAME_PK_POINTS: i32 = 200;
+pub(super) const SPITTING_SPIDER_GREEN_POISON_DURATION_TICKS: u64 = 5;
 pub(super) const BUG_BAT_IMAGE: u16 = 42;
 pub(super) const BUG_BAT_FALLBACK_VIEW_RANGE: u8 = 7;
 pub(super) const BUG_BAT_FALLBACK_HP: i32 = 3;
@@ -174,6 +176,7 @@ pub(super) const CRYSTAL_BIND_UNABLE_TO_DISASSEMBLE: i16 = 0x2000;
 pub(super) const CRYSTAL_BIND_NO_HERO: i16 = i16::MIN;
 
 pub(super) const CRYSTAL_ITEM_TYPE_MEAT: u8 = 15;
+pub(super) const CRYSTAL_ITEM_TYPE_ORE: u8 = 14;
 pub(super) const CRYSTAL_ITEM_TYPE_WEAPON: u8 = 1;
 pub(super) const CRYSTAL_ITEM_TYPE_ARMOUR: u8 = 2;
 pub(super) const CRYSTAL_ITEM_TYPE_HELMET: u8 = 4;

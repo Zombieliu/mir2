@@ -67,6 +67,8 @@ impl ZoneManager {
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
             | ZoneCommand::CommitGroundDropClaim { session_id, .. }
             | ZoneCommand::CancelGroundDropClaim { session_id, .. }
+            | ZoneCommand::OpenDoor { session_id, .. }
+            | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {
                 let Some(key) = self.session_zones.get(session_id).cloned() else {
                     return Vec::new();

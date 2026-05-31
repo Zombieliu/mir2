@@ -2077,6 +2077,10 @@ pub struct MapTransferRecord {
     pub to_map_title: String,
     pub to_position: Point,
     pub to_direction: MirDirection,
+    /// Crystal `MovementInfo.ConquestIndex`. `0` means an ordinary movement;
+    /// `> 0` means the movement only fires for a player whose guild owns the
+    /// conquest with that index.
+    pub conquest_index: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2099,6 +2103,29 @@ pub struct MapDropRuleRecord {
     pub no_mount: bool,
     pub no_hero: bool,
     pub need_bridle: bool,
+}
+
+/// A rectangular mining zone on a map (Crystal `MapInfo.MineZones`). Every cell
+/// within `size` tiles of `(x, y)` becomes a mineable spot served by the given
+/// built-in mine set (`mine_set` is 1-based, matching Crystal's `MineIndex`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MineZoneRecord {
+    pub map_file_name: String,
+    pub mine_set: u8,
+    pub x: i32,
+    pub y: i32,
+    pub size: u16,
+}
+
+/// Environmental hazard flags for a map (Crystal `MapInfo.Lightning/Fire` and
+/// their damage caps). Hazards periodically strike players on the map.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MapHazardRecord {
+    pub map_file_name: String,
+    pub lightning: bool,
+    pub fire: bool,
+    pub lightning_damage: i32,
+    pub fire_damage: i32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2185,9 +2212,14 @@ pub struct SimulationConfig {
     pub visible_monsters: Vec<VisibleMonsterRecord>,
     pub visible_npcs: Vec<VisibleNpcRecord>,
     pub conquest_wars: BTreeMap<i32, bool>,
+    /// Conquest index → name of the guild that currently owns it. Gates
+    /// conquest movements (Crystal `MyGuild.Conquest.Info.Index`).
+    pub conquest_owners: BTreeMap<i32, String>,
     pub map_transfers: Vec<MapTransferRecord>,
     pub safe_zones: Vec<SafeZoneRecord>,
     pub map_drop_rules: Vec<MapDropRuleRecord>,
+    pub mine_zones: Vec<MineZoneRecord>,
+    pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
@@ -2272,9 +2304,12 @@ impl SimulationConfig {
                 })
                 .collect(),
             conquest_wars: BTreeMap::new(),
+            conquest_owners: BTreeMap::new(),
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             map_drop_rules: Vec::new(),
+            mine_zones: Vec::new(),
+            map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
             account_store_path: None,
             account_store_database_url: None,
@@ -2966,6 +3001,7 @@ fn starter_map_transfers() -> Vec<MapTransferRecord> {
         to_map_title: "BichonProvince".to_string(),
         to_position: Point { x: 330, y: 270 },
         to_direction: MirDirection::Down,
+        conquest_index: 0,
     }]
 }
 

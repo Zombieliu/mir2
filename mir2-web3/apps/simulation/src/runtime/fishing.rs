@@ -158,7 +158,33 @@ pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
     packets.push(fishing_update_packet(world));
 }
 
+/// Derive the fishing attribute from the cell three tiles ahead of the player
+/// (Crystal `FishingCast` reads `Cells[PointMove(loc, dir, 3)].FishingAttribute`).
+///
+/// Only applied when the current map actually declares fishing cells; maps
+/// without parsed fishing data (e.g. the synthetic starter field) keep the
+/// permissive default attribute so they remain fishable.
+fn sync_fishing_attribute_from_map(world: &mut World) {
+    if world
+        .resource::<MapRuntimeResource>()
+        .fishing_cells
+        .is_empty()
+    {
+        return;
+    }
+    let location = current_location(world);
+    let point = offset_point(&location.position, location.direction, 3);
+    let attribute = world
+        .resource::<MapRuntimeResource>()
+        .fishing_cells
+        .get(&(point.x, point.y))
+        .copied()
+        .unwrap_or(-1);
+    world.resource_mut::<FishingResource>().fishing_attribute = attribute;
+}
+
 fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> bool {
+    sync_fishing_attribute_from_map(world);
     if !fishing_rod_and_point_are_valid(world) {
         reject_fishing(world);
         return false;

@@ -379,6 +379,18 @@ pub enum ZoneCommand {
         session_id: SessionId,
         now_ms: u64,
     },
+    OpenDoor {
+        session_id: SessionId,
+        door_index: u8,
+        now_ms: u64,
+    },
+    ConfigureHazards {
+        session_id: SessionId,
+        lightning: bool,
+        fire: bool,
+        lightning_damage: i32,
+        fire_damage: i32,
+    },
     Tick {
         now_ms: u64,
     },

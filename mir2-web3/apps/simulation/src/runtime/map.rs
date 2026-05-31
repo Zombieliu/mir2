@@ -8,8 +8,8 @@ use bevy_ecs::prelude::{With, Without, World};
 use mir2_game_data::{
     crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_npc_info_manifest,
     localized_text_or_fallback, starter_map_collision, BlockedMapCellTemplate, DecorKind,
-    DecorObjectTemplate, DoorMapCellTemplate, MapBounds, MapCellAttribute, SceneView,
-    StarterMapCollision, TerrainKind, TerrainPatchTemplate,
+    DecorObjectTemplate, DoorMapCellTemplate, FishingCellTemplate, MapBounds, MapCellAttribute,
+    SceneView, StarterMapCollision, TerrainKind, TerrainPatchTemplate,
 };
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
@@ -42,6 +42,7 @@ pub(super) struct RuntimeMapCollisionData {
     pub(super) collision: StarterMapCollision,
     pub(super) blocked_set: BTreeSet<(i32, i32)>,
     pub(super) closed_door_set: BTreeSet<(i32, i32)>,
+    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,6 +50,10 @@ pub(crate) struct ZoneMapCollisionData {
     pub bounds: MapBounds,
     pub blocked_cells: BTreeSet<(i32, i32)>,
     pub transfer_source_cells: BTreeSet<(i32, i32)>,
+    /// Door index → its cells (deduped, `& 0x7F`). `blocked_cells` already
+    /// includes these (doors start closed); the zone uses this to open/close
+    /// shared doors dynamically.
+    pub doors: BTreeMap<u8, Vec<(i32, i32)>>,
 }
 
 pub(super) fn normalize_map_file_name(file_name: &str) -> String {
@@ -65,10 +70,19 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     let mut blocked_cells = collision.blocked_set;
     blocked_cells.extend(collision.closed_door_set);
     let transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
+    let mut doors: BTreeMap<u8, Vec<(i32, i32)>> = BTreeMap::new();
+    for door in &collision.collision.doors {
+        let cell = (door.x, door.y);
+        let entry = doors.entry(door.index & 0x7F).or_default();
+        if !entry.contains(&cell) {
+            entry.push(cell);
+        }
+    }
     Some(ZoneMapCollisionData {
         bounds: collision.collision.region_bounds,
         blocked_cells,
         transfer_source_cells,
+        doors,
     })
 }
 
@@ -261,6 +275,7 @@ pub(super) fn transfer_for_current_player_position(world: &World) -> Option<MapT
         .chain(crystal_movement_transfer_records_for_map(
             &map.current_map.file_name,
         ))
+        .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
         .find(|transfer| point_in_bounds(&transfer.from_bounds, &position))
 }
 
@@ -276,6 +291,7 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
         .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_movement_transfer_records_for_map(&map.current_map.file_name)
             .iter()
+            .filter(|transfer| conquest_movement_allowed(world, transfer.conquest_index))
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
 }
 
@@ -297,7 +313,11 @@ pub(super) fn crystal_movement_transfer_records_for_map(
     map.movements
         .iter()
         .filter_map(|movement| {
-            if movement.need_hole || movement.need_move || movement.conquest_index > 0 {
+            // NeedHole movements require a dig hole and NeedMove movements are
+            // driven by the NPC `ENTERMAP` command, so neither is a step-on
+            // auto-transfer. Conquest movements ARE included (tagged with their
+            // index) and gated on guild ownership at application time.
+            if movement.need_hole || movement.need_move {
                 return None;
             }
             let target = crystal_map_respawns_by_index(movement.map_index)?;
@@ -327,9 +347,35 @@ pub(super) fn crystal_movement_transfer_records_for_map(
                 to_map_title: target.map_title,
                 to_position: movement.destination.clone(),
                 to_direction: MirDirection::Down,
+                conquest_index: movement.conquest_index,
             })
         })
         .collect()
+}
+
+/// Whether the current player may use a conquest movement of the given index
+/// (Crystal: `MyGuild.Conquest.Info.Index == ConquestIndex`). Ordinary
+/// movements (`conquest_index <= 0`) are always allowed.
+pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> bool {
+    if conquest_index <= 0 {
+        return true;
+    }
+    let guild = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .guild
+        .name
+        .trim()
+        .to_string();
+    if guild.is_empty() {
+        return false;
+    }
+    world
+        .resource::<MapRuntimeResource>()
+        .conquest_owners
+        .get(&conquest_index)
+        .map(|owner| owner.eq_ignore_ascii_case(&guild))
+        .unwrap_or(false)
 }
 
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
@@ -469,6 +515,16 @@ pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPack
             "server.NotFound",
         ))];
     };
+
+    // A conquest movement only fires for a member of the owning guild.
+    if !conquest_movement_allowed(world, transfer.conquest_index) {
+        let language = super::session::current_language(world);
+        return vec![super::session::system_message(&localized_text_or_fallback(
+            language,
+            "server.CannotPositionMoveOnMap",
+            "server.CannotPositionMoveOnMap",
+        ))];
+    }
 
     let Some(player) = player_entity(world) else {
         let language = super::session::current_language(world);
@@ -875,11 +931,17 @@ pub(super) fn runtime_map_collision_from_template(
         .filter(|door| door.closed)
         .map(|door| (door.x, door.y))
         .collect();
+    let fishing_cells = collision
+        .fishing_cells
+        .iter()
+        .map(|cell| ((cell.x, cell.y), cell.attribute))
+        .collect();
 
     RuntimeMapCollisionData {
         collision,
         blocked_set,
         closed_door_set,
+        fishing_cells,
     }
 }
 
@@ -989,6 +1051,7 @@ pub(super) fn parse_runtime_map_collision_v100(
     let mut offset = 8usize;
     let mut blocked_cells = Vec::new();
     let mut doors = Vec::new();
+    let mut fishing_cells = Vec::new();
 
     for x in 0..i32::from(width) {
         for y in 0..i32::from(height) {
@@ -1017,6 +1080,7 @@ pub(super) fn parse_runtime_map_collision_v100(
                     closed: true,
                 });
             }
+            push_fishing_cell(bytes, offset + 11, x, y, &mut fishing_cells);
             offset += 12;
         }
     }
@@ -1027,6 +1091,7 @@ pub(super) fn parse_runtime_map_collision_v100(
         height,
         blocked_cells,
         doors,
+        fishing_cells,
     ))
 }
 
@@ -1092,12 +1157,14 @@ pub(super) fn parse_runtime_map_collision_v4(
         }
     }
 
+    // Crystal `LoadMapCellsv4` does not read a fishing attribute.
     Some(build_runtime_collision_output(
         map_file_name,
         width,
         height,
         blocked_cells,
         doors,
+        Vec::new(),
     ))
 }
 
@@ -1110,6 +1177,7 @@ pub(super) fn parse_runtime_map_collision_v5(
     let mut offset =
         28usize + (3usize * usize::from((width / 2) + (width % 2)) * usize::from(height / 2));
     let mut blocked_cells = Vec::new();
+    let mut fishing_cells = Vec::new();
 
     for x in 0..i32::from(width) {
         for y in 0..i32::from(height) {
@@ -1127,6 +1195,7 @@ pub(super) fn parse_runtime_map_collision_v5(
                     },
                 });
             }
+            push_fishing_cell(bytes, offset + 13, x, y, &mut fishing_cells);
             offset += 14;
         }
     }
@@ -1137,6 +1206,7 @@ pub(super) fn parse_runtime_map_collision_v5(
         height,
         blocked_cells,
         Vec::new(),
+        fishing_cells,
     ))
 }
 
@@ -1169,11 +1239,13 @@ pub(super) fn parse_runtime_map_collision_v6(
         }
     }
 
+    // Crystal `LoadMapCellsv6` does not read a fishing attribute.
     Some(build_runtime_collision_output(
         map_file_name,
         width,
         height,
         blocked_cells,
+        Vec::new(),
         Vec::new(),
     ))
 }
@@ -1187,6 +1259,7 @@ pub(super) fn parse_runtime_map_collision_v7(
     let mut offset = 54usize;
     let mut blocked_cells = Vec::new();
     let mut doors = Vec::new();
+    let mut fishing_cells = Vec::new();
 
     for x in 0..i32::from(width) {
         for y in 0..i32::from(height) {
@@ -1214,6 +1287,8 @@ pub(super) fn parse_runtime_map_collision_v7(
                     closed: true,
                 });
             }
+            // Light byte (fishing attribute) sits 4 bytes past the door byte.
+            push_fishing_cell(bytes, offset + 4, x, y, &mut fishing_cells);
             offset += 7;
         }
     }
@@ -1224,6 +1299,7 @@ pub(super) fn parse_runtime_map_collision_v7(
         height,
         blocked_cells,
         doors,
+        fishing_cells,
     ))
 }
 
@@ -1237,6 +1313,7 @@ pub(super) fn parse_runtime_map_collision_v1(
     let mut offset = 54usize;
     let mut blocked_cells = Vec::new();
     let mut doors = Vec::new();
+    let mut fishing_cells = Vec::new();
 
     for x in 0..i32::from(width) {
         for y in 0..i32::from(height) {
@@ -1265,6 +1342,8 @@ pub(super) fn parse_runtime_map_collision_v1(
                     closed: true,
                 });
             }
+            // Light byte (fishing attribute) sits 5 bytes past the door byte.
+            push_fishing_cell(bytes, offset + 5, x, y, &mut fishing_cells);
             offset += 7;
         }
     }
@@ -1275,6 +1354,7 @@ pub(super) fn parse_runtime_map_collision_v1(
         height,
         blocked_cells,
         doors,
+        fishing_cells,
     ))
 }
 
@@ -1290,6 +1370,7 @@ pub(super) fn parse_runtime_map_collision_fixed(
     let mut offset = start_offset;
     let mut blocked_cells = Vec::new();
     let mut doors = Vec::new();
+    let mut fishing_cells = Vec::new();
 
     for x in 0..i32::from(width) {
         for y in 0..i32::from(height) {
@@ -1301,6 +1382,13 @@ pub(super) fn parse_runtime_map_collision_fixed(
                 14 => offset + 6,
                 36 => offset + 6,
                 _ => offset + 6,
+            };
+            // Light byte (fishing attribute): v0 door+3, v2 door+5, v3 door+12.
+            let light_offset = match stride {
+                12 => offset + 11,
+                14 => offset + 11,
+                36 => offset + 18,
+                _ => offset + 11,
             };
             let door = *bytes.get(door_offset)?;
             if high_wall || low_wall || no_floor {
@@ -1322,6 +1410,7 @@ pub(super) fn parse_runtime_map_collision_fixed(
                     closed: true,
                 });
             }
+            push_fishing_cell(bytes, light_offset, x, y, &mut fishing_cells);
             offset += stride;
         }
     }
@@ -1332,6 +1421,7 @@ pub(super) fn parse_runtime_map_collision_fixed(
         height,
         blocked_cells,
         doors,
+        fishing_cells,
     ))
 }
 
@@ -1341,6 +1431,7 @@ pub(super) fn build_runtime_collision_output(
     map_height: u16,
     blocked_cells: Vec<BlockedMapCellTemplate>,
     doors: Vec<DoorMapCellTemplate>,
+    fishing_cells: Vec<FishingCellTemplate>,
 ) -> StarterMapCollision {
     StarterMapCollision {
         map_file_name: format!("{}.map", normalize_map_file_name(map_file_name)),
@@ -1360,6 +1451,27 @@ pub(super) fn build_runtime_collision_output(
         },
         blocked_cells,
         doors,
+        fishing_cells,
+    }
+}
+
+/// Record a fishing cell when the map's per-cell light byte falls in Crystal's
+/// fishable range (100..=119 → attribute 0..=19).
+fn push_fishing_cell(
+    bytes: &[u8],
+    light_offset: usize,
+    x: i32,
+    y: i32,
+    fishing_cells: &mut Vec<FishingCellTemplate>,
+) {
+    if let Some(&light) = bytes.get(light_offset) {
+        if (100..=119).contains(&light) {
+            fishing_cells.push(FishingCellTemplate {
+                x,
+                y,
+                attribute: (light - 100) as i8,
+            });
+        }
     }
 }
 
@@ -1412,10 +1524,19 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
         runtime_map_collision_from_template(fallback)
     });
 
-    let mut map = world.resource_mut::<MapRuntimeResource>();
-    map.map_region_bounds = collision.collision.region_bounds;
-    map.blocked_cells = collision.blocked_set;
-    map.closed_door_cells = collision.closed_door_set;
+    let doors = super::resources::DoorRegistry::from_templates(&collision.collision.doors);
+    {
+        let mut map = world.resource_mut::<MapRuntimeResource>();
+        map.map_region_bounds = collision.collision.region_bounds;
+        map.blocked_cells = collision.blocked_set;
+        map.closed_door_cells = collision.closed_door_set;
+        map.doors = doors;
+        map.fishing_cells = collision.fishing_cells;
+    }
+    super::mining::rebuild_mine_spots(world);
+    if let Some(mut hazards) = world.get_resource_mut::<super::hazard::MapHazardResource>() {
+        hazards.reset();
+    }
 }
 
 pub(super) fn runtime_active_map_collision_data(

@@ -256,6 +256,10 @@ impl InProcessWorldRuntime {
         self.session.zone_monster_spawn_snapshot(object_id)
     }
 
+    pub fn current_map_hazard_config(&self) -> Option<(bool, bool, i32, i32)> {
+        self.session.current_map_hazard_config()
+    }
+
     pub fn zone_melee_attack_damage(&self) -> i32 {
         self.session.zone_melee_attack_damage()
     }

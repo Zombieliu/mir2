@@ -135,6 +135,15 @@ pub struct DoorMapCellTemplate {
     pub closed: bool,
 }
 
+/// A cell flagged as fishable in the `.map` file (Crystal `Cell.FishingAttribute`,
+/// derived from a light byte in 100..=119 → attribute 0..=19).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FishingCellTemplate {
+    pub x: i32,
+    pub y: i32,
+    pub attribute: i8,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StarterMapCollision {
@@ -145,6 +154,8 @@ pub struct StarterMapCollision {
     pub play_bounds: MapBounds,
     pub blocked_cells: Vec<BlockedMapCellTemplate>,
     pub doors: Vec<DoorMapCellTemplate>,
+    #[serde(default)]
+    pub fishing_cells: Vec<FishingCellTemplate>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
