@@ -151,6 +151,7 @@ export type DisplayItem = {
   addedAttack?: number;
   addedDefence?: number;
   weight?: number;
+  addedStats?: Array<{ stat: number; value: number }>;
 };
 
 export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;

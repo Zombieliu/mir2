@@ -128,6 +128,7 @@ impl ItemState {
             attack: self.attack,
             defence: self.defence,
             weight: self.weight,
+            added_stats: self.added_stats.clone(),
         }
     }
 

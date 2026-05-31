@@ -2727,6 +2727,7 @@ pub struct WorldItemSnapshot {
     pub attack: i32,
     pub defence: i32,
     pub weight: u16,
+    pub added_stats: Vec<UserItemStat>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

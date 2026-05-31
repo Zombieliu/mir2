@@ -17,6 +17,7 @@ export type OriginalItemTooltipProps = {
   addedDefence?: number;
   weight?: number;
   grade?: string;
+  addedStats?: Array<{ stat: number; value: number }>;
   align?: ItemTooltipAlign;
 };
 
@@ -27,6 +28,26 @@ const GRADE_COLORS: Record<string, string> = {
   legendary: "#ff9a3c",
   mythical: "#c56bff",
   heroic: "#ff5a4d",
+};
+
+// Crystal Stat enum index -> label for item bonus stats. DC (4-6) and AC (0-1)
+// are intentionally omitted: the Attack/Defence rows already show those.
+const BONUS_STAT_LABELS: Record<number, string> = {
+  2: "MAC",
+  3: "MAC",
+  7: "MC",
+  8: "MC",
+  9: "MC",
+  10: "SC",
+  11: "SC",
+  12: "SC",
+  13: "HP",
+  14: "MP",
+  15: "Accuracy",
+  16: "Agility",
+  17: "Luck",
+  19: "Haste",
+  38: "A.Speed",
 };
 
 export function OriginalItemTooltip({
@@ -42,6 +63,7 @@ export function OriginalItemTooltip({
   addedDefence,
   weight,
   grade,
+  addedStats,
   align = "right",
 }: OriginalItemTooltipProps) {
   const descriptionLines = description
@@ -70,6 +92,21 @@ export function OriginalItemTooltip({
   const bonusDefence = addedDefence ?? 0;
   if (baseDefence > 0 || bonusDefence > 0) {
     rows.push({ label: t("ui.defence", [], "Defence"), value: statValue(baseDefence, bonusDefence) });
+  }
+  if (addedStats?.length) {
+    const bonusByLabel = new Map<string, number>();
+    for (const entry of addedStats) {
+      if (!entry || !entry.value) continue;
+      const label = BONUS_STAT_LABELS[entry.stat];
+      if (!label) continue;
+      const previous = bonusByLabel.get(label) ?? 0;
+      if (Math.abs(entry.value) > Math.abs(previous)) {
+        bonusByLabel.set(label, entry.value);
+      }
+    }
+    for (const [label, value] of bonusByLabel) {
+      rows.push({ label, value: value > 0 ? `+${value}` : String(value) });
+    }
   }
   if (weight !== undefined && weight > 0) {
     rows.push({ label: t("ui.weight", [], "Weight"), value: String(weight) });

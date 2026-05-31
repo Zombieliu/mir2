@@ -213,6 +213,7 @@ type GatewayWorldItem = {
   addedAttack?: number | null;
   addedDefence?: number | null;
   weight?: number | null;
+  addedStats?: Array<{ stat: number; value: number }> | null;
 };
 
 type GatewayEquipmentItem = {
@@ -459,6 +460,7 @@ type WorldItem = {
   addedAttack?: number;
   addedDefence?: number;
   weight?: number;
+  addedStats?: Array<{ stat: number; value: number }>;
 };
 
 const TRADE_SLOT_COUNT = 10;
@@ -6537,6 +6539,7 @@ export default function HomePage() {
       addedAttack: item.addedAttack ?? undefined,
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
+      addedStats: item.addedStats ?? undefined,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
       key: item.key,
@@ -6555,6 +6558,7 @@ export default function HomePage() {
       addedAttack: item.addedAttack ?? undefined,
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
+      addedStats: item.addedStats ?? undefined,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
       key: item.key,
@@ -6573,6 +6577,7 @@ export default function HomePage() {
       addedAttack: item.addedAttack ?? undefined,
       addedDefence: item.addedDefence ?? undefined,
       weight: item.weight ?? undefined,
+      addedStats: item.addedStats ?? undefined,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
       slot: item.slot,
