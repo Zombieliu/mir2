@@ -14,7 +14,8 @@ use super::{
     start_game_visible_respawn_spawns, tile_distance, BuffResource, BuffState,
     CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing, FishingResource,
     HarvestMonsterState, InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState,
-    MonsterCombatStats, MonsterPoisonState, MonsterRespawnSchedule, MonsterSpawnRule,
+    MonsterCombatStats, MonsterDamageBuff, MonsterPoisonState, MonsterRespawnSchedule,
+    MonsterSpawnRule,
     MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, MountResource, NpcInteractionContext,
     NpcStateResource, ObjectId, PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource,
     PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
@@ -4339,6 +4340,83 @@ fn crystal_monster_attack_damage_rolls_across_its_class_range() {
         saw_min && saw_mid && saw_max,
         "rolled damage should span the whole DC range, not pin to the maximum"
     );
+}
+
+#[test]
+fn crystal_yin_devil_node_enhances_nearby_allies_dc() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Keep the player far away so the allies do not wander off to chase.
+    set_player_position(&mut session, Point { x: 40, y: 40 });
+
+    let node_pos = Point { x: 320, y: 240 };
+    let current_tick = runtime_tick(session.app.world());
+    let make_agent = |ai: u8| MonsterAgent {
+        image: 0,
+        dead: false,
+        patrol_origin: node_pos.clone(),
+        ai,
+        disposition: WorldEntityDisposition::Hostile,
+        hostile_to_player: true,
+        tracking_player: false,
+        view_range: 7,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: current_tick,
+        next_attack_tick: current_tick,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: current_tick,
+    };
+    session.app.world_mut().spawn((
+        ObjectId(92_900),
+        DisplayName::literal("YinDevilNode"),
+        Position(node_pos.clone()),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals {
+            hp: 100,
+            max_hp: 100,
+        },
+        make_agent(42),
+    ));
+    let ally = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(92_901),
+            DisplayName::literal("BoneSpearman"),
+            Position(Point {
+                x: node_pos.x + 2,
+                y: node_pos.y,
+            }),
+            Facing(MirDirection::Left),
+            Monster,
+            MonsterVitals {
+                hp: 200,
+                max_hp: 200,
+            },
+            make_agent(29),
+        ))
+        .id();
+
+    session.tick();
+
+    let buff = session
+        .app
+        .world()
+        .entity(ally)
+        .get::<MonsterDamageBuff>()
+        .copied();
+    let buff = buff.expect("YinDevilNode should enhance a nearby ally");
+    assert!(
+        buff.bonus_dc >= 4,
+        "UltimateEnhancer grants at least +4 DC, got {}",
+        buff.bonus_dc
+    );
+    assert!(buff.expires_at_tick > current_tick);
 }
 
 #[test]

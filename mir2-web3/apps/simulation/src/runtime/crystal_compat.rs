@@ -79,6 +79,9 @@ pub(super) const MAN_TREE_STUN_CHANCE_DENOMINATOR: u64 = 5;
 pub(super) const MAN_TREE_STUN_DURATION_TICKS: u64 = 5;
 pub(super) const MAN_TREE_STUN_BUFF_KEY: &str = "crystal-stun";
 pub(super) const TRAINER_DAMAGE_REPORT_IDLE_TICKS: u64 = 5;
+/// YinDevilNode (UltimateEnhancer) buffs friendly monsters within 7 tiles with +MaxDC for 5s.
+pub(super) const YIN_DEVIL_NODE_BUFF_RANGE: i32 = 7;
+pub(super) const YIN_DEVIL_NODE_BUFF_DURATION_TICKS: u64 = 5;
 pub(super) const GREAT_FOX_SPIRIT_SLOW_CHANCE_DENOMINATOR: u64 = 5;
 pub(super) const GREAT_FOX_SPIRIT_SLOW_DURATION_TICKS: u64 = 15;
 pub(super) const GREAT_FOX_SPIRIT_PARALYSIS_CHANCE_DENOMINATOR: u64 = 5;

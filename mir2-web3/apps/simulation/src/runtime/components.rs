@@ -123,6 +123,14 @@ pub(super) struct MonsterAiState {
     pub(super) next_state_tick: u64,
 }
 
+/// Temporary attack-power buff a monster receives from a friendly aura caster (Crystal
+/// `UltimateEnhancer`, e.g. the YinDevilNode). Added to the attacker's rolled DC while active.
+#[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
+pub(super) struct MonsterDamageBuff {
+    pub(super) bonus_dc: i32,
+    pub(super) expires_at_tick: u64,
+}
+
 #[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
 pub(super) struct HarvestMonsterState {
     pub(super) remaining_skin_count: u8,

@@ -11,8 +11,8 @@ use super::combat::*;
 use super::components::{
     current_player_is_dead, current_player_object_id, entity_facing, entity_name, entity_object_id,
     entity_position, player_entity, DisplayName, Facing, GeneralMeowMeowState, Monster,
-    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterVitals, ObjectId, Position,
-    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
+    MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterDamageBuff, MonsterVitals, ObjectId,
+    Position, SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState,
 };
 use super::crystal_compat::*;
 use super::drops::tick_ground_drop_expiry;
@@ -138,6 +138,17 @@ pub(super) fn summon_attack_damage(
     } else {
         0
     })
+}
+
+/// Bonus attack power an entity currently gains from a friendly aura (UltimateEnhancer), expired
+/// lazily by tick. Added on top of the attacker's rolled DC.
+pub(super) fn monster_damage_buff_bonus(world: &World, entity: Entity, tick: u64) -> i32 {
+    world
+        .entity(entity)
+        .get::<MonsterDamageBuff>()
+        .filter(|buff| buff.expires_at_tick > tick)
+        .map(|buff| buff.bonus_dc)
+        .unwrap_or(0)
 }
 
 pub(super) fn hostile_monster_summon_target(
@@ -765,7 +776,7 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
-        42 => update_yin_devil_node_state(agent, tick),
+        42 => update_yin_devil_node_state(world, entity, agent, position, tick),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
@@ -3448,7 +3459,13 @@ pub(super) fn update_reviving_zombie_state(
     true
 }
 
-pub(super) fn update_yin_devil_node_state(agent: &mut MonsterAgent, tick: u64) -> bool {
+pub(super) fn update_yin_devil_node_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    position: &Point,
+    tick: u64,
+) -> bool {
     if agent.dead {
         return true;
     }
@@ -3456,7 +3473,48 @@ pub(super) fn update_yin_devil_node_state(agent: &mut MonsterAgent, tick: u64) -
     agent.tracking_player = false;
     agent.can_wander = false;
     agent.next_move_tick = tick + 1;
-    agent.next_attack_tick = tick + 1;
+
+    // The node is rooted; it only pulses on its attack cadence, and only when allies are nearby
+    // (Crystal FindFriendsNearby(7)). Each pulse re-enhances every friendly monster within 7 tiles
+    // with +MaxDC (its own Level/7 + 4) for 5 seconds (UltimateEnhancer).
+    if tick < agent.next_attack_tick {
+        return true;
+    }
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+
+    let node_hostile = agent.hostile_to_player;
+    let lang = current_language(world);
+    let allies: Vec<(Entity, i32)> = {
+        #[allow(deprecated)]
+        world
+            .iter_entities()
+            .filter_map(|candidate| {
+                if candidate.id() == entity {
+                    return None;
+                }
+                let candidate_agent = candidate.get::<MonsterAgent>()?;
+                if candidate_agent.dead || candidate_agent.hostile_to_player != node_hostile {
+                    return None;
+                }
+                let candidate_position = candidate.get::<Position>()?;
+                if tile_distance(position, &candidate_position.0) > YIN_DEVIL_NODE_BUFF_RANGE {
+                    return None;
+                }
+                let name = candidate.get::<DisplayName>()?.resolve(lang);
+                let level = crystal_monster_by_name(&name)
+                    .map(|monster| i32::from(monster.level))
+                    .unwrap_or(0);
+                Some((candidate.id(), level / 7 + 4))
+            })
+            .collect()
+    };
+    let expires_at_tick = tick + YIN_DEVIL_NODE_BUFF_DURATION_TICKS;
+    for (ally, bonus_dc) in allies {
+        world.entity_mut(ally).insert(MonsterDamageBuff {
+            bonus_dc,
+            expires_at_tick,
+        });
+    }
     true
 }
 
@@ -4671,6 +4729,11 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             &player_position,
                             attacker_id,
                         )
+                    };
+                    let final_damage = if final_damage > 0 {
+                        final_damage + monster_damage_buff_bonus(world, entity, tick)
+                    } else {
+                        final_damage
                     };
                     let attack_type = if armadillo_type_one_branch
                         || hell_keeper_type_one_branch
