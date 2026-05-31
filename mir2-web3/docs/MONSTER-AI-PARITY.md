@@ -214,5 +214,19 @@ runtime:
 - AI 112 `DarkBeast` (15 spawns) — `dark_beast_secondary_branch`.
 
 ## Remaining gaps (lower-impact / data-inactive)
-- YinDevilNode (41/42) support-buff emission to friendly targets within 7.
-- ToxicGhoul death-AoE branch (data-inactive in current manifests).
+- YinDevilNode (41/42) support-buff emission to friendly targets within 7
+  (would emit `BlessedArmour`/`UltimateEnhancer` buffs onto other monsters,
+  not the player).
+- ToxicGhoul death-AoE branch (data-inactive in current manifests — all
+  ToxicGhoul variants carry effect=0).
+- Per-branch damage-source mixing (e.g. AI 88 ManectricKing push branch
+  uses DC while range/mass uses MC; AI 116 BlackHammerCat Type-1 direct
+  hit uses MC while the line splash uses DC). `monster_player_attack_damage`
+  takes one (agent, source, target) tuple per call, so dispatching by
+  internal random/HP branches isn't possible without restructuring; the
+  current arms use the *common* damage source for the distance-keyed
+  branch, which is correct for the dominant fraction of hits but not for
+  the rare mixed sub-branches.
+- AIs with 0 manifest spawns that have Crystal subclasses but no runtime
+  bespoke logic (142 TreeQueen, 163-171 Horned*, 210 HoodedSummonerScrolls).
+  None of these have active spawns in the imported respawn manifest.
