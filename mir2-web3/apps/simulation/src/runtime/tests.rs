@@ -39460,9 +39460,11 @@ fn magic_packet_crystal_fire_wall_spawns_cross_spell_objects_and_ticks_ground_da
                 offset_point(&target, MirDirection::Left, 1),
             ];
             (can_occupy(session.app.world(), candidate.clone(), Some(player))
-                && cross
-                    .iter()
-                    .all(|point| can_occupy(session.app.world(), point.clone(), None)))
+                && is_combat_position(&session, &candidate)
+                && cross.iter().all(|point| {
+                    can_occupy(session.app.world(), point.clone(), None)
+                        && is_combat_position(&session, point)
+                }))
             .then_some((candidate, target))
         })
         .expect("open FireWall cross");
@@ -39666,9 +39668,10 @@ fn magic_packet_crystal_thunder_storm_hits_current_location_square_and_reduces_l
                 undead.clone(),
                 requested.clone(),
             ];
-            (points
-                .iter()
-                .all(|point| can_occupy(session.app.world(), point.clone(), Some(player))))
+            (points.iter().all(|point| {
+                can_occupy(session.app.world(), point.clone(), Some(player))
+                    && is_combat_position(&session, point)
+            }))
             .then_some((candidate, living, undead, outside, requested))
         })
         .expect("open ThunderStorm square");
@@ -43735,10 +43738,15 @@ fn magic_packet_crystal_fire_bang_and_ice_storm_hit_target_three_by_three() {
                     y: candidate.y,
                 };
                 let square_open = (target.y - 2..=target.y + 2).all(|y| {
-                    (target.x - 2..=target.x + 2)
-                        .all(|x| can_occupy(session.app.world(), Point { x, y }, None))
+                    (target.x - 2..=target.x + 2).all(|x| {
+                        let point = Point { x, y };
+                        can_occupy(session.app.world(), point.clone(), None)
+                            && is_combat_position(&session, &point)
+                    })
                 });
-                (can_occupy(session.app.world(), candidate.clone(), Some(player)) && square_open)
+                (can_occupy(session.app.world(), candidate.clone(), Some(player))
+                    && is_combat_position(&session, &candidate)
+                    && square_open)
                     .then_some((candidate, target))
             })
             .expect("open Blizzard/MeteorStrike target square");
