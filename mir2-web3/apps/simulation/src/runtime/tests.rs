@@ -54066,16 +54066,27 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     let flat = super::crystal_player_melee_damage(session.app.world());
-    // Guaranteed crit (rate 100) for +100% (CriticalDamage 10 == ten 10% steps).
+    // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
+    // (Crystal RefreshStatCaps). So crits land ~18% of the time and each adds
+    // CriticalDamage*10% = +100% (a doubled blow).
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_RATE, 100);
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.critical_rate(), 18);
+    assert_eq!(stats.critical_damage(), 10);
 
-    let rolled = super::crystal_player_rolled_melee_damage(session.app.world(), 7);
-    assert_eq!(
-        rolled,
-        flat * 2,
-        "a guaranteed crit with CriticalDamage 10 should double the blow"
-    );
+    let (mut crits, mut normals) = (0, 0);
+    for tick in 0..200 {
+        match super::crystal_player_rolled_melee_damage(session.app.world(), tick) {
+            d if d == flat => normals += 1,
+            d => {
+                assert_eq!(d, flat * 2, "a crit with CriticalDamage 10 doubles the blow");
+                crits += 1;
+            }
+        }
+    }
+    assert!(crits > 0, "an 18% crit rate should land some crits");
+    assert!(normals > 0, "an 18% crit rate should not crit every swing");
 }
 
 #[test]
@@ -54120,17 +54131,37 @@ fn poison_resistance_reduces_player_poison_tick_damage() {
 }
 
 #[test]
-fn magic_resistance_reduces_incoming_magic_damage() {
+fn magic_resistance_grants_miss_chance_against_incoming_magic() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    assert_eq!(super::crystal_player_magic_mitigated(session.app.world(), 100), 100);
 
-    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 5);
-    let mitigated = super::crystal_player_magic_mitigated(session.app.world(), 100);
-    assert!(
-        mitigated < 100 && mitigated >= 1,
-        "magic resist 5 should shave the blow (got {mitigated})"
-    );
+    // No resistance: every magic blow lands in full.
+    for tick in 0..40 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        assert_eq!(
+            super::crystal_player_magic_mitigated(session.app.world(), 100),
+            100
+        );
+    }
+
+    // Gear grants MagicResist 6, but the class cap is 2 → ~2/10 chance to fully
+    // shrug a magic blow (Crystal GetArmour MAC miss check).
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 6);
+    assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
+
+    let (mut misses, mut hits) = (0, 0);
+    for tick in 0..200 {
+        super::set_runtime_tick(session.app.world_mut(), tick);
+        match super::crystal_player_magic_mitigated(session.app.world(), 100) {
+            0 => misses += 1,
+            other => {
+                assert_eq!(other, 100, "a non-miss magic blow lands in full");
+                hits += 1;
+            }
+        }
+    }
+    assert!(misses > 0, "magic resistance should sometimes fully block magic");
+    assert!(hits > 0, "a 2/10 resist must not block every blow");
 }
 
 #[test]
@@ -54242,4 +54273,24 @@ fn player_stats_expose_class_weight_capacities() {
     assert!(stats.bag_weight() >= 50);
     assert!(stats.hand_weight() >= 12);
     assert!(stats.wear_weight() >= 15);
+}
+
+#[test]
+fn class_base_stats_scale_with_level_per_crystal_formula() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    set_active_character_class_gender_level(&mut session, MirClass::Warrior, MirGender::Male, 50);
+
+    // Weights are pure class-base (no equipment contributes them), so they
+    // exercise Crystal's StatFormula.Weight: Base + (level/Gain) * level.
+    // Warrior @50: Bag 50+(50/3)*50=883, Wear 15+(50/20)*50=140, Hand 12+(50/13)*50=204.
+    let stats = super::player_stats(session.app.world());
+    assert_eq!(stats.bag_weight(), 883);
+    assert_eq!(stats.wear_weight(), 140);
+    assert_eq!(stats.hand_weight(), 204);
+
+    // Class stat caps (Crystal RefreshStatCaps): MagicResist is capped at 2 even
+    // when gear/level would push it higher.
+    equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 9);
+    assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
 }
