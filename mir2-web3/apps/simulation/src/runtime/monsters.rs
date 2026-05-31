@@ -2134,9 +2134,9 @@ pub(super) fn monster_attack_uses_magic_defence(ai: u8, source: &Point, target: 
     match ai {
         // Normal attack always carries a MAC* defence type (full Crystal roster, extracted from each
         // subclass's Attack() override — covers spawned and data-only families alike).
-        7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 52 | 55 | 61
-        | 63 | 73 | 75 | 87 | 92 | 94 | 100 | 102 | 103 | 107 | 108 | 110 | 120 | 122 | 135 | 136
-        | 140 | 142 | 152 | 160 | 210 | 215 | 216 | 221 => true,
+        7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 52 | 55 | 60 | 61
+        | 63 | 73 | 75 | 87 | 92 | 93 | 94 | 95 | 100 | 102 | 103 | 107 | 108 | 110 | 120 | 122 | 135
+        | 136 | 140 | 142 | 149 | 152 | 160 | 210 | 211 | 215 | 216 | 221 => true,
         // Physical in melee, magic at range (the Attack() mixes ACAgility and MAC*).
         // SepHighArcher (223) is NOT here: its primary shot is `DefenceType.ACAgility` (physical) — only
         // a conditional poison-buff AoE is MAC — so it resolves against AC like the other archers.

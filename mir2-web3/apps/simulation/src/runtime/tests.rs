@@ -4688,6 +4688,23 @@ fn sep_clone_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn data_only_caster_families_resolve_against_mac() {
+    // These data-only families deal their primary hit with a MAC* DefenceType in Crystal (verified
+    // against each subclass): VampireSpider (60, MACAgility), FlameMage (93) / FlameAssassin (95)
+    // via base RightGuard (MACAgility/MAC), PowerBead (149, MACAgility), HoodedSummoner (211, MAC).
+    // They must resolve against the player's MAC, not AC, at every range.
+    let near = Point { x: 20, y: 20 };
+    let far = Point { x: 20, y: 28 };
+    for ai in [60u8, 93, 95, 149, 211] {
+        assert!(
+            super::monster_attack_uses_magic_defence(ai, &near, &near)
+                && super::monster_attack_uses_magic_defence(ai, &near, &far),
+            "caster ai {ai} should resolve against MAC at every range"
+        );
+    }
+}
+
+#[test]
 fn mutated_manworm_blinks_with_effect_four_when_struck_hard() {
     // MutatedManworm (ai 65) shares SnowWolfKing's FindWeakerTarget blink, but with teleport effect 4
     // instead of 11. A blow heavier than its own DC (28-55) gives a 50% chance to blink toward the
