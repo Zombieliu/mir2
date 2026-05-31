@@ -1,9 +1,30 @@
-# Magic / combat test failures → green: diagnosis & plan
+# Magic / combat / persistence test failures → green: diagnosis & plan
 
-Status: **ALL 50 magic_packet_* tests fixed** on branch
-`claude/optimistic-mayer-gswKV` (PR #8). Full single-threaded lib failures went
-from 70 → 19, with **zero regressions** (baseline failure set is a strict
-subset; verified by `comm`). The 19 remaining are unrelated to magic: combat
+Status: **lib failures 70 → 3** on branch `claude/optimistic-mayer-gswKV`
+(PR #8), with **zero regressions** at every step (baseline failure set stays a
+strict superset; verified by `comm` on each engine change). Fixed this effort:
+all 50 magic_packet_* tests, all 9 combat damage-branch tests, all 5
+persistence/save/reconnect tests, and the soak test (via safe-zone immunity).
+
+The **3 remaining** are map-data (manifest) drift, not code bugs:
+- `crystal_current_map_spawn_table_uses_representative_map_rosters` — expected
+  spawn roster rules absent from the current respawn manifest.
+- `crystal_manifest_movements_skip_crystal_invalid_direct_transfers` and
+  `walk_onto_blocked_crystal_manifest_movement_source_transfers_map` — reference
+  map movements (e.g. 322,248→0104/Library) not present in the current
+  `crystal_respawn_manifest.json`. These need the manifest regenerated from the
+  Crystal submodule (empty in this container) or the test expectations re-pinned
+  to the current data — a data task, not an engine fix.
+
+## Safe-zone player damage immunity (engine, Crystal parity)
+Added `combat::current_player_in_safe_zone`; `resolve_pending_combat_actions`
+skips incoming monster combat damage (no Struck) while the player stands in a
+safe zone. Poison/bleeding DOT still ticks (Crystal-accurate). The 11 combat
+tests that fought at the town spawn (a safe zone) were relocated to a
+combat-clear origin (~(305,277), shift -30x/+10y) so they still exercise real
+damage. Verified engine+tests together: zero regressions.
+
+## (historical) magic-test status
 damage-branch tests, storage/persistence, soak, and a manifest-drift transfer.
 
 ## Root causes fixed (all engine-correct, no behaviour hacks)
