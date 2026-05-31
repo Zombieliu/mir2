@@ -93,7 +93,29 @@ The combat-regression suite was re-baselined for these (kill tests use a lethal
 test weapon to keep their defeat-outcome intent; per-hit damage assertions became
 armour-roll ranges).
 
-Remaining minor items: the physical `Random(Agility+1) > attacker.Accuracy` miss
-check on monster melee (monster accuracy is not yet modelled server-side),
-`MinMAC..MaxMAC` magic armour rolls (magic currently uses the AC roll + resist
-miss), and proximity-gating the lover/mentor experience bonus.
+## Shared-zone combat parity
+
+The shared zone (the emerging world-combat authority) resolves combat from the
+same engine: `crystal_zone_player_combat_stats` populates `ZonePlayerCombatStats`
+from `player_stats()`, so the zone rolls the real `Random(MinDC,MaxDC)` melee,
+`Random(MinAC,MaxAC)`/`Random(MinMAC,MaxMAC)` armour, **and** the `CriticalRate`/
+`CriticalDamage` crit (`zone_apply_player_critical`) — identical to the session
+path. `crystal_player_zone_base_melee_damage` (the non-authoritative fallback +
+range/magic base) is unified with the engine. This closes the session↔zone
+combat divergence.
+
+On the defensive side, player attack-magic against a monster now subtracts the
+target's `Random(MinMAC,MaxMAC)` (`zone_magic_damage_after_monster_armour`),
+mirroring the AC subtraction the physical path applies — so the ~404/555 monsters
+with non-zero template MAC mitigate spell damage authoritatively. This covers the
+single-target cast, secondary AoE targets, the FireBounce chain, and the
+ground/AoE attack spells (FireWall/Blizzard/MeteorStrike/PoisonCloud/ExplosiveTrap)
+per damage tick. The PoisonCloud poison DoT is applied separately and stays
+unmitigated (poison is not reduced by MAC).
+
+Remaining minor item: the physical `Random(Agility+1) > attacker.Accuracy` miss
+check on monster melee. Monster accuracy is **not** present in the extracted data —
+the `generate-crystal-respawn-manifest.mjs` extractor reads `Agility` but drops it
+from the monster output and never reads `Accuracy`, so this needs a data-pipeline
+change before it can fire. (Proximity-gating the lover/mentor experience bonus also
+remains.)
