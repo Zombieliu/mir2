@@ -93,6 +93,17 @@ The combat-regression suite was re-baselined for these (kill tests use a lethal
 test weapon to keep their defeat-outcome intent; per-hit damage assertions became
 armour-roll ranges).
 
+## Shared-zone combat parity
+
+The shared zone (the emerging world-combat authority) resolves combat from the
+same engine: `crystal_zone_player_combat_stats` populates `ZonePlayerCombatStats`
+from `player_stats()`, so the zone rolls the real `Random(MinDC,MaxDC)` melee,
+`Random(MinAC,MaxAC)`/`Random(MinMAC,MaxMAC)` armour, **and** the `CriticalRate`/
+`CriticalDamage` crit (`zone_apply_player_critical`) — identical to the session
+path. `crystal_player_zone_base_melee_damage` (the non-authoritative fallback +
+range/magic base) is unified with the engine. This closes the session↔zone
+combat divergence.
+
 Remaining minor items: the physical `Random(Agility+1) > attacker.Accuracy` miss
 check on monster melee (monster accuracy is not yet modelled server-side),
 `MinMAC..MaxMAC` magic armour rolls (magic currently uses the AC roll + resist

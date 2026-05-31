@@ -7255,6 +7255,7 @@ fn zone_resolve_player_physical_attack(
 
     let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
         .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
     let armour = zone_roll_stat_range(
         monster.defense.min_ac,
         monster.defense.max_ac,
@@ -7263,6 +7264,33 @@ fn zone_resolve_player_physical_attack(
         0x0AC,
     );
     Some(base.saturating_sub(armour).max(0))
+}
+
+/// Crystal critical hit: with a `CriticalRate`/100 chance the blow is amplified
+/// by `CriticalDamage * 10%`. Resolved deterministically off the tick (mirrors
+/// the per-session `crystal_apply_player_critical`). Inert when the player has
+/// no crit gear.
+fn zone_apply_player_critical(
+    damage: i32,
+    stats: &super::types::ZonePlayerCombatStats,
+    object_id: u32,
+    now_ms: u64,
+) -> i32 {
+    let rate = stats.critical_rate.clamp(0, 100);
+    if rate <= 0 || damage <= 0 {
+        return damage;
+    }
+    let roll = zone_deterministic_roll(
+        now_ms,
+        usize::try_from(object_id).unwrap_or_default(),
+        0xC817,
+        100,
+    );
+    if roll >= u64::try_from(rate).unwrap_or(0) {
+        return damage;
+    }
+    let bonus_steps = stats.critical_damage.max(1);
+    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
 }
 
 /// Authoritatively recompute a spell's damage from the Crystal magic template,

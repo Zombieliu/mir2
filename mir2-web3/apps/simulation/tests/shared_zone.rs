@@ -7989,6 +7989,61 @@ fn zone_resolves_player_attack_damage_from_authoritative_stats() {
 }
 
 #[test]
+fn zone_resolves_player_critical_hit_from_authoritative_stats() {
+    // With CriticalRate 100 the zone amplifies the rolled DC by CriticalDamage
+    // (10 == +100%) before subtracting armour — the Crystal crit, owned by the
+    // zone rather than the session.
+    let mut zone = zone();
+    let attacker = session("first");
+    zone.handle(ZoneCommand::Join(join_with_combat_stats(
+        "first",
+        101,
+        "Scout",
+        330,
+        270,
+        ZonePlayerCombatStats {
+            min_dc: 15,
+            max_dc: 15,
+            accuracy: 10_000,
+            critical_rate: 100,
+            critical_damage: 10,
+            ..Default::default()
+        },
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: attacker.clone(),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            331,
+            270,
+            100,
+            ZoneMonsterDefense {
+                agility: 0,
+                min_ac: 5,
+                max_ac: 5,
+                ..Default::default()
+            },
+        ),
+        now_ms: 0,
+    });
+
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: attacker.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 999,
+        now_ms: 10,
+    });
+    let struck = zone.tick(10);
+
+    // base 15 -> crit doubles to 30, minus 5 armour = 25 (vs 10 without crit).
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(25));
+}
+
+#[test]
 fn zone_player_attack_armour_can_fully_block_authoritative_damage() {
     // When armour meets or exceeds the rolled damage the hit lands but deals 0 —
     // a Crystal "block" — and the monster keeps full HP.

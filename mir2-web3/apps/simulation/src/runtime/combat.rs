@@ -417,6 +417,8 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         max_ac: stats.max_ac(),
         min_mac: stats.min_mac(),
         max_mac: stats.max_mac(),
+        critical_rate: stats.critical_rate(),
+        critical_damage: stats.critical_damage(),
     }
 }
 

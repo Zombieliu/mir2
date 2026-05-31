@@ -127,6 +127,10 @@ pub struct ZonePlayerCombatStats {
     pub max_ac: i32,
     pub min_mac: i32,
     pub max_mac: i32,
+    /// Crystal `CriticalRate` (0..100 chance) and `CriticalDamage` (each point is
+    /// +10% on a landed crit). Zero for a player with no crit gear.
+    pub critical_rate: i32,
+    pub critical_damage: i32,
 }
 
 impl ZonePlayerCombatStats {
