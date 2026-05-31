@@ -25,8 +25,8 @@ pub use runtime::{
     SharedGroundDropPickupCommit, SharedItemRentalAgreement, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
     SimulationSession, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
-    ZoneRuntime,
+    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, WorldCommand, WorldCommandExecution,

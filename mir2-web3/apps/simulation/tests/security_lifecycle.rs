@@ -103,6 +103,7 @@ fn each_joined_player_has_unique_object_id() {
         position: Point { x: 330, y: 270 },
         direction: MirDirection::Down,
         chat_profile: Default::default(),
+        combat_stats: Default::default(),
     }));
     zone.handle(ZoneCommand::Join(ZoneJoin {
         session_id: second.clone(),
@@ -120,6 +121,7 @@ fn each_joined_player_has_unique_object_id() {
         position: Point { x: 332, y: 270 },
         direction: MirDirection::Down,
         chat_profile: Default::default(),
+        combat_stats: Default::default(),
     }));
 
     assert_ne!(

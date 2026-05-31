@@ -16,7 +16,8 @@ use mir2_simulation::{
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue, SharedTradeOffer,
     WorldCommand, WorldCommandExecution, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneCommand,
-    ZoneManager, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntimeHandle,
+    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneOutbound,
+    ZoneRuntimeHandle,
 };
 
 use crate::GatewayConfig;
@@ -2639,6 +2640,9 @@ fn zone_monster_spawn_from_shared_entity(
         max_hp,
         hp,
         experience: template_ref.map(|monster| monster.experience).unwrap_or(0),
+        defense: template_ref
+            .map(|monster| ZoneMonsterDefense::from_crystal_template(monster))
+            .unwrap_or_default(),
         position: Point {
             x: entity.x,
             y: entity.y,
@@ -3501,6 +3505,15 @@ impl SharedInProcessZoneSessionRuntime {
                         profile: join.chat_profile.clone(),
                     }),
             );
+            // Keep the zone's authoritative combat view fresh so equipment,
+            // buff, and level changes are reflected the next time the zone rolls
+            // this player's damage.
+            outbounds.extend(zone_state.zone_manager.handle(
+                ZoneCommand::UpdatePlayerCombatStats {
+                    session_id: session_id.clone(),
+                    stats: join.combat_stats,
+                },
+            ));
             outbounds.extend(
                 zone_state
                     .zone_manager
