@@ -325,8 +325,7 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         .filter(|item| !item.is_broken())
         .map(|item| item.total_defence())
         .sum();
-    let magic_armour =
-        crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_MAX_MAC).max(0);
+    let magic_armour = crystal_equipment_added_stat_total(resources, CRYSTAL_STAT_MAX_MAC).max(0);
     super::ZonePlayerCombatStats {
         min_dc: base,
         max_dc: base,
