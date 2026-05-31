@@ -54206,3 +54206,50 @@ fn monster_melee_attack_is_reduced_by_randomised_player_ac() {
         "incoming melee {damage} should be raw {raw_dc} minus armour in [0, {player_ac}]"
     );
 }
+
+#[test]
+fn high_agility_player_dodges_some_incoming_melee() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_pos = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_pos.clone());
+    // Push agility well above the monster accuracy floor so dodges occur.
+    push_player_stat_buff(&mut session, "test-agility", super::CRYSTAL_STAT_AGILITY, 40);
+
+    let mob = spawn_crystal_monster_for_test(
+        &mut session,
+        91_012,
+        "BombSpider",
+        Point { x: player_pos.x + 1, y: player_pos.y },
+        MirDirection::Left,
+        true,
+    );
+    let mut agent = session
+        .app
+        .world()
+        .entity(mob)
+        .get::<MonsterAgent>()
+        .expect("mob agent")
+        .clone();
+    agent.ai = 7; // physical melee
+
+    let mut dodged = false;
+    let mut landed = false;
+    for dx in 1..16 {
+        let source = Point { x: player_pos.x + dx, y: player_pos.y };
+        let dmg = super::monster_player_attack_damage(
+            session.app.world(),
+            "BombSpider",
+            &agent,
+            &source,
+            &player_pos,
+        );
+        if dmg == 0 {
+            dodged = true;
+        } else {
+            landed = true;
+        }
+    }
+    assert!(dodged, "a high-agility player should dodge some incoming melee");
+    assert!(landed, "but not all blows");
+}

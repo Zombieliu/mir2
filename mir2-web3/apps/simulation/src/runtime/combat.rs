@@ -344,7 +344,7 @@ fn crystal_player_accuracy(world: &World) -> i32 {
 /// it the agility dodge would make a base-agility player evade almost every
 /// monster blow, so monster attacks use this floor to land reliably while still
 /// letting very-high-agility builds occasionally dodge.
-const MONSTER_DEFAULT_ACCURACY: i32 = 20;
+pub(super) const MONSTER_DEFAULT_ACCURACY: i32 = 20;
 
 /// Resolve the player's full Crystal combat stats: class/level base
 /// ([`player_base_combat_stats`]) plus equipment and buff totals, normalised by

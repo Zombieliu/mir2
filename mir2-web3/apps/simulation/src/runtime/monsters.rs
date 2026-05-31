@@ -14,8 +14,8 @@ use mir2_protocol::{
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
 use super::combat::{
-    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
-    ranged_attack_delay_ticks, PendingPlayerStatusEffect,
+    combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks, player_combat_stats,
+    ranged_attack_delay_ticks, PendingPlayerStatusEffect, MONSTER_DEFAULT_ACCURACY,
 };
 use super::components::{
     entity_facing, entity_object_id, entity_position, DisplayName, Facing, GeneralMeowMeowState,
@@ -25,7 +25,7 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
-use super::combat_engine::get_defence_power;
+use super::combat_engine::{deterministic_range, get_defence_power, MAGIC_RESIST_WEIGHT};
 use super::equipment::total_defence_bonus;
 use super::items::current_player_required_stat_total;
 use super::map::{
@@ -2029,21 +2029,46 @@ pub(super) fn monster_player_attack_damage(
     if base_damage <= 0 {
         return 0;
     }
+    let is_magic = monster_attack_uses_magic(agent, source, target);
+    let tick = runtime_tick(world);
+    let salt = (source.x as usize)
+        .wrapping_mul(1009)
+        .wrapping_add(source.y as usize);
+
+    // Crystal `GetArmour` evasion: physical blows can be dodged by agility
+    // (`rand(Agility + 1) > Accuracy`), magic blows magic-resisted
+    // (`rand(MagicResistWeight) < MagicResist`). Either makes the blow miss.
+    let player_stats = player_combat_stats(world);
+    if is_magic {
+        let resist_roll = deterministic_range(
+            tick,
+            salt.wrapping_add(0x11),
+            1,
+            0,
+            (MAGIC_RESIST_WEIGHT as i32 - 1).max(0),
+        );
+        if resist_roll < player_stats.magic_resist {
+            return 0;
+        }
+    } else {
+        let dodge_roll =
+            deterministic_range(tick, salt.wrapping_add(0x22), 2, 0, player_stats.agility.max(0));
+        if dodge_roll > MONSTER_DEFAULT_ACCURACY {
+            return 0;
+        }
+    }
+
     // Crystal rolls the absorbed armour as `GetDefencePower(0, MaxAC)` rather than
     // subtracting the full value, so incoming damage varies hit-to-hit. Magic/spell
-    // blows are mitigated by the magic armour (MAC), matching `DefenceType.MAC`;
-    // the previous code subtracted the flat physical defence for every attack.
+    // blows are mitigated by the magic armour (MAC), matching `DefenceType.MAC`.
     let inventory = world.resource::<InventoryResource>();
     let buffs = world.resource::<BuffResource>();
-    let max_armour = if monster_attack_uses_magic(agent, source, target) {
+    let max_armour = if is_magic {
         current_player_required_stat_total(inventory, buffs, CRYSTAL_STAT_MAX_MAC)
     } else {
         total_defence_bonus(inventory, buffs)
     };
-    let salt = (source.x as usize)
-        .wrapping_mul(1009)
-        .wrapping_add(source.y as usize);
-    let mitigation = get_defence_power(0, max_armour, runtime_tick(world), salt);
+    let mitigation = get_defence_power(0, max_armour, tick, salt);
     (base_damage - mitigation).max(1)
 }
 
