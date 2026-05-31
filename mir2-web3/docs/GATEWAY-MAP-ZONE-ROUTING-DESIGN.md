@@ -330,7 +330,13 @@ Consequences:
   validation, so it should be a deliberate, coordinated change, not a session-tail
   attempt.
 
-> Status note: this spec was written during a window where the build/test loop
-> was unavailable; it is grounded in the read-verified API above, not in compiled
-> tests. Implement + verify (`cargo test -p mir2-gateway`) before relying on it.
+> Status note: the spec below the harness was originally drafted while the
+> build/test loop was unavailable. The **harness/oracle is now compile-verified
+> green** (2026-05-31, `cargo +1.89.0 test -p mir2-gateway --lib routing::tests`):
+> `per_map_router_derives_distinct_zone_per_map`,
+> `per_map_routing_assigns_two_maps_to_two_zones_through_registry`,
+> `map_zone_two_sessions_on_same_map_share_a_zone_and_see_each_other`, and
+> `map_zone_transfer_changes_map_but_not_zone_today` all pass (4/4). The Steps 2+3
+> *implementation* sketch above remains read-verified (not yet coded), so verify
+> against this oracle when implementing it.
 
