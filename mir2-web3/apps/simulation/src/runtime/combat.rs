@@ -184,12 +184,12 @@ fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct PlayerDamageOutcome {
-    applied: bool,
-    died: bool,
+pub(super) struct PlayerDamageOutcome {
+    pub(super) applied: bool,
+    pub(super) died: bool,
 }
 
-fn apply_damage_to_current_player(
+pub(super) fn apply_damage_to_current_player(
     world: &mut World,
     damage: i32,
     packets: &mut Vec<ServerPacket>,
@@ -3027,6 +3027,19 @@ impl SimulationSession {
         });
 
         let Some(object_id) = object_id else {
+            // No creature in front — Crystal swings into the cell ahead and, with
+            // a pickaxe (spell == None), mines it (`HumanObject` Mining label).
+            if requested_spell == Spell::None {
+                if let Some(mut mine_packets) =
+                    super::mining::try_mine(self.app.world_mut(), direction)
+                {
+                    let mut packets = vec![ServerPacket::UserLocation {
+                        location: current_location(self.app.world()),
+                    }];
+                    packets.append(&mut mine_packets);
+                    return packets;
+                }
+            }
             return vec![ServerPacket::UserLocation {
                 location: current_location(self.app.world()),
             }];

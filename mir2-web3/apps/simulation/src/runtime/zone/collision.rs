@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use mir2_protocol::Point;
 
@@ -35,6 +35,8 @@ pub struct ZoneCollision {
     bounds: Option<ZoneBounds>,
     blocked_cells: BTreeSet<(i32, i32)>,
     transfer_source_cells: BTreeSet<(i32, i32)>,
+    /// Door index → its cells (start closed, i.e. present in `blocked_cells`).
+    doors: BTreeMap<u8, Vec<(i32, i32)>>,
 }
 
 impl ZoneCollision {
@@ -49,6 +51,7 @@ impl ZoneCollision {
                 )),
                 blocked_cells: data.blocked_cells,
                 transfer_source_cells: data.transfer_source_cells,
+                doors: data.doors,
             })
             .unwrap_or_else(Self::unbounded)
     }
@@ -58,6 +61,30 @@ impl ZoneCollision {
             bounds: None,
             blocked_cells: BTreeSet::new(),
             transfer_source_cells: BTreeSet::new(),
+            doors: BTreeMap::new(),
+        }
+    }
+
+    /// Door index → cells, for building the zone's dynamic door state.
+    pub(crate) fn doors(&self) -> &BTreeMap<u8, Vec<(i32, i32)>> {
+        &self.doors
+    }
+
+    /// Unblock a door's cells (door opened). No-op for unknown indices.
+    pub(crate) fn open_door(&mut self, index: u8) {
+        if let Some(cells) = self.doors.get(&index) {
+            for cell in cells {
+                self.blocked_cells.remove(cell);
+            }
+        }
+    }
+
+    /// Re-block a door's cells (door closed).
+    pub(crate) fn close_door(&mut self, index: u8) {
+        if let Some(cells) = self.doors.get(&index) {
+            for cell in cells {
+                self.blocked_cells.insert(*cell);
+            }
         }
     }
 
@@ -72,6 +99,16 @@ impl ZoneCollision {
     {
         self.blocked_cells
             .extend(cells.into_iter().map(|point| (point.x, point.y)));
+        self
+    }
+
+    /// Register a (closed) door of the given index over `cells`.
+    #[cfg(test)]
+    pub(crate) fn with_door(mut self, index: u8, cells: Vec<(i32, i32)>) -> Self {
+        for cell in &cells {
+            self.blocked_cells.insert(*cell);
+        }
+        self.doors.insert(index & 0x7F, cells);
         self
     }
 

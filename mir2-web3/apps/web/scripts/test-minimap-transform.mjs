@@ -59,8 +59,10 @@ const closeTo = (actual, expected, tolerance, label) => {
   });
   assert.ok(transform, "Bichon mini map transform should exist");
   const player = worldToMiniMapImagePoint(transform, { x: 347, y: 285 });
-  assert.ok(player.x > 560 && player.x < 585, "Bichon 347,285 should land in the calibrated image x range");
-  assert.ok(player.y > 305 && player.y < 325, "Bichon 347,285 should land in the calibrated image y range");
+  // Crystal's minimap is a LINEAR projection (MainDialogs.DrawMiniMap:
+  // scaleX = image.Width/map.Width): 347 * 1052/700 = 521.49, 285 * 700/700 = 285.
+  assert.ok(player.x > 515 && player.x < 528, "Bichon 347,285 should land in the linear image x range");
+  assert.ok(player.y > 280 && player.y < 290, "Bichon 347,285 should land in the linear image y range");
 
   const stableGirlMary = worldToMiniMapImagePoint(transform, { x: 353, y: 278 });
   assert.ok(stableGirlMary.x > player.x, "StableGirl Mary should be slightly east/right of 347,285 on MMap 101");
@@ -144,8 +146,8 @@ const closeTo = (actual, expected, tolerance, label) => {
 
   const player = { x: 330, y: 270 };
   const playerImagePoint = worldToMiniMapImagePoint(miniTransform, player);
-  closeTo(playerImagePoint.x, 571.0857142857143, 0.0001, "map 0 player image x should be 571.085714...");
-  closeTo(playerImagePoint.y, 300, 0.0001, "map 0 player image y should be 300");
+  closeTo(playerImagePoint.x, 495.9428571428572, 0.0001, "map 0 player image x should be 330*1052/700");
+  closeTo(playerImagePoint.y, 270, 0.0001, "map 0 player image y should be 270 (linear, scaleY=1)");
 
   const miniViewWidth = 120;
   const miniViewHeight = 108;
@@ -155,7 +157,7 @@ const closeTo = (actual, expected, tolerance, label) => {
     x: playerImagePoint.x - miniRasterLeft,
     y: playerImagePoint.y - miniRasterTop,
   };
-  closeTo(miniViewportPoint.x, 60.085714285714285, 0.0001, "map 0 mini viewport x should stay centered on player");
+  closeTo(miniViewportPoint.x, 59.94285714285718, 0.0001, "map 0 mini viewport x should stay centered on player");
   closeTo(miniViewportPoint.y, 54, 0.0001, "map 0 mini viewport y should stay centered on player");
 
   const bigTransform = findCrystalMiniMapTransform(CRYSTAL_MINI_MAP_TRANSFORMS, {
@@ -187,8 +189,8 @@ const closeTo = (actual, expected, tolerance, label) => {
     x: bigViewport.left + playerImagePoint.x * bigViewport.scale,
     y: bigViewport.top + playerImagePoint.y * bigViewport.scale,
   };
-  closeTo(bigViewportPoint.x, 322.3428571428571, 0.0001, "map 0 big viewport x");
-  closeTo(bigViewportPoint.y, 214.97718631178705, 0.0001, "map 0 big viewport y");
+  closeTo(bigViewportPoint.x, 281.77142857142854, 0.0001, "map 0 big viewport x");
+  closeTo(bigViewportPoint.y, 198.77946768060835, 0.0001, "map 0 big viewport y");
 
   closeTo((bigViewportPoint.x - bigViewport.left) / bigViewport.scale, playerImagePoint.x, 0.0001, "big viewport X should decode back to image space");
   closeTo((bigViewportPoint.y - bigViewport.top) / bigViewport.scale, playerImagePoint.y, 0.0001, "big viewport Y should decode back to image space");
