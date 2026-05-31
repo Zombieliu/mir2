@@ -50,6 +50,35 @@ Closed several of the largest interaction gaps (verified by `tsc --noEmit` +
   with hold-repeat, drag slider, Max button) instead of a bare number input.
   ~30% -> ~70%.
 
+## Update 2026-05-31 (round 3 - Crystal .Lib source available)
+
+The Crystal client Debug build (incl. all `.Lib` graphics + Cursors) became
+available, so several items previously written off as "asset-gated" were
+actually doable. Landed (each `tsc`/`next build` green; backend ones also
+`cargo check` + `world_snapshot` tests):
+
+- **NPC vendor shop** (buy grid + sell drop-zone + repair), **mail compose /
+  reply / item attachments** (real `SendMail` with `items_idx`).
+- **Item tooltip is now full-field**: grade colour, attack/defence (base+bonus),
+  bonus stat list (MAC/MC/SC/Accuracy/Agility/Luck/HP/MP/Haste), weight,
+  **equip requirements** (level/AC/MAC/DC/MC/SC + class restriction), and
+  **price** - all forwarded from the Crystal item template via WorldItemSnapshot.
+- **Real skill & buff icons**: exported MagIcon.Lib (224 frames) + BuffIcon.Lib
+  (265 frames) to PNG; the F1-F8 skill bar renders the real magic icon (greyed
+  on cooldown) and the buff row renders real BuffType icons.
+- **Custom cursors fixed**: the 7 Crystal `.CUR` cursors were committed but the
+  CSS referenced mismatched-case filenames (never loaded on a case-sensitive
+  host); normalized to lowercase `.cur` and wired default/attack/npc/text +
+  trash (delete) / upgrade (repair) states.
+- **Social dialog identity**: per-system Crystal menu-icon header + accent.
+
+Truly remaining (still gated): per-dialog Crystal bitmap *frames* for the NPC /
+social windows (the compiled `Client.dll` has no C# source, so the exact frame
+indices can't be confirmed without guessing), the data-gated social
+interactions (guild ranks/war, searchable market), and the backend-command-gated
+Inspect (view other players' gear) + BigMap town teleport. Live two-client
+trade/shop feel remains human-gated.
+
 ## Update 2026-05-31 (round 2)
 
 Closed the round-1 "still open" headline items (verified by `tsc`/`next build`,
