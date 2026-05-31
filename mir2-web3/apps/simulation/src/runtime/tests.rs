@@ -4625,6 +4625,53 @@ fn crystal_spell_magic_defence_classification_matches_crystal() {
 }
 
 #[test]
+fn evil_mir_applies_green_and_paralysis_poison() {
+    // EvilMir (ai 52, data-only): Crystal Attack rolls PoisonTarget(_,5,15,Green) AND
+    // PoisonTarget(_,5,5,Paralysis) on every landed hit. The generated profile only carried the
+    // green half; the bespoke case must surface both.
+    let agent = MonsterAgent {
+        image: 0,
+        dead: false,
+        patrol_origin: Point { x: 0, y: 0 },
+        ai: 52,
+        disposition: WorldEntityDisposition::Hostile,
+        hostile_to_player: true,
+        tracking_player: false,
+        view_range: 7,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: 0,
+        next_attack_tick: 0,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: 0,
+    };
+    match super::monster_player_status_effect(&agent) {
+        Some(super::PendingPlayerStatusEffect::GreenPoisonAndParalysis {
+            green_chance_denominator,
+            green_duration_ticks,
+            paralysis_chance_denominator,
+            paralysis_duration_ticks,
+            ..
+        }) => {
+            assert_eq!(
+                (green_chance_denominator, green_duration_ticks),
+                (5, 15),
+                "EvilMir green poison is 1/5 chance, 15-tick duration"
+            );
+            assert_eq!(
+                (paralysis_chance_denominator, paralysis_duration_ticks),
+                (5, 5),
+                "EvilMir paralysis is 1/5 chance, 5-tick duration"
+            );
+        }
+        other => panic!("EvilMir (ai 52) should apply green + paralysis, got {other:?}"),
+    }
+}
+
+#[test]
 fn crystal_unhandled_family_deals_real_damage_class_not_flat_seven() {
     // BoneSpearman (ai 29) carries DC 17-30. Before the fix every family missing an explicit
     // damage case fell through to a flat `7`; it must now deal its real damage class.

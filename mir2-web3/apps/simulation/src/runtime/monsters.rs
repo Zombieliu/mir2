@@ -2258,6 +2258,73 @@ pub(super) fn monster_player_status_effect(
             chance_denominator: TOXIC_GHOUL_GREEN_POISON_CHANCE_DENOMINATOR,
             duration_ticks: TOXIC_GHOUL_GREEN_POISON_DURATION_TICKS,
         }),
+        // EvilMir (ai 52): green DOT + paralysis on every landed hit (the profile only carries green).
+        52 => Some(PendingPlayerStatusEffect::GreenPoisonAndParalysis {
+            green_chance_denominator: EVIL_MIR_GREEN_POISON_CHANCE_DENOMINATOR,
+            green_duration_ticks: EVIL_MIR_GREEN_POISON_DURATION_TICKS,
+            green_salt: 152,
+            paralysis_chance_denominator: EVIL_MIR_PARALYSIS_CHANCE_DENOMINATOR,
+            paralysis_duration_ticks: EVIL_MIR_PARALYSIS_DURATION_TICKS,
+            paralysis_salt: 153,
+        }),
+        // Data-only families that apply TWO poisons per hit, 1:1 with each subclass's Crystal
+        // `PoisonTarget(target, chance, duration, type)` calls. The generated profile only carries one
+        // of the two, so these bespoke cases surface the pair (a rare tertiary poison is omitted —
+        // no triple-poison variant exists).
+        // FinialTurtle.Attack: Slow(8,15) + Frozen(15,5).
+        72 => Some(PendingPlayerStatusEffect::SlowAndFrozen {
+            slow_chance_denominator: 8,
+            slow_duration_ticks: 15,
+            slow_salt: 1720,
+            frozen_chance_denominator: 15,
+            frozen_duration_ticks: 5,
+            frozen_salt: 1721,
+        }),
+        // OmaMage.Attack: Slow(6,5) + Frozen(9,5).
+        147 => Some(PendingPlayerStatusEffect::SlowAndFrozen {
+            slow_chance_denominator: 6,
+            slow_duration_ticks: 5,
+            slow_salt: 1470,
+            frozen_chance_denominator: 9,
+            frozen_duration_ticks: 5,
+            frozen_salt: 1471,
+        }),
+        // RhinoPriest.Attack: Slow(2,5) + Frozen(4,5).
+        137 => Some(PendingPlayerStatusEffect::SlowAndFrozen {
+            slow_chance_denominator: 2,
+            slow_duration_ticks: 5,
+            slow_salt: 1370,
+            frozen_chance_denominator: 4,
+            frozen_duration_ticks: 5,
+            frozen_salt: 1371,
+        }),
+        // KingGuard.Attack: Slow(5,10) + Paralysis(5,10) (a tertiary green is not modelled).
+        105 => Some(PendingPlayerStatusEffect::SlowAndParalysis {
+            slow_chance_denominator: 5,
+            slow_duration_ticks: 10,
+            slow_salt: 1050,
+            paralysis_chance_denominator: 5,
+            paralysis_duration_ticks: 10,
+            paralysis_salt: 1051,
+        }),
+        // TurtleKing.Attack: Slow(5,15) + Paralysis(5,5) (a tertiary dazed is not modelled).
+        73 => Some(PendingPlayerStatusEffect::SlowAndParalysis {
+            slow_chance_denominator: 5,
+            slow_duration_ticks: 15,
+            slow_salt: 730,
+            paralysis_chance_denominator: 5,
+            paralysis_duration_ticks: 5,
+            paralysis_salt: 731,
+        }),
+        // GasToad.Attack: Green(1,5) + Paralysis(1,5) — both land on every hit.
+        132 => Some(PendingPlayerStatusEffect::GreenPoisonAndParalysis {
+            green_chance_denominator: 1,
+            green_duration_ticks: 5,
+            green_salt: 1320,
+            paralysis_chance_denominator: 1,
+            paralysis_duration_ticks: 5,
+            paralysis_salt: 1321,
+        }),
         // Generated-profile poison fallback: families without a bespoke poison case apply the
         // on-hit poison extracted from their Crystal `PoisonTarget` call (data-only families etc.).
         ai => crystal_monster_profile_poison(ai),

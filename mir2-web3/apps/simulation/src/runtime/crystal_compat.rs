@@ -139,6 +139,13 @@ pub(super) const GENERAL_MEOW_MEOW_THUNDER_RANDOM_COOLDOWN_TICKS: u64 = 4;
 pub(super) const GENERAL_MEOW_MEOW_SLAVE_NAMES: [&str; 4] =
     ["StainHammerCat", "BlackHammerCat", "StrayCat", "CatShaman"];
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
+/// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
+/// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The
+/// generated profile only carries the green half; this case adds the paralysis.
+pub(super) const EVIL_MIR_GREEN_POISON_CHANCE_DENOMINATOR: u64 = 5;
+pub(super) const EVIL_MIR_GREEN_POISON_DURATION_TICKS: u64 = 15;
+pub(super) const EVIL_MIR_PARALYSIS_CHANCE_DENOMINATOR: u64 = 5;
+pub(super) const EVIL_MIR_PARALYSIS_DURATION_TICKS: u64 = 5;
 /// SnowWolfKing FindWeakerTarget: when struck for more than its own DC it blinks (Teleport effect
 /// 11) toward a fresh target, 50% of the time when a player lands the blow.
 pub(super) const SNOW_WOLF_KING_TELEPORT_EFFECT: u8 = 11;
