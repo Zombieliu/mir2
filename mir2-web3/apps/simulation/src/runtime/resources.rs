@@ -877,6 +877,9 @@ pub(super) struct PlayerPermissionResource {
     pub(super) unlock_curse: bool,
     pub(super) free_map_shout: bool,
     pub(super) free_server_shout: bool,
+    /// GM rank for in-game `@` command access (0 = normal player). Sourced from
+    /// the account store at StartGame; gates the `@` command dispatcher.
+    pub(super) gm_level: u8,
 }
 
 impl PlayerPermissionResource {
@@ -885,7 +888,12 @@ impl PlayerPermissionResource {
             unlock_curse: false,
             free_map_shout: false,
             free_server_shout: false,
+            gm_level: 0,
         }
+    }
+
+    pub(super) fn is_gm(&self) -> bool {
+        self.gm_level > 0
     }
 }
 

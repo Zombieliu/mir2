@@ -638,6 +638,24 @@ pub(super) fn apply_character_save(world: &mut World, save: &CharacterSaveRecord
         .resource_mut::<PlayerPermissionResource>()
         .free_server_shout = false;
     {
+        // Source GM rank from the authoritative account record (0 for normal
+        // players). Gates the in-game `@` command dispatcher.
+        let gm_level = {
+            let config = world.resource::<RuntimeConfigResource>().config.clone();
+            let account_id = world.resource::<SessionResource>().account_id.clone();
+            account_id
+                .and_then(|account_id| {
+                    config
+                        .account_store
+                        .lock()
+                        .ok()
+                        .and_then(|store| store.accounts.get(&account_id).map(|a| a.gm_level))
+                })
+                .unwrap_or(0)
+        };
+        world.resource_mut::<PlayerPermissionResource>().gm_level = gm_level;
+    }
+    {
         let mut recovery = world.resource_mut::<PotionRecoveryResource>();
         recovery.pending_pot_health_amount = 0;
         recovery.pending_pot_mana_amount = 0;

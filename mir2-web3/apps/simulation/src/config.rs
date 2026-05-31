@@ -723,6 +723,10 @@ pub struct AccountRecord {
     pub ban_until_ms: Option<u64>,
     #[serde(default)]
     pub banned_at_ms: Option<u64>,
+    /// GM rank for in-game `@` command access (0 = normal player). Set by admin
+    /// tooling / account provisioning; never granted implicitly.
+    #[serde(default)]
+    pub gm_level: u8,
     pub characters: Vec<CharacterRecord>,
     pub saves: BTreeMap<i32, CharacterSaveRecord>,
 }
@@ -753,6 +757,7 @@ impl AccountRecord {
             ban_reason: String::new(),
             ban_until_ms: None,
             banned_at_ms: None,
+            gm_level: 0,
             characters: vec![default_character],
             saves,
         }
@@ -770,6 +775,7 @@ impl AccountRecord {
             ban_reason: String::new(),
             ban_until_ms: None,
             banned_at_ms: None,
+            gm_level: 0,
             characters: Vec::new(),
             saves: BTreeMap::new(),
         }
