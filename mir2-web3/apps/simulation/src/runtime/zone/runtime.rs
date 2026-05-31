@@ -90,6 +90,9 @@ pub struct ZoneRuntime {
     // sync) so visibility diffs scan a local neighborhood instead of all
     // players. See `aoi_grid` and `recompute_player_visibility`.
     player_grid: AoiGrid<SessionId>,
+    // Spatial index of zone-object positions (NPCs, owner-generated objects).
+    // Objects do not move after insert, so this is synced only at insert/remove.
+    object_grid: AoiGrid<u32>,
     next_object_id: u32,
 }
 
@@ -245,6 +248,7 @@ impl ZoneRuntime {
             // Cells are sized to the AOI range so the 3x3 neighborhood of any
             // point is a superset of everything within AOI range.
             player_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
+            object_grid: AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE),
             next_object_id: 1_000_000,
         }
     }
@@ -752,6 +756,7 @@ impl ZoneRuntime {
         let mut outbounds = Vec::new();
         for object_id in object_ids {
             self.objects.remove(&object_id);
+            self.object_grid.remove(&object_id);
             self.native_monsters.remove(&object_id);
             self.dead_object_ids.remove(&object_id);
             self.revived_object_ids.remove(&object_id);
@@ -6004,6 +6009,7 @@ impl ZoneRuntime {
                 if retained_zone_object_is_drop(packet) {
                     object.expires_at_ms = Some(now_ms.saturating_add(ZONE_DROP_EXPIRE_MS));
                 }
+                self.object_grid.insert(object.object_id, &object.position);
                 self.objects.insert(object.object_id, object);
                 continue;
             }
@@ -6029,6 +6035,7 @@ impl ZoneRuntime {
 
     fn remove_ground_drop_object_for_claim(&mut self, object_id: u32) -> Vec<ZoneOutbound> {
         self.objects.remove(&object_id);
+        self.object_grid.remove(&object_id);
         self.dead_object_ids.remove(&object_id);
         self.revived_object_ids.remove(&object_id);
         self.harvested_object_ids.remove(&object_id);
@@ -6118,6 +6125,7 @@ impl ZoneRuntime {
         }
         for object_id in expired_object_ids {
             self.objects.remove(&object_id);
+            self.object_grid.remove(&object_id);
             self.native_monsters.remove(&object_id);
             self.ground_drops.remove(&object_id);
             self.claimed_ground_drops.remove(&object_id);
@@ -6159,6 +6167,7 @@ impl ZoneRuntime {
 
     fn remove_retained_zone_object(&mut self, object_id: u32) {
         self.objects.remove(&object_id);
+        self.object_grid.remove(&object_id);
         self.native_monsters.remove(&object_id);
         self.pending_native_hits
             .retain(|hit| hit.object_id != object_id && hit.attacker_object_id != object_id);
@@ -6177,15 +6186,30 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id).cloned() else {
             return Vec::new();
         };
-        let comparisons = self
-            .objects
-            .values()
-            .map(|object| {
-                (
-                    object.object_id,
-                    points_visible(&player.position, &object.position),
-                    player.visible_object_ids.contains(&object.object_id),
-                )
+        // Candidate object ids = AOI-grid neighbors (superset of everything in
+        // range) UNION objects already visible to this player (so an object that
+        // just left range still gets its ObjectRemove). Filter to live objects;
+        // the exact points_visible test below preserves full-scan output.
+        let mut candidate_object_ids: BTreeSet<u32> = self
+            .object_grid
+            .neighbors(&player.position)
+            .into_iter()
+            .collect();
+        for object_id in &player.visible_object_ids {
+            if self.objects.contains_key(object_id) {
+                candidate_object_ids.insert(*object_id);
+            }
+        }
+        let comparisons = candidate_object_ids
+            .into_iter()
+            .filter_map(|object_id| {
+                self.objects.get(&object_id).map(|object| {
+                    (
+                        object.object_id,
+                        points_visible(&player.position, &object.position),
+                        player.visible_object_ids.contains(&object.object_id),
+                    )
+                })
             })
             .collect::<Vec<_>>();
         let mut packets = Vec::new();
