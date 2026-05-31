@@ -6,6 +6,7 @@ mod door;
 mod drops;
 mod equipment;
 mod fishing;
+mod gm_commands;
 mod hazard;
 mod hero_ai;
 mod inventory;

@@ -286,6 +286,33 @@ export type AdminEconomyReadModel = {
   priceFeedConfigured: boolean;
 };
 
+export type AdminEconomyAggregateReadModel = {
+  source: string;
+  generatedAtMs: number;
+  configured: boolean;
+  characterCount: number;
+  totalGold: number;
+  totalCredit: number;
+  averageGold: number;
+  maxGold: number;
+  activeAuctionCount: number;
+  activeAuctionValue: number;
+  unclaimedMailCount: number;
+  unclaimedMailGold: number;
+  goldDistribution: Array<{ bucket: string; characters: number }>;
+  topHolders: Array<{
+    accountId: string;
+    characterIndex: number;
+    characterName: string;
+    gold: number;
+  }>;
+  goldByMap: Array<{
+    mapFileName: string;
+    totalGold: number;
+    characters: number;
+  }>;
+};
+
 export type AdminMarketReadModel = {
   source: string;
   generatedAtMs: number;
@@ -453,7 +480,7 @@ export async function operatorHeaders() {
     "x-operator-role": process.env.ADMIN_OPERATOR_ROLE ?? "ops_admin",
     "x-operator-permissions":
       process.env.ADMIN_OPERATOR_PERMISSIONS ??
-      "account_read,account_write,account_ban,character_read,character_write,character_kick,character_message,inventory_read,inventory_grant_item,currency_grant,mail_send_system,world_broadcast,server_control,market_moderate,guild_moderate,namelist_manage,content_read,content_publish,audit_read,approval_manage,permission_manage"
+      "account_read,account_write,account_ban,character_read,character_write,character_kick,character_message,inventory_read,inventory_grant_item,currency_grant,mail_send_system,world_broadcast,server_control,market_moderate,guild_moderate,namelist_manage,content_read,content_publish,content_rollback,audit_read,approval_manage,permission_manage"
   };
   if (token) {
     headers.authorization = `Bearer ${token}`;
