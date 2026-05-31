@@ -41,13 +41,52 @@ export function OriginalAudioSettingsControls({
         onClick={() => updateSettings({ musicEnabled: !settings.musicEnabled })}
         t={t}
       />
+      <AudioVolumeSlider
+        label={t("ui.musicVolume", [], "Music Volume")}
+        value={settings.musicVolume}
+        disabled={!settings.musicEnabled}
+        onChange={(value) => updateSettings({ musicVolume: value })}
+      />
       <AudioToggleButton
         label={t("ui.effects", [], "Effects")}
         enabled={settings.effectsEnabled}
         onClick={() => updateSettings({ effectsEnabled: !settings.effectsEnabled })}
         t={t}
       />
+      <AudioVolumeSlider
+        label={t("ui.effectsVolume", [], "Effects Volume")}
+        value={settings.effectsVolume}
+        disabled={!settings.effectsEnabled}
+        onChange={(value) => updateSettings({ effectsVolume: value })}
+      />
     </section>
+  );
+}
+
+type AudioVolumeSliderProps = {
+  label: string;
+  value: number;
+  disabled: boolean;
+  onChange: (value: number) => void;
+};
+
+function AudioVolumeSlider({ label, value, disabled, onChange }: AudioVolumeSliderProps) {
+  const percent = Math.round(Math.min(1, Math.max(0, value)) * 100);
+  return (
+    <label className="audio-settings-slider" data-audio-disabled={disabled}>
+      <span>{label}</span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={percent}
+        disabled={disabled}
+        aria-label={label}
+        onChange={(event) => onChange(Number(event.target.value) / 100)}
+      />
+      <strong>{percent}%</strong>
+    </label>
   );
 }
 

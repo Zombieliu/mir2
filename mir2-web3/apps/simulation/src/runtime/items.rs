@@ -1223,7 +1223,7 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         let mut entry = world.entity_mut(player);
         let mut vitals = entry.get_mut::<PlayerVitals>().expect("player vitals");
         vitals.hp = vitals.max_hp.max(1);
-        vitals.mp = 100;
+        vitals.mp = vitals.max_mp;
         *vitals
     };
 

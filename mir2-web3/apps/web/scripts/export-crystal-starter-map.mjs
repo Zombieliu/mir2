@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { deflateSync, gunzipSync } from "node:zlib";
@@ -40,6 +40,11 @@ async function main() {
   const clientRoot = args.clientRoot ?? args._[0] ?? DEFAULT_CLIENT_ROOT;
   if (args.frames.length > 0) {
     await exportExplicitFrames(clientRoot, args.frames);
+    return;
+  }
+
+  if (args.full) {
+    await exportFullMap(clientRoot, args.map, { overwrite: Boolean(args.overwrite) });
     return;
   }
 
@@ -223,6 +228,126 @@ async function exportExplicitFrames(clientRoot, specs) {
   }
 
   console.log(JSON.stringify({ ok: true, clientRoot, exported }, null, 2));
+}
+
+// Full-map export: sweep EVERY cell of the map and export every referenced
+// sprite frame (back/middle/front/tile-animation) so a whole town like Bichon
+// has no missing PNG "holes" beyond the starter viewport. Runs where the
+// Crystal client .Lib libraries already live (no client needed in the cloud
+// container); the resulting small PNGs are committed via git.
+async function exportFullMap(clientRoot, mapFileNameArg, options = {}) {
+  const overwrite = Boolean(options.overwrite);
+  const mapFileName =
+    mapFileNameArg ??
+    String(JSON.parse(readFileSync(STARTER_SCENE_PATH, "utf8")).map?.file_name ?? "0");
+  const mapPath = path.join(clientRoot, "Map", `${mapFileName}.map`);
+  const dataDir = path.join(clientRoot, "Data");
+
+  const warnings = new Set();
+  const wanted = new Map(); // libraryKey -> Set<frameIndex>
+  let cellsScanned = 0;
+
+  function want(layer) {
+    if (!layer) {
+      return;
+    }
+    let frames = wanted.get(layer.libraryKey);
+    if (!frames) {
+      frames = new Set();
+      wanted.set(layer.libraryKey, frames);
+    }
+    for (const frameIndex of layer.frames) {
+      if (Number.isInteger(frameIndex) && frameIndex >= 0) {
+        frames.add(frameIndex);
+      }
+    }
+  }
+
+  function safeLayer(fn, cell) {
+    try {
+      return fn(cell);
+    } catch (error) {
+      warnings.add(error.message);
+      return null;
+    }
+  }
+
+  forEachMapCell(mapPath, ({ x, y, cell }) => {
+    cellsScanned += 1;
+    if (x % 2 === 0 && y % 2 === 0) {
+      want(safeLayer(backLayerForCell, cell));
+    }
+    want(safeLayer(middleLayerForCell, cell));
+    want(safeLayer(frontLayerForCell, cell));
+    want(safeLayer(tileAnimationLayerForCell, cell));
+  });
+
+  await mkdir(PUBLIC_DIR, { recursive: true });
+
+  const CONCURRENCY = 64;
+  let framesExported = 0;
+  let framesSkipped = 0;
+  let alreadyPresent = 0;
+
+  // Process one library at a time so only a single (potentially large) .Lib
+  // buffer is held in memory, and write PNGs in bounded batches to avoid EMFILE.
+  for (const [libraryKey, frameSet] of wanted) {
+    const libraryPath = path.join(dataDir, "Map", ...libraryKey.split("/")) + ".Lib";
+    let library = null;
+    try {
+      library = parseLibraryLazy(libraryPath);
+    } catch (error) {
+      warnings.add(`library ${libraryKey}: ${error.message}`);
+      continue;
+    }
+
+    const normalizedKey = normalizeLibraryName(libraryKey);
+    const exportDir = path.join(PUBLIC_DIR, ...normalizedKey.split("/"));
+    await mkdir(exportDir, { recursive: true });
+
+    const indices = [...frameSet].sort((a, b) => a - b);
+    for (let start = 0; start < indices.length; start += CONCURRENCY) {
+      const batch = indices.slice(start, start + CONCURRENCY);
+      await Promise.all(
+        batch.map(async (frameIndex) => {
+          const pngPath = path.join(exportDir, `${frameIndex}.png`);
+          if (!overwrite && existsSync(pngPath)) {
+            alreadyPresent += 1;
+            return;
+          }
+          const frame = libraryFrame(library, frameIndex);
+          if (!frame || frame.width <= 0 || frame.height <= 0) {
+            framesSkipped += 1;
+            return;
+          }
+          const rgba = postProcessFrameRgba(normalizedKey, frameIndex, frame.rgba);
+          await writeFile(pngPath, encodePng(frame.width, frame.height, rgba));
+          framesExported += 1;
+        }),
+      );
+    }
+
+    library = null;
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        mode: "full-map",
+        clientRoot,
+        mapFileName: `${mapFileName}.map`,
+        cellsScanned,
+        librariesReferenced: wanted.size,
+        framesExported,
+        alreadyPresent,
+        framesSkipped,
+        warnings: [...warnings],
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 function exportBoundsForScene(sceneView) {
@@ -425,6 +550,19 @@ function parseArgs(values) {
       index += 1;
       continue;
     }
+    if (value === "--full" || value === "--full-map") {
+      parsed.full = true;
+      continue;
+    }
+    if (value === "--overwrite") {
+      parsed.overwrite = true;
+      continue;
+    }
+    if (value === "--map") {
+      parsed.map = requireValue(values, index, value);
+      index += 1;
+      continue;
+    }
     if (value === "--frame") {
       parsed.frames.push(requireValue(values, index, value));
       index += 1;
@@ -568,6 +706,47 @@ function parseLibrary(filePath) {
   }
 
   return { version, count, frames };
+}
+
+// Lazy variant of parseLibrary: reads the frame offset table but defers frame
+// decoding to libraryFrame(), so a full-map sweep only decodes the frames it
+// actually needs instead of every frame in a large .Lib.
+function parseLibraryLazy(filePath) {
+  const buffer = readFileSyncCompat(filePath);
+  let offset = 0;
+
+  const version = buffer.readInt32LE(offset);
+  offset += 4;
+
+  if (version < 2) {
+    throw new Error(`Unsupported lib version ${version}: ${filePath}`);
+  }
+
+  const count = buffer.readInt32LE(offset);
+  offset += 4;
+
+  if (version >= 3) {
+    offset += 4;
+  }
+
+  const frameOffsets = [];
+  for (let index = 0; index < count; index += 1) {
+    frameOffsets.push(buffer.readInt32LE(offset));
+    offset += 4;
+  }
+
+  return { version, count, frameOffsets, buffer };
+}
+
+function libraryFrame(library, index) {
+  if (index < 0 || index >= library.count) {
+    return null;
+  }
+  const frameOffset = library.frameOffsets[index];
+  if (!frameOffset || frameOffset <= 0 || frameOffset >= library.buffer.length) {
+    return null;
+  }
+  return parseFrame(library.buffer, frameOffset, index);
 }
 
 function parseFrame(buffer, offset, index) {
