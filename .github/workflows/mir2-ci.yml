@@ -20,6 +20,10 @@ concurrency:
 
 permissions:
   contents: read
+  # dorny/paths-filter lists changed files via the PR API on pull_request events;
+  # without this it 403s and the `changes` job fails, which previously caused the
+  # real gates to be skipped (false green). Keep this so change-detection works.
+  pull-requests: read
 
 jobs:
   changes:
@@ -46,7 +50,9 @@ jobs:
 
   web-resource-gate:
     needs: changes
-    if: ${{ needs.changes.outputs.web == 'true' }}
+    # Fail-safe: run when web paths changed OR when change-detection did not
+    # succeed, so a broken `changes` job can never silently skip the real gate.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.web == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -75,7 +81,9 @@ jobs:
 
   rust-workspace:
     needs: changes
-    if: ${{ needs.changes.outputs.rust == 'true' }}
+    # Fail-safe: run when rust paths changed OR when change-detection did not
+    # succeed, so a broken `changes` job can never silently skip the real gate.
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.rust == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     defaults:
