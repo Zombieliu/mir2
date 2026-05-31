@@ -42428,6 +42428,23 @@ fn magic_packet_progresses_user_magic_and_emits_level_packets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 7);
+    set_current_player_mp(&mut session, 500);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_box(&session, player, 2, 2, 2, 2);
+    set_player_position(&mut session, origin.clone());
+    let target_tile = Point {
+        x: origin.x + 1,
+        y: origin.y,
+    };
+    let target_object_id = 98_002;
+    spawn_crystal_monster_for_test(
+        &mut session,
+        target_object_id,
+        "Yob",
+        target_tile.clone(),
+        MirDirection::Left,
+        true,
+    );
     let magic = mir2_game_data::crystal_magic_by_spell("FireBall").expect("FireBall magic");
     let mut fireball = super::crystal_skill_state("FireBall", 0).expect("fireball magic");
     fireball.experience = magic.need1.saturating_sub(1);
@@ -42443,8 +42460,8 @@ fn magic_packet_progresses_user_magic_and_emits_level_packets() {
         object_id,
         spell: Spell::FireBall,
         direction: MirDirection::Right,
-        target_id: 3_002,
-        location: Point { x: 334, y: 267 },
+        target_id: target_object_id,
+        location: target_tile,
         spell_target_lock: true,
     });
     let snapshot = session.world_snapshot();
@@ -42499,6 +42516,23 @@ fn magic_packet_crystal_skill_gain_multiplier_scales_practice_experience() {
                 value: 3,
             }],
         });
+    set_current_player_mp(&mut session, 500);
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_box(&session, player, 2, 2, 2, 2);
+    set_player_position(&mut session, origin.clone());
+    let target_tile = Point {
+        x: origin.x + 1,
+        y: origin.y,
+    };
+    let target_object_id = 98_003;
+    spawn_crystal_monster_for_test(
+        &mut session,
+        target_object_id,
+        "Yob",
+        target_tile.clone(),
+        MirDirection::Left,
+        true,
+    );
     session
         .app
         .world_mut()
@@ -42516,8 +42550,8 @@ fn magic_packet_crystal_skill_gain_multiplier_scales_practice_experience() {
         object_id,
         spell: Spell::FireBall,
         direction: MirDirection::Right,
-        target_id: 3_002,
-        location: Point { x: 334, y: 267 },
+        target_id: target_object_id,
+        location: target_tile,
         spell_target_lock: true,
     });
 
