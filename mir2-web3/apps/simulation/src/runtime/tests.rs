@@ -41595,7 +41595,8 @@ fn magic_packet_crystal_vampirism_damages_target_and_heals_player() {
     set_active_character_class_gender_level(&mut session, MirClass::Wizard, MirGender::Male, 45);
     set_current_player_mp(&mut session, 500);
     set_current_player_hp(&mut session, 20);
-    let origin = Point { x: 333, y: 267 };
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_line(&session, player, MirDirection::Right, 4);
     set_player_position(&mut session, origin.clone());
     let target = spawn_crystal_monster_for_test(
         &mut session,
@@ -46019,7 +46020,8 @@ fn magic_packet_crystal_flame_disruptor_boosts_living_targets() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     set_current_player_mp(&mut session, 500);
-    let origin = Point { x: 333, y: 267 };
+    let player = player_entity(session.app.world()).expect("player entity");
+    let origin = find_combat_origin_line(&session, player, MirDirection::Right, 5);
     set_player_position(&mut session, origin.clone());
     let living = spawn_crystal_monster_for_test(
         &mut session,
