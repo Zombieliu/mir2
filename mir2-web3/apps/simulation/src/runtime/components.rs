@@ -66,6 +66,7 @@ pub(super) struct PlayerVitals {
     pub(super) hp: i32,
     pub(super) max_hp: i32,
     pub(super) mp: i32,
+    pub(super) max_mp: i32,
 }
 
 #[derive(Component, Clone, Copy)]

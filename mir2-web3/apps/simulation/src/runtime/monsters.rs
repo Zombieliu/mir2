@@ -13,6 +13,7 @@ use mir2_protocol::{
 
 use crate::config::{MonsterSpawnSource, SimulationConfig, WorldEntityDisposition};
 
+use super::combat::crystal_player_rolled_armour;
 use super::combat::{
     combat_delay_ticks, deterministic_chance_roll, melee_attack_delay_ticks,
     ranged_attack_delay_ticks, PendingPlayerStatusEffect,
@@ -25,7 +26,6 @@ use super::components::{
 };
 use super::crystal_compat::*;
 use super::drops::PendingHarvestDrops;
-use super::equipment::total_defence_bonus;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
     runtime_full_map_collision_data, walkable_point_count_in_rect, walkable_points_in_rect,
@@ -33,8 +33,7 @@ use super::map::{
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
 use super::packets::object_movement;
 use super::resources::{
-    BuffResource, InventoryResource, MapRuntimeResource, ObjectIdAllocatorResource,
-    RuntimeConfigResource, RuntimeQueueResource,
+    MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource, RuntimeQueueResource,
 };
 
 #[derive(Debug, Clone)]
@@ -2024,14 +2023,19 @@ pub(super) fn monster_player_attack_damage(
         117 => crystal_monster_attack_damage(monster_name),
         _ => 7,
     };
-    let mitigation = total_defence_bonus(
-        world.resource::<InventoryResource>(),
-        world.resource::<BuffResource>(),
-    );
+    let mitigation = crystal_player_rolled_armour(world);
     if base_damage <= 0 {
         return 0;
     }
-    (base_damage - mitigation).max(1)
+    let mitigated = (base_damage - mitigation).max(1);
+    // Ranged monster strikes are the magic-school attacks in Crystal; the
+    // player's MagicResist further shrugs part of the blow. Inert (no change)
+    // for a player without magic resistance.
+    if tile_distance(source, target) > 1 {
+        super::combat::crystal_player_magic_mitigated(world, mitigated)
+    } else {
+        mitigated
+    }
 }
 
 pub(super) fn monster_player_status_effect(

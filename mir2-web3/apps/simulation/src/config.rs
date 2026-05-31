@@ -815,6 +815,8 @@ pub struct CharacterSaveRecord {
     pub max_hp: i32,
     pub mp: i32,
     #[serde(default)]
+    pub max_mp: i32,
+    #[serde(default)]
     pub experience: i64,
     #[serde(default = "default_max_experience")]
     pub max_experience: i64,
@@ -884,6 +886,7 @@ impl CharacterSaveRecord {
             hp: max_hp,
             max_hp,
             mp,
+            max_mp: mp,
             experience: 0,
             max_experience: default_max_experience(),
             gold: 1280,
