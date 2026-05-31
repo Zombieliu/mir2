@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Cost guard: only the Production branch (main) runs the full build. Preview /
+# feature-branch deployments exit here, BEFORE the expensive Rust toolchain +
+# wasm-bindgen + Bevy/Next compile, so parallel branches don't burn Build CPU
+# minutes. Set MIR2_FORCE_PREVIEW_BUILD=1 to force a preview build when needed.
+# The clean, complete fix is the Vercel project "Ignored Build Step"
+# (Settings -> Git), which skips the build entirely; this guard cuts cost even
+# without it. No-op locally (VERCEL is unset), and production (main) is unaffected.
+if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" != "production" ] \
+  && [ "${MIR2_FORCE_PREVIEW_BUILD:-}" != "1" ]; then
+  echo "[vercel-build] VERCEL_ENV=${VERCEL_ENV:-unset} is not 'production' — skipping preview build to save Build CPU minutes (set MIR2_FORCE_PREVIEW_BUILD=1 to override)."
+  exit 0
+fi
+
 TOOLCHAIN="${RUST_TOOLCHAIN_VERSION:-1.89.0}"
 export PATH="$HOME/.cargo/bin:$PATH"
 
