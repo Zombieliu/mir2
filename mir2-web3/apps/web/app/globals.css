@@ -5434,3 +5434,70 @@ body.mir-dragging-item * {
   opacity: 0.5;
   cursor: default;
 }
+
+/* ---- Mail compose overlay ---- */
+.mail-compose {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 40px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(16, 12, 10, 0.98);
+  border: 1px solid #caa24f;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  color: #e9d6ad;
+  font-size: 12px;
+}
+
+.mail-compose-title {
+  font-weight: 600;
+  color: #ffe2a0;
+}
+
+.mail-compose-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mail-compose-field > span {
+  color: #b89a63;
+}
+
+.mail-compose-field input,
+.mail-compose-field textarea {
+  width: 100%;
+  color: #ffe9a6;
+  background: #1a1209;
+  border: 1px solid #6b5430;
+  font: inherit;
+  resize: none;
+}
+
+.mail-compose-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.mail-compose-actions button {
+  flex: 1 1 0;
+  height: 24px;
+  color: #e9d6ad;
+  background: #25190e;
+  border: 1px solid #705932;
+  cursor: pointer;
+}
+
+.mail-compose-send {
+  background: linear-gradient(180deg, #4a3411, #2c1d0c);
+  border-color: #caa24f;
+}
+
+.mail-compose-send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

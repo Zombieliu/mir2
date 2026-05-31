@@ -154,6 +154,7 @@ export type OriginalClientShellProps = {
   onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
+  onSendMail: (name: string, message: string, gold: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;

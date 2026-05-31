@@ -314,6 +314,7 @@ export function OriginalClientShell({
   onTransferMap,
   onClaimMail,
   onDeleteMail,
+  onSendMail,
   onBuyGameShopItem,
   onRunStage5Command,
   onSendClientCommand,
@@ -1715,6 +1716,7 @@ export function OriginalClientShell({
               onCastSkill={onCastSkill}
               onTransferMap={onTransferMap}
               onClaimMail={onClaimMail}
+              onSendMail={onSendMail}
               onDeleteMail={onDeleteMail}
               onBuyGameShopItem={onBuyGameShopItem}
               onRunStage5Command={onRunStage5Command}

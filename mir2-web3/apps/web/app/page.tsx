@@ -4778,6 +4778,18 @@ export default function HomePage() {
     send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
   }
 
+  function sendMailMessage(name: string, message: string, gold: number) {
+    const amount = Math.max(0, Math.floor(gold));
+    send({
+      type: "sendMail",
+      name,
+      message,
+      gold: amount,
+      itemsIdx: [0, 0, 0, 0, 0],
+      stamped: amount > 0,
+    });
+  }
+
   function buyGameShopItem(gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") {
     send({
       type: "stage5Command",
@@ -8060,6 +8072,7 @@ export default function HomePage() {
       onCastSkill={castSkill}
       onTransferMap={transferMap}
       onClaimMail={claimMail}
+      onSendMail={sendMailMessage}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
       onRunStage5Command={runStage5Command}

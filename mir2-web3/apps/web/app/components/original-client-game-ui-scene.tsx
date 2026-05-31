@@ -98,6 +98,7 @@ type GameUiSceneProps = {
   onTransferMap: (transferKey: string) => void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
+  onSendMail: (name: string, message: string, gold: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
   onRunStage5Command: (action: string, args?: string[]) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
@@ -153,6 +154,7 @@ export function GameUiScene({
   onTransferMap,
   onClaimMail,
   onDeleteMail,
+  onSendMail,
   onBuyGameShopItem,
   onRunStage5Command,
   onSendClientCommand,
@@ -424,6 +426,7 @@ export function GameUiScene({
           mail={world.stage5Systems?.mail ?? []}
           onClaim={onClaimMail}
           onDelete={onDeleteMail}
+          onSendMail={onSendMail}
           onClose={() => setShowMailPanel(false)}
         />
       ) : null}

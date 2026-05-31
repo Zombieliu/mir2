@@ -49,14 +49,35 @@ export type MailPanelProps = {
   mail: DisplayMailMessageLike[];
   onClaim: (mailId: number) => void;
   onDelete: (mailId: number) => void;
+  onSendMail: (name: string, message: string, gold: number) => void;
   onClose: () => void;
 };
 
-export function MailPanel({ t, mail, onClaim, onDelete, onClose }: MailPanelProps) {
+export function MailPanel({ t, mail, onClaim, onDelete, onSendMail, onClose }: MailPanelProps) {
   const entries = mail.filter((message) => !message.deleted);
   const visibleEntries = entries.slice(0, 10);
   const selectedEntry = visibleEntries.find((entry) => entry.id !== undefined) ?? visibleEntries[0] ?? null;
   const pageCount = Math.max(1, Math.ceil(entries.length / 10));
+
+  const [composing, setComposing] = useState(false);
+  const [recipient, setRecipient] = useState("");
+  const [composeMessage, setComposeMessage] = useState("");
+  const [composeGold, setComposeGold] = useState("0");
+
+  const openCompose = (toName: string) => {
+    setRecipient(toName);
+    setComposeMessage("");
+    setComposeGold("0");
+    setComposing(true);
+  };
+
+  const submitCompose = () => {
+    const name = recipient.trim();
+    if (!name) return;
+    const gold = Math.max(0, Number.parseInt(composeGold || "0", 10) || 0);
+    onSendMail(name, composeMessage, gold);
+    setComposing(false);
+  };
 
   return (
     <section className="mail-panel">
@@ -88,8 +109,43 @@ export function MailPanel({ t, mail, onClaim, onDelete, onClose }: MailPanelProp
       <div className="mail-page-next">
         <SpriteButton sprite={ORIGINAL_UI.mail.nextButton} label={t("ui.next", [], "Next")} onClick={() => undefined} />
       </div>
-      <div className="mail-action send"><SpriteButton sprite={ORIGINAL_UI.mail.sendButton} label={t("client.Send", [], "Send")} onClick={() => undefined} /></div>
-      <div className="mail-action reply"><SpriteButton sprite={ORIGINAL_UI.mail.replyButton} label={t("client.Reply", [], "Reply")} onClick={() => undefined} /></div>
+      <div className="mail-action send"><SpriteButton sprite={ORIGINAL_UI.mail.sendButton} label={t("client.Send", [], "Send")} onClick={() => openCompose("")} /></div>
+      <div className="mail-action reply"><SpriteButton sprite={ORIGINAL_UI.mail.replyButton} label={t("client.Reply", [], "Reply")} onClick={() => openCompose(selectedEntry?.from ?? "")} /></div>
+      {composing ? (
+        <div className="mail-compose" role="dialog" aria-label={t("client.Send", [], "Send")}>
+          <div className="mail-compose-title">{t("client.Send", [], "Send Mail")}</div>
+          <label className="mail-compose-field">
+            <span>{t("client.Sender", [], "To")}</span>
+            <input
+              type="text"
+              value={recipient}
+              onChange={(event) => setRecipient(event.target.value)}
+              autoFocus
+            />
+          </label>
+          <label className="mail-compose-field message">
+            <span>{t("client.Message", [], "Message")}</span>
+            <textarea value={composeMessage} onChange={(event) => setComposeMessage(event.target.value)} rows={4} />
+          </label>
+          <label className="mail-compose-field">
+            <span>{t("ui.gold", [], "Gold")}</span>
+            <input
+              type="number"
+              min={0}
+              value={composeGold}
+              onChange={(event) => setComposeGold(event.target.value)}
+            />
+          </label>
+          <div className="mail-compose-actions">
+            <button type="button" className="mail-compose-send" disabled={!recipient.trim()} onClick={submitCompose}>
+              {t("client.Send", [], "Send")}
+            </button>
+            <button type="button" className="mail-compose-cancel" onClick={() => setComposing(false)}>
+              {t("ui.cancel", [], "Cancel")}
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div className="mail-action read">
         <SpriteButton
           sprite={ORIGINAL_UI.mail.readButton}
