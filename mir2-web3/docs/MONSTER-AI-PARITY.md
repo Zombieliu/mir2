@@ -85,5 +85,26 @@ the spider's deterministic poison does not leak into BoneSpearman. Test:
 `crystal_ai29_bone_spearman_splashes_line_target` (asserts a friendly-opposite
 secondary monster on the line tile loses HP).
 
+### AI 44 → BlackFoxman line splash on range branch ✅
+Crystal `BlackFoxman.Attack` is a hybrid: adjacent (range ≤ 1) AND
+`Random.Next(3) > 0` (2/3) → base melee `Attack()` (Type 0). Otherwise (range
+branch — distance > 1, or 1/3 of adjacent attacks) → `Broadcast(ObjectAttack
+Type=1)` + `LineAttack(damage, 2, 250)` against a 2-tile line.
+
+The Rust runtime already covered AI 44's attack range (2 tiles, x==y/parity)
+and `monster_object_attack_type` emits Type=1 when distance > 1 (existing test
+`black_foxman_uses_type_one_line_attack_at_two_tiles`), but the line *splash*
+was missing — only the direct target took damage. Added
+`black_foxman_line_branch = agent.ai == 44 && distance > 1` and folded it
+into the `spider_line_targets` builder, mirroring the `LineAttack(damage, 2,
+…)` shape. The adjacent path retains Type 0 + plain melee (Crystal's "close +
+2/3 chance" branch falls back to base `Attack()`, so no line splash).
+
+Test: `crystal_ai44_black_foxman_splashes_line_target_at_range` (spawns AI-44
+fox at distance 2 + a friendly-opposite secondary monster on the line; asserts
+the secondary's HP drops within 5 ticks).
+
 ## Next candidates
-44 `BlackFoxman` (Crystal `2 attacks, 1 close + 1 line`).
+Higher-effort: 26 `ShamanZombie` (70 spawns), 28 `ToxicGhoul` (56 spawns —
+poison is already wired by name; the AI needs special hooks), 12 `BugBagMaggot`
+(189 spawns).

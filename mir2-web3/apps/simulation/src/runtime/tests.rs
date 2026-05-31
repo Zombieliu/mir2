@@ -54999,3 +54999,118 @@ fn crystal_ai29_bone_spearman_splashes_line_target() {
         "AI-29 BoneSpearman line attack should splash a friendly-opposite monster on the line (Crystal LineAttack(damage, 2, 250)); before={before_secondary_hp} after={after_secondary_hp}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 44 is Crystal's `BlackFoxman` — adjacent attacks have a 2/3
+// chance of falling through to base melee, but at distance ≥ 2 Crystal
+// broadcasts `ObjectAttack Type=1` and runs `LineAttack(damage, 2, 250)` — a
+// 2-tile line splash. Existing `black_foxman_uses_type_one_line_attack_at_two_tiles`
+// covers Type=1 + the player strike; this proves the line splash hits a second
+// monster behind the player.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai44_black_foxman_splashes_line_target_at_range() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let fox_object_id = 98_944_u32;
+    let secondary_object_id = 98_945_u32;
+    let current_tick = runtime_tick(session.app.world());
+
+    set_player_position(&mut session, player_origin.clone());
+
+    let fox_position = Point {
+        x: player_origin.x + 2,
+        y: player_origin.y,
+    };
+    session.app.world_mut().spawn((
+        ObjectId(fox_object_id),
+        DisplayName::literal("BlackFoxman Splash Test"),
+        Position(fox_position.clone()),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals { hp: 50, max_hp: 50 },
+        MonsterAgent {
+            image: 43,
+            dead: false,
+            patrol_origin: fox_position.clone(),
+            ai: 44,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+
+    let secondary_position = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let secondary_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(secondary_object_id),
+            DisplayName::literal("Splash Target 44"),
+            Position(secondary_position.clone()),
+            Facing(MirDirection::Right),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: secondary_position,
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 0,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    let before_secondary_hp = session
+        .app
+        .world()
+        .entity(secondary_entity)
+        .get::<MonsterVitals>()
+        .expect("secondary vitals")
+        .hp;
+
+    for _ in 0..5 {
+        let _ = session.tick();
+    }
+    let after_secondary_hp = session
+        .app
+        .world()
+        .entity(secondary_entity)
+        .get::<MonsterVitals>()
+        .expect("secondary vitals")
+        .hp;
+    assert!(
+        after_secondary_hp < before_secondary_hp,
+        "AI-44 BlackFoxman at distance 2 should splash a friendly-opposite monster on the line (Crystal LineAttack(damage, 2, 250) on the Type=1 branch); before={before_secondary_hp} after={after_secondary_hp}"
+    );
+}

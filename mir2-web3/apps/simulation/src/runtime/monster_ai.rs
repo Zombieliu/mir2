@@ -4463,6 +4463,11 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     // Crystal `LineAttack(damage, 2, ...)`: 2-tile line that
                     // splashes damage along the attack direction.
                     let spitting_spider_line_branch = matches!(agent.ai, 4 | 29 | 35);
+                    // AI 44 BlackFoxman branches: adjacent → base Attack() 2/3,
+                    // otherwise `Broadcast(ObjectAttack Type=1)` +
+                    // `LineAttack(damage, 2, 250)`. Splash only on the range
+                    // branch (distance > 1) to match Crystal.
+                    let black_foxman_line_branch = agent.ai == 44 && distance > 1;
                     let crystal_spider_line_branch = agent.ai == 37 && distance > 1;
                     let king_scorpion_line_targets = if agent.ai == 19 {
                         forward_line_opposing_monster_targets(
@@ -5432,20 +5437,22 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         } else {
                             Vec::new()
                         };
-                        let spider_line_targets =
-                            if spitting_spider_line_branch || crystal_spider_line_branch {
-                                forward_line_opposing_monster_targets(
-                                    world,
-                                    &monster_entities,
-                                    entity,
-                                    &position,
-                                    attack_direction,
-                                    &agent,
-                                    if crystal_spider_line_branch { 3 } else { 2 },
-                                )
-                            } else {
-                                Vec::new()
-                            };
+                        let spider_line_targets = if spitting_spider_line_branch
+                            || crystal_spider_line_branch
+                            || black_foxman_line_branch
+                        {
+                            forward_line_opposing_monster_targets(
+                                world,
+                                &monster_entities,
+                                entity,
+                                &position,
+                                attack_direction,
+                                &agent,
+                                if crystal_spider_line_branch { 3 } else { 2 },
+                            )
+                        } else {
+                            Vec::new()
+                        };
                         let red_moon_evil_area_targets = if red_moon_evil_area_branch {
                             nearby_opposing_monster_targets(
                                 world,
