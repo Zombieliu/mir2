@@ -4220,7 +4220,7 @@ button.character-spell-value:hover {
   position: absolute;
   top: 30px;
   width: 50px;
-  max-height: 80px;
+  height: 80px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -4723,4 +4723,79 @@ body.mir-dragging-item,
 body.mir-dragging-item * {
   cursor: grabbing !important;
   user-select: none !important;
+}
+
+/* ---- In-game Options dialog (HUD Option button) ---- */
+.options-dialog {
+  position: absolute;
+  top: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  z-index: 60;
+  background: rgba(16, 12, 10, 0.97);
+  border: 1px solid #6b5430;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 233, 188, 0.05);
+  color: #e9d6ad;
+  font-size: 12px;
+  padding: 0 0 12px;
+}
+
+.options-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 6px 0 10px;
+  background: linear-gradient(180deg, #3a2918, #241710);
+  border-bottom: 1px solid #6b5430;
+}
+
+.options-dialog-title {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.options-dialog-close {
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+
+.options-dialog-section {
+  padding: 10px 12px 0;
+}
+
+.options-dialog-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b89a63;
+  margin-bottom: 6px;
+}
+
+.options-audio-settings {
+  display: flex;
+  gap: 8px;
+}
+
+.options-dialog-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 8px;
+  background: #25190e;
+  border: 1px solid #705932;
+  color: #e9d6ad;
+  cursor: pointer;
+}
+
+.options-dialog-toggle[data-options-toggle-on="true"] {
+  background: linear-gradient(180deg, #4a3411, #2c1d0c);
+  border-color: #caa24f;
+}
+
+.options-dialog-toggle-state {
+  color: #ffe9a6;
 }

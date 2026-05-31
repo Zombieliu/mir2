@@ -19,6 +19,7 @@ import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-
 import { GameShopWindow } from "./original-client-game-shop";
 import { InventoryWindow } from "./original-client-inventory-window";
 import { CharacterWindow } from "./original-client-character-window";
+import { OptionsDialog } from "./original-client-options-dialog";
 import {
   SystemMenuFeaturePanel,
   SystemMenuPanel,
@@ -159,6 +160,7 @@ export function GameUiScene({
   const [showReportPanel, setShowReportPanel] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showGameShop, setShowGameShop] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   const [showSystemMenuFeaturePanel, setShowSystemMenuFeaturePanel] = useState<SystemMenuSurfacePanel | null>(null);
   const [dismissedDialogKey, setDismissedDialogKey] = useState<string | null>(null);
 
@@ -379,6 +381,8 @@ export function GameUiScene({
         onToggleGameShop={() => setShowGameShop((current) => !current)}
         showMenu={showSystemMenu}
         onToggleMenu={() => setShowSystemMenu((current) => !current)}
+        showOptions={showOptions}
+        onToggleOptions={() => setShowOptions((current) => !current)}
       />
       {showMailPanel ? (
         <MailPanel
@@ -441,6 +445,14 @@ export function GameUiScene({
           playerClass={player?.classKey ?? "warrior"}
           onBuy={onBuyGameShopItem}
           onClose={() => setShowGameShop(false)}
+        />
+      ) : null}
+      {showOptions ? (
+        <OptionsDialog
+          t={t}
+          chatTransparent={transparentChat}
+          onToggleChatTransparent={() => setTransparentChat((current) => !current)}
+          onClose={() => setShowOptions(false)}
         />
       ) : null}
       {visibleDialog ? (

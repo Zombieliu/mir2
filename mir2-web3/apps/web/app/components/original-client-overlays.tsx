@@ -598,6 +598,8 @@ export type MainHudProps = {
   onToggleGameShop: () => void;
   showMenu: boolean;
   onToggleMenu: () => void;
+  showOptions: boolean;
+  onToggleOptions: () => void;
 };
 
 export function MainHud({
@@ -618,13 +620,21 @@ export function MainHud({
   onToggleGameShop,
   showMenu,
   onToggleMenu,
+  showOptions,
+  onToggleOptions,
 }: MainHudProps) {
   const healthRatio = ratio(world.playerHp, world.playerMaxHp);
-  const manaRatio = ratio(world.playerMp, Math.max(world.playerMp ?? 0, 100));
+  // The server reports mana as a 0-100 percentage (Crystal ObjectMana
+  // semantics), which the client stores in playerMp. Treat it as that percent
+  // rather than guessing a max-MP scalar; a real numeric max MP with stat/gear
+  // scaling is a backend stat-engine follow-up (the server still divides mana
+  // by a fixed scale today).
+  const manaPercent = Math.max(0, Math.min(100, Math.round(world.playerMp ?? 0)));
+  const manaRatio = manaPercent / 100;
   const experienceRatio = ratio(world.playerExperience, world.playerMaxExperience);
   const currentHp = world.playerHp ?? 0;
   const maxHp = world.playerMaxHp ?? 0;
-  const currentMp = world.playerMp ?? 0;
+  const currentMp = manaPercent;
   const maxMp = 100;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
@@ -642,10 +652,16 @@ export function MainHud({
         <img className="hud-exp-bar" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
         <img className="hud-weight-bar" src={ORIGINAL_UI.hud.weightBar} alt="" draggable={false} />
 
-        <div className={`hud-orb-fill hp ${hpOnlyOrb ? "hp-only" : ""}`} style={{ height: `${80 * healthRatio}px` }}>
+        <div
+          className={`hud-orb-fill hp ${hpOnlyOrb ? "hp-only" : ""}`}
+          style={{ clipPath: `inset(${(1 - healthRatio) * 100}% 0 0 0)` }}
+        >
           <img src={hpOnlyOrb ? ORIGINAL_UI.hud.healthOnlyOrb : ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
         </div>
-        <div className={`hud-orb-fill mp ${hpOnlyOrb ? "hidden" : ""}`} style={{ height: `${80 * manaRatio}px` }}>
+        <div
+          className={`hud-orb-fill mp ${hpOnlyOrb ? "hidden" : ""}`}
+          style={{ clipPath: `inset(${(1 - manaRatio) * 100}% 0 0 0)` }}
+        >
           <img src={ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
         </div>
 
@@ -688,7 +704,7 @@ export function MainHud({
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.quest} label={t("ui.quest")} onClick={() => onOpenInventoryTab("quest")} active={showInventory && activeInventoryTab === "quest"} />
         </div>
         <div className="hud-button option">
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} onClick={() => onOpenCharacterTab("stats2")} active={showCharacter && activeCharacterTab === "stats2"} />
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} onClick={onToggleOptions} active={showOptions} />
         </div>
       </div>
     </div>
