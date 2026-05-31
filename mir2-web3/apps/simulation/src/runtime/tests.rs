@@ -4666,6 +4666,28 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn sep_clone_defence_typing_matches_crystal() {
+    // Verified against the Crystal Sep* subclasses' primary Attack() DefenceType:
+    //  - SepTaoist (216) / SepHighTaoist (221): MACAgility -> always magic.
+    //  - SepHighArcher (223): primary shot is ACAgility (physical); only a conditional poison AoE is
+    //    MAC, so the hit a player normally takes is physical at every range.
+    let near = Point { x: 10, y: 10 };
+    let far = Point { x: 10, y: 16 };
+    for ai in [216u8, 221] {
+        assert!(
+            super::monster_attack_uses_magic_defence(ai, &near, &near)
+                && super::monster_attack_uses_magic_defence(ai, &near, &far),
+            "Sep Taoist ai {ai} resolves against MAC at every range"
+        );
+    }
+    assert!(
+        !super::monster_attack_uses_magic_defence(223, &near, &near)
+            && !super::monster_attack_uses_magic_defence(223, &near, &far),
+        "SepHighArcher (223) primary shot is physical (ACAgility), not MAC, at every range"
+    );
+}
+
+#[test]
 fn mutated_manworm_blinks_with_effect_four_when_struck_hard() {
     // MutatedManworm (ai 65) shares SnowWolfKing's FindWeakerTarget blink, but with teleport effect 4
     // instead of 11. A blow heavier than its own DC (28-55) gives a 50% chance to blink toward the

@@ -2136,11 +2136,13 @@ pub(super) fn monster_attack_uses_magic_defence(ai: u8, source: &Point, target: 
         // subclass's Attack() override — covers spawned and data-only families alike).
         7 | 10 | 14 | 16 | 17 | 22 | 26 | 28 | 30 | 31 | 32 | 36 | 38 | 45 | 46 | 50 | 52 | 55 | 61
         | 63 | 73 | 75 | 87 | 92 | 94 | 100 | 102 | 103 | 107 | 108 | 110 | 120 | 122 | 135 | 136
-        | 140 | 142 | 152 | 160 | 210 | 215 | 216 => true,
+        | 140 | 142 | 152 | 160 | 210 | 215 | 216 | 221 => true,
         // Physical in melee, magic at range (the Attack() mixes ACAgility and MAC*).
+        // SepHighArcher (223) is NOT here: its primary shot is `DefenceType.ACAgility` (physical) — only
+        // a conditional poison-buff AoE is MAC — so it resolves against AC like the other archers.
         19 | 34 | 37 | 43 | 49 | 67 | 72 | 85 | 91 | 105 | 115 | 118 | 121 | 123 | 129 | 130 | 131
         | 137 | 141 | 143 | 144 | 147 | 148 | 150 | 153 | 155 | 156 | 159 | 162 | 163 | 167 | 178
-        | 181 | 182 | 196 | 200 | 212 | 223 => tile_distance(source, target) > 1,
+        | 181 | 182 | 196 | 200 | 212 => tile_distance(source, target) > 1,
         _ => false,
     }
 }
@@ -2235,6 +2237,10 @@ pub(super) fn monster_player_attack_damage(
         45 | 46 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         117 if tile_distance(source, target) > 1 => crystal_monster_raw_magic_damage_rolled(monster_name, tick, attacker_id),
         117 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
+        // SepTaoist (216) / SepHighTaoist (221): the primary hit damage is `GetAttackPower(MinDC,
+        // MaxDC)` (resolved against MAC) — SC is only the slow/poison's `power`, not the hit. The
+        // generated profile mislabels these as `sc`, so pin them to DC here.
+        216 | 221 => crystal_monster_attack_damage_rolled(monster_name, tick, attacker_id),
         // Crystal `MonsterObject.Attack` deals `GetAttackPower(MinDC, MaxDC)` for every family that
         // does not override it (SpittingSpider, ShamanZombie, BoneSpearman, VampireSpider,
         // SpittingToad, the plain MonsterObject, …). The previous flat `7` placeholder made those
