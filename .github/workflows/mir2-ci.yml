@@ -42,11 +42,12 @@ jobs:
               - 'mir2-web3/apps/web/**'
               - '.github/workflows/mir2-ci.yml'
             rust:
-              - 'mir2-web3/apps/**'
+              - 'mir2-web3/apps/admin-api/**'
+              - 'mir2-web3/apps/gateway/**'
+              - 'mir2-web3/apps/simulation/**'
               - 'mir2-web3/packages/**'
               - 'mir2-web3/Cargo.toml'
               - 'mir2-web3/Cargo.lock'
-              - '.github/workflows/mir2-ci.yml'
 
   web-resource-gate:
     needs: changes
@@ -110,7 +111,7 @@ jobs:
       # vertical_slice) plus protocol/game-data unit tests; none require Postgres/Redis/network.
       # admin-api/gateway tests that need external services are intentionally excluded.
       - name: Test core crates
-        run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture --test-threads=1
+        run: cargo test -p mir2-simulation -p mir2-protocol -p mir2-game-data --locked -- --nocapture
         env:
           RUST_BACKTRACE: "1"
           CARGO_TERM_COLOR: always
