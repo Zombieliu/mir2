@@ -2325,6 +2325,25 @@ pub(super) fn monster_player_status_effect(
             paralysis_duration_ticks: 5,
             paralysis_salt: 1321,
         }),
+        // On-hit poisons the generated profile missed (the PoisonTarget lives in CompleteRangeAttack
+        // or a non-standard branch), restored 1:1 with each subclass's Crystal call.
+        // LightTurtle.CompleteRangeAttack: Green(5,5).
+        74 => Some(PendingPlayerStatusEffect::GreenPoison {
+            chance_denominator: 5,
+            duration_ticks: 5,
+        }),
+        // HellCannibal.Attack: Red(5,5).
+        78 => Some(PendingPlayerStatusEffect::RedPoison {
+            chance_denominator: 5,
+            duration_ticks: 5,
+            salt: 780,
+        }),
+        // FlameAssassin.Attack: Slow(5,5).
+        95 => Some(PendingPlayerStatusEffect::SlowPoison {
+            chance_denominator: 5,
+            duration_ticks: 5,
+            salt: 950,
+        }),
         // Generated-profile poison fallback: families without a bespoke poison case apply the
         // on-hit poison extracted from their Crystal `PoisonTarget` call (data-only families etc.).
         ai => crystal_monster_profile_poison(ai),
