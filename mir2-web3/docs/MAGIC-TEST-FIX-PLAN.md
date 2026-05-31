@@ -1,20 +1,48 @@
 # Magic / combat / persistence test failures → green: diagnosis & plan
 
-Status: **lib failures 70 → 3** on branch `claude/optimistic-mayer-gswKV`
-(PR #8), with **zero regressions** at every step (baseline failure set stays a
-strict superset; verified by `comm` on each engine change). Fixed this effort:
-all 50 magic_packet_* tests, all 9 combat damage-branch tests, all 5
-persistence/save/reconnect tests, and the soak test (via safe-zone immunity).
+Status: **lib failures 70 → 3 in-suite (2 in isolation)** on branch
+`claude/optimistic-mayer-gswKV` (PR #8), with **zero regressions** at every step
+(baseline failure set stays a strict superset; verified by `comm` after each
+change). Fixed this effort: all 50 magic_packet_* tests, all 9 combat
+damage-branch tests, all 5 persistence/save/reconnect tests, the soak test (via
+safe-zone immunity), the bomb_spider test, and the invalid-direct-transfer
+skip (see below).
 
-The **3 remaining** are map-data (manifest) drift, not code bugs:
-- `crystal_current_map_spawn_table_uses_representative_map_rosters` — expected
-  spawn roster rules absent from the current respawn manifest.
-- `crystal_manifest_movements_skip_crystal_invalid_direct_transfers` and
-  `walk_onto_blocked_crystal_manifest_movement_source_transfers_map` — reference
-  map movements (e.g. 322,248→0104/Library) not present in the current
-  `crystal_respawn_manifest.json`. These need the manifest regenerated from the
-  Crystal submodule (empty in this container) or the test expectations re-pinned
-  to the current data — a data task, not an engine fix.
+The Crystal respawn **manifest** is present and current (463 maps, 6.3 MB in
+`crystal_respawn_manifest.json`). What is absent in this container are the
+per-map **client `.map` collision binaries**: only the embedded starter map
+`"0"` has collision data; `runtime_map_collision_data` loads every other map
+from `{CRYSTAL_CLIENT_ROOT}/Map/<name>.map`, none of which exist here. (An
+earlier draft of this doc wrongly said the manifest was empty — it is not.)
+
+The 3 remaining in-suite failures, with precise mechanisms:
+
+- `crystal_manifest_movements_skip_crystal_invalid_direct_transfers` — **now
+  passes in isolation** after the `(0,0)`-destination fix (see below). Its
+  remaining in-suite failure is pre-existing, order-dependent global state
+  (process-wide `OnceLock`/env): `SimulationConfig::default()` yields different
+  `map_transfers` after certain earlier tests run. It was already failing
+  in-suite at baseline; the data-coupling half of the bug is fixed.
+- `crystal_current_map_spawn_table_uses_representative_map_rosters` — HF1 /
+  D1801 / HKR rosters exist in the manifest with the expected names/AIs, but
+  `build_crystal_current_map_spawn_table` derives each rule's spawn slots from
+  the target map's walkable cells. Those respawn origins (e.g. HellKnight1 at
+  `(50,60)` on HF1) fall outside map-0's region bounds, and HF1/D1801/HKR `.map`
+  files are absent, so zero candidate tiles → 0 slots (test wants 4/1). Fails
+  even in isolation; genuinely needs the client `.map` binaries.
+- `walk_onto_blocked_crystal_manifest_movement_source_transfers_map` — walking
+  onto the `(322,247)→0104/Library` movement source needs 0104's collision to
+  complete the transfer and place the player at `(4,10)`; `0104.map` is absent.
+  Fails even in isolation; genuinely needs the client `.map` binaries.
+
+## Invalid direct-transfer skip — `(0,0)` destination sentinel (engine)
+`crystal_movement_transfer_records_for_map` now skips manifest movements whose
+destination is `(0,0)` — the C# `Point` default / "no explicit destination"
+sentinel (~11%: 1,224 of 11,220 non-hole/move movements). Crystal never lands a
+player on a map's `(0,0)` corner; this matches the existing collision-based
+validity check on machines that have the client `.map` files (where `(0,0)`
+reads as non-walkable) without depending on those binaries. Sits next to the
+existing `need_hole`/`need_move` exclusions. Zero regressions.
 
 ## Safe-zone player damage immunity (engine, Crystal parity)
 Added `combat::current_player_in_safe_zone`; `resolve_pending_combat_actions`

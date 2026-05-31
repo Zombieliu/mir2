@@ -308,6 +308,16 @@ pub(super) fn crystal_movement_transfer_records_for_map(
             if movement.need_hole || movement.need_move {
                 return None;
             }
+            // A destination of (0,0) is the manifest's "no explicit destination"
+            // sentinel (the C# `Point` default; ~11% of movements). Crystal
+            // never lands a player on the map's (0,0) corner — such direct
+            // transfers are skipped. This also matches the collision-based
+            // validity check below on machines that have the client `.map`
+            // files (where (0,0) reads as non-walkable), but does not depend on
+            // those binaries being present.
+            if movement.destination.x == 0 && movement.destination.y == 0 {
+                return None;
+            }
             let target = crystal_map_respawns_by_index(movement.map_index)?;
             if !crystal_manifest_movement_destination_is_valid(
                 &target.map_file_name,
