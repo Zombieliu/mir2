@@ -461,6 +461,11 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) chat_ban_until_ms: Option<u64>,
     pub(super) chat_next_allowed_at_ms: u64,
     pub(super) chat_spam_tick: u8,
+    /// Tick at which the player last took damage; gates passive regeneration so
+    /// it pauses during combat (Crystal behaviour).
+    pub(super) last_damaged_tick: u64,
+    /// Tick of the most recent passive regeneration pulse.
+    pub(super) last_regen_tick: u64,
 }
 
 impl PlayerRuntimeResource {
@@ -476,6 +481,7 @@ impl PlayerRuntimeResource {
                 hp: default_max_hp,
                 max_hp: default_max_hp,
                 mp: default_mp,
+                max_mp: default_mp,
             },
             experience: 0,
             max_experience: 100,
@@ -486,6 +492,8 @@ impl PlayerRuntimeResource {
             chat_ban_until_ms: None,
             chat_next_allowed_at_ms: 0,
             chat_spam_tick: 0,
+            last_damaged_tick: 0,
+            last_regen_tick: 0,
         }
     }
 }
@@ -749,6 +757,9 @@ pub(super) struct RuntimeQueueResource {
     pub(super) pending_monster_spawns: Vec<PendingMonsterSpawnAction>,
     pub(super) pending_ground_spell_actions: Vec<PendingGroundSpellAction>,
     pub(super) pending_movement_command: Option<PendingMovementCommand>,
+    /// Defence type of the spell currently being cast, so scheduled/deferred damage rolls the
+    /// correct target armour (Crystal `DefenceType`). `None` outside a player cast.
+    pub(super) current_spell_defence: Option<super::combat::CrystalDefence>,
 }
 
 impl RuntimeQueueResource {
@@ -758,6 +769,7 @@ impl RuntimeQueueResource {
             pending_monster_spawns: Vec::new(),
             pending_ground_spell_actions: Vec::new(),
             pending_movement_command: None,
+            current_spell_defence: None,
         }
     }
 }
