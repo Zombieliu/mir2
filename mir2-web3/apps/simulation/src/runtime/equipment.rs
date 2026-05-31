@@ -413,6 +413,9 @@ pub(super) fn equipment_shape(
     })
 }
 
+// Retained as test-introspection helpers (combat mitigation now rolls armour
+// from the stat block rather than summing these flat totals).
+#[allow(dead_code)]
 pub(super) fn total_attack_bonus(resources: &InventoryResource, buffs: &BuffResource) -> i32 {
     resources
         .equipment_items
@@ -423,6 +426,7 @@ pub(super) fn total_attack_bonus(resources: &InventoryResource, buffs: &BuffReso
         + buffs.buffs.iter().map(buff_attack_bonus).sum::<i32>()
 }
 
+#[allow(dead_code)]
 pub(super) fn total_defence_bonus(resources: &InventoryResource, buffs: &BuffResource) -> i32 {
     resources
         .equipment_items
@@ -478,7 +482,11 @@ fn seed_equipment(
 }
 
 pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
-    vec![
+    // Starter gear carries Crystal-accurate stat ranges (from the item manifest):
+    // WoodenSword MinDC 2/MaxDC 4, LightLeatherArmour MinAC 3/MaxAC 5 +
+    // MinMAC 3/MaxMAC 4. Combat stats live in `added_stats` (the Crystal shape),
+    // so the scalar attack/defence are 0.
+    let mut items = vec![
         seed_equipment(
             "wooden-sword",
             EquipmentSlot::Weapon,
@@ -487,7 +495,7 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             18,
             20,
             ItemGrade::Common,
-            2,
+            0,
             0,
             4,
             0,
@@ -501,9 +509,9 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             14,
             ItemGrade::Common,
             0,
-            1,
             0,
-            3,
+            0,
+            5,
         ),
         seed_equipment(
             "copper-necklace",
@@ -557,7 +565,17 @@ pub(super) fn seed_equipment_items() -> Vec<EquipmentState> {
             0,
             0,
         ),
-    ]
+    ];
+
+    // WoodenSword (slot 0): MaxDC 4 (scalar) + MinDC 2.
+    items[0].added_stats = vec![UserItemStat { stat: 4, value: 2 }];
+    // LightLeatherArmour (slot 1): MaxAC 5 (scalar) + MinAC 3, MinMAC 3, MaxMAC 4.
+    items[1].added_stats = vec![
+        UserItemStat { stat: 0, value: 3 },
+        UserItemStat { stat: 2, value: 3 },
+        UserItemStat { stat: 3, value: 4 },
+    ];
+    items
 }
 
 pub(super) fn user_item_from_equipment_state(item: &EquipmentState) -> Option<UserItem> {
