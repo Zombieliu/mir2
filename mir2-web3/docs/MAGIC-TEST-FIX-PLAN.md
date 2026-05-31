@@ -1,7 +1,41 @@
 # Magic / combat test failures → green: diagnosis & plan
 
-Status: **root cause proven, fix template in place, campaign in progress** on
-branch `claude/optimistic-mayer-gswKV` (PR #8).
+Status: **40 of 50 magic tests fixed** on branch `claude/optimistic-mayer-gswKV`
+(PR #8). `magic_packet_*` went from 50 failing → **10 failing / 67 passing**.
+The dominant safe-zone root cause is fully resolved; the remaining 10 are a
+behaviour/fixture long-tail (below).
+
+## Remaining 10 (need per-test work, not the safe-zone template)
+
+These now pass preflight (cast resolves) but fail on spell-shape / fixture
+assertions, or depend on starter-scene geometry inside the safe zone:
+
+1. `..._halfmoon_crosshalfmoon_and_heavenly_sword_hit_shapes` — multi-session;
+   constant origin (310,275); a sub-target takes no damage (arc-shape geometry).
+2. `..._ice_thrust_hits_three_column_path_and_freezes` — `near` (origin.x+2)
+   untouched; the front tile (origin.x+1) is occupied by `outside` — likely a
+   path/occupancy interaction in the spell, possibly an engine shape bug.
+3. `..._moon_mist_hides_and_hits_nearby_targets` — missing AddBuff packet.
+4. `..._purification_removes_player_curse_debuff` — missing expected packet.
+5. `..._shoulder_dash_moves_pushes_and_reports_blocked_failures` —
+   `dash_locations` empty (push/dash movement geometry).
+6. `..._skill_gain_multiplier_scales_practice_experience` — relies on starter
+   monster 3002 near spawn (inside safe zone); needs own spawned target.
+7. `..._special_arrow_shots_queue_damage_and_apply_visible_buffs` — missing
+   packet (StraightShot/DoubleShot may need a bow or different setup).
+8. `..._thunder_storm_hits_current_location_square_and_reduces_living_damage` —
+   `undead` at candidate.Left not struck; ThunderStorm square geometry.
+9. `..._ultimate_enhancer_consumes_amulet_and_scales_target_class_stat` —
+   already equips Amulet; missing packet (target class/stat scaling).
+10. `..._progresses_user_magic_and_emits_level_packets` — relies on starter
+    monster 3002 near spawn; needs own spawned target outside the safe zone.
+    (An attempt to spawn 3002 + combat origin still missed MagicDelay — FireBall
+    projectile resolution from the relocated origin needs a closer look.)
+
+Approach for the tail: read each spell's hit/shape implementation in `skills.rs`
+and align the test's target offsets / facing with it; for the two starter-scene
+tests, spawn an own target outside the safe zone. A few may be genuine engine
+shape bugs — verify against Crystal before changing engine code.
 
 ## The failures
 
