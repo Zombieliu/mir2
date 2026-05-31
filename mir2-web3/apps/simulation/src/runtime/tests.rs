@@ -2078,6 +2078,30 @@ fn logout_persists_character_state_for_later_start_game() {
     assert_eq!(player.y, 267);
 }
 
+/// Mirror the pre-`d4e40705` login auto-create that these save/reload tests
+/// assume. Plain `Login` no longer auto-creates accounts (it now returns
+/// `result: 4` for unknown ids), so a test that logs in must establish the
+/// account first. Registers `account_id` idempotently, seeded with the
+/// configured default character at index 0 and the default password ("demo"),
+/// and persists it so file-backed stores survive a fresh-config reload.
+fn seed_login_account(session: &mut SimulationSession, account_id: &str) {
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let default_character = config.default_character.clone();
+    config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned")
+        .accounts
+        .entry(account_id.to_string())
+        .or_insert_with(|| crate::config::AccountRecord::new(default_character.clone()));
+    let _ = config.save_account_store_account(account_id);
+}
+
 #[test]
 fn file_account_store_survives_fresh_config_reload() {
     let temp_dir =
@@ -2087,6 +2111,7 @@ fn file_account_store_survives_fresh_config_reload() {
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
     let mut first = SimulationSession::new(config);
+    seed_login_account(&mut first, "disk");
     let _ = first.handle_packet(ClientPacket::Login {
         account_id: "disk".to_string(),
         password: "demo".to_string(),
@@ -28969,6 +28994,7 @@ fn sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain() {
 #[test]
 fn stage3_playable_pve_loop_persists_after_reconnect() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    seed_login_account(&mut session, "stage3-loop");
     let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "stage3-loop".to_string(),
         password: "demo".to_string(),
@@ -34438,6 +34464,7 @@ fn visible_player_config_shapes_feed_world_sprite_snapshot() {
 #[test]
 fn item_roll_fields_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    seed_login_account(&mut session, "roll-save");
     let packets = session.handle_packet(ClientPacket::Login {
         account_id: "roll-save".to_string(),
         password: "demo".to_string(),
@@ -34780,6 +34807,7 @@ fn taking_back_item_uses_crystal_inventory_index_for_bag2_slots() {
 #[test]
 fn storage_items_persist_through_save_and_reload() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    seed_login_account(&mut session, "storage-save");
     let packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-save".to_string(),
         password: "demo".to_string(),
@@ -36173,6 +36201,7 @@ fn storage_password_can_exist_without_forcing_lock_when_config_disabled() {
 #[test]
 fn storage_password_set_unlock_remove_updates_crystal_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    seed_login_account(&mut session, "storage-password");
     let login_packets = session.handle_packet(ClientPacket::Login {
         account_id: "storage-password".to_string(),
         password: "demo".to_string(),
