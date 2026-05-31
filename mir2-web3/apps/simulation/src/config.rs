@@ -3370,6 +3370,14 @@ pub struct Stage5RefineState {
     pub current_item: Option<String>,
     pub refining: bool,
     pub ready: bool,
+    /// Unique id of the weapon currently "in the oven" (set at RefineItem).
+    pub pending_unique_id: u64,
+    /// Success chance (0-100) computed from the deposited ingredients at
+    /// RefineItem time and rolled against at CheckRefine.
+    pub pending_chance: u8,
+    /// Target stat code (Crystal MaxDC/MaxMC/MaxSC) the refine will add on
+    /// success, chosen from the ingredients' bias and the weapon's stats.
+    pub pending_stat: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]

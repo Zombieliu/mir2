@@ -7,7 +7,7 @@ use mir2_game_data::{
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
     crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
     crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
-    localized_text_or_fallback, LanguageCode,
+    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientBuff, ClientFriend, ClientGtMap,
@@ -46,7 +46,8 @@ use super::crystal_compat::{
     CRYSTAL_ITEM_TYPE_BOOTS, CRYSTAL_ITEM_TYPE_BRACELET, CRYSTAL_ITEM_TYPE_HELMET,
     CRYSTAL_ITEM_TYPE_NECKLACE, CRYSTAL_ITEM_TYPE_POTION, CRYSTAL_ITEM_TYPE_RING,
     CRYSTAL_ITEM_TYPE_WEAPON, CRYSTAL_POTION_SHAPE_NORMAL, CRYSTAL_POTION_SHAPE_SUN_POTION,
-    CRYSTAL_STAT_HP, CRYSTAL_STAT_MP,
+    CRYSTAL_STAT_HP, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_SC,
+    CRYSTAL_STAT_MP,
 };
 use super::drops::*;
 use super::drops::{
@@ -3329,25 +3330,202 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
     packets
 }
 
+// --- Crystal-style weapon refine tuning ---------------------------------
+// Best-effort model: the deposited ingredients set a success chance and bias
+// the refined stat (DC/MC/SC); CheckRefine rolls against it. Exact ingredient
+// weights/thresholds are Crystal `Settings` values to be re-validated against
+// the C# reference; these are sane defaults that make refine real (success/
+// fail/material cost/soft cap) instead of an unconditional +1.
+const REFINE_BASE_CHANCE: i32 = 35;
+const REFINE_PER_INGREDIENT: i32 = 12;
+const REFINE_MAX_INGREDIENT_BONUS_COUNT: usize = 5;
+const REFINE_MAX_CHANCE: i32 = 90;
+const REFINE_MIN_CHANCE: i32 = 3;
+const REFINE_REFINED_PENALTY: i32 = 6;
+const REFINE_MAX_LEVEL: i32 = 10;
+const REFINE_GAIN_PER_SUCCESS: i32 = 1;
+const REFINE_FAIL_DURABILITY_LOSS_PERCENT: u32 = 10;
+
+fn refine_template_for_key(key: &str) -> Option<CrystalItemTemplate> {
+    key.strip_prefix("crystal-item-")
+        .and_then(|index| index.parse::<i32>().ok())
+        .and_then(crystal_item_by_index)
+}
+
+/// Sum the deposited ingredients' DC/MC/SC contribution (from their Crystal
+/// templates) so the refine targets the stat the player invested in.
+fn refine_ingredient_bias(slots: &BTreeMap<u8, String>) -> (i32, i32, i32) {
+    let mut dc = 0;
+    let mut mc = 0;
+    let mut sc = 0;
+    for key in slots.values() {
+        if let Some(template) = refine_template_for_key(key) {
+            dc += crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_DC).max(0);
+            mc += crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_MC).max(0);
+            sc += crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_SC).max(0);
+        }
+    }
+    (dc, mc, sc)
+}
+
+fn refine_weapon_supports(item: &ItemState, stat: u8) -> bool {
+    if let Some(template) = refine_template_for_key(&item.key) {
+        crystal_item_stat_value(&template, stat) > 0
+    } else {
+        // Starter items without a Crystal template: only physical (DC) weapons.
+        stat == CRYSTAL_STAT_MAX_DC && (item.attack > 0 || item.added_attack > 0)
+    }
+}
+
+fn refine_current_refined(item: &ItemState, stat: u8) -> i32 {
+    match stat {
+        CRYSTAL_STAT_MAX_DC => item.added_attack,
+        _ => item
+            .added_stats
+            .iter()
+            .filter(|entry| entry.stat == stat)
+            .map(|entry| entry.value)
+            .sum(),
+    }
+}
+
+/// Choose the refined stat (DC>MC>SC on ties) among the stats the weapon
+/// supports, biased by the ingredients, and return the weapon's current refined
+/// amount for it. `None` if the item cannot be refined at all.
+fn refine_plan(item: &ItemState, slots: &BTreeMap<u8, String>) -> Option<(u8, i32)> {
+    let (dc_bias, mc_bias, sc_bias) = refine_ingredient_bias(slots);
+    let candidates = [
+        (CRYSTAL_STAT_MAX_DC, dc_bias),
+        (CRYSTAL_STAT_MAX_MC, mc_bias),
+        (CRYSTAL_STAT_MAX_SC, sc_bias),
+    ];
+    let mut best: Option<(u8, i32)> = None;
+    for (stat, bias) in candidates {
+        if !refine_weapon_supports(item, stat) {
+            continue;
+        }
+        if best.map(|(_, current)| bias > current).unwrap_or(true) {
+            best = Some((stat, bias));
+        }
+    }
+    let (target, _) = best?;
+    Some((target, refine_current_refined(item, target)))
+}
+
+/// Success chance (0-100) from ingredient count and the weapon's current refine
+/// level. More ingredients help; an already heavily-refined weapon is harder
+/// (acting as a soft cap), and a weapon at `REFINE_MAX_LEVEL` cannot refine.
+pub(super) fn refine_success_chance(ingredient_count: usize, current_refined: i32) -> u8 {
+    if current_refined >= REFINE_MAX_LEVEL {
+        return 0;
+    }
+    let bonus =
+        ingredient_count.min(REFINE_MAX_INGREDIENT_BONUS_COUNT) as i32 * REFINE_PER_INGREDIENT;
+    let penalty = current_refined.max(0) * REFINE_REFINED_PENALTY;
+    (REFINE_BASE_CHANCE + bonus - penalty).clamp(REFINE_MIN_CHANCE, REFINE_MAX_CHANCE) as u8
+}
+
+/// Deterministic refine outcome so all observers/saves agree.
+pub(super) fn refine_roll_succeeds(tick: u64, unique_id: u64, chance: u8) -> bool {
+    if chance >= 100 {
+        return true;
+    }
+    if chance == 0 {
+        return false;
+    }
+    let value = tick
+        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+        .wrapping_add(unique_id.wrapping_mul(0xBF58_476D_1CE4_E5B9))
+        .wrapping_add(0x94D0_49BB_1331_11EB);
+    (value % 100) < u64::from(chance)
+}
+
+fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
+    if stat == CRYSTAL_STAT_MAX_DC {
+        item.added_attack = item.added_attack.saturating_add(amount);
+    } else if let Some(existing) = item.added_stats.iter_mut().find(|entry| entry.stat == stat) {
+        existing.value = existing.value.saturating_add(amount);
+    } else {
+        item.added_stats.push(UserItemStat {
+            stat,
+            value: amount,
+        });
+    }
+}
+
+fn apply_refine_failure(item: &mut ItemState) {
+    let Some(max) = item.durability_max.filter(|max| *max > 0) else {
+        return;
+    };
+    let loss = (u32::from(max) * REFINE_FAIL_DURABILITY_LOSS_PERCENT / 100).max(1) as u16;
+    let current = item.durability_current.unwrap_or(max);
+    item.durability_current = Some(current.saturating_sub(loss));
+}
+
+fn stage5_refine_return_deposited_materials(world: &mut World) -> Vec<ServerPacket> {
+    let returned = std::mem::take(
+        &mut world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine
+            .slots,
+    );
+    for (slot, item_key) in returned {
+        add_or_increment_item(
+            world,
+            ItemContainer::Bag1,
+            &item_key,
+            &stage5_item_name(&item_key),
+            "Stage 5 refine return.",
+            slot,
+            1,
+            1,
+        );
+    }
+    vec![ServerPacket::NPCCollectRefine { success: false }]
+}
+
 fn stage5_refine_item_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(item_key) = world
+    let Some(item) = world
         .resource::<InventoryResource>()
         .inventory_items
         .iter()
         .find(|item| item_matches_inventory_unique_id(item, unique_id))
-        .map(|item| item.key.clone())
+        .cloned()
     else {
         return vec![ServerPacket::NPCCollectRefine { success: false }];
     };
+    let slots = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .clone();
+    // Refining requires at least one ingredient and a refineable target stat.
+    let Some((target_stat, current_refined)) = (!slots.is_empty())
+        .then(|| refine_plan(&item, &slots))
+        .flatten()
+    else {
+        return stage5_refine_return_deposited_materials(world);
+    };
+    let chance = refine_success_chance(slots.len(), current_refined);
+    if chance == 0 {
+        // Weapon already at the refine cap: refuse and return the materials.
+        return stage5_refine_return_deposited_materials(world);
+    }
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        stage5.stage5_systems.refine.current_item = Some(item_key);
-        stage5.stage5_systems.refine.refining = true;
-        stage5.stage5_systems.refine.ready = true;
-        stage5.stage5_systems.refine.slots.clear();
+        let refine = &mut stage5.stage5_systems.refine;
+        refine.current_item = Some(item.key.clone());
+        refine.refining = true;
+        refine.ready = true;
+        refine.pending_unique_id = unique_id;
+        refine.pending_chance = chance;
+        refine.pending_stat = target_stat;
+        refine.slots.clear(); // ingredients consumed by the attempt
     }
     vec![ServerPacket::RefineItem { unique_id }]
 }
@@ -3356,23 +3534,53 @@ fn stage5_check_refine_packet(world: &mut World, unique_id: u64) -> Vec<ServerPa
     if !is_in_world(world) {
         return Vec::new();
     }
-    let mut inventory = world.resource_mut::<InventoryResource>();
-    let Some(item) = inventory
-        .inventory_items
-        .iter_mut()
-        .find(|item| item_matches_inventory_unique_id(item, unique_id))
-    else {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
+    let (chance, target_stat, pending_unique_id) = {
+        let refine = &world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine;
+        (
+            refine.pending_chance,
+            refine.pending_stat,
+            refine.pending_unique_id,
+        )
     };
-    item.added_attack += 1;
-    drop(inventory);
+    if pending_unique_id != unique_id {
+        return vec![ServerPacket::NPCCollectRefine { success: false }];
+    }
+    let tick = super::session::runtime_tick(world);
+    let succeeded = refine_roll_succeeds(tick, unique_id, chance);
+    let found = {
+        let mut inventory = world.resource_mut::<InventoryResource>();
+        if let Some(item) = inventory
+            .inventory_items
+            .iter_mut()
+            .find(|item| item_matches_inventory_unique_id(item, unique_id))
+        {
+            if succeeded {
+                apply_refine_success(item, target_stat, REFINE_GAIN_PER_SUCCESS);
+            } else {
+                apply_refine_failure(item);
+            }
+            true
+        } else {
+            false
+        }
+    };
     world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
         .refine = Default::default();
+    if !found {
+        return vec![ServerPacket::NPCCollectRefine { success: false }];
+    }
     vec![
         ServerPacket::RefineItem { unique_id },
-        system_message("Refine check succeeded."),
+        system_message(if succeeded {
+            "Refine succeeded."
+        } else {
+            "Refine failed."
+        }),
     ]
 }
 
