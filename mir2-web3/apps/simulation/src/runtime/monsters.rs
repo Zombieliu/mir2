@@ -1155,6 +1155,26 @@ pub(super) fn crystal_monster_raw_magic_damage(name: &str) -> i32 {
         .unwrap_or(0)
 }
 
+/// Physical armour range `(MinAC, MaxAC)` for a monster, used by Crystal `DefenceType.AC`.
+pub(super) fn crystal_monster_ac_range(name: &str) -> (i32, i32) {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            let min = monster.min_ac.max(0);
+            (min, monster.max_ac.max(min))
+        })
+        .unwrap_or((0, 0))
+}
+
+/// Magic armour range `(MinMAC, MaxMAC)` for a monster, used by Crystal `DefenceType.MAC`.
+pub(super) fn crystal_monster_mac_range(name: &str) -> (i32, i32) {
+    crystal_monster_by_name(name)
+        .map(|monster| {
+            let min = monster.min_mac.max(0);
+            (min, monster.max_mac.max(min))
+        })
+        .unwrap_or((0, 0))
+}
+
 pub(super) fn crystal_monster_raw_attack_damage(name: &str) -> i32 {
     crystal_monster_by_name(name)
         .map(|monster| monster.max_dc.max(monster.min_dc))

@@ -25,8 +25,8 @@ use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
 };
 use super::monsters::{
-    crystal_dynamic_monster_template, crystal_monster_attack_damage,
-    crystal_monster_effect_for_name, crystal_monster_raw_attack_damage,
+    crystal_dynamic_monster_template, crystal_monster_ac_range, crystal_monster_attack_damage,
+    crystal_monster_effect_for_name, crystal_monster_mac_range, crystal_monster_raw_attack_damage,
     crystal_respawn_template_from_monster, deterministic_roll, ignores_monster_damage,
     is_hidden_or_sleeping_target, monster_ignores_damage, monster_is_damageable,
     monster_is_stoned_zuma, monster_locks_player_target_on_hit, monster_melee_attack_packet,
@@ -475,6 +475,106 @@ fn crystal_player_hit_roll_succeeds(
     roll <= u64::try_from(crystal_player_accuracy(world).max(0)).unwrap_or(0)
 }
 
+/// Crystal `DefenceType` — selects which armour stat the defender rolls against and whether an
+/// agility dodge applies. Mirrors `Shared/Enums.cs`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub(super) enum CrystalDefence {
+    /// Auto-attack default: agility dodge, AC armour (left unreduced here for legacy parity).
+    #[default]
+    AcAgility,
+    /// Physical skill: AC armour, no agility dodge.
+    Ac,
+    /// Magic + agility dodge.
+    MacAgility,
+    /// Magic: MAC armour, no agility dodge.
+    Mac,
+    /// Pure agility dodge, no armour (e.g. HalfMoon family).
+    Agility,
+    /// Ignores armour and dodge entirely.
+    None,
+}
+
+impl CrystalDefence {
+    /// Whether the agility-vs-accuracy dodge applies (Crystal's `*Agility` variants).
+    pub(super) fn uses_agility_dodge(self) -> bool {
+        matches!(self, Self::AcAgility | Self::MacAgility | Self::Agility)
+    }
+}
+
+/// The defence type captured for the spell currently being cast (so deferred/scheduled damage
+/// rolls the correct armour). `AcAgility` when no cast is in progress (auto-attacks / monster AI).
+pub(super) fn current_cast_defence(world: &World) -> CrystalDefence {
+    world
+        .resource::<RuntimeQueueResource>()
+        .current_spell_defence
+        .unwrap_or_default()
+}
+
+/// Sets the cast-scoped defence, returning the previous value so the caller can restore it.
+pub(super) fn set_cast_defence(
+    world: &mut World,
+    defence: Option<CrystalDefence>,
+) -> Option<CrystalDefence> {
+    std::mem::replace(
+        &mut world
+            .resource_mut::<RuntimeQueueResource>()
+            .current_spell_defence,
+        defence,
+    )
+}
+
+/// Crystal `GetDefencePower(min, max)` = `Random(min, max + 1)`, made deterministic.
+fn crystal_defence_power_roll(
+    tick: u64,
+    attacker_id: u32,
+    target_entity: Entity,
+    min: i32,
+    max: i32,
+) -> i32 {
+    let min = min.max(0);
+    let max = max.max(min);
+    if max <= min {
+        return min;
+    }
+    let span = (max - min + 1) as u64;
+    min + deterministic_roll(
+        tick,
+        usize::try_from(attacker_id).unwrap_or_default(),
+        (target_entity.index() as usize) ^ 0x5A5A,
+        span,
+    ) as i32
+}
+
+/// Rolls the defender monster's armour for a `DefenceType` (Crystal `GetArmour`). `AcAgility`
+/// (legacy auto-attack), `Agility`, and `None` contribute no armour reduction.
+pub(super) fn crystal_monster_defence_armour(
+    world: &World,
+    target_entity: Entity,
+    defence: CrystalDefence,
+    tick: u64,
+    attacker_id: u32,
+) -> i32 {
+    let range = match defence {
+        CrystalDefence::Ac => {
+            entity_name(world, target_entity).map(|name| crystal_monster_ac_range(&name))
+        }
+        CrystalDefence::Mac | CrystalDefence::MacAgility => {
+            entity_name(world, target_entity).map(|name| crystal_monster_mac_range(&name))
+        }
+        CrystalDefence::AcAgility | CrystalDefence::Agility | CrystalDefence::None => None,
+    };
+    let Some((min, max)) = range else {
+        return 0;
+    };
+    crystal_defence_power_roll(tick, attacker_id, target_entity, min, max)
+}
+
+/// Crystal net damage after armour: `max(0, damage - armour)` (armour >= damage means a 0-damage
+/// "miss" indicator in Crystal).
+pub(super) fn crystal_armour_reduced_damage(damage: i32, armour: i32) -> i32 {
+    (damage - armour.max(0)).max(0)
+}
+
 fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
     for (spell_name, spell) in [
         ("Fencing", Spell::Fencing),
@@ -759,6 +859,8 @@ pub(super) struct PendingCombatAction {
     pub(super) due_packet: Option<ServerPacket>,
     pub(super) player_movement: Option<PendingPlayerMovement>,
     pub(super) on_monster_defeat: Option<PendingMonsterDefeatAction>,
+    /// Crystal `DefenceType` used to roll target armour when this damage resolves.
+    pub(super) defence: CrystalDefence,
 }
 
 pub(super) fn queue_pending_combat_action(world: &mut World, action: PendingCombatAction) {
@@ -780,6 +882,7 @@ pub(super) fn queue_due_packet(world: &mut World, due_tick: u64, packet: ServerP
             due_packet: Some(packet),
             player_movement: None,
             on_monster_defeat: None,
+            defence: CrystalDefence::default(),
         },
     );
 }
@@ -800,6 +903,7 @@ pub(super) fn schedule_heal_to_player(world: &mut World, due_tick: u64, heal: i3
             due_packet: None,
             player_movement: None,
             on_monster_defeat: None,
+            defence: CrystalDefence::default(),
         },
     );
 }
@@ -882,6 +986,7 @@ pub(super) fn schedule_damage_to_player_with_effect_due_packet_and_movement(
             due_packet,
             player_movement,
             on_monster_defeat: None,
+            defence: CrystalDefence::default(),
         },
     );
 }
@@ -903,6 +1008,7 @@ pub(super) fn schedule_player_status_effect(
             due_packet: None,
             player_movement: None,
             on_monster_defeat: None,
+            defence: CrystalDefence::default(),
         },
     );
 }
@@ -938,6 +1044,7 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
     defeat_action: Option<PendingMonsterDefeatAction>,
     due_packet: Option<ServerPacket>,
 ) {
+    let defence = current_cast_defence(world);
     queue_pending_combat_action(
         world,
         PendingCombatAction {
@@ -949,6 +1056,7 @@ pub(super) fn schedule_damage_to_monster_with_due_packet(
             due_packet,
             player_movement: None,
             on_monster_defeat: defeat_action,
+            defence,
         },
     );
 }
@@ -1629,7 +1737,9 @@ pub(super) fn resolve_pending_combat_actions(
                 if !monster_is_damageable(world, target_entity) {
                     continue;
                 }
+                // Agility-vs-accuracy dodge only applies to Crystal's *Agility defence types.
                 if action.damage > 0
+                    && action.defence.uses_agility_dodge()
                     && !crystal_player_hit_roll_succeeds(
                         world,
                         action.attacker_id,
@@ -1646,6 +1756,30 @@ pub(super) fn resolve_pending_combat_actions(
                     }
                     continue;
                 }
+                // Crystal armour reduction (DefenceType.AC/MAC): armour >= damage -> 0 (miss).
+                let net_damage = if action.damage > 0 {
+                    let armour = crystal_monster_defence_armour(
+                        world,
+                        target_entity,
+                        action.defence,
+                        current_tick,
+                        action.attacker_id,
+                    );
+                    let reduced = crystal_armour_reduced_damage(action.damage, armour);
+                    if reduced == 0 {
+                        if let Some(object_id) = entity_object_id(world, target_entity) {
+                            packets.push(ServerPacket::DamageIndicator {
+                                damage: 0,
+                                damage_type: 1,
+                                object_id,
+                            });
+                        }
+                        continue;
+                    }
+                    reduced
+                } else {
+                    action.damage
+                };
                 if let Some(packet) = action.due_packet {
                     packets.push(packet);
                 }
@@ -1657,13 +1791,8 @@ pub(super) fn resolve_pending_combat_actions(
                 if ignores_damage {
                     continue;
                 }
-                let monster_dead = damage_monster_entity(
-                    world,
-                    target_entity,
-                    action.damage,
-                    current_tick,
-                    packets,
-                );
+                let monster_dead =
+                    damage_monster_entity(world, target_entity, net_damage, current_tick, packets);
                 if monster_dead {
                     if let Some(defeat_action) = action.on_monster_defeat {
                         handle_monster_defeat(
@@ -1793,6 +1922,20 @@ pub(super) fn damage_monster_entity(
     if damage <= 0 {
         return false;
     }
+
+    // Apply Crystal armour reduction for the active cast's DefenceType (immediate/ground-spell
+    // hits). For scheduled damage the reduction already happened in resolve_pending_combat_actions
+    // where the cast scope is closed (AcAgility -> no armour), so this is a no-op there.
+    let damage = {
+        let defence = current_cast_defence(world);
+        let armour =
+            crystal_monster_defence_armour(world, monster_entity, defence, current_tick, 0);
+        let reduced = crystal_armour_reduced_damage(damage, armour);
+        if reduced <= 0 {
+            return false;
+        }
+        reduced
+    };
 
     let spawn_ref = world.entity(monster_entity).get::<SpawnSlotRef>().copied();
     let summoned_state = world
