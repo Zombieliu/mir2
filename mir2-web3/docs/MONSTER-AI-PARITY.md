@@ -130,6 +130,26 @@ do not emit attack packets at the player, matching AI 42. Test:
 buff-emission Crystal does in `ProcessTarget`/`CompleteAttack` is a separate
 gap noted for future work — both AIs only become immobile here.)
 
+### AI 116 BlackHammerCat — DC/MC damage + line splash ✅
+Crystal `BlackHammerCat.Attack` is BlackFoxman-shaped: adjacent + 2/3 chance
+→ Type 0 + `GetAttackPower(MinDC, MaxDC)` (DC). Otherwise → Type 1 +
+`GetAttackPower(MinMC, MaxMC)` (MC) on the direct hit, then
+`LineAttack(damage, 2, 300)` (DC) splashes a 2-tile line.
+
+The runtime already had AI 116 in `monster_attack_range = 2`,
+`monster_in_attack_range` (2-tile parity mask shared with 19/44/etc.), and
+`monster_object_attack_type` (Type 1 when distance > 1), but no damage arm
+(default 7) and no line-splash branch. Added:
+- `116 if distance > 1 => crystal_monster_magic_damage(monster_name)` (range
+  branch uses MC).
+- `116 => crystal_monster_attack_damage(monster_name)` (adjacent branch uses
+  DC).
+- `black_hammer_cat_line_branch = agent.ai == 116 && distance > 1` folded
+  into the `spider_line_targets` builder.
+
+Test `crystal_ai116_black_hammer_cat_splashes_line_target_at_range` proves
+the 2-tile line splash hits a friendly-opposite secondary monster.
+
 ### AIs 4, 8, 15, 26, 29, 44 — imported DC damage parity ✅
 Audit of `monster_player_attack_damage` arms vs Crystal `Attack()` bodies
 found six high-spawn AI numbers using `GetAttackPower(MinDC, MaxDC)` in

@@ -4470,6 +4470,10 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                     // `LineAttack(damage, 2, 250)`. Splash only on the range
                     // branch (distance > 1) to match Crystal.
                     let black_foxman_line_branch = agent.ai == 44 && distance > 1;
+                    // AI 116 BlackHammerCat is BlackFoxman-shaped: adjacent +
+                    // 2/3 → DC melee (Type 0). Otherwise → Type 1 MC magic +
+                    // `LineAttack(damage, 2, 300)` (DC). Splash on range only.
+                    let black_hammer_cat_line_branch = agent.ai == 116 && distance > 1;
                     // AI 26 ShamanZombie: always emits `ObjectRangeAttack` +
                     // `LineAttack(damage, 6, 300, MACAgility)` — a 6-tile line.
                     let shaman_zombie_line_branch = agent.ai == 26;
@@ -5445,6 +5449,7 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                         let spider_line_targets = if spitting_spider_line_branch
                             || crystal_spider_line_branch
                             || black_foxman_line_branch
+                            || black_hammer_cat_line_branch
                             || shaman_zombie_line_branch
                         {
                             let line_distance = if shaman_zombie_line_branch {

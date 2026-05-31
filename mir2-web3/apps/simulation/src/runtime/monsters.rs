@@ -2031,6 +2031,11 @@ pub(super) fn monster_player_attack_damage(
         // `BlackFoxman.Attack` — all use `GetAttackPower(MinDC, MaxDC)` for
         // the attack damage. Previously these fell through to the default 7.
         4 | 8 | 15 | 26 | 29 | 44 => crystal_monster_attack_damage(monster_name),
+        // Crystal `BlackHammerCat.Attack` (AI 116): adjacent + 2/3 chance →
+        // Type 0 + DC. Otherwise → Type 1 + MC damage on the direct hit
+        // (then a separate DC line splash, handled via the line-branch).
+        116 if tile_distance(source, target) > 1 => crystal_monster_magic_damage(monster_name),
+        116 => crystal_monster_attack_damage(monster_name),
         _ => 7,
     };
     let mitigation = total_defence_bonus(
