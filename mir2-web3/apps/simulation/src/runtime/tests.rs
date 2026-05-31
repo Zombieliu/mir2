@@ -54878,3 +54878,124 @@ fn crystal_ai4_spitting_spider_poisons_player_on_hit() {
         "AI-4 SpittingSpider should apply GreenPoison on hit (Crystal CompleteAttack: PoisonTarget Green)"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 29 is Crystal's `BoneSpearman` — `LineAttack(damage, 2, 250)`,
+// a 2-tile line splash that damages the direct target and any friendly-opposite
+// targets in line. Existing `bone_spearman_ai_hits_from_two_tiles_like_line_attack`
+// covers the player-strike timing; this proves the line splash hits a second
+// monster behind the player.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai29_bone_spearman_splashes_line_target() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let spearman_object_id = 98_929_u32;
+    let secondary_object_id = 98_930_u32;
+    let current_tick = runtime_tick(session.app.world());
+
+    set_player_position(&mut session, player_origin.clone());
+
+    // Spearman 2 tiles east of player. Crystal LineAttack travels along
+    // direction-to-target, so the line tiles are (spearman_x-1, y) and
+    // (spearman_x-2, y) — the player sits on the far end of the line.
+    let spearman_position = Point {
+        x: player_origin.x + 2,
+        y: player_origin.y,
+    };
+    session.app.world_mut().spawn((
+        ObjectId(spearman_object_id),
+        DisplayName::literal("Bone Spearman Splash Test"),
+        Position(spearman_position.clone()),
+        Facing(MirDirection::Left),
+        Monster,
+        MonsterVitals { hp: 50, max_hp: 50 },
+        MonsterAgent {
+            image: 43,
+            dead: false,
+            patrol_origin: spearman_position.clone(),
+            ai: 29,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: current_tick,
+            next_attack_tick: current_tick,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: current_tick,
+        },
+    ));
+
+    // Friendly-to-player (i.e. hostile_to_player=false) secondary monster on
+    // the line tile between spearman and player — Crystal `LineAttack` splashes
+    // it because it is friendly-opposite to the attacker.
+    let secondary_position = Point {
+        x: player_origin.x + 1,
+        y: player_origin.y,
+    };
+    let secondary_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            ObjectId(secondary_object_id),
+            DisplayName::literal("Splash Target"),
+            Position(secondary_position.clone()),
+            Facing(MirDirection::Right),
+            Monster,
+            MonsterVitals { hp: 50, max_hp: 50 },
+            MonsterAgent {
+                image: 0,
+                dead: false,
+                patrol_origin: secondary_position,
+                ai: 0,
+                disposition: WorldEntityDisposition::Neutral,
+                hostile_to_player: false,
+                tracking_player: false,
+                view_range: 0,
+                can_wander: false,
+                move_interval_ticks: 1,
+                attack_interval_ticks: 1,
+                next_move_tick: current_tick,
+                next_attack_tick: current_tick,
+                route: Vec::new(),
+                route_index: 0,
+                route_waiting: false,
+                next_route_tick: current_tick,
+            },
+        ))
+        .id();
+    sync_visible_objects(&mut session);
+
+    let before_secondary_hp = session
+        .app
+        .world()
+        .entity(secondary_entity)
+        .get::<MonsterVitals>()
+        .expect("secondary vitals")
+        .hp;
+
+    // Tick a few times to let the spearman attack and the line splash to land.
+    for _ in 0..5 {
+        let _ = session.tick();
+    }
+    let after_secondary_hp = session
+        .app
+        .world()
+        .entity(secondary_entity)
+        .get::<MonsterVitals>()
+        .expect("secondary vitals")
+        .hp;
+    assert!(
+        after_secondary_hp < before_secondary_hp,
+        "AI-29 BoneSpearman line attack should splash a friendly-opposite monster on the line (Crystal LineAttack(damage, 2, 250)); before={before_secondary_hp} after={after_secondary_hp}"
+    );
+}

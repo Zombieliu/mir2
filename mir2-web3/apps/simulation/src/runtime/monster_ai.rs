@@ -4459,7 +4459,10 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
                             TRAP_ROCK_ATTACK_PARALYSIS_CHANCE_DENOMINATOR,
                         );
                     let dark_wraith_line_branch = agent.ai == 192 && distance > 1;
-                    let spitting_spider_line_branch = matches!(agent.ai, 4 | 35);
+                    // AI 4 SpittingSpider, 29 BoneSpearman, 35 unnamed line —
+                    // Crystal `LineAttack(damage, 2, ...)`: 2-tile line that
+                    // splashes damage along the attack direction.
+                    let spitting_spider_line_branch = matches!(agent.ai, 4 | 29 | 35);
                     let crystal_spider_line_branch = agent.ai == 37 && distance > 1;
                     let king_scorpion_line_targets = if agent.ai == 19 {
                         forward_line_opposing_monster_targets(

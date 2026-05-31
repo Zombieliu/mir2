@@ -71,6 +71,19 @@ deterministic `PoisonTarget` (no chance roll). Test:
 up `TOXIC_GHOUL_GREEN_POISON_BUFF_KEY` within 10 ticks of an adjacent AI-4
 spider).
 
-## Next candidates (line attackers — higher effort)
-29 `BoneSpearman` (line), 44 `BlackFoxman` (close+line). These need additional
-line/area patterns beyond the generic ranged + line path.
+### AI 29 → BoneSpearman line splash ✅
+Crystal `BoneSpearman.Attack` is byte-identical to `SpittingSpider.Attack`
+minus the poison: `Direction = DirectionFromPoint(...)`, `Broadcast(ObjectAttack
+{...})`, then `LineAttack(damage, 2, 250)` — a 2-tile line attack along the
+attack direction that splashes damage to any friendly-opposite target on the
+line. The existing
+`bone_spearman_ai_hits_from_two_tiles_like_line_attack` test covered the
+*player* strike but the line-target splash was missing because AI 29 wasn't in
+`spitting_spider_line_branch` (only 4 and 35 were). Extended the matcher to
+`4 | 29 | 35`. AI 29 has no poison entry in `monster_player_status_effect`, so
+the spider's deterministic poison does not leak into BoneSpearman. Test:
+`crystal_ai29_bone_spearman_splashes_line_target` (asserts a friendly-opposite
+secondary monster on the line tile loses HP).
+
+## Next candidates
+44 `BlackFoxman` (Crystal `2 attacks, 1 close + 1 line`).
