@@ -392,6 +392,84 @@ fn run_step_expires_after_crystal_celltime_grace() {
 }
 
 #[test]
+fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
+    // Two players take an identical first walk at now=0. The walk cadence is
+    // 600ms unmounted and 400ms mounted (600 * 2 / 3). At now=400 the mounted
+    // player's second step is ready while the unmounted player's is not, so the
+    // mount speed boost is observable through the authoritative zone path.
+    let mut zone = zone();
+    let rider = session("rider");
+    let walker = session("walker");
+    zone.handle(ZoneCommand::Join(join("rider", 201, "Rider", 320, 250)));
+    zone.handle(ZoneCommand::Join(join("walker", 202, "Walker", 360, 250)));
+
+    // Put the rider on a mount via the same MountUpdate path a real client uses.
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: rider.clone(),
+        owner_local_object_id: 2001,
+        packets: vec![ServerPacket::MountUpdate {
+            object_id: 2001,
+            mount_type: 3,
+            riding_mount: true,
+        }],
+        now_ms: 0,
+    });
+
+    // First step for both, at the same instant. This sets the rider's next
+    // ready time to 400ms (mounted) and the walker's to 600ms (unmounted).
+    for who in [&rider, &walker] {
+        zone.handle(ZoneCommand::Walk {
+            session_id: who.clone(),
+            direction: MirDirection::Right,
+            seq: 1,
+            now_ms: 0,
+        });
+    }
+    zone.tick(0);
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 321, y: 250 }));
+    assert_eq!(zone.player_position(&walker), Some(Point { x: 361, y: 250 }));
+
+    // Queue both second steps early (now=50), outside the 300ms input buffer of
+    // either ready time, so neither is consumed on arrival — both stay queued
+    // until a tick reaches their cadence.
+    for who in [&rider, &walker] {
+        zone.handle(ZoneCommand::Walk {
+            session_id: who.clone(),
+            direction: MirDirection::Right,
+            seq: 2,
+            now_ms: 50,
+        });
+    }
+    assert_eq!(
+        zone.player_position(&rider),
+        Some(Point { x: 321, y: 250 }),
+        "queued step must not consume before the mount cadence elapses"
+    );
+
+    // At now=400 the mounted rider's cadence has elapsed but the walker's has
+    // not: the rider takes its second step, the walker is still on cooldown.
+    zone.tick(400);
+    assert_eq!(
+        zone.player_position(&rider),
+        Some(Point { x: 322, y: 250 }),
+        "mounted player should step again once 400ms elapses"
+    );
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 361, y: 250 }),
+        "unmounted player should still be on cooldown at 400ms"
+    );
+
+    // By now=600 the walker's 600ms cadence elapses and it advances too.
+    zone.tick(600);
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 362, y: 250 }),
+        "unmounted player should step once its 600ms cadence elapses"
+    );
+}
+
+#[test]
 fn run_received_inside_grace_survives_late_zone_tick() {
     let mut zone = zone();
     let first = session("first");
