@@ -130,6 +130,25 @@ do not emit attack packets at the player, matching AI 42. Test:
 buff-emission Crystal does in `ProcessTarget`/`CompleteAttack` is a separate
 gap noted for future work — both AIs only become immobile here.)
 
+### AIs 4, 8, 15, 26, 29, 44 — imported DC damage parity ✅
+Audit of `monster_player_attack_damage` arms vs Crystal `Attack()` bodies
+found six high-spawn AI numbers using `GetAttackPower(MinDC, MaxDC)` in
+Crystal but falling through to the default `7` in the runtime:
+- AI 4 `SpittingSpider` (48 spawns)
+- AI 8 `AxeSkeleton` (306 spawns)
+- AI 15 `ZumaMonster` (363 spawns — uses base `MonsterObject.Attack`)
+- AI 26 `ShamanZombie` (70 spawns)
+- AI 29 `BoneSpearman` (51 spawns)
+- AI 44 `BlackFoxman` (65 spawns)
+
+Added a single arm `4 | 8 | 15 | 26 | 29 | 44 =>
+crystal_monster_attack_damage(monster_name)` to use the imported DC. Existing
+literal-name tests for these AIs (which still resolve to the default 7
+because Crystal monster lookup misses) stay green; the new
+`crystal_ai26_shaman_zombie_uses_imported_dc_damage` test locks in the new
+behavior with the manifest `ShamanZombie` (max_dc=17) — comfortably above 7
+fallback.
+
 ### AI 31 RightGuard + AI 32 LeftGuard — imported DC damage ✅
 Crystal `RightGuard.Attack` and `LeftGuard.Attack` both compute
 `int damage = GetAttackPower(Stats[Stat.MinDC], Stats[Stat.MaxDC])` for both

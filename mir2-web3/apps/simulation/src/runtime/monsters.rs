@@ -2026,6 +2026,11 @@ pub(super) fn monster_player_attack_damage(
         // Crystal `RightGuard.Attack` / `LeftGuard.Attack`: both
         // `GetAttackPower(MinDC, MaxDC)` for melee and ranged.
         31 | 32 => crystal_monster_attack_damage(monster_name),
+        // Crystal `SpittingSpider.Attack`, `AxeSkeleton.Attack`,
+        // `ZumaMonster` (base), `ShamanZombie.Attack`, `BoneSpearman.Attack`,
+        // `BlackFoxman.Attack` — all use `GetAttackPower(MinDC, MaxDC)` for
+        // the attack damage. Previously these fell through to the default 7.
+        4 | 8 | 15 | 26 | 29 | 44 => crystal_monster_attack_damage(monster_name),
         _ => 7,
     };
     let mitigation = total_defence_bonus(

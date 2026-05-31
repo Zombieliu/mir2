@@ -55365,3 +55365,48 @@ fn crystal_ai31_right_guard_uses_imported_dc_damage() {
         "AI-31 RightGuard should hit using imported DC damage (min_dc=16, max_dc=39 in Crystal manifest), got {dealt} from a {before_hp}->{after_hp} delta"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AIs 4, 8, 15, 26, 29, 44 all compute Crystal damage as
+// `GetAttackPower(MinDC, MaxDC)` but were defaulting to 7 in the runtime's
+// `monster_player_attack_damage` table. This regression test uses
+// `ShamanZombie` (manifest max_dc=17) — well above the 7 fallback — to lock
+// in the batch DC fix for the line-splash AI family.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai26_shaman_zombie_uses_imported_dc_damage() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let player_origin = Point { x: 900, y: 900 };
+    let shaman_object_id = 98_960_u32;
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    set_player_position(&mut session, player_origin.clone());
+
+    let _shaman = spawn_crystal_monster_for_test(
+        &mut session,
+        shaman_object_id,
+        "ShamanZombie",
+        Point {
+            x: player_origin.x + 4,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    sync_visible_objects(&mut session);
+
+    // Ranged shot: tick to launch, tick to land.
+    let _ = session.tick();
+    let _ = session.tick();
+
+    let after_hp = session.world_snapshot().player_hp.expect("player hp");
+    let dealt = before_hp - after_hp;
+    assert!(
+        dealt > 8,
+        "AI-26 ShamanZombie should hit using imported DC damage (max_dc=17), got {dealt} from a {before_hp}->{after_hp} delta"
+    );
+}
