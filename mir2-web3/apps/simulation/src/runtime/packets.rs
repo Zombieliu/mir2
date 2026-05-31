@@ -6552,7 +6552,6 @@ impl SimulationSession {
             | ClientPacket::TownRevive
             | ClientPacket::RequestUserName { .. }
             | ClientPacket::RequestChatItem { .. }
-            | ClientPacket::EquipSlotItem { .. }
             | ClientPacket::AcceptReincarnation
             | ClientPacket::CancelReincarnation
             | ClientPacket::AwakeningNeedMaterials { .. }
@@ -6611,7 +6610,11 @@ impl SimulationSession {
                 from,
                 to,
             } => stage5_guild_storage_item_packet(self.app.world_mut(), change_type, from, to),
-            ClientPacket::CraftItem { .. } => vec![ServerPacket::CraftItem { success: false }],
+            ClientPacket::CraftItem {
+                unique_id,
+                count,
+                slots,
+            } => craft_item_impl(self.app.world_mut(), unique_id, count, slots),
             ClientPacket::DepositTradeItem { from, to } => {
                 stage5_deposit_trade_item_packet(self.app.world_mut(), from, to)
             }
@@ -7060,6 +7063,20 @@ impl SimulationSession {
                 unique_id,
                 to,
                 from_unique_id,
+            ),
+            ClientPacket::EquipSlotItem {
+                grid,
+                unique_id,
+                to,
+                grid_to,
+                to_unique_id,
+            } => equip_slot_item_impl(
+                self.app.world_mut(),
+                grid,
+                unique_id,
+                to,
+                grid_to,
+                to_unique_id,
             ),
             ClientPacket::SplitItem {
                 grid,
