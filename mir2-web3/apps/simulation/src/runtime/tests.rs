@@ -39366,8 +39366,11 @@ fn magic_packet_crystal_slashing_burst_leaps_two_tiles_and_delays_front_damage()
             let target = offset_point(&candidate, MirDirection::Right, 1);
             let destination = offset_point(&candidate, MirDirection::Right, 2);
             (can_occupy(session.app.world(), candidate.clone(), Some(player))
+                && is_combat_position(&session, &candidate)
                 && can_occupy(session.app.world(), target.clone(), None)
-                && can_occupy(session.app.world(), destination.clone(), None))
+                && is_combat_position(&session, &target)
+                && can_occupy(session.app.world(), destination.clone(), None)
+                && is_combat_position(&session, &destination))
             .then_some((candidate, target, destination))
         })
         .expect("open SlashingBurst lane");
@@ -39784,9 +39787,13 @@ fn magic_packet_crystal_repulsion_pushes_adjacent_lower_level_monster_and_hits_t
             let push_1 = offset_point(&candidate, MirDirection::Right, 2);
             let push_2 = offset_point(&candidate, MirDirection::Right, 3);
             (can_occupy(session.app.world(), candidate.clone(), Some(player))
+                && is_combat_position(&session, &candidate)
                 && can_occupy(session.app.world(), monster.clone(), None)
-                && can_occupy(session.app.world(), push_1, None)
-                && can_occupy(session.app.world(), push_2, None))
+                && is_combat_position(&session, &monster)
+                && can_occupy(session.app.world(), push_1.clone(), None)
+                && is_combat_position(&session, &push_1)
+                && can_occupy(session.app.world(), push_2.clone(), None)
+                && is_combat_position(&session, &push_2))
             .then_some((candidate, monster))
         })
         .expect("open Repulsion lane");
