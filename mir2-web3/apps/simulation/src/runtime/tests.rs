@@ -4322,19 +4322,23 @@ fn crystal_reviving_zombie_life_count_is_randomised_zero_to_two() {
 #[test]
 fn crystal_monster_attack_damage_rolls_across_its_class_range() {
     // BoneSpearman carries DC 17-30. Crystal's GetAttackPower rolls a fresh value per swing rather
-    // than always returning the maximum.
+    // than always returning the maximum. Derive the bounds from the dataset (the same min/max class
+    // helpers that bound the magic/spell roll tests) so the assertion tracks the data.
+    let min = super::crystal_monster_min_attack_damage("BoneSpearman");
+    let max = super::crystal_monster_attack_damage("BoneSpearman");
+    assert_eq!((min, max), (17, 30), "BoneSpearman DC class should be 17-30");
     let mut saw_min = false;
     let mut saw_max = false;
     let mut saw_mid = false;
     for tick in 0..4_000u64 {
         let value = crystal_monster_attack_damage_rolled("BoneSpearman", tick, 77_000);
         assert!(
-            (17..=30).contains(&value),
-            "rolled damage {value} outside DC range 17..=30"
+            (min..=max).contains(&value),
+            "rolled damage {value} outside DC range {min}..={max}"
         );
-        saw_min |= value == 17;
-        saw_max |= value == 30;
-        saw_mid |= value > 17 && value < 30;
+        saw_min |= value == min;
+        saw_max |= value == max;
+        saw_mid |= value > min && value < max;
     }
     assert!(
         saw_min && saw_mid && saw_max,
