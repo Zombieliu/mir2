@@ -31930,6 +31930,89 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
 }
 
 #[test]
+fn transfer_onto_no_mount_map_force_dismounts_player() {
+    let mut config = SimulationConfig::default();
+    // Destination map "1" forbids mounts.
+    config.map_drop_rules.push(MapDropRuleRecord {
+        map_file_name: "1".to_string(),
+        no_town_teleport: false,
+        no_escape: false,
+        no_random: false,
+        no_drug: false,
+        no_reincarnation: false,
+        no_throw_item: false,
+        no_drop_player: false,
+        no_drop_monster: false,
+        no_mount: true,
+        no_hero: false,
+        need_bridle: false,
+    });
+    let mut session = SimulationSession::new(config);
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Mount up on the (mount-allowed) starting map.
+    {
+        let mut mount = session.app.world_mut().resource_mut::<MountResource>();
+        mount.mount_type = 12;
+        mount.riding_mount = true;
+    }
+
+    // Transfer onto the no-mount map: the player is force-dismounted.
+    let packets = session.transfer_map("crystal:1:30:30");
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MountUpdate {
+                mount_type: 12,
+                riding_mount: false,
+                ..
+            }
+        )),
+        "expected a force-dismount MountUpdate on entering a no-mount map: {packets:?}"
+    );
+    assert!(
+        !session
+            .app
+            .world()
+            .resource::<MountResource>()
+            .riding_mount,
+        "mount resource should no longer be riding after entering a no-mount map"
+    );
+}
+
+#[test]
+fn transfer_onto_mount_allowed_map_keeps_player_mounted() {
+    // Sanity counterpart: transferring onto an ordinary map must NOT dismount.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    {
+        let mut mount = session.app.world_mut().resource_mut::<MountResource>();
+        mount.mount_type = 12;
+        mount.riding_mount = true;
+    }
+
+    let packets = session.transfer_map("crystal:1:30:30");
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::MountUpdate {
+                riding_mount: false,
+                ..
+            }
+        )),
+        "ordinary map transfer should not emit a dismount: {packets:?}"
+    );
+    assert!(
+        session
+            .app
+            .world()
+            .resource::<MountResource>()
+            .riding_mount,
+        "player should remain mounted after an ordinary map transfer"
+    );
+}
+
+#[test]
 fn use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

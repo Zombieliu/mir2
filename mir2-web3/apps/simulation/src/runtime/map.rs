@@ -14,9 +14,9 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
 use super::components::{
-    entity_position, player_entity, CharacterBody, DisplayName, Facing, Hero, Monster,
-    MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals,
-    Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
+    current_player_object_id, entity_position, player_entity, CharacterBody, DisplayName, Facing,
+    Hero, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId,
+    PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::monsters::{
@@ -29,8 +29,8 @@ use super::packets::{
 };
 use super::resources::{
     current_language, is_in_world, reset_crystal_player_movement_timing, MapRuntimeResource,
-    NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, Stage5SystemsResource,
+    MountResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, Stage5SystemsResource,
 };
 use super::save::{active_character_runtime_state, ActiveCharacterRuntimeState};
 use super::session::{system_message, SimulationSession};
@@ -604,7 +604,43 @@ pub(super) fn relocate_player_to_map(
         });
     }
     despawn_stage5_hero_for_no_hero_map(world, &mut packets);
+    dismount_for_no_mount_map(world, &mut packets);
     packets
+}
+
+/// Crystal force-dismounts a player when they enter a map flagged `NoMount`.
+/// Mirror that on map transfer: if the destination map disallows mounts and the
+/// player is currently riding, clear the ride and emit `MountUpdate` so the
+/// client (and any AOI observers, once the gateway rebroadcasts it) drops the
+/// mount visual.
+fn dismount_for_no_mount_map(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if !current_map_disallows_mount(world) {
+        return;
+    }
+    let was_riding = {
+        let mut mount = world.resource_mut::<MountResource>();
+        let was_riding = mount.riding_mount;
+        mount.riding_mount = false;
+        was_riding
+    };
+    if !was_riding {
+        return;
+    }
+    let mount_type = world.resource::<MountResource>().mount_type;
+    packets.push(ServerPacket::MountUpdate {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        mount_type,
+        riding_mount: false,
+    });
+    let language = super::session::current_language(world);
+    packets.push(ServerPacket::Chat {
+        message: localized_text_or_fallback(
+            language,
+            "server.MountNotAllowedOnMap",
+            "Mounts are not allowed on this map. You have dismounted.",
+        ),
+        chat_type: ChatType::System,
+    });
 }
 
 pub(super) fn parse_debug_crystal_transfer_key(key: &str) -> Option<(String, Point)> {
