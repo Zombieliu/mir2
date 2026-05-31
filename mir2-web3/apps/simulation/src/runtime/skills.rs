@@ -29,15 +29,15 @@ use super::components::{
     MonsterAgent, MonsterVitals, PlayerVitals, Position, SummonedMonster,
 };
 use super::crystal_compat::{
-    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY, CRYSTAL_STAT_ATTACK_SPEED,
-    CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT,
-    CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN, CRYSTAL_STAT_ENERGY_SHIELD_PERCENT, CRYSTAL_STAT_LUCK,
-    CRYSTAL_STAT_MANA_PENALTY_PERCENT, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
-    CRYSTAL_STAT_MAX_DC_RATE_PERCENT, CRYSTAL_STAT_MAX_MAC, CRYSTAL_STAT_MAX_MC,
-    CRYSTAL_STAT_MAX_MC_RATE_PERCENT, CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MAX_SC_RATE_PERCENT,
-    CRYSTAL_STAT_MIN_AC, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MIN_SC,
-    CRYSTAL_STAT_POISON_ATTACK, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER,
-    CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
+    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_AGILITY,
+    CRYSTAL_STAT_ATTACK_SPEED, CRYSTAL_STAT_ATTACK_SPEED_RATE_PERCENT,
+    CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT, CRYSTAL_STAT_ENERGY_SHIELD_HP_GAIN,
+    CRYSTAL_STAT_ENERGY_SHIELD_PERCENT, CRYSTAL_STAT_LUCK, CRYSTAL_STAT_MANA_PENALTY_PERCENT,
+    CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, CRYSTAL_STAT_MAX_DC_RATE_PERCENT,
+    CRYSTAL_STAT_MAX_MAC, CRYSTAL_STAT_MAX_MC, CRYSTAL_STAT_MAX_MC_RATE_PERCENT,
+    CRYSTAL_STAT_MAX_SC, CRYSTAL_STAT_MAX_SC_RATE_PERCENT, CRYSTAL_STAT_MIN_AC,
+    CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_POISON_ATTACK,
+    CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, CRYSTAL_STAT_TELEPORT_MANA_PENALTY_PERCENT,
 };
 use super::equipment::equipment_slot_unique_id;
 use super::items::{
@@ -3765,8 +3765,13 @@ fn apply_crystal_ice_thrust_spell(
         offset_point(&front, direction, 1),
         offset_point(&front, rotated_direction(direction, 1), 1),
     ];
-    let near_damage =
-        crystal_spell_damage_with_crit(world, tick, magic, skill.level, crystal_luck_crit_chance(world));
+    let near_damage = crystal_spell_damage_with_crit(
+        world,
+        tick,
+        magic,
+        skill.level,
+        crystal_luck_crit_chance(world),
+    );
     let far_damage = near_damage.saturating_mul(3).saturating_div(5).max(1);
     let due_tick = queued_before_world_tick_due_tick(tick, combat_delay_ticks(1_500));
 
@@ -4103,7 +4108,8 @@ fn apply_crystal_napalm_shot_spell(
         tick,
         ranged_attack_delay_ticks(&player_position, &center_position),
     );
-    let damage = crystal_archer_state_damage(world, crystal_spell_damage(world, tick, magic, skill.level));
+    let damage =
+        crystal_archer_state_damage(world, crystal_spell_damage(world, tick, magic, skill.level));
     for target_entity in hostile_monsters_in_square(world, &center_position, 2) {
         let Some(target_id) = entity_object_id(world, target_entity) else {
             continue;
@@ -7446,7 +7452,13 @@ mod crystal_damage_formula_tests {
     #[test]
     fn damage_channel_matches_crystal_class_sources() {
         // Wizard + Archer ranged scale off Magic-Crystal (MC).
-        for spell in ["FireBall", "GreatFireBall", "Lightning", "FrostCrunch", "StraightShot"] {
+        for spell in [
+            "FireBall",
+            "GreatFireBall",
+            "Lightning",
+            "FrostCrunch",
+            "StraightShot",
+        ] {
             assert_eq!(
                 crystal_spell_damage_channel(spell),
                 CrystalDamageChannel::Mc,
@@ -7454,7 +7466,13 @@ mod crystal_damage_formula_tests {
             );
         }
         // Taoist spells scale off Spirit-Crystal (SC).
-        for spell in ["Healing", "SoulFireBall", "Poisoning", "Curse", "MassHealing"] {
+        for spell in [
+            "Healing",
+            "SoulFireBall",
+            "Poisoning",
+            "Curse",
+            "MassHealing",
+        ] {
             assert_eq!(
                 crystal_spell_damage_channel(spell),
                 CrystalDamageChannel::Sc,
@@ -7462,7 +7480,13 @@ mod crystal_damage_formula_tests {
             );
         }
         // Warrior + Assassin melee scale off Damage-Crystal (DC).
-        for spell in ["Slaying", "HalfMoon", "TwinDrakeBlade", "CrescentSlash", "CatTongue"] {
+        for spell in [
+            "Slaying",
+            "HalfMoon",
+            "TwinDrakeBlade",
+            "CrescentSlash",
+            "CatTongue",
+        ] {
             assert_eq!(
                 crystal_spell_damage_channel(spell),
                 CrystalDamageChannel::Dc,
@@ -7474,7 +7498,10 @@ mod crystal_damage_formula_tests {
     #[test]
     fn range_falloff_rewards_maximum_range() {
         // Crystal bows do full min damage at max range and the least at point blank.
-        assert_eq!(crystal_range_min_after_falloff(90, CRYSTAL_MAX_ATTACK_RANGE), 90);
+        assert_eq!(
+            crystal_range_min_after_falloff(90, CRYSTAL_MAX_ATTACK_RANGE),
+            90
+        );
         assert_eq!(crystal_range_min_after_falloff(90, 0), 0);
         // Mid range: penalty = floor(90/9 * (9-4)) = 50 -> 40.
         assert_eq!(crystal_range_min_after_falloff(90, 4), 40);
@@ -7497,21 +7524,47 @@ mod crystal_damage_formula_tests {
     fn spell_defence_matches_crystal_defence_types() {
         use crate::runtime::combat::CrystalDefence;
         // Wizard/Taoist/Archer magic + MAC-routed warrior skills roll against MAC.
-        for spell in ["FireBall", "Lightning", "SoulFireBall", "BladeAvalanche", "StraightShot"] {
+        for spell in [
+            "FireBall",
+            "Lightning",
+            "SoulFireBall",
+            "BladeAvalanche",
+            "StraightShot",
+        ] {
             assert_eq!(crystal_spell_defence(spell), CrystalDefence::Mac, "{spell}");
         }
         // Physical skills roll against AC (no agility dodge).
-        for spell in ["CrescentSlash", "FlashDash", "CatTongue", "MoonMist", "FlamingSword"] {
+        for spell in [
+            "CrescentSlash",
+            "FlashDash",
+            "CatTongue",
+            "MoonMist",
+            "FlamingSword",
+        ] {
             assert_eq!(crystal_spell_defence(spell), CrystalDefence::Ac, "{spell}");
         }
         // HalfMoon family is pure agility dodge (no armour).
-        for spell in ["HalfMoon", "CrossHalfMoon", "DoubleSlash", "Thrusting", "TwinDrakeBlade"] {
-            assert_eq!(crystal_spell_defence(spell), CrystalDefence::Agility, "{spell}");
+        for spell in [
+            "HalfMoon",
+            "CrossHalfMoon",
+            "DoubleSlash",
+            "Thrusting",
+            "TwinDrakeBlade",
+        ] {
+            assert_eq!(
+                crystal_spell_defence(spell),
+                CrystalDefence::Agility,
+                "{spell}"
+            );
             assert!(crystal_spell_defence(spell).uses_agility_dodge());
         }
         // Control / knockback / poison-application spells bypass armour and dodge.
         for spell in ["Curse", "Repulsion", "Poisoning", "ShoulderDash"] {
-            assert_eq!(crystal_spell_defence(spell), CrystalDefence::None, "{spell}");
+            assert_eq!(
+                crystal_spell_defence(spell),
+                CrystalDefence::None,
+                "{spell}"
+            );
         }
     }
 }

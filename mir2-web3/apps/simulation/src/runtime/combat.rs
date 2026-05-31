@@ -1569,13 +1569,8 @@ pub(super) fn resolve_pending_combat_actions(
                 if ignores_damage {
                     continue;
                 }
-                let monster_dead = damage_monster_entity(
-                    world,
-                    target_entity,
-                    net_damage,
-                    current_tick,
-                    packets,
-                );
+                let monster_dead =
+                    damage_monster_entity(world, target_entity, net_damage, current_tick, packets);
                 if monster_dead {
                     if let Some(defeat_action) = action.on_monster_defeat {
                         handle_monster_defeat(
@@ -1711,7 +1706,8 @@ pub(super) fn damage_monster_entity(
     // where the cast scope is closed (AcAgility -> no armour), so this is a no-op there.
     let damage = {
         let defence = current_cast_defence(world);
-        let armour = crystal_monster_defence_armour(world, monster_entity, defence, current_tick, 0);
+        let armour =
+            crystal_monster_defence_armour(world, monster_entity, defence, current_tick, 0);
         let reduced = crystal_armour_reduced_damage(damage, armour);
         if reduced <= 0 {
             return false;
