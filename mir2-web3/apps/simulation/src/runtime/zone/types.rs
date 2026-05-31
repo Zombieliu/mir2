@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use crate::config::GroundDropSnapshot;
 
+use mir2_game_data::CrystalMonsterTemplate;
 use mir2_protocol::{
     ChatItem, ClientBuff, MirClass, MirDirection, MirGender, ObjectHealthInfo, ObjectManaInfo,
     Point, ServerPacket, Spell, UserItem,
@@ -96,6 +97,52 @@ pub struct ZoneChatItem {
     pub item: Option<UserItem>,
 }
 
+/// Authoritative combat stat block for a player inside the shared zone.
+///
+/// Historically the gateway computed the final melee/range/magic damage inside
+/// the attacker's *personal* `SimulationSession` and handed the zone a single
+/// pre-rolled scalar (`ZoneCommand::PlayerAttackObject { damage, .. }`). That
+/// made the per-player session — not the shared zone — the authority for combat
+/// outcomes, so two players hitting the same monster were trusting two
+/// independently computed numbers.
+///
+/// Carrying the attacker's stat block into the zone lets the zone itself roll
+/// the Crystal-style `Random(MinDC..=MaxDC)` damage, run the accuracy-vs-agility
+/// hit check, and subtract the target's armour — making the zone the single
+/// source of truth for combat resolution.
+///
+/// When `has_authoritative_damage()` is `false` (the default), the zone falls
+/// back to the legacy trusted scalar so existing callers keep working.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct ZonePlayerCombatStats {
+    pub min_dc: i32,
+    pub max_dc: i32,
+    pub min_mc: i32,
+    pub max_mc: i32,
+    pub min_sc: i32,
+    pub max_sc: i32,
+    pub accuracy: i32,
+    pub agility: i32,
+    pub min_ac: i32,
+    pub max_ac: i32,
+    pub min_mac: i32,
+    pub max_mac: i32,
+}
+
+impl ZonePlayerCombatStats {
+    /// Whether the zone has enough information to roll authoritative physical
+    /// (melee/range) damage instead of trusting the gateway-supplied scalar.
+    pub fn has_authoritative_damage(&self) -> bool {
+        self.max_dc > 0
+    }
+
+    /// Whether the zone has enough information to roll authoritative magic
+    /// (wizardry) damage instead of trusting the gateway-supplied scalar.
+    pub fn has_authoritative_magic(&self) -> bool {
+        self.max_mc > 0
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ZoneJoin {
     pub session_id: SessionId,
@@ -113,6 +160,7 @@ pub struct ZoneJoin {
     pub position: Point,
     pub direction: MirDirection,
     pub chat_profile: ZoneChatProfile,
+    pub combat_stats: ZonePlayerCombatStats,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,7 +191,45 @@ pub struct ZoneMonsterSpawn {
     pub experience: u32,
     pub position: Point,
     pub direction: MirDirection,
+    /// Authoritative defensive stats so the zone can resolve incoming player
+    /// damage (accuracy-vs-agility hit check + armour subtraction) itself. When
+    /// `defense.is_zero()` the zone treats the monster as having no armour/dodge
+    /// and applies trusted damage unchanged (legacy behaviour).
+    pub defense: ZoneMonsterDefense,
     pub drops: Vec<GroundDropSnapshot>,
+}
+
+/// Authoritative defensive stats for a shared-zone monster.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct ZoneMonsterDefense {
+    pub agility: i32,
+    pub min_ac: i32,
+    pub max_ac: i32,
+    pub min_mac: i32,
+    pub max_mac: i32,
+}
+
+impl ZoneMonsterDefense {
+    /// Project a Crystal monster template's authoritative defensive stats into a
+    /// shared-zone defense block so the zone can run the accuracy-vs-agility hit
+    /// check and subtract armour itself.
+    pub fn from_crystal_template(template: &CrystalMonsterTemplate) -> Self {
+        Self {
+            agility: template.agility.max(0),
+            min_ac: template.min_ac.max(0),
+            max_ac: template.max_ac.max(0),
+            min_mac: template.min_mac.max(0),
+            max_mac: template.max_mac.max(0),
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.agility == 0
+            && self.min_ac == 0
+            && self.max_ac == 0
+            && self.min_mac == 0
+            && self.max_mac == 0
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -180,6 +266,13 @@ pub enum ZoneCommand {
     UpdateChatProfile {
         session_id: SessionId,
         profile: ZoneChatProfile,
+    },
+    /// Refresh the authoritative combat stat block for a player (e.g. after an
+    /// equipment change or a buff recompute) so the zone keeps rolling damage
+    /// from current stats.
+    UpdatePlayerCombatStats {
+        session_id: SessionId,
+        stats: ZonePlayerCombatStats,
     },
     SyncPlayerTransform {
         session_id: SessionId,
@@ -371,6 +464,7 @@ pub(crate) struct ZoneNativeMonster {
     pub max_hp: i32,
     pub hp: i32,
     pub experience: u32,
+    pub defense: ZoneMonsterDefense,
     pub position: Point,
     pub direction: MirDirection,
     pub dead: bool,
@@ -405,6 +499,7 @@ impl ZoneNativeMonster {
             max_hp,
             hp,
             experience: spawn.experience,
+            defense: spawn.defense,
             position: spawn.position.clone(),
             direction: spawn.direction,
             dead: hp == 0,
@@ -470,6 +565,7 @@ pub(crate) struct ZonePlayer {
     pub next_spell_ready_at_ms: u64,
     pub magic_ready_at_ms: BTreeMap<u8, u64>,
     pub chat_profile: ZoneChatProfile,
+    pub combat_stats: ZonePlayerCombatStats,
     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
 }
 
@@ -516,6 +612,7 @@ impl ZonePlayer {
             next_spell_ready_at_ms: 0,
             magic_ready_at_ms: BTreeMap::new(),
             chat_profile: join.chat_profile,
+            combat_stats: join.combat_stats,
             buffs: BTreeMap::new(),
         }
     }
