@@ -54716,3 +54716,94 @@ fn crystal_ai58_town_guard_attacks_hostile_monsters() {
         "AI-58 guard's attack should strike the hostile monster, got {hit_packets:?}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Monster AI: AI 57 is Crystal's `TownArcher` — a ranged town guard that
+// targets ONLY red-name players (PKPoints >= 200) within view range and
+// fires an ObjectRangeAttack projectile (Crystal TownArcher.cs FindTarget
+// filters `playerob.PKPoints < 200`, Attack broadcasts ObjectRangeAttack +
+// ProjectileAttack(GetAttackPower(MinDC, MaxDC))). Inert against non-PK
+// players and against monsters.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn crystal_ai57_town_archer_attacks_red_name_player() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    super::super::map::clear_non_player_world_entities(session.app.world_mut());
+
+    let current_tick = runtime_tick(session.app.world());
+    let archer_position = Point { x: 900, y: 900 };
+    let archer_object_id = 91_057_u32;
+
+    let archer_agent = MonsterAgent {
+        image: 0,
+        dead: false,
+        patrol_origin: archer_position.clone(),
+        ai: 57,
+        disposition: WorldEntityDisposition::Neutral,
+        hostile_to_player: false,
+        tracking_player: false,
+        view_range: 10,
+        can_wander: false,
+        move_interval_ticks: 1,
+        attack_interval_ticks: 1,
+        next_move_tick: current_tick,
+        next_attack_tick: current_tick,
+        route: Vec::new(),
+        route_index: 0,
+        route_waiting: false,
+        next_route_tick: current_tick,
+    };
+
+    let _archer_entity = session
+        .app
+        .world_mut()
+        .spawn((
+            WorldObject,
+            ObjectId(archer_object_id),
+            DisplayName::literal("Test Town Archer"),
+            Position(archer_position.clone()),
+            Facing(MirDirection::Down),
+            Monster,
+            MonsterVitals { hp: 80, max_hp: 80 },
+            archer_agent,
+        ))
+        .id();
+
+    // Player within range 10 but PK points = 0 → archer must NOT attack
+    // (Crystal TownArcher.FindTarget skips `PKPoints < 200`).
+    set_player_position(
+        &mut session,
+        Point {
+            x: archer_position.x + 2,
+            y: archer_position.y,
+        },
+    );
+
+    let baseline = session.tick();
+    assert!(
+        !baseline.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRangeAttack { info } if info.object_id == archer_object_id
+        )),
+        "AI-57 town archer must ignore non-PK players, got {baseline:?}"
+    );
+
+    // Flip the player to red-name (PKPoints >= 200) and tick again — Crystal
+    // archer fires ObjectRangeAttack at the red-name target.
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .pk_points = 250;
+
+    let attack_packets = session.tick();
+    assert!(
+        attack_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRangeAttack { info } if info.object_id == archer_object_id
+        )),
+        "AI-57 town archer should fire ObjectRangeAttack at red-name player, got {attack_packets:?}"
+    );
+}

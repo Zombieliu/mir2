@@ -40,7 +40,24 @@ non-hostile-to-player (`monster_targets_players` excludes 58), so town guards no
 attack hostile monsters and ignore players, matching AI 6. Test:
 `crystal_ai58_town_guard_attacks_hostile_monsters` (attacks + strikes a hostile).
 
-## Next candidates (ranged/line attackers — higher effort)
-57 `TownArcher`, 4 `SpittingSpider` (line+poison), 29 `BoneSpearman` (line),
-44 `BlackFoxman` (close+line). These need a ranged/line attack pattern not in the
-generic melee path.
+### AI 57 → TownArcher ✅
+Crystal `TownArcher` overrides `FindTarget` to scan ONLY `ObjectType.Player`
+within `ViewRange` and skip any player with `PKPoints < 200`; `Attack()` then
+broadcasts `ObjectRangeAttack` and calls `ProjectileAttack(GetAttackPower(MinDC,
+MaxDC))`. AI 57 was already configured as Neutral, `monster_uses_ranged_attack`,
+attack range 10, but the runtime never *targeted* a player from AI 57 (Neutral
+monsters skip the generic player-aggro path). Added bespoke hook
+`update_town_archer_state` in `update_special_monster_state`: gates on
+`PlayerRuntimeResource.pk_points >= CRYSTAL_RED_NAME_PK_POINTS` (200) and
+`monster_in_attack_range` (≤10), then faces, emits `ObjectRangeAttack`,
+schedules `schedule_damage_to_player(damage, monster_attack_delay_ticks)`.
+Damage arm `57 => crystal_monster_attack_damage(monster_name)` (DC-based,
+matches Crystal `GetAttackPower(MinDC, MaxDC)`). Inert against non-PK players
+(PKPoints < 200) and against monsters (matches Crystal's `default: continue` in
+FindTarget). Test: `crystal_ai57_town_archer_attacks_red_name_player` (no
+attack when PKPoints=0; ObjectRangeAttack fires after `pk_points = 250`).
+
+## Next candidates (line/AoE attackers — higher effort)
+4 `SpittingSpider` (line+poison), 29 `BoneSpearman` (line),
+44 `BlackFoxman` (close+line). These need a line/area attack pattern beyond the
+generic ranged path.
