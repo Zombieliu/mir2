@@ -156,6 +156,14 @@ pub(super) const HOODED_SUMMONER_MAX_SLAVES: u8 = 4;
 pub(super) const HOODED_SUMMONER_SLAVE_THROTTLE_TICKS: u64 = 15;
 pub(super) const HOODED_SUMMONER_SCROLLS_GROUP_A: [&str; 2] = ["WarriorScroll", "TaoistScroll"];
 pub(super) const HOODED_SUMMONER_SCROLLS_GROUP_B: [&str; 2] = ["WizardScroll", "AssassinScroll"];
+/// TreeQueen (ai 142): a stationary root-spawning boss. Each root pulse erupts a 7x7 MassRoots field
+/// (MC damage) centred on the player; ground roots erupt a 5x5 DC patch. Root pulses are throttled,
+/// and when the player is within 2 tiles it adds a 3-tile fire-bombardment (MACAgility) on its beat.
+pub(super) const TREE_QUEEN_AI: u8 = 142;
+pub(super) const TREE_QUEEN_ROOT_THROTTLE_TICKS: u64 = 3;
+pub(super) const TREE_QUEEN_MASS_ROOT_RADIUS: i32 = 3;
+pub(super) const TREE_QUEEN_ROOT_LIFETIME_TICKS: u64 = 2;
+pub(super) const TREE_QUEEN_FIRE_BOMBARDMENT_RADIUS: i32 = 3;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

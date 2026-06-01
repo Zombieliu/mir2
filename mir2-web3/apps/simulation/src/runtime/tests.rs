@@ -4799,6 +4799,70 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn tree_queen_fire_bombardment_damages_adjacent_player() {
+    // TreeQueen (ai 142) is a stationary root boss. Within 2 tiles it fires a 3-tile fire-bombardment
+    // (DC-scaled, DC 100-350) cluster on its attack beat, routed through the monster ground-hazard
+    // pipeline; a player standing in the cluster takes damage. (Its MC-scaled roots are 0 for the
+    // real TreeQueen, which has MC 0, so the bombardment is its actual damage source.)
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 5_000,
+        max_hp: 5_000,
+        mp: 200,
+    });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let queen_id = 71_001_u32;
+    let queen = spawn_crystal_monster_for_test(
+        &mut session,
+        queen_id,
+        "TreeQueen",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(queen);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("queen agent");
+        agent.tracking_player = true;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let mut took_damage = false;
+    for _ in 0..12 {
+        session.tick();
+        if session.world_snapshot().player_hp.expect("player hp") < before_hp {
+            took_damage = true;
+            break;
+        }
+    }
+    assert!(
+        took_damage,
+        "TreeQueen's fire bombardment should damage an adjacent player"
+    );
+    // It must hold its ground (stationary).
+    assert_eq!(
+        session.app.world().entity(queen).get::<Position>().expect("queen position").0,
+        Point { x: player_origin.x + 1, y: player_origin.y },
+        "TreeQueen is stationary"
+    );
+}
+
+#[test]
 fn hooded_summoner_summons_scroll_mob_slaves() {
     // HoodedSummoner (ai 211) summons scroll-mob slaves on its summon-roll beats (Crystal cases 4/5
     // of Next(6)), capped at 4. Force ai 211 on an in-range aggroed monster and tick until a slave

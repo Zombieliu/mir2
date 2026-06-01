@@ -1,6 +1,8 @@
 use bevy_ecs::{entity::Entity, prelude::World};
 use mir2_game_data::{crystal_monster_by_name, CrystalRespawnTemplate};
-use mir2_protocol::{MirDirection, ObjectMovement, ObjectSpellInfo, Point, ServerPacket, Spell};
+use mir2_protocol::{
+    MirDirection, ObjectMovement, ObjectRangeAttackInfo, ObjectSpellInfo, Point, ServerPacket, Spell,
+};
 
 use crate::config::WorldEntityDisposition;
 
@@ -779,6 +781,16 @@ pub(super) fn update_special_monster_state(
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
+        142 => update_tree_queen_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         211 => update_hooded_summoner_state(
             world,
             entity,
@@ -2343,6 +2355,126 @@ pub(super) fn update_hooded_summoner_state(
         usize::from(HOODED_SUMMONER_MAX_SLAVES),
         1,
     );
+    true
+}
+
+/// TreeQueen (ai 142): a stationary root-spawning boss. On a throttled root pulse it erupts a 7x7
+/// MassRoots field (MC damage) centred on the player via the monster ground-hazard pipeline; when the
+/// player is within 2 tiles on its attack beat it additionally fires a 3-tile fire-bombardment
+/// (MACAgility, MC-scaled) cluster. Always returns true (its whole turn is bespoke; it never moves).
+pub(super) fn update_tree_queen_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return true;
+    };
+    // Only engage once the player is on the map and aggroed (TreeQueen's InAttackRange is map-wide).
+    if !agent.hostile_to_player && !agent.tracking_player {
+        return true;
+    }
+    agent.tracking_player = true;
+
+    let root_dc = entity_name(world, entity)
+        .map(|name| crystal_monster_raw_magic_damage(&name))
+        .unwrap_or(0);
+
+    // Periodic MassRoots field (7x7 around the player), throttled by next_state_tick.
+    if root_dc > 0 && tick >= ai_state.next_state_tick {
+        ai_state.next_state_tick = tick + TREE_QUEEN_ROOT_THROTTLE_TICKS;
+        let r = TREE_QUEEN_MASS_ROOT_RADIUS;
+        let mut locations = Vec::new();
+        for dy in -r..=r {
+            for dx in -r..=r {
+                let p = Point {
+                    x: player_position.x + dx,
+                    y: player_position.y + dy,
+                };
+                if &p != position {
+                    locations.push(p);
+                }
+            }
+        }
+        let damage = crystal_attack_power_roll(0, root_dc, tick, object_id, 14_200);
+        let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+        packets.push(ServerPacket::ObjectRangeAttack {
+            info: ObjectRangeAttackInfo {
+                object_id,
+                location: position.clone(),
+                direction,
+                target_id: current_player_object_id(world).unwrap_or(0),
+                target: player_position.clone(),
+                attack_type: 1,
+                spell: 0,
+                level: 0,
+            },
+        });
+        world
+            .resource_mut::<RuntimeQueueResource>()
+            .pending_ground_spell_actions
+            .push(PendingGroundSpellAction {
+                spell: Spell::TreeQueenMassRoots,
+                caster_object_id: object_id,
+                locations,
+                damage,
+                next_tick: tick + 1,
+                expires_at_tick: tick + TREE_QUEEN_ROOT_LIFETIME_TICKS,
+                tick_interval: 1,
+                damages_player: true,
+            });
+    }
+
+    // Adjacent (<=2) fire bombardment on the attack beat: a 3-tile MACAgility cluster on the player.
+    if monster_can_attack(agent, ai_state)
+        && tick >= agent.next_attack_tick
+        && tile_distance(position, player_position) <= 2
+    {
+        agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+        let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+        world.entity_mut(entity).insert(Facing(direction));
+        if let Some(packet) = monster_typed_attack_packet(world, entity, position, direction, 0) {
+            packets.push(packet);
+        }
+        let bomb_dc = entity_name(world, entity)
+            .map(|name| crystal_monster_raw_attack_damage(&name))
+            .unwrap_or(0);
+        if bomb_dc > 0 {
+            let r = TREE_QUEEN_FIRE_BOMBARDMENT_RADIUS;
+            let mut locations = Vec::new();
+            for dy in -r..=r {
+                for dx in -r..=r {
+                    locations.push(Point {
+                        x: player_position.x + dx,
+                        y: player_position.y + dy,
+                    });
+                }
+            }
+            let damage = crystal_attack_power_roll(0, bomb_dc, tick, object_id, 14_201);
+            world
+                .resource_mut::<RuntimeQueueResource>()
+                .pending_ground_spell_actions
+                .push(PendingGroundSpellAction {
+                    spell: Spell::TreeQueenGroundRoots,
+                    caster_object_id: object_id,
+                    locations,
+                    damage,
+                    next_tick: tick + combat_delay_ticks(500),
+                    expires_at_tick: tick + combat_delay_ticks(500) + 1,
+                    tick_interval: 1,
+                    damages_player: true,
+                });
+        }
+    }
+
     true
 }
 
