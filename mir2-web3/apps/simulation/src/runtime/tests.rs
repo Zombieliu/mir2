@@ -20227,15 +20227,14 @@ fn water_dragon_range_hit_applies_green_poison() {
             max_mp: 100,
         });
     let before_hp = session.world_snapshot().player_hp.expect("player hp");
-    // The ranged hit also applies green poison, whose first DOT tick (the Crystal
-    // player green-poison tick is 5) lands in the same tick the hit resolves, so
-    // the measured HP loss is the direct hit plus one poison tick.
-    const GREEN_POISON_TICK_DAMAGE: i32 = 5;
-    let expected_damage = {
-        (super::crystal_monster_magic_damage("Hydra") - total_defence_bonus(session.app.world()))
-            .max(1)
-            + GREEN_POISON_TICK_DAMAGE
-    };
+    // The water-dragon ranged strike is an armour-ignoring magic hit (the Crystal
+    // magic channel is mitigated by MAC, not the physical AC that
+    // `total_defence_bonus` returns), so the measured HP loss is the monster's
+    // full magic damage. #16's stat engine gave the seed player nonzero physical
+    // defence, which the old `- total_defence_bonus` expectation wrongly
+    // subtracted. The hit also applies green poison (asserted below), but its
+    // first DOT tick lands after this hit resolves, so it is not part of this loss.
+    let expected_damage = super::crystal_monster_magic_damage("Hydra");
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
         hydra_object_id,
@@ -45548,6 +45547,26 @@ fn magic_packet_crystal_moon_mist_hides_and_hits_nearby_targets() {
         55,
     );
     set_current_player_mp(&mut session, 500);
+    // MoonMist deals DC-channel damage; the seed WoodenSword (MinDC 2 / MaxDC 4)
+    // rolls to ~4, which a trivial-AC undead (BoneFamiliar rolls AC 2–4) fully
+    // blocks via Crystal's `armour >= damage` miss rule — masking the AoE hit on
+    // the undead. Give the seed weapon a real DC range (as a levelled Assassin
+    // would carry: MaxDC via the weapon's attack, MinDC via an explicit stat) so
+    // the hit clears the undead's armour and lands on both targets.
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("seed weapon");
+        weapon.added_attack += 40;
+        weapon.added_stats.push(UserItemStat {
+            stat: super::CRYSTAL_STAT_MIN_DC,
+            value: 40,
+        });
+    }
+    super::refresh_player_stats(session.app.world_mut());
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 4, 2, 2, 2);
     set_player_position(&mut session, origin.clone());
