@@ -75,6 +75,26 @@ jobs:
       - name: Install wasm target
         run: rustup target add wasm32-unknown-unknown --toolchain 1.89.0
 
+      - name: Install wasm-bindgen CLI
+        working-directory: mir2-web3/apps/game-client/runtime
+        run: |
+          set -euo pipefail
+          wasm_bindgen_version="$(
+            awk '
+              $0 == "name = \"wasm-bindgen\"" { found = 1; next }
+              found && $1 == "version" {
+                gsub(/"/, "", $3)
+                print $3
+                exit
+              }
+            ' Cargo.lock
+          )"
+          if [ -z "$wasm_bindgen_version" ]; then
+            echo "Unable to resolve wasm-bindgen version from Cargo.lock" >&2
+            exit 1
+          fi
+          cargo install wasm-bindgen-cli --version "$wasm_bindgen_version" --locked
+
       - name: Install Web dependencies
         working-directory: mir2-web3/apps/web
         run: npm ci
@@ -101,9 +121,10 @@ jobs:
             exit 1
           fi
 
-          object_prefix_template="${INPUT_OBJECT_PREFIX:-mir2/v/{version}}"
-          asset_base="${asset_base_template//\{version\}/$asset_version}"
-          object_prefix="${object_prefix_template//\{version\}/$asset_version}"
+          version_placeholder="{version}"
+          object_prefix_template="${INPUT_OBJECT_PREFIX:-mir2/v/$version_placeholder}"
+          asset_base="${asset_base_template//$version_placeholder/$asset_version}"
+          object_prefix="${object_prefix_template//$version_placeholder/$asset_version}"
 
           {
             echo "MIR2_ASSET_VERSION=$asset_version"
