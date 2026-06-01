@@ -6,20 +6,19 @@ use super::{
     current_location, current_player_object_id, entity_by_object_id, entity_facing,
     entity_object_id, entity_position, equipment_slot_from_index, equipment_slot_index,
     execute_crystal_npc_action_line, initial_monster_ai_state, initial_wooma_taurus_state,
-    initial_yimoogi_state, is_safe_zone_point, is_static_spawnable_point, mark_crystal_packet_action,
-    offset_point, player_entity, point_in_data_range, respawn_tick_for_schedule, runtime_tick,
-    set_crystal_npc_flag, spawn_positions_for_rule, spawn_runtime_monster,
-    start_game_visible_respawn_spawns, tile_distance, BuffResource, BuffState,
-    CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing, FishingResource,
-    HarvestMonsterState, InventoryResource, ItemState, Monster, MonsterAgent, MonsterAiState,
-    MonsterCombatStats, MonsterPoisonState, MonsterRespawnSchedule, MonsterSpawnRule,
-    MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals, MapRuntimeResource, MountResource,
-    NpcInteractionContext,
-    NpcStateResource, ObjectId, PlayerActionKind, PlayerPermissionResource, PlayerRuntimeResource,
-    PlayerVitals, Position, QuestResource, RuntimeConfigResource, RuntimeQueueResource,
-    SessionResource, SimulationSession, SkillResource, SpawnSlotRef, Stage5SystemsResource,
-    SummonedMonster, WoomaTaurusState, WorldObject, YimoogiState, BASE_STORAGE_SLOTS,
-    CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
+    initial_yimoogi_state, is_safe_zone_point, is_static_spawnable_point,
+    mark_crystal_packet_action, offset_point, player_entity, point_in_data_range,
+    respawn_tick_for_schedule, runtime_tick, set_crystal_npc_flag, spawn_positions_for_rule,
+    spawn_runtime_monster, start_game_visible_respawn_spawns, tile_distance, BuffResource,
+    BuffState, CrystalNpcActionControl, CrystalNpcExecutionState, DisplayName, Facing,
+    FishingResource, HarvestMonsterState, InventoryResource, ItemState, MapRuntimeResource,
+    Monster, MonsterAgent, MonsterAiState, MonsterCombatStats, MonsterPoisonState,
+    MonsterRespawnSchedule, MonsterSpawnRule, MonsterSpawnSlot, MonsterSpawnTable, MonsterVitals,
+    MountResource, NpcInteractionContext, NpcStateResource, ObjectId, PlayerActionKind,
+    PlayerPermissionResource, PlayerRuntimeResource, PlayerVitals, Position, QuestResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SimulationSession, SkillResource,
+    SpawnSlotRef, Stage5SystemsResource, SummonedMonster, WoomaTaurusState, WorldObject,
+    YimoogiState, BASE_STORAGE_SLOTS, CRYSTAL_STAT_SKILL_GAIN_MULTIPLIER, EXPANDED_STORAGE_SLOTS,
 };
 use crate::config::{ItemGrade, MapDropRuleRecord, MonsterSpawnSource};
 use crate::{
@@ -1352,7 +1351,6 @@ fn player_position(session: &SimulationSession) -> Point {
 fn crystal_client_map_available(map_file_name: &str) -> bool {
     super::runtime_map_collision_data(map_file_name).is_some()
 }
-
 
 fn unique_runtime_temp_dir(label: &str) -> std::path::PathBuf {
     let unique = std::time::SystemTime::now()
@@ -21060,12 +21058,31 @@ fn bomb_spider_explodes_when_adjacent_and_damages_player() {
 
     {
         let snap = session.world_snapshot();
-        let pl = snap.entities.iter().find(|e| e.kind == crate::WorldEntityKind::SelfPlayer).map(|e|(e.x,e.y));
-        let mon: Vec<_> = snap.entities.iter().filter(|e| matches!(e.kind, crate::WorldEntityKind::Monster)).map(|e|(e.object_id,e.x,e.y,e.dead)).collect();
+        let pl = snap
+            .entities
+            .iter()
+            .find(|e| e.kind == crate::WorldEntityKind::SelfPlayer)
+            .map(|e| (e.x, e.y));
+        let mon: Vec<_> = snap
+            .entities
+            .iter()
+            .filter(|e| matches!(e.kind, crate::WorldEntityKind::Monster))
+            .map(|e| (e.object_id, e.x, e.y, e.dead))
+            .collect();
         eprintln!("BSDBG player={:?} monsters={:?}", pl, mon);
     }
     let explode_packets = session.tick();
-    eprintln!("BSDBG explode died={} struck={}", explode_packets.iter().filter(|p|matches!(p,ServerPacket::ObjectDied{..})).count(), explode_packets.iter().filter(|p|matches!(p,ServerPacket::Struck{..})).count());
+    eprintln!(
+        "BSDBG explode died={} struck={}",
+        explode_packets
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::ObjectDied { .. }))
+            .count(),
+        explode_packets
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::Struck { .. }))
+            .count()
+    );
     assert!(explode_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::ObjectDied { info } if info.object_id >= 80_000
@@ -32348,11 +32365,7 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
         "expected a force-dismount MountUpdate on entering a no-mount map: {packets:?}"
     );
     assert!(
-        !session
-            .app
-            .world()
-            .resource::<MountResource>()
-            .riding_mount,
+        !session.app.world().resource::<MountResource>().riding_mount,
         "mount resource should no longer be riding after entering a no-mount map"
     );
 }
@@ -32380,11 +32393,7 @@ fn transfer_onto_mount_allowed_map_keeps_player_mounted() {
         "ordinary map transfer should not emit a dismount: {packets:?}"
     );
     assert!(
-        session
-            .app
-            .world()
-            .resource::<MountResource>()
-            .riding_mount,
+        session.app.world().resource::<MountResource>().riding_mount,
         "player should remain mounted after an ordinary map transfer"
     );
 }
@@ -45536,6 +45545,26 @@ fn magic_packet_crystal_moon_mist_hides_and_hits_nearby_targets() {
         55,
     );
     set_current_player_mp(&mut session, 500);
+    // MoonMist deals DC-channel damage; the seed WoodenSword (MinDC 2 / MaxDC 4)
+    // rolls to ~4, which a trivial-AC undead (BoneFamiliar rolls AC 2–4) fully
+    // blocks via Crystal's `armour >= damage` miss rule — masking the AoE hit on
+    // the undead. Give the seed weapon a real DC range (as a levelled Assassin
+    // would carry: MaxDC via the weapon's attack, MinDC via an explicit stat) so
+    // the hit clears the undead's armour and lands on both targets.
+    {
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
+        let weapon = inventory
+            .equipment_items
+            .iter_mut()
+            .find(|item| item.slot == EquipmentSlot::Weapon)
+            .expect("seed weapon");
+        weapon.added_attack += 40;
+        weapon.added_stats.push(UserItemStat {
+            stat: super::CRYSTAL_STAT_MIN_DC,
+            value: 40,
+        });
+    }
+    super::refresh_player_stats(session.app.world_mut());
     let player = player_entity(session.app.world()).expect("player entity");
     let origin = find_combat_origin_box(&session, player, 4, 2, 2, 2);
     set_player_position(&mut session, origin.clone());
