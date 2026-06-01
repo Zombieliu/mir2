@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { ExtraWindows } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
 
 import {
@@ -1216,6 +1217,20 @@ export default function HomePage() {
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventory] = useState(false);
   const [showCharacter, setShowCharacter] = useState(false);
+  const [showQuestLog, setShowQuestLog] = useState(false);
+  const [showHeroPet, setShowHeroPet] = useState(false);
+  const [showGuild, setShowGuild] = useState(false);
+  useEffect(() => {
+    const onExtraWindowHotkey = (event: KeyboardEvent) => {
+      if (!event.altKey || event.ctrlKey || event.metaKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "q") { event.preventDefault(); setShowQuestLog((value) => !value); }
+      else if (key === "h") { event.preventDefault(); setShowHeroPet((value) => !value); }
+      else if (key === "g") { event.preventDefault(); setShowGuild((value) => !value); }
+    };
+    window.addEventListener("keydown", onExtraWindowHotkey);
+    return () => window.removeEventListener("keydown", onExtraWindowHotkey);
+  }, []);
   const [activeInventoryTab, setActiveInventoryTab] = useState<"bag1" | "bag2" | "quest">("bag1");
   const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
@@ -8882,6 +8897,7 @@ export default function HomePage() {
 
   return (
     !isClientReady ? null :
+    <>
     <OriginalClientShell
       language={language}
       screen={screen}
@@ -9010,6 +9026,13 @@ export default function HomePage() {
       targetDistance={selectedEntity ? tileDistance(self, selectedEntity) : null}
       entityKindClassName={entityKindClassName}
     />
+    <ExtraWindows
+      t={t}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog }}
+      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: null, creatures: [] }}
+      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null }}
+    />
+    </>
   );
 }
 
