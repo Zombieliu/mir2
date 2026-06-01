@@ -291,6 +291,20 @@ export const ORIGINAL_UI = {
     closeButton: sprite("/original-ui/Prguse2/360.png", "/original-ui/Prguse2/361.png", "/original-ui/Prguse2/362.png"),
     helpButton: sprite("/original-ui/Prguse2/257.png", "/original-ui/Prguse2/258.png", "/original-ui/Prguse2/259.png"),
   },
+  trade: {
+    // Crystal TradeDialog (one side): Prguse frame 389, 204x152. Item cells form
+    // a 5x2 grid at (x*36+10+x, y*32+39+y); gold at (35,123); the confirm/lock
+    // button is Title 520-522 at (135,120); close (Prguse2 360-362) at (181,3).
+    width: 204,
+    height: 152,
+    frame: "/original-ui/Prguse/389.png",
+    closeButton: sprite("/original-ui/Prguse2/360.png", "/original-ui/Prguse2/361.png", "/original-ui/Prguse2/362.png"),
+    confirmButton: sprite("/original-ui/Title/520.png", "/original-ui/Title/521.png", "/original-ui/Title/522.png"),
+    cellSize: 32,
+    cellStep: 37,
+    cellOriginX: 10,
+    cellOriginY: 39,
+  },
   mail: {
     width: 312,
     height: 444,
