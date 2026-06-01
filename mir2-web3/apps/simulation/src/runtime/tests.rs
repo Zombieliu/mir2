@@ -20235,6 +20235,10 @@ fn water_dragon_range_hit_applies_green_poison() {
     // subtracted. The hit also applies green poison (asserted below), but its
     // first DOT tick lands after this hit resolves, so it is not part of this loss.
     let expected_damage = super::crystal_monster_magic_damage("Hydra");
+    // Green poison's first DOT tick (the Crystal player green-poison tick is 5)
+    // can resolve within a tick of the ranged hit, so the assertion below allows
+    // a +/-5 tolerance band around the direct magic damage.
+    const GREEN_POISON_TICK_DAMAGE: i32 = 5;
     let hydra = spawn_crystal_monster_for_test(
         &mut session,
         hydra_object_id,
