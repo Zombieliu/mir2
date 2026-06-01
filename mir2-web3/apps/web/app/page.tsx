@@ -33,6 +33,18 @@ import type {
   TerrainPatch,
 } from "../lib/scene-types";
 import type { ClientScreen } from "../lib/original-ui";
+import {
+  attackModeLabel,
+  groupMembersAfterChange,
+  heroCreateResultMessage,
+  mailResultMessage,
+  normalizeFriendList,
+  normalizeMailList,
+  normalizeUserItem,
+  patchItemsByUniqueId,
+  petModeLabel,
+  removeItemByUniqueId,
+} from "../lib/extended-server-packets";
 import bevyRuntimeVersion from "../lib/generated/bevy_runtime_version.json";
 import {
   CRYSTAL_MONSTER_SPRITES,
@@ -5680,6 +5692,1189 @@ export default function HomePage() {
             [numberOrZero(payload.milliseconds)],
             `Start game delayed: ${numberOrZero(payload.milliseconds)} ms.`,
           ),
+          "system",
+        );
+        break;
+      // --- [fe-packets] extended handlers ---
+      // Additive gameplay-visible server->client packet handling. Field shapes
+      // follow apps/gateway/src/web.rs `server_packet_to_event`.
+
+      // Object world-state sync ------------------------------------------------
+      case "ObjectTeleportOut":
+        updateWorldEntityFromLocationPacket(payload);
+        break;
+      case "ObjectTeleportIn":
+        updateWorldEntityFromLocationPacket(payload);
+        break;
+      case "ObjectHidden": {
+        const objectId = stringifyId(payload.objectId);
+        const hidden = payload.hidden === true;
+        // Hidden mobs (e.g. sneaking/stealth) stay tracked but lose selection focus.
+        setWorld((current) =>
+          hidden && current.selectedObjectId === objectId
+            ? { ...current, selectedObjectId: null }
+            : current,
+        );
+        break;
+      }
+      case "ObjectSneaking":
+        // Visual-only stealth toggle; location is unchanged. Restore selection sanity.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        break;
+      case "RemoveDelayedExplosion": {
+        const objectId = stringifyId(payload.objectId);
+        setWorld((current) => {
+          const projectiles = current.projectiles.filter(
+            (projectile) => projectile.attackerId !== objectId && projectile.targetId !== objectId,
+          );
+          if (projectiles.length === current.projectiles.length) {
+            return current;
+          }
+          return { ...current, projectiles };
+        });
+        break;
+      }
+      case "RangeAttack": {
+        // Self ranged attack: the source is the local player; reuse the projectile
+        // spawner by supplying the player's object id as the attacker.
+        const playerObjectId = worldRef.current.playerObjectId;
+        if (playerObjectId) {
+          spawnRangeProjectile({ ...payload, objectId: playerObjectId });
+        }
+        restoreObjectSelection(stringifyId(payload.targetId));
+        break;
+      }
+      case "SetBindingShot":
+        // Trap/binding marker on a target; surface location-only update if present.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        break;
+      case "MountUpdate":
+        // Mount appearance is re-derived from the next world snapshot; clear any
+        // stale walk/run animation on the affected entity so speed re-syncs.
+        {
+          const objectId = stringifyId(payload.objectId);
+          setWorld((current) => ({
+            ...current,
+            entities: patchEntityInList(current.entities, objectId, (entity) => ({
+              ...entity,
+              movementAnimation: undefined,
+              movementStartedAt: undefined,
+              movementUntil: undefined,
+            })),
+          }));
+        }
+        break;
+      case "FishingUpdate":
+        if (payload.foundFish === true) {
+          appendLog(t("ui.fishingBite", [], "A fish is biting!"), "system");
+        }
+        break;
+
+      // Player / hero progression ---------------------------------------------
+      case "GainExperience": {
+        const amount = numberOrZero(payload.amount);
+        if (amount > 0) {
+          setWorld((current) => ({
+            ...current,
+            playerExperience: current.playerExperience + amount,
+          }));
+        }
+        break;
+      }
+      case "LevelChanged":
+        setWorld((current) => ({
+          ...current,
+          playerExperience: numberOrZero(payload.experience),
+          playerMaxExperience: Math.max(numberOrZero(payload.maxExperience), 1),
+        }));
+        appendLog(
+          t("server.LevelUp", [numberOrZero(payload.level)], `You reached level ${numberOrZero(payload.level)}.`),
+          "system",
+          "announcement",
+        );
+        break;
+      case "HealthChanged": {
+        const hp = numberOrUndefined(payload.hp);
+        const mp = numberOrUndefined(payload.mp);
+        setWorld((current) => ({
+          ...current,
+          playerHp: typeof hp === "number" ? Math.max(0, hp) : current.playerHp,
+          playerMp: typeof mp === "number" ? Math.max(0, mp) : current.playerMp,
+          entities: current.playerObjectId
+            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                ...entity,
+                hp: typeof hp === "number" ? Math.max(0, hp) : entity.hp,
+              }))
+            : current.entities,
+        }));
+        break;
+      }
+      case "GainHeroExperience":
+      case "HeroLevelChanged":
+      case "HeroHealthChanged":
+        // Hero (companion) stats are tracked in the stage5 hero slice rather than
+        // the primary HUD; mirror them there so panels can read them.
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              ...(event.packet === "HeroHealthChanged"
+                ? { hp: numberOrUndefined(payload.hp), mp: numberOrUndefined(payload.mp) }
+                : {}),
+              ...(event.packet === "HeroLevelChanged"
+                ? {
+                    level: numberOrUndefined(payload.level),
+                    experience: numberOrUndefined(payload.experience),
+                    maxExperience: numberOrUndefined(payload.maxExperience),
+                  }
+                : {}),
+            },
+          },
+        }));
+        break;
+      case "GainedCredit": {
+        const credit = numberOrZero(payload.credit);
+        setWorld((current) => ({ ...current, credit: current.credit + credit }));
+        break;
+      }
+      case "LoseCredit": {
+        const credit = numberOrZero(payload.credit);
+        setWorld((current) => ({ ...current, credit: Math.max(0, current.credit - credit) }));
+        break;
+      }
+      case "Poisoned":
+        appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
+        break;
+      case "Death":
+        setWorld((current) => ({
+          ...current,
+          playerHp: 0,
+          entities: current.playerObjectId
+            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                ...entity,
+                hp: 0,
+                dead: true,
+              }))
+            : current.entities,
+        }));
+        break;
+      case "Revived":
+        setWorld((current) => ({
+          ...current,
+          playerHp:
+            typeof current.playerMaxHp === "number" ? Math.max(1, current.playerMaxHp) : current.playerHp,
+          entities: current.playerObjectId
+            ? patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                ...entity,
+                dead: false,
+                hp: typeof entity.maxHp === "number" ? Math.max(1, entity.maxHp) : entity.hp,
+              }))
+            : current.entities,
+        }));
+        break;
+
+      // Inventory / item lifecycle --------------------------------------------
+      case "GainedItem":
+      case "GainedQuestItem":
+      case "NewChatItem": {
+        const item = normalizeUserItem(payload.item);
+        if (item) {
+          appendLog(
+            t("ui.gainedItem", [String(item.itemIndex ?? item.uniqueId)], "You gained an item."),
+            "system",
+          );
+        }
+        break;
+      }
+      case "RefreshItem":
+      case "ItemUpgraded": {
+        const item = normalizeUserItem(payload.item);
+        if (item) {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
+              uniqueId: item.uniqueId,
+              quantity: item.count,
+              durabilityCurrent: item.currentDura,
+              durabilityMax: item.maxDura,
+            }),
+            beltItems: patchItemsByUniqueId(current.beltItems, {
+              uniqueId: item.uniqueId,
+              quantity: item.count,
+              durabilityCurrent: item.currentDura,
+              durabilityMax: item.maxDura,
+            }),
+            storageItems: patchItemsByUniqueId(current.storageItems, {
+              uniqueId: item.uniqueId,
+              quantity: item.count,
+              durabilityCurrent: item.currentDura,
+              durabilityMax: item.maxDura,
+            }),
+          }));
+        }
+        break;
+      }
+      case "DeleteItem":
+      case "DeleteQuestItem": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const count = numberOrZero(payload.count);
+        if (typeof uniqueId === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: removeItemByUniqueId(current.inventoryItems, uniqueId, count),
+            beltItems: removeItemByUniqueId(current.beltItems, uniqueId, count),
+            storageItems: removeItemByUniqueId(current.storageItems, uniqueId, count),
+          }));
+        }
+        break;
+      }
+      case "SellItem": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const count = numberOrZero(payload.count);
+        if (payload.success === true && typeof uniqueId === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: removeItemByUniqueId(current.inventoryItems, uniqueId, Math.max(1, count)),
+          }));
+        }
+        break;
+      }
+      case "CombineItem": {
+        const destroy = payload.destroy === true;
+        const idFrom = numberOrUndefined(payload.idFrom);
+        if (payload.success === true && destroy && typeof idFrom === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: removeItemByUniqueId(current.inventoryItems, idFrom, 1),
+          }));
+        }
+        break;
+      }
+      case "ItemRepaired": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const currentDura = numberOrUndefined(payload.currentDura);
+        const maxDura = numberOrUndefined(payload.maxDura);
+        if (typeof uniqueId === "number") {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
+              uniqueId,
+              durabilityCurrent: currentDura,
+              durabilityMax: maxDura,
+            }),
+            beltItems: patchItemsByUniqueId(current.beltItems, {
+              uniqueId,
+              durabilityCurrent: currentDura,
+              durabilityMax: maxDura,
+            }),
+            storageItems: patchItemsByUniqueId(current.storageItems, {
+              uniqueId,
+              durabilityCurrent: currentDura,
+              durabilityMax: maxDura,
+            }),
+          }));
+        }
+        break;
+      }
+      case "ResizeInventory": {
+        const size = numberOrZero(payload.size);
+        if (size > 0) {
+          setWorld((current) => ({
+            ...current,
+            maxBagSlots: size,
+          }));
+        }
+        break;
+      }
+
+      // Magic / skills ---------------------------------------------------------
+      case "RemoveMagic": {
+        const placeId = numberOrUndefined(payload.placeId);
+        if (typeof placeId === "number") {
+          setWorld((current) => ({
+            ...current,
+            knownSkills: current.knownSkills.filter((skill) => skill.hotkey !== placeId),
+          }));
+        }
+        break;
+      }
+      case "SpellToggle": {
+        const objectId = stringifyId(payload.objectId);
+        if (objectId === "0" || objectId === worldRef.current.playerObjectId) {
+          const spell = stringOrFallback(payload.spell, "");
+          const canUse = payload.canUse === true;
+          if (spell) {
+            setWorld((current) => ({
+              ...current,
+              knownSkills: current.knownSkills.map((skill) =>
+                skillMatchesCrystalSpell(skill, spell)
+                  ? { ...skill, castKind: canUse ? skill.castKind ?? "toggle" : "passive" }
+                  : skill,
+              ),
+            }));
+          }
+        }
+        break;
+      }
+
+      // Group / party ----------------------------------------------------------
+      case "SwitchGroup":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            group: {
+              ...(current.stage5Systems.group ?? {}),
+              lootMode: payload.allowGroup === true ? "group" : "solo",
+            },
+          },
+        }));
+        break;
+      case "AddMember":
+      case "DeleteMember": {
+        const name = stringOrFallback(payload.name, "");
+        if (name) {
+          setWorld((current) => ({
+            ...current,
+            stage5Systems: {
+              ...current.stage5Systems,
+              group: {
+                ...(current.stage5Systems.group ?? {}),
+                members: groupMembersAfterChange(
+                  current.stage5Systems.group?.members,
+                  event.packet === "AddMember" ? { add: name } : { remove: name },
+                ),
+              },
+            },
+          }));
+        }
+        break;
+      }
+      case "DeleteGroup":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            group: { ...(current.stage5Systems.group ?? {}), members: [] },
+          },
+        }));
+        break;
+      case "GroupInvite":
+        appendLog(
+          t(
+            "server.GroupInviteFrom",
+            [stringOrFallback(payload.name, "?")],
+            `${stringOrFallback(payload.name, "Someone")} invites you to a group.`,
+          ),
+          "system",
+          "group",
+        );
+        break;
+
+      // Social: friends / mentor / relationship --------------------------------
+      case "FriendUpdate": {
+        const friends = normalizeFriendList(payload.friends);
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            social: {
+              ...(current.stage5Systems.social ?? {}),
+              friends: friends.filter((friend) => !friend.blocked).map((friend) => friend.name),
+              blocked: friends.filter((friend) => friend.blocked).map((friend) => friend.name),
+            },
+          },
+        }));
+        break;
+      }
+      case "MentorUpdate":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            mentor: {
+              ...(current.stage5Systems.mentor ?? {}),
+              name: stringOrFallback(payload.name, ""),
+              level: numberOrUndefined(payload.level),
+              online: payload.online === true,
+              menteeExp: numberOrUndefined(payload.menteeExp),
+            },
+          },
+        }));
+        break;
+      case "LoverUpdate":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            relationship: {
+              ...(current.stage5Systems.relationship ?? {}),
+              name: stringOrFallback(payload.name, ""),
+              mapName: stringOrFallback(payload.mapName, ""),
+              marriedDays: numberOrUndefined(payload.marriedDays),
+            },
+          },
+        }));
+        break;
+      case "MarriageRequest":
+      case "DivorceRequest":
+      case "MentorRequest": {
+        const name = stringOrFallback(payload.name, "?");
+        const key =
+          event.packet === "MarriageRequest"
+            ? "server.MarriageRequestFrom"
+            : event.packet === "DivorceRequest"
+              ? "server.DivorceRequestFrom"
+              : "server.MentorRequestFrom";
+        appendLog(t(key, [name], `${name} sent you a ${event.packet}.`), "system", "relationship");
+        break;
+      }
+
+      // Trade ------------------------------------------------------------------
+      case "TradeRequest":
+      case "TradeAccept": {
+        const name = stringOrFallback(payload.name, "?");
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            trade: {
+              ...(current.stage5Systems.trade ?? {}),
+              partner: name,
+              state: event.packet === "TradeAccept" ? "open" : "requested",
+            },
+          },
+        }));
+        appendLog(
+          t("server.TradeRequestFrom", [name], `${name} wants to trade.`),
+          "system",
+          "trade",
+        );
+        break;
+      }
+      case "TradeGold":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            trade: {
+              ...(current.stage5Systems.trade ?? {}),
+              partnerGold: numberOrZero(payload.amount),
+            },
+          },
+        }));
+        break;
+      case "TradeItem":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            trade: {
+              ...(current.stage5Systems.trade ?? {}),
+              partnerItemCount: Array.isArray(payload.tradeItems) ? payload.tradeItems.length : 0,
+            },
+          },
+        }));
+        break;
+      case "TradeConfirm":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            trade: { ...(current.stage5Systems.trade ?? {}), confirmed: true },
+          },
+        }));
+        break;
+      case "TradeCancel":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: { ...current.stage5Systems, trade: null },
+        }));
+        appendLog(t("server.TradeCancelled", [], "Trade cancelled."), "system", "trade");
+        break;
+
+      // Mail -------------------------------------------------------------------
+      case "ReceiveMail": {
+        const mail = normalizeMailList(payload.mail);
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: { ...current.stage5Systems, mail },
+        }));
+        break;
+      }
+      case "MailSent":
+      case "ParcelCollected":
+        appendLog(
+          mailResultMessage(numberOrZero(payload.result), event.packet === "ParcelCollected"),
+          "system",
+        );
+        break;
+      case "MailCost":
+        appendLog(
+          t("ui.mailCost", [numberOrZero(payload.cost)], `Mail cost: ${numberOrZero(payload.cost)} gold.`),
+          "system",
+        );
+        break;
+
+      // Hero management --------------------------------------------------------
+      case "NewHero":
+        appendLog(heroCreateResultMessage(numberOrZero(payload.result)), "system");
+        break;
+      case "ManageHeroes":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              maximumCount: numberOrUndefined(payload.maximumCount),
+              currentHero: (payload.currentHero as Record<string, unknown> | null) ?? null,
+              heroes: Array.isArray(payload.heroes) ? payload.heroes.length : 0,
+            },
+          },
+        }));
+        break;
+      case "ChangeHero":
+      case "SetHeroBehaviour":
+      case "UpdateHeroSpawnState":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              ...(event.packet === "SetHeroBehaviour"
+                ? { behaviour: numberOrUndefined(payload.behaviour) }
+                : {}),
+              ...(event.packet === "UpdateHeroSpawnState"
+                ? { spawnState: numberOrUndefined(payload.state) }
+                : {}),
+              ...(event.packet === "ChangeHero"
+                ? { fromIndex: numberOrUndefined(payload.fromIndex) }
+                : {}),
+            },
+          },
+        }));
+        break;
+
+      // Intelligent creatures (pets) ------------------------------------------
+      case "NewIntelligentCreature":
+      case "UpdateIntelligentCreatureList":
+        setWorld((current) => {
+          const list = Array.isArray(payload.creatureList)
+            ? (payload.creatureList as Array<Record<string, unknown>>)
+            : current.stage5Systems.intelligentCreatures ?? [];
+          return {
+            ...current,
+            stage5Systems: { ...current.stage5Systems, intelligentCreatures: list },
+          };
+        });
+        break;
+
+      // Item rental ------------------------------------------------------------
+      case "ItemRentalRequest":
+      case "ItemRentalFee":
+      case "ItemRentalPeriod":
+      case "CancelItemRental":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              ...(event.packet === "ItemRentalRequest"
+                ? {
+                    partner: stringOrFallback(payload.name, ""),
+                    renting: payload.renting === true,
+                  }
+                : {}),
+              ...(event.packet === "ItemRentalFee" ? { fee: numberOrZero(payload.amount) } : {}),
+              ...(event.packet === "ItemRentalPeriod" ? { days: numberOrZero(payload.days) } : {}),
+              ...(event.packet === "CancelItemRental" ? { partner: null, renting: false } : {}),
+            },
+          },
+        }));
+        break;
+
+      // NPC interaction surfaces ----------------------------------------------
+      case "NPCGoods":
+      case "NPCPearlGoods":
+      case "NPCSell":
+      case "NPCRepair":
+      case "NPCSRepair":
+      case "NPCRefine":
+      case "NPCReplaceWedRing":
+        // Opening an NPC service panel: reuse the inventory surface used by NPCStorage.
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
+        break;
+      case "NPCResponse": {
+        const page = Array.isArray(payload.page)
+          ? (payload.page as unknown[]).filter((line): line is string => typeof line === "string")
+          : [];
+        for (const line of page) {
+          if (line.trim().length > 0) {
+            appendLog(line, "chat", "server");
+          }
+        }
+        break;
+      }
+      case "NPCCollectRefine":
+        appendLog(
+          payload.success === true
+            ? t("ui.refineCollected", [], "Refined item collected.")
+            : t("ui.refineFailed", [], "Refine failed."),
+          "system",
+        );
+        break;
+
+      // Output / misc gameplay messages ---------------------------------------
+      case "SendOutputMessage": {
+        const message = stringOrFallback(payload.message, "");
+        if (message) {
+          appendLog(message, "system", "server");
+        }
+        break;
+      }
+      case "Roll":
+        appendLog(
+          t(
+            "ui.rollResult",
+            [numberOrZero(payload.result)],
+            `Roll result: ${numberOrZero(payload.result)}.`,
+          ),
+          "chat",
+          "server",
+        );
+        break;
+      case "OpenBrowser": {
+        const url = stringOrFallback(payload.url, "");
+        if (url) {
+          appendLog(t("ui.openBrowser", [url], `Open link: ${url}`), "system", "server");
+        }
+        break;
+      }
+      case "ChangeAMode":
+        appendLog(
+          t(
+            "client.AttackModeChanged",
+            [attackModeLabel(numberOrZero(payload.mode))],
+            `[Mode: ${attackModeLabel(numberOrZero(payload.mode))}]`,
+          ),
+          "system",
+        );
+        break;
+      case "ChangePMode":
+        appendLog(
+          t(
+            "client.PetModeChanged",
+            [petModeLabel(numberOrZero(payload.mode))],
+            `[Pet: ${petModeLabel(numberOrZero(payload.mode))}]`,
+          ),
+          "system",
+        );
+        break;
+      case "MarketSuccess":
+        appendLog(stringOrFallback(payload.message, t("ui.marketSuccess", [], "Market action succeeded.")), "system");
+        break;
+      case "MarketFail":
+        appendLog(t("ui.marketFail", [numberOrZero(payload.reason)], "Market action failed."), "system");
+        break;
+
+      // Guild subsystem --------------------------------------------------------
+      case "GuildStatus":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            guild: {
+              ...(current.stage5Systems.guild ?? {}),
+              name: stringOrFallback(payload.guildName, current.stage5Systems.guild?.name ?? ""),
+              rank: stringOrFallback(payload.guildRankName, current.stage5Systems.guild?.rank ?? ""),
+            },
+          },
+        }));
+        break;
+      case "GuildMemberChange": {
+        const name = stringOrFallback(payload.name, "");
+        // change_type (status): 0 = add member, 1 = remove/kick member; other
+        // values (2..5) are rank/option/notice edits that do not alter membership.
+        const status = numberOrZero(payload.status);
+        if (name && (status === 0 || status === 1)) {
+          setWorld((current) => ({
+            ...current,
+            stage5Systems: {
+              ...current.stage5Systems,
+              guild: {
+                ...(current.stage5Systems.guild ?? {}),
+                members: groupMembersAfterChange(
+                  current.stage5Systems.guild?.members,
+                  status === 1 ? { remove: name } : { add: name },
+                ),
+              },
+            },
+          }));
+        }
+        break;
+      }
+      case "GuildNoticeChange": {
+        const notice = Array.isArray(payload.notice)
+          ? (payload.notice as unknown[]).filter((line): line is string => typeof line === "string")
+          : [];
+        if (notice.length > 0) {
+          setWorld((current) => ({
+            ...current,
+            stage5Systems: {
+              ...current.stage5Systems,
+              guild: { ...(current.stage5Systems.guild ?? {}), chatLog: notice },
+            },
+          }));
+        }
+        break;
+      }
+      case "GuildInvite":
+        appendLog(
+          t(
+            "server.GuildInviteFrom",
+            [stringOrFallback(payload.name, "?")],
+            `${stringOrFallback(payload.name, "A guild")} invites you to their guild.`,
+          ),
+          "system",
+          "guild",
+        );
+        break;
+      case "GuildExpGain":
+        appendLog(
+          t(
+            "server.GuildExpGain",
+            [numberOrZero(payload.amount)],
+            `Guild gained ${numberOrZero(payload.amount)} experience.`,
+          ),
+          "system",
+          "guild",
+        );
+        break;
+
+      // Object appearance / identity sync -------------------------------------
+      case "ColourChanged":
+        setWorld((current) =>
+          current.playerObjectId
+            ? {
+                ...current,
+                entities: patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                  ...entity,
+                  nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? entity.nameColourArgb,
+                })),
+              }
+            : current,
+        );
+        break;
+      case "ObjectColourChanged": {
+        const objectId = stringifyId(payload.objectId);
+        setWorld((current) => ({
+          ...current,
+          entities: patchEntityInList(current.entities, objectId, (entity) => ({
+            ...entity,
+            nameColourArgb: numberOrUndefined(payload.nameColourArgb) ?? entity.nameColourArgb,
+          })),
+        }));
+        break;
+      }
+      case "ObjectName":
+      case "UserName": {
+        const objectId = stringifyId(payload.objectId ?? payload.id);
+        const name = stringOrFallback(payload.name, "");
+        if (name && objectId !== "0") {
+          setWorld((current) => ({
+            ...current,
+            entities: patchEntityInList(current.entities, objectId, (entity) => ({
+              ...entity,
+              name,
+            })),
+          }));
+        }
+        break;
+      }
+      case "ObjectLeveled": {
+        const objectId = stringifyId(payload.objectId);
+        setWorld((current) => ({
+          ...current,
+          entities: patchEntityInList(current.entities, objectId, (entity) => ({
+            ...entity,
+            level: typeof entity.level === "number" ? entity.level + 1 : entity.level,
+          })),
+        }));
+        break;
+      }
+      case "DamageIndicator": {
+        // Floating combat text; mirror onto the entity HP where it is the self.
+        const objectId = stringifyId(payload.objectId);
+        const damage = numberOrZero(payload.damage);
+        if (objectId !== "0" && objectId === worldRef.current.playerObjectId && damage > 0) {
+          setWorld((current) => ({
+            ...current,
+            playerHp:
+              typeof current.playerHp === "number"
+                ? Math.max(0, current.playerHp - damage)
+                : current.playerHp,
+          }));
+        }
+        break;
+      }
+      case "ObjectEffect":
+        // One-shot visual effect on an object; keep selection sane.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        break;
+
+      // Quests -----------------------------------------------------------------
+      case "CompleteQuest": {
+        const completed = Array.isArray(payload.completedQuests)
+          ? (payload.completedQuests as unknown[]).filter(
+              (id): id is number => typeof id === "number",
+            )
+          : [];
+        if (completed.length > 0) {
+          setWorld((current) => ({
+            ...current,
+            questLog: current.questLog.map((quest) =>
+              completed.includes(quest.questId)
+                ? { ...quest, stage: "completed" as QuestStage }
+                : quest,
+            ),
+          }));
+          appendLog(t("ui.questCompleted", [], "Quest completed."), "system");
+        }
+        break;
+      }
+      case "ChangeQuest": {
+        const questId = numberOrUndefined(payload.questId);
+        const completed = payload.completed === true;
+        if (typeof questId === "number") {
+          setWorld((current) => ({
+            ...current,
+            questLog: current.questLog.map((quest) =>
+              quest.questId === questId
+                ? {
+                    ...quest,
+                    stage: completed
+                      ? ("completed" as QuestStage)
+                      : payload.taken === true
+                        ? ("inProgress" as QuestStage)
+                        : quest.stage,
+                  }
+                : quest,
+            ),
+          }));
+        }
+        break;
+      }
+      case "ShareQuest":
+        appendLog(
+          t(
+            "server.QuestShared",
+            [stringOrFallback(payload.sharerName, "?")],
+            `${stringOrFallback(payload.sharerName, "A party member")} shared a quest.`,
+          ),
+          "system",
+          "group",
+        );
+        break;
+
+      // Map / navigation -------------------------------------------------------
+      case "MapChanged": {
+        const fileName = stringOrNull(payload.fileName);
+        const miniMap = numberOrUndefined(payload.miniMap);
+        const bigMap = numberOrUndefined(payload.bigMap);
+        const location = payload.location as { x?: number; y?: number } | undefined;
+        setWorld((current) => {
+          const mapChanged =
+            normalizeMapFileName(fileName) !== normalizeMapFileName(current.mapFileName);
+          const preservedSelfEntity = current.playerObjectId
+            ? current.entities.find((entity) => entity.objectId === current.playerObjectId)
+            : undefined;
+          const movedSelf =
+            preservedSelfEntity && location
+              ? {
+                  ...preservedSelfEntity,
+                  x: numberOrZero(location.x),
+                  y: numberOrZero(location.y),
+                  direction: stringOrNull(payload.direction) ?? preservedSelfEntity.direction,
+                }
+              : preservedSelfEntity;
+          const nextWorld = {
+            ...current,
+            mapTitle: stringOrNull(payload.title) ?? current.mapTitle,
+            mapFileName: fileName ?? current.mapFileName,
+            miniMapIndex: typeof miniMap === "number" && miniMap > 0 ? miniMap : current.miniMapIndex,
+            bigMapIndex: typeof bigMap === "number" && bigMap > 0 ? bigMap : current.bigMapIndex,
+            selectedObjectId: mapChanged ? null : current.selectedObjectId,
+            activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
+            entities: mapChanged && movedSelf ? [movedSelf] : mapChanged ? [] : current.entities,
+            groundDrops: mapChanged ? [] : current.groundDrops,
+            projectiles: mapChanged ? [] : current.projectiles,
+            sceneView: mapChanged ? null : current.sceneView,
+            terrainPatches: mapChanged ? [] : current.terrainPatches,
+            decorObjects: mapChanged ? [] : current.decorObjects,
+            originalMapRegion: mapChanged ? null : current.originalMapRegion,
+          };
+          worldRef.current = nextWorld;
+          return nextWorld;
+        });
+        break;
+      }
+      case "SetCompass":
+        // Quest/compass marker; surfaced as an interaction hint coordinate.
+        {
+          const location = payload.location as { x?: number; y?: number } | undefined;
+          if (location && typeof location.x === "number" && typeof location.y === "number") {
+            appendLog(
+              t("ui.compassSet", [location.x, location.y], `Compass set to (${location.x}, ${location.y}).`),
+              "system",
+            );
+          }
+        }
+        break;
+
+      // Item move/equip acknowledgements (server grid indices) -----------------
+      case "EquipItem":
+      case "MoveItem":
+      case "RemoveItem":
+      case "RemoveSlotItem":
+      case "StoreItem":
+      case "TakeBackItem":
+      case "DepositTradeItem":
+      case "RetrieveTradeItem":
+      case "DepositRefineItem":
+      case "RetrieveRefineItem":
+      case "TakeBackHeroItem":
+      case "TransferHeroItem":
+      case "DepositRentalItem":
+      case "RetrieveRentalItem":
+        // These confirm a slot operation by grid index. The authoritative item
+        // layout is reconciled from the next world snapshot / UserSlotsRefresh;
+        // surface only a failure note so the player gets feedback on rejection.
+        if (payload.success === false) {
+          appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        }
+        break;
+      case "UserSlotsRefresh":
+        // Full inventory/equipment refresh handled by the snapshot pipeline; flag
+        // the next snapshot as an in-place packet refresh so it merges cleanly.
+        packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        break;
+
+      // Misc world events ------------------------------------------------------
+      case "InTrapRock":
+        if (payload.trapped === true) {
+          appendLog(t("ui.trappedInRock", [], "You are trapped in rock!"), "system");
+        }
+        break;
+      case "ReturnToLogin":
+        screenRef.current = "login";
+        setScreen("login");
+        setLoginBusy(false);
+        break;
+
+      // Skill book -------------------------------------------------------------
+      case "NewMagic": {
+        const magic = payload.magic as Record<string, unknown> | undefined;
+        if (magic && payload.hero !== true) {
+          const spell = stringOrFallback(magic.spell, "");
+          const name = stringOrFallback(magic.name, spell || "Skill");
+          const level = numberOrZero(magic.level);
+          const key = spell ? `magic-${spell}` : `magic-${name}`;
+          const nextSkill: KnownSkill = {
+            key,
+            name,
+            description: `${name}${level > 0 ? ` (Lv. ${level})` : ""}`,
+            spell: spell || null,
+            hotkey: numberOrUndefined(magic.key),
+            delayMs: numberOrUndefined(magic.delay),
+            castTimeMs: numberOrUndefined(magic.cast_time) ?? numberOrUndefined(magic.castTime),
+            cooldownRemainingTicks: 0,
+          };
+          setWorld((current) => ({
+            ...current,
+            knownSkills: [
+              nextSkill,
+              ...current.knownSkills.filter((skill) => skill.key !== key),
+            ],
+          }));
+        }
+        break;
+      }
+
+      // Item split (creates / decrements a stack) ------------------------------
+      case "SplitItem": {
+        const item = normalizeUserItem(payload.item);
+        if (item) {
+          appendLog(t("ui.itemSplit", [], "Item split."), "system");
+        }
+        break;
+      }
+      case "SplitItem1": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        const count = numberOrZero(payload.count);
+        if (payload.success === true && typeof uniqueId === "number" && count > 0) {
+          setWorld((current) => ({
+            ...current,
+            inventoryItems: patchItemsByUniqueId(current.inventoryItems, {
+              uniqueId,
+              // The source stack loses `count` units when split into a new slot.
+              quantity: Math.max(
+                0,
+                (current.inventoryItems.find((entry) => entry.uniqueId === uniqueId)?.quantity ?? count) - count,
+              ),
+            }),
+          }));
+        }
+        break;
+      }
+      case "CraftItem":
+        appendLog(
+          payload.success === true
+            ? t("ui.craftSuccess", [], "Item crafted.")
+            : t("ui.craftFailed", [], "Crafting failed."),
+          "system",
+        );
+        break;
+      case "ConsignItem":
+        appendLog(
+          payload.success === true
+            ? t("ui.consignSuccess", [], "Item consigned to the market.")
+            : t("ui.consignFailed", [], "Consignment failed."),
+          "system",
+          "trade",
+        );
+        break;
+
+      // Item awakening ---------------------------------------------------------
+      case "Awakening":
+        appendLog(
+          numberOrZero(payload.result) > 0
+            ? t("ui.awakeningSuccess", [], "Awakening succeeded.")
+            : t("ui.awakeningFailed", [], "Awakening failed."),
+          "system",
+        );
+        break;
+
+      // Hero (companion) info --------------------------------------------------
+      case "HeroInformation":
+      case "NewHeroInfo":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              info: (payload.info as Record<string, unknown> | undefined) ?? current.stage5Systems.hero?.info,
+            },
+          },
+        }));
+        break;
+
+      // Self knockback (back-step) --------------------------------------------
+      case "UserBackStep": {
+        const point = movementPointFromPacketPayload(payload);
+        const direction = stringOrNull(payload.direction) ?? undefined;
+        setWorld((current) =>
+          current.playerObjectId
+            ? {
+                ...current,
+                entities: patchEntityInList(current.entities, current.playerObjectId, (entity) => ({
+                  ...entity,
+                  x: point.x,
+                  y: point.y,
+                  direction: direction ?? entity.direction,
+                })),
+              }
+            : current,
+        );
+        break;
+      }
+
+      // Pet pickup -------------------------------------------------------------
+      case "IntelligentCreaturePickup":
+        appendLog(t("ui.petPickup", [], "Your creature picked up an item."), "system");
+        break;
+
+      // Rental item detail -----------------------------------------------------
+      case "UpdateRentalItem": {
+        const loanItem = normalizeUserItem(payload.loanItem);
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              loanItemUniqueId: loanItem?.uniqueId ?? null,
+            },
+          },
+        }));
+        break;
+      }
+
+      // Quest definitions ------------------------------------------------------
+      case "NewQuestInfo": {
+        const info = payload.info as Record<string, unknown> | undefined;
+        const questId = info ? numberOrUndefined(info.index) : undefined;
+        if (info && typeof questId === "number") {
+          const name = stringOrFallback(info.name, `Quest ${questId}`);
+          const description = Array.isArray(info.description)
+            ? (info.description as unknown[]).filter((line): line is string => typeof line === "string")
+            : [];
+          const taskDescription = Array.isArray(info.task_description)
+            ? (info.task_description as unknown[]).filter((line): line is string => typeof line === "string")
+            : Array.isArray(info.taskDescription)
+              ? (info.taskDescription as unknown[]).filter((line): line is string => typeof line === "string")
+              : [];
+          setWorld((current) => {
+            if (current.questLog.some((quest) => quest.questId === questId)) {
+              return current;
+            }
+            const nextEntry: QuestEntry = {
+              questId,
+              title: name,
+              summary: description[0] ?? "",
+              objective: taskDescription[0] ?? "",
+              progressLabel: "",
+              tracker: stringOrFallback(info.group, ""),
+              stage: "available",
+              current: 0,
+              required: 0,
+              rewardPreview: "",
+            };
+            return { ...current, questLog: [...current.questLog, nextEntry] };
+          });
+        }
+        break;
+      }
+
+      // Refine / repair acknowledgements --------------------------------------
+      case "RefineItem":
+        appendLog(t("ui.refineStarted", [], "Item sent for refining."), "system");
+        break;
+      case "RepairItem":
+        appendLog(t("ui.repairStarted", [], "Item repaired."), "system");
+        break;
+      case "GuildStorageGoldChange":
+        appendLog(
+          t(
+            "ui.guildStorageGold",
+            [numberOrZero(payload.amount)],
+            `Guild storage gold changed by ${numberOrZero(payload.amount)}.`,
+          ),
+          "system",
+          "guild",
+        );
+        break;
+      case "AllowObserve":
+        appendLog(
+          payload.allow === true
+            ? t("ui.observeAllowed", [], "Observers are now allowed.")
+            : t("ui.observeBlocked", [], "Observers are now blocked."),
           "system",
         );
         break;
