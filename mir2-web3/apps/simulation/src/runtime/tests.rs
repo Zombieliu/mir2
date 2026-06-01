@@ -1349,7 +1349,10 @@ fn player_position(session: &SimulationSession) -> Point {
 /// (rather than hard-fail) when the client is absent; they still run fully in
 /// any environment that has the client checked out / CRYSTAL_CLIENT_ROOT set.
 fn crystal_client_map_available(map_file_name: &str) -> bool {
-    super::runtime_map_collision_data(map_file_name).is_some()
+    // These tests assert full client geometry, so gate on the filesystem Crystal
+    // client install only -- NOT the bundled map pack (which the sim now falls
+    // back to for collision but which doesn't carry the full client map info).
+    super::crystal_map_path(map_file_name).is_some()
 }
 
 fn unique_runtime_temp_dir(label: &str) -> std::path::PathBuf {
@@ -55465,6 +55468,19 @@ fn deadmine_entrance_collision_parses_from_pack() {
     assert!(
         !collision.blocked_cells.is_empty(),
         "DeadMine entrance should have blocked rock cells"
+    );
+}
+
+#[test]
+fn sim_loads_deadmine_collision_from_pack_at_runtime() {
+    // With no Crystal client install, the loader falls back to the bundled map
+    // pack, so DeadMine entrance collision is available to the sim's movement
+    // and zone systems.
+    let collision = super::super::map::runtime_map_collision_data("d401")
+        .expect("sim should load DeadMine entrance collision from the map pack");
+    assert!(
+        !collision.blocked_set.is_empty(),
+        "DeadMine entrance should have blocked cells loaded at runtime"
     );
 }
 

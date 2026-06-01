@@ -988,10 +988,35 @@ pub(super) fn runtime_map_collision_data_uncached(
         return Some(runtime_map_collision_from_template(starter_map_collision()));
     }
 
-    let map_path = crystal_map_path(normalized)?;
-    let bytes = fs::read(map_path).ok()?;
+    let bytes = crystal_map_path(normalized)
+        .and_then(|path| fs::read(path).ok())
+        .or_else(|| read_crystal_map_pack_bytes(normalized))?;
     let collision = parse_runtime_map_collision(normalized, &bytes)?;
     Some(runtime_map_collision_from_template(collision))
+}
+
+/// Locate the bundled `crystal-map-pack` directory (gzipped Crystal `.map`
+/// files), so the sim can host maps with no Crystal client install. Honors
+/// `MIR2_CRYSTAL_MAP_PACK`, else falls back to the in-repo pack path.
+fn crystal_map_pack_dir() -> Option<PathBuf> {
+    if let Ok(dir) = std::env::var("MIR2_CRYSTAL_MAP_PACK") {
+        let dir = PathBuf::from(dir);
+        return dir.is_dir().then_some(dir);
+    }
+    let repo_default =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../web/lib/generated/crystal-map-pack");
+    repo_default.is_dir().then_some(repo_default)
+}
+
+/// Decompress a map's raw `.map` bytes from `{pack}/{name}.map.gz`.
+fn read_crystal_map_pack_bytes(normalized: &str) -> Option<Vec<u8>> {
+    use std::io::Read;
+    let gz_path = crystal_map_pack_dir()?.join(format!("{normalized}.map.gz"));
+    let gz = fs::read(gz_path).ok()?;
+    let mut decoder = flate2::read::GzDecoder::new(gz.as_slice());
+    let mut bytes = Vec::new();
+    decoder.read_to_end(&mut bytes).ok()?;
+    Some(bytes)
 }
 
 pub(super) fn runtime_map_collision_from_template(
