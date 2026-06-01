@@ -4799,6 +4799,66 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn witch_doctor_self_heals_when_low_and_blinks() {
+    // WitchDoctor (ai 75) blink-kite caster: under 50% HP it sometimes self-heals 1/4 max HP, and on
+    // other beats may blink. Force ai 75 at low HP in range and confirm it regains HP via its heal
+    // (or blinks away from its start tile) within a few beats. (No manifest instance; force the ai.)
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let doc_id = 71_801_u32;
+    let doc_start = Point {
+        x: player_origin.x + 4,
+        y: player_origin.y,
+    };
+    let doc = spawn_crystal_monster_for_test(
+        &mut session,
+        doc_id,
+        "Yob",
+        doc_start.clone(),
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(doc);
+        entry.insert(MonsterVitals { hp: 100, max_hp: 1_000 }); // 10% HP -> heal gate open
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("doc agent");
+        agent.ai = 75;
+        agent.tracking_player = true;
+        agent.can_wander = false;
+        agent.view_range = 8;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let hp = |session: &SimulationSession| {
+        session.app.world().entity(doc).get::<MonsterVitals>().expect("doc vitals").hp
+    };
+    let mut healed = false;
+    let mut blinked = false;
+    let start_hp = hp(&session);
+    for _ in 0..20 {
+        session.tick();
+        if hp(&session) > start_hp {
+            healed = true;
+        }
+        let pos = session.app.world().entity(doc).get::<Position>().expect("doc pos").0.clone();
+        if pos != doc_start {
+            blinked = true;
+        }
+        if healed && blinked {
+            break;
+        }
+    }
+    assert!(healed, "WitchDoctor under 50% HP should self-heal");
+    assert!(blinked, "WitchDoctor should blink (teleport) at least once");
+}
+
+#[test]
 fn floating_rock_death_explosion_damages_nearby_player() {
     // FloatingRock (ai 166): on death it bursts for DC against everything within 3 tiles. Spawn a
     // monster with real DC (OmaWarrior2, min_dc 22), force ai 166 adjacent to the player, kill it,

@@ -208,6 +208,14 @@ pub(super) const FLOATING_ROCK_DEATH_RADIUS: i32 = 3;
 pub(super) const POISON_HUGGER_AI: u8 = 69;
 pub(super) const POISON_HUGGER_DEATH_RADIUS: i32 = 1;
 pub(super) const DEATH_AOE_DELAY_TICKS: u64 = 1;
+/// WitchDoctor (ai 75): a blink-kite caster. On its attack beat 1-in-5 it teleports away (blink),
+/// else under 50% HP a 1-in-3 self-heal of 1/4 max HP, else a ranged MC attack (generic path).
+pub(super) const WITCH_DOCTOR_AI: u8 = 75;
+pub(super) const WITCH_DOCTOR_BLINK_CHANCE_DENOMINATOR: u64 = 5;
+pub(super) const WITCH_DOCTOR_HEAL_CHANCE_DENOMINATOR: u64 = 3;
+pub(super) const WITCH_DOCTOR_HEAL_HP_PERCENT_GATE: i32 = 50;
+pub(super) const WITCH_DOCTOR_HEAL_FRACTION_DENOMINATOR: i32 = 4;
+pub(super) const WITCH_DOCTOR_TELEPORT_EFFECT: u8 = 4;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

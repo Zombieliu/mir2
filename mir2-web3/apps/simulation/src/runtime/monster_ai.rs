@@ -821,6 +821,16 @@ pub(super) fn update_special_monster_state(
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
+        75 => update_witch_doctor_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         142 => update_tree_queen_state(
             world,
             entity,
@@ -2965,6 +2975,73 @@ pub(super) fn update_chieftain_archer_state(
             push_player_in_direction(world, player, away, 1, packets);
         }
     }
+    false
+}
+
+/// WitchDoctor (ai 75): a blink-kite caster. On its attack beat 1-in-5 it teleports away (blink),
+/// otherwise — under 50% HP — a 1-in-3 self-heal of 1/4 max HP. Both consume the turn (return true);
+/// any other beat falls through (false) to its ranged MC attack via the generic path.
+pub(super) fn update_witch_doctor_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) || !agent.tracking_player {
+        return false;
+    }
+    if tick < agent.next_attack_tick
+        || !monster_in_attack_range(agent, position, player_position)
+    {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+
+    // 1-in-5: blink away (kite). Reuse the foxman/snow-wolf blink (repositions near the player).
+    if deterministic_value(0, object_id, tick, WITCH_DOCTOR_BLINK_CHANCE_DENOMINATOR) == 0 {
+        agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+        snow_wolf_king_teleport_to_player_with_effect(
+            world,
+            entity,
+            tick,
+            WITCH_DOCTOR_TELEPORT_EFFECT,
+            packets,
+        );
+        return true;
+    }
+
+    // Under 50% HP: 1-in-3 self-heal of 1/4 max HP.
+    let (hp, max_hp) = world
+        .entity(entity)
+        .get::<MonsterVitals>()
+        .map(|v| (v.hp, v.max_hp))
+        .unwrap_or((1, 1));
+    let hp_percent = hp.saturating_mul(100) / max_hp.max(1);
+    if hp_percent < WITCH_DOCTOR_HEAL_HP_PERCENT_GATE
+        && deterministic_value(0, object_id, tick.wrapping_add(7), WITCH_DOCTOR_HEAL_CHANCE_DENOMINATOR) == 0
+    {
+        agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+        let heal = (max_hp / WITCH_DOCTOR_HEAL_FRACTION_DENOMINATOR).max(1);
+        if let Some(mut vitals) = world.entity_mut(entity).get_mut::<MonsterVitals>() {
+            vitals.hp = (vitals.hp + heal).min(vitals.max_hp);
+        }
+        let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+        world.entity_mut(entity).insert(Facing(direction));
+        if let Some(packet) = monster_typed_attack_packet(world, entity, position, direction, 0) {
+            packets.push(packet);
+        }
+        if let Some(info) = object_health_info_for_entity(world, entity, 0) {
+            packets.push(ServerPacket::ObjectHealth { info });
+        }
+        return true;
+    }
+
     false
 }
 
