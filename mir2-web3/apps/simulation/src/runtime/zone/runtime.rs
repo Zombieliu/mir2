@@ -1254,8 +1254,8 @@ impl ZoneRuntime {
             self.occupancy.remove(&tile_key(&player.position));
             player.position = destination;
             player.direction = action.direction;
-            player.movement_ready_at_ms = now_ms
-                .saturating_add(zone_player_move_delay_ms(player, effective_running, now_ms));
+            player.movement_ready_at_ms =
+                now_ms.saturating_add(zone_player_move_delay_ms(player, effective_running, now_ms));
             player.run_step_until_ms = now_ms.saturating_add(ZONE_RUN_GRACE_MS);
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
