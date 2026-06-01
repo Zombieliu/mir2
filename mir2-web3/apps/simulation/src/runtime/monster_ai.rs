@@ -788,6 +788,16 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
+        83 => update_tornado_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
@@ -2779,6 +2789,57 @@ pub(super) fn update_sep_clone_displacement(
         _ => {}
     }
     false
+}
+
+/// Tornado (ai 83): a pure-knockback monster. When the player is adjacent it melees normally (falls
+/// through to the generic AI); at range 2-5 on its attack beat it shoves the player away with no
+/// damage (Crystal `Pushed(this, dir, dist - 1)`). Returns true when it performs the shove.
+pub(super) fn update_tornado_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) || !agent.tracking_player {
+        return false;
+    }
+    if tick < agent.next_attack_tick {
+        return false;
+    }
+    let distance = tile_distance(position, player_position);
+    // Adjacent (or on top): normal melee — let the generic attack path handle it.
+    if distance <= 1 || distance > TORNADO_ATTACK_RANGE {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+    let Some(away) = direction_toward(position, player_position) else {
+        return false;
+    };
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+    world.entity_mut(entity).insert(Facing(away));
+    packets.push(ServerPacket::ObjectRangeAttack {
+        info: ObjectRangeAttackInfo {
+            object_id,
+            location: position.clone(),
+            direction: away,
+            target_id: current_player_object_id(world).unwrap_or(0),
+            target: player_position.clone(),
+            attack_type: 0,
+            spell: 0,
+            level: 0,
+        },
+    });
+    if let Some(player) = player_entity(world) {
+        // Shove the player away by `distance - 1` tiles (Crystal Pushed dist - 1).
+        push_player_in_direction(world, player, away, (distance - 1).max(1), packets);
+    }
+    true
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(

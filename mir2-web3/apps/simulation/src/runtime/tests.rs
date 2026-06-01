@@ -4799,6 +4799,68 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn tornado_shoves_the_player_away_without_damage() {
+    // Tornado (ai 83) is a pure-knockback monster: at range 2-5 it shoves the player away with no
+    // damage. Place it 3 tiles from the player in open ground and tick; the player should be pushed
+    // farther away and lose no HP.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let tornado_id = 71_401_u32;
+    let tornado_pos = Point {
+        x: player_origin.x - 3,
+        y: player_origin.y,
+    };
+    let tornado = spawn_crystal_monster_for_test(
+        &mut session,
+        tornado_id,
+        "Yob",
+        tornado_pos.clone(),
+        MirDirection::Right,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(tornado);
+        entry.insert(MonsterVitals { hp: 5_000, max_hp: 5_000 });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("tornado agent");
+        agent.ai = 83;
+        agent.tracking_player = true;
+        agent.can_wander = false;
+        agent.view_range = 7;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let mut shoved = false;
+    let player_id = current_player_object_id(session.app.world()).unwrap_or(0);
+    for _ in 0..6 {
+        let packets = session.tick();
+        if packets.iter().any(|p| matches!(
+            p, ServerPacket::ObjectPushed { object_id, .. } if *object_id == player_id
+        )) || player_position(&session) != player_origin {
+            shoved = true;
+            break;
+        }
+    }
+    assert!(shoved, "Tornado should shove the player away from range");
+    assert!(
+        tile_distance(&player_position(&session), &tornado_pos)
+            >= tile_distance(&player_origin, &tornado_pos),
+        "the player should be pushed away from the tornado"
+    );
+    assert_eq!(
+        session.world_snapshot().player_hp.expect("player hp"),
+        before_hp,
+        "Tornado's shove deals no damage"
+    );
+}
+
+#[test]
 fn sep_clone_displacement_flourishes() {
     // SepArcher (218) BackStep-jumps away when the player closes within 2 tiles; SepWizard (215)
     // Repulsion-pushes an adjacent player away. Both are cosmetic flourishes layered on the family's

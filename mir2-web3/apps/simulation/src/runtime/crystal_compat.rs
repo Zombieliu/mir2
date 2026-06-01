@@ -184,6 +184,10 @@ pub(super) const SEP_WIZARD_PUSH_DISTANCE: i32 = 4;
 pub(super) const SEP_WIZARD_PUSH_THROTTLE_TICKS: u64 = 10;
 pub(super) const SEP_ARCHER_BACKSTEP_DISTANCE: i32 = 3;
 pub(super) const SEP_ARCHER_BACKSTEP_THROTTLE_TICKS: u64 = 5;
+/// Tornado (ai 83): a pure knockback monster. Adjacent it melees normally; at range 2-5 it shoves
+/// the player away (no damage) by `distance - 1` tiles, away from the tornado.
+pub(super) const TORNADO_AI: u8 = 83;
+pub(super) const TORNADO_ATTACK_RANGE: i32 = 5;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

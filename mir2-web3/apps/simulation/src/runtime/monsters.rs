@@ -1753,6 +1753,7 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         6 | 113 => agent.view_range.max(1),
         57 => 10,
         8 => 6,
+        83 => TORNADO_ATTACK_RANGE,
         // Families without a bespoke reach fall back to the generated profile's InAttackRange
         // distance (0 means "out to view range"), so data-only ranged casters/archers engage from
         // distance instead of only when adjacent.
