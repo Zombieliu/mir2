@@ -322,6 +322,9 @@ jobs:
             echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
             exit 1
           fi
+          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
+            export MIR2_SKIP_WORKER_ROUTE_DEPLOY="1"
+          fi
           node - <<'NODE'
           const fs = require("node:fs");
           const { MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, NEXT_PUBLIC_MIR2_ASSET_BASE_URL } = process.env;
@@ -337,6 +340,9 @@ jobs:
             MIR2_ASSET_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
             MIR2_ASSET_VERSION: process.env.MIR2_ASSET_VERSION,
           };
+          if (process.env.MIR2_SKIP_WORKER_ROUTE_DEPLOY === "1") {
+            delete config.routes;
+          }
           fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
           NODE
           npx wrangler@latest deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
