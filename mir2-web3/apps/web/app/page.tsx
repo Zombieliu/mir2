@@ -5449,6 +5449,26 @@ export default function HomePage() {
           "system",
         );
         break;
+      case "MineNodeState": {
+        // Server-authoritative depletion stage for a mineable cell. The in-world
+        // vein sprite is rendered by the Bevy runtime; here we surface the stage
+        // change in the message log so "ore depletes as you mine" is observable.
+        const mineStage = numberOrZero(payload.stage);
+        const mineStageLabel =
+          mineStage >= 2 ? "full vein" : mineStage === 1 ? "cracked" : "depleted";
+        const mineLoc = payload.location as { x?: number; y?: number } | undefined;
+        const mineX = numberOrZero(mineLoc?.x);
+        const mineY = numberOrZero(mineLoc?.y);
+        appendLog(
+          t(
+            "ui.mineNode",
+            [String(mineX), String(mineY), mineStageLabel],
+            `Mine node (${mineX}, ${mineY}) -> ${mineStageLabel}`,
+          ),
+          "system",
+        );
+        break;
+      }
       case "PlaySound":
         playOriginalSoundId(numberOrZero(payload.sound));
         break;
