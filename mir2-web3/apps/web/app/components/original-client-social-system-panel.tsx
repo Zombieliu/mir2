@@ -37,6 +37,13 @@ const SOCIAL_PANEL_ICONS: Partial<Record<SystemMenuSocialPanel, string>> = {
   guild: ORIGINAL_UI.menu.buttons.guild.sprite.base,
 };
 
+// Real Crystal dialog background art, shown as a faint backdrop behind the
+// data-driven content so each window carries its genuine frame. Systems without
+// a mapped frame keep the plain panel.
+const SOCIAL_PANEL_FRAMES = ORIGINAL_UI.social.frames as Partial<
+  Record<SystemMenuSocialPanel, { frame: string; width: number; height: number }>
+>;
+
 
 export function SocialSystemPanel({
   t,
@@ -99,6 +106,14 @@ export function SocialSystemPanel({
       data-system-social-selected-row={resolvedSelectedRowName}
       data-system-social-status={statusLine}
     >
+      {SOCIAL_PANEL_FRAMES[panel] ? (
+        <img
+          className="system-social-frame-backdrop"
+          src={SOCIAL_PANEL_FRAMES[panel]!.frame}
+          alt=""
+          draggable={false}
+        />
+      ) : null}
       <div className="system-social-header">
         {SOCIAL_PANEL_ICONS[panel] ? (
           <img

@@ -5594,3 +5594,21 @@ body.mir-dragging-item * {
 .character-repair-actions button:hover {
   cursor: var(--mir-cursor-upgrade);
 }
+
+/* Real Crystal dialog frame as a faint backdrop behind the social panel body. */
+.system-social-frame-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  opacity: 0.5;
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.system-social-panel > :not(.system-social-frame-backdrop) {
+  position: relative;
+  z-index: 1;
+}

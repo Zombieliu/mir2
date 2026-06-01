@@ -291,6 +291,19 @@ export const ORIGINAL_UI = {
     closeButton: sprite("/original-ui/Prguse2/360.png", "/original-ui/Prguse2/361.png", "/original-ui/Prguse2/362.png"),
     helpButton: sprite("/original-ui/Prguse2/257.png", "/original-ui/Prguse2/258.png", "/original-ui/Prguse2/259.png"),
   },
+  social: {
+    // Real Crystal dialog backgrounds + close-button locations per system
+    // (Suprcode/Crystal). Used to skin the data-driven social panel with the
+    // genuine window art instead of a generic box.
+    closeButton: sprite("/original-ui/Prguse2/360.png", "/original-ui/Prguse2/361.png", "/original-ui/Prguse2/362.png"),
+    frames: {
+      guild: { frame: "/original-ui/Prguse/180.png", width: 595, height: 432, closeX: 565, closeY: 4 },
+      group: { frame: "/original-ui/Prguse/120.png", width: 232, height: 252, closeX: 206, closeY: 3 },
+      friend: { frame: "/original-ui/Title/199.png", width: 264, height: 270, closeX: 237, closeY: 3 },
+      relationship: { frame: "/original-ui/Prguse/583.png", width: 288, height: 200, closeX: 260, closeY: 3 },
+      marriage: { frame: "/original-ui/Prguse/583.png", width: 288, height: 200, closeX: 260, closeY: 3 },
+    },
+  },
   trade: {
     // Crystal TradeDialog (one side): Prguse frame 389, 204x152. Item cells form
     // a 5x2 grid at (x*36+10+x, y*32+39+y); gold at (35,123); the confirm/lock
