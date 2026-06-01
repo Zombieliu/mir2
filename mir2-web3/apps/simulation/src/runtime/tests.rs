@@ -4799,6 +4799,56 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn floating_rock_death_explosion_damages_nearby_player() {
+    // FloatingRock (ai 166): on death it bursts for DC against everything within 3 tiles. Spawn a
+    // monster with real DC (OmaWarrior2, min_dc 22), force ai 166 adjacent to the player, kill it,
+    // and confirm the player takes the death-AoE damage. (FloatingRock itself has no manifest
+    // instance; the death-AoE reads the spawned monster's DC.)
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 5_000,
+        max_hp: 5_000,
+        mp: 200,
+    });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let rock_id = 71_701_u32;
+    let rock = spawn_crystal_monster_for_test(
+        &mut session,
+        rock_id,
+        "OmaWarrior2",
+        Point {
+            x: player_origin.x + 2,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(rock);
+        entry.insert(MonsterVitals { hp: 10, max_hp: 10 });
+        entry.get_mut::<MonsterAgent>().expect("rock agent").ai = 166;
+    }
+    sync_visible_objects(&mut session);
+
+    // Kill it (death-AoE schedules damage to the adjacent player).
+    let mut packets = Vec::new();
+    super::damage_monster_entity(session.app.world_mut(), rock, i32::MAX, current_tick, &mut packets);
+    for _ in 0..4 {
+        session.tick();
+    }
+    assert!(
+        session.world_snapshot().player_hp.expect("player hp") < before_hp,
+        "FloatingRock's death explosion should damage a nearby player"
+    );
+}
+
+#[test]
 fn chieftain_archer_knocks_the_player_back_on_some_shots() {
     // ChieftainArcher (ai 175) is a range-6 archer; on ~1-in-3 of its shots (the SC shot) it also
     // knocks the player back 1 tile. Place it at range and confirm the player gets pushed at least

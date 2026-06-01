@@ -2078,6 +2078,16 @@ pub(super) fn damage_monster_entity(
             complete_tucson_egg_death(world, monster_entity, position, current_tick);
         }
     }
+    if monster_dead && matches!(dead_ai, FLOATING_ROCK_AI | POISON_HUGGER_AI) {
+        if let Some(position) = position.as_ref() {
+            let radius = if dead_ai == FLOATING_ROCK_AI {
+                FLOATING_ROCK_DEATH_RADIUS
+            } else {
+                POISON_HUGGER_DEATH_RADIUS
+            };
+            explode_monster_death_aoe(world, monster_entity, position, radius, current_tick);
+        }
+    }
     if monster_dead && dead_ai == 97 {
         if let Some(summoned) = summoned_state {
             advance_hell_lord_stage(world, summoned.summoner_object_id, current_tick, packets);
@@ -2479,6 +2489,42 @@ pub(super) fn explode_bomb_spider(
 
     let current_tick = world.resource::<RuntimeClockResource>().tick;
     let _ = damage_monster_entity(world, monster_entity, i32::MAX, current_tick, packets);
+}
+
+/// Crystal `Die()` death-explosion AoE (FloatingRock 166, PoisonHugger 69): on death the monster
+/// deals its DC against everything within `radius` tiles, resolved against AC. Damages the player if
+/// they stand in the blast.
+pub(super) fn explode_monster_death_aoe(
+    world: &mut World,
+    monster_entity: Entity,
+    position: &Point,
+    radius: i32,
+    current_tick: u64,
+) {
+    let Some(attacker_id) = entity_object_id(world, monster_entity) else {
+        return;
+    };
+    let name = entity_name(world, monster_entity).unwrap_or_else(|| "Monster".to_string());
+    let dc = crystal_monster_raw_attack_damage(&name);
+    if dc <= 0 {
+        return;
+    }
+    let Some(player) = player_entity(world) else {
+        return;
+    };
+    let Some(player_position) = entity_position(world, player) else {
+        return;
+    };
+    if tile_distance(position, &player_position) <= radius {
+        let damage = crystal_attack_power_roll(0, dc, current_tick, attacker_id, 0x6_6000).max(1);
+        schedule_damage_to_player(
+            world,
+            current_tick + DEATH_AOE_DELAY_TICKS,
+            attacker_id,
+            name,
+            damage,
+        );
+    }
 }
 
 pub(super) fn explode_vampire_spider(

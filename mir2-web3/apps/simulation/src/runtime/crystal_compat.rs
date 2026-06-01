@@ -201,6 +201,13 @@ pub(super) const BEHEMOTH_SLAVE_NAMES: [&str; 3] = ["Hugger", "PoisonHugger", "M
 /// bit (its three-stat damage is already covered by the generic ranged path).
 pub(super) const CHIEFTAIN_ARCHER_AI: u8 = 175;
 pub(super) const CHIEFTAIN_ARCHER_PUSH_CHANCE_DENOMINATOR: u64 = 3;
+/// Death-explosion AoE: FloatingRock (166) bursts for DC against everything within 3 tiles on death;
+/// PoisonHugger (69) bursts for DC within 1 tile. The player in the blast takes the (AC-mitigated) DC.
+pub(super) const FLOATING_ROCK_AI: u8 = 166;
+pub(super) const FLOATING_ROCK_DEATH_RADIUS: i32 = 3;
+pub(super) const POISON_HUGGER_AI: u8 = 69;
+pub(super) const POISON_HUGGER_DEATH_RADIUS: i32 = 1;
+pub(super) const DEATH_AOE_DELAY_TICKS: u64 = 1;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The
