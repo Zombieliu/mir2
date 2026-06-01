@@ -779,6 +779,16 @@ pub(super) fn update_special_monster_state(
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
+        211 => update_hooded_summoner_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         131 => update_tucson_general_state(
             world,
             entity,
@@ -2260,6 +2270,80 @@ pub(super) fn spawn_monster_slave_wave(
             );
         }
     }
+}
+
+/// HoodedSummoner (ai 211): on its attack tick, 1/3 of the time (Crystal cases 4 and 5 of `Next(6)`)
+/// it summons a scroll-mob slave instead of firing — case 4 from {WarriorScroll, TaoistScroll}, case 5
+/// from {WizardScroll, AssassinScroll} — capped at 4 live slaves on a 15s throttle. Returns true when
+/// it summoned (consuming the turn); false to let the generic ranged MC attack proceed.
+pub(super) fn update_hooded_summoner_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) {
+        return false;
+    }
+    // Only act on an attack beat, in range, with the player aggroed — same gate as a normal swing.
+    if tick < agent.next_attack_tick
+        || !agent.tracking_player
+        || !monster_in_attack_range(agent, position, player_position)
+    {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+
+    // Crystal rolls Next(6); cases 4 and 5 attempt a summon. Seed the roll with `tick` in the
+    // slot-index position (its 12347 multiplier is coprime-friendly with 6, unlike the tick
+    // multiplier 1103515245 % 6 == 3 which would only ever yield two values across ticks).
+    let roll = deterministic_roll(0, object_id as usize, tick as usize, 6);
+    if roll < 4 {
+        return false; // a ranged attack beat — let the generic AI fire.
+    }
+    // Throttle (15s) and slave cap.
+    if tick < ai_state.next_state_tick
+        || active_summoned_monster_count(world, object_id) >= usize::from(HOODED_SUMMONER_MAX_SLAVES)
+    {
+        return false;
+    }
+
+    let Some(direction) = direction_toward(position, player_position) else {
+        return false;
+    };
+    let scrolls: &[&str] = if roll == 4 {
+        &HOODED_SUMMONER_SCROLLS_GROUP_A
+    } else {
+        &HOODED_SUMMONER_SCROLLS_GROUP_B
+    };
+    let player = player_entity(world);
+
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+    ai_state.next_state_tick = tick + HOODED_SUMMONER_SLAVE_THROTTLE_TICKS;
+    world.entity_mut(entity).insert(Facing(direction));
+    if let Some(packet) = monster_typed_attack_packet(world, entity, position, direction, 0) {
+        packets.push(packet);
+    }
+    spawn_monster_slave_wave(
+        world,
+        entity,
+        object_id,
+        position,
+        direction,
+        player,
+        agent,
+        tick,
+        scrolls,
+        usize::from(HOODED_SUMMONER_MAX_SLAVES),
+        1,
+    );
+    true
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(

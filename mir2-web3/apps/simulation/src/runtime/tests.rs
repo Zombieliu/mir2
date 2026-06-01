@@ -4733,6 +4733,73 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn hooded_summoner_summons_scroll_mob_slaves() {
+    // HoodedSummoner (ai 211) summons scroll-mob slaves on its summon-roll beats (Crystal cases 4/5
+    // of Next(6)), capped at 4. Force ai 211 on an in-range aggroed monster and tick until a slave
+    // tagged with the summoner's id appears; assert it's one of the four scroll mobs.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 5_000,
+        max_hp: 5_000,
+        mp: 200,
+    });
+
+    let summoner_id = 70_801_u32;
+    let summoner = spawn_crystal_monster_for_test(
+        &mut session,
+        summoner_id,
+        "WizardScroll", // any manifest monster; we override its ai to 211 below
+        Point {
+            x: player_origin.x + 2,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(summoner);
+        entry.insert(MonsterVitals {
+            hp: 100_000,
+            max_hp: 100_000,
+        });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("summoner agent");
+        agent.ai = 211;
+        agent.can_wander = false;
+        agent.tracking_player = true;
+        agent.view_range = 7;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let scrolls = ["WarriorScroll", "TaoistScroll", "WizardScroll", "AssassinScroll"];
+    let mut summoned_name: Option<String> = None;
+    for _ in 0..60 {
+        let packets = session.tick();
+        for packet in &packets {
+            if let ServerPacket::ObjectMonster { info } = packet {
+                if info.master_object_id == summoner_id && scrolls.contains(&info.name.as_str()) {
+                    summoned_name = Some(info.name.clone());
+                    break;
+                }
+            }
+        }
+        if summoned_name.is_some() {
+            break;
+        }
+    }
+    assert!(
+        summoned_name.is_some(),
+        "HoodedSummoner should summon a scroll-mob slave within 60 ticks"
+    );
+}
+
+#[test]
 fn mutated_manworm_blinks_with_effect_four_when_struck_hard() {
     // MutatedManworm (ai 65) shares SnowWolfKing's FindWeakerTarget blink, but with teleport effect 4
     // instead of 11. A blow heavier than its own DC (28-55) gives a 50% chance to blink toward the

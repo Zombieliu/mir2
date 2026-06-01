@@ -148,6 +148,14 @@ pub(super) const ICE_PILLAR_AI: u8 = 89;
 /// rolls it up to this many tiles in the attacker's facing direction, bouncing off blocked tiles.
 pub(super) const FOOTBALL_AI: u8 = 68;
 pub(super) const FOOTBALL_KICK_DISTANCE: i32 = 4;
+/// HoodedSummoner (ai 211): on a 1/6 attack roll (cases 4 and 5) it summons scroll-mob slaves —
+/// case 4 from {WarriorScroll, TaoistScroll}, case 5 from {WizardScroll, AssassinScroll} — capped at
+/// 4 live slaves on a 15-second throttle; every other roll is a ranged MC attack.
+pub(super) const HOODED_SUMMONER_AI: u8 = 211;
+pub(super) const HOODED_SUMMONER_MAX_SLAVES: u8 = 4;
+pub(super) const HOODED_SUMMONER_SLAVE_THROTTLE_TICKS: u64 = 15;
+pub(super) const HOODED_SUMMONER_SCROLLS_GROUP_A: [&str; 2] = ["WarriorScroll", "TaoistScroll"];
+pub(super) const HOODED_SUMMONER_SCROLLS_GROUP_B: [&str; 2] = ["WizardScroll", "AssassinScroll"];
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The
