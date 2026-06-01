@@ -14,6 +14,7 @@
     "assets:verify": "npm run generate:crystal-asset-index && npm run generate:original-asset-manifest && npm run smoke:crystal-minimap-assets && npm run audit:crystal-map-coverage && npm run audit:crystal-map-gameplay",
     "assets:verify:offline": "npm run generate:present-sounds && npm run smoke:crystal-minimap-assets && npm run generate:original-asset-manifest && npm run report:asset-coverage && npm run preflight:asset-release && npm run test:resource-loading && npm run test:audio-system && npm run test:sound-export",
     "report:asset-coverage": "node ./scripts/report-asset-coverage.mjs",
+    "measure:frontend-coverage": "node ./scripts/measure-frontend-coverage.mjs",
     "preflight:asset-release": "node ./scripts/preflight-asset-release.mjs",
     "export:crystal-map": "node ./scripts/export-crystal-starter-map.mjs",
     "generate:crystal-map-blend": "node ./scripts/generate-crystal-map-blend-assets.mjs",
