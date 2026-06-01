@@ -23,6 +23,11 @@ const MAPS = [
   { map: "HF3", x: 200, y: 200 },
   { map: "D1801", x: 200, y: 200 },
   { map: "HKR", x: 200, y: 200 },
+  // Coverage for a tiny Bichon-town interior and a guild-arena map. No x/y: the
+  // scene API centers on each map's middle so the request lands in-bounds even
+  // for small interiors (a fixed 200,200 would clamp to an empty edge -> 0 cells).
+  { map: "0100" },
+  { map: "GA9" },
 ];
 
 const CRITICAL_SCENE = { map: "0", x: 307, y: 232, width: 56, height: 68 };
@@ -86,8 +91,10 @@ if (failures.length > 0) {
 async function requestMap(target, pass) {
   const url = new URL("/api/scene/crystal", BASE_URL);
   url.searchParams.set("map", target.map);
-  url.searchParams.set("x", String(target.x));
-  url.searchParams.set("y", String(target.y));
+  // Omit x/y when a map's size isn't hard-coded: the scene API then centers on
+  // the map's middle (loader fallbackCenter), always in-bounds and populated.
+  if (target.x !== undefined) url.searchParams.set("x", String(target.x));
+  if (target.y !== undefined) url.searchParams.set("y", String(target.y));
   url.searchParams.set("width", String(target.width ?? 24));
   url.searchParams.set("height", String(target.height ?? 18));
 
