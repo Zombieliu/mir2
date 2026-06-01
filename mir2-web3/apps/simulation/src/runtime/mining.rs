@@ -180,6 +180,28 @@ pub(super) fn mine_stage(stones_left: u8, max_stones: u8) -> u8 {
     }
 }
 
+/// Emit a `MineNodeState` for every mineable cell on the current map so the
+/// client renders veins on map entry (not only after the first swing). Called
+/// from the start-game / map-entry packet assembly.
+pub(super) fn mine_node_state_packets(world: &World) -> Vec<ServerPacket> {
+    let mining = world.resource::<MiningResource>();
+    mining
+        .spots
+        .iter()
+        .map(|(&(x, y), spot)| {
+            let max_stones = mining
+                .mine_sets
+                .get(spot.mine_set_index)
+                .map(|set| set.max_stones)
+                .unwrap_or(0);
+            ServerPacket::MineNodeState {
+                location: Point { x, y },
+                stage: mine_stage(spot.stones_left, max_stones),
+            }
+        })
+        .collect()
+}
+
 struct EquippedPickaxe {
     unique_id: u64,
 }

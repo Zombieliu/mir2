@@ -55386,6 +55386,25 @@ fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
 }
 
 #[test]
+fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let bichon_vein = packets.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::MineNodeState { location, stage }
+                if location.x == 331 && location.y == 270 && *stage == 2
+        )
+    });
+    assert!(
+        bichon_vein,
+        "entering Bichon should broadcast a full MineNodeState for the starter vein"
+    );
+}
+
+#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
