@@ -92,6 +92,9 @@ const sceneCacheExports = loadTypeScriptModule(new URL("../lib/scene-blueprint-c
 });
 const originalAssetManifest = readOriginalAssetManifest();
 const originalAssetPaths = new Set(Object.keys(originalAssetManifest.assets ?? {}));
+const localOriginalMapPngCount = [...originalAssetPaths].filter((assetPath) =>
+  assetPath.startsWith("/original-map/"),
+).length;
 
 // The full Bichon map "0" cell data (which references WemadeMir2/Objects23 sprites) only
 // exists when the raw Crystal client map or its packaged form is present. In reduced
@@ -206,12 +209,13 @@ const fullBichonMapDataAvailable =
   for (const framePath of framePaths) {
     assert.ok(originalAssetPaths.has(framePath), `scene blueprint frame missing from manifest: ${framePath}`);
   }
-  // Graceful degradation: with all referenced assets present the region must report no misses.
-  assert.deepEqual(
-    blueprint.originalMapRegion?.missingAssets ?? [],
-    [],
-    "fully-resolved scene must not report missing assets",
-  );
+  const sceneMissingAssets = blueprint.originalMapRegion?.missingAssets ?? [];
+  if (fullBichonMapDataAvailable && localOriginalMapPngCount < 200_000) {
+    assertOnlyRemoteOriginalMapMisses(sceneMissingAssets);
+  } else {
+    // Graceful degradation: with all referenced assets present the region must report no misses.
+    assert.deepEqual(sceneMissingAssets, [], "fully-resolved scene must not report missing assets");
+  }
 }
 
 {
@@ -328,6 +332,19 @@ function sceneBlueprintOriginalMapFramePaths(blueprint) {
     }
   }
   return [...new Set(paths)].sort((left, right) => left.localeCompare(right));
+}
+
+function assertOnlyRemoteOriginalMapMisses(missingAssets) {
+  for (const asset of missingAssets) {
+    assert.equal(asset.resourceType, "png", "local subset misses must be PNG resources");
+    assert.ok(
+      typeof asset.path === "string" && asset.path.startsWith("/original-map/"),
+      `local subset miss must be an original-map path: ${JSON.stringify(asset)}`,
+    );
+    assert.ok(!originalAssetPaths.has(asset.path), `reported missing path is unexpectedly local: ${asset.path}`);
+    assert.ok(typeof asset.libraryKey === "string" && asset.libraryKey.length > 0, "missing PNG must name libraryKey");
+    assert.ok(Number.isInteger(asset.frameIndex), "missing PNG must name frameIndex");
+  }
 }
 
 function originalActorMetaFramePaths() {
