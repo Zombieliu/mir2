@@ -140,7 +140,13 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
         .collect();
 
     let mut spots = BTreeMap::new();
-    let set_count = world.resource::<MiningResource>().mine_sets.len();
+    let mine_set_max_stones: Vec<u8> = world
+        .resource::<MiningResource>()
+        .mine_sets
+        .iter()
+        .map(|set| set.max_stones)
+        .collect();
+    let set_count = mine_set_max_stones.len();
     for (set_index, x0, y0, size) in zones {
         if set_index >= set_count {
             continue;
@@ -151,7 +157,8 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
             for y in (y0 - size)..(y0 + size) {
                 spots.entry((x, y)).or_insert(MineSpot {
                     mine_set_index: set_index,
-                    stones_left: 0,
+                    // Fresh veins begin full so mining visibly depletes them.
+                    stones_left: mine_set_max_stones[set_index],
                     last_regen_tick: 0,
                 });
             }

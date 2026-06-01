@@ -55360,6 +55360,32 @@ fn mine_stage_thresholds_match_fullness() {
 }
 
 #[test]
+fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let mining = session
+        .app
+        .world()
+        .resource::<super::super::mining::MiningResource>();
+    assert!(
+        !mining.spots.is_empty(),
+        "crystal runtime should wire the Bichon starter mine zone into spots"
+    );
+    // Zone center (333,270) size 2 -> cells x in [331,335), y in [268,272).
+    let spot = mining
+        .spots
+        .get(&(331, 270))
+        .unwrap_or_else(|| panic!("starter vein cell (331,270) missing; spots={:?}", mining.spots.keys().collect::<Vec<_>>()));
+    assert!(
+        spot.stones_left > 0,
+        "fresh starter vein should begin full, got {}",
+        spot.stones_left
+    );
+}
+
+#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
