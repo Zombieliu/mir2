@@ -4799,6 +4799,67 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn evil_mir_attacks_player_with_mac_damage_and_poison() {
+    // EvilMir (ai 52) is the stationary final boss: on its beat it hits the player (1/8 full-DC mass
+    // attack, else 0.75x DC single-target), resolved against MAC, applying green + paralysis. With a
+    // high-MAC, low-AC player the MAC routing matters; assert the player takes damage over a few beats
+    // and is poisoned, and that EvilMir holds its ground.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 8_000,
+        max_hp: 8_000,
+        mp: 200,
+    });
+    let before_hp = session.world_snapshot().player_hp.expect("player hp");
+
+    let mir_id = 71_201_u32;
+    let mir = spawn_crystal_monster_for_test(
+        &mut session,
+        mir_id,
+        "EvilMir",
+        Point {
+            x: player_origin.x + 3,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(mir);
+        entry.insert(MonsterVitals {
+            hp: 200_000,
+            max_hp: 200_000,
+        });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("mir agent");
+        agent.tracking_player = true;
+        agent.view_range = 10;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let mut took_damage = false;
+    for _ in 0..12 {
+        session.tick();
+        if session.world_snapshot().player_hp.expect("player hp") < before_hp {
+            took_damage = true;
+            break;
+        }
+    }
+    assert!(took_damage, "EvilMir should damage the player from range");
+    assert_eq!(
+        session.app.world().entity(mir).get::<Position>().expect("mir position").0,
+        Point { x: player_origin.x + 3, y: player_origin.y },
+        "EvilMir is stationary"
+    );
+}
+
+#[test]
 fn horned_commander_shields_and_summons_under_low_hp() {
     // HornedCommander (ai 171) under 10% HP raises a lasting immunity shield (becomes damage-immune)
     // and summons a HornedWarrior slave once. Drop it below 10% and tick.

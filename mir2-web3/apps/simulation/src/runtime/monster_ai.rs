@@ -778,6 +778,16 @@ pub(super) fn update_special_monster_state(
             packets,
         ),
         42 => update_yin_devil_node_state(world, entity, agent, position, tick),
+        52 => update_evil_mir_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
@@ -2608,6 +2618,83 @@ pub(super) fn update_horned_commander_state(
     }
 
     false
+}
+
+/// EvilMir (ai 52): the final boss. Stationary; on each attack beat in range it rolls 1-in-8 for a
+/// full-DC MassAttack (a 17-tile AoE that hits the player wherever they stand) or otherwise a
+/// single-target hit at 0.75x DC. Both resolve against MAC and apply its green + paralysis poison.
+/// Owns its attack so the two damage tiers are faithful; returns true when it attacks.
+pub(super) fn update_evil_mir_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) {
+        return false;
+    }
+    if !agent.hostile_to_player && !agent.tracking_player {
+        return false;
+    }
+    agent.tracking_player = true;
+    if tick < agent.next_attack_tick
+        || tile_distance(position, player_position) > agent.view_range.max(1)
+    {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+    let dc = entity_name(world, entity)
+        .map(|name| crystal_monster_raw_attack_damage(&name))
+        .unwrap_or(0);
+    if dc == 0 {
+        return false;
+    }
+
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+    let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+    world.entity_mut(entity).insert(Facing(direction));
+
+    let mass_attack = deterministic_value(tick, object_id, 5_200, EVIL_MIR_MASS_ATTACK_CHANCE_DENOMINATOR) == 0;
+    let rolled = crystal_attack_power_roll(0, dc, tick, object_id, 5_201).max(1);
+    let (damage, in_range) = if mass_attack {
+        // Full DC, huge AoE — broadcast a melee swing, hit anything within 17 tiles.
+        if let Some(packet) = monster_melee_attack_packet(world, entity, position, direction) {
+            packets.push(packet);
+        }
+        (
+            rolled,
+            tile_distance(position, player_position) <= EVIL_MIR_MASS_ATTACK_RANGE,
+        )
+    } else {
+        // Single-target ranged at 0.75x DC.
+        if let Some(packet) = monster_typed_attack_packet(world, entity, position, direction, 0) {
+            packets.push(packet);
+        }
+        (
+            (rolled * EVIL_MIR_SINGLE_TARGET_DAMAGE_PERCENT / 100).max(1),
+            true,
+        )
+    };
+
+    if in_range {
+        let mitigation = monster_player_damage_mitigation(world, agent.ai, position, player_position);
+        let final_damage = (damage - mitigation).max(1);
+        schedule_damage_to_player_with_effect(
+            world,
+            tick + combat_delay_ticks(500),
+            object_id,
+            entity_name(world, entity).unwrap_or_else(|| "EvilMir".to_string()),
+            final_damage,
+            monster_player_status_effect(agent),
+        );
+    }
+    true
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(

@@ -185,6 +185,12 @@ pub(super) const EVIL_MIR_GREEN_POISON_CHANCE_DENOMINATOR: u64 = 5;
 pub(super) const EVIL_MIR_GREEN_POISON_DURATION_TICKS: u64 = 15;
 pub(super) const EVIL_MIR_PARALYSIS_CHANCE_DENOMINATOR: u64 = 5;
 pub(super) const EVIL_MIR_PARALYSIS_DURATION_TICKS: u64 = 5;
+/// EvilMir (ai 52) `ProcessTarget`: each beat, 1-in-8 it does a full-DC MassAttack (huge 17-tile AoE
+/// hitting everything), otherwise a single-target ranged hit at 0.75x DC. Both resolve against MAC
+/// and apply its green + paralysis poison.
+pub(super) const EVIL_MIR_MASS_ATTACK_CHANCE_DENOMINATOR: u64 = 8;
+pub(super) const EVIL_MIR_MASS_ATTACK_RANGE: i32 = 17;
+pub(super) const EVIL_MIR_SINGLE_TARGET_DAMAGE_PERCENT: i32 = 75;
 /// SnowWolfKing FindWeakerTarget: when struck for more than its own DC it blinks (Teleport effect
 /// 11) toward a fresh target, 50% of the time when a player lands the blow.
 pub(super) const SNOW_WOLF_KING_TELEPORT_EFFECT: u8 = 11;
