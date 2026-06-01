@@ -418,12 +418,13 @@ fn crystal_resolve_player_attack_on_monster(
     if armour >= damage {
         return None;
     }
-    // IcePillar (ai 89) is a damage sponge: Crystal's `Attacked` does the full armour/miss roll, but
-    // on any non-blocked hit it loses exactly 1 HP (`ChangeHP(-1)`) regardless of the rolled damage.
+    // Damage sponges: Crystal's `Attacked` override does the full armour/miss roll, but on any
+    // non-blocked hit loses exactly 1 HP (`ChangeHP(-1)`) regardless of rolled damage — Tree (3),
+    // IcePillar (89) and TucsonEgg (128) all share this. (Tree/egg are also non-combatant props.)
     if world
         .entity(monster_entity)
         .get::<MonsterAgent>()
-        .is_some_and(|agent| agent.ai == ICE_PILLAR_AI)
+        .is_some_and(|agent| matches!(agent.ai, 3 | ICE_PILLAR_AI | 128))
     {
         return Some(1);
     }

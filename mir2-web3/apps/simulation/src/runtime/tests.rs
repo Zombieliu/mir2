@@ -4666,6 +4666,72 @@ fn ice_pillar_is_a_one_hp_per_hit_poison_immune_damage_sponge() {
 }
 
 #[test]
+fn tucson_egg_is_a_one_hp_per_hit_damage_sponge() {
+    // TucsonEgg (ai 128) shares the Crystal ChangeHP(-1) damage-sponge Attacked override: a landed
+    // hit chips exactly 1 HP regardless of rolled damage. Force ai 128 on the manifest TucsonEgg.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    grant_player_attack_bonus(&mut session, 200);
+
+    let egg_id = 70_901_u32;
+    let egg = spawn_crystal_monster_for_test(
+        &mut session,
+        egg_id,
+        "TucsonEgg",
+        Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    {
+        let mut entry = session.app.world_mut().entity_mut(egg);
+        entry.insert((
+            MonsterVitals {
+                hp: 1_000,
+                max_hp: 1_000,
+            },
+            MonsterCombatStats { agility: 0 },
+        ));
+        entry.get_mut::<MonsterAgent>().expect("egg agent").ai = 128;
+    }
+    sync_visible_objects(&mut session);
+
+    let hp = |session: &SimulationSession| {
+        session
+            .app
+            .world()
+            .entity(egg)
+            .get::<MonsterVitals>()
+            .expect("egg vitals")
+            .hp
+    };
+    // The egg regenerates like any monster, so assert the sponge property directly: a tick in which
+    // its Struck lands must never drop HP by more than 1, no matter how hard the swing.
+    let mut saw_chip = false;
+    for _ in 0..8 {
+        let before = hp(&session);
+        session.attack(egg_id);
+        let packets = session.tick();
+        let struck = packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::Struck { info } if info.attacker_id == current_player_object_id(session.app.world()).unwrap_or(0)
+        )) || packets.iter().any(|p| matches!(
+            p, ServerPacket::ObjectStruck { info } if info.object_id == egg_id
+        ));
+        let delta = before - hp(&session); // positive = damage, negative = regen
+        assert!(delta <= 1, "a landed hit must chip at most 1 HP (delta {delta}, struck {struck})");
+        if delta == 1 {
+            saw_chip = true;
+        }
+    }
+    assert!(saw_chip, "at least one swing should chip the egg's 1 HP");
+}
+
+#[test]
 fn sep_clone_defence_typing_matches_crystal() {
     // Verified against the Crystal Sep* subclasses' primary Attack() DefenceType:
     //  - SepTaoist (216) / SepHighTaoist (221): MACAgility -> always magic.
