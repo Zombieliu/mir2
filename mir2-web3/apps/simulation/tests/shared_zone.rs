@@ -8287,6 +8287,93 @@ fn zone_player_attack_armour_can_fully_block_authoritative_damage() {
 }
 
 #[test]
+fn zone_player_attack_luck_biases_authoritative_damage_toward_max() {
+    // Crystal `MapObject.GetAttackPower(MinDC, MaxDC)` is Luck-biased: positive
+    // Luck can force the MaxDC end. The zone's authoritative physical attack must
+    // honor Luck just like the per-session path, so a lucky attacker lands MaxDC
+    // far more often than a Luck-less one across the same swings.
+    fn rolled_damages(luck: i32) -> Vec<i32> {
+        let mut zone = zone();
+        let attacker = session("first");
+        zone.handle(ZoneCommand::Join(join_with_combat_stats(
+            "first",
+            101,
+            "Scout",
+            330,
+            270,
+            ZonePlayerCombatStats {
+                min_dc: 5,
+                max_dc: 25,
+                accuracy: 10_000, // never miss, so every swing yields a damage roll
+                luck,
+                ..Default::default()
+            },
+        )));
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: attacker.clone(),
+            monster: native_monster_spawn_with_defense(
+                9100,
+                331,
+                270,
+                1_000_000, // huge HP so it survives every swing
+                ZoneMonsterDefense {
+                    agility: 0,
+                    min_ac: 0,
+                    max_ac: 0, // no armour, so the indicator is the raw rolled DC
+                    ..Default::default()
+                },
+            ),
+            now_ms: 0,
+        });
+
+        // Attacks are gated by a 600ms action window; space them 1s apart so each
+        // lands and rolls at a distinct deterministic tick.
+        let mut damages = Vec::new();
+        for i in 0..32u64 {
+            let now_ms = 1_000 + i * 1_000;
+            zone.handle(ZoneCommand::PlayerAttackObject {
+                session_id: attacker.clone(),
+                object_id: 9100,
+                direction: MirDirection::Right,
+                spell: Spell::None as u8,
+                level: 0,
+                attack_type: 0,
+                damage: 999,
+                now_ms,
+            });
+            let struck = zone.tick(now_ms);
+            if let Some(damage) = damage_indicator_for(&struck, 9100) {
+                damages.push(damage);
+            }
+        }
+        damages
+    }
+
+    let plain = rolled_damages(0);
+    let lucky = rolled_damages(9); // MaxLuck is 10, so 9 forces max ~90% of swings.
+
+    assert!(!plain.is_empty() && !lucky.is_empty(), "swings should land");
+    for &d in plain.iter().chain(lucky.iter()) {
+        assert!((5..=25).contains(&d), "rolled {d} outside [5, 25]");
+    }
+
+    let max_rolls = |rolls: &[i32]| rolls.iter().filter(|&&d| d == 25).count();
+    assert!(
+        max_rolls(&lucky) > max_rolls(&plain),
+        "Luck 9 should land MaxDC (25) more often (lucky={}, plain={})",
+        max_rolls(&lucky),
+        max_rolls(&plain)
+    );
+    let sum = |rolls: &[i32]| rolls.iter().map(|&d| i64::from(d)).sum::<i64>();
+    assert!(
+        sum(&lucky) > sum(&plain),
+        "Luck should raise average zone melee damage (lucky={}, plain={})",
+        sum(&lucky),
+        sum(&plain)
+    );
+}
+
+#[test]
 fn zone_player_attack_misses_evasive_monster_authoritatively() {
     // A player with zero accuracy against a hugely evasive monster fails the
     // accuracy-vs-agility check: only the swing animation is broadcast — no

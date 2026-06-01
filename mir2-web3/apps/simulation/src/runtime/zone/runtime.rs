@@ -7521,6 +7521,48 @@ fn zone_roll_stat_range(min: i32, max: i32, tick: u64, actor_id: u32, salt: u64)
     lo.saturating_add(i32::try_from(roll).unwrap_or_default())
 }
 
+/// Crystal `MapObject.GetAttackPower(min, max)` — a Luck-biased roll used for the
+/// physical attack-power channel (not for `GetDefencePower`/armour). Positive
+/// Luck can force the `max` end, negative Luck the `min` end. With `luck == 0`
+/// this is identical to [`zone_roll_stat_range`] (same tick/actor/salt), so a
+/// player with no Luck gear rolls exactly as before. Mirrors the per-session
+/// `crystal_attack_power_roll`.
+fn zone_roll_attack_power(
+    min: i32,
+    max: i32,
+    luck: i32,
+    tick: u64,
+    actor_id: u32,
+    salt: u64,
+) -> i32 {
+    let lo = min.min(max).max(0);
+    let hi = max.max(min).max(0);
+    const MAX_LUCK: u64 = 10; // Crystal Settings.MaxLuck default.
+    let actor = usize::try_from(actor_id).unwrap_or_default();
+    if luck > 0 {
+        let roll = zone_deterministic_roll(
+            tick,
+            actor,
+            usize::try_from(salt).unwrap_or_default(),
+            MAX_LUCK,
+        ) as i32;
+        if luck > roll {
+            return hi;
+        }
+    } else if luck < 0 {
+        let roll = zone_deterministic_roll(
+            tick,
+            actor,
+            usize::try_from(salt.wrapping_add(0xABCD)).unwrap_or_default(),
+            MAX_LUCK,
+        ) as i32;
+        if luck < -roll {
+            return lo;
+        }
+    }
+    zone_roll_stat_range(min, max, tick, actor_id, salt)
+}
+
 /// Authoritatively resolve a player's physical (melee/range) attack against a
 /// shared-zone monster.
 ///
@@ -7563,8 +7605,15 @@ fn zone_resolve_player_physical_attack(
         }
     }
 
-    let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
-        .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let base = zone_roll_attack_power(
+        stats.min_dc,
+        stats.max_dc,
+        stats.luck,
+        now_ms,
+        player.object_id,
+        0x5DC,
+    )
+    .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
     let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
     let armour = zone_roll_stat_range(
         monster.defense.min_ac,
