@@ -4799,6 +4799,58 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn horned_commander_shields_and_summons_under_low_hp() {
+    // HornedCommander (ai 171) under 10% HP raises a lasting immunity shield (becomes damage-immune)
+    // and summons a HornedWarrior slave once. Drop it below 10% and tick.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+
+    let boss_id = 71_101_u32;
+    let boss = spawn_crystal_monster_for_test(
+        &mut session,
+        boss_id,
+        "HornedCommander",
+        Point {
+            x: player_origin.x + 2,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(boss);
+        entry.insert(MonsterVitals { hp: 50, max_hp: 1_000 }); // 5% HP -> below the 10% shield gate
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("boss agent");
+        agent.tracking_player = true;
+        agent.view_range = 10;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let mut summoned_slave = false;
+    let mut became_immune = false;
+    for _ in 0..6 {
+        let packets = session.tick();
+        summoned_slave |= packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectMonster { info }
+                if info.master_object_id == boss_id && info.name == "HornedWarrior"
+        ));
+        // Shield raised => monster_ignores_damage true for ai 171 with ai_state.mode.
+        became_immune |= super::monster_ignores_damage(session.app.world(), boss);
+        if summoned_slave && became_immune {
+            break;
+        }
+    }
+    assert!(became_immune, "HornedCommander should raise its immunity shield under 10% HP");
+    assert!(summoned_slave, "HornedCommander should summon a HornedWarrior slave under 10% HP");
+}
+
+#[test]
 fn tree_queen_fire_bombardment_damages_adjacent_player() {
     // TreeQueen (ai 142) is a stationary root boss. Within 2 tiles it fires a 3-tile fire-bombardment
     // (DC-scaled, DC 100-350) cluster on its attack beat, routed through the monster ground-hazard

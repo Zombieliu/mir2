@@ -151,6 +151,7 @@ pub(super) const FOOTBALL_KICK_DISTANCE: i32 = 4;
 /// HoodedSummoner (ai 211): on a 1/6 attack roll (cases 4 and 5) it summons scroll-mob slaves —
 /// case 4 from {WarriorScroll, TaoistScroll}, case 5 from {WizardScroll, AssassinScroll} — capped at
 /// 4 live slaves on a 15-second throttle; every other roll is a ranged MC attack.
+#[allow(dead_code)] // documents the ai number; the dispatch matches the literal
 pub(super) const HOODED_SUMMONER_AI: u8 = 211;
 pub(super) const HOODED_SUMMONER_MAX_SLAVES: u8 = 4;
 pub(super) const HOODED_SUMMONER_SLAVE_THROTTLE_TICKS: u64 = 15;
@@ -159,11 +160,23 @@ pub(super) const HOODED_SUMMONER_SCROLLS_GROUP_B: [&str; 2] = ["WizardScroll", "
 /// TreeQueen (ai 142): a stationary root-spawning boss. Each root pulse erupts a 7x7 MassRoots field
 /// (MC damage) centred on the player; ground roots erupt a 5x5 DC patch. Root pulses are throttled,
 /// and when the player is within 2 tiles it adds a 3-tile fire-bombardment (MACAgility) on its beat.
+#[allow(dead_code)] // documents the ai number; the dispatch matches the literal
 pub(super) const TREE_QUEEN_AI: u8 = 142;
 pub(super) const TREE_QUEEN_ROOT_THROTTLE_TICKS: u64 = 3;
 pub(super) const TREE_QUEEN_MASS_ROOT_RADIUS: i32 = 3;
 pub(super) const TREE_QUEEN_ROOT_LIFETIME_TICKS: u64 = 2;
 pub(super) const TREE_QUEEN_FIRE_BOMBARDMENT_RADIUS: i32 = 3;
+/// HornedCommander (ai 171): a multi-phase boss. Its player-facing heavy attacks are charge-up
+/// strikes dealing `DC * loops` (loops rolled 5-9) resolved against AC, after which it is briefly
+/// immune (the charge animation). Under 10% HP it raises an immunity shield and summons a slave.
+pub(super) const HORNED_COMMANDER_AI: u8 = 171;
+pub(super) const HORNED_COMMANDER_HEAVY_CHANCE_DENOMINATOR: u64 = 4;
+pub(super) const HORNED_COMMANDER_LOOPS_MIN: i64 = 5;
+pub(super) const HORNED_COMMANDER_LOOPS_MAX: i64 = 9;
+pub(super) const HORNED_COMMANDER_CHARGE_TICKS: u64 = 3;
+pub(super) const HORNED_COMMANDER_SHIELD_HP_PERCENT: i32 = 10;
+pub(super) const HORNED_COMMANDER_SHIELD_DURATION_TICKS: u64 = 20;
+pub(super) const HORNED_COMMANDER_SLAVE_NAME: &str = "HornedWarrior";
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

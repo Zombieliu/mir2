@@ -776,7 +776,11 @@ pub(super) fn monster_ignores_damage(world: &World, monster_entity: Entity) -> b
     };
     let ai_state = entry.get::<MonsterAiState>().copied().unwrap_or_default();
 
-    ignores_monster_damage(agent) || (agent.ai == 98 && ai_state.extra_byte < 4)
+    ignores_monster_damage(agent)
+        || (agent.ai == 98 && ai_state.extra_byte < 4)
+        // HornedCommander (171) raises an immunity shield (ai_state.mode) under 10% HP and during its
+        // charge-up heavy attacks.
+        || (agent.ai == HORNED_COMMANDER_AI && ai_state.mode)
 }
 
 pub(super) fn queue_pending_monster_spawn(world: &mut World, action: PendingMonsterSpawnAction) {

@@ -791,6 +791,16 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
+        171 => update_horned_commander_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         211 => update_hooded_summoner_state(
             world,
             entity,
@@ -2476,6 +2486,128 @@ pub(super) fn update_tree_queen_state(
     }
 
     true
+}
+
+/// HornedCommander (ai 171): a multi-phase boss. Player-facing core is a charge-up heavy attack — on
+/// a ~1/4 attack beat it raises its immunity shield, then `HORNED_COMMANDER_CHARGE_TICKS` later lands
+/// a `DC * loops` (loops 5-9) AC strike and drops the shield. Under 10% HP it raises a lasting
+/// immunity shield and summons a HornedWarrior slave once. Returns true while acting (charging /
+/// shielded / heavy beat); false to let the generic melee fire on a normal beat.
+pub(super) fn update_horned_commander_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return true;
+    };
+
+    // Resolve a pending charge-up: when the shield window elapses, land the queued heavy strike.
+    if ai_state.mode && ai_state.extra && tick >= ai_state.next_state_tick {
+        ai_state.mode = false; // drop immunity
+        ai_state.extra = false;
+        let dc = entity_name(world, entity)
+            .map(|name| crystal_monster_raw_attack_damage(&name))
+            .unwrap_or(0);
+        if dc > 0 && tile_distance(position, player_position) <= agent.view_range.max(1) {
+            let loops = HORNED_COMMANDER_LOOPS_MIN
+                + deterministic_value(
+                    tick,
+                    object_id,
+                    17_100,
+                    (HORNED_COMMANDER_LOOPS_MAX - HORNED_COMMANDER_LOOPS_MIN + 1) as u64,
+                ) as i64;
+            let per = crystal_attack_power_roll(0, dc, tick, object_id, 17_101);
+            let damage = (per as i64 * loops) as i32;
+            schedule_damage_to_player(
+                world,
+                tick + 1,
+                object_id,
+                entity_name(world, entity).unwrap_or_else(|| "HornedCommander".to_string()),
+                damage.max(1),
+            );
+        }
+        agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+        return true;
+    }
+    // While shielded/charging, do nothing else.
+    if ai_state.mode {
+        return true;
+    }
+
+    // Under 10% HP: raise a lasting immunity shield and summon a slave (once, tracked by extra_byte).
+    let hp_percent = world
+        .entity(entity)
+        .get::<MonsterVitals>()
+        .map(|v| v.hp.saturating_mul(100) / v.max_hp.max(1))
+        .unwrap_or(100);
+    if hp_percent < HORNED_COMMANDER_SHIELD_HP_PERCENT && ai_state.extra_byte == 0 {
+        ai_state.extra_byte = 1;
+        ai_state.mode = true;
+        ai_state.extra = false;
+        ai_state.next_state_tick = tick + HORNED_COMMANDER_SHIELD_DURATION_TICKS;
+        let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+        let spawn = directional_destination(world, position, direction, 1, Some(entity))
+            .unwrap_or_else(|| offset_point(position, direction, 1));
+        queue_hell_lord_summon(
+            world,
+            entity,
+            HORNED_COMMANDER_SLAVE_NAME,
+            spawn,
+            tick,
+            player_entity(world),
+            Some(SummonedMonster {
+                summoner_object_id: object_id,
+                visible_extra: false,
+                expire_tick: None,
+                require_summoner_within: None,
+                despawn_tick_after_death: None,
+                totem_master_object_id: None,
+                max_minions: Some(2),
+            }),
+            Some(true),
+        );
+        // Re-arm the shield-elapse path to drop immunity after the duration (no heavy strike queued).
+        ai_state.extra = false;
+        return true;
+    }
+    // Shield duration elapsed without a charge (the low-HP shield): drop it.
+    if ai_state.extra_byte == 1 && tick >= ai_state.next_state_tick {
+        ai_state.mode = false;
+    }
+
+    // Heavy charge-up: on a ~1/4 attack beat in range, raise the shield and arm the strike.
+    if monster_can_attack(agent, ai_state)
+        && tick >= agent.next_attack_tick
+        && agent.tracking_player
+        && tile_distance(position, player_position) <= agent.view_range.max(1)
+        && deterministic_chance_roll(
+            tick,
+            object_id,
+            17_102,
+            HORNED_COMMANDER_HEAVY_CHANCE_DENOMINATOR,
+        )
+    {
+        ai_state.mode = true; // immunity during charge
+        ai_state.extra = true; // a heavy strike is queued
+        ai_state.next_state_tick = tick + HORNED_COMMANDER_CHARGE_TICKS;
+        let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+        world.entity_mut(entity).insert(Facing(direction));
+        if let Some(packet) = monster_typed_attack_packet(world, entity, position, direction, 2) {
+            packets.push(packet);
+        }
+        return true;
+    }
+
+    false
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(
