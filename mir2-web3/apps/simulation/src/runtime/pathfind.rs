@@ -112,7 +112,11 @@ pub(super) fn find_path_adjacent(
 /// Pure 8-direction A* core, parameterised over a walkability predicate so it
 /// can be unit-tested without constructing a Bevy `World`. `is_walkable` is
 /// called for the goal tile and every intermediate tile (never for `start`).
-pub(super) fn find_path_with<F>(start: &Point, goal: &Point, mut is_walkable: F) -> Option<Vec<Point>>
+pub(super) fn find_path_with<F>(
+    start: &Point,
+    goal: &Point,
+    mut is_walkable: F,
+) -> Option<Vec<Point>>
 where
     F: FnMut(&Point) -> bool,
 {
@@ -149,7 +153,12 @@ where
 /// Shared bounded A* over the 8-connected tile grid. Expands from `start`
 /// toward `goal` (used only by the heuristic) until `is_goal` accepts a tile.
 /// `start` is never passed to `is_walkable`; every other expanded tile is.
-fn astar<G, F>(start: &Point, goal: &Point, mut is_goal: G, is_walkable: &mut F) -> Option<Vec<Point>>
+fn astar<G, F>(
+    start: &Point,
+    goal: &Point,
+    mut is_goal: G,
+    is_walkable: &mut F,
+) -> Option<Vec<Point>>
 where
     G: FnMut(&Point) -> bool,
     F: FnMut(&Point) -> bool,
@@ -241,7 +250,12 @@ mod tests {
 
     /// Every returned step is exactly one Chebyshev tile from the previous one,
     /// the path ends on the goal and never crosses a blocked tile.
-    fn assert_valid_path(start: &Point, path: &[Point], goal: &Point, blocked: &HashSet<(i32, i32)>) {
+    fn assert_valid_path(
+        start: &Point,
+        path: &[Point],
+        goal: &Point,
+        blocked: &HashSet<(i32, i32)>,
+    ) {
         assert_eq!(path.last(), Some(goal), "path must end on the goal");
         let mut prev = start.clone();
         for step in path {
@@ -291,7 +305,11 @@ mod tests {
             .expect("a detour around the wall exists");
         assert_valid_path(&start, &path, &goal, &blocked);
         // The detour is necessarily longer than the blocked straight line.
-        assert!(path.len() > 4, "expected a detour, got {} steps", path.len());
+        assert!(
+            path.len() > 4,
+            "expected a detour, got {} steps",
+            path.len()
+        );
     }
 
     #[test]
@@ -339,7 +357,11 @@ mod tests {
             (last.x - goal.x).abs() <= 1 && (last.y - goal.y).abs() <= 1,
             "path must end adjacent to the goal, ended at {last:?}"
         );
-        assert_ne!((last.x, last.y), (goal.x, goal.y), "must not enter the goal");
+        assert_ne!(
+            (last.x, last.y),
+            (goal.x, goal.y),
+            "must not enter the goal"
+        );
         // Steps are single-tile and never the occupied goal tile.
         let mut prev = start.clone();
         for step in &path {
@@ -375,7 +397,10 @@ mod tests {
         let last = path.last().expect("non-empty path");
         assert!((last.x - goal.x).abs() <= 1 && (last.y - goal.y).abs() <= 1);
         for step in &path {
-            assert!(!blocked.contains(&(step.x, step.y)), "stepped into wall {step:?}");
+            assert!(
+                !blocked.contains(&(step.x, step.y)),
+                "stepped into wall {step:?}"
+            );
         }
     }
 }
