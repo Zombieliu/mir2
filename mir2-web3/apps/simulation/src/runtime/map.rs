@@ -1866,4 +1866,3 @@ impl SimulationSession {
         apply_map_transfer(self.app.world_mut(), key)
     }
 }
-

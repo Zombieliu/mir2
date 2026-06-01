@@ -21,6 +21,7 @@
     "audit:crystal-map-gameplay": "node ./scripts/audit-crystal-map-gameplay.mjs",
     "smoke:crystal-assets": "node ./scripts/smoke-crystal-assets.mjs",
     "smoke:crystal-map-api": "node ./scripts/smoke-crystal-map-api.mjs",
+    "verify:crystal-map-pack": "node ./scripts/verify-crystal-map-pack.mjs",
     "qa:capture-map-monsters": "node ./scripts/capture-production-map-monsters.mjs",
     "smoke:crystal-minimap-assets": "node ./scripts/smoke-crystal-minimap-assets.mjs",
     "smoke:cache-metrics": "node ./scripts/smoke-cache-metrics.mjs",

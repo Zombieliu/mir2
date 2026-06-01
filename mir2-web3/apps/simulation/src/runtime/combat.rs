@@ -21,6 +21,7 @@ use super::drops::{
 };
 use super::equipment::{damage_weapon_durability, damage_worn_durability};
 use super::items::crystal_equipment_added_stat_total;
+use super::map::is_safe_zone_point;
 use super::monster_ai::{
     advance_world, schedule_snow_wolf_king_death_explosion, set_guardian_rocks_active_near,
 };
@@ -43,7 +44,6 @@ use super::packets::{
     visible_object_bundle_for_entity,
 };
 use super::quests::advance_crystal_quest_kill;
-use super::map::is_safe_zone_point;
 use super::resources::{
     is_in_world, runtime_tick, BuffResource, ElementalResource, InventoryResource,
     MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,

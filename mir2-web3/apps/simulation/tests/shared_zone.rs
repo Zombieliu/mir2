@@ -481,7 +481,10 @@ fn mounted_player_walks_a_step_sooner_than_an_unmounted_player() {
     }
     zone.tick(0);
     assert_eq!(zone.player_position(&rider), Some(Point { x: 321, y: 250 }));
-    assert_eq!(zone.player_position(&walker), Some(Point { x: 361, y: 250 }));
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 361, y: 250 })
+    );
 
     // Queue both second steps early (now=50), outside the 300ms input buffer of
     // either ready time, so neither is consumed on arrival — both stay queued
