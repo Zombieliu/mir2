@@ -61,6 +61,7 @@ struct SceneRegistry {
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     map: MapSceneCache,
+    mine_nodes: HashMap<(i32, i32), Entity>,
 }
 
 #[derive(Default)]
@@ -128,6 +129,8 @@ struct WorldSnapshot {
     decor_objects: Vec<DecorObject>,
     #[serde(default)]
     entities: Vec<WorldEntity>,
+    #[serde(default)]
+    mine_nodes: Vec<MineNode>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -195,6 +198,16 @@ struct WorldEntity {
     y: i32,
     direction: Option<String>,
     level: Option<u16>,
+}
+
+/// A mineable cell's depletion stage, driven by the server `MineNodeState`
+/// packet. Rendered as a coloured marker that fades as the vein is mined out.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MineNode {
+    x: i32,
+    y: i32,
+    stage: u8,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -391,6 +404,7 @@ pub fn boot_mir2_runtime() {
                 ingest_pending_entity_render_atlases,
                 sync_map_scene,
                 sync_entities,
+                sync_mine_nodes,
                 sync_entity_render_layers,
                 follow_player,
             )
@@ -919,6 +933,68 @@ fn follow_player(
     camera_transform.translation.x = focus.x as f32 * TILE_SIZE;
     camera_transform.translation.y = -(focus.y as f32) * TILE_SIZE;
     camera_transform.translation.z = 1000.0;
+}
+
+/// Colour for a mine node marker by depletion stage (2 full / 1 cracked / 0 empty).
+fn mine_node_color(stage: u8) -> Color {
+    if stage >= 2 {
+        Color::srgba(0.74, 0.58, 0.30, 0.95) // full vein: bright ore
+    } else if stage == 1 {
+        Color::srgba(0.55, 0.45, 0.28, 0.62) // partially mined: dimmer
+    } else {
+        Color::srgba(0.32, 0.32, 0.34, 0.30) // depleted: faint grey rock
+    }
+}
+
+/// Render mine nodes as coloured markers, diffing against the snapshot each
+/// frame (mirrors `sync_entities`): spawn new cells, recolour existing ones as
+/// their stage changes, and despawn cells that are gone.
+fn sync_mine_nodes(
+    mut commands: Commands,
+    state: Res<RuntimeWorldState>,
+    mut registry: ResMut<SceneRegistry>,
+    mut sprite_query: Query<&mut Sprite>,
+) {
+    let Some(snapshot) = &state.snapshot else {
+        return;
+    };
+
+    let mut alive: HashSet<(i32, i32)> = HashSet::new();
+    for node in &snapshot.mine_nodes {
+        let cell = (node.x, node.y);
+        alive.insert(cell);
+        let color = mine_node_color(node.stage);
+
+        if let Some(&entity) = registry.mine_nodes.get(&cell) {
+            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
+                sprite.color = color;
+            }
+            continue;
+        }
+
+        let mut translation = tile_to_world(node.x, node.y);
+        translation.z = 0.2;
+        let entity = commands
+            .spawn((
+                MirObject,
+                Sprite::from_color(color, Vec2::splat(TILE_SIZE - 10.0)),
+                Transform::from_translation(translation),
+            ))
+            .id();
+        registry.mine_nodes.insert(cell, entity);
+    }
+
+    let stale: Vec<(i32, i32)> = registry
+        .mine_nodes
+        .keys()
+        .filter(|cell| !alive.contains(*cell))
+        .copied()
+        .collect();
+    for cell in stale {
+        if let Some(entity) = registry.mine_nodes.remove(&cell) {
+            commands.entity(entity).despawn();
+        }
+    }
 }
 
 fn tile_to_world(x: i32, y: i32) -> Vec3 {
