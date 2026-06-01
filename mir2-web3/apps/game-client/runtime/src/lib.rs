@@ -61,7 +61,7 @@ struct SceneRegistry {
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     map: MapSceneCache,
-    mine_nodes: HashMap<(i32, i32), Entity>,
+    mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
 }
 
 #[derive(Default)]
@@ -935,20 +935,28 @@ fn follow_player(
     camera_transform.translation.z = 1000.0;
 }
 
-/// Colour for a mine node marker by depletion stage (2 full / 1 cracked / 0 empty).
-fn mine_node_color(stage: u8) -> Color {
+/// Per-cell entities for a rendered mine vein: a constant dark rock base plus an
+/// ore overlay whose colour and size shrink as the vein is mined out.
+struct MineNodeHandles {
+    root: Entity,
+    ore: Entity,
+}
+
+/// Ore-overlay colour and size for a depletion stage (2 full / 1 cracked / 0 empty).
+fn mine_ore_visual(stage: u8) -> (Color, Vec2) {
+    let full = TILE_SIZE - 12.0;
     if stage >= 2 {
-        Color::srgba(0.74, 0.58, 0.30, 0.95) // full vein: bright ore
+        (Color::srgba(0.85, 0.66, 0.28, 0.95), Vec2::splat(full)) // full vein: big bright ore
     } else if stage == 1 {
-        Color::srgba(0.55, 0.45, 0.28, 0.62) // partially mined: dimmer
+        (Color::srgba(0.70, 0.52, 0.26, 0.80), Vec2::splat(full * 0.6)) // half-mined: smaller, dimmer
     } else {
-        Color::srgba(0.32, 0.32, 0.34, 0.30) // depleted: faint grey rock
+        (Color::srgba(0.45, 0.40, 0.30, 0.35), Vec2::splat(full * 0.3)) // depleted: tiny, faint
     }
 }
 
-/// Render mine nodes as coloured markers, diffing against the snapshot each
-/// frame (mirrors `sync_entities`): spawn new cells, recolour existing ones as
-/// their stage changes, and despawn cells that are gone.
+/// Render mine veins as a rock base + an ore overlay, diffing against the
+/// snapshot each frame (mirrors `sync_entities`): spawn new cells, shrink/fade
+/// the ore overlay as the stage drops, and despawn cells that are gone.
 fn sync_mine_nodes(
     mut commands: Commands,
     state: Res<RuntimeWorldState>,
@@ -963,25 +971,39 @@ fn sync_mine_nodes(
     for node in &snapshot.mine_nodes {
         let cell = (node.x, node.y);
         alive.insert(cell);
-        let color = mine_node_color(node.stage);
+        let (ore_color, ore_size) = mine_ore_visual(node.stage);
 
-        if let Some(&entity) = registry.mine_nodes.get(&cell) {
-            if let Ok(mut sprite) = sprite_query.get_mut(entity) {
-                sprite.color = color;
+        if let Some(handles) = registry.mine_nodes.get(&cell) {
+            if let Ok(mut sprite) = sprite_query.get_mut(handles.ore) {
+                sprite.color = ore_color;
+                sprite.custom_size = Some(ore_size);
             }
             continue;
         }
 
         let mut translation = tile_to_world(node.x, node.y);
         translation.z = 0.2;
-        let entity = commands
-            .spawn((
-                MirObject,
-                Sprite::from_color(color, Vec2::splat(TILE_SIZE - 10.0)),
-                Transform::from_translation(translation),
-            ))
+        let mut ore: Option<Entity> = None;
+        let root = commands
+            .spawn((MirObject, Transform::from_translation(translation)))
+            .with_children(|parent| {
+                parent.spawn((
+                    Sprite::from_color(Color::srgb(0.18, 0.16, 0.15), Vec2::splat(TILE_SIZE - 8.0)),
+                    Transform::from_xyz(0.0, 0.0, 0.0),
+                ));
+                ore = Some(
+                    parent
+                        .spawn((
+                            Sprite::from_color(ore_color, ore_size),
+                            Transform::from_xyz(0.0, 0.0, 0.02),
+                        ))
+                        .id(),
+                );
+            })
             .id();
-        registry.mine_nodes.insert(cell, entity);
+        if let Some(ore) = ore {
+            registry.mine_nodes.insert(cell, MineNodeHandles { root, ore });
+        }
     }
 
     let stale: Vec<(i32, i32)> = registry
@@ -991,8 +1013,8 @@ fn sync_mine_nodes(
         .copied()
         .collect();
     for cell in stale {
-        if let Some(entity) = registry.mine_nodes.remove(&cell) {
-            commands.entity(entity).despawn();
+        if let Some(handles) = registry.mine_nodes.remove(&cell) {
+            commands.entity(handles.root).despawn();
         }
     }
 }
