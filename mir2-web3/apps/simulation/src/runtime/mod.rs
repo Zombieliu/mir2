@@ -19,6 +19,7 @@ mod movement;
 mod npc;
 mod npc_script;
 mod packets;
+mod pathfind;
 mod quests;
 mod rental;
 mod resources;

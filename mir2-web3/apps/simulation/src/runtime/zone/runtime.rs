@@ -1254,8 +1254,8 @@ impl ZoneRuntime {
             self.occupancy.remove(&tile_key(&player.position));
             player.position = destination;
             player.direction = action.direction;
-            player.movement_ready_at_ms =
-                now_ms.saturating_add(movement_delay_ms(effective_running));
+            player.movement_ready_at_ms = now_ms
+                .saturating_add(zone_player_move_delay_ms(player, effective_running, now_ms));
             player.run_step_until_ms = now_ms.saturating_add(ZONE_RUN_GRACE_MS);
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
@@ -7850,10 +7850,31 @@ fn zone_deterministic_roll(
 
 fn zone_player_status_blocks_movement(player: &ZonePlayer, now_ms: u64) -> bool {
     let status_poison = player.native_status_poison;
-    status_poison & (CRYSTAL_POISON_PARALYSIS | CRYSTAL_POISON_STUN) != 0
+    status_poison & (CRYSTAL_POISON_PARALYSIS | CRYSTAL_POISON_STUN | CRYSTAL_POISON_FROZEN) != 0
         && player
             .native_status_poison_expires_at_ms
             .is_some_and(|expires_at_ms| now_ms < expires_at_ms)
+}
+
+fn zone_player_slowed(player: &ZonePlayer, now_ms: u64) -> bool {
+    player.native_status_poison & CRYSTAL_POISON_SLOW != 0
+        && player
+            .native_status_poison_expires_at_ms
+            .is_some_and(|expires_at_ms| now_ms < expires_at_ms)
+}
+
+/// Per-step movement delay for a zone player, accounting for being mounted
+/// (faster) and the Slow poison (slower). Mirrors Crystal, where mounts speed
+/// movement up and the Slow debuff roughly halves action speed.
+fn zone_player_move_delay_ms(player: &ZonePlayer, running: bool, now_ms: u64) -> u64 {
+    let mut delay = movement_delay_ms(running);
+    if player.riding_mount && player.mount_type >= 0 {
+        delay = delay.saturating_mul(2) / 3;
+    }
+    if zone_player_slowed(player, now_ms) {
+        delay = delay.saturating_mul(2);
+    }
+    delay.max(1)
 }
 
 fn native_monster_control_active(monster: &ZoneNativeMonster, now_ms: u64) -> bool {
@@ -8827,5 +8848,97 @@ mod step1_ecs_mirror_tests {
         // not leak a stale entity.
         zone.handle(ZoneCommand::Join(test_join("first", 101, 340, 280)));
         assert!(zone.ecs_mirror_matches_players());
+    }
+}
+
+#[cfg(test)]
+mod movement_status_tests {
+    use super::*;
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn test_player() -> ZonePlayer {
+        ZonePlayer::from_join(
+            ZoneJoin {
+                session_id: SessionId::new("tester"),
+                account_id: "tester-account".to_string(),
+                character_index: 0,
+                object_id: 1,
+                name: "Tester".to_string(),
+                class: MirClass::Warrior,
+                gender: MirGender::Male,
+                level: 7,
+                hp: 60,
+                max_hp: 60,
+                mp: 100,
+                map_file_name: "0".to_string(),
+                position: Point { x: 10, y: 10 },
+                direction: MirDirection::Down,
+                chat_profile: Default::default(),
+                combat_stats: Default::default(),
+            },
+            1,
+        )
+    }
+
+    #[test]
+    fn frozen_poison_blocks_movement_until_it_expires() {
+        let mut player = test_player();
+        player.native_status_poison = CRYSTAL_POISON_FROZEN;
+        player.native_status_poison_expires_at_ms = Some(1_000);
+
+        assert!(zone_player_status_blocks_movement(&player, 500));
+        // Expired frozen no longer blocks.
+        assert!(!zone_player_status_blocks_movement(&player, 1_000));
+        assert!(!zone_player_status_blocks_movement(&player, 1_500));
+    }
+
+    #[test]
+    fn green_poison_alone_does_not_block_movement() {
+        let mut player = test_player();
+        player.native_status_poison = CRYSTAL_POISON_GREEN;
+        player.native_status_poison_expires_at_ms = Some(10_000);
+        assert!(!zone_player_status_blocks_movement(&player, 0));
+    }
+
+    #[test]
+    fn slow_poison_doubles_the_step_delay() {
+        let mut player = test_player();
+        let base_walk = movement_delay_ms(false);
+        assert_eq!(zone_player_move_delay_ms(&player, false, 0), base_walk);
+
+        player.native_status_poison = CRYSTAL_POISON_SLOW;
+        player.native_status_poison_expires_at_ms = Some(5_000);
+        assert_eq!(
+            zone_player_move_delay_ms(&player, false, 1_000),
+            base_walk.saturating_mul(2)
+        );
+        // Once the slow expires the player returns to base cadence.
+        assert_eq!(zone_player_move_delay_ms(&player, false, 5_000), base_walk);
+    }
+
+    #[test]
+    fn riding_a_mount_speeds_movement_up() {
+        let mut player = test_player();
+        let base_walk = movement_delay_ms(false);
+        player.riding_mount = true;
+        player.mount_type = 3;
+        let mounted = zone_player_move_delay_ms(&player, false, 0);
+        assert!(
+            mounted < base_walk,
+            "mounted delay {mounted} should be faster than base {base_walk}"
+        );
+        assert_eq!(mounted, base_walk.saturating_mul(2) / 3);
+    }
+
+    #[test]
+    fn dismounted_flag_without_a_mount_type_does_not_speed_up() {
+        let mut player = test_player();
+        // riding flag set but no mount equipped (mount_type < 0) must not boost.
+        player.riding_mount = true;
+        player.mount_type = -1;
+        assert_eq!(
+            zone_player_move_delay_ms(&player, false, 0),
+            movement_delay_ms(false)
+        );
     }
 }

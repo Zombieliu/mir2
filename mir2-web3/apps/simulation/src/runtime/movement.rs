@@ -15,6 +15,7 @@ use super::map::{
 };
 use super::monster_ai::advance_world;
 use super::npc::dismiss_dialog;
+use super::pathfind;
 use super::resources::{
     crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
     PlayerRuntimeResource, RuntimeConfigResource,
@@ -366,6 +367,44 @@ pub(super) fn move_distance_for_mode(running: bool) -> i32 {
     }
 }
 
+/// Choose the next tile to step onto when routing from `from` toward `to`,
+/// using the server-side A* search so click-to-move paths around static
+/// blockers and other occupants instead of stalling against them.
+///
+/// Tries an exact-tile route first; if `to` is unreachable because it is itself
+/// occupied (the common "click a monster to approach it" case), falls back to a
+/// route that stops on a tile *adjacent* to `to`. Returns `None` only when not
+/// even an adjacent tile is reachable, letting the caller fall back to
+/// straight-line stepping.
+fn pathfind_next_step(
+    world: &World,
+    from: &Point,
+    to: &Point,
+    max_step: i32,
+    ignore_entity: Entity,
+) -> Option<Point> {
+    let path = pathfind::find_path(world, from, to, Some(ignore_entity))
+        .filter(|path| !path.is_empty())
+        .or_else(|| {
+            pathfind::find_path_adjacent(world, from, to, Some(ignore_entity))
+                .filter(|path| !path.is_empty())
+        })?;
+    let first = path.first()?.clone();
+    if max_step <= 1 {
+        return Some(first);
+    }
+    // Running covers two tiles, but only extend to the second tile when the
+    // route continues in the same direction. If the path bends at the first
+    // tile, degrade the run to a single-tile walk for this step rather than
+    // cutting the corner (Crystal allows a run to degrade to a walk).
+    if let (Some(second), Some(direction)) = (path.get(1), direction_toward(from, &first)) {
+        if direction_toward(&first, second) == Some(direction) {
+            return Some(second.clone());
+        }
+    }
+    Some(first)
+}
+
 pub(super) fn clamp_to_map_region(world: &World, point: Point) -> Point {
     let bounds = world.resource::<MapRuntimeResource>().map_region_bounds;
 
@@ -555,11 +594,26 @@ impl SimulationSession {
         let mut packets = Vec::new();
 
         if next_position != target {
-            let candidate =
-                step_point_toward_by(&next_position, &target, move_distance_for_mode(running));
+            let move_distance = move_distance_for_mode(running);
+            let candidate = step_point_toward_by(&next_position, &target, move_distance);
 
             if candidate != next_position {
-                let next_step = if can_traverse_between(
+                // Prefer an A*-routed step so click-to-move walks around walls,
+                // trees and other occupants. Fall back to the original
+                // straight-line stepping when no full route exists (e.g. the
+                // destination tile is occupied), which still advances toward the
+                // target and preserves the legacy "approach then stop" feel.
+                let routed_step = pathfind_next_step(
+                    self.app.world(),
+                    &next_position,
+                    &target,
+                    move_distance,
+                    player_entity,
+                );
+
+                let next_step = if let Some(routed_step) = routed_step {
+                    Some(routed_step)
+                } else if can_traverse_between(
                     self.app.world(),
                     &next_position,
                     &candidate,

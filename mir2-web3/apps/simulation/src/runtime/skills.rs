@@ -325,7 +325,15 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::SummonVampire
         | Spell::SummonToad
         | Spell::SummonSnakes
-        | Spell::PetEnhancer => SkillCastKind::SelfOnly,
+        | Spell::PetEnhancer
+        // Taoist support buffs applied to self/allies (no hostile target).
+        | Spell::SoulShield
+        | Spell::BlessedArmour
+        | Spell::UltimateEnhancer
+        // Assassin self-centred hide that also mists nearby tiles.
+        | Spell::MoonMist
+        // Friendly decoy trap placed at the caster's own feet (no target/aim).
+        | Spell::Stonetrap => SkillCastKind::SelfOnly,
         Spell::FireWall
         | Spell::FireBang
         | Spell::IceStorm
@@ -338,7 +346,6 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::Trap
         | Spell::ExplosiveTrap
         | Spell::DelayedExplosion
-        | Spell::Stonetrap
         | Spell::Portal
         | Spell::Blink
         | Spell::Teleport
@@ -358,6 +365,11 @@ fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
         | Spell::SlashingBurst
         | Spell::CrescentSlash
         | Spell::LionRoar
+        // Forward / self-centred AoE spells aimed by facing (cast with no locked
+        // target), not single-target spells.
+        | Spell::IceThrust
+        | Spell::HeavenlySword
+        | Spell::ThunderStorm
         | Spell::BattleCry => SkillCastKind::Direction,
         _ => SkillCastKind::Target,
     }
@@ -378,6 +390,9 @@ fn crystal_spell_is_offensive(spell: Spell) -> bool {
             | Spell::BackStep
             | Spell::FlashDash
             | Spell::StormEscape
+            // Cleanse cast on self/allies (Crystal Purification) — Target-kind
+            // but not offensive, so it must not require a hostile target.
+            | Spell::Purification
     )
 }
 
