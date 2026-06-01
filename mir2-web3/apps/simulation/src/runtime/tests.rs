@@ -55326,6 +55326,40 @@ fn crystal_mining_swing_emits_mine_effect_and_depletes_stone() {
 }
 
 #[test]
+fn crystal_mining_swing_broadcasts_mine_node_state() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+    // Near-full vein (set 0 max_stones = 80): one swing leaves 79 -> stage 2.
+    let target = place_mine_spot_in_front(&mut session, 80, 0);
+
+    let packets = super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right)
+        .expect("mining should resolve");
+    let stage = packets.iter().find_map(|packet| match packet {
+        ServerPacket::MineNodeState { location, stage }
+            if location.x == target.x && location.y == target.y =>
+        {
+            Some(*stage)
+        }
+        _ => None,
+    });
+    assert_eq!(
+        stage,
+        Some(2),
+        "a near-full vein should broadcast stage 2, got {packets:?}"
+    );
+}
+
+#[test]
+fn mine_stage_thresholds_match_fullness() {
+    use super::super::mining::mine_stage;
+    assert_eq!(mine_stage(0, 80), 0, "no stones -> empty rock");
+    assert_eq!(mine_stage(39, 80), 1, "below half -> partially mined");
+    assert_eq!(mine_stage(40, 80), 2, "at half -> full vein");
+    assert_eq!(mine_stage(80, 80), 2, "full -> full vein");
+}
+
+#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

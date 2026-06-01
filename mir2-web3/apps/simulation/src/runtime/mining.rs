@@ -161,6 +161,18 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
     world.resource_mut::<MiningResource>().spots = spots;
 }
 
+/// Map a spot's remaining stones to a coarse visual stage for `MineNodeState`:
+/// 0 = depleted (empty rock), 1 = partially mined (<50%), 2 = full vein.
+pub(super) fn mine_stage(stones_left: u8, max_stones: u8) -> u8 {
+    if stones_left == 0 {
+        0
+    } else if u16::from(stones_left) * 2 < u16::from(max_stones) {
+        1
+    } else {
+        2
+    }
+}
+
 struct EquippedPickaxe {
     unique_id: u64,
 }
@@ -270,6 +282,22 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
             spot.stones_left = new_stones;
         }
     }
+
+    // Broadcast the post-swing visual stage so the client can render the node
+    // depleting (full -> cracked -> empty) and refilling on regen.
+    let stage = {
+        let stones = world
+            .resource::<MiningResource>()
+            .spots
+            .get(&(target.x, target.y))
+            .map(|spot| spot.stones_left)
+            .unwrap_or(0);
+        mine_stage(stones, set.max_stones)
+    };
+    packets.push(ServerPacket::MineNodeState {
+        location: target.clone(),
+        stage,
+    });
 
     Some(packets)
 }

@@ -604,6 +604,7 @@ pub enum ServerPacketId {
     GuildTerritoryPage = 276,
     StorageUnlockResult = 277,
     StoragePasswordResult = 278,
+    MineNodeState = 279,
 }
 
 impl TryFrom<i16> for ServerPacketId {
@@ -890,6 +891,7 @@ impl TryFrom<i16> for ServerPacketId {
             276 => Ok(Self::GuildTerritoryPage),
             277 => Ok(Self::StorageUnlockResult),
             278 => Ok(Self::StoragePasswordResult),
+            279 => Ok(Self::MineNodeState),
             other => Err(PacketCodecError::UnknownServerPacketId(other)),
         }
     }
