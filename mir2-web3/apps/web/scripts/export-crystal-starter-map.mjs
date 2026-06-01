@@ -44,19 +44,28 @@ async function main() {
   }
 
   const starterScene = JSON.parse(await readFile(STARTER_SCENE_PATH, "utf8"));
-  const mapFileName = String(starterScene.map?.file_name ?? "0");
+  // --full exports the entire map (every cell) instead of a window around the
+  // starter spawn, so the runtime renders the real, complete Crystal map rather
+  // than the small starter slice + synthetic fallback. --map overrides which
+  // map file to export; --out overrides the output JSON path.
+  const fullMap = Boolean(args.full);
+  const mapFileName = String(args.map ?? starterScene.map?.file_name ?? "0");
   const mapPath = path.join(clientRoot, "Map", `${mapFileName}.map`);
   const dataDir = path.join(clientRoot, "Data");
   const sceneView = starterScene.scene_view;
+  const outputJsonPath = args.out ? path.resolve(args.out) : OUTPUT_JSON_PATH;
 
-  if (!sceneView?.center) {
+  if (!fullMap && !sceneView?.center) {
     throw new Error("starter scene is missing scene_view.center");
   }
 
   await mkdir(PUBLIC_DIR, { recursive: true });
-  await mkdir(path.dirname(OUTPUT_JSON_PATH), { recursive: true });
+  await mkdir(path.dirname(outputJsonPath), { recursive: true });
 
-  const bounds = exportBoundsForScene(sceneView);
+  const mapDimensions = readMapDimensions(mapPath);
+  const bounds = fullMap
+    ? { minX: 0, maxX: mapDimensions.width - 1, minY: 0, maxY: mapDimensions.height - 1 }
+    : exportBoundsForScene(sceneView);
   const sprites = {};
   const cells = [];
   const spriteIds = new Map();
@@ -103,14 +112,18 @@ async function main() {
     cellWidth: CELL_WIDTH,
     cellHeight: CELL_HEIGHT,
     regionBounds: bounds,
-    playBounds: playBoundsForScene(sceneView),
+    playBounds: fullMap ? bounds : playBoundsForScene(sceneView),
     sprites,
     cells,
   };
 
   await Promise.all(pendingWrites);
-  await writeFile(OUTPUT_JSON_PATH, `${JSON.stringify(output, null, 2)}\n`, "utf8");
-  console.log(`Exported starter map region to ${OUTPUT_JSON_PATH}`);
+  await writeFile(outputJsonPath, `${JSON.stringify(output, null, 2)}\n`, "utf8");
+  console.log(
+    fullMap
+      ? `Exported FULL map ${mapFileName} (${mapDimensions.width}x${mapDimensions.height}, ${cells.length} cells, ${spriteIds.size} sprites) to ${outputJsonPath}`
+      : `Exported starter map region to ${outputJsonPath}`,
+  );
 
   function registerSprite(layer, kind) {
     const library = ensureLibrary(layer.libraryKey);
@@ -435,6 +448,20 @@ function parseArgs(values) {
       index += 1;
       continue;
     }
+    if (value === "--full") {
+      parsed.full = true;
+      continue;
+    }
+    if (value === "--map") {
+      parsed.map = requireValue(values, index, value);
+      index += 1;
+      continue;
+    }
+    if (value === "--out") {
+      parsed.out = requireValue(values, index, value);
+      index += 1;
+      continue;
+    }
     if (!value.startsWith("--")) {
       parsed._.push(value);
       continue;
@@ -514,6 +541,11 @@ function parseMapBuffer(mapPath) {
   return {
     ...parseType100Map(readFileSyncCompat(mapPath)),
   };
+}
+
+function readMapDimensions(mapPath) {
+  const buffer = parseMapBuffer(mapPath);
+  return { width: buffer.width, height: buffer.height };
 }
 
 function parseType100Map(bytes) {
