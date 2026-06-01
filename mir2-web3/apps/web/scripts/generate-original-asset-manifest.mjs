@@ -19,6 +19,14 @@ const MANIFEST_ROOTS = [
 const args = parseArgs(process.argv.slice(2));
 const outputPath = path.resolve(args.output ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_PATH ?? DEFAULT_OUTPUT_PATH);
 const collectionMode = String(args.mode ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_MODE ?? "filesystem");
+const remoteReleaseManifestSource = normalizeOptionalString(
+  args.remoteRelease ??
+    args.remoteReleaseManifest ??
+    process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE ??
+    process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE_MANIFEST ??
+    process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST_URL ??
+    "",
+);
 const manifestConcurrency = positiveIntegerArg(
   args.concurrency ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_CONCURRENCY,
   64,
@@ -30,10 +38,78 @@ main().catch((error) => {
 });
 
 async function main() {
-  if (!["filesystem", "git"].includes(collectionMode)) {
-    throw new Error(`Unsupported --mode ${collectionMode}; expected "filesystem" or "git".`);
+  if (!["filesystem", "git", "remote-release"].includes(collectionMode)) {
+    throw new Error(`Unsupported --mode ${collectionMode}; expected "filesystem", "git", or "remote-release".`);
   }
 
+  const { records, remoteRelease } =
+    collectionMode === "remote-release"
+      ? await collectRemoteReleaseAssetRecords()
+      : { records: await collectLocalAssetRecords(), remoteRelease: null };
+
+  const entries = [];
+  const assetHash = createHash("sha256");
+  let totalBytes = 0;
+  const stats = {
+    originalMapPngCount: 0,
+    originalUiPngCount: 0,
+  };
+
+  for (const record of records.filter(Boolean).sort((left, right) => left.publicPath.localeCompare(right.publicPath))) {
+    totalBytes += record.size;
+    assetHash.update(record.publicPath);
+    assetHash.update(String(record.size));
+    assetHash.update(record.sha256 || record.contentType || "");
+
+    if (record.source === "original-map") stats.originalMapPngCount += 1;
+    if (record.source === "original-ui") stats.originalUiPngCount += 1;
+    const entry = {
+      size: record.size,
+      source: record.source,
+    };
+    if (record.sha256) entry.sha256 = record.sha256;
+    if (record.contentType) entry.contentType = record.contentType;
+    entries.push([record.publicPath, entry]);
+  }
+
+  const assets = Object.fromEntries(entries.sort(([left], [right]) => left.localeCompare(right)));
+  const manifest = {
+    schemaVersion: SCHEMA_VERSION,
+    kind: "mir2-original-asset-manifest",
+    generatedAt: new Date().toISOString(),
+    collectionMode,
+    assetHash: assetHash.digest("hex"),
+    stats: {
+      assetCount: entries.length,
+      ...stats,
+      totalBytes,
+    },
+    ...(remoteRelease ? { remoteRelease } : {}),
+    assets,
+  };
+
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        outputPath,
+        collectionMode,
+        assetCount: manifest.stats.assetCount,
+        originalMapPngCount: manifest.stats.originalMapPngCount,
+        originalUiPngCount: manifest.stats.originalUiPngCount,
+        totalBytes,
+        assetHash: manifest.assetHash,
+        remoteRelease,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+async function collectLocalAssetRecords() {
   const files = collectionMode === "git" ? await collectGitTrackedPngs() : await collectFilesystemPngs();
   let completed = 0;
   const hashedFiles = await mapWithConcurrency(files, manifestConcurrency, async (filePath) => {
@@ -56,65 +132,98 @@ async function main() {
     };
   });
 
-  const entries = [];
-  const assetHash = createHash("sha256");
-  let totalBytes = 0;
-  const stats = {
-    originalMapPngCount: 0,
-    originalUiPngCount: 0,
-  };
+  return hashedFiles.filter(Boolean);
+}
 
-  for (const record of hashedFiles.filter(Boolean).sort((left, right) => left.publicPath.localeCompare(right.publicPath))) {
-    totalBytes += record.size;
-    assetHash.update(record.publicPath);
-    assetHash.update(String(record.size));
-    assetHash.update(record.sha256);
-
-    if (record.source === "original-map") stats.originalMapPngCount += 1;
-    if (record.source === "original-ui") stats.originalUiPngCount += 1;
-    entries.push([
-      record.publicPath,
-      {
-        size: record.size,
-        sha256: record.sha256,
-        source: record.source,
-      },
-    ]);
+async function collectRemoteReleaseAssetRecords() {
+  const source = resolveRemoteReleaseManifestSource();
+  const release = await readRemoteReleaseManifest(source);
+  const files = Array.isArray(release.files) ? release.files : [];
+  if (files.length === 0) {
+    throw new Error(`Remote asset release manifest has no files: ${source}`);
   }
 
-  const assets = Object.fromEntries(entries.sort(([left], [right]) => left.localeCompare(right)));
-  const manifest = {
-    schemaVersion: SCHEMA_VERSION,
-    kind: "mir2-original-asset-manifest",
-    generatedAt: new Date().toISOString(),
-    collectionMode,
-    assetHash: assetHash.digest("hex"),
-    stats: {
-      assetCount: entries.length,
-      ...stats,
-      totalBytes,
-    },
-    assets,
-  };
+  const records = [];
+  for (const file of files) {
+    const relativePath = normalizeRemoteReleaseRelativePath(file, release);
+    if (!relativePath || !TRACKED_ASSET_EXTENSIONS.has(path.extname(relativePath).toLowerCase())) {
+      continue;
+    }
+    const root = MANIFEST_ROOTS.find((candidate) => relativePath.startsWith(`${candidate.publicRoot}/`));
+    if (!root) continue;
+    const size = normalizeRemoteReleaseFileSize(file);
+    const sha256 = normalizeOptionalString(file.sha256 ?? file.h ?? "");
+    const contentType = normalizeOptionalString(file.contentType ?? file.c ?? "");
+    records.push({
+      publicPath: `/${relativePath}`,
+      source: root.source,
+      size,
+      sha256,
+      contentType,
+    });
+  }
 
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await fs.writeFile(outputPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-  console.log(
-    JSON.stringify(
-      {
-        ok: true,
-        outputPath,
-        collectionMode,
-        assetCount: manifest.stats.assetCount,
-        originalMapPngCount: manifest.stats.originalMapPngCount,
-        originalUiPngCount: manifest.stats.originalUiPngCount,
-        totalBytes,
-        assetHash: manifest.assetHash,
-      },
-      null,
-      2,
-    ),
+  if (records.length === 0) {
+    throw new Error(`Remote asset release manifest has no original-map/original-ui PNG/CUR entries: ${source}`);
+  }
+
+  return {
+    records,
+    remoteRelease: {
+      source,
+      version: normalizeOptionalString(release.version ?? ""),
+      assetBaseUrl: normalizeOptionalString(release.assetBaseUrl ?? ""),
+      objectPrefix: normalizeOptionalString(release.objectPrefix ?? ""),
+      fileCount: files.length,
+      missingCount: Number.isFinite(Number(release.stats?.missingCount)) ? Number(release.stats.missingCount) : null,
+    },
+  };
+}
+
+function resolveRemoteReleaseManifestSource() {
+  if (remoteReleaseManifestSource) return remoteReleaseManifestSource;
+  const assetBaseUrl = normalizeOptionalString(
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL ?? "",
+  ).replace(/\/+$/, "");
+  if (assetBaseUrl) return `${assetBaseUrl}/remote-asset-release.json`;
+  throw new Error(
+    "remote-release mode requires --remoteRelease, MIR2_ORIGINAL_ASSET_REMOTE_RELEASE, or NEXT_PUBLIC_MIR2_ASSET_BASE_URL.",
   );
+}
+
+async function readRemoteReleaseManifest(source) {
+  if (isHttpUrl(source)) {
+    const response = await fetch(source, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Remote asset release fetch failed: HTTP ${response.status} ${source}`);
+    }
+    return response.json();
+  }
+  return JSON.parse(await fs.readFile(path.resolve(source), "utf8"));
+}
+
+function normalizeRemoteReleaseRelativePath(file, release) {
+  const value = normalizeOptionalString(file.relativePath ?? file.path ?? file.p ?? file.objectKey ?? file.k ?? "");
+  if (!value) return "";
+  let relativePath = value;
+  if (isHttpUrl(relativePath)) {
+    try {
+      relativePath = new URL(relativePath).pathname;
+    } catch {
+      return "";
+    }
+  }
+  relativePath = relativePath.replace(/^\/+/, "");
+  const objectPrefix = normalizeOptionalString(release.objectPrefix ?? "").replace(/^\/+|\/+$/g, "");
+  if (objectPrefix && relativePath.startsWith(`${objectPrefix}/`)) {
+    relativePath = relativePath.slice(objectPrefix.length + 1);
+  }
+  return relativePath;
+}
+
+function normalizeRemoteReleaseFileSize(file) {
+  const size = Number(file.size ?? file.s ?? 0);
+  return Number.isFinite(size) && size > 0 ? size : 0;
 }
 
 async function collectFilesystemPngs() {
@@ -238,4 +347,12 @@ function positiveIntegerArg(value, fallback) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 1) return fallback;
   return Math.floor(parsed);
+}
+
+function normalizeOptionalString(value) {
+  return String(value ?? "").trim();
+}
+
+function isHttpUrl(value) {
+  return /^https?:\/\//i.test(String(value || ""));
 }
