@@ -4799,6 +4799,58 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn data_only_ranged_families_engage_from_distance() {
+    // 34 data-only ranged casters/archers had their reach flattened to melee 1 by the profile
+    // extractor (their Crystal InAttackRange uses an AttackRange field). Each should now report its
+    // real reach so it attacks from distance instead of closing to melee. Spot-check the mapping and
+    // confirm monster_in_attack_range agrees at the expected distance.
+    let cases = [
+        (101u8, 12i32), // AncientBringer
+        (71, 10),       // Behemoth
+        (73, 7),        // TurtleKing
+        (93, 8),        // FlameMage
+        (163, 6),       // HornedMage
+        (178, 5),       // IcePhantom
+        (139, 4),       // StoneGolem
+        (94, 2),        // FlameScythe
+    ];
+    for (ai, range) in cases {
+        let agent = MonsterAgent {
+            image: 0,
+            dead: false,
+            patrol_origin: Point { x: 0, y: 0 },
+            ai,
+            disposition: WorldEntityDisposition::Hostile,
+            hostile_to_player: true,
+            tracking_player: true,
+            view_range: 7,
+            can_wander: false,
+            move_interval_ticks: 1,
+            attack_interval_ticks: 1,
+            next_move_tick: 0,
+            next_attack_tick: 0,
+            route: Vec::new(),
+            route_index: 0,
+            route_waiting: false,
+            next_route_tick: 0,
+        };
+        assert_eq!(
+            super::monster_attack_range(&agent),
+            range,
+            "ai {ai} should engage at range {range}, not melee"
+        );
+        // In range at exactly `range` tiles away, out of range one tile farther (for range < 12,
+        // bounded by the test map).
+        let source = Point { x: 50, y: 50 };
+        let at_range = Point { x: 50 + range, y: 50 };
+        assert!(
+            super::monster_in_attack_range(&agent, &source, &at_range),
+            "ai {ai} should be in attack range at {range} tiles"
+        );
+    }
+}
+
+#[test]
 fn witch_doctor_self_heals_when_low_and_blinks() {
     // WitchDoctor (ai 75) blink-kite caster: under 50% HP it sometimes self-heals 1/4 max HP, and on
     // other beats may blink. Force ai 75 at low HP in range and confirm it regains HP via its heal

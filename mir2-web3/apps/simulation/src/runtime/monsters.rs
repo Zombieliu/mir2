@@ -1756,6 +1756,18 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         83 => TORNADO_ATTACK_RANGE,
         175 => 6, // ChieftainArcher: a range-6 archer (its InAttackRange), not melee.
         75 => 6,  // WitchDoctor: AttackRange 6 (blink-kite caster), not melee.
+        // Data-only ranged casters/archers whose Crystal `InAttackRange` uses an `AttackRange` field
+        // the profile extractor flattened to melee (1). Each value is the subclass's AttackRange, so
+        // they engage from distance instead of suicidally closing to melee.
+        71 | 80 | 105 => 10,
+        101 => 12,
+        73 | 91 => 7,
+        93 | 95 | 200 | 201 => 8,
+        55 | 72 | 90 | 129 | 137 | 140 | 141 | 150 | 155 | 156 | 160 | 163 | 164 | 199 | 218 | 223 => 6,
+        69 | 84 | 153 | 169 | 178 => 5,
+        139 => 4,
+        96 => 3,
+        94 => 2,
         // Families without a bespoke reach fall back to the generated profile's InAttackRange
         // distance (0 means "out to view range"), so data-only ranged casters/archers engage from
         // distance instead of only when adjacent.
