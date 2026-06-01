@@ -50,7 +50,10 @@ use super::resources::{
     RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
-use super::skills::{advance_magic_progression, crystal_magic_damage, normalize_crystal_skill_key};
+use super::skills::{
+    advance_magic_progression, crystal_attack_power_roll, crystal_magic_damage,
+    normalize_crystal_skill_key,
+};
 use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 
 #[allow(deprecated)]
@@ -362,20 +365,31 @@ fn crystal_apply_player_critical(
     damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
 }
 
-/// Rolled melee damage for the local player: `Random(MinDC, MaxDC)` from the
-/// authoritative stat block, plus the Slaying bonus and the critical-hit roll.
+/// Rolled melee damage for the local player: Crystal `PlayerObject.Attack()` →
+/// `GetAttackPower(MinDC, MaxDC)` from the authoritative stat block, plus the
+/// Slaying bonus and the critical-hit roll.
 ///
-/// For seed equipment the stat block's `MaxDC` equals
-/// [`crystal_player_melee_damage`] and `MinDC == MaxDC`, so the result is the
-/// historical flat figure; explicit `Min/Max DC` gear opens a real spread.
+/// `GetAttackPower` is a Luck-biased roll (`MapObject.GetAttackPower`): positive
+/// Luck can force the `MaxDC` end, negative Luck the `MinDC` end. The basic melee
+/// attack uses the same Luck-biased channel as the player's spells
+/// (`crystal_spell_attack_power`) so gear Luck affects auto-attacks too. For
+/// seed equipment the stat block's `MinDC == MaxDC` and Luck is `0`, so the
+/// result is the historical flat figure (the Luck-biased roll reduces to the
+/// previous uniform roll when Luck is 0); explicit `Min/Max DC` gear opens a
+/// real spread.
 pub(super) fn crystal_player_rolled_melee_damage(world: &World, current_tick: u64) -> i32 {
     let stats = player_stats(world);
     let slaying = crystal_slaying_melee_bonus(world);
     let min = (stats.min_dc() + slaying).max(1);
     let max = (stats.max_dc() + slaying).max(min);
     let actor_id = current_player_object_id(world).unwrap_or(0);
-    let rolled =
-        deterministic_range_roll(current_tick, actor_id, CRYSTAL_SALT_MELEE_DC_ROLL, min, max);
+    let rolled = crystal_attack_power_roll(
+        world,
+        current_tick,
+        CRYSTAL_SALT_MELEE_DC_ROLL as u64,
+        min,
+        max,
+    );
     crystal_apply_player_critical(world, &stats, actor_id, current_tick, rolled)
 }
 
@@ -434,6 +448,9 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         max_mac: stats.max_mac(),
         critical_rate: stats.critical_rate(),
         critical_damage: stats.critical_damage(),
+        // Luck biases the physical attack-power roll (Crystal GetAttackPower), so
+        // the zone melee/range path matches the per-session path's Luck handling.
+        luck: stats.luck(),
     }
 }
 
