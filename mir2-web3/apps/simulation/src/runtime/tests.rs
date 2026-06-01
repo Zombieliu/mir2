@@ -55443,6 +55443,32 @@ fn crystal_runtime_bichon_blacksmith_sells_a_pickaxe() {
 }
 
 #[test]
+fn deadmine_entrance_collision_parses_from_pack() {
+    // d401 = DeadMineEntrance. Its gzipped Crystal .map ships in the map pack;
+    // prove the sim's collision parser understands DeadMine geometry -- the
+    // foundation for hosting the dangerous mine server-side.
+    use std::io::Read;
+    let gz: &[u8] = include_bytes!("fixtures/d401.map.gz");
+    let mut decoder = flate2::read::GzDecoder::new(gz);
+    let mut bytes = Vec::new();
+    decoder
+        .read_to_end(&mut bytes)
+        .expect("d401.map.gz should decompress");
+    assert!(
+        bytes.len() > 100_000,
+        "d401.map should be a full Crystal map, got {} bytes",
+        bytes.len()
+    );
+
+    let collision = super::super::map::parse_runtime_map_collision("d401", &bytes)
+        .expect("sim should parse DeadMine entrance collision");
+    assert!(
+        !collision.blocked_cells.is_empty(),
+        "DeadMine entrance should have blocked rock cells"
+    );
+}
+
+#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
