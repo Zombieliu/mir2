@@ -43,10 +43,11 @@ use super::packets::{
     visible_object_bundle_for_entity,
 };
 use super::quests::advance_crystal_quest_kill;
+use super::map::is_safe_zone_point;
 use super::resources::{
     is_in_world, runtime_tick, BuffResource, ElementalResource, InventoryResource,
-    PlayerRuntimeResource, RuntimeClockResource, RuntimeQueueResource, SessionResource,
-    SkillResource,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,
+    RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
 use super::skills::{advance_magic_progression, crystal_magic_damage, normalize_crystal_skill_key};
@@ -187,6 +188,20 @@ fn crystal_player_damage_after_status(world: &World, damage: i32) -> i32 {
 pub(super) struct PlayerDamageOutcome {
     pub(super) applied: bool,
     pub(super) died: bool,
+}
+
+/// Crystal protects players standing in a safe zone from monster/PvP combat
+/// damage (poison/bleeding DOT still ticks). Used to gate incoming monster hits.
+pub(super) fn current_player_in_safe_zone(world: &World) -> bool {
+    let Some(player) = player_entity(world) else {
+        return false;
+    };
+    let Some(position) = entity_position(world, player) else {
+        return false;
+    };
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let map = world.resource::<MapRuntimeResource>();
+    is_safe_zone_point(config, map, &position)
 }
 
 pub(super) fn apply_damage_to_current_player(
@@ -1661,6 +1676,14 @@ pub(super) fn resolve_pending_combat_actions(
                 let Some(player) = player_entity(world) else {
                     continue;
                 };
+                // Crystal safe zones shield players from monster/PvP combat
+                // damage; skip the hit (no Struck) when the player is inside one.
+                if current_player_in_safe_zone(world) {
+                    if let Some(packet) = action.due_packet {
+                        packets.push(packet);
+                    }
+                    continue;
+                }
                 if action.damage > 0 {
                     let outcome = apply_damage_to_current_player(world, action.damage, packets);
                     if outcome.applied {
