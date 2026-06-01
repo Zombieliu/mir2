@@ -50,6 +50,34 @@ Closed several of the largest interaction gaps (verified by `tsc --noEmit` +
   with hold-repeat, drag slider, Max button) instead of a bare number input.
   ~30% -> ~70%.
 
+## Update 2026-06-01 (round 4 - R2 fullcrystal + Crystal source: real dialog frames)
+
+Two external unlocks closed the last big "asset-gated" item (per-dialog Crystal
+bitmap frames):
+
+1. The R2 asset release switched to `20260601-fullcrystal-a2f10be0`, a full
+   transcode of the Crystal client (verified: the `mir2-r2-asset-cache` Worker
+   maps `/original-ui/<lib>/<n>.png` straight to an R2 object key, and the
+   `mir2-asset-worker.js` service worker routes all `/original-ui/` requests to
+   that R2 base) - so any referenced frame resolves at runtime.
+2. The open-source Crystal client (Suprcode/Crystal) provides the exact
+   dialog->frame mapping that the compiled DLL hid.
+
+Rebuilt with the genuine frame indices pulled from the C# source:
+
+- **NPC dialog**: Prguse/995 background, close (413,3), body text at (8,34)
+  420px wide on an 18px stride (NPCDialogs.cs).
+- **Trade**: two 204x152 Prguse/389 frames; 5x2 cells at (x*36+10+x, y*32+39+y);
+  gold (35,123); confirm Title/520-522 (135,120); close (181,3) (TradeDialogs.cs).
+- **Social backdrops**: guild=Prguse/180, group=Prguse/120, friend=Title/199,
+  relationship/marriage=Prguse/583 rendered as the real window art behind the
+  data-driven panel (GuildDialog/GroupDialog/FriendDialog/RelationshipDialog.cs).
+
+Each verified by `tsc` + `next build`; the export manifest was updated so a
+local export reproduces the same frames. "Per-dialog Crystal bitmap frames" is
+no longer gated - it is a mechanical source-lookup + wire job for any remaining
+window.
+
 ## Update 2026-05-31 (round 3 - Crystal .Lib source available)
 
 The Crystal client Debug build (incl. all `.Lib` graphics + Cursors) became
