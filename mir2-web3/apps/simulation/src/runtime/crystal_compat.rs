@@ -196,6 +196,11 @@ pub(super) const BEHEMOTH_MAX_SLAVES: usize = 8;
 pub(super) const BEHEMOTH_SLAVE_BATCH: usize = 3;
 pub(super) const BEHEMOTH_SUMMON_THROTTLE_TICKS: u64 = 12;
 pub(super) const BEHEMOTH_SLAVE_NAMES: [&str; 3] = ["Hugger", "PoisonHugger", "MutatedHugger"];
+/// ChieftainArcher (ai 175): a ranged archer that rolls one of three shot types (DC/MC/SC, all
+/// physical); on the SC shot (1-in-3) it also pushes the player back 1 tile. The push is the bespoke
+/// bit (its three-stat damage is already covered by the generic ranged path).
+pub(super) const CHIEFTAIN_ARCHER_AI: u8 = 175;
+pub(super) const CHIEFTAIN_ARCHER_PUSH_CHANCE_DENOMINATOR: u64 = 3;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

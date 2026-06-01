@@ -808,6 +808,16 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
+        175 => update_chieftain_archer_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         60 => update_vampire_spider_state(world, entity, agent, position, tick, packets),
         61 => update_spitting_toad_state(world, entity, agent, position, tick, packets),
         62 => update_snake_totem_state(world, entity, agent, position, tick, packets),
@@ -2918,6 +2928,44 @@ pub(super) fn update_behemoth_state(
         BEHEMOTH_SLAVE_BATCH,
     );
     true
+}
+
+/// ChieftainArcher (ai 175): on ~1-in-3 of its ranged shots (the SC shot) it knocks the player back
+/// 1 tile after the hit. Applied as an additive flourish on its attack beat; returns false so the
+/// generic ranged shot (its actual damage) still fires.
+pub(super) fn update_chieftain_archer_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) || !agent.tracking_player {
+        return false;
+    }
+    if tick < agent.next_attack_tick
+        || !monster_in_attack_range(agent, position, player_position)
+    {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+    // The SC shot (1-in-3) pushes the player 1 tile away, after its damage. Apply the push on those
+    // beats; the shot itself still resolves via the generic ranged path. (Seed `tick` in the
+    // slot-index position so the mod-3 roll spreads across ticks — see HoodedSummoner.)
+    if deterministic_value(0, object_id, tick, CHIEFTAIN_ARCHER_PUSH_CHANCE_DENOMINATOR) == 0 {
+        if let (Some(player), Some(away)) = (
+            player_entity(world),
+            direction_toward(position, player_position),
+        ) {
+            push_player_in_direction(world, player, away, 1, packets);
+        }
+    }
+    false
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(

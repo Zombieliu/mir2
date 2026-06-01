@@ -4799,6 +4799,60 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn chieftain_archer_knocks_the_player_back_on_some_shots() {
+    // ChieftainArcher (ai 175) is a range-6 archer; on ~1-in-3 of its shots (the SC shot) it also
+    // knocks the player back 1 tile. Place it at range and confirm the player gets pushed at least
+    // once over several beats. (Spawn a real monster and force ai 175.)
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 20_000,
+        max_hp: 20_000,
+        mp: 200,
+    });
+
+    let archer_id = 71_601_u32;
+    let archer = spawn_crystal_monster_for_test(
+        &mut session,
+        archer_id,
+        "Yob",
+        Point {
+            x: player_origin.x + 4,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(archer);
+        entry.insert(MonsterVitals { hp: 5_000, max_hp: 5_000 });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("archer agent");
+        agent.ai = 175;
+        agent.tracking_player = true;
+        agent.can_wander = false;
+        agent.view_range = 8;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    // The knockback relocates the player (push_player_in_direction emits an ObjectWalk for them).
+    let mut pushed = false;
+    for _ in 0..18 {
+        session.tick();
+        if player_position(&session) != player_origin {
+            pushed = true;
+            break;
+        }
+    }
+    assert!(pushed, "ChieftainArcher should knock the player back on its SC shot");
+}
+
+#[test]
 fn behemoth_summons_hugger_slaves_at_range() {
     // Behemoth (ai 71): when the player is in view but beyond melee, it sometimes summons a wave of
     // Hugger slaves ({Hugger, PoisonHugger, MutatedHugger}). Place it a few tiles from the player.

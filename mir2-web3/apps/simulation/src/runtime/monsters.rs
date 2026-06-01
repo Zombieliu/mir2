@@ -1754,6 +1754,7 @@ pub(super) fn monster_attack_range(agent: &MonsterAgent) -> i32 {
         57 => 10,
         8 => 6,
         83 => TORNADO_ATTACK_RANGE,
+        175 => 6, // ChieftainArcher: a range-6 archer (its InAttackRange), not melee.
         // Families without a bespoke reach fall back to the generated profile's InAttackRange
         // distance (0 means "out to view range"), so data-only ranged casters/archers engage from
         // distance instead of only when adjacent.
