@@ -56834,6 +56834,68 @@ fn equipping_dc_range_weapon_produces_damage_spread() {
 }
 
 #[test]
+fn luck_biases_basic_melee_attack_power_toward_max() {
+    // Crystal `PlayerObject.Attack()` rolls melee with `GetAttackPower(MinDC,
+    // MaxDC)`, which is Luck-biased (`MapObject.GetAttackPower`): positive Luck
+    // can force the MaxDC end. The basic melee auto-attack must honor Luck just
+    // like the player's spells do, so high Luck shifts the rolls toward MaxDC.
+    fn rolled_melee_with_luck(luck: i32) -> Vec<i32> {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        // Open a wide DC spread so a Luck max-bias is observable.
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 24);
+        if luck != 0 {
+            equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_LUCK, luck);
+        }
+        assert_eq!(
+            super::player_stats(session.app.world()).luck(),
+            luck,
+            "weapon Luck stat should reach the combat luck channel"
+        );
+        (0..96)
+            .map(|tick| super::crystal_player_rolled_melee_damage(session.app.world(), tick))
+            .collect()
+    }
+
+    let no_luck = rolled_melee_with_luck(0);
+    let lucky = rolled_melee_with_luck(9); // MaxLuck is 10, so 9 forces max ~90%.
+
+    let stats = {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MIN_DC, 4);
+        equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_MAX_DC, 24);
+        super::player_stats(session.app.world())
+    };
+    let (min, max) = (stats.min_dc(), stats.max_dc());
+
+    // Every roll (with or without Luck, no crit gear) stays in [min, max].
+    for &d in no_luck.iter().chain(lucky.iter()) {
+        assert!(
+            (min..=max).contains(&d),
+            "rolled {d} outside [{min}, {max}]"
+        );
+    }
+
+    let max_rolls = |rolls: &[i32]| rolls.iter().filter(|&&d| d == max).count();
+    let lucky_maxes = max_rolls(&lucky);
+    let plain_maxes = max_rolls(&no_luck);
+
+    // High Luck forces the MaxDC end far more often than an unlucky swing.
+    assert!(
+        lucky_maxes > plain_maxes,
+        "Luck 9 should land MaxDC more often (lucky={lucky_maxes}, plain={plain_maxes})"
+    );
+    let lucky_sum: i64 = lucky.iter().map(|&d| i64::from(d)).sum();
+    let plain_sum: i64 = no_luck.iter().map(|&d| i64::from(d)).sum();
+    assert!(
+        lucky_sum > plain_sum,
+        "Luck should raise average melee damage (lucky_sum={lucky_sum}, plain_sum={plain_sum})"
+    );
+}
+
+#[test]
 fn equipping_hp_gear_raises_max_hp_and_unequip_restores() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
