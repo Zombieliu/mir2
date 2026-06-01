@@ -377,6 +377,23 @@ jobs:
           fi
           npm run generate:original-asset-manifest
           npx vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
+          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
+            vercel_env_args=(
+              --build-env "MIR2_USE_PREBUILT_BEVY_RUNTIME=1"
+              --build-env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
+              --build-env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
+              --build-env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              --build-env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+              --build-env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE=$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
+              --build-env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE=$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
+              --env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
+              --env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
+              --env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
+              --env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
+            )
+            npx vercel@latest deploy --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
+            exit 0
+          fi
           npx vercel@latest build --prod --yes --token "$VERCEL_TOKEN"
           npm run vercel:prune-output
           npx vercel@latest deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
