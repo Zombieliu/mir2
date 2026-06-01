@@ -702,6 +702,35 @@ pub(super) fn clear_non_player_world_entities(world: &mut World) {
     }
 }
 
+/// Spawn the operator-configured `visible_npcs` into the world. Used by
+/// `rebuild_world` and again after the crystal world rebuild (which clears all
+/// non-player objects), so configured NPCs also appear on crystal maps.
+pub(super) fn spawn_config_visible_npcs(world: &mut World) {
+    let records = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .visible_npcs
+        .clone();
+    for record in &records {
+        world.spawn((
+            WorldObject,
+            Npc,
+            ObjectId(record.object_id),
+            localized_npc_name_key(record.object_id)
+                .map(|key| DisplayName::localized(key, record.name.clone()))
+                .unwrap_or_else(|| DisplayName::literal(record.name.clone())),
+            Position(record.position.clone()),
+            Facing(record.direction),
+            NpcAgent {
+                image: record.image,
+                colour_argb: record.colour_argb,
+                quest_ids: record.quest_ids.clone(),
+                script_key: record.script_key.clone(),
+            },
+        ));
+    }
+}
+
 pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
@@ -1812,24 +1841,7 @@ pub(super) fn rebuild_world(world: &mut World) {
         }
     }
 
-    for record in &config.visible_npcs {
-        world.spawn((
-            WorldObject,
-            Npc,
-            ObjectId(record.object_id),
-            localized_npc_name_key(record.object_id)
-                .map(|key| DisplayName::localized(key, record.name.clone()))
-                .unwrap_or_else(|| DisplayName::literal(record.name.clone())),
-            Position(record.position.clone()),
-            Facing(record.direction),
-            NpcAgent {
-                image: record.image,
-                colour_argb: record.colour_argb,
-                quest_ids: record.quest_ids.clone(),
-                script_key: record.script_key.clone(),
-            },
-        ));
-    }
+    spawn_config_visible_npcs(world);
 
     spawn_stage5_hero(world);
     world.insert_resource(spawn_table);

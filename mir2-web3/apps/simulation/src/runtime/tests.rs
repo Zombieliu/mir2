@@ -55405,6 +55405,44 @@ fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
 }
 
 #[test]
+fn crystal_runtime_bichon_blacksmith_sells_a_pickaxe() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 100_000;
+
+    let _ = session.interact(4600);
+    let goods_packets = session.select_npc_dialog_target("@BuySell");
+    let pickaxe_unique_id = goods_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NPCGoods { list, .. } => list
+                .iter()
+                .find(|item| item.item_index == 836)
+                .map(|item| item.unique_id),
+            _ => None,
+        })
+        .expect("Bichon blacksmith should offer a PickAxe (item 836) in its goods");
+
+    let buy_packets = session.handle_packet(ClientPacket::BuyItem {
+        item_index: pickaxe_unique_id,
+        count: 1,
+        panel_type: 0,
+    });
+    assert!(
+        buy_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.item_index == 836
+        )),
+        "buying from the blacksmith should grant a PickAxe, got {buy_packets:?}"
+    );
+}
+
+#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });

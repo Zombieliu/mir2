@@ -2353,6 +2353,18 @@ impl SimulationConfig {
             y: 270,
             size: 2,
         });
+        // Bichon blacksmith whose existing [Trade] list already sells a PickAxe,
+        // so players can buy a mining tool without touching the starter inventory.
+        self.visible_npcs.push(VisibleNpcRecord {
+            object_id: 4600,
+            name: "Blacksmith".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 329, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/BichonWall/Blacksmith-0103".to_string()),
+        });
         self
     }
 
