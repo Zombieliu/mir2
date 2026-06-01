@@ -1,6 +1,9 @@
 name: Mir2 Web Assets R2 Release
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       run_id:
@@ -41,7 +44,17 @@ permissions:
   contents: read
 
 jobs:
+  push-release-workflow-gate:
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm release workflow is manual-only
+        run: |
+          echo "R2 asset release is manual-only."
+          echo "Use workflow_dispatch with publish_r2/deploy_worker/deploy_vercel inputs to run the release chain."
+
   build-web-assets:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -178,7 +191,7 @@ jobs:
           fi
           MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
 
-      - name: Release doctor: manifest + R2 asset checks
+      - name: "Release doctor: manifest + R2 asset checks"
         if: ${{ inputs.publish_r2 }}
         working-directory: mir2-web3/apps/web
         run: |
