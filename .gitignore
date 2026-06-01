@@ -55,3 +55,6 @@ Desktop.ini
 **/.env.*
 !**/.env.example
 !**/.env.sample
+
+# Claude Code agent worktrees (ephemeral)
+.claude/worktrees/
