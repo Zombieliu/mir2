@@ -202,6 +202,9 @@ export function OriginalClientMobileControls({
 
     let disposed = false;
     let manager: NippleCollection | null = null;
+    let repositionTimer = 0;
+    let moveHandler: ((...args: unknown[]) => void) | null = null;
+    let endHandler: (() => void) | null = null;
 
     import("nipplejs")
       .then((module) => {
@@ -232,6 +235,7 @@ export function OriginalClientMobileControls({
               force: Number(data?.force ?? 0),
             },
             runLockedRef.current,
+            activeIntentRef.current?.direction ?? null,
           );
           activeIntentRef.current = nextIntent;
           setActiveIntent(nextIntent);
@@ -253,17 +257,28 @@ export function OriginalClientMobileControls({
           publishDebugState(null);
         };
 
+        moveHandler = handleMove;
+        endHandler = handleEnd;
         manager.on("move", handleMove);
         manager.on("end", handleEnd);
-        window.setTimeout(() => manager?.reposition?.(), 0);
+        repositionTimer = window.setTimeout(() => manager?.reposition?.(), 0);
       })
       .catch((error: unknown) => {
+        // Joystick init failing must not crash mobile gameplay; the page stays
+        // usable (tap-to-move still works) and the chunk-reload guard handles
+        // genuine ChunkLoadErrors.
         console.error("Failed to initialize mobile joystick", error);
       });
 
     return () => {
       disposed = true;
-      manager?.destroy();
+      if (repositionTimer) window.clearTimeout(repositionTimer);
+      if (manager) {
+        if (moveHandler) manager.off?.("move", moveHandler);
+        if (endHandler) manager.off?.("end", endHandler);
+        manager.destroy();
+      }
+      manager = null;
       activeIntentRef.current = null;
       setActiveIntent(null);
       onDirectionStopRef.current();

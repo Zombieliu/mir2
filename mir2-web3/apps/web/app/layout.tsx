@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AssetCacheRegistrar } from "./components/asset-cache-registrar";
+import { ChunkReloadGuard } from "./lib/chunk-reload-guard";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" translate="no" className="notranslate" suppressHydrationWarning>
       <body translate="no" className="notranslate" suppressHydrationWarning>
+        <ChunkReloadGuard />
         <AssetCacheRegistrar />
         {children}
       </body>
