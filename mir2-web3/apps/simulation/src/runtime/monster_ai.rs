@@ -821,6 +821,16 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
+        215 | 218 | 220 | 223 => update_sep_clone_displacement(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         131 => update_tucson_general_state(
             world,
             entity,
@@ -2695,6 +2705,80 @@ pub(super) fn update_evil_mir_state(
         );
     }
     true
+}
+
+/// Sep PvP-clone self-displacement flourishes (cosmetic — combat damage/typing is already faithful):
+/// SepWizard / SepHighWizard (215/220) Repulsion-push an adjacent player away on a throttle;
+/// SepArcher / SepHighArcher (218/223) BackStep-jump away when the player closes within 2 tiles.
+/// Always returns false so the family's normal ranged attack still fires on its own beat.
+pub(super) fn update_sep_clone_displacement(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !agent.tracking_player || tick < ai_state.next_state_tick {
+        return false;
+    }
+    let distance = tile_distance(position, player_position);
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+
+    match agent.ai {
+        // Wizard Repulsion: when the player is adjacent, shove them away 4 tiles.
+        215 | 220 if distance <= 1 => {
+            if let Some(push_dir) = direction_toward(position, player_position) {
+                if let Some(player) = player_entity(world) {
+                    let pushed = push_player_in_direction(
+                        world,
+                        player,
+                        push_dir,
+                        SEP_WIZARD_PUSH_DISTANCE,
+                        packets,
+                    );
+                    if pushed.is_some() {
+                        ai_state.next_state_tick = tick + SEP_WIZARD_PUSH_THROTTLE_TICKS;
+                    }
+                }
+            }
+        }
+        // Archer BackStep: when the player closes within 2, hop 3 tiles away from them.
+        218 | 223 if distance <= 2 => {
+            if let Some(toward) = direction_toward(position, player_position) {
+                let away = rotated_direction(toward, 4);
+                let destination = directional_destination(
+                    world,
+                    position,
+                    away,
+                    SEP_ARCHER_BACKSTEP_DISTANCE,
+                    Some(entity),
+                )
+                .unwrap_or_else(|| offset_point(position, away, SEP_ARCHER_BACKSTEP_DISTANCE));
+                if &destination != position {
+                    let travelled = tile_distance(position, &destination);
+                    world
+                        .entity_mut(entity)
+                        .insert((Position(destination.clone()), Facing(toward)));
+                    packets.push(ServerPacket::ObjectBackStep {
+                        movement: ObjectMovement {
+                            object_id,
+                            position: destination,
+                            direction: toward,
+                        },
+                        distance: travelled,
+                    });
+                    ai_state.next_state_tick = tick + SEP_ARCHER_BACKSTEP_THROTTLE_TICKS;
+                }
+            }
+        }
+        _ => {}
+    }
+    false
 }
 
 pub(super) fn spawn_snow_wolf_king_slaves(

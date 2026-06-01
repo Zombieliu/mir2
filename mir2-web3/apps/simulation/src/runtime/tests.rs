@@ -4799,6 +4799,102 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn sep_clone_displacement_flourishes() {
+    // SepArcher (218) BackStep-jumps away when the player closes within 2 tiles; SepWizard (215)
+    // Repulsion-pushes an adjacent player away. Both are cosmetic flourishes layered on the family's
+    // (already faithful) ranged attack. Force the ai on a spawned monster adjacent to the player.
+
+    // --- SepArcher backstep ---
+    {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let player_origin = Point { x: 333, y: 267 };
+        set_player_position(&mut session, player_origin.clone());
+        let archer_start = Point {
+            x: player_origin.x + 1,
+            y: player_origin.y,
+        };
+        let archer_id = 71_301_u32;
+        let archer = spawn_crystal_monster_for_test(
+            &mut session,
+            archer_id,
+            "Yob",
+            archer_start.clone(),
+            MirDirection::Left,
+            true,
+        );
+        let current_tick = runtime_tick(session.app.world());
+        {
+            let mut entry = session.app.world_mut().entity_mut(archer);
+            entry.insert(MonsterVitals { hp: 5_000, max_hp: 5_000 });
+            let mut agent = entry.get_mut::<MonsterAgent>().expect("archer agent");
+            agent.ai = 218;
+            agent.tracking_player = true;
+            agent.can_wander = false;
+            agent.view_range = 7;
+        }
+        sync_visible_objects(&mut session);
+
+        let mut backstepped = false;
+        for _ in 0..6 {
+            let packets = session.tick();
+            if packets.iter().any(|p| matches!(
+                p, ServerPacket::ObjectBackStep { movement, .. } if movement.object_id == archer_id
+            )) {
+                backstepped = true;
+                break;
+            }
+        }
+        let archer_end = session.app.world().entity(archer).get::<Position>().expect("archer pos").0.clone();
+        assert!(backstepped, "SepArcher should emit an ObjectBackStep when the player is close");
+        assert!(
+            tile_distance(&archer_end, &player_origin) > tile_distance(&archer_start, &player_origin),
+            "SepArcher should end farther from the player (start {archer_start:?}, end {archer_end:?})"
+        );
+    }
+
+    // --- SepWizard push ---
+    {
+        let mut session = SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let player_origin = Point { x: 333, y: 267 };
+        set_player_position(&mut session, player_origin.clone());
+        let wizard_id = 71_302_u32;
+        let wizard = spawn_crystal_monster_for_test(
+            &mut session,
+            wizard_id,
+            "Yob",
+            Point { x: player_origin.x + 1, y: player_origin.y },
+            MirDirection::Left,
+            true,
+        );
+        {
+            let mut entry = session.app.world_mut().entity_mut(wizard);
+            entry.insert(MonsterVitals { hp: 5_000, max_hp: 5_000 });
+            let mut agent = entry.get_mut::<MonsterAgent>().expect("wizard agent");
+            agent.ai = 215;
+            agent.tracking_player = true;
+            agent.can_wander = false;
+            agent.view_range = 7;
+        }
+        sync_visible_objects(&mut session);
+
+        let mut pushed = false;
+        for _ in 0..6 {
+            let packets = session.tick();
+            let player_id = current_player_object_id(session.app.world()).unwrap_or(0);
+            if packets.iter().any(|p| matches!(
+                p, ServerPacket::ObjectPushed { object_id, .. } if *object_id == player_id
+            )) || player_position(&session) != player_origin {
+                pushed = true;
+                break;
+            }
+        }
+        assert!(pushed, "SepWizard should Repulsion-push the adjacent player");
+    }
+}
+
+#[test]
 fn evil_mir_attacks_player_with_mac_damage_and_poison() {
     // EvilMir (ai 52) is the stationary final boss: on its beat it hits the player (1/8 full-DC mass
     // attack, else 0.75x DC single-target), resolved against MAC, applying green + paralysis. With a

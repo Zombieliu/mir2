@@ -177,6 +177,13 @@ pub(super) const HORNED_COMMANDER_CHARGE_TICKS: u64 = 3;
 pub(super) const HORNED_COMMANDER_SHIELD_HP_PERCENT: i32 = 10;
 pub(super) const HORNED_COMMANDER_SHIELD_DURATION_TICKS: u64 = 20;
 pub(super) const HORNED_COMMANDER_SLAVE_NAME: &str = "HornedWarrior";
+/// Sep PvP-clone self-displacement flourishes (cosmetic; combat is already faithful): SepWizard /
+/// SepHighWizard (215/220) Repulsion-push an adjacent player 4 tiles on a throttle; SepArcher /
+/// SepHighArcher (218/223) BackStep-jump 3 tiles away when the player is within 2.
+pub(super) const SEP_WIZARD_PUSH_DISTANCE: i32 = 4;
+pub(super) const SEP_WIZARD_PUSH_THROTTLE_TICKS: u64 = 10;
+pub(super) const SEP_ARCHER_BACKSTEP_DISTANCE: i32 = 3;
+pub(super) const SEP_ARCHER_BACKSTEP_THROTTLE_TICKS: u64 = 5;
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The
