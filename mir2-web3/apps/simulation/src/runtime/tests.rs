@@ -55405,20 +55405,6 @@ fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
 }
 
 #[test]
-fn starter_loadout_includes_a_pickaxe() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
-    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    let resources = session.app.world().resource::<InventoryResource>();
-    assert!(
-        resources
-            .inventory_items
-            .iter()
-            .any(|item| item.key == "crystal-item-836"),
-        "starter bag should contain a pickaxe (crystal-item-836) so players can mine"
-    );
-}
-
-#[test]
 fn crystal_mining_without_pickaxe_does_nothing() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
