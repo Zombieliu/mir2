@@ -188,6 +188,14 @@ pub(super) const SEP_ARCHER_BACKSTEP_THROTTLE_TICKS: u64 = 5;
 /// the player away (no damage) by `distance - 1` tiles, away from the tornado.
 pub(super) const TORNADO_AI: u8 = 83;
 pub(super) const TORNADO_ATTACK_RANGE: i32 = 5;
+/// Behemoth (ai 71): a melee boss that, when the player is out of melee range, sometimes summons a
+/// wave of Hugger slaves (from {Hugger, PoisonHugger, MutatedHugger}) capped at 8, on a throttle;
+/// otherwise it does a 3x-DC ranged slam (already covered by the generic ranged path).
+pub(super) const BEHEMOTH_AI: u8 = 71;
+pub(super) const BEHEMOTH_MAX_SLAVES: usize = 8;
+pub(super) const BEHEMOTH_SLAVE_BATCH: usize = 3;
+pub(super) const BEHEMOTH_SUMMON_THROTTLE_TICKS: u64 = 12;
+pub(super) const BEHEMOTH_SLAVE_NAMES: [&str; 3] = ["Hugger", "PoisonHugger", "MutatedHugger"];
 pub(super) const SNOW_WOLF_KING_SLAVE_COUNT: usize = 3;
 /// EvilMir (ai 52) `Attack`: each landed hit rolls `PoisonTarget(_, 5, 15, Green, 2000)` and
 /// `PoisonTarget(_, 5, 5, Paralysis, 1000)` — both green DOT and a paralysis stun, 1/5 each. The

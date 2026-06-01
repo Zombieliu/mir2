@@ -4799,6 +4799,67 @@ fn spawned_caster_defence_typing_matches_crystal() {
 }
 
 #[test]
+fn behemoth_summons_hugger_slaves_at_range() {
+    // Behemoth (ai 71): when the player is in view but beyond melee, it sometimes summons a wave of
+    // Hugger slaves ({Hugger, PoisonHugger, MutatedHugger}). Place it a few tiles from the player.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let player_origin = Point { x: 333, y: 267 };
+    set_player_position(&mut session, player_origin.clone());
+    let player = player_entity(session.app.world()).expect("player entity");
+    session.app.world_mut().entity_mut(player).insert(PlayerVitals {
+        hp: 5_000,
+        max_hp: 5_000,
+        mp: 200,
+    });
+
+    let behemoth_id = 71_501_u32;
+    // "Behemoth" is a data-only class with no manifest instance; spawn a real monster and force ai 71.
+    let behemoth = spawn_crystal_monster_for_test(
+        &mut session,
+        behemoth_id,
+        "Hugger",
+        Point {
+            x: player_origin.x + 3,
+            y: player_origin.y,
+        },
+        MirDirection::Left,
+        true,
+    );
+    let current_tick = runtime_tick(session.app.world());
+    {
+        let mut entry = session.app.world_mut().entity_mut(behemoth);
+        entry.insert(MonsterVitals {
+            hp: 200_000,
+            max_hp: 200_000,
+        });
+        let mut agent = entry.get_mut::<MonsterAgent>().expect("behemoth agent");
+        agent.ai = 71;
+        agent.tracking_player = true;
+        agent.can_wander = false;
+        agent.view_range = 8;
+        agent.attack_interval_ticks = 1;
+        agent.next_attack_tick = current_tick;
+    }
+    sync_visible_objects(&mut session);
+
+    let huggers = ["Hugger", "PoisonHugger", "MutatedHugger"];
+    let mut summoned = false;
+    for _ in 0..40 {
+        let packets = session.tick();
+        if packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::ObjectMonster { info }
+                if info.master_object_id == behemoth_id && huggers.contains(&info.name.as_str())
+        )) {
+            summoned = true;
+            break;
+        }
+    }
+    assert!(summoned, "Behemoth should summon a Hugger slave when the player is at range");
+}
+
+#[test]
 fn tornado_shoves_the_player_away_without_damage() {
     // Tornado (ai 83) is a pure-knockback monster: at range 2-5 it shoves the player away with no
     // damage. Place it 3 tiles from the player in open ground and tick; the player should be pushed

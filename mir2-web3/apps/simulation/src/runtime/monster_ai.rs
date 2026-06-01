@@ -788,6 +788,16 @@ pub(super) fn update_special_monster_state(
             tick,
             packets,
         ),
+        71 => update_behemoth_state(
+            world,
+            entity,
+            agent,
+            ai_state,
+            position,
+            player_position,
+            tick,
+            packets,
+        ),
         83 => update_tornado_state(
             world,
             entity,
@@ -2839,6 +2849,74 @@ pub(super) fn update_tornado_state(
         // Shove the player away by `distance - 1` tiles (Crystal Pushed dist - 1).
         push_player_in_direction(world, player, away, (distance - 1).max(1), packets);
     }
+    true
+}
+
+/// Behemoth (ai 71): when the player is out of melee range, on a throttled beat it summons a wave of
+/// Hugger slaves (from {Hugger, PoisonHugger, MutatedHugger}, capped at 8) instead of attacking.
+/// Returns true when it summons; false otherwise so its melee swipe / ranged slam fire normally.
+pub(super) fn update_behemoth_state(
+    world: &mut World,
+    entity: Entity,
+    agent: &mut MonsterAgent,
+    ai_state: &mut MonsterAiState,
+    position: &Point,
+    player_position: &Point,
+    tick: u64,
+    packets: &mut Vec<ServerPacket>,
+) -> bool {
+    if agent.dead || !monster_can_attack(agent, ai_state) || !agent.tracking_player {
+        return false;
+    }
+    // Only summon when the player is in view but beyond melee, on the summon beat, cap allowing.
+    let distance = tile_distance(position, player_position);
+    if distance <= 1
+        || distance > agent.view_range.max(1)
+        || tick < agent.next_attack_tick
+        || tick < ai_state.next_state_tick
+    {
+        return false;
+    }
+    let Some(object_id) = entity_object_id(world, entity) else {
+        return false;
+    };
+    if active_summoned_monster_count(world, object_id) >= BEHEMOTH_MAX_SLAVES {
+        return false;
+    }
+    // Crystal alternates summon vs a 3x-DC slam at range; gate the summon to ~half its range beats.
+    if !deterministic_chance_roll(tick, object_id, 7_100, 2) {
+        return false; // let the generic ranged slam fire this beat.
+    }
+
+    let direction = direction_toward(position, player_position).unwrap_or(MirDirection::Down);
+    agent.next_attack_tick = tick + agent.attack_interval_ticks.max(1);
+    ai_state.next_state_tick = tick + BEHEMOTH_SUMMON_THROTTLE_TICKS;
+    world.entity_mut(entity).insert(Facing(direction));
+    packets.push(ServerPacket::ObjectRangeAttack {
+        info: ObjectRangeAttackInfo {
+            object_id,
+            location: position.clone(),
+            direction,
+            target_id: current_player_object_id(world).unwrap_or(0),
+            target: player_position.clone(),
+            attack_type: 0,
+            spell: 0,
+            level: 0,
+        },
+    });
+    spawn_monster_slave_wave(
+        world,
+        entity,
+        object_id,
+        position,
+        direction,
+        player_entity(world),
+        agent,
+        tick,
+        &BEHEMOTH_SLAVE_NAMES,
+        BEHEMOTH_MAX_SLAVES,
+        BEHEMOTH_SLAVE_BATCH,
+    );
     true
 }
 
