@@ -418,6 +418,20 @@ export function OriginalClientShell({
     setMotionNow(Date.now());
   }, []);
 
+  // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
+  // This shell is lazily mounted (dynamic, ssr:false); the runtime attaches to this canvas
+  // on boot, so booting before it exists panics bevy_winit ("Cannot find element"). This
+  // mount effect runs after the canvas is committed to the DOM.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const w = window as Window & { __mir2BevyCanvasReady?: boolean };
+    w.__mir2BevyCanvasReady = true;
+    window.dispatchEvent(new Event("mir2:bevy-canvas-ready"));
+    return () => {
+      w.__mir2BevyCanvasReady = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (screen === "game") {
       stageFrameRef.current?.focus({ preventScroll: true });
