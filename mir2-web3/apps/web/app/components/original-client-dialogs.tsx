@@ -250,7 +250,51 @@ export type NpcDialogPanelProps = {
   onClose: () => void;
   onSelectTarget: (target: string) => void;
   onSubmitInput: (value: string) => void;
+  /** Optional NPC portrait image URL, shown in the header. */
+  portrait?: string | null;
 };
+
+/** Classify a dialog option for icon hinting (matches Crystal @-targets). */
+type NpcLinkKind = "default" | "buy" | "sell" | "repair" | "quest" | "exit" | "back";
+
+function npcLinkKind(text: string, target: string): NpcLinkKind {
+  const key = `${target} ${text}`.toLowerCase();
+  if (/@exit\b|\bexit\b|\bgoodbye\b|\bleave\b/.test(key)) return "exit";
+  if (/@back\b|\bback\b|\bmain\b/.test(key)) return "back";
+  if (/buysell|@buy\b|\bbuy\b|\bgoods\b|\bshop\b|\bstore\b/.test(key)) return "buy";
+  if (/@sell\b|\bsell\b/.test(key)) return "sell";
+  if (/@?repair|\brepair\b/.test(key)) return "repair";
+  if (/quest|task|mission|@accept|@finish|@complete|@share/.test(key)) return "quest";
+  return "default";
+}
+
+/** A small leading glyph for the option, echoing the original icon affordances. */
+function npcLinkGlyph(kind: NpcLinkKind): string {
+  switch (kind) {
+    case "buy":
+      return "▸"; // ▸ buy/goods
+    case "sell":
+      return "▾"; // ▾ sell
+    case "repair":
+      return "⚒"; // ⚒ repair
+    case "quest":
+      return "✧"; // ✧ quest
+    case "exit":
+      return "✕"; // ✕ exit
+    case "back":
+      return "‹"; // ‹ back
+    default:
+      return "•"; // • default
+  }
+}
+
+/** Extract a gold amount mentioned in an option's text, if any. */
+function npcLinkGold(text: string): number | null {
+  const match = text.replace(/,/g, "").match(/(\d{2,})\s*(?:gold|gp)\b/i);
+  if (!match) return null;
+  const value = Number.parseInt(match[1], 10);
+  return Number.isFinite(value) ? value : null;
+}
 
 export function NpcDialogPanel({
   t,
@@ -258,6 +302,7 @@ export function NpcDialogPanel({
   onClose,
   onSelectTarget,
   onSubmitInput,
+  portrait,
 }: NpcDialogPanelProps) {
   const [inputValue, setInputValue] = useState("");
   const bodyLines = dialog.body.map(stripCrystalDialogMarkup).filter((line) => line.trim().length > 0);
@@ -267,28 +312,51 @@ export function NpcDialogPanel({
   return (
     <section className="npc-dialog-panel">
       <div className="npc-dialog-head">
+        {portrait ? (
+          <img
+            src={portrait}
+            alt=""
+            draggable={false}
+            style={{ position: "absolute", left: 4, top: 2, width: 20, height: 20, imageRendering: "pixelated" }}
+          />
+        ) : null}
         <strong>{title}</strong>
         <div className="npc-dialog-actions">
           <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
           <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close")} onClick={onClose} />
         </div>
       </div>
-      <div className="npc-dialog-body">
+      <div className="npc-dialog-body" style={{ maxHeight: 168, overflowY: "auto" }}>
         {bodyLines.map((line, index) => (
           <p key={`${dialog.npcObjectId}-${index}`}>{line}</p>
         ))}
         {dialog.links.length ? (
           <div className="npc-dialog-links">
-            {dialog.links.map((link, index) => (
-              <button
-                key={`${dialog.npcObjectId}-link-${index}-${link.target}`}
-                type="button"
-                data-target={link.target}
-                onClick={() => onSelectTarget(link.target)}
-              >
-                {stripCrystalDialogMarkup(link.text)}
-              </button>
-            ))}
+            {dialog.links.map((link, index) => {
+              const label = stripCrystalDialogMarkup(link.text);
+              const kind = npcLinkKind(label, link.target);
+              const gold = npcLinkGold(label);
+              return (
+                <button
+                  key={`${dialog.npcObjectId}-link-${index}-${link.target}`}
+                  type="button"
+                  data-target={link.target}
+                  data-link-kind={kind}
+                  onClick={() => onSelectTarget(link.target)}
+                >
+                  <span aria-hidden style={{ display: "inline-block", width: 14, color: "#caa64a" }}>
+                    {npcLinkGlyph(kind)}
+                  </span>
+                  {label}
+                  {gold !== null ? (
+                    <span style={{ marginLeft: 6, color: "#f0d98a" }}>{`(${gold.toLocaleString("en-US")} ${t("client.Gold", [], "Gold")})`}</span>
+                  ) : null}
+                  {kind === "quest" ? (
+                    <span style={{ marginLeft: 6, color: "#7be07a" }}>{t("ui.questTag", [], "[Quest]")}</span>
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
         ) : null}
       </div>

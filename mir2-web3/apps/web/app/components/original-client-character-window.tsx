@@ -82,6 +82,33 @@ type DisplayWorld = {
 
 type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
 
+type StatRangeValue = { min?: number; max?: number };
+
+/**
+ * Rich, fully-derived character stats matching Crystal's stats pages. Every
+ * field is optional: when the host does not supply this prop (the historical
+ * case) the window falls back to deriving AC from equipment defence and DC
+ * from equipment attack, leaving the rest of the printed slots blank — exactly
+ * as before. When supplied, the stat pages render the authoritative ranges and
+ * secondary attributes (accuracy/agility/luck, holy, attack speed, resists).
+ */
+export type DisplayCharacterStats = {
+  ac?: StatRangeValue;
+  mac?: StatRangeValue;
+  dc?: StatRangeValue;
+  mc?: StatRangeValue;
+  sc?: StatRangeValue;
+  accuracy?: number;
+  agility?: number;
+  luck?: number;
+  holy?: number;
+  attackSpeed?: number;
+  magicResist?: number;
+  poisonResist?: number;
+  handWeight?: { current?: number; max?: number };
+  wearWeight?: { current?: number; max?: number };
+};
+
 type CharacterWindowProps = {
   t: TranslateFn;
   activeTab: CharacterTabKey;
@@ -93,6 +120,14 @@ type CharacterWindowProps = {
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
+  /** Optional authoritative stat ranges; derived from equipment when absent. */
+  stats?: DisplayCharacterStats;
+  /** Optional guild name shown on the header line under the player's name. */
+  guildName?: string;
+  /** Optional guild rank/title shown alongside the guild name. */
+  guildRank?: string;
+  /** Optional class title / honorific shown next to the level. */
+  title?: string;
 };
 
 type StatCell = {
@@ -113,6 +148,10 @@ export function CharacterWindow({
   onRepairItem,
   onSpecialRepairItem,
   onCastSkill,
+  stats,
+  guildName,
+  guildRank,
+  title,
 }: CharacterWindowProps) {
   const activePage = ORIGINAL_UI.character.pages[activeTab];
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
@@ -132,15 +171,15 @@ export function CharacterWindow({
   // (HP/MP plus derived AC from defence and DC from attack) and leave the rest
   // as empty aligned slots so the panel still lines up with the printed labels.
   const stats1Cells: StatCell[] = [
-    statRangeCell(t("ui.statAc", [], "AC"), 0, totalDefence),
-    statRangeCell(t("ui.statMac", [], "MAC"), 0, 0),
-    statRangeCell(t("ui.statDc", [], "DC"), weaponAttack, totalAttack),
-    statRangeCell(t("ui.statMc", [], "MC"), 0, 0),
-    statRangeCell(t("ui.statSc", [], "SC"), 0, 0),
-    statCell(t("ui.statAccuracy", [], "Accuracy"), ""),
-    statCell(t("ui.statAgility", [], "Agility"), ""),
-    statCell(t("ui.statLuck", [], "Luck"), ""),
-    statCell("", ""),
+    rangeCellFrom(t("ui.statAc", [], "AC"), stats?.ac, 0, totalDefence),
+    rangeCellFrom(t("ui.statMac", [], "MAC"), stats?.mac, 0, 0),
+    rangeCellFrom(t("ui.statDc", [], "DC"), stats?.dc, weaponAttack, totalAttack),
+    rangeCellFrom(t("ui.statMc", [], "MC"), stats?.mc, 0, 0),
+    rangeCellFrom(t("ui.statSc", [], "SC"), stats?.sc, 0, 0),
+    statCell(t("ui.statAccuracy", [], "Accuracy"), flatValue(stats?.accuracy)),
+    statCell(t("ui.statAgility", [], "Agility"), flatValue(stats?.agility)),
+    statCell(t("ui.statLuck", [], "Luck"), flatValue(stats?.luck)),
+    statCell(t("ui.statAttackSpeed", [], "A.Speed"), flatValue(stats?.attackSpeed)),
     statCell(t("ui.hp", [], "HP"), pairValue(world.playerHp, world.playerMaxHp)),
     statCell(t("ui.mp", [], "MP"), pairValue(world.playerMp, world.playerMp !== undefined ? Math.max(world.playerMp, 100) : undefined)),
   ];
@@ -152,11 +191,11 @@ export function CharacterWindow({
     statCell(t("ui.experience", [], "Experience"), `${expPercent.toFixed(2)}%`),
     statCell(t("ui.statBagSpace", [], "Bag Space"), pairValue(world.freeBagSlots, world.maxBagSlots)),
     statCell(t("ui.statWeight", [], "Weight"), pairValue(world.currentWeight, world.maxWeight)),
-    statCell(t("ui.statHandWeight", [], "Hand Weight"), ""),
-    statCell(t("ui.statWearWeight", [], "Wear Weight"), ""),
-    statCell(t("ui.statMagicResist", [], "Magic Resist"), ""),
-    statCell(t("ui.statPoisonResist", [], "Poison Resist"), ""),
-    statCell(t("ui.statHoly", [], "Holy"), ""),
+    statCell(t("ui.statHandWeight", [], "Hand Weight"), pairValue(stats?.handWeight?.current, stats?.handWeight?.max)),
+    statCell(t("ui.statWearWeight", [], "Wear Weight"), pairValue(stats?.wearWeight?.current, stats?.wearWeight?.max)),
+    statCell(t("ui.statMagicResist", [], "Magic Resist"), flatValue(stats?.magicResist)),
+    statCell(t("ui.statPoisonResist", [], "Poison Resist"), flatValue(stats?.poisonResist)),
+    statCell(t("ui.statHoly", [], "Holy"), flatValue(stats?.holy)),
     statCell("", ""),
     statCell("", ""),
     statCell("", ""),
@@ -197,7 +236,19 @@ export function CharacterWindow({
             style={CLASS_BADGE_STYLE}
           />
         ) : null}
-        <span>{levelLabel}</span>
+        <span>{[levelLabel, title].filter(Boolean).join(" · ")}</span>
+      </div>
+
+      {guildName ? (
+        <div style={HEADER_GUILD_STYLE} title={guildName}>
+          {`< ${guildName}${guildRank ? ` · ${guildRank}` : ""} >`}
+        </div>
+      ) : null}
+
+      {/* Experience bar (mirrors the bottom-of-window XP gauge in Crystal). */}
+      <div style={EXP_BAR_TRACK_STYLE} aria-label={t("ui.experience", [], "Experience")} title={`${t("ui.experience", [], "Experience")}: ${expPercent.toFixed(2)}%`}>
+        <span style={{ ...EXP_BAR_FILL_STYLE, width: `${Math.min(100, Math.max(0, expPercent))}%` }} />
+        <span style={EXP_BAR_TEXT_STYLE}>{`${expPercent.toFixed(1)}%`}</span>
       </div>
 
       {activeTab === "char" ? (
@@ -341,6 +392,51 @@ const CLASS_BADGE_STYLE: CSSProperties = {
   imageRendering: "pixelated",
 };
 
+const HEADER_GUILD_STYLE: CSSProperties = {
+  position: "absolute",
+  left: 0,
+  top: 50,
+  width: 264,
+  textAlign: "center",
+  fontSize: 10,
+  color: "#caa64a",
+  textShadow: "1px 1px 0 #000",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  textOverflow: "ellipsis",
+};
+
+const EXP_BAR_TRACK_STYLE: CSSProperties = {
+  position: "absolute",
+  left: 18,
+  top: 367,
+  width: 228,
+  height: 9,
+  border: "1px solid rgba(190, 157, 99, 0.5)",
+  background: "rgba(11, 8, 5, 0.7)",
+  overflow: "hidden",
+};
+
+const EXP_BAR_FILL_STYLE: CSSProperties = {
+  position: "absolute",
+  left: 0,
+  top: 0,
+  height: "100%",
+  background: "linear-gradient(180deg, #d6b46e, #9c7a32)",
+};
+
+const EXP_BAR_TEXT_STYLE: CSSProperties = {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: 0,
+  textAlign: "center",
+  fontSize: 8,
+  lineHeight: "9px",
+  color: "#f4ecd6",
+  textShadow: "1px 1px 0 #000",
+};
+
 function originalItemIconPath(icon: number) {
   return `/original-ui/Items/${icon}.png`;
 }
@@ -355,6 +451,25 @@ function statRangeCell(label: string, min: number, max: number): StatCell {
   }
   const safeMin = Math.max(0, Math.min(min, max));
   return { label, value: `${safeMin}-${max}` };
+}
+
+/**
+ * Prefer an authoritative stat range when supplied; otherwise derive from the
+ * equipment-based fallback (min/max). Renders an empty aligned slot when no
+ * data is available, keeping the printed labels aligned.
+ */
+function rangeCellFrom(label: string, range: StatRangeValue | undefined, fallbackMin: number, fallbackMax: number): StatCell {
+  if (range && (range.min !== undefined || range.max !== undefined)) {
+    const min = Math.max(0, range.min ?? 0);
+    const max = Math.max(min, range.max ?? min);
+    return { label, value: `${min}-${max}` };
+  }
+  return statRangeCell(label, fallbackMin, fallbackMax);
+}
+
+function flatValue(value: number | undefined): string {
+  if (value === undefined || !Number.isFinite(value)) return "";
+  return String(value);
 }
 
 function pairValue(current?: number, max?: number) {
