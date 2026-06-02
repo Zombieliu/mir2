@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { DEFAULT_HOTKEY_GROUPS } from "./original-client-hotkey-window";
 import { SpriteButton } from "./original-client-overlays";
 import { SocialSystemPanel, type SystemMenuSocialPanel } from "./original-client-social-system-panel";
 
@@ -102,12 +103,18 @@ export function SystemMenuPanel({
   const [qaMap, setQaMap] = useState(() => normalizeMapInput(mapFileName ?? "0"));
   const [qaX, setQaX] = useState(() => String(playerPosition?.x ?? 330));
   const [qaY, setQaY] = useState(() => String(playerPosition?.y ?? 270));
+  // Local, self-contained reference overlay (no host wiring needed). The
+  // original options screen exposes a key list + quick help next to the menu;
+  // we surface the same content without changing the prop contract.
+  const [infoOverlay, setInfoOverlay] = useState<"help" | "keyboard" | null>(null);
   const noop = () => undefined;
+  const toggleInfoOverlay = (next: "help" | "keyboard") =>
+    setInfoOverlay((current) => (current === next ? null : next));
   const menuButtons: SystemMenuButtonDefinition[] = [
     { key: "exit", label: t("ui.exit"), onClick: onLogout },
     { key: "logout", label: t("ui.logout", [], "Log Out"), onClick: onLogout },
-    { key: "help", label: t("ui.help", [], "Help"), onClick: noop },
-    { key: "keyboard", label: t("ui.keyboard", [], "Keyboard"), onClick: noop },
+    { key: "help", label: t("ui.help", [], "Help"), onClick: () => toggleInfoOverlay("help") },
+    { key: "keyboard", label: t("ui.keyboard", [], "Keyboard"), onClick: () => toggleInfoOverlay("keyboard") },
     { key: "ranking", label: t("ui.ranking", [], "Ranking"), panel: "ranking" as const },
     { key: "creature", label: t("ui.creature", [], "Creature"), panel: "creature" as const },
     { key: "ride", label: t("ui.mount", [], "Mount"), panel: "mount" as const },
@@ -224,7 +231,59 @@ export function SystemMenuPanel({
           ))}
         </div>
       </section>
+      {infoOverlay ? (
+        <SystemMenuInfoOverlay t={t} mode={infoOverlay} onClose={() => setInfoOverlay(null)} />
+      ) : null}
     </>
+  );
+}
+
+function SystemMenuInfoOverlay({
+  t,
+  mode,
+  onClose,
+}: {
+  t: TranslateFn;
+  mode: "help" | "keyboard";
+  onClose: () => void;
+}) {
+  const title = mode === "keyboard" ? t("ui.keyboard", [], "Keyboard") : t("ui.help", [], "Help");
+  return (
+    <section
+      className="system-menu-info-overlay"
+      data-system-menu-info={mode}
+      aria-label={title}
+      style={infoStyle.panel}
+    >
+      <div style={infoStyle.head}>
+        <span style={infoStyle.title}>{title}</span>
+        <button type="button" aria-label={t("ui.close", [], "Close")} onClick={onClose} style={infoStyle.close}>
+          ×
+        </button>
+      </div>
+      <div style={infoStyle.body}>
+        {mode === "keyboard" ? (
+          DEFAULT_HOTKEY_GROUPS.map((group) => (
+            <div key={group.titleKey} style={infoStyle.group}>
+              <div style={infoStyle.groupTitle}>{t(group.titleKey, [], group.titleFallback)}</div>
+              {group.bindings.map((binding) => (
+                <div key={binding.id} style={infoStyle.row}>
+                  <span style={infoStyle.rowLabel}>{t(binding.labelKey, [], binding.labelFallback)}</span>
+                  <kbd style={infoStyle.keycap}>{binding.keys}</kbd>
+                </div>
+              ))}
+            </div>
+          ))
+        ) : (
+          <div style={infoStyle.group}>
+            <div style={infoStyle.groupTitle}>{t("ui.helpSubtitle", [], "Legend of Mir 2 quick reference")}</div>
+            <p style={infoStyle.helpLine}>{t("ui.helpMoveBody", [], "Left-click the ground to walk. Hold the button to keep moving.")}</p>
+            <p style={infoStyle.helpLine}>{t("ui.helpInteractBody", [], "Left-click an NPC to talk, a monster to attack, or a dropped item to pick it up.")}</p>
+            <p style={infoStyle.helpLine}>{t("ui.helpWindowsBody", [], "Use the toolbar or hotkeys to open Character, Inventory, Skills and this menu.")}</p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -455,6 +514,71 @@ function FishingSystemPanel({
     </>
   );
 }
+
+const infoStyle: Record<string, CSSProperties> = {
+  panel: {
+    position: "absolute",
+    right: 56,
+    top: 60,
+    width: 280,
+    maxHeight: 420,
+    zIndex: 40,
+    display: "flex",
+    flexDirection: "column",
+    border: "1px solid rgba(190, 157, 99, 0.6)",
+    background:
+      "linear-gradient(180deg, rgba(40, 28, 15, 0.97), rgba(12, 8, 5, 0.97))",
+    boxShadow: "0 16px 36px rgba(0, 0, 0, 0.5)",
+    color: "#f0eee8",
+    font: "11px Georgia, 'Times New Roman', serif",
+    textShadow: "1px 1px 0 #000",
+  },
+  head: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "5px 8px",
+    borderBottom: "1px solid rgba(190, 157, 99, 0.36)",
+  },
+  title: { fontSize: 12, fontWeight: 700, color: "#f4dcaf", letterSpacing: 0.5 },
+  close: {
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    background: "rgba(30, 20, 12, 0.86)",
+    color: "#e3d3af",
+    width: 18,
+    height: 18,
+    lineHeight: "14px",
+    fontSize: 13,
+    cursor: "pointer",
+  },
+  body: { overflowY: "auto", padding: "6px 8px", display: "flex", flexDirection: "column", gap: 8 },
+  group: { display: "flex", flexDirection: "column", gap: 3 },
+  groupTitle: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#f4dcaf",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    borderBottom: "1px solid rgba(190, 157, 99, 0.24)",
+    paddingBottom: 3,
+    marginBottom: 1,
+  },
+  row: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  rowLabel: { color: "#d6c6a5", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  keycap: {
+    flex: "0 0 auto",
+    fontFamily: "inherit",
+    fontSize: 10,
+    color: "#f8e6bb",
+    background: "linear-gradient(180deg, rgba(52, 32, 18, 0.95), rgba(28, 17, 9, 0.95))",
+    border: "1px solid rgba(214, 180, 110, 0.6)",
+    borderRadius: 3,
+    padding: "0 6px",
+    minWidth: 44,
+    textAlign: "center",
+  },
+  helpLine: { margin: 0, color: "#d6c6a5", lineHeight: 1.4 },
+};
 
 function normalizeMapInput(value: string) {
   return value.trim().replace(/\.map$/i, "") || "0";

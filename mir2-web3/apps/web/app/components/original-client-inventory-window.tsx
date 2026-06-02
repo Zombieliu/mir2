@@ -713,8 +713,8 @@ export function InventoryWindow({
       <button
         type="button"
         className="inventory-gold"
-        aria-label={t("ui.dropGold", [], "Drop Gold")}
-        title={t("ui.dropGold", [], "Drop Gold")}
+        aria-label={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)} — ${t("ui.dropGold", [], "Drop Gold")}`}
+        title={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)}`}
         onClick={() => {
           setPendingGoldDrop(true);
           setDeleteMode(false);
@@ -726,9 +726,14 @@ export function InventoryWindow({
           setDeleteFeedback(null);
         }}
       >
-        {world.gold}
+        {world.gold.toLocaleString(locale)}
       </button>
-      <div className="inventory-weight">{world.freeBagSlots}</div>
+      <div
+        className="inventory-weight"
+        title={`${t("ui.statBagSpace", [], "Bag Space")}: ${world.freeBagSlots}/${world.maxBagSlots}`}
+      >
+        {world.freeBagSlots}
+      </div>
       {deleteMode ? <div className="inventory-delete-hint">{`${t("ui.deleteItem")}...`}</div> : null}
       {showStorageWindow ? (
         <div className="window-shell storage-window">

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI, type CharacterTabKey } from "../../lib/original-ui";
-import { OriginalItemTooltip } from "./original-client-item-tooltip";
+import { OriginalItemTooltip, type ItemTooltipGrade } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -28,7 +28,19 @@ type EquipmentSlot =
   | "belt"
   | "stone";
 
-type DisplayEntity = { name: string };
+type EntityClassKey = "warrior" | "wizard" | "taoist" | "assassin" | "archer";
+
+/**
+ * The window only needs the player's identity + class for the header / paperdoll
+ * badge. These fields are all optional so any compatible payload (including the
+ * minimal `{ name }` the host historically passed) keeps working.
+ */
+type DisplayEntity = {
+  name: string;
+  classKey?: EntityClassKey;
+  genderKey?: "male" | "female";
+  level?: number;
+};
 
 type DisplayEquipmentItem = {
   slot: EquipmentSlot;
@@ -83,6 +95,13 @@ type CharacterWindowProps = {
   onCastSkill: (skillKey: string) => void;
 };
 
+type StatCell = {
+  /** Localised stat name, used for the accessible label + hover title. */
+  label: string;
+  /** Formatted value shown in the cell ("" renders an empty aligned slot). */
+  value: string;
+};
+
 export function CharacterWindow({
   t,
   activeTab,
@@ -99,6 +118,7 @@ export function CharacterWindow({
   const equipmentBySlot = new Map(world.equipmentItems.map((item) => [item.slot, item]));
   const totalAttack = world.equipmentItems.reduce((sum, item) => sum + item.attack, 0);
   const totalDefence = world.equipmentItems.reduce((sum, item) => sum + item.defence, 0);
+  const weaponAttack = equipmentBySlot.get("weapon")?.attack ?? 0;
   const [repairMode, setRepairMode] = useState<"normal" | "special" | null>(null);
   const repairModeLabel =
     repairMode === "normal"
@@ -106,42 +126,52 @@ export function CharacterWindow({
       : repairMode === "special"
         ? t("ui.specialRepairItem", [], "Special Repair")
         : "";
-  const stats1Values = [
-    displayFieldValue(world.playerHp, world.playerMaxHp),
-    displayFieldValue(world.playerMp, 100),
-    statNumber(totalDefence),
-    "",
-    statNumber(totalAttack),
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
+
+  // Crystal stats page 1: AC / MAC / DC / MC / SC / Accuracy / Agility / Light /
+  // ... then HP / MP at the bottom. We surface what the world payload provides
+  // (HP/MP plus derived AC from defence and DC from attack) and leave the rest
+  // as empty aligned slots so the panel still lines up with the printed labels.
+  const stats1Cells: StatCell[] = [
+    statRangeCell(t("ui.statAc", [], "AC"), 0, totalDefence),
+    statRangeCell(t("ui.statMac", [], "MAC"), 0, 0),
+    statRangeCell(t("ui.statDc", [], "DC"), weaponAttack, totalAttack),
+    statRangeCell(t("ui.statMc", [], "MC"), 0, 0),
+    statRangeCell(t("ui.statSc", [], "SC"), 0, 0),
+    statCell(t("ui.statAccuracy", [], "Accuracy"), ""),
+    statCell(t("ui.statAgility", [], "Agility"), ""),
+    statCell(t("ui.statLuck", [], "Luck"), ""),
+    statCell("", ""),
+    statCell(t("ui.hp", [], "HP"), pairValue(world.playerHp, world.playerMaxHp)),
+    statCell(t("ui.mp", [], "MP"), pairValue(world.playerMp, world.playerMp !== undefined ? Math.max(world.playerMp, 100) : undefined)),
   ];
-  const stats2Values = [
-    `${(ratio(world.playerExperience, world.playerMaxExperience) * 100).toFixed(2)}%`,
-    statPair(world.freeBagSlots, world.maxBagSlots),
-    statPair(world.currentWeight, world.maxWeight),
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
+
+  // Crystal stats page 2: Experience / Weight (bag) / Wear weight / Hand weight /
+  // Magic resist / Poison resist / Holy / Luck / Bag space.
+  const expPercent = ratio(world.playerExperience, world.playerMaxExperience) * 100;
+  const stats2Cells: StatCell[] = [
+    statCell(t("ui.experience", [], "Experience"), `${expPercent.toFixed(2)}%`),
+    statCell(t("ui.statBagSpace", [], "Bag Space"), pairValue(world.freeBagSlots, world.maxBagSlots)),
+    statCell(t("ui.statWeight", [], "Weight"), pairValue(world.currentWeight, world.maxWeight)),
+    statCell(t("ui.statHandWeight", [], "Hand Weight"), ""),
+    statCell(t("ui.statWearWeight", [], "Wear Weight"), ""),
+    statCell(t("ui.statMagicResist", [], "Magic Resist"), ""),
+    statCell(t("ui.statPoisonResist", [], "Poison Resist"), ""),
+    statCell(t("ui.statHoly", [], "Holy"), ""),
+    statCell("", ""),
+    statCell("", ""),
+    statCell("", ""),
   ];
-  const spellValues = [
-    ...world.knownSkills.slice(0, 7).map((skill) => {
-      const cooldownSuffix =
-        skill.cooldownRemainingTicks > 0 ? ` (${skill.cooldownRemainingTicks})` : "";
-      return `${skill.name}${cooldownSuffix}`;
-    }),
-  ];
+
+  const spellValues = world.knownSkills.slice(0, 7).map((skill) => {
+    const cooldownSuffix = skill.cooldownRemainingTicks > 0 ? ` (${skill.cooldownRemainingTicks})` : "";
+    return `${skill.name}${cooldownSuffix}`;
+  });
   while (spellValues.length < 7) {
     spellValues.push("");
   }
+
+  const classIcon = player?.classKey ? ORIGINAL_UI.character.classIcons[player.classKey] : null;
+  const levelLabel = player?.level ? t("ui.heroLevel", [player.level], `Level ${player.level}`) : "";
 
   return (
     <div className="window-shell character-window">
@@ -157,39 +187,52 @@ export function CharacterWindow({
       <div className="character-tab spells"><button type="button" className="window-tab-button" onClick={() => onTabChange("spells")}><img src={ORIGINAL_UI.character.tabs.spells} alt={t("ui.spells")} draggable={false} /></button></div>
 
       <div className="character-name">{player?.name ?? ""}</div>
-      <div className="character-guild" />
+      <div className="character-guild">
+        {classIcon ? (
+          <img
+            src={classIcon}
+            alt={player?.classKey ?? ""}
+            title={`${classLabel(t, player?.classKey)}${levelLabel ? ` · ${levelLabel}` : ""}`}
+            draggable={false}
+            style={CLASS_BADGE_STYLE}
+          />
+        ) : null}
+        <span>{levelLabel}</span>
+      </div>
 
       {activeTab === "char" ? (
         <>
           {ORIGINAL_UI.character.equipmentSlots.map((slot) => {
-            const item = equipmentBySlot.get(equipmentSlotFromLabel(slot.label));
+            const equipSlot = equipmentSlotFromLabel(slot.label);
+            const item = equipmentBySlot.get(equipSlot);
 
             return (
               <div
                 key={slot.label}
                 className="character-slot"
                 style={{ left: slot.x + 8, top: slot.y + 90 }}
-                aria-label={slot.label}
+                aria-label={equipmentSlotLabel(t, equipSlot)}
+                title={equipmentSlotLabel(t, equipSlot)}
               >
-	                {item ? (
-	                  <button
-	                    type="button"
-	                    className="character-slot-card"
-	                    aria-label={item.name}
-	                    onClick={() => {
-	                      if (repairMode === "normal") {
-	                        onRepairItem({ slot: item.slot });
-	                        setRepairMode(null);
-	                        return;
-	                      }
-	                      if (repairMode === "special") {
-	                        onSpecialRepairItem({ slot: item.slot });
-	                        setRepairMode(null);
-	                        return;
-	                      }
-	                      onRemoveItem({ slot: item.slot });
-	                    }}
-	                  >
+                {item ? (
+                  <button
+                    type="button"
+                    className="character-slot-card"
+                    aria-label={item.name}
+                    onClick={() => {
+                      if (repairMode === "normal") {
+                        onRepairItem({ slot: item.slot });
+                        setRepairMode(null);
+                        return;
+                      }
+                      if (repairMode === "special") {
+                        onSpecialRepairItem({ slot: item.slot });
+                        setRepairMode(null);
+                        return;
+                      }
+                      onRemoveItem({ slot: item.slot });
+                    }}
+                  >
                     <img
                       className="original-item-icon character-item-icon"
                       src={originalItemIconPath(item.icon)}
@@ -200,8 +243,12 @@ export function CharacterWindow({
                       t={t}
                       name={item.name}
                       description={item.description}
+                      itemType={equipmentSlotLabel(t, equipSlot)}
+                      grade={gradeForDurability(item)}
                       durabilityCurrent={item.durabilityCurrent}
                       durabilityMax={item.durabilityMax}
+                      dc={item.attack > 0 ? { min: 0, max: item.attack } : undefined}
+                      ac={item.defence > 0 ? { min: 0, max: item.defence } : undefined}
                       attack={item.attack}
                       defence={item.defence}
                       align={slot.x > 110 ? "left" : "right"}
@@ -211,50 +258,33 @@ export function CharacterWindow({
               </div>
             );
           })}
-	        </>
-	      ) : null}
-
-	      {activeTab === "char" ? (
-	        <>
-	          {repairModeLabel ? <div className="inventory-delete-hint">{repairModeLabel}</div> : null}
-	          <div className="character-repair-actions">
-	            <button
-	              type="button"
-	              className={repairMode === "normal" ? "active" : ""}
-	              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
-	            >
-	              {t("ui.repairItem", [], "Repair Item")}
-	            </button>
-	            <button
-	              type="button"
-	              className={repairMode === "special" ? "active" : ""}
-	              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
-	            >
-	              {t("ui.specialRepairItem", [], "Special Repair")}
-	            </button>
-	          </div>
-	        </>
-	      ) : null}
-
-      {activeTab === "stats1" ? (
-        <div className="character-field-values stats1">
-          {stats1Values.map((value, index) => (
-            <div key={`stats1-${index}`} className="character-field-value">
-              {value}
-            </div>
-          ))}
-        </div>
+        </>
       ) : null}
 
-      {activeTab === "stats2" ? (
-        <div className="character-field-values stats2">
-          {stats2Values.map((value, index) => (
-            <div key={`stats2-${index}`} className="character-field-value">
-              {value}
-            </div>
-          ))}
-        </div>
+      {activeTab === "char" ? (
+        <>
+          {repairModeLabel ? <div className="inventory-delete-hint">{repairModeLabel}</div> : null}
+          <div className="character-repair-actions">
+            <button
+              type="button"
+              className={repairMode === "normal" ? "active" : ""}
+              onClick={() => setRepairMode((current) => (current === "normal" ? null : "normal"))}
+            >
+              {t("ui.repairItem", [], "Repair Item")}
+            </button>
+            <button
+              type="button"
+              className={repairMode === "special" ? "active" : ""}
+              onClick={() => setRepairMode((current) => (current === "special" ? null : "special"))}
+            >
+              {t("ui.specialRepairItem", [], "Special Repair")}
+            </button>
+          </div>
+        </>
       ) : null}
+
+      {activeTab === "stats1" ? <StatColumn page="stats1" cells={stats1Cells} /> : null}
+      {activeTab === "stats2" ? <StatColumn page="stats2" cells={stats2Cells} /> : null}
 
       {activeTab === "spells" ? (
         <div className="character-spell-values">
@@ -286,36 +316,121 @@ export function CharacterWindow({
   );
 }
 
+function StatColumn({ page, cells }: { page: "stats1" | "stats2"; cells: StatCell[] }) {
+  return (
+    <div className={`character-field-values ${page}`}>
+      {cells.map((cell, index) => (
+        <div
+          key={`${page}-${index}`}
+          className="character-field-value"
+          aria-label={cell.label || undefined}
+          title={cell.label || undefined}
+        >
+          {cell.value}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const CLASS_BADGE_STYLE: CSSProperties = {
+  width: 16,
+  height: 16,
+  marginRight: 5,
+  verticalAlign: "middle",
+  imageRendering: "pixelated",
+};
+
 function originalItemIconPath(icon: number) {
   return `/original-ui/Items/${icon}.png`;
+}
+
+function statCell(label: string, value: string): StatCell {
+  return { label, value };
+}
+
+function statRangeCell(label: string, min: number, max: number): StatCell {
+  if (min <= 0 && max <= 0) {
+    return { label, value: "" };
+  }
+  const safeMin = Math.max(0, Math.min(min, max));
+  return { label, value: `${safeMin}-${max}` };
+}
+
+function pairValue(current?: number, max?: number) {
+  if (current === undefined || max === undefined) {
+    return "";
+  }
+  return `${current}/${max}`;
 }
 
 function ratio(value?: number, max?: number) {
   if (value === undefined || max === undefined || max <= 0) {
     return 0;
   }
-
   return Math.max(0, Math.min(1, value / max));
 }
 
-function statNumber(value: number) {
-  return value > 0 ? String(value) : "";
+/**
+ * Derive a display grade from how well-preserved the item is so the tooltip
+ * header gets a sensible colour even when the payload has no explicit grade.
+ */
+function gradeForDurability(item: DisplayEquipmentItem): ItemTooltipGrade | undefined {
+  if (item.durabilityMax <= 0) return undefined;
+  const combined = item.attack + item.defence;
+  if (combined >= 12) return "legendary";
+  if (combined >= 8) return "heroic";
+  if (combined >= 4) return "rare";
+  return "common";
 }
 
-function statPair(current?: number, max?: number) {
-  if (current === undefined || max === undefined) {
-    return "";
+function classLabel(t: TranslateFn, classKey?: EntityClassKey) {
+  switch (classKey) {
+    case "wizard":
+      return t("ui.classWizard", [], "Wizard");
+    case "taoist":
+      return t("ui.classTaoist", [], "Taoist");
+    case "assassin":
+      return t("ui.classAssassin", [], "Assassin");
+    case "archer":
+      return t("ui.classArcher", [], "Archer");
+    case "warrior":
+      return t("ui.classWarrior", [], "Warrior");
+    default:
+      return "";
   }
-
-  return `${current}/${max}`;
 }
 
-function displayFieldValue(current?: number, max?: number) {
-  if (current === undefined || max === undefined) {
-    return "";
+function equipmentSlotLabel(t: TranslateFn, slot: EquipmentSlot): string {
+  switch (slot) {
+    case "weapon":
+      return t("ui.slotWeapon", [], "Weapon");
+    case "armour":
+      return t("ui.slotArmour", [], "Armour");
+    case "helmet":
+      return t("ui.slotHelmet", [], "Helmet");
+    case "mount":
+      return t("ui.slotMount", [], "Mount");
+    case "necklace":
+      return t("ui.slotNecklace", [], "Necklace");
+    case "torch":
+      return t("ui.slotTorch", [], "Torch");
+    case "braceletLeft":
+    case "braceletRight":
+      return t("ui.slotBracelet", [], "Bracelet");
+    case "ringLeft":
+    case "ringRight":
+      return t("ui.slotRing", [], "Ring");
+    case "amulet":
+      return t("ui.slotAmulet", [], "Amulet");
+    case "boots":
+      return t("ui.slotBoots", [], "Boots");
+    case "belt":
+      return t("ui.slotBelt", [], "Belt");
+    case "stone":
+    default:
+      return t("ui.slotStone", [], "Stone");
   }
-
-  return `${current}/${max}`;
 }
 
 function equipmentSlotFromLabel(label: string): EquipmentSlot {
