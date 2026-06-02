@@ -66,8 +66,9 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     label: "Bichon spawn scene",
     priority: 40,
     cacheTier: "critical",
-    // Prewarm the packed entity atlas and the same map footprint requested by the live game scene.
-    // This keeps first Bichon movement from stampeding hundreds of tiny PNG requests on demand.
+    // Prewarm the packed entity atlas and the actual production Bichon entry footprint.
+    // StartGame currently places Scout near 398,333, so warming the old login
+    // showcase center still left the first playable scene to cold-load.
     urls: [
       "/original-ui/MMap/0.png",
       "/bevy-entity-atlases/manifest.json",
@@ -76,7 +77,7 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     scenes: [
       {
         label: "BichonProvince spawn",
-        url: "/api/scene/crystal?map=0&x=330&y=270&width=56&height=68",
+        url: "/api/scene/crystal?map=0&x=398&y=333&width=56&height=72",
         spriteFrameLimit: 960,
       },
     ],
