@@ -16,6 +16,12 @@ export type FriendEntry = {
   name: string;
   online?: boolean;
   memo?: string;
+  /** Human-readable last-seen string for offline friends (Crystal LastLogin). */
+  lastSeen?: string;
+  /** Optional level/class context for the detail line. */
+  level?: number;
+  /** Map the friend was last seen on. */
+  location?: string;
 };
 
 /**
@@ -36,6 +42,10 @@ export type FriendsWindowProps = {
   onUnblockPlayer?: (name: string) => void;
   /** Whisper / private message to the selected friend. */
   onWhisper?: (name: string) => void;
+  /** Compose mail to the selected friend (Crystal friend Mail button). */
+  onMail?: (name: string) => void;
+  /** Edit/save a memo note for the selected friend. */
+  onEditMemo?: (name: string, memo: string) => void;
   onClose: () => void;
 };
 
@@ -53,12 +63,16 @@ export function FriendsWindow({
   onBlockPlayer,
   onUnblockPlayer,
   onWhisper,
+  onMail,
+  onEditMemo,
   onClose,
 }: FriendsWindowProps) {
   const [tab, setTab] = useState<FriendsTab>("friends");
   const [page, setPage] = useState(0);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [addName, setAddName] = useState("");
+  const [memoEditing, setMemoEditing] = useState(false);
+  const [memoDraft, setMemoDraft] = useState("");
 
   const friends = useMemo(() => normalizeEntries(social?.friends), [social?.friends]);
   const blocked = useMemo(() => normalizeEntries(social?.blocked), [social?.blocked]);
@@ -79,7 +93,12 @@ export function FriendsWindow({
 
   useEffect(() => {
     setPage(0);
+    setMemoEditing(false);
   }, [tab]);
+
+  useEffect(() => {
+    setMemoEditing(false);
+  }, [selectedName]);
 
   useEffect(() => {
     if (page > pageCount - 1) {
@@ -187,15 +206,47 @@ export function FriendsWindow({
       <div style={style.detail} data-friend-detail={selected?.name ?? ""}>
         {selected ? (
           <>
-            <div style={style.detailName}>{selected.name}</div>
+            <div style={style.detailHead}>
+              <span style={style.detailName}>{selected.name}</span>
+              {selected.level ? <span style={style.detailLevel}>{t("ui.heroLevel", [selected.level], `Lv ${selected.level}`)}</span> : null}
+            </div>
             <div style={style.detailMeta}>
               {tab === "friends"
                 ? selected.online
-                  ? t("ui.guildStateOnline", [], "Online")
-                  : t("ui.guildStateOffline", [], "Offline")
+                  ? selected.location
+                    ? t("ui.friendOnlineAt", [selected.location], `Online · ${selected.location}`)
+                    : t("ui.guildStateOnline", [], "Online")
+                  : selected.lastSeen
+                    ? t("ui.friendLastSeen", [selected.lastSeen], `Offline · last seen ${selected.lastSeen}`)
+                    : t("ui.guildStateOffline", [], "Offline")
                 : t("ui.friendBlocked", [], "Blocked")}
             </div>
-            {selected.memo ? <p style={style.memo}>{selected.memo}</p> : null}
+            {memoEditing && tab === "friends" ? (
+              <form
+                style={style.memoEditRow}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  onEditMemo?.(selected.name, memoDraft.trim());
+                  setMemoEditing(false);
+                }}
+              >
+                <input
+                  style={style.memoInput}
+                  value={memoDraft}
+                  onChange={(event) => setMemoDraft(event.target.value)}
+                  placeholder={t("ui.friendMemoPlaceholder", [], "Add a note...")}
+                  aria-label={t("ui.friendMemo", [], "Memo")}
+                  spellCheck={false}
+                  maxLength={100}
+                  autoFocus
+                />
+                <button type="submit" disabled={!onEditMemo} style={style.memoSave}>
+                  {t("ui.guildSaveNotice", [], "Save")}
+                </button>
+              </form>
+            ) : selected.memo ? (
+              <p style={style.memo}>{selected.memo}</p>
+            ) : null}
           </>
         ) : (
           <div style={style.empty}>{t("ui.friendSelectHint", [], "Select a name to view details.")}</div>
@@ -212,6 +263,35 @@ export function FriendsWindow({
               onClick={() => selected && onWhisper?.(selected.name)}
             >
               {t("ui.friendWhisper", [], "Whisper")}
+            </button>
+            <button
+              type="button"
+              disabled={!selected || !onMail}
+              style={{ ...style.actionButton, ...(!selected || !onMail ? style.actionButtonDisabled : null) }}
+              onClick={() => selected && onMail?.(selected.name)}
+            >
+              {t("ui.friendMail", [], "Mail")}
+            </button>
+            <button
+              type="button"
+              disabled={!selected || !onEditMemo}
+              aria-pressed={memoEditing}
+              style={{ ...style.actionButton, ...(!selected || !onEditMemo ? style.actionButtonDisabled : null) }}
+              onClick={() => {
+                if (!selected) return;
+                setMemoDraft(selected.memo ?? "");
+                setMemoEditing((prev) => !prev);
+              }}
+            >
+              {t("ui.friendMemo", [], "Memo")}
+            </button>
+            <button
+              type="button"
+              disabled={!selected || !onBlockPlayer}
+              style={{ ...style.actionButton, ...(!selected || !onBlockPlayer ? style.actionButtonDisabled : null) }}
+              onClick={() => selected && onBlockPlayer?.(selected.name)}
+            >
+              {t("ui.friendBlock", [], "Block")}
             </button>
             <button
               type="button"
@@ -391,10 +471,31 @@ const style: Record<string, CSSProperties> = {
     background: "linear-gradient(180deg, rgba(27, 19, 10, 0.78), rgba(11, 8, 5, 0.7))",
     padding: "6px 8px",
   },
-  detailName: { color: "#f8e6bb", fontSize: 12, fontWeight: 700, marginBottom: 2 },
+  detailHead: { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 6, marginBottom: 2 },
+  detailName: { color: "#f8e6bb", fontSize: 12, fontWeight: 700 },
+  detailLevel: { fontSize: 10, color: "#cbb38a", flex: "0 0 auto" },
   detailMeta: { fontSize: 10, color: "#cbb38a" },
-  memo: { margin: "4px 0 0", fontSize: 11, color: "#d6c6a5", lineHeight: 1.3 },
-  actions: { position: "absolute", left: 12, top: 376, width: 288, display: "flex", gap: 6 },
+  memo: { margin: "4px 0 0", fontSize: 11, color: "#d6c6a5", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  memoEditRow: { display: "flex", gap: 4, marginTop: 4 },
+  memoInput: {
+    flex: 1,
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    background: "rgba(11, 8, 5, 0.7)",
+    color: "#f0eee8",
+    padding: "2px 6px",
+    fontSize: 10,
+    fontFamily: "inherit",
+  },
+  memoSave: {
+    flex: "0 0 auto",
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
+    color: "#f4dcaf",
+    padding: "2px 8px",
+    fontSize: 10,
+    cursor: "pointer",
+  },
+  actions: { position: "absolute", left: 12, top: 376, width: 288, display: "flex", gap: 3 },
   addRow: { position: "absolute", left: 12, top: 408, width: 288, display: "flex", gap: 6 },
   input: {
     flex: 1,
@@ -406,11 +507,15 @@ const style: Record<string, CSSProperties> = {
   },
   actionButton: {
     flex: 1,
+    minWidth: 0,
     border: "1px solid rgba(190, 157, 99, 0.56)",
     background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
     color: "#f4dcaf",
-    padding: "4px 0",
-    fontSize: 11,
+    padding: "4px 2px",
+    fontSize: 10,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     cursor: "pointer",
   },
   actionButtonDisabled: { opacity: 0.45, cursor: "default" },

@@ -11,6 +11,24 @@ type TranslateFn = (
   fallback?: string,
 ) => string;
 
+/** A named defensive structure with current HP and repair cost. */
+export type ConquestStructure = {
+  name?: string;
+  /** HP as a percentage 0-100. */
+  hpPercent?: number;
+  /** Whether it is currently alive/standing. */
+  alive?: boolean;
+  /** Cost to repair (gold). */
+  repairCost?: number;
+};
+
+/** A capture flag / control point and which guild currently holds it. */
+export type ConquestFlag = {
+  name?: string;
+  /** Guild currently controlling the point, if any. */
+  controlledBy?: string;
+};
+
 /** Mirrors the stage-5 `conquest` slice. */
 export type ConquestSummary = {
   castleOwner?: string;
@@ -24,6 +42,27 @@ export type ConquestSummary = {
   gates?: number[];
   /** Indices of gates that are currently open. */
   openGates?: number[];
+  // --- Additive optional fields (rendered gracefully when absent) ---
+  /** Castle / palace name. */
+  name?: string;
+  /** Whether a war is currently underway (Crystal `WarIsOn`). */
+  warActive?: boolean;
+  /** Daily war start time as a "HH:MM" string. */
+  warStartTime?: string;
+  /** Daily war end time as a "HH:MM" string. */
+  warEndTime?: string;
+  /** War length in minutes (Crystal `WarLength`). */
+  warLengthMinutes?: number;
+  /** Days the war runs (e.g. "Saturday"). */
+  warDays?: string[];
+  /** Game mode label (CapturePalace / KingOfHill / Classic / ControlPoints). */
+  gameType?: string;
+  /** How the war is triggered (Request / Auto / Forced). */
+  startType?: string;
+  /** Defending archer NPCs (Crystal `ArcherList`). */
+  archers?: ConquestStructure[];
+  /** Capture flags / control points (Crystal `FlagList`). */
+  flags?: ConquestFlag[];
 };
 
 /** Mirrors the stage-5 `guildTerritory` slice. */
@@ -43,6 +82,8 @@ export type ConquestWindowProps = {
   onStartWar?: () => void;
   onToggleGate?: (gateIndex: number) => void;
   onSetTaxRate?: (percent: number) => void;
+  /** Repair a named defending structure ("archer" | "gate" | "wall" | "guard" + index). */
+  onRepairStructure?: (kind: "archer" | "gate" | "wall" | "guard", index: number) => void;
   onClose: () => void;
 };
 
@@ -56,6 +97,8 @@ const CONQUEST_TABS: { key: ConquestTab; labelKey: string; fallback: string }[] 
   { key: "log", labelKey: "ui.conquestLog", fallback: "War Log" },
 ];
 
+const TAX_PRESETS = [0, 5, 10, 15, 20, 30, 50];
+
 export function ConquestWindow({
   t,
   conquest,
@@ -64,6 +107,7 @@ export function ConquestWindow({
   onStartWar,
   onToggleGate,
   onSetTaxRate,
+  onRepairStructure,
   onClose,
 }: ConquestWindowProps) {
   const [tab, setTab] = useState<ConquestTab>("castle");
@@ -74,6 +118,10 @@ export function ConquestWindow({
   const eventLog = conquest?.eventLog ?? [];
   const taxRate = clampPercent(conquest?.taxRatePercent ?? 0);
   const openGates = new Set(conquest?.openGates ?? []);
+  const warActive = conquest?.warActive ?? false;
+  const archers = conquest?.archers ?? [];
+  const flags = conquest?.flags ?? [];
+  const scheduleText = buildScheduleText(conquest);
 
   return (
     <section
@@ -83,11 +131,12 @@ export function ConquestWindow({
       style={style.window}
     >
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
-      <div style={style.titleText}>{t("ui.conquest", [], "Conquest")}</div>
+      <div style={style.titleText}>{conquest?.name?.trim() || t("ui.conquest", [], "Conquest")}</div>
       <div style={style.subtitle}>
         {owner
           ? t("ui.conquestHeldBy", [owner], `Held by ${owner}`)
           : t("ui.conquestUnclaimed", [], "Castle unclaimed")}
+        {warActive ? <span style={style.warBadge}>{t("ui.conquestWarLive", [], "WAR LIVE")}</span> : null}
       </div>
       <div style={style.close}>
         <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
@@ -118,7 +167,18 @@ export function ConquestWindow({
             <Info label={t("ui.conquestOwner", [], "Owner")} value={owner || t("ui.conquestUnclaimedShort", [], "Unclaimed")} />
             <Info label={t("ui.conquestTax", [], "Tax Rate")} value={`${taxRate}%`} />
             <Info label={t("ui.conquestTreasury", [], "Treasury")} value={formatNumber(conquest?.gold ?? 0)} />
-            <Info label={t("ui.conquestWars", [], "Active Wars")} value={String(activeWars.length)} />
+            <Info
+              label={t("ui.conquestWarState", [], "War State")}
+              value={warActive ? t("ui.conquestWarOn", [], "In Progress") : t("ui.conquestWarOff", [], "Peacetime")}
+            />
+            <Info
+              label={t("ui.conquestGameType", [], "Game Type")}
+              value={conquest?.gameType?.trim() || "-"}
+            />
+            <Info
+              label={t("ui.conquestStartType", [], "Trigger")}
+              value={conquest?.startType?.trim() || "-"}
+            />
             <Info
               label={t("ui.conquestTerritory", [], "Sabuk Wall")}
               value={territory?.owned ? t("ui.on", [], "Owned") : t("ui.off", [], "Free")}
@@ -127,6 +187,7 @@ export function ConquestWindow({
               label={t("ui.conquestRental", [], "Rental Days")}
               value={typeof territory?.rentalDaysLeft === "number" ? String(territory.rentalDaysLeft) : "-"}
             />
+            <Info label={t("ui.conquestSchedule", [], "Schedule")} value={scheduleText} />
           </div>
 
           <div style={style.subhead}>{t("ui.conquestWars", [], "Active Wars")}</div>
@@ -145,7 +206,7 @@ export function ConquestWindow({
 
           <div style={style.taxRow}>
             <span style={style.taxLabel}>{t("ui.conquestSetTax", [], "Set Tax")}</span>
-            {[0, 5, 10, 15].map((value) => (
+            {TAX_PRESETS.map((value) => (
               <button
                 key={`tax-${value}`}
                 type="button"
@@ -175,7 +236,7 @@ export function ConquestWindow({
       ) : null}
 
       {tab === "defences" ? (
-        <div style={style.panel}>
+        <div style={{ ...style.panel, overflowY: "auto" }}>
           <StructureGroup
             t={t}
             title={t("ui.conquestWalls", [], "Walls")}
@@ -188,6 +249,57 @@ export function ConquestWindow({
             values={conquest?.guards ?? []}
             color="#d8552f"
           />
+          <div style={style.subhead}>{t("ui.conquestArchers", [], "Defending Archers")}</div>
+          {archers.length === 0 ? (
+            <div style={style.empty}>{t("ui.conquestNoArchers", [], "No defending NPCs.")}</div>
+          ) : (
+            <div style={style.structureRows}>
+              {archers.map((archer, index) => {
+                const hp = clampPercent(archer.hpPercent ?? (archer.alive === false ? 0 : 100));
+                const dead = archer.alive === false || hp <= 0;
+                return (
+                  <div key={`archer-${index}`} style={style.archerRow} data-archer-alive={dead ? "0" : "1"}>
+                    <span style={style.archerName}>{archer.name?.trim() || t("ui.conquestArcherNo", [index + 1], `Archer ${index + 1}`)}</span>
+                    <Bar value={hp} color={dead ? "#5c5648" : "#8be07a"} />
+                    {dead ? (
+                      <button
+                        type="button"
+                        disabled={!onRepairStructure || !ownedByViewer}
+                        title={archer.repairCost ? t("ui.conquestRepairCost", [archer.repairCost], `Repair (${archer.repairCost}g)`) : undefined}
+                        style={{ ...style.repairButton, ...(!onRepairStructure || !ownedByViewer ? style.actionButtonDisabled : null) }}
+                        onClick={() => onRepairStructure?.("archer", index)}
+                      >
+                        {t("ui.conquestRepair", [], "Repair")}
+                      </button>
+                    ) : (
+                      <span style={style.archerState}>{t("ui.conquestAlive", [], "Alive")}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div style={style.subhead}>{t("ui.conquestFlags", [], "Control Points")}</div>
+          {flags.length === 0 ? (
+            <div style={style.empty}>{t("ui.conquestNoFlags", [], "No control points.")}</div>
+          ) : (
+            <div style={style.structureRows}>
+              {flags.map((flag, index) => {
+                const held = flag.controlledBy?.trim() ?? "";
+                const mine = held.length > 0 && guildName != null && held === guildName;
+                return (
+                  <div key={`flag-${index}`} style={style.flagRow} data-flag-owner={held}>
+                    <span style={style.archerName}>{flag.name?.trim() || t("ui.conquestFlagNo", [index + 1], `Flag ${index + 1}`)}</span>
+                    <span style={{ ...style.flagOwner, color: mine ? "#8be07a" : held ? "#f0d69b" : "#9c8d6f" }}>
+                      {held || t("ui.conquestNeutral", [], "Neutral")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <div style={style.subhead}>{t("ui.conquestGates", [], "Gates")}</div>
           <div style={style.gateGrid}>
             {(conquest?.gates ?? []).length === 0 ? (
@@ -309,6 +421,21 @@ function formatNumber(value: number) {
   return value.toLocaleString("en-US");
 }
 
+/** Compose a human-readable "Sat 20:00–21:00 (60m)" war schedule line. */
+function buildScheduleText(conquest: ConquestSummary | null): string {
+  if (!conquest) return "-";
+  const days = (conquest.warDays ?? []).filter((day) => day && day.trim().length > 0);
+  const start = conquest.warStartTime?.trim();
+  const end = conquest.warEndTime?.trim();
+  const length = typeof conquest.warLengthMinutes === "number" ? conquest.warLengthMinutes : undefined;
+
+  const parts: string[] = [];
+  if (days.length) parts.push(days.join(", "));
+  if (start) parts.push(end ? `${start}-${end}` : start);
+  if (!start && length != null) parts.push(`${length}m`);
+  return parts.length ? parts.join(" · ") : "-";
+}
+
 const style: Record<string, CSSProperties> = {
   window: {
     position: "absolute",
@@ -332,7 +459,16 @@ const style: Record<string, CSSProperties> = {
     color: "#f4dcaf",
     letterSpacing: 0.5,
   },
-  subtitle: { position: "absolute", left: 22, top: 30, fontSize: 11, color: "#cbb38a" },
+  subtitle: { position: "absolute", left: 22, top: 30, fontSize: 11, color: "#cbb38a", display: "flex", alignItems: "center", gap: 8 },
+  warBadge: {
+    fontSize: 9,
+    fontWeight: 700,
+    color: "#fff",
+    background: "#b5322a",
+    border: "1px solid #e0746c",
+    padding: "1px 6px",
+    letterSpacing: 0.6,
+  },
   close: { position: "absolute", left: 666, top: 6 },
   tabs: { position: "absolute", left: 22, top: 50, display: "flex", gap: 4 },
   tab: {
@@ -404,6 +540,28 @@ const style: Record<string, CSSProperties> = {
   structureGroup: { display: "flex", flexDirection: "column", gap: 4 },
   structureRows: { display: "flex", flexDirection: "column", gap: 3 },
   structureRow: { display: "flex", alignItems: "center", gap: 8 },
+  archerRow: { display: "flex", alignItems: "center", gap: 8 },
+  archerName: { flex: "0 0 150px", fontSize: 11, color: "#e3d3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  archerState: { flex: "0 0 60px", fontSize: 10, color: "#8be07a", textAlign: "right" },
+  repairButton: {
+    flex: "0 0 60px",
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    background: "rgba(52, 32, 18, 0.86)",
+    color: "#f4dcaf",
+    padding: "2px 0",
+    fontSize: 10,
+    cursor: "pointer",
+  },
+  flagRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    border: "1px solid rgba(190, 157, 99, 0.28)",
+    background: "rgba(20, 13, 7, 0.4)",
+    padding: "3px 8px",
+  },
+  flagOwner: { fontSize: 11, flex: "0 0 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 },
   structureLabel: { flex: "0 0 20px", fontSize: 11, color: "#a89568", textAlign: "right" },
   structureValue: { flex: "0 0 44px", fontSize: 11, color: "#e3d3af", textAlign: "right" },
   gateGrid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, overflowY: "auto" },
