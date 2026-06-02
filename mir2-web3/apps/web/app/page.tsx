@@ -2,7 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { ExtraWindows } from "./components/original-client-extra-windows";
+import {
+  ExtraWindows,
+  adaptHero,
+  adaptCreatures,
+  adaptGroup,
+  adaptFriends,
+  adaptRelationship,
+  adaptMentor,
+  adaptActiveRankingPage,
+  adaptMarketListings,
+  adaptConquest,
+  adaptGuildTerritory,
+} from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
 
 import {
@@ -1220,6 +1232,12 @@ export default function HomePage() {
   const [showQuestLog, setShowQuestLog] = useState(false);
   const [showHeroPet, setShowHeroPet] = useState(false);
   const [showGuild, setShowGuild] = useState(false);
+  const [showGroup, setShowGroup] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
+  const [showBonds, setShowBonds] = useState(false);
+  const [showRanking, setShowRanking] = useState(false);
+  const [showMarket, setShowMarket] = useState(false);
+  const [showConquest, setShowConquest] = useState(false);
   useEffect(() => {
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
@@ -1227,6 +1245,12 @@ export default function HomePage() {
       if (key === "q") { event.preventDefault(); setShowQuestLog((value) => !value); }
       else if (key === "h") { event.preventDefault(); setShowHeroPet((value) => !value); }
       else if (key === "g") { event.preventDefault(); setShowGuild((value) => !value); }
+      else if (key === "p") { event.preventDefault(); setShowGroup((value) => !value); }
+      else if (key === "f") { event.preventDefault(); setShowFriends((value) => !value); }
+      else if (key === "b") { event.preventDefault(); setShowBonds((value) => !value); }
+      else if (key === "r") { event.preventDefault(); setShowRanking((value) => !value); }
+      else if (key === "m") { event.preventDefault(); setShowMarket((value) => !value); }
+      else if (key === "k") { event.preventDefault(); setShowConquest((value) => !value); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
@@ -9587,8 +9611,14 @@ export default function HomePage() {
     <ExtraWindows
       t={t}
       questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog }}
-      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: null, creatures: [] }}
+      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures) }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social) }}
+      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor) }}
+      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null }}
+      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold }}
+      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null }}
     />
     </>
   );
