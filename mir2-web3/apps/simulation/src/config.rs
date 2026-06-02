@@ -2343,6 +2343,28 @@ impl SimulationConfig {
         self.monster_spawn_source = MonsterSpawnSource::CrystalStarterRegion;
         self.map_transfers.clear();
         apply_crystal_map_metadata(&mut self.map);
+        // Starter mining zone: a small ore vein just east of the Bichon spawn
+        // (330, 270) so players can try mining without leaving the starter map.
+        // Expands to cells x in [331, 335), y in [268, 272).
+        self.mine_zones.push(MineZoneRecord {
+            map_file_name: "0".to_string(),
+            mine_set: 1,
+            x: 333,
+            y: 270,
+            size: 2,
+        });
+        // Bichon blacksmith whose existing [Trade] list already sells a PickAxe,
+        // so players can buy a mining tool without touching the starter inventory.
+        self.visible_npcs.push(VisibleNpcRecord {
+            object_id: 4600,
+            name: "Blacksmith".to_string(),
+            image: 5,
+            colour_argb: -1,
+            position: Point { x: 329, y: 270 },
+            direction: MirDirection::Down,
+            quest_ids: Vec::new(),
+            script_key: Some("BichonProvince/BichonWall/Blacksmith-0103".to_string()),
+        });
         self
     }
 

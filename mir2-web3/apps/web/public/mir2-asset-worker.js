@@ -1,8 +1,10 @@
 const CACHE_PREFIX = "mir2-asset-cache";
+const CACHE_SCHEMA_VERSION = "sw2";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
   version: DEFAULT_VERSION,
+  assetVersion: DEFAULT_VERSION,
   staticAssetMaxEntries: 20000,
   staticCriticalMaxEntries: 3000,
   staticBackgroundMaxEntries: 6000,
@@ -68,8 +70,10 @@ self.addEventListener("message", (event) => {
   const caches = manifest.runtimeCaches || {};
   const remoteAssets = manifest.remoteAssets || {};
   const staticAssetMaxEntries = positiveNumber(caches.staticAssetMaxEntries, 20000);
+  const assetVersion = String(data.manifestVersion || manifest.version || DEFAULT_VERSION);
   runtimeConfig = {
-    version: String(data.manifestVersion || manifest.version || DEFAULT_VERSION),
+    version: String(data.cacheNamespace || manifest.cacheNamespace || assetVersion || DEFAULT_VERSION),
+    assetVersion,
     staticAssetMaxEntries,
     staticCriticalMaxEntries: positiveNumber(caches.staticCriticalMaxEntries, Math.min(staticAssetMaxEntries, 3000)),
     staticBackgroundMaxEntries: positiveNumber(caches.staticBackgroundMaxEntries, Math.min(staticAssetMaxEntries, 6000)),
@@ -87,6 +91,8 @@ self.addEventListener("message", (event) => {
       postClientMessage(event, "MIR2_ASSET_CACHE_CONFIGURED", {
         deletedCaches,
         version: runtimeConfig.version,
+        assetVersion: runtimeConfig.assetVersion,
+        cacheNamespace: runtimeConfig.version,
         remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
         staticAssetTiers: summarizeStaticAssetTiers(),
       });
@@ -138,12 +144,13 @@ function isStaticGameAsset(url) {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
-    url.pathname.startsWith("/generated/original-map-blend/")
+    url.pathname.startsWith("/generated/original-map-blend/") ||
+    url.pathname.startsWith("/bevy-entity-atlases/")
   );
 }
 
 function cacheName(kind) {
-  return `${CACHE_PREFIX}-${kind}-${runtimeConfig.version || DEFAULT_VERSION}`;
+  return `${CACHE_PREFIX}-${CACHE_SCHEMA_VERSION}-${kind}-${runtimeConfig.version || DEFAULT_VERSION}`;
 }
 
 async function cacheFirst(request, name, maxEntries, event) {
@@ -277,7 +284,8 @@ function isRemoteBackedStaticGameAsset(url) {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
-    url.pathname.startsWith("/generated/original-map-blend/")
+    url.pathname.startsWith("/generated/original-map-blend/") ||
+    url.pathname.startsWith("/bevy-entity-atlases/")
   );
 }
 
