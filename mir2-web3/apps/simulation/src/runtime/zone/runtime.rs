@@ -7625,10 +7625,13 @@ fn zone_resolve_player_physical_attack(
     Some(base.saturating_sub(armour).max(0))
 }
 
-/// Crystal critical hit: with a `CriticalRate`/100 chance the blow is amplified
-/// by `CriticalDamage * 10%`. Resolved deterministically off the tick (mirrors
-/// the per-session `crystal_apply_player_critical`). Inert when the player has
-/// no crit gear.
+/// Crystal critical hit (HumanObject.cs:7156-7161, MonsterObject.cs:2594-2599):
+/// the blow crits when `Random(100) < CriticalRate * Settings.CriticalRateWeight`
+/// (weight 5) and is then amplified by
+/// `Floor(damage * (CriticalDamage / Settings.CriticalDamageWeight) * 10)`
+/// (weight 50 → +20% per `CriticalDamage` point). Resolved deterministically off
+/// the tick (mirrors the per-session `crystal_apply_player_critical`). Inert when
+/// the player has no crit gear.
 fn zone_apply_player_critical(
     damage: i32,
     stats: &super::types::ZonePlayerCombatStats,
@@ -7645,11 +7648,12 @@ fn zone_apply_player_critical(
         0xC817,
         100,
     );
-    if roll >= u64::try_from(rate).unwrap_or(0) {
+    let crit_chance =
+        rate.saturating_mul(crate::runtime::crystal_compat::CRYSTAL_CRITICAL_RATE_WEIGHT);
+    if roll >= u64::try_from(crit_chance).unwrap_or(0) {
         return damage;
     }
-    let bonus_steps = stats.critical_damage.max(1);
-    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+    crate::runtime::combat::crystal_critical_amplified_damage(damage, stats.critical_damage)
 }
 
 /// Subtract a target monster's authoritative magic armour `Random(MinMAC,MaxMAC)`
