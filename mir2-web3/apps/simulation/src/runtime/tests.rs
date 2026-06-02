@@ -56994,6 +56994,33 @@ fn critical_amplified_damage_matches_crystal_weight_arithmetic() {
 }
 
 #[test]
+fn magic_get_damage_honors_sub_one_multiplier_and_truncates() {
+    // Crystal `UserMagic.GetDamage(base) = (int)((base + GetPower()) * GetMultiplier())`
+    // (MagicInfo.cs:180). The multiplier is NOT floored at 1.0, and the result is
+    // truncated, not rounded.
+
+    // HalfMoon: power 0/0, mpower 0/0, MultiplierBase 0.3, MultiplierBonus 0.1.
+    let half_moon = mir2_game_data::crystal_magic_by_spell("HalfMoon").expect("HalfMoon");
+    // GetPower() == 0, so GetDamage(base) == (int)(base * multiplier).
+    // Level 0: multiplier 0.3 -> (int)(100*0.3) = 30 (the retired floor gave 100).
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 0, 100), 30);
+    // Level 3: multiplier 0.3 + 3*0.1 = 0.6 -> (int)(100*0.6) = 60.
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 3, 100), 60);
+    // Truncation (not rounding): (int)(99*0.3) = (int)(29.7) = 29.
+    assert_eq!(super::crystal_magic_get_damage(&half_moon, 0, 99), 29);
+
+    // Thrusting: MultiplierBase 0.25 -> (int)(100*0.25) = 25.
+    let thrusting = mir2_game_data::crystal_magic_by_spell("Thrusting").expect("Thrusting");
+    assert_eq!(super::crystal_magic_get_damage(&thrusting, 0, 100), 25);
+
+    // FireBall: power 2/0, mpower 8/0, MultiplierBase 1.0. GetPower() level 0 =
+    // Round((8/4)*1 + 2) = 4, GetDamage(100) = (int)((100+4)*1.0) = 104.
+    let fireball = mir2_game_data::crystal_magic_by_spell("FireBall").expect("FireBall");
+    assert_eq!(super::crystal_magic_get_power(&fireball, 0), 4);
+    assert_eq!(super::crystal_magic_get_damage(&fireball, 0, 100), 104);
+}
+
+#[test]
 fn poison_resistance_reduces_player_poison_tick_damage() {
     // Baseline: unresisted green poison applies the full tick.
     let mut baseline = SimulationSession::new(SimulationConfig::default());
