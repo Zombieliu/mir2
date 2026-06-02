@@ -75,6 +75,7 @@ export function GameSceneBackdrop({
             top: sprite.top + cameraOffset.y,
             width: sprite.width,
             height: sprite.height,
+            zIndex: sprite.zIndex,
           }}
         />
       ))}
