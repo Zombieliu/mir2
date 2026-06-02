@@ -57253,3 +57253,162 @@ fn zone_player_combat_stats_use_real_engine_ranges() {
     );
     assert!(stats.has_authoritative_damage());
 }
+
+// Crystal `MirConnection.ChangeAMode` (MirConnection.cs:1432) stores
+// `Player.AMode` and echoes `S.ChangeAMode { Mode }`. Mirror that here: the
+// handler persists the attack mode for snapshots and returns the echo packet.
+#[test]
+fn change_a_mode_packet_stores_attack_mode_and_echoes_crystal_packet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // Default attack mode is Peace (0).
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 0);
+
+    // AttackMode.RedBrown == 4 in Crystal (Shared/Enums.cs AttackMode).
+    let packets = session.handle_packet(ClientPacket::ChangeAMode { mode: 4 });
+    assert_eq!(packets, vec![ServerPacket::ChangeAMode { mode: 4 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 4);
+
+    // A second change overwrites the stored mode and echoes again.
+    let packets = session.handle_packet(ClientPacket::ChangeAMode { mode: 1 });
+    assert_eq!(packets, vec![ServerPacket::ChangeAMode { mode: 1 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.attack_mode, 1);
+}
+
+// Crystal `MirConnection.ChangePMode` (MirConnection.cs:1440) stores
+// `Player.PMode` and echoes `S.ChangePMode { Mode }`.
+#[test]
+fn change_p_mode_packet_stores_pet_mode_and_echoes_crystal_packet() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 0);
+
+    // PetMode.MoveOnly == 1 in Crystal (Shared/Enums.cs PetMode).
+    let packets = session.handle_packet(ClientPacket::ChangePMode { mode: 1 });
+    assert_eq!(packets, vec![ServerPacket::ChangePMode { mode: 1 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 1);
+
+    let packets = session.handle_packet(ClientPacket::ChangePMode { mode: 3 });
+    assert_eq!(packets, vec![ServerPacket::ChangePMode { mode: 3 }]);
+    assert_eq!(session.world_snapshot().stage5_systems.pet_mode, 3);
+}
+
+// Crystal `PlayerObject.SetAutoPotValue` (PlayerObject.cs:9639) clamps the
+// trigger percentage to <= 99 and echoes `S.SetAutoPotValue` while the hero is
+// spawned with AutoPot enabled. This drives the same handler the new gateway
+// `SetAutoPotValue` browser command reaches end-to-end.
+#[test]
+fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.handle_packet(ClientPacket::NewHero {
+        name: "Aide".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Taoist,
+    });
+
+    // Stat byte 0 == HP. 250 clamps to 99 (Crystal Math.Min(99, value)).
+    let packets = session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 0,
+        value: 250,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::SetAutoPotValue {
+            stat: 0,
+            value: 250,
+        }]
+    );
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.auto_hp_percent),
+        Some(99)
+    );
+
+    // Any non-zero stat byte targets MP.
+    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 1, value: 40 });
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.auto_mp_percent),
+        Some(40)
+    );
+}
+
+// Crystal `PlayerObject.SetAutoPotItem` (PlayerObject.cs:9651) routes by grid
+// (HeroHPItem/HeroMPItem) and zeroes an unknown item index. Confirms the
+// handler the new gateway `SetAutoPotItem` browser command reaches.
+#[test]
+fn set_auto_pot_item_packet_routes_by_grid_for_spawned_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.handle_packet(ClientPacket::NewHero {
+        name: "Aide".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Taoist,
+    });
+
+    // An unknown/zero item index resolves to 0 (Crystal GetItemInfo == null).
+    let packets = session.handle_packet(ClientPacket::SetAutoPotItem {
+        grid: MirGridType::HeroHpItem,
+        item_index: 0,
+    });
+    assert_eq!(
+        packets,
+        vec![ServerPacket::SetAutoPotItem {
+            grid: MirGridType::HeroHpItem as u8,
+            item_index: 0,
+        }]
+    );
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.hp_item_index),
+        Some(0)
+    );
+
+    // MP grid routes to the MP item slot.
+    session.handle_packet(ClientPacket::SetAutoPotItem {
+        grid: MirGridType::HeroMpItem,
+        item_index: 0,
+    });
+    assert_eq!(
+        session
+            .world_snapshot()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| hero.mp_item_index),
+        Some(0)
+    );
+}
+
+// Without a spawned AutoPot hero, Crystal's SetAutoPot* handlers early-return
+// (PlayerObject.cs:9641 / :9653). The Rust handlers mirror that no-op.
+#[test]
+fn set_auto_pot_packets_no_op_without_spawned_hero() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    assert!(session
+        .handle_packet(ClientPacket::SetAutoPotValue { stat: 0, value: 50 })
+        .is_empty());
+    assert!(session
+        .handle_packet(ClientPacket::SetAutoPotItem {
+            grid: MirGridType::HeroHpItem,
+            item_index: 0,
+        })
+        .is_empty());
+}
