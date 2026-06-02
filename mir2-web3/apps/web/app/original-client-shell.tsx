@@ -95,6 +95,10 @@ import {
   type ViewportOffset,
 } from "./components/original-client-scene-rendering";
 import { OriginalClientSceneVisualLayers } from "./components/original-client-scene-visual-layers";
+import {
+  OriginalClientSceneOverlays,
+  type SceneChatBubble,
+} from "./components/original-client-scene-overlays";
 import { OriginalClientMobileControls } from "./components/original-client-mobile-controls";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 
@@ -107,6 +111,19 @@ type HeldScenePointer = {
   tileX?: number;
   tileY?: number;
 };
+
+type ChatBubbleRecord = {
+  speaker: string;
+  text: string;
+  channel: string;
+  firstSeenAt: number;
+};
+
+// How long a freshly-seen chat line floats over its speaker before it is dropped.
+const CHAT_BUBBLE_TTL_MS = 6_000;
+// Channels worth surfacing as over-head speech (local say-style chatter). Global/system channels
+// such as trade, server, announcement and system stay in the chat log only.
+const CHAT_BUBBLE_CHANNELS = new Set(["normal", "shout", "whisper", "group", "guild"]);
 
 type BevyEntityAtlasRect = {
   key: string;
@@ -375,6 +392,10 @@ export function OriginalClientShell({
             : null;
   const missingSceneSpriteLibrariesRef = useRef<Set<string>>(new Set());
   const entityMotionSnapshotsRef = useRef<Record<string, EntityMotionSnapshot>>({});
+  // Over-head chat bubble bookkeeping. Keyed by speaker name (the only entity reference a chat log
+  // line carries), each record remembers when the line first appeared so bubbles can expire on the
+  // shell's existing motion clock without any dedicated timer.
+  const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
   const heldKeyboardMoveKeysRef = useRef<Set<KeyboardMoveDirection>>(new Set());
@@ -965,6 +986,16 @@ export function OriginalClientShell({
         }))
     : [];
   const viewportDepthPlayer = renderPlayer ?? player ?? { x: 0, y: 0 };
+  // Over-head chat bubbles + selected-target action label for the DOM scene overlays. Bubbles reuse
+  // the chat log the shell already receives and expire on `motionNow` (the existing render tick);
+  // the action label reuses the helper the shell already imported for keyboard target actions.
+  const sceneChatBubbles =
+    screen === "game"
+      ? deriveChatBubbles(logs, viewportEntities, chatBubbleStateRef.current, motionNow)
+      : [];
+  const selectedTargetReadoutLabel = selectedEntity
+    ? selectedTargetActionLabel(t, selectedEntity, targetDistance)
+    : null;
   const domEntityFallbackRequested = shouldUseDomEntityFallback(forceMobileControls || touchPrimaryDevice);
   const hideBevyCanvasForDomEntityFallback =
     screen === "game" && (bevyRuntimeBackend === "webgl2" || domEntityFallbackRequested);
@@ -1616,6 +1647,19 @@ export function OriginalClientShell({
             onPickGroundDrop={onPickGroundDrop}
             onActivateEntity={onActivateEntity}
           />
+          <OriginalClientSceneOverlays
+            screen={screen}
+            t={t}
+            player={player}
+            selectedEntity={selectedEntity}
+            viewportEntitySprites={viewportEntitySprites}
+            playerCameraMotionOffset={playerCameraMotionOffset}
+            entityMotionSnapshots={entityMotionSnapshotsRef.current}
+            motionNow={motionNow}
+            chatBubbles={sceneChatBubbles}
+            targetActionLabel={selectedTargetReadoutLabel}
+            entityKindClassName={entityKindClassName}
+          />
           {screen === "login" ? (
             <LoginOverlay
               language={language}
@@ -1743,6 +1787,90 @@ export function OriginalClientShell({
       />
     </main>
   );
+}
+
+// Strip the leading "[HH:MM:SS] " stamp createLogLine adds so the bubble shows only the speech.
+function stripLogTimestamp(text: string): string {
+  return text.replace(/^\[\d{1,2}:\d{2}:\d{2}(?:\s?[AP]M)?\]\s*/i, "");
+}
+
+// Pull "Speaker: words" out of a chat line. Mir chat lines are emitted as "<name>: <message>"; the
+// portion before the first colon is the speaker we try to anchor the bubble to. Returns null when
+// the line has no speaker prefix (server notices, hints, etc.).
+function parseChatLine(text: string): { speaker: string; text: string } | null {
+  const stripped = stripLogTimestamp(text).trim();
+  const colon = stripped.indexOf(":");
+  if (colon <= 0) {
+    return null;
+  }
+  const speaker = stripped.slice(0, colon).trim();
+  const message = stripped.slice(colon + 1).trim();
+  // Reject prefixes that are clearly not a name (timestamps already stripped, but guard URLs etc.).
+  if (!speaker || !message || speaker.length > 24 || /\s{2,}/.test(speaker)) {
+    return null;
+  }
+  return { speaker, text: message };
+}
+
+// Derive the currently-visible over-head chat bubbles from the chat log + on-screen entities,
+// mutating `state` so each (speaker,text) pair keeps a stable firstSeenAt across renders. Expiry is
+// driven purely by `now` (the shell's motion clock), so no timer is required.
+function deriveChatBubbles(
+  logs: DisplayLogLine[],
+  viewportEntities: Array<DisplayEntity & { dx: number; dy: number }>,
+  state: Map<string, ChatBubbleRecord>,
+  now: number,
+): SceneChatBubble[] {
+  // Index visible speakers by lower-cased name (names are unique on screen for our purposes).
+  const entityByName = new Map<string, DisplayEntity & { dx: number; dy: number }>();
+  for (const entity of viewportEntities) {
+    if (entity.name) {
+      entityByName.set(entity.name.toLowerCase(), entity);
+    }
+  }
+
+  // Walk the chat-tone lines newest-first and remember the most recent line per speaker.
+  const latestBySpeaker = new Map<string, { text: string; channel: string }>();
+  for (const line of logs) {
+    if (line.tone !== "chat" || !CHAT_BUBBLE_CHANNELS.has(line.channel)) {
+      continue;
+    }
+    const parsed = parseChatLine(line.text);
+    if (!parsed) {
+      continue;
+    }
+    const key = parsed.speaker.toLowerCase();
+    if (!entityByName.has(key) || latestBySpeaker.has(key)) {
+      continue;
+    }
+    latestBySpeaker.set(key, { text: parsed.text, channel: line.channel });
+  }
+
+  // Reconcile records: stamp firstSeenAt for newly-said lines, refresh text for ongoing ones.
+  for (const [key, { text, channel }] of latestBySpeaker) {
+    const existing = state.get(key);
+    if (existing && existing.text === text) {
+      continue;
+    }
+    state.set(key, { speaker: key, text, channel, firstSeenAt: now });
+  }
+
+  // Emit active (non-expired) bubbles whose speaker is still on screen; prune the rest.
+  const bubbles: SceneChatBubble[] = [];
+  for (const [key, record] of state) {
+    const entity = entityByName.get(key);
+    if (!entity || now - record.firstSeenAt > CHAT_BUBBLE_TTL_MS) {
+      state.delete(key);
+      continue;
+    }
+    bubbles.push({
+      objectId: entity.objectId,
+      text: record.text,
+      channel: record.channel,
+      firstSeenAt: record.firstSeenAt,
+    });
+  }
+  return bubbles;
 }
 
 const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 96;
