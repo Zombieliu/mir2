@@ -25,7 +25,8 @@ use super::inventory::{
 };
 use super::map::{
     clear_non_player_world_entities, rebuild_world, refresh_runtime_map_collision,
-    should_use_crystal_current_map_world, spawn_visible_world_for_current_map,
+    should_use_crystal_current_map_world, spawn_config_visible_npcs,
+    spawn_visible_world_for_current_map,
 };
 use super::packets::*;
 use super::quests::QuestState;
@@ -882,6 +883,7 @@ impl SimulationSession {
         if should_use_crystal_current_map_world(self.app.world()) {
             clear_non_player_world_entities(self.app.world_mut());
             spawn_visible_world_for_current_map(self.app.world_mut());
+            spawn_config_visible_npcs(self.app.world_mut());
         }
 
         let visible_objects = collect_visible_objects(self.app.world());
@@ -999,6 +1001,8 @@ impl SimulationSession {
             }
         }
         packets.extend(start_game_post_visible_crystal_bootstrap_packets());
+        // Render mineable veins immediately on entry, not just after the first swing.
+        packets.extend(super::mining::mine_node_state_packets(self.app.world()));
         packets
     }
 }

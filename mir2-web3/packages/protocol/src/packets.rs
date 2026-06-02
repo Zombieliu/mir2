@@ -2640,6 +2640,14 @@ pub enum ServerPacket {
         effect: u8,
         value: u8,
     },
+    /// Persistent mining-node visual stage for a mineable cell (custom, beyond
+    /// Crystal). `stage`: 0 = depleted/empty rock, 1 = partially mined, 2 = full
+    /// vein. Lets the client render "ore depletes as you mine" without changing
+    /// the static map tiles.
+    MineNodeState {
+        location: Point,
+        stage: u8,
+    },
     AllowObserve {
         allow: bool,
     },
@@ -3155,6 +3163,7 @@ impl ServerPacket {
             Self::ObjectHealth { .. } => ServerPacketId::ObjectHealth,
             Self::ObjectMana { .. } => ServerPacketId::ObjectMana,
             Self::MapEffect { .. } => ServerPacketId::MapEffect,
+            Self::MineNodeState { .. } => ServerPacketId::MineNodeState,
             Self::AllowObserve { .. } => ServerPacketId::AllowObserve,
             Self::ObjectRangeAttack { .. } => ServerPacketId::ObjectRangeAttack,
             Self::AddBuff { .. } => ServerPacketId::AddBuff,
@@ -4165,6 +4174,10 @@ impl ServerPacket {
                 location.encode(writer);
                 writer.write_u8(*effect);
                 writer.write_u8(*value);
+            }
+            Self::MineNodeState { location, stage } => {
+                location.encode(writer);
+                writer.write_u8(*stage);
             }
             Self::AllowObserve { allow } => writer.write_bool(*allow),
             Self::ObjectRangeAttack { info } => info.encode(writer),
@@ -5525,6 +5538,10 @@ impl ServerPacket {
                 location: Point::decode(reader)?,
                 effect: reader.read_u8()?,
                 value: reader.read_u8()?,
+            },
+            ServerPacketId::MineNodeState => Self::MineNodeState {
+                location: Point::decode(reader)?,
+                stage: reader.read_u8()?,
             },
             ServerPacketId::AllowObserve => Self::AllowObserve {
                 allow: reader.read_bool()?,

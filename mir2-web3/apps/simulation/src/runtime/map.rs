@@ -702,6 +702,35 @@ pub(super) fn clear_non_player_world_entities(world: &mut World) {
     }
 }
 
+/// Spawn the operator-configured `visible_npcs` into the world. Used by
+/// `rebuild_world` and again after the crystal world rebuild (which clears all
+/// non-player objects), so configured NPCs also appear on crystal maps.
+pub(super) fn spawn_config_visible_npcs(world: &mut World) {
+    let records = world
+        .resource::<RuntimeConfigResource>()
+        .config
+        .visible_npcs
+        .clone();
+    for record in &records {
+        world.spawn((
+            WorldObject,
+            Npc,
+            ObjectId(record.object_id),
+            localized_npc_name_key(record.object_id)
+                .map(|key| DisplayName::localized(key, record.name.clone()))
+                .unwrap_or_else(|| DisplayName::literal(record.name.clone())),
+            Position(record.position.clone()),
+            Facing(record.direction),
+            NpcAgent {
+                image: record.image,
+                colour_argb: record.colour_argb,
+                quest_ids: record.quest_ids.clone(),
+                script_key: record.script_key.clone(),
+            },
+        ));
+    }
+}
+
 pub(super) fn should_use_crystal_current_map_world(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();
     let config = &world.resource::<RuntimeConfigResource>().config;
@@ -959,10 +988,35 @@ pub(super) fn runtime_map_collision_data_uncached(
         return Some(runtime_map_collision_from_template(starter_map_collision()));
     }
 
-    let map_path = crystal_map_path(normalized)?;
-    let bytes = fs::read(map_path).ok()?;
+    let bytes = crystal_map_path(normalized)
+        .and_then(|path| fs::read(path).ok())
+        .or_else(|| read_crystal_map_pack_bytes(normalized))?;
     let collision = parse_runtime_map_collision(normalized, &bytes)?;
     Some(runtime_map_collision_from_template(collision))
+}
+
+/// Locate the bundled `crystal-map-pack` directory (gzipped Crystal `.map`
+/// files), so the sim can host maps with no Crystal client install. Honors
+/// `MIR2_CRYSTAL_MAP_PACK`, else falls back to the in-repo pack path.
+fn crystal_map_pack_dir() -> Option<PathBuf> {
+    if let Ok(dir) = std::env::var("MIR2_CRYSTAL_MAP_PACK") {
+        let dir = PathBuf::from(dir);
+        return dir.is_dir().then_some(dir);
+    }
+    let repo_default =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../web/lib/generated/crystal-map-pack");
+    repo_default.is_dir().then_some(repo_default)
+}
+
+/// Decompress a map's raw `.map` bytes from `{pack}/{name}.map.gz`.
+fn read_crystal_map_pack_bytes(normalized: &str) -> Option<Vec<u8>> {
+    use std::io::Read;
+    let gz_path = crystal_map_pack_dir()?.join(format!("{normalized}.map.gz"));
+    let gz = fs::read(gz_path).ok()?;
+    let mut decoder = flate2::read::GzDecoder::new(gz.as_slice());
+    let mut bytes = Vec::new();
+    decoder.read_to_end(&mut bytes).ok()?;
+    Some(bytes)
 }
 
 pub(super) fn runtime_map_collision_from_template(
@@ -1812,24 +1866,7 @@ pub(super) fn rebuild_world(world: &mut World) {
         }
     }
 
-    for record in &config.visible_npcs {
-        world.spawn((
-            WorldObject,
-            Npc,
-            ObjectId(record.object_id),
-            localized_npc_name_key(record.object_id)
-                .map(|key| DisplayName::localized(key, record.name.clone()))
-                .unwrap_or_else(|| DisplayName::literal(record.name.clone())),
-            Position(record.position.clone()),
-            Facing(record.direction),
-            NpcAgent {
-                image: record.image,
-                colour_argb: record.colour_argb,
-                quest_ids: record.quest_ids.clone(),
-                script_key: record.script_key.clone(),
-            },
-        ));
-    }
+    spawn_config_visible_npcs(world);
 
     spawn_stage5_hero(world);
     world.insert_resource(spawn_table);

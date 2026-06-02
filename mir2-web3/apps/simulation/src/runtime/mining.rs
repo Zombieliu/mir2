@@ -140,7 +140,13 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
         .collect();
 
     let mut spots = BTreeMap::new();
-    let set_count = world.resource::<MiningResource>().mine_sets.len();
+    let mine_set_max_stones: Vec<u8> = world
+        .resource::<MiningResource>()
+        .mine_sets
+        .iter()
+        .map(|set| set.max_stones)
+        .collect();
+    let set_count = mine_set_max_stones.len();
     for (set_index, x0, y0, size) in zones {
         if set_index >= set_count {
             continue;
@@ -151,7 +157,8 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
             for y in (y0 - size)..(y0 + size) {
                 spots.entry((x, y)).or_insert(MineSpot {
                     mine_set_index: set_index,
-                    stones_left: 0,
+                    // Fresh veins begin full so mining visibly depletes them.
+                    stones_left: mine_set_max_stones[set_index],
                     last_regen_tick: 0,
                 });
             }
@@ -159,6 +166,40 @@ pub(super) fn rebuild_mine_spots(world: &mut World) {
     }
 
     world.resource_mut::<MiningResource>().spots = spots;
+}
+
+/// Map a spot's remaining stones to a coarse visual stage for `MineNodeState`:
+/// 0 = depleted (empty rock), 1 = partially mined (<50%), 2 = full vein.
+pub(super) fn mine_stage(stones_left: u8, max_stones: u8) -> u8 {
+    if stones_left == 0 {
+        0
+    } else if u16::from(stones_left) * 2 < u16::from(max_stones) {
+        1
+    } else {
+        2
+    }
+}
+
+/// Emit a `MineNodeState` for every mineable cell on the current map so the
+/// client renders veins on map entry (not only after the first swing). Called
+/// from the start-game / map-entry packet assembly.
+pub(super) fn mine_node_state_packets(world: &World) -> Vec<ServerPacket> {
+    let mining = world.resource::<MiningResource>();
+    mining
+        .spots
+        .iter()
+        .map(|(&(x, y), spot)| {
+            let max_stones = mining
+                .mine_sets
+                .get(spot.mine_set_index)
+                .map(|set| set.max_stones)
+                .unwrap_or(0);
+            ServerPacket::MineNodeState {
+                location: Point { x, y },
+                stage: mine_stage(spot.stones_left, max_stones),
+            }
+        })
+        .collect()
 }
 
 struct EquippedPickaxe {
@@ -270,6 +311,22 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
             spot.stones_left = new_stones;
         }
     }
+
+    // Broadcast the post-swing visual stage so the client can render the node
+    // depleting (full -> cracked -> empty) and refilling on regen.
+    let stage = {
+        let stones = world
+            .resource::<MiningResource>()
+            .spots
+            .get(&(target.x, target.y))
+            .map(|spot| spot.stones_left)
+            .unwrap_or(0);
+        mine_stage(stones, set.max_stones)
+    };
+    packets.push(ServerPacket::MineNodeState {
+        location: target.clone(),
+        stage,
+    });
 
     Some(packets)
 }

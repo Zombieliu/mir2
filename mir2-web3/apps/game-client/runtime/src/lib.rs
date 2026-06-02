@@ -61,6 +61,7 @@ struct SceneRegistry {
     entity_render_layers: HashMap<String, EntityRenderLayerHandle>,
     entity_render_atlases: HashMap<String, EntityRenderAtlasHandle>,
     map: MapSceneCache,
+    mine_nodes: HashMap<(i32, i32), MineNodeHandles>,
 }
 
 #[derive(Default)]
@@ -128,6 +129,8 @@ struct WorldSnapshot {
     decor_objects: Vec<DecorObject>,
     #[serde(default)]
     entities: Vec<WorldEntity>,
+    #[serde(default)]
+    mine_nodes: Vec<MineNode>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -195,6 +198,16 @@ struct WorldEntity {
     y: i32,
     direction: Option<String>,
     level: Option<u16>,
+}
+
+/// A mineable cell's depletion stage, driven by the server `MineNodeState`
+/// packet. Rendered as a coloured marker that fades as the vein is mined out.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MineNode {
+    x: i32,
+    y: i32,
+    stage: u8,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -391,6 +404,7 @@ pub fn boot_mir2_runtime() {
                 ingest_pending_entity_render_atlases,
                 sync_map_scene,
                 sync_entities,
+                sync_mine_nodes,
                 sync_entity_render_layers,
                 follow_player,
             )
@@ -919,6 +933,90 @@ fn follow_player(
     camera_transform.translation.x = focus.x as f32 * TILE_SIZE;
     camera_transform.translation.y = -(focus.y as f32) * TILE_SIZE;
     camera_transform.translation.z = 1000.0;
+}
+
+/// Per-cell entities for a rendered mine vein: a constant dark rock base plus an
+/// ore overlay whose colour and size shrink as the vein is mined out.
+struct MineNodeHandles {
+    root: Entity,
+    ore: Entity,
+}
+
+/// Ore-overlay colour and size for a depletion stage (2 full / 1 cracked / 0 empty).
+fn mine_ore_visual(stage: u8) -> (Color, Vec2) {
+    let full = TILE_SIZE - 12.0;
+    if stage >= 2 {
+        (Color::srgba(0.85, 0.66, 0.28, 0.95), Vec2::splat(full)) // full vein: big bright ore
+    } else if stage == 1 {
+        (Color::srgba(0.70, 0.52, 0.26, 0.80), Vec2::splat(full * 0.6)) // half-mined: smaller, dimmer
+    } else {
+        (Color::srgba(0.45, 0.40, 0.30, 0.35), Vec2::splat(full * 0.3)) // depleted: tiny, faint
+    }
+}
+
+/// Render mine veins as a rock base + an ore overlay, diffing against the
+/// snapshot each frame (mirrors `sync_entities`): spawn new cells, shrink/fade
+/// the ore overlay as the stage drops, and despawn cells that are gone.
+fn sync_mine_nodes(
+    mut commands: Commands,
+    state: Res<RuntimeWorldState>,
+    mut registry: ResMut<SceneRegistry>,
+    mut sprite_query: Query<&mut Sprite>,
+) {
+    let Some(snapshot) = &state.snapshot else {
+        return;
+    };
+
+    let mut alive: HashSet<(i32, i32)> = HashSet::new();
+    for node in &snapshot.mine_nodes {
+        let cell = (node.x, node.y);
+        alive.insert(cell);
+        let (ore_color, ore_size) = mine_ore_visual(node.stage);
+
+        if let Some(handles) = registry.mine_nodes.get(&cell) {
+            if let Ok(mut sprite) = sprite_query.get_mut(handles.ore) {
+                sprite.color = ore_color;
+                sprite.custom_size = Some(ore_size);
+            }
+            continue;
+        }
+
+        let mut translation = tile_to_world(node.x, node.y);
+        translation.z = 0.2;
+        let mut ore: Option<Entity> = None;
+        let root = commands
+            .spawn((MirObject, Transform::from_translation(translation)))
+            .with_children(|parent| {
+                parent.spawn((
+                    Sprite::from_color(Color::srgb(0.18, 0.16, 0.15), Vec2::splat(TILE_SIZE - 8.0)),
+                    Transform::from_xyz(0.0, 0.0, 0.0),
+                ));
+                ore = Some(
+                    parent
+                        .spawn((
+                            Sprite::from_color(ore_color, ore_size),
+                            Transform::from_xyz(0.0, 0.0, 0.02),
+                        ))
+                        .id(),
+                );
+            })
+            .id();
+        if let Some(ore) = ore {
+            registry.mine_nodes.insert(cell, MineNodeHandles { root, ore });
+        }
+    }
+
+    let stale: Vec<(i32, i32)> = registry
+        .mine_nodes
+        .keys()
+        .filter(|cell| !alive.contains(*cell))
+        .copied()
+        .collect();
+    for cell in stale {
+        if let Some(handles) = registry.mine_nodes.remove(&cell) {
+            commands.entity(handles.root).despawn();
+        }
+    }
 }
 
 fn tile_to_world(x: i32, y: i32) -> Vec3 {
