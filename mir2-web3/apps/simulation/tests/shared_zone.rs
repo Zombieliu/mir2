@@ -8173,9 +8173,11 @@ fn zone_resolves_player_attack_damage_from_authoritative_stats() {
 
 #[test]
 fn zone_resolves_player_critical_hit_from_authoritative_stats() {
-    // With CriticalRate 100 the zone amplifies the rolled DC by CriticalDamage
-    // (10 == +100%) before subtracting armour — the Crystal crit, owned by the
-    // zone rather than the session.
+    // With CriticalRate 100 (weight 5 -> always crits) the zone amplifies the
+    // rolled DC by `Floor(damage * (CriticalDamage / CriticalDamageWeight) * 10)`
+    // (weight 50, so CriticalDamage 10 == +200%, a tripled blow) before
+    // subtracting armour — the Crystal crit (HumanObject.cs:7156-7161,
+    // MonsterObject.cs:2594-2599), owned by the zone rather than the session.
     let mut zone = zone();
     let attacker = session("first");
     zone.handle(ZoneCommand::Join(join_with_combat_stats(
@@ -8222,8 +8224,9 @@ fn zone_resolves_player_critical_hit_from_authoritative_stats() {
     });
     let struck = zone.tick(10);
 
-    // base 15 -> crit doubles to 30, minus 5 armour = 25 (vs 10 without crit).
-    assert_eq!(damage_indicator_for(&struck, 9100), Some(25));
+    // base 15 -> crit triples to 45 (15 + Floor(15*2.0)), minus 5 armour = 40
+    // (vs 10 without crit).
+    assert_eq!(damage_indicator_for(&struck, 9100), Some(40));
 }
 
 #[test]

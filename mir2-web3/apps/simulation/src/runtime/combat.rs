@@ -338,8 +338,12 @@ fn crystal_slaying_melee_bonus(world: &World) -> i32 {
         .unwrap_or(0)
 }
 
-/// Crystal critical-hit application: when a `CriticalRate` roll lands, the blow
-/// is amplified by `CriticalDamage` (each point is +10%). Inert when the player
+/// Crystal critical-hit application (HumanObject.cs:7156-7161,
+/// MonsterObject.cs:2594-2599): a crit lands when
+/// `Random(100) < CriticalRate * Settings.CriticalRateWeight` (weight 5), and
+/// the blow is then amplified by
+/// `Floor(damage * ((CriticalDamage / Settings.CriticalDamageWeight) * 10))`
+/// (weight 50 → each point of `CriticalDamage` adds 20%). Inert when the player
 /// has no crit stats (the seed case).
 fn crystal_apply_player_critical(
     _world: &World,
@@ -358,11 +362,33 @@ fn crystal_apply_player_critical(
         CRYSTAL_SALT_CRITICAL as usize,
         100,
     );
-    if roll >= u64::try_from(rate).unwrap_or(0) {
+    let crit_chance = rate.saturating_mul(CRYSTAL_CRITICAL_RATE_WEIGHT);
+    if roll >= u64::try_from(crit_chance).unwrap_or(0) {
         return damage;
     }
-    let bonus_steps = stats.critical_damage().max(1);
-    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+    crystal_critical_amplified_damage(damage, stats.critical_damage())
+}
+
+/// Crystal crit amplification: `damage + Floor(damage * (CriticalDamage /
+/// CriticalDamageWeight) * 10)` (HumanObject.cs:7159). `CriticalDamage` is
+/// floored to 1 to match the engine treating an equipped-but-zero crit-damage
+/// gem as a minimal amplifier. With the default weight 50 a `CriticalDamage` of
+/// 10 yields a tripled blow (`damage + damage*2`).
+pub(crate) fn crystal_critical_amplified_damage(damage: i32, critical_damage: i32) -> i32 {
+    let bonus_steps = critical_damage.max(1);
+    // (CriticalDamage / CriticalDamageWeight) * 10 evaluated as Crystal does in
+    // f64, then floored, matching `(int)Math.Floor(...)`.
+    let multiplier =
+        (f64::from(bonus_steps) / f64::from(CRYSTAL_CRITICAL_DAMAGE_WEIGHT)) * 10.0;
+    let bonus = (f64::from(damage) * multiplier).floor();
+    let bonus = if bonus > f64::from(i32::MAX) {
+        i32::MAX
+    } else if bonus < 0.0 {
+        0
+    } else {
+        bonus as i32
+    };
+    damage.saturating_add(bonus)
 }
 
 /// Rolled melee damage for the local player: Crystal `PlayerObject.Attack()` →
