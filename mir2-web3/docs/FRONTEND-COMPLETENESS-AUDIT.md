@@ -265,3 +265,56 @@ The script exits 0, has no dependencies, makes no network calls, and resolves
 all inputs relative to its own location, so it is safe to run from anywhere and
 on CI. When the protocol, `page.tsx`, components, or committed assets change,
 re-run it and update §2 (and revisit the §4 scores).
+
+---
+
+## §6. Re-index snapshot — 2026-06-02 (branch `claude/fe-integration`)
+
+State after the three consolidation batches (packets / windows / VFX / SW / sim-parity / outbound / tests). **Not yet merged to `main` / not deployed.**
+
+### Hard metrics (from `measure:frontend-coverage`)
+
+| Signal | Value |
+|---|---|
+| ServerPacket handlers (inbound) | 276 / 280 (98.6%) |
+| ClientPacket senders (outbound) | 51 / 153 (33.3%; ~65 distinct true) |
+| UI dialog/window components | 27 / 36 (75%) |
+| Total components (.tsx) | 36 |
+| original-ui assets | 20 libs / 6,857 PNG |
+| original-map assets | 3 libs / 8,148 PNG |
+| crystal map pack | 1,620 .map.gz |
+
+### Per-module completion (estimates w/ evidence)
+
+| Module | % | Notes |
+|---|---|---|
+| Login / account / char-select (passkey) | 90% | mature |
+| Core HUD (HP/MP orbs, quick/skill bar, gold) | 85% | quickslot/belt present |
+| Scene / map-tile render (back/mid/front/light) | 88% | 1,620-tile pack, real tiles |
+| Mini-map / big-map | 85% | present |
+| Actor / monster sprite render (Bevy WASM) | ~60% | 8-dir+anim; **name tags / health bars / chat bubbles missing**; sprite frames currently 404 from R2 |
+| Chat (channels / input / log) | 75% | over-head bubbles missing |
+| Inventory / storage | 85% | |
+| Character / stats / equipment | 85% | |
+| Skill / magic book + skill bar | 80% | |
+| NPC dialog / shop / repair | 80% | |
+| Trade | 78% | actions partly wired |
+| Social: guild / group / friends / mentor-marriage | 80% | real data, most actions wired |
+| Quest log | 72% | track/abandon disabled (no packet) |
+| Hero / pet / intelligent creatures | 70% | real data; summon etc. disabled |
+| Mail | 75% | claim/delete wired |
+| Ranking / Market-auction | 80% | data + requests wired |
+| Conquest / guild-war | 70% | start-war wired; gate/tax via NPC |
+| Buff display | 75% | real data |
+| Help / hotkeys / world-map / chat-settings | 78% | static/config |
+| Options + audio settings | 70% | |
+| Mobile controls / input | 80% | SW + chunk + joystick hardened |
+| VFX / effects layer | 60% | 11 elements × 11 archetypes procedural; **real atlases pending** |
+
+### Weighted overall (visual/UI client): **≈ 75% (range 72–78%)**
+
+### Caps that block a blanket ">95% everywhere" from the sandbox
+- **VFX real atlases** + **audio** + **live sprite serving** → need the real Crystal client `.Lib` files + R2 credentials + deploy (the `/Crystal` C# submodule carries source, **0 `.Lib` assets**).
+- **Actor sprite fidelity** in the Bevy WASM runtime → heavy `wasm-bindgen` rebuild.
+- Code-doable toward ~95% (in-sandbox, cargo + Crystal C# source now available): outbound/window actions (via new gateway BrowserCommands), HUD/chat/inventory/character polish, entity name-tag/health-bar overlays, and deeper backend Crystal 1:1.
+
