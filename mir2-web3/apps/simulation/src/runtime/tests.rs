@@ -56929,8 +56929,13 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Gear grants crit rate 100 / damage 10, but caps clamp them to 18 / 10
-    // (Crystal RefreshStatCaps). So crits land ~18% of the time and each adds
-    // CriticalDamage*10% = +100% (a doubled blow).
+    // (Crystal RefreshStatCaps). Crystal's crit roll is
+    // `Random(100) < CriticalRate * Settings.CriticalRateWeight` (weight 5,
+    // HumanObject.cs:7156), so a rate of 18 lands a crit 18*5 = 90% of the time.
+    // Each landed crit is amplified by
+    // `Floor(damage * (CriticalDamage / CriticalDamageWeight) * 10)` (weight 50,
+    // HumanObject.cs:7159), i.e. CriticalDamage 10 → `damage + Floor(damage*2)` =
+    // a *tripled* blow.
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_RATE, 100);
     equipped_weapon_push_stat(&mut session, super::CRYSTAL_STAT_CRITICAL_DAMAGE, 10);
     let stats = super::player_stats(session.app.world());
@@ -56943,15 +56948,49 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
         let d = super::crystal_player_rolled_melee_damage(session.app.world(), tick);
         if (min..=max).contains(&d) {
             normals += 1;
-        } else if (2 * min..=2 * max).contains(&d) {
-            // crit: Random(MinDC,MaxDC) doubled by CriticalDamage 10.
+        } else if (3 * min..=3 * max).contains(&d) {
+            // crit: Random(MinDC,MaxDC) tripled by CriticalDamage 10 (weight 50).
             crits += 1;
         } else {
             panic!("rolled {d} is neither a normal [{min},{max}] nor crit hit");
         }
     }
-    assert!(crits > 0, "an 18% crit rate should land some crits");
-    assert!(normals > 0, "an 18% crit rate should not crit every swing");
+    assert!(crits > 0, "a 90% effective crit rate should land many crits");
+    assert!(
+        normals > 0,
+        "a 90% effective crit rate should still leave some normal swings"
+    );
+    // With weight 5 a clamped rate of 18 is a 90% crit chance, so crits must
+    // dominate (this would fail under the retired 1x-weight assumption).
+    assert!(
+        crits > normals,
+        "90% crit chance should produce more crits ({crits}) than normals ({normals})"
+    );
+}
+
+#[test]
+fn critical_amplified_damage_matches_crystal_weight_arithmetic() {
+    // Crystal HumanObject.cs:7159 / MonsterObject.cs:2597:
+    //   damage + Floor(damage * ((CriticalDamage / CriticalDamageWeight) * 10))
+    // with the default Settings.CriticalDamageWeight = 50.
+
+    // CriticalDamage 10: (10/50)*10 = 2.0 → damage + 2*damage = tripled.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 10), 300);
+    assert_eq!(super::crystal_critical_amplified_damage(37, 10), 37 + 74);
+
+    // CriticalDamage 5: (5/50)*10 = 1.0 → doubled.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 5), 200);
+
+    // CriticalDamage 1: (1/50)*10 = 0.2 → +20% (floored).
+    assert_eq!(super::crystal_critical_amplified_damage(100, 1), 120);
+    assert_eq!(super::crystal_critical_amplified_damage(99, 1), 99 + 19); // Floor(19.8)
+
+    // CriticalDamage 0 is treated as a minimal amplifier of 1 (matches the
+    // engine's `.max(1)` floor): (1/50)*10 = 0.2 → +20%.
+    assert_eq!(super::crystal_critical_amplified_damage(100, 0), 120);
+
+    // Zero / negative base damage is unchanged.
+    assert_eq!(super::crystal_critical_amplified_damage(0, 10), 0);
 }
 
 #[test]
