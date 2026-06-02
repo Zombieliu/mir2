@@ -14,6 +14,7 @@ import {
   adaptMarketListings,
   adaptConquest,
   adaptGuildTerritory,
+  type RankingTabKey,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
 
@@ -4642,6 +4643,162 @@ export default function HomePage() {
 
   function sendClientCommand(command: Record<string, unknown>) {
     send(command);
+  }
+
+  // ---------------------------------------------------------------------------
+  // ExtraWindows action handlers
+  //
+  // Each handler maps a Crystal UI window button to an outbound BrowserCommand
+  // whose field shapes match `BrowserCommand` in apps/gateway/src/web.rs (which
+  // forwards to the `ClientPacket` enum in packages/protocol/src/packets.rs).
+  // Window actions that have no real ClientPacket / BrowserCommand are left
+  // unwired so the window keeps the button disabled (see the <ExtraWindows>
+  // mount + the task report for the omitted list).
+  // ---------------------------------------------------------------------------
+
+  // Ranking: a window tab maps to a `(rankType, onlineOnly)` pair, matching the
+  // `rankingTabKey` adapter. `getRanking` -> ClientPacket::GetRanking; rankIndex
+  // 0 requests the first page.
+  function rankingRequestForTab(tab: RankingTabKey): { rankType: number; onlineOnly: boolean } {
+    switch (tab) {
+      case "warrior":
+        return { rankType: 1, onlineOnly: false };
+      case "wizard":
+        return { rankType: 2, onlineOnly: false };
+      case "taoist":
+        return { rankType: 3, onlineOnly: false };
+      case "assassin":
+        return { rankType: 4, onlineOnly: false };
+      case "archer":
+        return { rankType: 5, onlineOnly: false };
+      case "online":
+        return { rankType: 0, onlineOnly: true };
+      case "overall":
+      default:
+        return { rankType: 0, onlineOnly: false };
+    }
+  }
+
+  function requestRanking(tab: RankingTabKey) {
+    const { rankType, onlineOnly } = rankingRequestForTab(tab);
+    send({ type: "getRanking", rankType, rankIndex: 0, onlineOnly });
+  }
+
+  // Friends: the stage-5 social roster carries no character index, so the friend
+  // index that ClientPacket::RemoveFriend expects is derived from the displayed
+  // ordering (`friends` then `blocked`), matching the gateway's
+  // `stage5_friend_entries` enumeration.
+  function friendCharacterIndex(name: string): number | null {
+    const social = world.stage5Systems.social;
+    const friends = Array.isArray(social?.friends) ? social.friends : [];
+    const blocked = Array.isArray(social?.blocked) ? social.blocked : [];
+    const friendIdx = friends.findIndex((entry) => entry.toLowerCase() === name.toLowerCase());
+    if (friendIdx >= 0) return friendIdx;
+    const blockedIdx = blocked.findIndex((entry) => entry.toLowerCase() === name.toLowerCase());
+    if (blockedIdx >= 0) return friends.length + blockedIdx;
+    return null;
+  }
+
+  function addFriend(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "addFriend", name: trimmed, blocked: false });
+  }
+
+  function blockPlayer(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "addFriend", name: trimmed, blocked: true });
+  }
+
+  // RemoveFriend resolves the entry by index and drops it from both the friend
+  // and block lists, so it covers "remove friend" and "unblock" alike.
+  function removeFriendEntry(name: string) {
+    const characterIndex = friendCharacterIndex(name);
+    if (characterIndex === null) return;
+    send({ type: "removeFriend", characterIndex });
+  }
+
+  // Market: stage-5 auction listing ids are surfaced as strings; the
+  // MarketBuy / MarketGetBack packets key off the same numeric listing id.
+  function marketBuyListing(listingId: string) {
+    const auctionId = Number(listingId);
+    if (!Number.isFinite(auctionId)) return;
+    send({ type: "marketBuy", auctionId, bidPrice: 0 });
+  }
+
+  function marketCancelListing(listingId: string) {
+    const auctionId = Number(listingId);
+    if (!Number.isFinite(auctionId)) return;
+    // mode 0 == "get back" (the gateway ignores the mode discriminator).
+    send({ type: "marketGetBack", mode: 0, auctionId });
+  }
+
+  function marketSearch(query: string) {
+    send({ type: "marketSearch", matchText: query.trim() });
+  }
+
+  function marketRefresh() {
+    send({ type: "marketRefresh" });
+  }
+
+  // Bonds (relationship + mentor). MarriageRequest targets the faced player
+  // server-side, so the window's typed name is not part of the packet.
+  function proposeMarriage(_name: string) {
+    send({ type: "marriageRequest" });
+  }
+
+  function divorce() {
+    send({ type: "divorceRequest" });
+  }
+
+  // ChangeMarriage toggles whether the player accepts incoming proposals.
+  function toggleAllowMarriage(_allow: boolean) {
+    send({ type: "changeMarriage" });
+  }
+
+  function addMentor(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "addMentor", name: trimmed });
+  }
+
+  function allowMentor(_allow: boolean) {
+    send({ type: "allowMentor" });
+  }
+
+  function cancelMentor() {
+    send({ type: "cancelMentor" });
+  }
+
+  // Guild chat rides the real Chat packet: the "!~" prefix routes to guild chat
+  // server-side (apps/simulation/.../zone/runtime.rs). Notice editing, member
+  // invite, and kick have no BrowserCommand and stay unwired.
+  function sendGuildChat(message: string) {
+    const trimmed = message.trim();
+    if (!trimmed) return;
+    send({ type: "chat", message: `!~${trimmed}` });
+  }
+
+  // Group / conquest actions only have stage-5 action-channel mappings.
+  function groupInviteMember(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "stage5Command", action: "group.create", args: [trimmed] });
+  }
+
+  function groupLeave() {
+    send({ type: "stage5Command", action: "group.leave" });
+  }
+
+  function groupToggleLootMode() {
+    const current = world.stage5Systems.group?.lootMode;
+    const next = current === "group" ? "solo" : "group";
+    send({ type: "stage5Command", action: "group.loot", args: [next] });
+  }
+
+  function conquestStartWar() {
+    send({ type: "stage5Command", action: "conquest.start" });
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -9612,13 +9769,13 @@ export default function HomePage() {
       t={t}
       questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures) }}
-      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null }}
-      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social) }}
-      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor) }}
-      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null }}
-      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold }}
-      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null }}
+      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onSendGuildChat: sendGuildChat }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null, onInviteMember: groupInviteMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry }}
+      bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor), onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
+      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking }}
+      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh }}
+      conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
     />
     </>
   );
