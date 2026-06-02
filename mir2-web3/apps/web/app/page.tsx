@@ -72,7 +72,7 @@ type RuntimeStatus = {
 };
 
 type RuntimeModule = {
-  default?: (input?: string | URL | Request) => Promise<unknown>;
+  default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
@@ -8031,7 +8031,7 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
     // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
     // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
     await waitForBevyCanvas();
-    await runtime.default(runtimeWasmPath);
+    await runtime.default({ module_or_path: runtimeWasmPath });
   }
 
   return runtime;
