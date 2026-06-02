@@ -30,6 +30,9 @@ import type {
   ConquestSummary,
   GuildTerritorySummary,
 } from "../app/components/original-client-conquest-window";
+import type { TradeSummary } from "../app/components/original-client-trade-window";
+import type { BuffEntry } from "../app/components/original-client-buff-window";
+import type { WorldMapMarker } from "../app/components/original-client-world-map-window";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -46,6 +49,7 @@ export type Stage5SystemsLike = {
   guildTerritory?: UnknownRecord | null;
   hero?: UnknownRecord | null;
   intelligentCreatures?: Array<UnknownRecord> | null;
+  trade?: UnknownRecord | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -511,4 +515,142 @@ export function adaptGuildTerritory(
     rentalDaysLeft: readNumber(record, ["rentalDaysLeft"]),
     recallLog: readStringArray(record.recallLog),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Trade
+// ---------------------------------------------------------------------------
+
+/**
+ * Adapts the stage-5 `trade` slice into the Trade window's `TradeSummary`.
+ *
+ * The page builds this incrementally from the trade packets: `partner` +
+ * `state` ("requested" | "open") from `TradeRequest`/`TradeAccept`,
+ * `partnerGold` from `TradeGold`, `partnerItemCount` from `TradeItem`, and
+ * `confirmed` from `TradeConfirm`. Returns `null` when no trade is in flight so
+ * the host can keep the window closed.
+ */
+export function adaptTrade(trade: UnknownRecord | null | undefined): TradeSummary | null {
+  const record = asRecord(trade);
+  if (!record) return null;
+  const partner = readString(record, ["partner", "partnerName", "name"]);
+  const state = readString(record, ["state", "status"]);
+  // A trade with neither a partner nor a known state has nothing to show.
+  if (!partner && !state) return null;
+  return {
+    partner,
+    state,
+    partnerGold: readNumber(record, ["partnerGold", "gold"]),
+    partnerItemCount: readNumber(record, ["partnerItemCount", "itemCount"]),
+    confirmed: readBool(record, ["confirmed", "partnerConfirmed"]),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Buffs
+// ---------------------------------------------------------------------------
+
+type ActiveBuffLike = {
+  key?: unknown;
+  name?: unknown;
+  description?: unknown;
+  remainingTicks?: unknown;
+  attackBonus?: unknown;
+  defenceBonus?: unknown;
+};
+
+/**
+ * Adapts the world's `activeBuffs` list (mirrors the gateway `ActiveBuff`
+ * struct) into the Buff window's `BuffEntry[]`. Entries without a usable name
+ * are dropped; a missing `key` falls back to a positional id.
+ */
+export function adaptBuffs(buffs: Array<ActiveBuffLike> | null | undefined): BuffEntry[] {
+  if (!Array.isArray(buffs)) return [];
+  return buffs.flatMap((entry, index) => {
+    if (!entry || typeof entry !== "object") return [];
+    const name = typeof entry.name === "string" ? entry.name.trim() : "";
+    if (!name) return [];
+    const key = typeof entry.key === "string" && entry.key.length > 0 ? entry.key : `buff-${index}`;
+    return [
+      {
+        key,
+        name,
+        description: typeof entry.description === "string" ? entry.description : undefined,
+        remainingTicks:
+          typeof entry.remainingTicks === "number" && Number.isFinite(entry.remainingTicks)
+            ? entry.remainingTicks
+            : undefined,
+        attackBonus:
+          typeof entry.attackBonus === "number" && Number.isFinite(entry.attackBonus)
+            ? entry.attackBonus
+            : undefined,
+        defenceBonus:
+          typeof entry.defenceBonus === "number" && Number.isFinite(entry.defenceBonus)
+            ? entry.defenceBonus
+            : undefined,
+      },
+    ];
+  });
+}
+
+// ---------------------------------------------------------------------------
+// World map markers
+// ---------------------------------------------------------------------------
+
+type MapTransferLike = {
+  key?: unknown;
+  toMapTitle?: unknown;
+  toMapFileName?: unknown;
+  toPosition?: { x?: unknown; y?: unknown } | null;
+  bounds?: { minX?: unknown; maxX?: unknown; minY?: unknown; maxY?: unknown } | null;
+};
+
+/**
+ * Adapts the world's `mapTransfers` list into World map markers. Each transfer
+ * exposes a destination map plus the in-map exit bounds; the marker is plotted
+ * at the centre of those bounds, normalised against the supplied map size so it
+ * lands on the world image. Duplicate destinations are collapsed by title.
+ */
+export function adaptWorldMapMarkers(
+  transfers: Array<MapTransferLike> | null | undefined,
+  options?: { mapWidth?: number; mapHeight?: number; canTeleport?: (mapFileName: string) => boolean },
+): WorldMapMarker[] {
+  if (!Array.isArray(transfers)) return [];
+  const width = options?.mapWidth && options.mapWidth > 0 ? options.mapWidth : 1024;
+  const height = options?.mapHeight && options.mapHeight > 0 ? options.mapHeight : 1024;
+  const seen = new Set<string>();
+  const markers: WorldMapMarker[] = [];
+
+  transfers.forEach((entry, index) => {
+    if (!entry || typeof entry !== "object") return;
+    const title = typeof entry.toMapTitle === "string" ? entry.toMapTitle.trim() : "";
+    const mapFile = typeof entry.toMapFileName === "string" ? entry.toMapFileName : "";
+    const label = title || mapFile;
+    if (!label || seen.has(label)) return;
+    seen.add(label);
+
+    const bounds = entry.bounds && typeof entry.bounds === "object" ? entry.bounds : null;
+    const cx = midpoint(bounds?.minX, bounds?.maxX, entry.toPosition?.x);
+    const cy = midpoint(bounds?.minY, bounds?.maxY, entry.toPosition?.y);
+
+    markers.push({
+      key: typeof entry.key === "string" && entry.key.length > 0 ? entry.key : `transfer-${index}`,
+      title: label,
+      x: cx === undefined ? 0.5 : Math.max(0, Math.min(1, cx / width)),
+      y: cy === undefined ? 0.5 : Math.max(0, Math.min(1, cy / height)),
+      teleport: mapFile ? options?.canTeleport?.(mapFile) ?? false : false,
+    });
+  });
+
+  return markers;
+}
+
+function midpoint(min: unknown, max: unknown, fallback: unknown): number | undefined {
+  const lo = typeof min === "number" && Number.isFinite(min) ? min : undefined;
+  const hi = typeof max === "number" && Number.isFinite(max) ? max : undefined;
+  if (lo !== undefined && hi !== undefined) return (lo + hi) / 2;
+  if (lo !== undefined) return lo;
+  if (hi !== undefined) return hi;
+  if (typeof fallback === "number" && Number.isFinite(fallback)) return fallback;
+  return undefined;
 }
