@@ -1035,6 +1035,76 @@ enum BrowserCommand {
     ItemRentalLockFee,
     ItemRentalLockItem,
     ConfirmItemRental,
+    AcceptQuest {
+        #[serde(alias = "npcIndex", default)]
+        npc_index: u32,
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    FinishQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+        #[serde(alias = "selectedItemIndex", default = "default_selected_item_index")]
+        selected_item_index: i32,
+    },
+    AbandonQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    ShareQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    SwitchGroup {
+        #[serde(alias = "allowGroup")]
+        allow_group: bool,
+    },
+    AddMember {
+        name: String,
+    },
+    DelMember {
+        name: String,
+    },
+    GroupInvite {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    EditGuildMember {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        #[serde(alias = "rankIndex", default)]
+        rank_index: u8,
+        #[serde(default)]
+        name: String,
+        #[serde(alias = "rankName", default)]
+        rank_name: String,
+    },
+    EditGuildNotice {
+        #[serde(default)]
+        notice: Vec<String>,
+    },
+    GuildInvite {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    GuildNameReturn {
+        name: String,
+    },
+    RequestGuildInfo {
+        #[serde(alias = "infoType", default)]
+        info_type: u8,
+    },
+    GuildStorageGoldChange {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     CastSkill {
         key: String,
     },
@@ -1070,6 +1140,12 @@ enum SessionAction {
     Stage5Command { action: String, args: Vec<String> },
     SetLanguage { language: String },
     Tick,
+}
+
+/// Default `selected_item_index` for `FinishQuest`: `-1` means "no reward
+/// choice", which the simulation maps to `None` (see `stage5_finish_quest_packet`).
+fn default_selected_item_index() -> i32 {
+    -1
 }
 
 #[derive(Debug, Serialize)]
@@ -2889,6 +2965,91 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ConfirmItemRental => {
             Ok(SessionAction::Packet(ClientPacket::ConfirmItemRental))
         }
+        BrowserCommand::AcceptQuest {
+            npc_index,
+            quest_index,
+        } => Ok(SessionAction::Packet(ClientPacket::AcceptQuest {
+            npc_index,
+            quest_index,
+        })),
+        BrowserCommand::FinishQuest {
+            quest_index,
+            selected_item_index,
+        } => Ok(SessionAction::Packet(ClientPacket::FinishQuest {
+            quest_index,
+            selected_item_index,
+        })),
+        BrowserCommand::AbandonQuest { quest_index } => {
+            Ok(SessionAction::Packet(ClientPacket::AbandonQuest {
+                quest_index,
+            }))
+        }
+        BrowserCommand::ShareQuest { quest_index } => {
+            Ok(SessionAction::Packet(ClientPacket::ShareQuest {
+                quest_index,
+            }))
+        }
+        BrowserCommand::SwitchGroup { allow_group } => {
+            Ok(SessionAction::Packet(ClientPacket::SwitchGroup {
+                allow_group,
+            }))
+        }
+        BrowserCommand::AddMember { name } => {
+            Ok(SessionAction::Packet(ClientPacket::AddMember { name }))
+        }
+        BrowserCommand::DelMember { name } => {
+            Ok(SessionAction::Packet(ClientPacket::DelMember { name }))
+        }
+        BrowserCommand::GroupInvite { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::GroupInvite {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::EditGuildMember {
+            change_type,
+            rank_index,
+            name,
+            rank_name,
+        } => Ok(SessionAction::Packet(ClientPacket::EditGuildMember {
+            change_type,
+            rank_index,
+            name,
+            rank_name,
+        })),
+        BrowserCommand::EditGuildNotice { notice } => {
+            Ok(SessionAction::Packet(ClientPacket::EditGuildNotice {
+                notice,
+            }))
+        }
+        BrowserCommand::GuildInvite { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::GuildInvite {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::GuildNameReturn { name } => {
+            Ok(SessionAction::Packet(ClientPacket::GuildNameReturn { name }))
+        }
+        BrowserCommand::RequestGuildInfo { info_type } => {
+            Ok(SessionAction::Packet(ClientPacket::RequestGuildInfo {
+                info_type,
+            }))
+        }
+        BrowserCommand::GuildStorageGoldChange {
+            change_type,
+            amount,
+        } => Ok(SessionAction::Packet(ClientPacket::GuildStorageGoldChange {
+            change_type,
+            amount,
+        })),
+        BrowserCommand::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        } => Ok(SessionAction::Packet(ClientPacket::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        })),
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
         BrowserCommand::Stage5Command { action, args } => {
