@@ -138,7 +138,8 @@ function isStaticGameAsset(url) {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
-    url.pathname.startsWith("/generated/original-map-blend/")
+    url.pathname.startsWith("/generated/original-map-blend/") ||
+    url.pathname.startsWith("/bevy-entity-atlases/")
   );
 }
 
@@ -233,7 +234,8 @@ function isRemoteBackedStaticGameAsset(url) {
   return (
     url.pathname.startsWith("/original-ui/") ||
     url.pathname.startsWith("/original-map/") ||
-    url.pathname.startsWith("/generated/original-map-blend/")
+    url.pathname.startsWith("/generated/original-map-blend/") ||
+    url.pathname.startsWith("/bevy-entity-atlases/")
   );
 }
 

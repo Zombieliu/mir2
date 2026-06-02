@@ -111,7 +111,12 @@ export async function GET() {
     cacheNamespace,
     versionSource: process.env.MIR2_ASSET_VERSION ? "env:MIR2_ASSET_VERSION" : "stable-input-digest",
     generatedAt: new Date().toISOString(),
-    staticPrefixes: ["/original-ui/", "/original-map/", "/generated/original-map-blend/"],
+    staticPrefixes: [
+      "/original-ui/",
+      "/original-map/",
+      "/generated/original-map-blend/",
+      "/bevy-entity-atlases/",
+    ],
     apiPrefixes: ["/api/scene/crystal", "/api/original-ui-meta"],
     runtimeCaches: {
       staticAssetMaxEntries: 20000,

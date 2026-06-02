@@ -68,7 +68,11 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     cacheTier: "critical",
     // Prewarm the packed entity atlas and the same map footprint requested by the live game scene.
     // This keeps first Bichon movement from stampeding hundreds of tiny PNG requests on demand.
-    urls: ["/original-ui/MMap/0.png", "/bevy-entity-atlases/starter-bichon-base.png"],
+    urls: [
+      "/original-ui/MMap/0.png",
+      "/bevy-entity-atlases/manifest.json",
+      "/bevy-entity-atlases/starter-bichon-base.png",
+    ],
     scenes: [
       {
         label: "BichonProvince spawn",

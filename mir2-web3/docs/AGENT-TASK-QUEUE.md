@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> Latest entity-atlas resource hardening: 2026-06-02 adds
+> `/bevy-entity-atlases/` to the remote asset release roots, asset manifest
+> static prefixes, service-worker static/remote-cache handling, release doctor,
+> and production original-asset smoke. The Bichon spawn critical pack now
+> prewarms both the prebuilt entity-atlas manifest and PNG, while scene
+> readiness uses entity `preloadPaths` for DOM fallback walk/run/equipment
+> frames without extra scatter-fetching when the GPU atlas is already ready.
+> Verification passed script syntax checks, Web `tsc --noEmit`,
+> `preflight:asset-release`, `test:resource-loading`, `git diff --check`, and
+> production web-origin asset smoke. Current production CDN still returns 404
+> for the entity-atlas files until the next remote asset release is rebuilt and
+> uploaded to R2.
+
 > Latest Crystal map/minimap/resource parity closeout: 2026-05-27 prevents
 > scene-blueprint reloads from clearing existing mini/big map indices when a
 > partial blueprint has `null`, resolves Bichon map `0` mini/big map index
