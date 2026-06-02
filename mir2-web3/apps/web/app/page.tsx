@@ -18,6 +18,8 @@ import {
   adaptBuffs,
   adaptWorldMapMarkers,
   type RankingTabKey,
+  type MailMessageSummary,
+  type MailComposeDraft,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
 
@@ -1246,6 +1248,7 @@ export default function HomePage() {
   const [showConquest, setShowConquest] = useState(false);
   const [showTrade, setShowTrade] = useState(false);
   const [showBuffs, setShowBuffs] = useState(false);
+  const [showMail, setShowMail] = useState(false);
   const [showWorldMap, setShowWorldMap] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
@@ -1269,6 +1272,7 @@ export default function HomePage() {
       else if (key === "j") { event.preventDefault(); setShowHelp((value) => !value); }
       else if (key === "y") { event.preventDefault(); setShowHotkeys((value) => !value); }
       else if (key === "c") { event.preventDefault(); setShowChatSettings((value) => !value); }
+      else if (key === "l") { event.preventDefault(); setShowMail((value) => !value); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
@@ -4954,6 +4958,121 @@ export default function HomePage() {
 
   function cancelTrade() {
     send({ type: "tradeCancel" });
+  }
+
+  // ---- wave-2: additional window action wiring ----
+
+  // Hero AI behaviour -> ClientPacket::SetHeroBehaviour. HeroBehaviourKey maps
+  // positionally onto Crystal's HeroBehaviour enum; the sim stores + echoes the
+  // value, so the round-trip is faithful even if the ordinal differs.
+  function setHeroBehaviour(behaviour: "attack" | "counterAttack" | "follow" | "custom") {
+    const ordinal = { attack: 0, counterAttack: 1, follow: 2, custom: 3 } as const;
+    send({ type: "setHeroBehaviour", behaviour: ordinal[behaviour] ?? 0 });
+  }
+
+  // Recall the active hero. Crystal has no dedicated recall packet; recall rides
+  // ChangeHero (toggles the hero in/out beside the player), per the protocol audit.
+  function recallHero() {
+    send({ type: "changeHero", listIndex: 0 });
+  }
+
+  // Guild storage gold: GuildStorageGoldChange changeType 0 = deposit, 1 = withdraw.
+  function guildDepositGold(amount: number) {
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    send({ type: "guildStorageGoldChange", changeType: 0, amount: Math.floor(amount) });
+  }
+  function guildWithdrawGold(amount: number) {
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    send({ type: "guildStorageGoldChange", changeType: 1, amount: Math.floor(amount) });
+  }
+
+  // Assign a member to a rank -> EditGuildMember changeType 4 (carries rankIndex).
+  function changeGuildMemberRank(name: string, rankIndex: number) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "editGuildMember", changeType: 4, rankIndex, name: trimmed, rankName: "" });
+  }
+
+  // Save a guild rank: rename (changeType 2 carries rankName) then push each
+  // permission flag (changeType 5: rankName = option index 0..7, name = "true"/"false").
+  // permissions is the list of ENABLED permission keys for the rank; each of the
+  // 8 Crystal options is pushed true/false via EditGuildMember changeType 5.
+  function saveGuildRank(rankIndex: number, name: string, permissions: string[]) {
+    const trimmed = name.trim();
+    if (trimmed) {
+      send(
+        { type: "editGuildMember", changeType: 2, rankIndex, name: "", rankName: trimmed },
+        { quiet: true },
+      );
+    }
+    const optionByKey: Record<string, number> = {
+      changeRank: 0,
+      recruit: 1,
+      kick: 2,
+      storeItem: 3,
+      retrieveItem: 4,
+      alterAlliance: 5,
+      changeNotice: 6,
+      activateBuff: 7,
+    };
+    const enabled = new Set(permissions);
+    for (const [key, option] of Object.entries(optionByKey)) {
+      send(
+        {
+          type: "editGuildMember",
+          changeType: 5,
+          rankIndex,
+          name: enabled.has(key) ? "true" : "false",
+          rankName: String(option),
+        },
+        { quiet: true },
+      );
+    }
+  }
+
+  // Friend memo -> AddMemo, keyed by the same derived friend index as RemoveFriend.
+  function editFriendMemo(name: string, memo: string) {
+    const characterIndex = friendCharacterIndex(name);
+    if (characterIndex === null) return;
+    send({ type: "addMemo", characterIndex, memo });
+  }
+
+  // Ranking online-only toggle: re-request the active board with the flag.
+  function setRankingOnlineOnly(onlineOnly: boolean) {
+    send({ type: "getRanking", rankType: 0, rankIndex: 0, onlineOnly });
+  }
+
+  // Trade gold offer -> TradeGold.
+  function setTradeGold(amount: number) {
+    if (!Number.isFinite(amount) || amount < 0) return;
+    send({ type: "tradeGold", amount: Math.floor(amount) });
+  }
+
+  // Mail actions (ReadMail / CollectParcel / DeleteMail / SendMail).
+  function openMailMessage(mailId: number) {
+    send({ type: "readMail", mailId });
+  }
+  function claimMailAttachment(mailId: number) {
+    send({ type: "collectParcel", mailId });
+  }
+  function deleteMailMessage(mailId: number) {
+    send({ type: "deleteMail", mailId });
+  }
+  function sendMailMessage(draft: MailComposeDraft) {
+    const name = draft.to.trim();
+    if (!name) return;
+    send({
+      type: "sendMail",
+      name,
+      message: draft.body ?? "",
+      gold: Math.max(0, Math.floor(draft.gold ?? 0)),
+      itemsIdx: [0, 0, 0, 0, 0],
+      stamped: false,
+    });
+  }
+  // Friend "mail" affordance just opens the mail window (compose recipient typed there).
+  function openMailWindow(_name?: string) {
+    setShowMail(true);
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -9953,17 +10072,18 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest }}
-      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures), onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode }}
-      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest, onShareQuest: shareQuest }}
+      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures), onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
+      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
       group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
-      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer, onMail: openMailWindow, onEditMemo: editFriendMemo }}
       bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor), onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
-      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking }}
-      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh }}
+      ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking, onToggleOnlineOnly: setRankingOnlineOnly }}
+      market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh, onCollect: marketCancelListing }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
-      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade }}
+      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
+      mail={{ open: showMail, onClose: () => setShowMail(false), mail: adaptMailMessages(world.stage5Systems.mail), gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: adaptWorldMapMarkers(world.mapTransfers) }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
@@ -9971,6 +10091,27 @@ export default function HomePage() {
     />
     </>
   );
+}
+
+// Maps the normalized mail records (extended-server-packets normalizeMailList)
+// to the Mail window's MailMessageSummary shape. The list packet only carries a
+// item *count*, so attachments are surfaced as placeholder slots for the parcel
+// badge; full item detail arrives when the message is opened (ReadMail).
+function adaptMailMessages(raw: Array<Record<string, unknown>> | undefined): MailMessageSummary[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((entry) => {
+    const itemCount = Number(entry.itemCount ?? 0);
+    return {
+      id: Number(entry.mailId ?? 0),
+      from: typeof entry.senderName === "string" ? entry.senderName : "",
+      body: typeof entry.message === "string" ? entry.message : "",
+      gold: Number(entry.gold ?? 0),
+      read: Boolean(entry.opened),
+      locked: Boolean(entry.locked),
+      claimed: Boolean(entry.collected),
+      items: itemCount > 0 ? Array.from({ length: itemCount }, (_, index) => `#${index + 1}`) : undefined,
+    };
+  });
 }
 
 function upsertEntityInList(list: WorldEntity[], nextEntity: WorldEntity) {
