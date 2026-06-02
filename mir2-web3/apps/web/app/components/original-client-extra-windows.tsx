@@ -153,7 +153,7 @@ export type ExtraWindowsProps = {
   t: TranslateFn;
 
   questLog?: WindowToggle &
-    Pick<QuestLogWindowProps, "quests" | "onTrackQuest" | "onAbandonQuest">;
+    Pick<QuestLogWindowProps, "quests" | "onTrackQuest" | "onAbandonQuest" | "onShareQuest">;
 
   heroPet?: WindowToggle &
     Pick<
@@ -165,6 +165,8 @@ export type ExtraWindowsProps = {
       | "onSummonCreature"
       | "onReleaseCreature"
       | "onCyclePickupMode"
+      | "onSetHeroBehaviour"
+      | "onRecallHero"
     >;
 
   guild?: WindowToggle &
@@ -176,6 +178,10 @@ export type ExtraWindowsProps = {
       | "onInviteMember"
       | "onKickMember"
       | "onSendGuildChat"
+      | "onChangeMemberRank"
+      | "onSaveRank"
+      | "onDepositGold"
+      | "onWithdrawGold"
     >;
 
   group?: WindowToggle &
@@ -199,6 +205,8 @@ export type ExtraWindowsProps = {
       | "onBlockPlayer"
       | "onUnblockPlayer"
       | "onWhisper"
+      | "onMail"
+      | "onEditMemo"
     >;
 
   bonds?: WindowToggle &
@@ -215,12 +223,15 @@ export type ExtraWindowsProps = {
     >;
 
   ranking?: WindowToggle &
-    Pick<RankingWindowProps, "activeTab" | "page" | "playerName" | "onSelectTab" | "onRefresh">;
+    Pick<
+      RankingWindowProps,
+      "activeTab" | "page" | "playerName" | "onSelectTab" | "onRefresh" | "onToggleOnlineOnly"
+    >;
 
   market?: WindowToggle &
     Pick<
       MarketWindowProps,
-      "listings" | "gold" | "onBuy" | "onCancel" | "onList" | "onSearch" | "onRefresh"
+      "listings" | "gold" | "onBuy" | "onCancel" | "onList" | "onSearch" | "onRefresh" | "onCollect"
     >;
 
   mail?: WindowToggle &
@@ -251,6 +262,7 @@ export type ExtraWindowsProps = {
       | "onAccept"
       | "onConfirm"
       | "onCancel"
+      | "onSetGold"
     >;
 
   buffs?: WindowToggle & Pick<BuffWindowProps, "buffs" | "ticksPerSecond" | "onRemoveBuff">;
@@ -294,6 +306,7 @@ export function ExtraWindows({
           quests={questLog.quests}
           onTrackQuest={questLog.onTrackQuest}
           onAbandonQuest={questLog.onAbandonQuest}
+          onShareQuest={questLog.onShareQuest}
           onClose={questLog.onClose}
         />
       ) : null}
@@ -308,6 +321,8 @@ export function ExtraWindows({
           onSummonCreature={heroPet.onSummonCreature}
           onReleaseCreature={heroPet.onReleaseCreature}
           onCyclePickupMode={heroPet.onCyclePickupMode}
+          onSetHeroBehaviour={heroPet.onSetHeroBehaviour}
+          onRecallHero={heroPet.onRecallHero}
           onClose={heroPet.onClose}
         />
       ) : null}
@@ -321,6 +336,10 @@ export function ExtraWindows({
           onInviteMember={guild.onInviteMember}
           onKickMember={guild.onKickMember}
           onSendGuildChat={guild.onSendGuildChat}
+          onChangeMemberRank={guild.onChangeMemberRank}
+          onSaveRank={guild.onSaveRank}
+          onDepositGold={guild.onDepositGold}
+          onWithdrawGold={guild.onWithdrawGold}
           onClose={guild.onClose}
         />
       ) : null}
@@ -348,6 +367,8 @@ export function ExtraWindows({
           onBlockPlayer={friends.onBlockPlayer}
           onUnblockPlayer={friends.onUnblockPlayer}
           onWhisper={friends.onWhisper}
+          onMail={friends.onMail}
+          onEditMemo={friends.onEditMemo}
           onClose={friends.onClose}
         />
       ) : null}
@@ -375,6 +396,7 @@ export function ExtraWindows({
           playerName={ranking.playerName}
           onSelectTab={ranking.onSelectTab}
           onRefresh={ranking.onRefresh}
+          onToggleOnlineOnly={ranking.onToggleOnlineOnly}
           onClose={ranking.onClose}
         />
       ) : null}
@@ -389,6 +411,7 @@ export function ExtraWindows({
           onList={market.onList}
           onSearch={market.onSearch}
           onRefresh={market.onRefresh}
+          onCollect={market.onCollect}
           onClose={market.onClose}
         />
       ) : null}
@@ -430,6 +453,7 @@ export function ExtraWindows({
           onAccept={trade.onAccept}
           onConfirm={trade.onConfirm}
           onCancel={trade.onCancel}
+          onSetGold={trade.onSetGold}
           onClose={trade.onClose}
         />
       ) : null}
