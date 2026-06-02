@@ -7946,6 +7946,39 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
     : [...list, nextDrop];
 }
 
+/**
+ * Resolve once `selector` is present in the DOM (or reject after `timeoutMs`).
+ *
+ * The Bevy runtime is configured to attach to an existing `#mir2-web3-canvas`
+ * (apps/game-client/runtime/src/lib.rs), but that canvas is rendered inside the
+ * dynamically-imported OriginalClientShell, so it can mount *after* the WASM module
+ * finishes loading and boots. Booting first makes bevy_winit panic with
+ * "Cannot find element: #mir2-web3-canvas". Awaiting the element closes that race.
+ */
+async function waitForDomElement(selector: string, timeoutMs = 15000): Promise<void> {
+  if (typeof document === "undefined" || document.querySelector(selector)) {
+    return;
+  }
+  await new Promise<void>((resolve, reject) => {
+    const start = performance.now();
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve();
+      } else if (performance.now() - start > timeoutMs) {
+        observer.disconnect();
+        reject(new Error(`waitForDomElement timed out waiting for ${selector}`));
+      }
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    // Re-check in case the element mounted between the initial query and observe().
+    if (document.querySelector(selector)) {
+      observer.disconnect();
+      resolve();
+    }
+  });
+}
+
 async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<RuntimeModule> {
   const runtimeVersionQuery = encodeURIComponent(BEVY_RUNTIME_VERSION);
   const runtimePackageDir = bevyRuntimePackageDir(backend);
@@ -7956,6 +7989,9 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
   )) as RuntimeModule;
 
   if (typeof runtime.default === "function") {
+    // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
+    // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
+    await waitForDomElement("#mir2-web3-canvas");
     await runtime.default(runtimeWasmPath);
   }
 
