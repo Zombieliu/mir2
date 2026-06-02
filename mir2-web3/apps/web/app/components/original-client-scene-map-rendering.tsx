@@ -405,11 +405,10 @@ const SCENE_ASSET_DELAYED_RETRY_DELAYS_MS = [500, 1500, 3500, 7000, 12000];
 const SCENE_ASSET_STALLED_RETRY_DELAYS_MS = [2500, 5000, 10000, 15000];
 const MAP_OBJECT_ALPHA_KEY_SOLID_BRIGHTNESS = 18;
 const MAP_OBJECT_ALPHA_KEY_FEATHER_BRIGHTNESS = 72;
-// Once a scene asset has exhausted its retries it is negatively cached for this long before the
-// client will attempt it again. Kept short (3 min) so that an asset fixed or deployed
-// server-side recovers quickly; the cost of a few extra retries for a genuinely-absent asset is
-// low now that the server degrades gracefully and reports misses instead of 424-ing the scene.
-const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 3 * 60 * 1000;
+// Once a scene asset has exhausted its retries it is negatively cached briefly. These assets are
+// immutable, but the failure mode we see in production is usually a transient fetch/load miss while
+// a scene asks for hundreds of small PNGs at once, not an actual absent R2 object.
+const STATIC_SCENE_ASSET_NEGATIVE_CACHE_MS = 30 * 1000;
 const ALPHA_KEYED_SCENE_ASSET_MAX_BYTES = 32 * 1024 * 1024;
 const ALPHA_KEYED_SCENE_ASSET_MAX_ENTRIES = 256;
 const FAILED_STATIC_SCENE_ASSET_MAX_ENTRIES = 1024;
@@ -435,11 +434,9 @@ export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[]
   const remoteUrl = remoteSceneAssetUrl(url);
   add(remoteUrl);
 
-  if (!isImmutableSceneAssetUrl(url)) {
-    add(cacheBustedSceneAssetUrl(url, retryAttempt));
-    if (remoteUrl) {
-      add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
-    }
+  add(cacheBustedSceneAssetUrl(url, retryAttempt));
+  if (remoteUrl) {
+    add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
   }
 
   return candidates;
@@ -468,10 +465,6 @@ export function handleSceneAssetImageError(event: SyntheticEvent<HTMLImageElemen
   const nextSrc = candidates[nextIndex];
 
   if (!nextSrc) {
-    if (isImmutableSceneAssetUrl(originalSrc)) {
-      markStaticSceneAssetFailed(image, originalSrc);
-      return;
-    }
     scheduleSceneAssetImageDelayedRetry(image, originalSrc);
     return;
   }
@@ -535,12 +528,7 @@ export function rescueStalledSceneAssetImages(root: ParentNode = document) {
     }
 
     const retrySrc = sceneAssetDelayedRetryUrl(originalSrc, retryCount + 10);
-    if (!retrySrc) {
-      if (isImmutableSceneAssetUrl(originalSrc)) {
-        markStaticSceneAssetFailed(image, originalSrc);
-      }
-      continue;
-    }
+    if (!retrySrc) continue;
 
     image.dataset.mir2IncompleteSince = String(now);
     image.dataset.mir2StalledRetryCount = String(retryCount + 1);
@@ -769,10 +757,6 @@ function scheduleSceneAssetImageDelayedRetry(image: HTMLImageElement, originalSr
     image.style.visibility = "hidden";
     return;
   }
-  if (isImmutableSceneAssetUrl(originalSrc)) {
-    markStaticSceneAssetFailed(image, originalSrc);
-    return;
-  }
 
   const retryCount = Number.parseInt(image.dataset.mir2DelayedRetryCount ?? "0", 10);
   const nextRetryCount = Number.isFinite(retryCount) ? retryCount + 1 : 1;
@@ -806,10 +790,6 @@ function scheduleSceneAssetImageDelayedRetry(image: HTMLImageElement, originalSr
 }
 
 function sceneAssetDelayedRetryUrl(originalSrc: string, retryCount: number) {
-  if (isImmutableSceneAssetUrl(originalSrc)) {
-    return null;
-  }
-
   const retryCandidates = sceneAssetCandidateUrls(originalSrc, retryCount + 1).filter(
     (candidate) => candidate !== originalSrc,
   );
@@ -920,6 +900,7 @@ function staticSceneAssetRecentlyFailed(url: string) {
   }
 
   failedStaticSceneAssetUrls.delete(key);
+  loggedStaticSceneAssetFailures.delete(key);
   return false;
 }
 

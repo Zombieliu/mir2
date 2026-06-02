@@ -65,16 +65,15 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     name: "bichon-spawn",
     label: "Bichon spawn scene",
     priority: 40,
-    phase: "background",
-    cacheTier: "background",
-    // Prewarm the packed entity atlas so the GPU entity renderer has its texture ready on the
-    // first gameplay frame instead of waiting on an on-demand fetch.
+    cacheTier: "critical",
+    // Prewarm the packed entity atlas and the same map footprint requested by the live game scene.
+    // This keeps first Bichon movement from stampeding hundreds of tiny PNG requests on demand.
     urls: ["/original-ui/MMap/0.png", "/bevy-entity-atlases/starter-bichon-base.png"],
     scenes: [
       {
         label: "BichonProvince spawn",
-        url: "/api/scene/crystal?map=0&x=330&y=270&width=32&height=34",
-        spriteFrameLimit: 180,
+        url: "/api/scene/crystal?map=0&x=330&y=270&width=56&height=68",
+        spriteFrameLimit: 960,
       },
     ],
   },
