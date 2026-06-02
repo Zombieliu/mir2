@@ -55377,10 +55377,12 @@ fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
         "crystal runtime should wire the Bichon starter mine zone into spots"
     );
     // Zone center (333,270) size 2 -> cells x in [331,335), y in [268,272).
-    let spot = mining
-        .spots
-        .get(&(331, 270))
-        .unwrap_or_else(|| panic!("starter vein cell (331,270) missing; spots={:?}", mining.spots.keys().collect::<Vec<_>>()));
+    let spot = mining.spots.get(&(331, 270)).unwrap_or_else(|| {
+        panic!(
+            "starter vein cell (331,270) missing; spots={:?}",
+            mining.spots.keys().collect::<Vec<_>>()
+        )
+    });
     assert!(
         spot.stones_left > 0,
         "fresh starter vein should begin full, got {}",
