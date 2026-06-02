@@ -7947,35 +7947,41 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
 }
 
 /**
- * Resolve once `selector` is present in the DOM (or reject after `timeoutMs`).
+ * Resolve once the Bevy canvas (`#mir2-web3-canvas`) is ready to attach to — either it's
+ * already in the DOM, the shell has signalled readiness on mount (`window.__mir2BevyCanvasReady`
+ * / the `"mir2:bevy-canvas-ready"` event it dispatches), or a MutationObserver sees it inserted.
+ * Rejects after `timeoutMs`.
  *
- * The Bevy runtime is configured to attach to an existing `#mir2-web3-canvas`
- * (apps/game-client/runtime/src/lib.rs), but that canvas is rendered inside the
- * dynamically-imported OriginalClientShell, so it can mount *after* the WASM module
- * finishes loading and boots. Booting first makes bevy_winit panic with
- * "Cannot find element: #mir2-web3-canvas". Awaiting the element closes that race.
+ * The runtime attaches to an existing `#mir2-web3-canvas` (apps/game-client/runtime/src/lib.rs),
+ * rendered inside the lazily-mounted (dynamic, ssr:false) OriginalClientShell — booting the WASM
+ * before it exists makes bevy_winit panic "Cannot find element: #mir2-web3-canvas".
  */
-async function waitForDomElement(selector: string, timeoutMs = 15000): Promise<void> {
-  if (typeof document === "undefined" || document.querySelector(selector)) {
-    return;
-  }
+async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
+  if (typeof document === "undefined") return;
+  const w = window as Window & { __mir2BevyCanvasReady?: boolean };
+  const isReady = () =>
+    w.__mir2BevyCanvasReady === true || document.querySelector("#mir2-web3-canvas") !== null;
+  if (isReady()) return;
   await new Promise<void>((resolve, reject) => {
-    const start = performance.now();
-    const observer = new MutationObserver(() => {
-      if (document.querySelector(selector)) {
-        observer.disconnect();
-        resolve();
-      } else if (performance.now() - start > timeoutMs) {
-        observer.disconnect();
-        reject(new Error(`waitForDomElement timed out waiting for ${selector}`));
-      }
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    // Re-check in case the element mounted between the initial query and observe().
-    if (document.querySelector(selector)) {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
       observer.disconnect();
-      resolve();
-    }
+      window.removeEventListener("mir2:bevy-canvas-ready", onSignal);
+      if (ok) resolve();
+      else reject(new Error("timed out waiting for #mir2-web3-canvas"));
+    };
+    const onSignal = () => {
+      if (isReady()) finish(true);
+    };
+    const observer = new MutationObserver(onSignal);
+    const timer = window.setTimeout(() => finish(false), timeoutMs);
+    window.addEventListener("mir2:bevy-canvas-ready", onSignal);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    // Re-check in case it mounted between the initial check and listener/observer setup.
+    if (isReady()) finish(true);
   });
 }
 
@@ -7991,7 +7997,7 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
   if (typeof runtime.default === "function") {
     // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
     // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
-    await waitForDomElement("#mir2-web3-canvas");
+    await waitForBevyCanvas();
     await runtime.default(runtimeWasmPath);
   }
 
