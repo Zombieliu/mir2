@@ -1349,7 +1349,10 @@ fn player_position(session: &SimulationSession) -> Point {
 /// (rather than hard-fail) when the client is absent; they still run fully in
 /// any environment that has the client checked out / CRYSTAL_CLIENT_ROOT set.
 fn crystal_client_map_available(map_file_name: &str) -> bool {
-    super::runtime_map_collision_data(map_file_name).is_some()
+    // These tests assert full client geometry, so gate on the filesystem Crystal
+    // client install only -- NOT the bundled map pack (which the sim now falls
+    // back to for collision but which doesn't carry the full client map info).
+    super::crystal_map_path(map_file_name).is_some()
 }
 
 fn unique_runtime_temp_dir(label: &str) -> std::path::PathBuf {
@@ -55346,6 +55349,164 @@ fn crystal_mining_swing_emits_mine_effect_and_depletes_stone() {
         .expect("spot")
         .stones_left;
     assert_eq!(stones, 39, "one stone should be consumed");
+}
+
+#[test]
+fn crystal_mining_swing_broadcasts_mine_node_state() {
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_pickaxe(&mut session);
+    // Near-full vein (set 0 max_stones = 80): one swing leaves 79 -> stage 2.
+    let target = place_mine_spot_in_front(&mut session, 80, 0);
+
+    let packets = super::super::mining::try_mine(session.app.world_mut(), MirDirection::Right)
+        .expect("mining should resolve");
+    let stage = packets.iter().find_map(|packet| match packet {
+        ServerPacket::MineNodeState { location, stage }
+            if location.x == target.x && location.y == target.y =>
+        {
+            Some(*stage)
+        }
+        _ => None,
+    });
+    assert_eq!(
+        stage,
+        Some(2),
+        "a near-full vein should broadcast stage 2, got {packets:?}"
+    );
+}
+
+#[test]
+fn mine_stage_thresholds_match_fullness() {
+    use super::super::mining::mine_stage;
+    assert_eq!(mine_stage(0, 80), 0, "no stones -> empty rock");
+    assert_eq!(mine_stage(39, 80), 1, "below half -> partially mined");
+    assert_eq!(mine_stage(40, 80), 2, "at half -> full vein");
+    assert_eq!(mine_stage(80, 80), 2, "full -> full vein");
+}
+
+#[test]
+fn crystal_runtime_wires_full_bichon_starter_mine_zone() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let mining = session
+        .app
+        .world()
+        .resource::<super::super::mining::MiningResource>();
+    assert!(
+        !mining.spots.is_empty(),
+        "crystal runtime should wire the Bichon starter mine zone into spots"
+    );
+    // Zone center (333,270) size 2 -> cells x in [331,335), y in [268,272).
+    let spot = mining.spots.get(&(331, 270)).unwrap_or_else(|| {
+        panic!(
+            "starter vein cell (331,270) missing; spots={:?}",
+            mining.spots.keys().collect::<Vec<_>>()
+        )
+    });
+    assert!(
+        spot.stones_left > 0,
+        "fresh starter vein should begin full, got {}",
+        spot.stones_left
+    );
+}
+
+#[test]
+fn crystal_runtime_broadcasts_mine_nodes_on_entry() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    let bichon_vein = packets.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::MineNodeState { location, stage }
+                if location.x == 331 && location.y == 270 && *stage == 2
+        )
+    });
+    assert!(
+        bichon_vein,
+        "entering Bichon should broadcast a full MineNodeState for the starter vein"
+    );
+}
+
+#[test]
+fn crystal_runtime_bichon_blacksmith_sells_a_pickaxe() {
+    let mut session =
+        SimulationSession::new(SimulationConfig::default().with_crystal_map_runtime());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 100_000;
+
+    let _ = session.interact(4600);
+    let goods_packets = session.select_npc_dialog_target("@BuySell");
+    let pickaxe_unique_id = goods_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NPCGoods { list, .. } => list
+                .iter()
+                .find(|item| item.item_index == 836)
+                .map(|item| item.unique_id),
+            _ => None,
+        })
+        .expect("Bichon blacksmith should offer a PickAxe (item 836) in its goods");
+
+    let buy_packets = session.handle_packet(ClientPacket::BuyItem {
+        item_index: pickaxe_unique_id,
+        count: 1,
+        panel_type: 0,
+    });
+    assert!(
+        buy_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::GainedItem { item } if item.item_index == 836
+        )),
+        "buying from the blacksmith should grant a PickAxe, got {buy_packets:?}"
+    );
+}
+
+#[test]
+fn deadmine_entrance_collision_parses_from_pack() {
+    // d401 = DeadMineEntrance. Its gzipped Crystal .map ships in the map pack;
+    // prove the sim's collision parser understands DeadMine geometry -- the
+    // foundation for hosting the dangerous mine server-side.
+    use std::io::Read;
+    let gz: &[u8] = include_bytes!("fixtures/d401.map.gz");
+    let mut decoder = flate2::read::GzDecoder::new(gz);
+    let mut bytes = Vec::new();
+    decoder
+        .read_to_end(&mut bytes)
+        .expect("d401.map.gz should decompress");
+    assert!(
+        bytes.len() > 100_000,
+        "d401.map should be a full Crystal map, got {} bytes",
+        bytes.len()
+    );
+
+    let collision = super::super::map::parse_runtime_map_collision("d401", &bytes)
+        .expect("sim should parse DeadMine entrance collision");
+    assert!(
+        !collision.blocked_cells.is_empty(),
+        "DeadMine entrance should have blocked rock cells"
+    );
+}
+
+#[test]
+fn sim_loads_deadmine_collision_from_pack_at_runtime() {
+    // With no Crystal client install, the loader falls back to the bundled map
+    // pack, so DeadMine entrance collision is available to the sim's movement
+    // and zone systems.
+    let collision = super::super::map::runtime_map_collision_data("d401")
+        .expect("sim should load DeadMine entrance collision from the map pack");
+    assert!(
+        !collision.blocked_set.is_empty(),
+        "DeadMine entrance should have blocked cells loaded at runtime"
+    );
 }
 
 #[test]

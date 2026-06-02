@@ -577,6 +577,7 @@ type WorldState = {
   originalMapRegion: OriginalMapRegion | null;
   entities: WorldEntity[];
   groundDrops: GroundDrop[];
+  mineNodes: { x: number; y: number; stage: number }[];
   beltItems: WorldItem[];
   inventoryItems: WorldItem[];
   storageItems: WorldItem[];
@@ -705,6 +706,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   originalMapRegion: null,
   entities: [],
   groundDrops: [],
+  mineNodes: [],
   beltItems: [],
   inventoryItems: [],
   storageItems: [],
@@ -5156,6 +5158,7 @@ export default function HomePage() {
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && preservedSelfEntity ? [preservedSelfEntity] : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
+            mineNodes: mapChanged ? [] : current.mineNodes,
             projectiles: mapChanged ? [] : current.projectiles,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
@@ -5449,6 +5452,35 @@ export default function HomePage() {
           "system",
         );
         break;
+      case "MineNodeState": {
+        // Server-authoritative depletion stage for a mineable cell. The in-world
+        // vein sprite is rendered by the Bevy runtime; here we surface the stage
+        // change in the message log so "ore depletes as you mine" is observable.
+        const mineStage = numberOrZero(payload.stage);
+        const mineStageLabel =
+          mineStage >= 2 ? "full vein" : mineStage === 1 ? "cracked" : "depleted";
+        const mineLoc = payload.location as { x?: number; y?: number } | undefined;
+        const mineX = numberOrZero(mineLoc?.x);
+        const mineY = numberOrZero(mineLoc?.y);
+        setWorld((current) => {
+          const others = current.mineNodes.filter(
+            (node) => node.x !== mineX || node.y !== mineY,
+          );
+          return {
+            ...current,
+            mineNodes: [...others, { x: mineX, y: mineY, stage: mineStage }],
+          };
+        });
+        appendLog(
+          t(
+            "ui.mineNode",
+            [String(mineX), String(mineY), mineStageLabel],
+            `Mine node (${mineX}, ${mineY}) -> ${mineStageLabel}`,
+          ),
+          "system",
+        );
+        break;
+      }
       case "PlaySound":
         playOriginalSoundId(numberOrZero(payload.sound));
         break;
@@ -6557,6 +6589,7 @@ export default function HomePage() {
         originalMapRegion: current.originalMapRegion,
         entities: mergedEntitiesForWorld,
         groundDrops: mergedGroundDropsForWorld,
+        mineNodes: current.mineNodes,
         beltItems,
         inventoryItems,
         storageItems,
