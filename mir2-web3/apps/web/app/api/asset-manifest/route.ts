@@ -40,6 +40,12 @@ const manifestInputs: ManifestInput[] = [
     required: !isDevelopment,
   },
   {
+    name: "asset-service-worker",
+    absolutePath: path.join(webRoot, "public/mir2-asset-worker.js"),
+    digestMode: "raw",
+    required: !isDevelopment,
+  },
+  {
     name: "original-ui-manifest",
     absolutePath: path.join(webRoot, "public/original-ui/manifest.generated.json"),
     digestMode: "stableJson",
@@ -98,9 +104,11 @@ export async function GET() {
   ];
   const version = createAssetVersion(inputs);
   const remoteAssets = createRemoteAssetConfig(version);
+  const cacheNamespace = createCacheNamespace(version, inputs, remoteAssets);
   const response = {
     schemaVersion: 1,
     version,
+    cacheNamespace,
     versionSource: process.env.MIR2_ASSET_VERSION ? "env:MIR2_ASSET_VERSION" : "stable-input-digest",
     generatedAt: new Date().toISOString(),
     staticPrefixes: ["/original-ui/", "/original-map/", "/generated/original-map-blend/"],
@@ -201,6 +209,28 @@ function createAssetVersion(inputs: ManifestInputState[]) {
     }
   }
   return hash.digest("hex").slice(0, 16);
+}
+
+function createCacheNamespace(
+  version: string,
+  inputs: ManifestInputState[],
+  remoteAssets: ReturnType<typeof createRemoteAssetConfig>,
+) {
+  const hash = createHash("sha256");
+  hash.update("mir2-asset-cache-namespace-v2");
+  hash.update(process.env.MIR2_ASSET_CACHE_BUSTER ?? "");
+  hash.update(process.env.VERCEL_GIT_COMMIT_SHA ?? "");
+  hash.update(version);
+  hash.update(remoteAssets.assetBaseUrl ?? "");
+  hash.update(remoteAssets.objectPrefix ?? "");
+  for (const input of inputs) {
+    hash.update(input.name);
+    hash.update(input.exists ? "1" : "0");
+    hash.update(String(input.size ?? ""));
+    hash.update(input.assetHash ?? "");
+    hash.update(input.contentSha256 ?? "");
+  }
+  return normalizeAssetVersion(`${version}-${hash.digest("hex").slice(0, 12)}`);
 }
 
 function stableJsonDigestInput(contents: string) {

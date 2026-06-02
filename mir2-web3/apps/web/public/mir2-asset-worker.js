@@ -1,8 +1,10 @@
 const CACHE_PREFIX = "mir2-asset-cache";
+const CACHE_SCHEMA_VERSION = "sw2";
 const DEFAULT_VERSION = "bootstrap";
 
 let runtimeConfig = {
   version: DEFAULT_VERSION,
+  assetVersion: DEFAULT_VERSION,
   staticAssetMaxEntries: 20000,
   staticCriticalMaxEntries: 3000,
   staticBackgroundMaxEntries: 6000,
@@ -62,8 +64,10 @@ self.addEventListener("message", (event) => {
   const caches = manifest.runtimeCaches || {};
   const remoteAssets = manifest.remoteAssets || {};
   const staticAssetMaxEntries = positiveNumber(caches.staticAssetMaxEntries, 20000);
+  const assetVersion = String(data.manifestVersion || manifest.version || DEFAULT_VERSION);
   runtimeConfig = {
-    version: String(data.manifestVersion || manifest.version || DEFAULT_VERSION),
+    version: String(data.cacheNamespace || manifest.cacheNamespace || assetVersion || DEFAULT_VERSION),
+    assetVersion,
     staticAssetMaxEntries,
     staticCriticalMaxEntries: positiveNumber(caches.staticCriticalMaxEntries, Math.min(staticAssetMaxEntries, 3000)),
     staticBackgroundMaxEntries: positiveNumber(caches.staticBackgroundMaxEntries, Math.min(staticAssetMaxEntries, 6000)),
@@ -81,6 +85,8 @@ self.addEventListener("message", (event) => {
       postClientMessage(event, "MIR2_ASSET_CACHE_CONFIGURED", {
         deletedCaches,
         version: runtimeConfig.version,
+        assetVersion: runtimeConfig.assetVersion,
+        cacheNamespace: runtimeConfig.version,
         remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
         staticAssetTiers: summarizeStaticAssetTiers(),
       });
@@ -137,7 +143,7 @@ function isStaticGameAsset(url) {
 }
 
 function cacheName(kind) {
-  return `${CACHE_PREFIX}-${kind}-${runtimeConfig.version || DEFAULT_VERSION}`;
+  return `${CACHE_PREFIX}-${CACHE_SCHEMA_VERSION}-${kind}-${runtimeConfig.version || DEFAULT_VERSION}`;
 }
 
 async function cacheFirst(request, name, maxEntries, event) {
@@ -148,9 +154,13 @@ async function cacheFirst(request, name, maxEntries, event) {
     return cached;
   }
 
-  const response = await fetchStaticAsset(request);
-  await putCacheEntry(cache, request, response, maxEntries);
-  return response;
+  try {
+    const response = await fetchStaticAsset(request);
+    await putCacheEntry(cache, request, response, maxEntries);
+    return response;
+  } catch (error) {
+    return unavailableStaticAssetResponse(request, error);
+  }
 }
 
 async function touchCacheEntry(cache, request, response, maxEntries) {
@@ -173,7 +183,28 @@ async function fetchStaticAsset(request) {
     }
   }
 
-  return fetch(request);
+  try {
+    return await fetch(request);
+  } catch (error) {
+    const url = new URL(request.url);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`static asset fetch failed for ${url.pathname}: ${message}`);
+  }
+}
+
+function unavailableStaticAssetResponse(request, error) {
+  const url = new URL(request.url);
+  const message = error instanceof Error ? error.message : String(error);
+  return new Response(`mir2 static asset unavailable\npath=${url.pathname}\n${message}\n`, {
+    status: 503,
+    headers: {
+      "cache-control": "no-store",
+      "content-type": "text/plain; charset=utf-8",
+      "x-mir2-asset-worker": "fetch-failed",
+      "x-mir2-asset-version": runtimeConfig.assetVersion || runtimeConfig.version || DEFAULT_VERSION,
+      "x-mir2-cache-namespace": runtimeConfig.version || DEFAULT_VERSION,
+    },
+  });
 }
 
 function createRemoteAssetRequest(request) {
