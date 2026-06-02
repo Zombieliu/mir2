@@ -6559,13 +6559,31 @@ impl SimulationSession {
                     item_index,
                 }]
             }
+            // Crystal `MirConnection.ChangeAMode` (MirConnection.cs:1432): store
+            // `Player.AMode` and echo `S.ChangeAMode` so the client HUD updates.
+            ClientPacket::ChangeAMode { mode } => {
+                self.app
+                    .world_mut()
+                    .resource_mut::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .attack_mode = mode;
+                vec![ServerPacket::ChangeAMode { mode }]
+            }
+            // Crystal `MirConnection.ChangePMode` (MirConnection.cs:1440): store
+            // `Player.PMode` and echo `S.ChangePMode` so the client HUD updates.
+            ClientPacket::ChangePMode { mode } => {
+                self.app
+                    .world_mut()
+                    .resource_mut::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .pet_mode = mode;
+                vec![ServerPacket::ChangePMode { mode }]
+            }
             ClientPacket::ReplaceWedRing { .. }
             | ClientPacket::TeleportToNpc { .. }
             | ClientPacket::SearchMap { .. }
             | ClientPacket::Inspect { .. }
             | ClientPacket::Observe { .. }
-            | ClientPacket::ChangeAMode { .. }
-            | ClientPacket::ChangePMode { .. }
             | ClientPacket::ChangeTrade { .. }
             | ClientPacket::BuyItemBack { .. }
             | ClientPacket::TownRevive

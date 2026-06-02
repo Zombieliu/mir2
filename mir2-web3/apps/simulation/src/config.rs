@@ -3306,6 +3306,17 @@ pub struct Stage5SystemsState {
     pub intelligent_creatures: Vec<ClientIntelligentCreature>,
     #[serde(default)]
     pub item_rental: Stage5ItemRentalSnapshot,
+    /// Player attack mode (Crystal `PlayerObject.AMode`, set by `C.ChangeAMode`).
+    /// Crystal `AttackMode`: 0 Peace, 1 Group, 2 Guild, 3 EnemyGuild, 4 RedBrown,
+    /// 5 All. Persisted for snapshot fidelity; server echoes `S.ChangeAMode`.
+    #[serde(default)]
+    pub attack_mode: u8,
+    /// Player pet command mode (Crystal `PlayerObject.PMode`, set by
+    /// `C.ChangePMode`). Crystal `PetMode`: 0 Both, 1 MoveOnly, 2 AttackOnly,
+    /// 3 None, 4 FocusMasterTarget. Persisted for snapshot fidelity; server
+    /// echoes `S.ChangePMode`.
+    #[serde(default)]
+    pub pet_mode: u8,
 }
 
 impl Default for Stage5SystemsState {
@@ -3329,6 +3340,8 @@ impl Default for Stage5SystemsState {
             name_lists: Vec::new(),
             intelligent_creatures: Vec::new(),
             item_rental: Stage5ItemRentalSnapshot::default(),
+            attack_mode: 0,
+            pet_mode: 0,
         }
     }
 }
