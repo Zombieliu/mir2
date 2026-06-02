@@ -216,6 +216,145 @@ export function resolveMapEffect(
   return entry ? resolveAnimation(assets, entry) : null;
 }
 
+// Built-in numeric id -> Spell enum name map, mirroring packages/protocol `Spell` (types.rs). The
+// ObjectSpell/ObjectMagic packets carry the spell as this byte, and MapEffect/ObjectEffect carry a
+// raw SpellEffect byte that shares the same id space for the values we care about. The exported
+// manifest's `spell_effect_enum` (Crystal's SpellEffect declaration order) is PREFERRED whenever it
+// is populated; this map is only a fallback so numeric ids still resolve to a stable name (for atlas
+// lookup and for the procedural fallback's classification) when the manifest enum is absent.
+const SPELL_NAME_BY_ID: Record<number, string> = {
+  0: "None",
+  1: "Fencing",
+  2: "Slaying",
+  3: "Thrusting",
+  4: "HalfMoon",
+  5: "ShoulderDash",
+  6: "TwinDrakeBlade",
+  7: "Entrapment",
+  8: "FlamingSword",
+  9: "LionRoar",
+  10: "CrossHalfMoon",
+  11: "BladeAvalanche",
+  12: "ProtectionField",
+  13: "Rage",
+  14: "CounterAttack",
+  15: "SlashingBurst",
+  16: "Fury",
+  17: "ImmortalSkin",
+  31: "FireBall",
+  32: "Repulsion",
+  33: "ElectricShock",
+  34: "GreatFireBall",
+  35: "HellFire",
+  36: "ThunderBolt",
+  37: "Teleport",
+  38: "FireBang",
+  39: "FireWall",
+  40: "Lightning",
+  41: "FrostCrunch",
+  42: "ThunderStorm",
+  43: "MagicShield",
+  44: "TurnUndead",
+  45: "Vampirism",
+  46: "IceStorm",
+  47: "FlameDisruptor",
+  48: "Mirroring",
+  49: "FlameField",
+  50: "Blizzard",
+  51: "MagicBooster",
+  52: "MeteorStrike",
+  53: "IceThrust",
+  54: "FastMove",
+  55: "StormEscape",
+  61: "Healing",
+  62: "SpiritSword",
+  63: "Poisoning",
+  64: "SoulFireBall",
+  65: "SummonSkeleton",
+  67: "Hiding",
+  68: "MassHiding",
+  69: "SoulShield",
+  70: "Revelation",
+  71: "BlessedArmour",
+  72: "EnergyRepulsor",
+  73: "TrapHexagon",
+  74: "Purification",
+  75: "MassHealing",
+  76: "Hallucination",
+  77: "UltimateEnhancer",
+  78: "SummonShinsu",
+  79: "Reincarnation",
+  80: "SummonHolyDeva",
+  81: "Curse",
+  82: "Plague",
+  83: "PoisonCloud",
+  84: "EnergyShield",
+  85: "PetEnhancer",
+  86: "HealingCircle",
+  91: "FatalSword",
+  92: "DoubleSlash",
+  93: "Haste",
+  94: "FlashDash",
+  95: "LightBody",
+  96: "HeavenlySword",
+  97: "FireBurst",
+  98: "Trap",
+  99: "PoisonSword",
+  100: "MoonLight",
+  101: "MPEater",
+  102: "SwiftFeet",
+  103: "DarkBody",
+  104: "Hemorrhage",
+  105: "CrescentSlash",
+  106: "MoonMist",
+  107: "CatTongue",
+  121: "Focus",
+  122: "StraightShot",
+  123: "DoubleShot",
+  124: "ExplosiveTrap",
+  125: "DelayedExplosion",
+  126: "Meditation",
+  127: "BackStep",
+  128: "ElementalShot",
+  129: "Concentration",
+  130: "Stonetrap",
+  131: "ElementalBarrier",
+  132: "SummonVampire",
+  133: "VampireShot",
+  134: "SummonToad",
+  135: "PoisonShot",
+  136: "CrippleShot",
+  137: "SummonSnakes",
+  138: "NapalmShot",
+  139: "OneWithNature",
+  140: "BindingShot",
+  141: "MentalState",
+  151: "Blink",
+  152: "Portal",
+  153: "BattleCry",
+  154: "FireBounce",
+  155: "MeteorShower",
+  200: "DigOutZombie",
+  201: "Rubble",
+  202: "MapLightning",
+  203: "MapLava",
+  204: "MapQuake1",
+  205: "MapQuake2",
+  206: "DigOutArmadillo",
+  207: "GeneralMeowMeowThunder",
+  208: "StoneGolemQuake",
+  209: "EarthGolemPile",
+  210: "TreeQueenRoot",
+  211: "TreeQueenMassRoots",
+  212: "TreeQueenGroundRoots",
+  213: "TucsonGeneralRock",
+  214: "FlyingStatueIceTornado",
+  215: "DarkOmaKingNuke",
+  216: "HornedSorcererDustTornado",
+  217: "HornedCommanderRockFall",
+  218: "HornedCommanderRockSpike",
+};
+
 /**
  * Resolves a `MapEffect` / `ObjectEffect` packet's numeric `effect` (a raw SpellEffect byte) to a
  * playable animation, by mapping the number to its enum name and then resolving by name. Returns
@@ -225,13 +364,17 @@ export function resolveMapEffectByNumber(
   assets: EffectAssets,
   effect: number,
 ): EffectAnimation | null {
-  const name = assets.effectNameByNumber.get(effect);
+  const name = effectNameForNumber(assets, effect);
   return name ? resolveMapEffect(assets, name) : null;
 }
 
-/** The SpellEffect enum name for a numeric effect id, or null when unknown. */
+/**
+ * The effect/spell enum name for a numeric id. Prefers the exported manifest's `spell_effect_enum`
+ * (authoritative when present) and falls back to the built-in protocol `Spell` id map, so numeric
+ * ids still resolve to a stable name when the manifest enum has not been exported yet.
+ */
 export function effectNameForNumber(assets: EffectAssets, effect: number): string | null {
-  return assets.effectNameByNumber.get(effect) ?? null;
+  return assets.effectNameByNumber.get(effect) ?? SPELL_NAME_BY_ID[Math.trunc(effect)] ?? null;
 }
 
 /** A live effect placed at a tile, used by the render loop. */
