@@ -27,6 +27,22 @@ Gateway WebSocket configuration:
 - if unset outside localhost, the client uses the production Gateway WSS
   default `wss://165.154.65.136.sslip.io/ws`
 
+Original asset hosting (sprites + map tiles):
+
+- The original Crystal art (`/original-ui/**` sprites — NPC, Monster, CArmour,
+  CHair — and `/original-map/**` tiles) is served from a remote asset release
+  (R2). The repo ships only each asset's `meta.json`, not the PNGs.
+- Set `NEXT_PUBLIC_MIR2_ASSET_BASE_URL` (server route also accepts
+  `MIR2_ASSET_BASE_URL`) to the full asset-release base URL. The client rewrites
+  `/original-ui/...png` etc. onto that base; if it is unset/empty the requests
+  fall back to local paths that have no PNGs and every sprite 404s with
+  `[mir2] scene asset missing` (the game still runs — these are warnings).
+- Verify a running deploy at `<url>/api/asset-manifest`:
+  `remoteAssets.assetBaseUrl` must be the full release, not `null`. A `null`
+  value means the env var is not set on that build — the usual cause of missing
+  sprites in an otherwise-working game.
+- See `.env.example` for the variable.
+
 Local flow:
 
 1. build the WASM runtime with `npm run runtime:build:dev`

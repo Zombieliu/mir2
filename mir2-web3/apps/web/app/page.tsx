@@ -101,7 +101,7 @@ type RuntimeStatus = {
 };
 
 type RuntimeModule = {
-  default?: (input?: string | URL | Request) => Promise<unknown>;
+  default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
@@ -606,6 +606,7 @@ type WorldState = {
   originalMapRegion: OriginalMapRegion | null;
   entities: WorldEntity[];
   groundDrops: GroundDrop[];
+  mineNodes: { x: number; y: number; stage: number }[];
   beltItems: WorldItem[];
   inventoryItems: WorldItem[];
   storageItems: WorldItem[];
@@ -734,6 +735,7 @@ const DEFAULT_WORLD_STATE: WorldState = {
   originalMapRegion: null,
   entities: [],
   groundDrops: [],
+  mineNodes: [],
   beltItems: [],
   inventoryItems: [],
   storageItems: [],
@@ -5553,6 +5555,7 @@ export default function HomePage() {
             activeNpcDialog: mapChanged ? null : current.activeNpcDialog,
             entities: mapChanged && preservedSelfEntity ? [preservedSelfEntity] : mapChanged ? [] : current.entities,
             groundDrops: mapChanged ? [] : current.groundDrops,
+            mineNodes: mapChanged ? [] : current.mineNodes,
             projectiles: mapChanged ? [] : current.projectiles,
             sceneView: mapChanged ? null : current.sceneView,
             terrainPatches: mapChanged ? [] : current.terrainPatches,
@@ -5846,6 +5849,35 @@ export default function HomePage() {
           "system",
         );
         break;
+      case "MineNodeState": {
+        // Server-authoritative depletion stage for a mineable cell. The in-world
+        // vein sprite is rendered by the Bevy runtime; here we surface the stage
+        // change in the message log so "ore depletes as you mine" is observable.
+        const mineStage = numberOrZero(payload.stage);
+        const mineStageLabel =
+          mineStage >= 2 ? "full vein" : mineStage === 1 ? "cracked" : "depleted";
+        const mineLoc = payload.location as { x?: number; y?: number } | undefined;
+        const mineX = numberOrZero(mineLoc?.x);
+        const mineY = numberOrZero(mineLoc?.y);
+        setWorld((current) => {
+          const others = current.mineNodes.filter(
+            (node) => node.x !== mineX || node.y !== mineY,
+          );
+          return {
+            ...current,
+            mineNodes: [...others, { x: mineX, y: mineY, stage: mineStage }],
+          };
+        });
+        appendLog(
+          t(
+            "ui.mineNode",
+            [String(mineX), String(mineY), mineStageLabel],
+            `Mine node (${mineX}, ${mineY}) -> ${mineStageLabel}`,
+          ),
+          "system",
+        );
+        break;
+      }
       case "PlaySound":
         playOriginalSoundId(numberOrZero(payload.sound));
         break;
@@ -8655,6 +8687,7 @@ export default function HomePage() {
         originalMapRegion: current.originalMapRegion,
         entities: mergedEntitiesForWorld,
         groundDrops: mergedGroundDropsForWorld,
+        mineNodes: current.mineNodes,
         beltItems,
         inventoryItems,
         storageItems,
@@ -10068,6 +10101,45 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
     : [...list, nextDrop];
 }
 
+/**
+ * Resolve once the Bevy canvas (`#mir2-web3-canvas`) is ready to attach to — either it's
+ * already in the DOM, the shell has signalled readiness on mount (`window.__mir2BevyCanvasReady`
+ * / the `"mir2:bevy-canvas-ready"` event it dispatches), or a MutationObserver sees it inserted.
+ * Rejects after `timeoutMs`.
+ *
+ * The runtime attaches to an existing `#mir2-web3-canvas` (apps/game-client/runtime/src/lib.rs),
+ * rendered inside the lazily-mounted (dynamic, ssr:false) OriginalClientShell — booting the WASM
+ * before it exists makes bevy_winit panic "Cannot find element: #mir2-web3-canvas".
+ */
+async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
+  if (typeof document === "undefined") return;
+  const w = window as Window & { __mir2BevyCanvasReady?: boolean };
+  const isReady = () =>
+    w.__mir2BevyCanvasReady === true || document.querySelector("#mir2-web3-canvas") !== null;
+  if (isReady()) return;
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      observer.disconnect();
+      window.removeEventListener("mir2:bevy-canvas-ready", onSignal);
+      if (ok) resolve();
+      else reject(new Error("timed out waiting for #mir2-web3-canvas"));
+    };
+    const onSignal = () => {
+      if (isReady()) finish(true);
+    };
+    const observer = new MutationObserver(onSignal);
+    const timer = window.setTimeout(() => finish(false), timeoutMs);
+    window.addEventListener("mir2:bevy-canvas-ready", onSignal);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    // Re-check in case it mounted between the initial check and listener/observer setup.
+    if (isReady()) finish(true);
+  });
+}
+
 async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<RuntimeModule> {
   const runtimeVersionQuery = encodeURIComponent(BEVY_RUNTIME_VERSION);
   const runtimePackageDir = bevyRuntimePackageDir(backend);
@@ -10078,7 +10150,10 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<Runti
   )) as RuntimeModule;
 
   if (typeof runtime.default === "function") {
-    await runtime.default(runtimeWasmPath);
+    // The runtime attaches to #mir2-web3-canvas on boot; make sure it exists first
+    // (it lives in the lazily-mounted OriginalClientShell) to avoid a bevy_winit panic.
+    await waitForBevyCanvas();
+    await runtime.default({ module_or_path: runtimeWasmPath });
   }
 
   return runtime;

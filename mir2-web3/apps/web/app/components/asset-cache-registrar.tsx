@@ -6,6 +6,7 @@ import type { AssetCachePack } from "../../lib/asset-cache-packs";
 
 type AssetManifest = {
   version?: string;
+  cacheNamespace?: string;
   remoteAssets?: {
     enabled?: boolean;
     assetBaseUrl?: string | null;
@@ -26,6 +27,7 @@ type CacheResourceKind =
   | "original-ui"
   | "original-map"
   | "generated-map-blend"
+  | "bevy-entity-atlas"
   | "bevy-runtime"
   | "scene-api"
   | "asset-manifest"
@@ -172,6 +174,7 @@ declare global {
       enabled: boolean;
       status: string;
       version?: string;
+      cacheNamespace?: string;
       message?: string;
       prewarm?: string;
       prewarmProgress?: {
@@ -205,6 +208,7 @@ const CRITICAL_PREWARM_CONCURRENCY = 8;
 const BACKGROUND_PREWARM_CONCURRENCY = 3;
 const BACKGROUND_PREWARM_FIRST_PLAYABLE_TIMEOUT_MS = 90_000;
 const BACKGROUND_PREWARM_AFTER_PLAYABLE_DELAY_MS = 20_000;
+const CACHE_NAMESPACE_STORAGE_KEY = "mir2.assetCacheNamespace";
 
 type BackgroundPrewarmMode = "immediate" | "afterPlayable";
 
@@ -244,14 +248,17 @@ export function AssetCacheRegistrar() {
           cache: "no-cache",
         });
         const manifest = (await manifestResponse.json()) as AssetManifest;
+        const cacheNamespace = manifest.cacheNamespace || manifest.version || "";
         metrics.markMilestone("assetManifestReady", {
           version: manifest.version,
+          cacheNamespace,
           packCount: manifest.resourcePacks?.length ?? 0,
           remoteAssetsEnabled: Boolean(manifest.remoteAssets?.enabled),
           remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
         });
         logCacheEvent(metrics, "manifest", {
           version: manifest.version,
+          cacheNamespace,
           packCount: manifest.resourcePacks?.length ?? 0,
           packs: manifest.resourcePacks?.map((pack) => ({
             name: pack.name,
@@ -278,18 +285,21 @@ export function AssetCacheRegistrar() {
             type: "MIR2_ASSET_CACHE_CONFIG",
             manifest,
             manifestVersion: manifest.version,
+            cacheNamespace,
           };
           const configuredMessage = waitForServiceWorkerMessage("MIR2_ASSET_CACHE_CONFIGURED", 3000);
           readyRegistration.active?.postMessage(payload);
           registration.waiting?.postMessage(payload);
           registration.installing?.postMessage(payload);
           const configured = await configuredMessage;
+          const deletedCaches = Array.isArray(configured?.deletedCaches)
+            ? configured.deletedCaches.map(String)
+            : [];
           metrics.markMilestone("serviceWorkerConfigured", {
             version: manifest.version,
+            cacheNamespace,
             remoteAssetsEnabled: Boolean(manifest.remoteAssets?.enabled),
-            deletedCaches: Array.isArray(configured?.deletedCaches)
-              ? configured.deletedCaches.length
-              : null,
+            deletedCaches: deletedCaches.length,
             staticAssetTiers: configured?.staticAssetTiers ?? null,
           });
 
@@ -297,6 +307,7 @@ export function AssetCacheRegistrar() {
             enabled: true,
             status: "registered",
             version: manifest.version,
+            cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
             staticAssetTiers:
               typeof configured?.staticAssetTiers === "object" && configured.staticAssetTiers
@@ -306,11 +317,11 @@ export function AssetCacheRegistrar() {
           logCacheEvent(metrics, "service-worker", {
             status: window.__mir2AssetCache.status,
             version: manifest.version,
+            cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
-            deletedCaches: Array.isArray(configured?.deletedCaches)
-              ? configured.deletedCaches.length
-              : null,
+            deletedCaches: deletedCaches.length,
           });
+          maybeReloadAfterCacheNamespaceChange(cacheNamespace, deletedCaches);
           void refreshCacheStorageMetrics(metrics).then(() => {
             if (!disposed && debug) setSnapshot(metrics.snapshot());
           });
@@ -323,6 +334,7 @@ export function AssetCacheRegistrar() {
             enabled: false,
             status: shouldRegisterServiceWorker ? "unsupported-origin" : "disabled-dev",
             version: manifest.version,
+            cacheNamespace,
             remoteAssetBaseUrl: manifest.remoteAssets?.assetBaseUrl ?? null,
           };
           metrics.markMilestone("serviceWorkerSkipped", {
@@ -680,6 +692,38 @@ function waitForServiceWorkerMessage(type: string, timeoutMs: number) {
     }, timeoutMs);
     navigator.serviceWorker.addEventListener("message", onMessage);
   });
+}
+
+function maybeReloadAfterCacheNamespaceChange(cacheNamespace: string, deletedCaches: string[]) {
+  if (!cacheNamespace || deletedCaches.length === 0) return;
+
+  const previous = readStorageValue(window.localStorage, CACHE_NAMESPACE_STORAGE_KEY);
+  writeStorageValue(window.localStorage, CACHE_NAMESPACE_STORAGE_KEY, cacheNamespace);
+  if (previous === cacheNamespace) return;
+
+  const reloadKey = `${CACHE_NAMESPACE_STORAGE_KEY}.reloaded.${cacheNamespace}`;
+  if (readStorageValue(window.sessionStorage, reloadKey) === "1") return;
+  writeStorageValue(window.sessionStorage, reloadKey, "1");
+
+  window.setTimeout(() => {
+    window.location.reload();
+  }, 250);
+}
+
+function readStorageValue(storage: Storage, key: string) {
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorageValue(storage: Storage, key: string, value: string) {
+  try {
+    storage.setItem(key, value);
+  } catch {
+    // Storage can be unavailable in privacy modes; cache correctness should not depend on it.
+  }
 }
 
 async function prewarmAssetPacks(
@@ -1376,6 +1420,7 @@ function classifyUrl(url: URL): CacheResourceKind {
   if (url.pathname.startsWith("/original-ui/")) return "original-ui";
   if (url.pathname.startsWith("/original-map/")) return "original-map";
   if (url.pathname.startsWith("/generated/original-map-blend/")) return "generated-map-blend";
+  if (url.pathname.startsWith("/bevy-entity-atlases/")) return "bevy-entity-atlas";
   if (url.pathname.startsWith("/bevy-runtime/")) return "bevy-runtime";
   if (url.pathname === "/api/scene/crystal") return "scene-api";
   if (url.pathname === "/api/asset-manifest") return "asset-manifest";

@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest entity-atlas resource roadmap sync: 2026-06-02 closes a code-side
+> gap where the Bichon starter entity atlas was listed in the critical cache
+> pack but was not part of the remote R2 release roots or service-worker
+> static asset class. `/bevy-entity-atlases/` is now included in the asset
+> manifest, service-worker remote/cache handling, release doctor, production
+> smoke, and remote release builder; the starter pack prewarms both
+> `manifest.json` and `starter-bichon-base.png`. Scene readiness also uses
+> entity walk/run/equipment `preloadPaths` for DOM fallback while avoiding
+> duplicate scatter-fetches when the GPU atlas is already ready. Roadmap next:
+> rebuild/upload the remote asset release so the current production CDN 404s
+> for `/bevy-entity-atlases/*` become 200, then rerun the CDN target smoke.
+
 > Latest player/monster state roadmap sync: 2026-05-27 closes the first
 > Crystal death/vitals authority slice. Player damage can now reach 0 HP and
 > emits authoritative health/death packets, snapshots expose self `dead=true`,
