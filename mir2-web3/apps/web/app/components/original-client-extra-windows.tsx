@@ -9,14 +9,77 @@
  * whatever menu / hotkey state it already owns. Every callback is optional;
  * windows degrade gracefully (action buttons disable themselves) when a
  * handler is not supplied.
+ *
+ * The loosely-typed page state (`Record<string, unknown>` slices for `hero`,
+ * `intelligentCreatures`, `relationship`, `mentor`, `auction`, `conquest`, …)
+ * should be converted into the strict prop shapes below via the adapters in
+ * `lib/stage5-window-adapters.ts`, which this module also re-exports.
  */
 
+import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
+import { ConquestWindow, type ConquestSummary, type ConquestWindowProps, type GuildTerritorySummary } from "./original-client-conquest-window";
+import { FriendsWindow, type FriendEntry, type FriendsSummary, type FriendsWindowProps } from "./original-client-friends-window";
+import { GroupWindow, type GroupMember, type GroupSummary, type GroupWindowProps } from "./original-client-group-window";
 import { GuildWindow, type GuildSummary, type GuildWindowProps } from "./original-client-guild-window";
 import { HeroPetWindow, type CreatureSummary, type HeroSummary, type HeroPetWindowProps } from "./original-client-hero-pet-window";
+import { MarketWindow, type MarketListing, type MarketWindowProps } from "./original-client-market-window";
 import { QuestLogWindow, type QuestLogEntry, type QuestLogWindowProps } from "./original-client-quest-log-window";
+import { RankingWindow, type RankingEntry, type RankingPage, type RankingTabKey, type RankingWindowProps } from "./original-client-ranking-window";
 
-export type { CreatureSummary, GuildSummary, HeroSummary, QuestLogEntry };
-export { GuildWindow, HeroPetWindow, QuestLogWindow };
+export type {
+  BondsWindowProps,
+  ConquestSummary,
+  ConquestWindowProps,
+  CreatureSummary,
+  FriendEntry,
+  FriendsSummary,
+  FriendsWindowProps,
+  GroupMember,
+  GroupSummary,
+  GroupWindowProps,
+  GuildSummary,
+  GuildTerritorySummary,
+  HeroSummary,
+  MarketListing,
+  MarketWindowProps,
+  MentorSummary,
+  QuestLogEntry,
+  RankingEntry,
+  RankingPage,
+  RankingTabKey,
+  RankingWindowProps,
+  RelationshipSummary,
+};
+export {
+  BondsWindow,
+  ConquestWindow,
+  FriendsWindow,
+  GroupWindow,
+  GuildWindow,
+  HeroPetWindow,
+  MarketWindow,
+  QuestLogWindow,
+  RankingWindow,
+};
+
+// Re-export the typed adapters so a host can import everything from one module.
+export {
+  adaptConquest,
+  adaptCreatures,
+  adaptFriends,
+  adaptGroup,
+  adaptGuildTerritory,
+  adaptHero,
+  adaptMarketListings,
+  adaptMentor,
+  adaptRankingPage,
+  adaptActiveRankingPage,
+  adaptRelationship,
+  classKeyFromUnknown,
+  rankingPageKeyForTab,
+  rankingTabKey,
+  type Stage5SystemsLike,
+} from "../../lib/stage5-window-adapters";
 
 type TranslateFn = (
   key: string,
@@ -58,9 +121,71 @@ export type ExtraWindowsProps = {
       | "onKickMember"
       | "onSendGuildChat"
     >;
+
+  group?: WindowToggle &
+    Pick<
+      GroupWindowProps,
+      | "group"
+      | "playerName"
+      | "onInviteMember"
+      | "onKickMember"
+      | "onLeaveGroup"
+      | "onToggleLootMode"
+      | "onToggleAllowInvites"
+    >;
+
+  friends?: WindowToggle &
+    Pick<
+      FriendsWindowProps,
+      | "social"
+      | "onAddFriend"
+      | "onRemoveFriend"
+      | "onBlockPlayer"
+      | "onUnblockPlayer"
+      | "onWhisper"
+    >;
+
+  bonds?: WindowToggle &
+    Pick<
+      BondsWindowProps,
+      | "relationship"
+      | "mentor"
+      | "onAllowMarriage"
+      | "onProposeMarriage"
+      | "onDivorce"
+      | "onAllowMentor"
+      | "onAddMentor"
+      | "onCancelMentor"
+    >;
+
+  ranking?: WindowToggle &
+    Pick<RankingWindowProps, "activeTab" | "page" | "playerName" | "onSelectTab" | "onRefresh">;
+
+  market?: WindowToggle &
+    Pick<
+      MarketWindowProps,
+      "listings" | "gold" | "onBuy" | "onCancel" | "onList" | "onSearch" | "onRefresh"
+    >;
+
+  conquest?: WindowToggle &
+    Pick<
+      ConquestWindowProps,
+      "conquest" | "territory" | "guildName" | "onStartWar" | "onToggleGate" | "onSetTaxRate"
+    >;
 };
 
-export function ExtraWindows({ t, questLog, heroPet, guild }: ExtraWindowsProps) {
+export function ExtraWindows({
+  t,
+  questLog,
+  heroPet,
+  guild,
+  group,
+  friends,
+  bonds,
+  ranking,
+  market,
+  conquest,
+}: ExtraWindowsProps) {
   return (
     <>
       {questLog?.open ? (
@@ -97,6 +222,87 @@ export function ExtraWindows({ t, questLog, heroPet, guild }: ExtraWindowsProps)
           onKickMember={guild.onKickMember}
           onSendGuildChat={guild.onSendGuildChat}
           onClose={guild.onClose}
+        />
+      ) : null}
+
+      {group?.open ? (
+        <GroupWindow
+          t={t}
+          group={group.group}
+          playerName={group.playerName}
+          onInviteMember={group.onInviteMember}
+          onKickMember={group.onKickMember}
+          onLeaveGroup={group.onLeaveGroup}
+          onToggleLootMode={group.onToggleLootMode}
+          onToggleAllowInvites={group.onToggleAllowInvites}
+          onClose={group.onClose}
+        />
+      ) : null}
+
+      {friends?.open ? (
+        <FriendsWindow
+          t={t}
+          social={friends.social}
+          onAddFriend={friends.onAddFriend}
+          onRemoveFriend={friends.onRemoveFriend}
+          onBlockPlayer={friends.onBlockPlayer}
+          onUnblockPlayer={friends.onUnblockPlayer}
+          onWhisper={friends.onWhisper}
+          onClose={friends.onClose}
+        />
+      ) : null}
+
+      {bonds?.open ? (
+        <BondsWindow
+          t={t}
+          relationship={bonds.relationship}
+          mentor={bonds.mentor}
+          onAllowMarriage={bonds.onAllowMarriage}
+          onProposeMarriage={bonds.onProposeMarriage}
+          onDivorce={bonds.onDivorce}
+          onAllowMentor={bonds.onAllowMentor}
+          onAddMentor={bonds.onAddMentor}
+          onCancelMentor={bonds.onCancelMentor}
+          onClose={bonds.onClose}
+        />
+      ) : null}
+
+      {ranking?.open ? (
+        <RankingWindow
+          t={t}
+          activeTab={ranking.activeTab}
+          page={ranking.page}
+          playerName={ranking.playerName}
+          onSelectTab={ranking.onSelectTab}
+          onRefresh={ranking.onRefresh}
+          onClose={ranking.onClose}
+        />
+      ) : null}
+
+      {market?.open ? (
+        <MarketWindow
+          t={t}
+          listings={market.listings}
+          gold={market.gold}
+          onBuy={market.onBuy}
+          onCancel={market.onCancel}
+          onList={market.onList}
+          onSearch={market.onSearch}
+          onRefresh={market.onRefresh}
+          onClose={market.onClose}
+        />
+      ) : null}
+
+      {conquest?.open ? (
+        <ConquestWindow
+          t={t}
+          conquest={conquest.conquest}
+          territory={conquest.territory}
+          guildName={conquest.guildName}
+          onStartWar={conquest.onStartWar}
+          onToggleGate={conquest.onToggleGate}
+          onSetTaxRate={conquest.onSetTaxRate}
+          onClose={conquest.onClose}
         />
       ) : null}
     </>
