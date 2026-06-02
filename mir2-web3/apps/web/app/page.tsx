@@ -14,6 +14,9 @@ import {
   adaptMarketListings,
   adaptConquest,
   adaptGuildTerritory,
+  adaptTrade,
+  adaptBuffs,
+  adaptWorldMapMarkers,
   type RankingTabKey,
 } from "./components/original-client-extra-windows";
 import dynamic from "next/dynamic";
@@ -1239,6 +1242,12 @@ export default function HomePage() {
   const [showRanking, setShowRanking] = useState(false);
   const [showMarket, setShowMarket] = useState(false);
   const [showConquest, setShowConquest] = useState(false);
+  const [showTrade, setShowTrade] = useState(false);
+  const [showBuffs, setShowBuffs] = useState(false);
+  const [showWorldMap, setShowWorldMap] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showHotkeys, setShowHotkeys] = useState(false);
+  const [showChatSettings, setShowChatSettings] = useState(false);
   useEffect(() => {
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
@@ -1252,6 +1261,12 @@ export default function HomePage() {
       else if (key === "r") { event.preventDefault(); setShowRanking((value) => !value); }
       else if (key === "m") { event.preventDefault(); setShowMarket((value) => !value); }
       else if (key === "k") { event.preventDefault(); setShowConquest((value) => !value); }
+      else if (key === "t") { event.preventDefault(); setShowTrade((value) => !value); }
+      else if (key === "u") { event.preventDefault(); setShowBuffs((value) => !value); }
+      else if (key === "n") { event.preventDefault(); setShowWorldMap((value) => !value); }
+      else if (key === "j") { event.preventDefault(); setShowHelp((value) => !value); }
+      else if (key === "y") { event.preventDefault(); setShowHotkeys((value) => !value); }
+      else if (key === "c") { event.preventDefault(); setShowChatSettings((value) => !value); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
@@ -9776,6 +9791,12 @@ export default function HomePage() {
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking }}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
+      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold }}
+      buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
+      worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: adaptWorldMapMarkers(world.mapTransfers) }}
+      help={{ open: showHelp, onClose: () => setShowHelp(false) }}
+      hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
+      chatSettings={{ open: showChatSettings, onClose: () => setShowChatSettings(false) }}
     />
     </>
   );
