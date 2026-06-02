@@ -13,6 +13,12 @@ type TranslateFn = (
 
 type EntityClassKey = "warrior" | "wizard" | "taoist" | "assassin" | "archer";
 
+/** Hero AI behaviour, mirroring Crystal's `HeroBehaviour` enum. */
+export type HeroBehaviourKey = "attack" | "counterAttack" | "follow" | "custom";
+
+/** Hero spawn state, mirroring Crystal's `HeroSpawnState` enum. */
+export type HeroSpawnStateKey = "none" | "unsummoned" | "summoned" | "dead";
+
 /** A summoned battle hero (the "hero" slot of stage-5 systems). */
 export type HeroSummary = {
   name: string;
@@ -28,6 +34,20 @@ export type HeroSummary = {
   maxLoyalty?: number;
   attack?: number;
   defence?: number;
+  /** Magic defence (Crystal MAC stat). */
+  magicDefence?: number;
+  /** Magic attack (Crystal MC stat). */
+  magicAttack?: number;
+  /** Spell power / Tao attack (Crystal SC stat). */
+  spellPower?: number;
+  /** Hero grade/tier label (e.g. "Common" / "Elite"). */
+  grade?: string;
+  /** Gender, used for the avatar fallback. */
+  gender?: "male" | "female";
+  /** Current AI behaviour. Drives the highlighted mode in the selector. */
+  behaviour?: HeroBehaviourKey;
+  /** Spawn state; when present it supersedes `active` for the summon buttons. */
+  spawnState?: HeroSpawnStateKey;
   active?: boolean;
 };
 
@@ -45,8 +65,20 @@ export type CreatureSummary = {
   maxLifespan?: number;
   /** Pickup/autopick mode label, e.g. "Auto" / "Semi" / "Off". */
   pickupMode?: string;
+  /** Creature type label (Crystal IntelligentCreatureType). */
+  typeLabel?: string;
   summoned?: boolean;
 };
+
+/** AI-mode selector option. */
+type HeroBehaviourOption = { key: HeroBehaviourKey; labelKey: string; fallback: string };
+
+const HERO_BEHAVIOURS: HeroBehaviourOption[] = [
+  { key: "attack", labelKey: "ui.heroAiAttack", fallback: "Attack" },
+  { key: "counterAttack", labelKey: "ui.heroAiCounter", fallback: "Counter" },
+  { key: "follow", labelKey: "ui.heroAiFollow", fallback: "Follow" },
+  { key: "custom", labelKey: "ui.heroAiCustom", fallback: "Custom" },
+];
 
 export type HeroPetWindowProps = {
   t: TranslateFn;
@@ -54,6 +86,10 @@ export type HeroPetWindowProps = {
   creatures: CreatureSummary[];
   onSummonHero?: () => void;
   onDismissHero?: () => void;
+  /** Recall a dead/away hero (Crystal recall). */
+  onRecallHero?: () => void;
+  /** Change the hero's AI behaviour (Crystal SetHeroBehaviour). */
+  onSetHeroBehaviour?: (behaviour: HeroBehaviourKey) => void;
   onSummonCreature?: (creatureId: string) => void;
   onReleaseCreature?: (creatureId: string) => void;
   onCyclePickupMode?: (creatureId: string) => void;
@@ -72,6 +108,8 @@ export function HeroPetWindow({
   creatures,
   onSummonHero,
   onDismissHero,
+  onRecallHero,
+  onSetHeroBehaviour,
   onSummonCreature,
   onReleaseCreature,
   onCyclePickupMode,
@@ -95,12 +133,16 @@ export function HeroPetWindow({
   }, [hero, tab]);
 
   const heroClassIcon = hero?.classKey ? CLASS_ICONS[hero.classKey] : undefined;
+  // Spawn state supersedes the legacy `active` flag when present.
+  const heroSummoned = hero ? hero.spawnState === "summoned" || (hero.spawnState === undefined && Boolean(hero.active)) : false;
+  const heroDead = hero?.spawnState === "dead";
 
   return (
     <section
       aria-label={t("ui.heroPet", [], "Hero & Creatures")}
       data-hero-pet-tab={tab}
-      data-hero-active={hero?.active ? "1" : "0"}
+      data-hero-active={heroSummoned ? "1" : "0"}
+      data-hero-state={hero?.spawnState ?? ""}
       style={style.window}
     >
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
@@ -145,10 +187,17 @@ export function HeroPetWindow({
                   <span style={style.heroClassFallback} aria-hidden="true" />
                 )}
                 <div style={style.heroHeaderText}>
-                  <div style={style.heroName}>{hero.name}</div>
+                  <div style={style.heroNameRow}>
+                    <span style={style.heroName}>{hero.name}</span>
+                    {hero.grade ? <span style={style.heroGrade}>{hero.grade}</span> : null}
+                  </div>
                   <div style={style.heroMeta}>
                     {t("ui.heroLevel", [hero.level], `Level ${hero.level}`)}
-                    {hero.active ? ` · ${t("ui.heroSummoned", [], "Summoned")}` : ""}
+                    {heroDead
+                      ? ` · ${t("ui.heroDead", [], "Dead")}`
+                      : heroSummoned
+                        ? ` · ${t("ui.heroSummoned", [], "Summoned")}`
+                        : ` · ${t("ui.heroAway", [], "Away")}`}
                   </div>
                 </div>
               </div>
@@ -178,18 +227,60 @@ export function HeroPetWindow({
                 <Stat label={t("ui.attack", [], "AC")} value={statValue(hero.attack)} />
                 <Stat label={t("ui.defence", [], "DC")} value={statValue(hero.defence)} />
               </div>
+              {hero.magicAttack !== undefined ||
+              hero.magicDefence !== undefined ||
+              hero.spellPower !== undefined ? (
+                <div style={style.statGrid}>
+                  <Stat label={t("ui.magicAttack", [], "MC")} value={statValue(hero.magicAttack)} />
+                  <Stat label={t("ui.magicDefence", [], "MAC")} value={statValue(hero.magicDefence)} />
+                  <Stat label={t("ui.spellPower", [], "SC")} value={statValue(hero.spellPower)} />
+                </div>
+              ) : null}
+
+              <div style={style.aiSection}>
+                <div style={style.aiLabel}>{t("ui.heroAiMode", [], "AI Mode")}</div>
+                <div style={style.aiButtons} role="group" aria-label={t("ui.heroAiMode", [], "AI Mode")}>
+                  {HERO_BEHAVIOURS.map((option) => {
+                    const isActive = hero.behaviour === option.key;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        data-hero-ai={option.key}
+                        aria-pressed={isActive}
+                        disabled={!onSetHeroBehaviour || isActive}
+                        onClick={() => onSetHeroBehaviour?.(option.key)}
+                        style={{
+                          ...style.aiButton,
+                          ...(isActive ? style.aiButtonActive : null),
+                          ...(!onSetHeroBehaviour && !isActive ? style.actionButtonDisabled : null),
+                        }}
+                      >
+                        {t(option.labelKey, [], option.fallback)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
               <div style={style.actions}>
                 <ActionButton
                   label={t("ui.heroSummon", [], "Summon")}
-                  disabled={!onSummonHero || Boolean(hero.active)}
+                  disabled={!onSummonHero || heroSummoned || heroDead}
                   onClick={() => onSummonHero?.()}
                 />
                 <ActionButton
                   label={t("ui.heroDismiss", [], "Dismiss")}
-                  disabled={!onDismissHero || !hero.active}
+                  disabled={!onDismissHero || !heroSummoned}
                   onClick={() => onDismissHero?.()}
                 />
+                {onRecallHero ? (
+                  <ActionButton
+                    label={t("ui.heroRecall", [], "Recall")}
+                    disabled={!heroSummoned}
+                    onClick={() => onRecallHero()}
+                  />
+                ) : null}
               </div>
             </>
           ) : (
@@ -231,9 +322,13 @@ export function HeroPetWindow({
               <>
                 <div style={style.creatureDetailName}>{selectedCreature.name}</div>
                 <div style={style.creatureDetailMeta}>
+                  {selectedCreature.typeLabel ? <span>{selectedCreature.typeLabel}</span> : null}
+                  {selectedCreature.typeLabel && selectedCreature.level ? <span> · </span> : null}
                   {selectedCreature.level
                     ? t("ui.heroLevel", [selectedCreature.level], `Level ${selectedCreature.level}`)
-                    : t("ui.creature", [], "Creature")}
+                    : selectedCreature.typeLabel
+                      ? null
+                      : t("ui.creature", [], "Creature")}
                 </div>
                 {selectedCreature.maxHp ? (
                   <Gauge label={t("ui.hp", [], "HP")} current={selectedCreature.hp ?? 0} max={selectedCreature.maxHp} color="#d8552f" />
@@ -387,7 +482,8 @@ const style: Record<string, CSSProperties> = {
     height: 314,
     display: "flex",
     flexDirection: "column",
-    gap: 6,
+    gap: 5,
+    overflowY: "auto",
   },
   empty: { color: "#cbb38a", padding: "10px 4px", fontSize: 11 },
   heroHeader: { display: "flex", alignItems: "center", gap: 8 },
@@ -399,8 +495,39 @@ const style: Record<string, CSSProperties> = {
     background: "rgba(20, 13, 7, 0.6)",
   },
   heroHeaderText: { display: "flex", flexDirection: "column", gap: 2, minWidth: 0 },
-  heroName: { color: "#f8e6bb", fontSize: 13, fontWeight: 700 },
+  heroNameRow: { display: "flex", alignItems: "baseline", gap: 6, minWidth: 0 },
+  heroName: { color: "#f8e6bb", fontSize: 13, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  heroGrade: {
+    flex: "0 0 auto",
+    fontSize: 9,
+    color: "#f0d69b",
+    border: "1px solid rgba(214, 180, 110, 0.5)",
+    borderRadius: 2,
+    padding: "0 4px",
+  },
   heroMeta: { fontSize: 10, color: "#cbb38a" },
+  aiSection: { display: "flex", flexDirection: "column", gap: 3 },
+  aiLabel: { fontSize: 9, color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },
+  aiButtons: { display: "flex", gap: 3 },
+  aiButton: {
+    flex: 1,
+    minWidth: 0,
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    background: "linear-gradient(180deg, rgba(52, 32, 18, 0.92), rgba(28, 17, 9, 0.92))",
+    color: "#cbb38a",
+    padding: "3px 2px",
+    fontSize: 10,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  aiButtonActive: {
+    background: "linear-gradient(180deg, rgba(120, 74, 34, 0.96), rgba(70, 40, 20, 0.96))",
+    color: "#f8e6bb",
+    borderColor: "rgba(214, 180, 110, 0.85)",
+    cursor: "default",
+  },
   statGrid: { display: "flex", gap: 6 },
   stat: {
     flex: 1,
