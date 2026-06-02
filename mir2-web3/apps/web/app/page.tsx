@@ -1231,6 +1231,17 @@ export default function HomePage() {
     window.addEventListener("keydown", onExtraWindowHotkey);
     return () => window.removeEventListener("keydown", onExtraWindowHotkey);
   }, []);
+  // When the hero/pet window opens, ask the server to start streaming intelligent
+  // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).
+  useEffect(() => {
+    if (!showHeroPet) return;
+    send({ type: "requestIntelligentCreatureUpdates", update: true }, { quiet: true });
+    return () => {
+      send({ type: "requestIntelligentCreatureUpdates", update: false }, { quiet: true });
+    };
+    // `send` is a stable hoisted closure over refs; intentionally excluded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showHeroPet]);
   const [activeInventoryTab, setActiveInventoryTab] = useState<"bag1" | "bag2" | "quest">("bag1");
   const [activeCharacterTab, setActiveCharacterTab] = useState<"char" | "stats1" | "stats2" | "spells">("char");
   const [storageServiceOpenVersion, setStorageServiceOpenVersion] = useState(0);
@@ -4284,6 +4295,17 @@ export default function HomePage() {
     send({ type: "attack", objectId: Number(objectId) });
   }
 
+  // Harvest a corpse/resource in the given facing direction (ClientPacket::Harvest).
+  function harvestToward(direction: string) {
+    send({ type: "harvest", direction });
+  }
+
+  // Pick up whatever item is on the local player's own tile (ClientPacket::PickUp,
+  // which carries no location — the server uses the player's current position).
+  function pickUpUnderfoot() {
+    send({ type: "pickUpTile" });
+  }
+
   function createCharacter(draft: {
     name: string;
     classKey: SelectCharacterEntry["classKey"];
@@ -4568,10 +4590,17 @@ export default function HomePage() {
   }
 
   function claimMail(mailId: number) {
+    // Real protocol packets first (ReadMail marks the mail opened, CollectParcel
+    // pulls the gold/items), then the stage5 action channel as a fallback for the
+    // dev gateway's in-process mailbox. Field shapes match BrowserCommand::ReadMail
+    // / CollectParcel (`mailId`) in apps/gateway/src/web.rs.
+    send({ type: "readMail", mailId }, { quiet: true });
+    send({ type: "collectParcel", mailId }, { quiet: true });
     send({ type: "stage5Command", action: "mail.claim", args: [String(mailId)] });
   }
 
   function deleteMail(mailId: number) {
+    send({ type: "deleteMail", mailId }, { quiet: true });
     send({ type: "stage5Command", action: "mail.delete", args: [String(mailId)] });
   }
 
@@ -4674,7 +4703,14 @@ export default function HomePage() {
     }
     const drop = world.groundDrops.find((entry) => entry.x === x && entry.y === y);
     if (drop) {
-      pickGroundDrop(drop.objectId);
+      // If the drop is on the player's own tile, use the underfoot PickUp packet
+      // (no location); otherwise target the specific ground-drop object.
+      const standingSelf = world.entities.find((entity) => entity.objectId === world.playerObjectId);
+      if (standingSelf && standingSelf.x === x && standingSelf.y === y) {
+        pickUpUnderfoot();
+      } else {
+        pickGroundDrop(drop.objectId);
+      }
       return;
     }
     const transferKey = transferKeyForTile(x, y);
@@ -6893,6 +6929,524 @@ export default function HomePage() {
           "system",
         );
         break;
+
+      // --- [fe2-packets] additional extended handlers ---
+      // Second pass over apps/gateway/src/web.rs `server_packet_to_event`: variants
+      // with an observable effect that the first pass left on the default branch.
+
+      // Derived stat sheets ----------------------------------------------------
+      case "HeroBaseStatsInfo":
+        // Hero (companion) stat sheet -> stored on the stage5 hero slice for panels.
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              baseStats: (payload.stats as Record<string, unknown> | undefined) ?? null,
+            },
+          },
+        }));
+        break;
+      case "BaseStatsInfo":
+        // Player derived stats are reconciled from the world snapshot; the explicit
+        // packet only needs to flag the next snapshot as an in-place refresh.
+        packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        break;
+
+      // Account security -------------------------------------------------------
+      case "ChangePassword":
+        appendLog(
+          numberOrZero(payload.result) === 1
+            ? t("ui.passwordChanged", [], "Password changed successfully.")
+            : t("ui.passwordChangeFailed", [], "Password change failed."),
+          "system",
+        );
+        break;
+      case "ChangePasswordBanned":
+        appendLog(
+          t(
+            "ui.passwordChangeBanned",
+            [stringOrFallback(payload.reason, "")],
+            "Password change is temporarily blocked.",
+          ),
+          "system",
+        );
+        break;
+
+      // Item rental lock / confirmation flow -----------------------------------
+      case "GetRentedItems": {
+        const rentedItems = Array.isArray(payload.rentedItems) ? payload.rentedItems : [];
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              rentedItemCount: rentedItems.length,
+            },
+          },
+        }));
+        break;
+      }
+      case "ItemRentalLock":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              lockSuccess: payload.success === true,
+              goldLocked: payload.goldLocked === true,
+              itemLocked: payload.itemLocked === true,
+            },
+          },
+        }));
+        break;
+      case "ItemRentalPartnerLock":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              partnerGoldLocked: payload.goldLocked === true,
+              partnerItemLocked: payload.itemLocked === true,
+            },
+          },
+        }));
+        break;
+      case "CanConfirmItemRental":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              canConfirm: true,
+            },
+          },
+        }));
+        break;
+      case "ConfirmItemRental":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            itemRental: {
+              ...(current.stage5Systems.itemRental ?? {}),
+              confirmed: true,
+            },
+          },
+        }));
+        appendLog(t("ui.itemRentalConfirmed", [], "Item rental confirmed."), "system", "trade");
+        break;
+
+      // NPC service surfaces (open the relevant inventory-backed panel) --------
+      case "DefaultNPC":
+      case "NPCUpdate":
+        // Acknowledge that an NPC interaction surface is active. The dialog body
+        // arrives via NPCResponse / world snapshot; just keep selection coherent.
+        restoreObjectSelection(stringifyId(payload.objectId ?? payload.npcId));
+        break;
+      case "NPCAwakening":
+      case "NPCDisassemble":
+      case "NPCDowngrade":
+      case "NPCReset":
+      case "NPCCheckRefine":
+        // Opening an item-service NPC panel; reuse the inventory surface.
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
+        break;
+
+      // NPC market (consignment auction house) ---------------------------------
+      case "NPCMarket":
+      case "NPCMarketPage": {
+        const listings = Array.isArray(payload.listings)
+          ? (payload.listings as Array<Record<string, unknown>>)
+          : [];
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: { ...current.stage5Systems, auction: listings },
+        }));
+        break;
+      }
+
+      // Mail compose / lock acknowledgements -----------------------------------
+      case "MailSendRequest":
+        appendLog(t("ui.mailComposeReady", [], "You can compose mail now."), "system");
+        break;
+      case "MailLockedItem":
+        // Toggle confirmation for an attachment lock in the mail compose window.
+        appendLog(
+          payload.locked === true
+            ? t("ui.mailItemLocked", [], "Mail attachment locked.")
+            : t("ui.mailItemUnlocked", [], "Mail attachment unlocked."),
+          "system",
+        );
+        break;
+
+      // Item state changes (seal / slot count / awakening lock) ----------------
+      case "ItemSlotSizeChanged": {
+        const uniqueId = numberOrUndefined(payload.uniqueId);
+        if (typeof uniqueId === "number") {
+          // Socketed slot count changed; the next snapshot carries the new sockets.
+          packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        }
+        break;
+      }
+      case "ItemSealChanged":
+        appendLog(t("ui.itemSealChanged", [], "Item seal updated."), "system");
+        break;
+      case "AwakeningLockedItem":
+        appendLog(
+          payload.locked === true
+            ? t("ui.awakeningItemLocked", [], "Awakening item locked.")
+            : t("ui.awakeningItemUnlocked", [], "Awakening item unlocked."),
+          "system",
+        );
+        break;
+
+      // Item / recipe definition catalogues ------------------------------------
+      case "NewItemInfo":
+      case "NewRecipeInfo": {
+        const info = payload.info as Record<string, unknown> | undefined;
+        if (info) {
+          const name = stringOrFallback(info.name, "") || stringOrFallback(info.itemName, "");
+          if (name && event.packet === "NewRecipeInfo") {
+            appendLog(t("ui.recipeLearned", [name], `Recipe available: ${name}.`), "system");
+          }
+        }
+        break;
+      }
+
+      // Hero management acknowledgements ---------------------------------------
+      case "HeroCreateRequest":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              canCreateClass: Array.isArray(payload.canCreateClass) ? payload.canCreateClass : [],
+            },
+          },
+        }));
+        break;
+      case "UnlockHeroAutoPot":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: { ...(current.stage5Systems.hero ?? {}), autoPotUnlocked: true },
+          },
+        }));
+        break;
+      case "IntelligentCreatureEnableRename":
+        appendLog(t("ui.petRenameEnabled", [], "You can rename your creature now."), "system");
+        break;
+
+      // Group member positions (mini-map party markers) ------------------------
+      case "GroupMembersMap":
+      case "SendMemberLocation": {
+        const memberName =
+          stringOrFallback(payload.playerName, "") || stringOrFallback(payload.memberName, "");
+        if (memberName) {
+          const members =
+            event.packet === "GroupMembersMap" && Array.isArray(payload.playerMap)
+              ? (payload.playerMap as unknown[]).filter((line): line is string => typeof line === "string")
+              : undefined;
+          if (members && members.length > 0) {
+            setWorld((current) => ({
+              ...current,
+              stage5Systems: {
+                ...current.stage5Systems,
+                group: { ...(current.stage5Systems.group ?? {}), members },
+              },
+            }));
+          }
+        }
+        break;
+      }
+
+      // Guild buff catalogue ---------------------------------------------------
+      case "GuildBuffList": {
+        const activeCount = Array.isArray(payload.activeBuffs) ? payload.activeBuffs.length : 0;
+        if (activeCount > 0 && payload.remove !== true) {
+          appendLog(
+            t("ui.guildBuffs", [activeCount], `Guild has ${activeCount} active buff(s).`),
+            "system",
+            "guild",
+          );
+        }
+        break;
+      }
+
+      // Timers (expiring buffs / event countdowns) -----------------------------
+      case "SetTimer": {
+        const key = stringOrFallback(payload.key, "");
+        const seconds = numberOrZero(payload.seconds);
+        if (key && seconds > 0) {
+          appendLog(
+            t("ui.timerSet", [key, seconds], `Timer "${key}" set for ${seconds}s.`),
+            "system",
+          );
+        }
+        break;
+      }
+      case "ExpireTimer": {
+        const key = stringOrFallback(payload.key, "");
+        if (key) {
+          appendLog(t("ui.timerExpired", [key], `Timer "${key}" expired.`), "system");
+        }
+        break;
+      }
+
+      // Decorative / level-up world effects ------------------------------------
+      case "ObjectDeco":
+        // Static map decoration spawn; harmless beyond keeping selection sane.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        break;
+      case "ObjectLevelEffects":
+        // Level-up sparkle on another object; no state change beyond selection.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        break;
+      case "TeleportIn":
+        // Self teleport-in flash; the destination is reconciled by the snapshot.
+        break;
+      case "RefineCancel":
+        appendLog(t("ui.refineCancelled", [], "Refining cancelled."), "system");
+        break;
+
+      // World ambience ---------------------------------------------------------
+      case "TimeOfDay": {
+        const lights = numberOrUndefined(payload.lights);
+        if (typeof lights === "number") {
+          appendLog(
+            t("ui.timeOfDay", [lights], `Time of day changed (light ${lights}).`),
+            "system",
+          );
+        }
+        break;
+      }
+
+      // Cash shop stock --------------------------------------------------------
+      case "GameShopInfo": {
+        const stockLevel = numberOrUndefined(payload.stockLevel);
+        if (typeof stockLevel === "number") {
+          appendLog(
+            t("ui.gameShopStock", [stockLevel], `Game shop stock: ${stockLevel}.`),
+            "system",
+          );
+        }
+        break;
+      }
+
+      // Item merge acknowledgement (server grid op) ----------------------------
+      case "MergeItem":
+        if (payload.success === false) {
+          appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        }
+        break;
+
+      // --- [fe2-packets] typed-fallback handlers ---
+      // These ServerPacket variants have no bespoke arm in the gateway serializer;
+      // they arrive via its `typed_packet_event_detail` wildcard, so the variant
+      // name is PascalCase and every field is camelCase (rename_all_fields) plus a
+      // `typed: true` marker (apps/gateway/src/web.rs).
+
+      // Object appearance / status flags --------------------------------------
+      case "ObjectPoisoned": {
+        const objectId = stringifyId(payload.objectId);
+        if (objectId !== "0" && objectId === worldRef.current.playerObjectId && numberOrZero(payload.poison) > 0) {
+          appendLog(t("ui.poisoned", [], "You are poisoned."), "system");
+        }
+        restoreObjectSelection(objectId);
+        break;
+      }
+      case "PlayerUpdate":
+      case "TransformUpdate":
+      case "NPCImageUpdate":
+        // Equipment / transform / NPC sprite appearance change: the authoritative
+        // visuals are re-derived from the next world snapshot.
+        restoreObjectSelection(stringifyId(payload.objectId));
+        packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        break;
+      case "SetConcentration": {
+        const objectId = stringifyId(payload.objectId);
+        if (objectId === "0" || objectId === worldRef.current.playerObjectId) {
+          appendLog(
+            payload.enabled === true
+              ? t("ui.concentrationOn", [], "Concentration active.")
+              : t("ui.concentrationOff", [], "Concentration ended."),
+            "system",
+          );
+        }
+        break;
+      }
+      case "SetElemental": {
+        const objectId = stringifyId(payload.objectId);
+        if (objectId === "0" || objectId === worldRef.current.playerObjectId) {
+          const value = numberOrZero(payload.value);
+          appendLog(
+            payload.enabled === true
+              ? t("ui.elementalCharged", [value], `Elemental charge: ${value}.`)
+              : t("ui.elementalReleased", [], "Elemental charge released."),
+            "system",
+          );
+        }
+        break;
+      }
+      case "ObjectGuildNameChanged":
+        // Guild tag over another player's head; surface as a log line.
+        {
+          const guildName = stringOrFallback(payload.guildName, "");
+          if (guildName) {
+            appendLog(t("ui.guildNameChanged", [guildName], `Guild: ${guildName}.`), "system", "guild");
+          }
+        }
+        break;
+
+      // Doors ------------------------------------------------------------------
+      case "Opendoor":
+        // NB: the gateway emits this as "Opendoor" (lower-case d).
+        appendLog(
+          t("ui.doorOpened", [numberOrZero(payload.doorIndex)], `Door ${numberOrZero(payload.doorIndex)} opened.`),
+          "system",
+        );
+        break;
+
+      // Server notices ---------------------------------------------------------
+      case "UpdateNotice": {
+        const notice = payload.notice as Record<string, unknown> | undefined;
+        const message = notice ? stringOrFallback(notice.message, "") || stringOrFallback(notice.text, "") : "";
+        if (message) {
+          appendLog(message, "system", "announcement");
+        }
+        break;
+      }
+
+      // Map search / map metadata ---------------------------------------------
+      case "SearchMapResult":
+        appendLog(
+          t(
+            "ui.searchMapResult",
+            [numberOrZero(payload.mapIndex)],
+            `Map search located map ${numberOrZero(payload.mapIndex)}.`,
+          ),
+          "system",
+        );
+        break;
+      case "NewMapInfo":
+        // Map definition prefetch; the active map is reconciled from the snapshot.
+        packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        break;
+
+      // Equip-to-slot acknowledgement (server grid op) -------------------------
+      case "EquipSlotItem":
+        if (payload.success === false) {
+          appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        } else {
+          packetRuntimeSnapshotModeRef.current = "packetRefresh";
+        }
+        break;
+
+      // Cash-shop stock update -------------------------------------------------
+      case "GameShopStock":
+        appendLog(
+          t(
+            "ui.gameShopStock",
+            [numberOrZero(payload.stockLevel)],
+            `Game shop stock: ${numberOrZero(payload.stockLevel)}.`,
+          ),
+          "system",
+        );
+        break;
+
+      // Auto-potion configuration echo -----------------------------------------
+      case "SetAutoPotValue":
+      case "SetAutoPotItem":
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            hero: {
+              ...(current.stage5Systems.hero ?? {}),
+              ...(event.packet === "SetAutoPotValue"
+                ? { autoPotStat: numberOrUndefined(payload.stat), autoPotValue: numberOrUndefined(payload.value) }
+                : { autoPotItemIndex: numberOrUndefined(payload.itemIndex) }),
+            },
+          },
+        }));
+        break;
+
+      // NPC input / consign panels --------------------------------------------
+      case "NPCRequestInput":
+        // The dialog text input is surfaced through the snapshot's activeNpcDialog.
+        restoreObjectSelection(stringifyId(payload.npcId));
+        break;
+      case "NPCConsign":
+        setShowInventory(true);
+        setActiveInventoryTab("bag1");
+        break;
+
+      // Awakening material requirement -----------------------------------------
+      case "AwakeningNeedMaterials":
+        appendLog(t("ui.awakeningNeedMaterials", [], "Awakening requires materials."), "system");
+        break;
+
+      // Guild storage / territory / war ----------------------------------------
+      case "GuildStorageList": {
+        const items = Array.isArray(payload.items) ? payload.items : [];
+        const filled = items.filter((entry) => entry != null).length;
+        appendLog(
+          t("ui.guildStorageList", [filled], `Guild storage holds ${filled} item(s).`),
+          "system",
+          "guild",
+        );
+        break;
+      }
+      case "GuildStorageItemChange":
+        if (payload.success === false) {
+          appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        }
+        break;
+      case "GuildTerritoryPage":
+        appendLog(
+          t(
+            "ui.guildTerritoryPage",
+            [numberOrZero(payload.page)],
+            `Guild territory page ${numberOrZero(payload.page)}.`,
+          ),
+          "system",
+          "guild",
+        );
+        break;
+      case "GuildNameRequest":
+        appendLog(t("ui.guildNameRequest", [], "Enter a guild name."), "system", "guild");
+        break;
+      case "GuildRequestWar":
+        appendLog(t("ui.guildRequestWar", [], "Enter a guild to declare war on."), "system", "guild");
+        break;
+
+      // Player inspection window ----------------------------------------------
+      case "PlayerInspect": {
+        const info = payload.info as Record<string, unknown> | undefined;
+        const name = info ? stringOrFallback(info.name, "") : "";
+        appendLog(
+          t("ui.playerInspect", [name || "?"], `Inspecting ${name || "player"}.`),
+          "system",
+        );
+        break;
+      }
+
+      // Reincarnation prompts --------------------------------------------------
+      case "RequestReincarnation":
+        appendLog(t("ui.reincarnationOffer", [], "A reincarnation has been offered to you."), "system");
+        break;
+      case "CancelReincarnation":
+        appendLog(t("ui.reincarnationCancelled", [], "Reincarnation cancelled."), "system");
+        break;
       default:
         break;
     }
@@ -9015,7 +9569,11 @@ export default function HomePage() {
       }}
       onPrimaryTargetAction={() => {
         if (!selectedEntity) return;
-        if (selectedEntity.kind === "monster") return attackTarget(selectedEntity.objectId);
+        if (selectedEntity.kind === "monster") {
+          // A dead monster is a harvestable corpse; live ones are attacked.
+          if (selectedEntity.dead) return harvestToward(directionToward(self, selectedEntity));
+          return attackTarget(selectedEntity.objectId);
+        }
         if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
         sendCrystalTurn(directionToward(self, selectedEntity));
       }}
