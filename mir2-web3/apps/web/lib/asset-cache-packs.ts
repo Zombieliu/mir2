@@ -7,7 +7,7 @@ export type AssetCacheScenePrewarm = {
 };
 
 export type AssetCachePack = {
-  name: "login" | "character-select" | "hud-core" | "bichon-spawn";
+  name: "login" | "bichon-spawn" | "character-select" | "hud-core" | "login-audio";
   label: string;
   priority: number;
   phase?: "critical" | "background";
@@ -22,22 +22,35 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     label: "Login shell",
     priority: 10,
     cacheTier: "critical",
-    urls: uniqueUrls([
-      ...collectStaticAssetUrls(ORIGINAL_UI.login),
-      "/original-ui/Sound/Login2.wav",
-      "/original-ui/Sound/100.wav",
-    ]),
+    urls: uniqueUrls([...collectStaticAssetUrls(ORIGINAL_UI.login)]),
+  },
+  {
+    name: "bichon-spawn",
+    label: "Bichon spawn scene",
+    priority: 15,
+    cacheTier: "critical",
+    // Prewarm the packed entity atlas and the actual production Bichon entry footprint.
+    // StartGame currently places Scout near 398,333, so warming the old login
+    // showcase center still left the first playable scene to cold-load.
+    urls: [
+      "/original-ui/MMap/0.png",
+      "/bevy-entity-atlases/manifest.json",
+      "/bevy-entity-atlases/starter-bichon-base.png",
+    ],
+    scenes: [
+      {
+        label: "BichonProvince spawn",
+        url: "/api/scene/crystal?map=0&x=398&y=333&width=56&height=72",
+        spriteFrameLimit: 960,
+      },
+    ],
   },
   {
     name: "character-select",
     label: "Character select",
     priority: 20,
     cacheTier: "critical",
-    urls: uniqueUrls([
-      ...collectStaticAssetUrls(ORIGINAL_UI.select),
-      "/original-ui/Sound/Select2.wav",
-      "/original-ui/Sound/NewChar.wav",
-    ]),
+    urls: uniqueUrls([...collectStaticAssetUrls(ORIGINAL_UI.select)]),
   },
   {
     name: "hud-core",
@@ -62,25 +75,17 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     ]),
   },
   {
-    name: "bichon-spawn",
-    label: "Bichon spawn scene",
-    priority: 40,
-    cacheTier: "critical",
-    // Prewarm the packed entity atlas and the actual production Bichon entry footprint.
-    // StartGame currently places Scout near 398,333, so warming the old login
-    // showcase center still left the first playable scene to cold-load.
-    urls: [
-      "/original-ui/MMap/0.png",
-      "/bevy-entity-atlases/manifest.json",
-      "/bevy-entity-atlases/starter-bichon-base.png",
-    ],
-    scenes: [
-      {
-        label: "BichonProvince spawn",
-        url: "/api/scene/crystal?map=0&x=398&y=333&width=56&height=72",
-        spriteFrameLimit: 960,
-      },
-    ],
+    name: "login-audio",
+    label: "Login and select audio",
+    priority: 60,
+    phase: "background",
+    cacheTier: "background",
+    urls: uniqueUrls([
+      "/original-ui/Sound/Login2.wav",
+      "/original-ui/Sound/100.wav",
+      "/original-ui/Sound/Select2.wav",
+      "/original-ui/Sound/NewChar.wav",
+    ]),
   },
 ];
 
