@@ -4787,25 +4787,83 @@ export default function HomePage() {
   }
 
   // Guild chat rides the real Chat packet: the "!~" prefix routes to guild chat
-  // server-side (apps/simulation/.../zone/runtime.rs). Notice editing, member
-  // invite, and kick have no BrowserCommand and stay unwired.
+  // server-side (apps/simulation/.../zone/runtime.rs).
   function sendGuildChat(message: string) {
     const trimmed = message.trim();
     if (!trimmed) return;
     send({ type: "chat", message: `!~${trimmed}` });
   }
 
-  // Group / conquest actions only have stage-5 action-channel mappings.
+  // Guild notice editing -> ClientPacket::EditGuildNotice (the gateway forwards
+  // BrowserCommand::EditGuildNotice). The notice is a list of lines, so the
+  // multiline draft is split on newlines (matching the C# client's per-line
+  // notice array); blank trailing lines are dropped.
+  function editGuildNotice(notice: string) {
+    const lines = notice.replace(/\r\n/g, "\n").split("\n");
+    while (lines.length > 0 && lines[lines.length - 1].trim() === "") {
+      lines.pop();
+    }
+    send({ type: "editGuildNotice", notice: lines });
+  }
+
+  // Guild recruit/kick both ride ClientPacket::EditGuildMember. `changeType` 0
+  // recruits/adds the named player, 1 removes them (see
+  // stage5_edit_guild_member_packet in apps/simulation/.../runtime/packets.rs).
+  function inviteGuildMember(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "editGuildMember", changeType: 0, rankIndex: 0, name: trimmed, rankName: "" });
+  }
+
+  function kickGuildMember(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "editGuildMember", changeType: 1, rankIndex: 0, name: trimmed, rankName: "" });
+  }
+
+  // Whisper rides the real Chat packet: a "/name body" message routes to a
+  // private whisper server-side (apps/simulation/.../zone/runtime.rs). The
+  // friends window only supplies a target name, so seed the chat input with the
+  // "/name " prefix and let the player type the body (matching the original
+  // Crystal client's whisper-compose flow).
+  function whisperPlayer(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setChatMessage(`/${trimmed} `);
+  }
+
+  // Group invite rides the real protocol: AddMember requires grouping to be
+  // enabled first, so SwitchGroup(true) precedes AddMember (matching
+  // stage5_group_add_member_packet in apps/simulation/.../runtime/packets.rs).
   function groupInviteMember(name: string) {
     const trimmed = name.trim();
     if (!trimmed) return;
-    send({ type: "stage5Command", action: "group.create", args: [trimmed] });
+    send({ type: "switchGroup", allowGroup: true }, { quiet: true });
+    send({ type: "addMember", name: trimmed });
   }
 
+  // Kicking a member rides ClientPacket::DelMember.
+  function kickGroupMember(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    send({ type: "delMember", name: trimmed });
+  }
+
+  // Leaving / disbanding the group rides ClientPacket::SwitchGroup with
+  // allowGroup=false, which the simulation maps to clearing the roster +
+  // DeleteGroup. The stage-5 group.leave channel is kept as a dev fallback.
   function groupLeave() {
+    send({ type: "switchGroup", allowGroup: false }, { quiet: true });
     send({ type: "stage5Command", action: "group.leave" });
   }
 
+  // Toggling whether the player accepts group invites rides SwitchGroup's
+  // allowGroup flag directly.
+  function groupToggleAllowInvites(allow: boolean) {
+    send({ type: "switchGroup", allowGroup: allow });
+  }
+
+  // Loot mode has no dedicated ClientPacket; it stays on the stage-5 channel.
   function groupToggleLootMode() {
     const current = world.stage5Systems.group?.lootMode;
     const next = current === "group" ? "solo" : "group";
@@ -4814,6 +4872,86 @@ export default function HomePage() {
 
   function conquestStartWar() {
     send({ type: "stage5Command", action: "conquest.start" });
+  }
+
+  // Quest log actions. The window's "track" button shares the quest with the
+  // group (ClientPacket::ShareQuest); "abandon" drops it (AbandonQuest). Both
+  // key off the same `questIndex` the simulation tracks.
+  function shareQuest(questId: number) {
+    send({ type: "shareQuest", questIndex: questId });
+  }
+
+  function abandonQuest(questId: number) {
+    send({ type: "abandonQuest", questIndex: questId });
+  }
+
+  // Hero summon rides ClientPacket::ChangeHero, which spawns the recruited hero
+  // beside the player (stage5 ChangeHero handler). There is no dedicated hero
+  // "dismiss/recall" packet in the simulation yet, so onDismissHero is left
+  // unwired (button stays disabled) — see the task report follow-up.
+  function summonHero() {
+    send({ type: "changeHero", listIndex: 0 });
+  }
+
+  // Intelligent-creature summon/dismiss/release ride ClientPacket::
+  // UpdateIntelligentCreature. The packet echoes the full creature record, so
+  // look it up from the stage-5 list by the slot index encoded in the window's
+  // `creature-<slot>` id. summonMe sets petMode>=1, unsummonMe clears it,
+  // releaseMe removes the creature entirely (see
+  // stage5_update_intelligent_creature_packet in the simulation).
+  function intelligentCreatureRecord(creatureId: string): Record<string, unknown> | null {
+    const list = world.stage5Systems.intelligentCreatures;
+    if (!Array.isArray(list)) return null;
+    const slotText = creatureId.startsWith("creature-") ? creatureId.slice("creature-".length) : creatureId;
+    const slot = Number(slotText);
+    const match = Number.isFinite(slot)
+      ? list.find((entry) => Number((entry as Record<string, unknown>)?.slotIndex) === slot)
+      : undefined;
+    return (match ?? null) as Record<string, unknown> | null;
+  }
+
+  function summonCreature(creatureId: string) {
+    const creature = intelligentCreatureRecord(creatureId);
+    if (!creature) return;
+    send({ type: "updateIntelligentCreature", creature, summonMe: true, unsummonMe: false, releaseMe: false });
+  }
+
+  function releaseCreature(creatureId: string) {
+    const creature = intelligentCreatureRecord(creatureId);
+    if (!creature) return;
+    send({ type: "updateIntelligentCreature", creature, summonMe: false, unsummonMe: false, releaseMe: true });
+  }
+
+  // Cycling the pet mode re-sends the creature with the next petMode (0..5,
+  // matching the original PetMode enum) and no summon/release flags, so the
+  // simulation just updates the stored record.
+  function cycleCreaturePickupMode(creatureId: string) {
+    const creature = intelligentCreatureRecord(creatureId);
+    if (!creature) return;
+    const currentMode = Number(creature.petMode ?? 0);
+    const nextMode = Number.isFinite(currentMode) ? (currentMode + 1) % 6 : 1;
+    send({
+      type: "updateIntelligentCreature",
+      creature: { ...creature, petMode: nextMode },
+      summonMe: false,
+      unsummonMe: false,
+      releaseMe: false,
+    });
+  }
+
+  // Trade window actions ride the real trade packets: accept an incoming invite
+  // (TradeReply), lock in your side (TradeConfirm), or cancel the trade
+  // (TradeCancel).
+  function acceptTrade() {
+    send({ type: "tradeReply", acceptInvite: true });
+  }
+
+  function confirmTrade() {
+    send({ type: "tradeConfirm", locked: true });
+  }
+
+  function cancelTrade() {
+    send({ type: "tradeCancel" });
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -9782,16 +9920,16 @@ export default function HomePage() {
     />
     <ExtraWindows
       t={t}
-      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog }}
-      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures) }}
-      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onSendGuildChat: sendGuildChat }}
-      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null, onInviteMember: groupInviteMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode }}
-      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry }}
+      questLog={{ open: showQuestLog, onClose: () => setShowQuestLog(false), quests: world.questLog, onTrackQuest: shareQuest, onAbandonQuest: abandonQuest }}
+      heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: adaptHero(world.stage5Systems.hero), creatures: adaptCreatures(world.stage5Systems.intelligentCreatures), onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode }}
+      guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat }}
+      group={{ open: showGroup, onClose: () => setShowGroup(false), group: adaptGroup(world.stage5Systems.group), playerName: self?.name ?? null, onInviteMember: groupInviteMember, onKickMember: kickGroupMember, onLeaveGroup: groupLeave, onToggleLootMode: groupToggleLootMode, onToggleAllowInvites: groupToggleAllowInvites }}
+      friends={{ open: showFriends, onClose: () => setShowFriends(false), social: adaptFriends(world.stage5Systems.social), onAddFriend: addFriend, onBlockPlayer: blockPlayer, onRemoveFriend: removeFriendEntry, onUnblockPlayer: removeFriendEntry, onWhisper: whisperPlayer }}
       bonds={{ open: showBonds, onClose: () => setShowBonds(false), relationship: adaptRelationship(world.stage5Systems.relationship), mentor: adaptMentor(world.stage5Systems.mentor), onProposeMarriage: proposeMarriage, onDivorce: divorce, onAllowMarriage: toggleAllowMarriage, onAddMentor: addMentor, onAllowMentor: allowMentor, onCancelMentor: cancelMentor }}
       ranking={{ open: showRanking, onClose: () => setShowRanking(false), activeTab: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).tab, page: adaptActiveRankingPage(world.rankings, world.rankingCurrentKey).page, playerName: self?.name ?? null, onSelectTab: requestRanking, onRefresh: requestRanking }}
       market={{ open: showMarket, onClose: () => setShowMarket(false), listings: adaptMarketListings(world.stage5Systems.auction), gold: world.gold, onBuy: marketBuyListing, onCancel: marketCancelListing, onSearch: marketSearch, onRefresh: marketRefresh }}
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: adaptConquest(world.stage5Systems.conquest), territory: adaptGuildTerritory(world.stage5Systems.guildTerritory), guildName: world.stage5Systems?.guild?.name ?? null, onStartWar: conquestStartWar }}
-      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold }}
+      trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: adaptTrade(world.stage5Systems.trade), myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: adaptBuffs(world.activeBuffs) }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: world.mapTitle, markers: adaptWorldMapMarkers(world.mapTransfers) }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
