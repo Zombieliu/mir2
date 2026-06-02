@@ -17,17 +17,45 @@
  */
 
 import { BondsWindow, type BondsWindowProps, type MentorSummary, type RelationshipSummary } from "./original-client-bonds-window";
+import { BuffWindow, type BuffEntry, type BuffWindowProps } from "./original-client-buff-window";
+import {
+  ChatSettingsWindow,
+  type ChatChannelKey,
+  type ChatFontSize,
+  type ChatSettings,
+  type ChatSettingsWindowProps,
+} from "./original-client-chat-settings-window";
 import { ConquestWindow, type ConquestSummary, type ConquestWindowProps, type GuildTerritorySummary } from "./original-client-conquest-window";
 import { FriendsWindow, type FriendEntry, type FriendsSummary, type FriendsWindowProps } from "./original-client-friends-window";
 import { GroupWindow, type GroupMember, type GroupSummary, type GroupWindowProps } from "./original-client-group-window";
 import { GuildWindow, type GuildSummary, type GuildWindowProps } from "./original-client-guild-window";
+import { HelpWindow, type HelpWindowProps } from "./original-client-help-window";
 import { HeroPetWindow, type CreatureSummary, type HeroSummary, type HeroPetWindowProps } from "./original-client-hero-pet-window";
+import {
+  DEFAULT_HOTKEY_GROUPS,
+  HotkeyWindow,
+  type HotkeyBinding,
+  type HotkeyGroup,
+  type HotkeyWindowProps,
+} from "./original-client-hotkey-window";
 import { MarketWindow, type MarketListing, type MarketWindowProps } from "./original-client-market-window";
 import { QuestLogWindow, type QuestLogEntry, type QuestLogWindowProps } from "./original-client-quest-log-window";
 import { RankingWindow, type RankingEntry, type RankingPage, type RankingTabKey, type RankingWindowProps } from "./original-client-ranking-window";
+import { TradeWindow, type TradeSummary, type TradeWindowProps } from "./original-client-trade-window";
+import {
+  WorldMapWindow,
+  type WorldMapMarker,
+  type WorldMapWindowProps,
+} from "./original-client-world-map-window";
 
 export type {
   BondsWindowProps,
+  BuffEntry,
+  BuffWindowProps,
+  ChatChannelKey,
+  ChatFontSize,
+  ChatSettings,
+  ChatSettingsWindowProps,
   ConquestSummary,
   ConquestWindowProps,
   CreatureSummary,
@@ -39,7 +67,11 @@ export type {
   GroupWindowProps,
   GuildSummary,
   GuildTerritorySummary,
+  HelpWindowProps,
   HeroSummary,
+  HotkeyBinding,
+  HotkeyGroup,
+  HotkeyWindowProps,
   MarketListing,
   MarketWindowProps,
   MentorSummary,
@@ -49,21 +81,33 @@ export type {
   RankingTabKey,
   RankingWindowProps,
   RelationshipSummary,
+  TradeSummary,
+  TradeWindowProps,
+  WorldMapMarker,
+  WorldMapWindowProps,
 };
 export {
   BondsWindow,
+  BuffWindow,
+  ChatSettingsWindow,
   ConquestWindow,
+  DEFAULT_HOTKEY_GROUPS,
   FriendsWindow,
   GroupWindow,
   GuildWindow,
+  HelpWindow,
   HeroPetWindow,
+  HotkeyWindow,
   MarketWindow,
   QuestLogWindow,
   RankingWindow,
+  TradeWindow,
+  WorldMapWindow,
 };
 
 // Re-export the typed adapters so a host can import everything from one module.
 export {
+  adaptBuffs,
   adaptConquest,
   adaptCreatures,
   adaptFriends,
@@ -75,6 +119,8 @@ export {
   adaptRankingPage,
   adaptActiveRankingPage,
   adaptRelationship,
+  adaptTrade,
+  adaptWorldMapMarkers,
   classKeyFromUnknown,
   rankingPageKeyForTab,
   rankingTabKey,
@@ -172,6 +218,31 @@ export type ExtraWindowsProps = {
       ConquestWindowProps,
       "conquest" | "territory" | "guildName" | "onStartWar" | "onToggleGate" | "onSetTaxRate"
     >;
+
+  trade?: WindowToggle &
+    Pick<
+      TradeWindowProps,
+      | "trade"
+      | "myGold"
+      | "myItemCount"
+      | "myConfirmed"
+      | "onAccept"
+      | "onConfirm"
+      | "onCancel"
+    >;
+
+  buffs?: WindowToggle & Pick<BuffWindowProps, "buffs" | "ticksPerSecond" | "onRemoveBuff">;
+
+  worldMap?: WindowToggle &
+    Pick<WorldMapWindowProps, "currentMap" | "playerPosition" | "markers" | "onTeleport">;
+
+  /** Static help reference overlay (no server data required). */
+  help?: WindowToggle;
+
+  /** Static keyboard-layout overlay; pass `groups` to show rebound keys. */
+  hotkeys?: WindowToggle & Pick<HotkeyWindowProps, "groups">;
+
+  chatSettings?: WindowToggle & Pick<ChatSettingsWindowProps, "settings" | "onApply">;
 };
 
 export function ExtraWindows({
@@ -185,6 +256,12 @@ export function ExtraWindows({
   ranking,
   market,
   conquest,
+  trade,
+  buffs,
+  worldMap,
+  help,
+  hotkeys,
+  chatSettings,
 }: ExtraWindowsProps) {
   return (
     <>
@@ -303,6 +380,56 @@ export function ExtraWindows({
           onToggleGate={conquest.onToggleGate}
           onSetTaxRate={conquest.onSetTaxRate}
           onClose={conquest.onClose}
+        />
+      ) : null}
+
+      {trade?.open ? (
+        <TradeWindow
+          t={t}
+          trade={trade.trade}
+          myGold={trade.myGold}
+          myItemCount={trade.myItemCount}
+          myConfirmed={trade.myConfirmed}
+          onAccept={trade.onAccept}
+          onConfirm={trade.onConfirm}
+          onCancel={trade.onCancel}
+          onClose={trade.onClose}
+        />
+      ) : null}
+
+      {buffs?.open ? (
+        <BuffWindow
+          t={t}
+          buffs={buffs.buffs}
+          ticksPerSecond={buffs.ticksPerSecond}
+          onRemoveBuff={buffs.onRemoveBuff}
+          onClose={buffs.onClose}
+        />
+      ) : null}
+
+      {worldMap?.open ? (
+        <WorldMapWindow
+          t={t}
+          currentMap={worldMap.currentMap}
+          playerPosition={worldMap.playerPosition}
+          markers={worldMap.markers}
+          onTeleport={worldMap.onTeleport}
+          onClose={worldMap.onClose}
+        />
+      ) : null}
+
+      {help?.open ? <HelpWindow t={t} onClose={help.onClose} /> : null}
+
+      {hotkeys?.open ? (
+        <HotkeyWindow t={t} groups={hotkeys.groups} onClose={hotkeys.onClose} />
+      ) : null}
+
+      {chatSettings?.open ? (
+        <ChatSettingsWindow
+          t={t}
+          settings={chatSettings.settings}
+          onApply={chatSettings.onApply}
+          onClose={chatSettings.onClose}
         />
       ) : null}
     </>
