@@ -18,15 +18,20 @@ const MANIFEST_ROOTS = [
 
 const args = parseArgs(process.argv.slice(2));
 const outputPath = path.resolve(args.output ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_PATH ?? DEFAULT_OUTPUT_PATH);
-const collectionMode = String(args.mode ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_MODE ?? "filesystem");
+const explicitCollectionMode = normalizeOptionalString(args.mode ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_MODE ?? "");
+const assetVersion = normalizeOptionalString(process.env.MIR2_ASSET_VERSION ?? "");
 const remoteReleaseManifestSource = normalizeOptionalString(
-  args.remoteRelease ??
-    args.remoteReleaseManifest ??
-    process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE ??
-    process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE_MANIFEST ??
-    process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST_URL ??
-    "",
+  resolveTemplate(
+    args.remoteRelease ??
+      args.remoteReleaseManifest ??
+      process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE ??
+      process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE_MANIFEST ??
+      process.env.MIR2_REMOTE_ASSET_RELEASE_MANIFEST_URL ??
+      "",
+    assetVersion,
+  ),
 );
+const collectionMode = resolveCollectionMode();
 const manifestConcurrency = positiveIntegerArg(
   args.concurrency ?? process.env.MIR2_ORIGINAL_ASSET_MANIFEST_CONCURRENCY,
   64,
@@ -181,11 +186,24 @@ async function collectRemoteReleaseAssetRecords() {
 }
 
 function resolveRemoteReleaseManifestSource() {
-  if (remoteReleaseManifestSource) return remoteReleaseManifestSource;
+  if (remoteReleaseManifestSource) {
+    if (remoteReleaseManifestSource.includes("{version}")) {
+      throw new Error(
+        "remote-release mode cannot resolve the remote release manifest source because it contains {version} and MIR2_ASSET_VERSION is empty.",
+      );
+    }
+    return remoteReleaseManifestSource;
+  }
   const assetBaseUrl = normalizeOptionalString(
     process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL ?? "",
-  ).replace(/\/+$/, "");
-  if (assetBaseUrl) return `${assetBaseUrl}/remote-asset-release.json`;
+  );
+  const resolvedAssetBaseUrl = resolveTemplate(assetBaseUrl, assetVersion).replace(/\/+$/, "");
+  if (resolvedAssetBaseUrl.includes("{version}")) {
+    throw new Error(
+      "remote-release mode cannot resolve NEXT_PUBLIC_MIR2_ASSET_BASE_URL because it contains {version} and MIR2_ASSET_VERSION is empty.",
+    );
+  }
+  if (resolvedAssetBaseUrl) return `${resolvedAssetBaseUrl}/remote-asset-release.json`;
   throw new Error(
     "remote-release mode requires --remoteRelease, MIR2_ORIGINAL_ASSET_REMOTE_RELEASE, or NEXT_PUBLIC_MIR2_ASSET_BASE_URL.",
   );
@@ -351,6 +369,21 @@ function positiveIntegerArg(value, fallback) {
 
 function normalizeOptionalString(value) {
   return String(value ?? "").trim();
+}
+
+function resolveCollectionMode() {
+  if (explicitCollectionMode) return explicitCollectionMode;
+  if (remoteReleaseManifestSource) return "remote-release";
+  const assetBaseUrl = normalizeOptionalString(
+    process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? process.env.MIR2_ASSET_BASE_URL ?? "",
+  );
+  return assetBaseUrl ? "remote-release" : "filesystem";
+}
+
+function resolveTemplate(value, version) {
+  const text = String(value ?? "");
+  if (text.includes("{version}") && !version) return text;
+  return text.replaceAll("{version}", version);
 }
 
 function isHttpUrl(value) {
