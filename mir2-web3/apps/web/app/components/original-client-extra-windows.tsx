@@ -38,6 +38,12 @@ import {
   type HotkeyGroup,
   type HotkeyWindowProps,
 } from "./original-client-hotkey-window";
+import {
+  MailWindow,
+  type MailComposeDraft,
+  type MailMessageSummary,
+  type MailWindowProps,
+} from "./original-client-mail-window";
 import { MarketWindow, type MarketListing, type MarketWindowProps } from "./original-client-market-window";
 import { QuestLogWindow, type QuestLogEntry, type QuestLogWindowProps } from "./original-client-quest-log-window";
 import { RankingWindow, type RankingEntry, type RankingPage, type RankingTabKey, type RankingWindowProps } from "./original-client-ranking-window";
@@ -72,6 +78,9 @@ export type {
   HotkeyBinding,
   HotkeyGroup,
   HotkeyWindowProps,
+  MailComposeDraft,
+  MailMessageSummary,
+  MailWindowProps,
   MarketListing,
   MarketWindowProps,
   MentorSummary,
@@ -98,6 +107,7 @@ export {
   HelpWindow,
   HeroPetWindow,
   HotkeyWindow,
+  MailWindow,
   MarketWindow,
   QuestLogWindow,
   RankingWindow,
@@ -213,6 +223,18 @@ export type ExtraWindowsProps = {
       "listings" | "gold" | "onBuy" | "onCancel" | "onList" | "onSearch" | "onRefresh"
     >;
 
+  mail?: WindowToggle &
+    Pick<
+      MailWindowProps,
+      | "mail"
+      | "gold"
+      | "attachableItems"
+      | "onOpen"
+      | "onClaimAttachment"
+      | "onDeleteMail"
+      | "onSendMail"
+    >;
+
   conquest?: WindowToggle &
     Pick<
       ConquestWindowProps,
@@ -255,6 +277,7 @@ export function ExtraWindows({
   bonds,
   ranking,
   market,
+  mail,
   conquest,
   trade,
   buffs,
@@ -367,6 +390,20 @@ export function ExtraWindows({
           onSearch={market.onSearch}
           onRefresh={market.onRefresh}
           onClose={market.onClose}
+        />
+      ) : null}
+
+      {mail?.open ? (
+        <MailWindow
+          t={t}
+          mail={mail.mail}
+          gold={mail.gold}
+          attachableItems={mail.attachableItems}
+          onOpen={mail.onOpen}
+          onClaimAttachment={mail.onClaimAttachment}
+          onDeleteMail={mail.onDeleteMail}
+          onSendMail={mail.onSendMail}
+          onClose={mail.onClose}
         />
       ) : null}
 
