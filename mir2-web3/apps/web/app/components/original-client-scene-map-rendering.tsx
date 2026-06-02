@@ -860,6 +860,7 @@ function isRemoteBackedSceneAssetPath(path: string) {
     path.startsWith("/original-ui/") ||
     path.startsWith("/original-map/") ||
     path.startsWith("/generated/original-map-blend/") ||
+    path.startsWith("/bevy-entity-atlases/") ||
     path.startsWith("/bevy-runtime/")
   );
 }

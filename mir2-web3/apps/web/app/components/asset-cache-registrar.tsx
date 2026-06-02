@@ -27,6 +27,7 @@ type CacheResourceKind =
   | "original-ui"
   | "original-map"
   | "generated-map-blend"
+  | "bevy-entity-atlas"
   | "bevy-runtime"
   | "scene-api"
   | "asset-manifest"
@@ -1419,6 +1420,7 @@ function classifyUrl(url: URL): CacheResourceKind {
   if (url.pathname.startsWith("/original-ui/")) return "original-ui";
   if (url.pathname.startsWith("/original-map/")) return "original-map";
   if (url.pathname.startsWith("/generated/original-map-blend/")) return "generated-map-blend";
+  if (url.pathname.startsWith("/bevy-entity-atlases/")) return "bevy-entity-atlas";
   if (url.pathname.startsWith("/bevy-runtime/")) return "bevy-runtime";
   if (url.pathname === "/api/scene/crystal") return "scene-api";
   if (url.pathname === "/api/asset-manifest") return "asset-manifest";

@@ -18,6 +18,10 @@ const EXTRA_ORIGINAL_ASSET_PATHS = [
   ...makeRange(340, 354).map((value) => `/original-ui/Title/${value}.png`),
   ...makeRange(360, 362).map((value) => `/original-ui/Title/${value}.png`),
 ];
+const BEVY_ENTITY_ATLAS_PATHS = [
+  "/bevy-entity-atlases/manifest.json",
+  "/bevy-entity-atlases/starter-bichon-base.png",
+];
 
 const REQUIRED_PATHS = [
   ...LOGIN_TITLE_PATHS,
@@ -26,6 +30,7 @@ const REQUIRED_PATHS = [
   "/original-ui/Cursors/Cursor_Default.CUR",
   "/original-ui/Cursors/Cursor_TextPrompt.CUR",
   ...EXTRA_ORIGINAL_ASSET_PATHS,
+  ...BEVY_ENTITY_ATLAS_PATHS,
 ];
 
 const DEFAULT_REQUIRED_PATHS = REQUIRED_PATHS;

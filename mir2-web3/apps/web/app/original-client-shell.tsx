@@ -1126,7 +1126,9 @@ export function OriginalClientShell({
   }
   const showSyntheticScene = screen === "game" && !world.originalMapRegion;
   const sceneAssetUrlsRef = useRef<string[]>([]);
-  sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites);
+  sceneAssetUrlsRef.current = collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
+    includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
+  });
   const sceneAssetUrlKey = stableSceneAssetUrlKey(sceneAssetUrlsRef.current);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
@@ -1760,6 +1762,8 @@ export function OriginalClientShell({
 }
 
 const SCENE_INTERACTION_PRELOAD_URL_LIMIT = 96;
+const SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT = 96;
+const SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE = 64;
 const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 
 function collectVisibleSceneAssetUrls(
@@ -1776,6 +1780,7 @@ function collectVisibleSceneAssetUrls(
       preloadPaths?: string[];
     } | null;
   }>,
+  options: { includeEntityPreloadPaths?: boolean } = {},
 ) {
   const sceneCenterX = ORIGINAL_UI.game.sceneWidth / 2;
   const sceneCenterY = ORIGINAL_UI.game.sceneHeight / 2;
@@ -1795,19 +1800,42 @@ function collectVisibleSceneAssetUrls(
     })
     .slice(0, SCENE_INTERACTION_PRELOAD_URL_LIMIT)
     .map((sprite) => sprite.path);
+  const entityUrls: string[] = [];
+  const addEntityUrl = (url: string | null | undefined) => {
+    if (!url || entityUrls.includes(url)) {
+      return false;
+    }
+    entityUrls.push(url);
+    return true;
+  };
+
+  for (const { sprite } of viewportEntitySprites) {
+    if (!sprite) continue;
+
+    addEntityUrl(sprite.body?.path);
+    addEntityUrl(sprite.hair?.path);
+    for (const weapon of sprite.rearWeapons) addEntityUrl(weapon.path);
+    for (const weapon of sprite.frontWeapons) addEntityUrl(weapon.path);
+
+    if (!options.includeEntityPreloadPaths) {
+      continue;
+    }
+
+    let spritePreloadCount = 0;
+    for (const path of sprite.preloadPaths ?? []) {
+      if (spritePreloadCount >= SCENE_INTERACTION_ENTITY_PRELOAD_PATHS_PER_SPRITE) break;
+      if (entityUrls.length >= SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT) break;
+      if (addEntityUrl(path)) spritePreloadCount += 1;
+    }
+
+    if (entityUrls.length >= SCENE_INTERACTION_ENTITY_PRELOAD_URL_LIMIT) {
+      break;
+    }
+  }
 
   return [
     ...rankedMapUrls,
-    ...viewportEntitySprites.flatMap(({ sprite }) =>
-      sprite
-        ? [
-            sprite.body?.path,
-            sprite.hair?.path,
-            ...sprite.rearWeapons.map((weapon) => weapon.path),
-            ...sprite.frontWeapons.map((weapon) => weapon.path),
-          ]
-        : [],
-    ),
+    ...entityUrls,
   ].filter((url, index, list): url is string => Boolean(url) && list.indexOf(url) === index);
 }
 
