@@ -318,3 +318,51 @@ State after the three consolidation batches (packets / windows / VFX / SW / sim-
 - **Actor sprite fidelity** in the Bevy WASM runtime → heavy `wasm-bindgen` rebuild.
 - Code-doable toward ~95% (in-sandbox, cargo + Crystal C# source now available): outbound/window actions (via new gateway BrowserCommands), HUD/chat/inventory/character polish, entity name-tag/health-bar overlays, and deeper backend Crystal 1:1.
 
+## §7. Batch 4 results — 2026-06-02 (4 parallel agents → `claude/fe-integration`)
+
+Goal for this batch was **"push every code-doable module ≥95%."** Verdict: the code-doable
+surfaces advanced strongly (several modules from the 70–78% band into 82–90%), but a
+**blanket ≥95% everywhere was NOT reached and cannot be from the sandbox** — the ceilings on
+actor-sprite render (≈68%) and VFX (60%) are asset/deploy-gated (see §5 / §6 caps), not code.
+
+Branches merged (all verified, disjoint domains): `fe4-ui-polish` (6 components),
+`fe4-scene-hud` (shell + new `scene-overlays.tsx`), `fe4-outbound` (gateway `web.rs` +
+`page.tsx`), `fe4-sim-parity` (`apps/simulation`).
+
+### Verification gates (integration context, post-merge)
+- `npx tsc --noEmit` → **exit 0**
+- `cargo check -p mir2-gateway` → **exit 0**
+- `cargo test -p mir2-simulation` → **1207 passed / 0 failed** (was 1205; +2 crit/magic-parity fixes, 0 regressions)
+
+### Hard-metric deltas (`measure:frontend-coverage`)
+| Signal | §6 (before) | §7 (after) |
+|---|---|---|
+| ServerPacket handlers | 276/280 (98.6%) | 276/280 (98.6%) — at practical max |
+| ClientPacket senders (page.tsx-local) | 51/153 (~65 true) | 63/153 (77 distinct page.tsx-visible) |
+| Outbound bridge (gateway `browser_command_to_action`) | — | **111 distinct ClientPacket** of 153 (≈72.5%) |
+| UI dialog/window components | 27/36 | 28/37 (+`scene-overlays.tsx`) |
+
+### Per-module deltas (only modules this batch moved)
+| Module | §6 → §7 | What changed |
+|---|---|---|
+| Actor/monster sprite render | ~60% → **~68%** | DOM overlays added (health bars, selection ring, target readout); **sprite frames still 404 from R2 — asset-gated, the real cap** |
+| Chat | 75% → **82%** | over-head chat bubbles now derived from chat log + rendered |
+| Quest log | 72% → **85%** | track→`ShareQuest`, abandon→`AbandonQuest` wired (4 quest BrowserCommands added) |
+| Hero / pet / creatures | 70% → **82%** | summon hero→`ChangeHero`, creature summon/release/cycle→`UpdateIntelligentCreature`; dismiss/recall still blocked (no protocol packet) |
+| Social: guild/group/friends | 80% → **88%** | guild notice/invite/kick, group invite/kick/leave, friend whisper wired |
+| Trade | 78% → **85%** | accept/confirm/cancel → `TradeReply`/`TradeConfirm`/`TradeCancel` |
+| Inventory / storage | 85% → **90%** | stack-split steppers + slider + Min/Half/Max, gold-drop quick-amounts, locale gold |
+| Character / stats / equipment | 85% → **90%** | stat pages in Crystal row order, AC/DC ranges, paperdoll badge, richer equip tooltips |
+| Item tooltip (shared) | — | rebuilt: grade colors, AC/MAC/DC/MC/SC ranges, flat bonuses, requirements, bind/seal lines |
+| Options + audio | 70% → **80%** | master-volume slider + mute-all; system-menu Help/Keyboard overlays wired |
+| Combat / AI / magic (backend) | — | crit weights (Rate×5/Dmg×50) + magic `GetDamage` multiplier/truncation fixed to Crystal 1:1 |
+
+### Weighted overall (visual/UI client): **≈ 78% (range 76–81%)** — up from ≈75%
+
+### Still NOT ≥95% — honest gaps that remain (no code path from the sandbox)
+1. **Live sprite serving** — `/original-ui/Monster/...` frames exist in git but are pruned from the Vercel output and served only from R2; the R2 release is stale/partial → 404. Fix is an **R2 republish** (creds + deploy), not on these branches.
+2. **VFX real atlases** (60%) and **audio bytes** (in R2) — need real Crystal `.Lib` extraction on a real machine.
+3. **Actor sprite fidelity** — Bevy WASM `wasm-bindgen` rebuild.
+4. **Unwirable window actions** — hero dismiss/recall, conquest gate/tax, market consign (no item/price on button), mail compose (no mail component): each needs a **new protocol packet or sim handler or UI component**, deliberately out of this batch's additive scope.
+5. **Not merged to `main` / not deployed** — `claude/fe-integration` is 34 commits ahead of `origin/main`.
+
