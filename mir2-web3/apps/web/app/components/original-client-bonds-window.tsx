@@ -17,11 +17,26 @@ export type RelationshipSummary = {
   partnerName?: string;
   /** Map the partner is currently on (from LoverUpdate). */
   partnerMap?: string;
+  /** Whether the spouse is currently online (gates recall/teleport). */
+  partnerOnline?: boolean;
   marriedDays?: number;
+  /** Wedding date as a human-readable string. */
+  marriedDate?: string;
   /** Whether the viewer accepts incoming marriage proposals. */
   allowMarriage?: boolean;
+  /** Whether the viewer permits spousal recall to them (Crystal AllowRecall). */
+  allowRecall?: boolean;
   /** Name of an incoming marriage/divorce request, if any. */
   pendingRequestFrom?: string;
+};
+
+/** A single mentee/student row (when the viewer is acting as the mentor). */
+export type MentorStudent = {
+  name: string;
+  level?: number;
+  online?: boolean;
+  /** Mentee EXP accumulated toward graduation for this student. */
+  menteeExp?: number;
 };
 
 /** Mentor / mentee state, derived from the stage-5 `mentor` slice. */
@@ -33,6 +48,14 @@ export type MentorSummary = {
   menteeExp?: number;
   allowMentor?: boolean;
   pendingRequestFrom?: string;
+  /** True when the bonded counterpart is the viewer's student, not their mentor. */
+  isMentor?: boolean;
+  /** Students the viewer is currently mentoring (when acting as mentor). */
+  students?: MentorStudent[];
+  /** Whether EXP-share / mentee bonus is currently active. */
+  expShareActive?: boolean;
+  /** EXP needed to graduate (mentee target). */
+  graduationExp?: number;
 };
 
 export type BondsWindowProps = {
@@ -43,6 +66,12 @@ export type BondsWindowProps = {
   onAllowMarriage?: (allow: boolean) => void;
   onProposeMarriage?: (name: string) => void;
   onDivorce?: () => void;
+  /** Toggle whether the spouse may recall to the viewer. */
+  onAllowRecall?: (allow: boolean) => void;
+  /** Cast spousal recall (summon spouse to viewer). */
+  onRecallPartner?: () => void;
+  /** Teleport to the spouse's current location. */
+  onTeleportToPartner?: () => void;
   // Mentor actions.
   onAllowMentor?: (allow: boolean) => void;
   onAddMentor?: (name: string) => void;
@@ -61,6 +90,9 @@ export function BondsWindow({
   onAllowMarriage,
   onProposeMarriage,
   onDivorce,
+  onAllowRecall,
+  onRecallPartner,
+  onTeleportToPartner,
   onAllowMentor,
   onAddMentor,
   onCancelMentor,
@@ -72,11 +104,15 @@ export function BondsWindow({
 
   const partner = relationship?.partnerName?.trim() ?? "";
   const married = partner.length > 0;
+  const partnerOnline = relationship?.partnerOnline ?? false;
   const allowMarriage = relationship?.allowMarriage ?? true;
+  const allowRecall = relationship?.allowRecall ?? false;
 
   const mentorOf = mentor?.name?.trim() ?? "";
   const hasMentorLink = mentorOf.length > 0;
   const allowMentor = mentor?.allowMentor ?? true;
+  const viewerIsMentor = mentor?.isMentor ?? false;
+  const students = mentor?.students ?? [];
 
   return (
     <section
@@ -120,13 +156,23 @@ export function BondsWindow({
           <div style={style.statusCard} data-relationship-partner={partner}>
             <div style={style.statusName}>{married ? partner : t("ui.bondsSingle", [], "Single")}</div>
             <div style={style.statusMeta}>
-              {married ? t("ui.bondsMarried", [], "Married") : t("ui.bondsUnmarried", [], "No spouse")}
+              {married
+                ? `${t("ui.bondsMarried", [], "Married")} · ${
+                    partnerOnline ? t("ui.guildStateOnline", [], "Online") : t("ui.guildStateOffline", [], "Offline")
+                  }`
+                : t("ui.bondsUnmarried", [], "No spouse")}
             </div>
           </div>
 
           <Info label={t("ui.bondsPartner", [], "Spouse")} value={married ? partner : "-"} />
           {relationship?.partnerMap ? (
-            <Info label={t("ui.bondsLocation", [], "Location")} value={relationship.partnerMap} />
+            <Info
+              label={t("ui.bondsLocation", [], "Location")}
+              value={partnerOnline ? relationship.partnerMap : t("ui.guildStateOffline", [], "Offline")}
+            />
+          ) : null}
+          {relationship?.marriedDate ? (
+            <Info label={t("ui.bondsMarriedDate", [], "Wedding Date")} value={relationship.marriedDate} />
           ) : null}
           {typeof relationship?.marriedDays === "number" ? (
             <Info
@@ -151,6 +197,49 @@ export function BondsWindow({
               {allowMarriage ? t("ui.on", [], "On") : t("ui.off", [], "Off")}
             </button>
           </div>
+
+          {married ? (
+            <>
+              <div style={style.toggleRow}>
+                <span style={style.toggleLabel}>{t("ui.bondsAllowRecall", [], "Allow Recall")}</span>
+                <button
+                  type="button"
+                  disabled={!onAllowRecall}
+                  aria-pressed={allowRecall}
+                  onClick={() => onAllowRecall?.(!allowRecall)}
+                  style={{ ...style.toggleButton, ...(!onAllowRecall ? style.actionButtonDisabled : null) }}
+                >
+                  {allowRecall ? t("ui.on", [], "On") : t("ui.off", [], "Off")}
+                </button>
+              </div>
+              <div style={style.inputRow}>
+                <button
+                  type="button"
+                  disabled={!onRecallPartner || !partnerOnline}
+                  style={{
+                    ...style.actionButton,
+                    flex: 1,
+                    ...(!onRecallPartner || !partnerOnline ? style.actionButtonDisabled : null),
+                  }}
+                  onClick={() => onRecallPartner?.()}
+                >
+                  {t("ui.bondsRecall", [], "Recall Spouse")}
+                </button>
+                <button
+                  type="button"
+                  disabled={!onTeleportToPartner || !partnerOnline}
+                  style={{
+                    ...style.actionButton,
+                    flex: 1,
+                    ...(!onTeleportToPartner || !partnerOnline ? style.actionButtonDisabled : null),
+                  }}
+                  onClick={() => onTeleportToPartner?.()}
+                >
+                  {t("ui.bondsTeleport", [], "Teleport To")}
+                </button>
+              </div>
+            </>
+          ) : null}
 
           <div style={style.spacer} />
 
@@ -198,28 +287,82 @@ export function BondsWindow({
         </div>
       ) : (
         <div style={style.body}>
-          <div style={style.statusCard} data-mentor-name={mentorOf}>
+          <div style={style.statusCard} data-mentor-name={mentorOf} data-mentor-role={viewerIsMentor ? "mentor" : "mentee"}>
             <div style={style.statusName}>
               {hasMentorLink ? mentorOf : t("ui.bondsNoMentor", [], "No Mentor")}
             </div>
             <div style={style.statusMeta}>
               {hasMentorLink
-                ? mentor?.online
-                  ? t("ui.guildStateOnline", [], "Online")
-                  : t("ui.guildStateOffline", [], "Offline")
+                ? `${viewerIsMentor ? t("ui.bondsRoleMentee", [], "Your Student") : t("ui.bondsRoleMentor", [], "Your Mentor")} · ${
+                    mentor?.online ? t("ui.guildStateOnline", [], "Online") : t("ui.guildStateOffline", [], "Offline")
+                  }`
                 : t("ui.bondsMentorOpen", [], "Open to mentoring")}
             </div>
           </div>
 
-          <Info label={t("ui.bondsMentorName", [], "Mentor")} value={hasMentorLink ? mentorOf : "-"} />
+          <Info
+            label={viewerIsMentor ? t("ui.bondsRoleMentee", [], "Student") : t("ui.bondsMentorName", [], "Mentor")}
+            value={hasMentorLink ? mentorOf : "-"}
+          />
           <Info
             label={t("ui.guildLevel", [], "Level")}
             value={mentor?.level ? String(mentor.level) : "-"}
           />
-          <Info
-            label={t("ui.bondsMenteeExp", [], "Mentee EXP")}
-            value={typeof mentor?.menteeExp === "number" ? String(Math.max(0, mentor.menteeExp)) : "0"}
-          />
+          {hasMentorLink ? (
+            <Info
+              label={t("ui.bondsExpShare", [], "EXP Share")}
+              value={
+                mentor?.expShareActive
+                  ? t("ui.bondsExpShareOn", [], "Active")
+                  : t("ui.bondsExpShareOff", [], "Inactive")
+              }
+            />
+          ) : null}
+
+          {hasMentorLink && (typeof mentor?.menteeExp === "number" || typeof mentor?.graduationExp === "number") ? (
+            <div style={style.expBlock}>
+              <div style={style.expHead}>
+                <span style={style.toggleLabel}>{t("ui.bondsMenteeExp", [], "Mentee EXP")}</span>
+                <span style={style.expValue}>
+                  {mentor?.graduationExp
+                    ? `${Math.max(0, mentor?.menteeExp ?? 0)}/${mentor.graduationExp}`
+                    : String(Math.max(0, mentor?.menteeExp ?? 0))}
+                </span>
+              </div>
+              {mentor?.graduationExp ? (
+                <div style={style.expTrack} role="progressbar" aria-valuenow={mentor?.menteeExp ?? 0} aria-valuemax={mentor.graduationExp}>
+                  <span
+                    style={{
+                      ...style.expFill,
+                      width: `${Math.min(100, Math.max(0, ((mentor?.menteeExp ?? 0) / Math.max(mentor.graduationExp, 1)) * 100))}%`,
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {viewerIsMentor && students.length > 0 ? (
+            <>
+              <div style={style.toggleLabel}>{t("ui.bondsStudents", [students.length], `Students (${students.length})`)}</div>
+              <div style={style.studentList} aria-label={t("ui.bondsStudents", [students.length], "Students")}>
+                {students.map((student) => (
+                  <div key={student.name} style={style.studentRow} data-student-name={student.name}>
+                    <span
+                      style={{ ...style.studentDot, background: student.online ? "#8be07a" : "#5c5648" }}
+                      aria-hidden="true"
+                    />
+                    <span style={style.studentName}>{student.name}</span>
+                    {student.level ? <span style={style.studentMeta}>{t("ui.heroLevel", [student.level], `Lv ${student.level}`)}</span> : null}
+                    {typeof student.menteeExp === "number" ? (
+                      <span style={style.studentMeta}>{`${Math.max(0, student.menteeExp)} EXP`}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+
           <Info
             label={t("ui.bondsRequest", [], "Pending")}
             value={mentor?.pendingRequestFrom?.trim() || t("ui.bondsNoRequest", [], "None")}
@@ -346,6 +489,7 @@ const style: Record<string, CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: 6,
+    overflowY: "auto",
   },
   statusCard: {
     border: "1px solid rgba(190, 157, 99, 0.4)",
@@ -375,7 +519,32 @@ const style: Record<string, CSSProperties> = {
     fontSize: 11,
     cursor: "pointer",
   },
-  spacer: { flex: 1 },
+  spacer: { flex: 1, minHeight: 6 },
+  expBlock: { display: "flex", flexDirection: "column", gap: 3 },
+  expHead: { display: "flex", justifyContent: "space-between", alignItems: "baseline" },
+  expValue: { fontSize: 11, color: "#e3d3af" },
+  expTrack: {
+    position: "relative",
+    height: 7,
+    background: "rgba(0, 0, 0, 0.55)",
+    border: "1px solid rgba(190, 157, 99, 0.4)",
+    overflow: "hidden",
+  },
+  expFill: { position: "absolute", left: 0, top: 0, bottom: 0, display: "block", background: "#caa64a" },
+  studentList: {
+    border: "1px solid rgba(190, 157, 99, 0.28)",
+    background: "rgba(11, 8, 5, 0.45)",
+    padding: "4px 6px",
+    maxHeight: 96,
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+  },
+  studentRow: { display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#e3d3af" },
+  studentDot: { width: 7, height: 7, borderRadius: "50%", flex: "0 0 auto" },
+  studentName: { flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  studentMeta: { fontSize: 10, color: "#cbb38a", flex: "0 0 auto" },
   inputRow: { display: "flex", gap: 6 },
   input: {
     flex: 1,

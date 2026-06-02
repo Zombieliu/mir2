@@ -33,6 +33,8 @@ export type GroupSummary = {
   lootMode?: string;
   /** Whether the viewer currently allows incoming group invites. */
   allowInvites?: boolean;
+  /** Hard party cap (Crystal `Globals.MaxGroup`, default 15). */
+  maxMembers?: number;
 };
 
 export type GroupWindowProps = {
@@ -45,12 +47,25 @@ export type GroupWindowProps = {
   onLeaveGroup?: () => void;
   onToggleLootMode?: () => void;
   onToggleAllowInvites?: (allow: boolean) => void;
+  /** Transfer party leadership to the selected member. */
+  onPromoteLeader?: (name: string) => void;
   onClose: () => void;
 };
 
 const FRAME = ORIGINAL_UI.character;
 
 const CLASS_ICONS = FRAME.classIcons;
+
+const DEFAULT_MAX_GROUP = 15;
+
+/** Class-based name colour, mirroring how Crystal tints party roster names. */
+const CLASS_COLORS: Record<NonNullable<GroupMember["classKey"]>, string> = {
+  warrior: "#e0c08a",
+  wizard: "#8fb6ff",
+  taoist: "#8be0b0",
+  assassin: "#c79be0",
+  archer: "#e0b87a",
+};
 
 export function GroupWindow({
   t,
@@ -61,6 +76,7 @@ export function GroupWindow({
   onLeaveGroup,
   onToggleLootMode,
   onToggleAllowInvites,
+  onPromoteLeader,
   onClose,
 }: GroupWindowProps) {
   const [selectedName, setSelectedName] = useState<string | null>(null);
@@ -68,6 +84,8 @@ export function GroupWindow({
 
   const members = useMemo(() => normalizeMembers(group?.members), [group?.members]);
   const onlineCount = members.filter((member) => member.online).length;
+  const maxMembers = group?.maxMembers && group.maxMembers > 0 ? group.maxMembers : DEFAULT_MAX_GROUP;
+  const groupFull = members.length >= maxMembers;
   const leader = members.find((member) => member.leader) ?? members[0] ?? null;
   const viewerIsLeader =
     playerName != null && leader != null && leader.name === playerName;
@@ -101,7 +119,11 @@ export function GroupWindow({
       <img style={style.page} src={FRAME.pages.char} alt="" draggable={false} />
       <div style={style.titleText}>{t("ui.group", [], "Party")}</div>
       <div style={style.subtitle}>
-        {t("ui.groupMemberCount", [members.length, onlineCount], `${members.length} members · ${onlineCount} online`)}
+        {t(
+          "ui.groupMemberCountMax",
+          [members.length, maxMembers, onlineCount],
+          `${members.length}/${maxMembers} · ${onlineCount} online`,
+        )}
       </div>
       <div style={style.close}>
         <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
@@ -155,7 +177,12 @@ export function GroupWindow({
                 ) : (
                   <span style={style.rowIconFallback} aria-hidden="true" />
                 )}
-                <span style={style.rowName}>
+                <span
+                  style={{
+                    ...style.rowName,
+                    color: member.classKey ? CLASS_COLORS[member.classKey] : style.rowName.color,
+                  }}
+                >
                   {member.name}
                   {member.leader ? <span style={style.leaderTag}>{t("ui.groupLeader", [], "Leader")}</span> : null}
                 </span>
@@ -171,7 +198,12 @@ export function GroupWindow({
       <div style={style.detail} data-member-detail={selected?.name ?? ""}>
         {selected ? (
           <>
-            <div style={style.detailName}>
+            <div
+              style={{
+                ...style.detailName,
+                color: selected.classKey ? CLASS_COLORS[selected.classKey] : style.detailName.color,
+              }}
+            >
               {selected.name}
               {selected.leader ? <span style={style.leaderTag}>{t("ui.groupLeader", [], "Leader")}</span> : null}
             </div>
@@ -200,24 +232,46 @@ export function GroupWindow({
                 </div>
               </div>
             ) : null}
-            <button
-              type="button"
-              disabled={
-                !onKickMember ||
-                !viewerIsLeader ||
-                Boolean(selected.leader) ||
-                (playerName != null && selected.name === playerName)
-              }
-              style={{
-                ...style.actionButton,
-                ...(!onKickMember || !viewerIsLeader || selected.leader || (playerName != null && selected.name === playerName)
-                  ? style.actionButtonDisabled
-                  : null),
-              }}
-              onClick={() => onKickMember?.(selected.name)}
-            >
-              {t("ui.groupKick", [], "Remove")}
-            </button>
+            <div style={style.detailActions}>
+              <button
+                type="button"
+                disabled={
+                  !onPromoteLeader ||
+                  !viewerIsLeader ||
+                  Boolean(selected.leader) ||
+                  (playerName != null && selected.name === playerName)
+                }
+                style={{
+                  ...style.actionButton,
+                  flex: 1,
+                  ...(!onPromoteLeader || !viewerIsLeader || selected.leader || (playerName != null && selected.name === playerName)
+                    ? style.actionButtonDisabled
+                    : null),
+                }}
+                onClick={() => onPromoteLeader?.(selected.name)}
+              >
+                {t("ui.groupMakeLeader", [], "Make Leader")}
+              </button>
+              <button
+                type="button"
+                disabled={
+                  !onKickMember ||
+                  !viewerIsLeader ||
+                  Boolean(selected.leader) ||
+                  (playerName != null && selected.name === playerName)
+                }
+                style={{
+                  ...style.actionButton,
+                  flex: 1,
+                  ...(!onKickMember || !viewerIsLeader || selected.leader || (playerName != null && selected.name === playerName)
+                    ? style.actionButtonDisabled
+                    : null),
+                }}
+                onClick={() => onKickMember?.(selected.name)}
+              >
+                {t("ui.groupKick", [], "Remove")}
+              </button>
+            </div>
           </>
         ) : (
           <div style={style.empty}>{t("ui.groupSelectHint", [], "Select a member.")}</div>
@@ -246,11 +300,12 @@ export function GroupWindow({
         />
         <button
           type="submit"
-          disabled={!onInviteMember || inviteName.trim().length === 0}
+          disabled={!onInviteMember || inviteName.trim().length === 0 || groupFull}
+          title={groupFull ? t("ui.groupFull", [maxMembers], `Party is full (${maxMembers})`) : undefined}
           style={{
             ...style.actionButton,
             flex: "0 0 78px",
-            ...(!onInviteMember || inviteName.trim().length === 0 ? style.actionButtonDisabled : null),
+            ...(!onInviteMember || inviteName.trim().length === 0 || groupFull ? style.actionButtonDisabled : null),
           }}
         >
           {t("ui.groupInvite", [], "Invite")}
@@ -398,6 +453,7 @@ const style: Record<string, CSSProperties> = {
   },
   detailName: { color: "#f8e6bb", fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 },
   detailMeta: { fontSize: 10, color: "#cbb38a" },
+  detailActions: { display: "flex", gap: 4, marginTop: "auto" },
   gauge: { display: "flex", flexDirection: "column", gap: 2 },
   gaugeHead: { display: "flex", justifyContent: "space-between", fontSize: 10, color: "#cbb38a" },
   gaugeLabel: { color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },

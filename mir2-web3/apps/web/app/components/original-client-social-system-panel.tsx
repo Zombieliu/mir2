@@ -43,8 +43,14 @@ export function SocialSystemPanel({
   const [statusLine, setStatusLine] = useState(() => definition.footer);
   const sendClientCommandRef = useRef(onSendClientCommand);
 
-  const activeTab = definition.tabs[activeTabIndex] ?? definition.tabs[0];
-  const selectedRow = activeTab.rows[selectedRowIndex] ?? activeTab.rows[0];
+  const tabCount = definition.tabs.length;
+  // Clamp indices so a shrinking definition (fewer tabs/rows) can never read
+  // out of bounds and crash the hub.
+  const safeTabIndex = tabCount === 0 ? 0 : Math.min(activeTabIndex, tabCount - 1);
+  const activeTab = definition.tabs[safeTabIndex] ?? definition.tabs[0];
+  const rowCount = activeTab?.rows.length ?? 0;
+  const safeRowIndex = rowCount === 0 ? 0 : Math.min(selectedRowIndex, rowCount - 1);
+  const selectedRow = activeTab?.rows[safeRowIndex] ?? activeTab?.rows[0];
 
   useEffect(() => {
     sendClientCommandRef.current = onSendClientCommand;
@@ -69,6 +75,22 @@ export function SocialSystemPanel({
     return null;
   }
 
+  const selectTab = (index: number) => {
+    if (tabCount === 0) return;
+    const next = ((index % tabCount) + tabCount) % tabCount;
+    const resolvedLabel = resolveSystemMenuShellText(definition.tabs[next].label, playerName);
+    setActiveTabIndex(next);
+    setSelectedRowIndex(0);
+    setStatusLine(`${resolvedLabel} opened`);
+  };
+
+  const selectRow = (index: number) => {
+    if (rowCount === 0) return;
+    const next = ((index % rowCount) + rowCount) % rowCount;
+    setSelectedRowIndex(next);
+    setStatusLine(`${resolveSystemMenuShellText(activeTab.rows[next].name, playerName)} selected`);
+  };
+
   const resolvedSubtitle = resolveSystemMenuShellText(definition.subtitle, playerName);
   const resolvedTabLabel = resolveSystemMenuShellText(activeTab.label, playerName);
   const resolvedSelectedRowName = resolveSystemMenuShellText(selectedRow.name, playerName);
@@ -84,44 +106,82 @@ export function SocialSystemPanel({
       data-system-social-status={statusLine}
     >
       <div className="system-social-subtitle">{resolvedSubtitle}</div>
-      <div className="system-social-tabs" role="tablist" aria-label={featureTitleForSocialPanel(t, panel)}>
+      <div
+        className="system-social-tabs"
+        role="tablist"
+        aria-label={featureTitleForSocialPanel(t, panel)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowRight") {
+            event.preventDefault();
+            selectTab(safeTabIndex + 1);
+          } else if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            selectTab(safeTabIndex - 1);
+          }
+        }}
+      >
         {definition.tabs.map((tab, index) => {
           const resolvedLabel = resolveSystemMenuShellText(tab.label, playerName);
+          const active = index === safeTabIndex;
           return (
             <button
               key={tab.key}
               type="button"
-              className={index === activeTabIndex ? "active" : ""}
+              id={`social-tab-${panel}-${tab.key}`}
+              className={active ? "active" : ""}
               data-social-tab-key={tab.key}
               role="tab"
-              aria-selected={index === activeTabIndex}
-              onClick={() => {
-                setActiveTabIndex(index);
-                setSelectedRowIndex(0);
-                setStatusLine(`${resolvedLabel} opened`);
-              }}
+              aria-selected={active}
+              aria-controls={`social-tabpanel-${panel}`}
+              tabIndex={active ? 0 : -1}
+              onClick={() => selectTab(index)}
             >
               {resolvedLabel}
             </button>
           );
         })}
       </div>
-      <div className="system-social-body">
-        <div className="system-social-list" aria-label={`${resolvedTabLabel} rows`}>
+      <div
+        className="system-social-body"
+        id={`social-tabpanel-${panel}`}
+        role="tabpanel"
+        aria-labelledby={`social-tab-${panel}-${activeTab.key}`}
+      >
+        <div
+          className="system-social-list"
+          role="listbox"
+          aria-label={`${resolvedTabLabel} rows`}
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              selectRow(safeRowIndex + 1);
+            } else if (event.key === "ArrowUp") {
+              event.preventDefault();
+              selectRow(safeRowIndex - 1);
+            } else if (event.key === "Home") {
+              event.preventDefault();
+              selectRow(0);
+            } else if (event.key === "End") {
+              event.preventDefault();
+              selectRow(rowCount - 1);
+            }
+          }}
+        >
           {activeTab.rows.map((row, index) => {
             const resolvedRowName = resolveSystemMenuShellText(row.name, playerName);
             const resolvedRowMeta = resolveSystemMenuShellText(row.meta, playerName);
+            const selected = index === safeRowIndex;
             return (
               <button
                 key={`${panel}-${activeTab.key}-${row.name}`}
                 type="button"
-                className={`system-social-entry ${index === selectedRowIndex ? "selected" : ""}`}
+                className={`system-social-entry ${selected ? "selected" : ""}`}
                 data-social-entry-name={resolvedRowName}
-                aria-pressed={index === selectedRowIndex}
-                onClick={() => {
-                  setSelectedRowIndex(index);
-                  setStatusLine(`${resolvedRowName} selected`);
-                }}
+                role="option"
+                aria-selected={selected}
+                aria-pressed={selected}
+                onClick={() => selectRow(index)}
               >
                 <strong>{resolvedRowName}</strong>
                 <span>{resolvedRowMeta}</span>
@@ -174,7 +234,7 @@ export function SocialSystemPanel({
       </div>
       <div className="system-social-footer">
         <span>{definition.footer}</span>
-        <span>{statusLine}</span>
+        <span aria-live="polite">{statusLine}</span>
       </div>
       <div className="system-social-shell-tick" aria-hidden="true">
         {`${resolvedSelectedRowName} • ${resolvedSelectedRowMeta}`}
