@@ -178,7 +178,13 @@ export function LoginOverlay({
         onLanguageChange={onLanguageChange}
       />
       <OriginalAudioSettingsControls t={t} compact className="login-audio-settings" />
-      <div className="login-dialog">
+      <form
+        className="login-dialog"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmitLogin();
+        }}
+      >
         <img className="login-panel" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
         <img className="login-title" src={ORIGINAL_UI.login.title} alt="" draggable={false} />
         <img className="login-label account" src={ORIGINAL_UI.login.accountLabel} alt="" draggable={false} />
@@ -282,7 +288,7 @@ export function LoginOverlay({
             ) : null}
           </div>
         ) : null}
-      </div>
+      </form>
       {showAccountPanel ? (
         <div className="login-account-panel">
           <strong>{t("ui.viewKey")}</strong>
