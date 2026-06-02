@@ -27,6 +27,7 @@ const DEFAULT_PUBLIC_ASSET_ROOTS = [
   "original-ui",
   "original-map",
   "generated/original-map-blend",
+  "bevy-entity-atlases",
 ];
 const LOGIN_TITLE_PATHS = [
   ...makeRange(30, 32),
@@ -536,7 +537,8 @@ function normalizeStaticAssetPath(value) {
   if (
     !url.pathname.startsWith("/original-ui/") &&
     !url.pathname.startsWith("/original-map/") &&
-    !url.pathname.startsWith("/generated/original-map-blend/")
+    !url.pathname.startsWith("/generated/original-map-blend/") &&
+    !url.pathname.startsWith("/bevy-entity-atlases/")
   ) {
     return "";
   }
@@ -684,7 +686,8 @@ function normalizePublicAssetRoot(value) {
   if (
     root !== "original-ui" &&
     root !== "original-map" &&
-    root !== "generated/original-map-blend"
+    root !== "generated/original-map-blend" &&
+    root !== "bevy-entity-atlases"
   ) {
     return "";
   }
