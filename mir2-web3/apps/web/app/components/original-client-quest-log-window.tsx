@@ -13,10 +13,43 @@ type TranslateFn = (
 
 type QuestStage = "available" | "inProgress" | "readyToTurnIn" | "completed";
 
+/** A single quest objective with optional progress counts. */
+export type QuestObjective = {
+  label: string;
+  current?: number;
+  required?: number;
+  /** Explicitly mark an objective complete (otherwise derived from counts). */
+  done?: boolean;
+};
+
+/** A single item reward shown in the reward preview grid. */
+export type QuestRewardItem = {
+  name: string;
+  /** Icon index into `/original-ui/Items/<icon>.png`. */
+  icon?: number;
+  count?: number;
+  /** True for player-selected rewards (Crystal RewardsSelectItem). */
+  selectable?: boolean;
+};
+
+/** Structured reward breakdown (Crystal QuestRewards). */
+export type QuestRewardSummary = {
+  gold?: number;
+  experience?: number;
+  credit?: number;
+  items?: QuestRewardItem[];
+  /** Rewards the player must choose one of. */
+  selectItems?: QuestRewardItem[];
+};
+
 /**
  * Mirrors the relevant fields of {@link DisplayQuest} from
  * `original-client-types.ts` without importing the whole world type, so the
  * window stays self-contained and can be driven by any compatible payload.
+ *
+ * The structured `descriptionLines`, `objectives`, `rewards`, `timeLimit` and
+ * `npc` fields are optional enrichment mirroring the Crystal quest detail
+ * dialog; when absent the window falls back to the flat string fields.
  */
 export type QuestLogEntry = {
   questId: number;
@@ -29,13 +62,24 @@ export type QuestLogEntry = {
   current: number;
   required: number;
   rewardPreview: string;
+  /** Full description paragraphs (Crystal Description / CompletionDescription). */
+  descriptionLines?: string[];
+  /** Per-objective progress list (Crystal TaskList). */
+  objectives?: QuestObjective[];
+  /** Structured reward breakdown. */
+  rewards?: QuestRewardSummary;
+  /** Remaining time-limit label (Crystal TimeLimit). */
+  timeLimit?: string;
+  /** Quest-giver / return NPC name (Crystal ReturnDescription). */
+  npc?: string;
 };
 
 export type QuestLogWindowProps = {
   t: TranslateFn;
   quests: QuestLogEntry[];
-  /** Optional: fired when the player abandons / shares a quest from the panel. */
+  /** Optional: fired when the player tracks / shares / abandons a quest. */
   onTrackQuest?: (questId: number) => void;
+  onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
   onClose: () => void;
 };
@@ -60,6 +104,7 @@ export function QuestLogWindow({
   t,
   quests,
   onTrackQuest,
+  onShareQuest,
   onAbandonQuest,
   onClose,
 }: QuestLogWindowProps) {
@@ -189,25 +234,72 @@ export function QuestLogWindow({
                 {stageLabel(t, selected.stage)}
               </span>
               {selected.tracker ? <span style={style.detailTracker}>{selected.tracker}</span> : null}
+              {selected.timeLimit ? (
+                <span style={style.detailTimeLimit}>{t("ui.questTimeLimit", [selected.timeLimit], `Time: ${selected.timeLimit}`)}</span>
+              ) : null}
             </div>
-            <p style={style.detailSummary}>{selected.summary}</p>
+
+            {selected.descriptionLines && selected.descriptionLines.length > 0 ? (
+              selected.descriptionLines.map((line, index) => (
+                <p key={index} style={style.detailSummary}>
+                  {line}
+                </p>
+              ))
+            ) : (
+              <p style={style.detailSummary}>{selected.summary}</p>
+            )}
+
             <div style={style.detailObjectiveLabel}>{t("ui.questObjective", [], "Objective")}</div>
-            <p style={style.detailObjective}>{selected.objective}</p>
-            <div style={style.progressRow}>
-              <span>{selected.progressLabel}</span>
-              <span>{progressPercentLabel(selected.current, selected.required)}</span>
-            </div>
-            <div style={style.progressTrack} role="progressbar" aria-valuenow={selected.current} aria-valuemax={selected.required}>
-              <span
-                style={{
-                  ...style.progressFill,
-                  width: `${progressPercent(selected.current, selected.required)}%`,
-                  background: stageColor(selected.stage),
-                }}
-              />
-            </div>
+            {selected.objectives && selected.objectives.length > 0 ? (
+              <ul style={style.objectiveList}>
+                {selected.objectives.map((objective, index) => {
+                  const done = isObjectiveDone(objective);
+                  return (
+                    <li key={index} style={style.objectiveItem}>
+                      <span style={{ ...style.objectiveCheck, color: done ? "#8be07a" : "#9c8d6f" }}>
+                        {done ? "✔" : "•"}
+                      </span>
+                      <span style={{ ...style.objectiveText, ...(done ? style.objectiveTextDone : null) }}>
+                        {objective.label}
+                      </span>
+                      {objective.required !== undefined ? (
+                        <span style={style.objectiveCount}>
+                          {`${objective.current ?? 0}/${objective.required}`}
+                        </span>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <>
+                <p style={style.detailObjective}>{selected.objective}</p>
+                <div style={style.progressRow}>
+                  <span>{selected.progressLabel}</span>
+                  <span>{progressPercentLabel(selected.current, selected.required)}</span>
+                </div>
+                <div style={style.progressTrack} role="progressbar" aria-valuenow={selected.current} aria-valuemax={selected.required}>
+                  <span
+                    style={{
+                      ...style.progressFill,
+                      width: `${progressPercent(selected.current, selected.required)}%`,
+                      background: stageColor(selected.stage),
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
+            {selected.npc ? (
+              <div style={style.detailReturn}>{t("ui.questReturnTo", [selected.npc], `Return to: ${selected.npc}`)}</div>
+            ) : null}
+
             <div style={style.rewardLabel}>{t("ui.questReward", [], "Reward")}</div>
-            <p style={style.reward}>{selected.rewardPreview || t("ui.questNoReward", [], "No reward listed.")}</p>
+            {selected.rewards ? (
+              <QuestRewardView t={t} rewards={selected.rewards} fallback={selected.rewardPreview} />
+            ) : (
+              <p style={style.reward}>{selected.rewardPreview || t("ui.questNoReward", [], "No reward listed.")}</p>
+            )}
           </>
         ) : (
           <div style={style.empty}>{t("ui.questSelectHint", [], "Select a quest to view details.")}</div>
@@ -225,6 +317,14 @@ export function QuestLogWindow({
         </button>
         <button
           type="button"
+          disabled={!selected || !onShareQuest}
+          style={{ ...style.actionButton, ...(!selected || !onShareQuest ? style.actionButtonDisabled : null) }}
+          onClick={() => selected && onShareQuest?.(selected.questId)}
+        >
+          {t("ui.questShare", [], "Share")}
+        </button>
+        <button
+          type="button"
           disabled={!selected || !onAbandonQuest || selected?.stage === "completed"}
           style={{
             ...style.actionButton,
@@ -237,6 +337,80 @@ export function QuestLogWindow({
       </div>
     </section>
   );
+}
+
+function QuestRewardView({
+  t,
+  rewards,
+  fallback,
+}: {
+  t: TranslateFn;
+  rewards: QuestRewardSummary;
+  fallback: string;
+}) {
+  const hasChips =
+    (rewards.experience ?? 0) > 0 || (rewards.gold ?? 0) > 0 || (rewards.credit ?? 0) > 0;
+  const items = rewards.items ?? [];
+  const selectItems = rewards.selectItems ?? [];
+  const hasAnything = hasChips || items.length > 0 || selectItems.length > 0;
+
+  if (!hasAnything) {
+    return <p style={style.reward}>{fallback || t("ui.questNoReward", [], "No reward listed.")}</p>;
+  }
+
+  return (
+    <div style={style.rewardBox}>
+      {hasChips ? (
+        <div style={style.rewardChips}>
+          {(rewards.experience ?? 0) > 0 ? (
+            <span style={style.rewardChip}>{t("ui.questRewardExp", [formatNumber(rewards.experience!)], `EXP ${formatNumber(rewards.experience!)}`)}</span>
+          ) : null}
+          {(rewards.gold ?? 0) > 0 ? (
+            <span style={style.rewardChip}>{t("ui.questRewardGold", [formatNumber(rewards.gold!)], `Gold ${formatNumber(rewards.gold!)}`)}</span>
+          ) : null}
+          {(rewards.credit ?? 0) > 0 ? (
+            <span style={style.rewardChip}>{t("ui.questRewardCredit", [formatNumber(rewards.credit!)], `Credit ${formatNumber(rewards.credit!)}`)}</span>
+          ) : null}
+        </div>
+      ) : null}
+      {items.length > 0 ? <RewardItems items={items} /> : null}
+      {selectItems.length > 0 ? (
+        <>
+          <div style={style.rewardSelectLabel}>{t("ui.questRewardSelect", [], "Choose one:")}</div>
+          <RewardItems items={selectItems} />
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function RewardItems({ items }: { items: QuestRewardItem[] }) {
+  return (
+    <div style={style.rewardItems} role="list">
+      {items.map((item, index) => (
+        <div key={index} role="listitem" title={item.name} style={style.rewardItemCell}>
+          {typeof item.icon === "number" ? (
+            <img style={style.rewardItemIcon} src={`/original-ui/Items/${item.icon}.png`} alt="" draggable={false} />
+          ) : (
+            <span style={style.rewardItemText}>{item.name.slice(0, 3)}</span>
+          )}
+          {item.count && item.count > 1 ? <span style={style.rewardItemCount}>{item.count}</span> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function isObjectiveDone(objective: QuestObjective): boolean {
+  if (typeof objective.done === "boolean") return objective.done;
+  if (objective.required !== undefined && objective.required > 0) {
+    return (objective.current ?? 0) >= objective.required;
+  }
+  return false;
+}
+
+function formatNumber(value: number): string {
+  return Math.max(0, Math.trunc(value)).toLocaleString("en-US");
 }
 
 function stageLabel(t: TranslateFn, stage: QuestStage) {
@@ -383,18 +557,27 @@ const style: Record<string, CSSProperties> = {
     top: 278,
     width: 288,
     height: 118,
-    overflow: "hidden",
+    overflowY: "auto",
+    overflowX: "hidden",
     border: "1px solid rgba(190, 157, 99, 0.32)",
     background: "linear-gradient(180deg, rgba(27, 19, 10, 0.78), rgba(11, 8, 5, 0.7))",
     padding: "6px 8px",
   },
   detailTitle: { color: "#f8e6bb", fontSize: 12, fontWeight: 700, marginBottom: 2 },
-  detailStageRow: { display: "flex", gap: 8, alignItems: "baseline", marginBottom: 3 },
+  detailStageRow: { display: "flex", gap: 8, alignItems: "baseline", marginBottom: 3, flexWrap: "wrap" },
   detailStageTag: { fontSize: 10, fontWeight: 700 },
   detailTracker: { fontSize: 10, color: "#b7a884" },
+  detailTimeLimit: { fontSize: 10, color: "#e0b06a" },
   detailSummary: { margin: "0 0 4px", fontSize: 11, color: "#d6c6a5", lineHeight: 1.3 },
   detailObjectiveLabel: { fontSize: 9, color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },
   detailObjective: { margin: "0 0 4px", fontSize: 11, color: "#e3d3af", lineHeight: 1.3 },
+  objectiveList: { listStyle: "none", margin: "2px 0 4px", padding: 0, display: "flex", flexDirection: "column", gap: 2 },
+  objectiveItem: { display: "flex", alignItems: "baseline", gap: 5, fontSize: 11 },
+  objectiveCheck: { flex: "0 0 auto", fontSize: 10 },
+  objectiveText: { flex: 1, minWidth: 0, color: "#e3d3af", lineHeight: 1.3 },
+  objectiveTextDone: { color: "#9c8d6f", textDecoration: "line-through" },
+  objectiveCount: { flex: "0 0 auto", fontSize: 10, color: "#cbb38a" },
+  detailReturn: { fontSize: 10, color: "#b7a884", marginBottom: 4 },
   progressRow: { display: "flex", justifyContent: "space-between", fontSize: 10, color: "#cbb38a", marginBottom: 2 },
   progressTrack: {
     position: "relative",
@@ -407,6 +590,41 @@ const style: Record<string, CSSProperties> = {
   progressFill: { position: "absolute", left: 0, top: 0, bottom: 0, display: "block" },
   rewardLabel: { fontSize: 9, color: "#a89568", textTransform: "uppercase", letterSpacing: 0.5 },
   reward: { margin: 0, fontSize: 11, color: "#f0d69b", lineHeight: 1.3 },
+  rewardBox: { display: "flex", flexDirection: "column", gap: 3, marginTop: 2 },
+  rewardChips: { display: "flex", flexWrap: "wrap", gap: 4 },
+  rewardChip: {
+    fontSize: 10,
+    color: "#f0d69b",
+    border: "1px solid rgba(214, 180, 110, 0.45)",
+    borderRadius: 2,
+    padding: "1px 6px",
+    background: "rgba(0, 0, 0, 0.3)",
+  },
+  rewardSelectLabel: { fontSize: 9, color: "#a89568" },
+  rewardItems: { display: "flex", flexWrap: "wrap", gap: 4 },
+  rewardItemCell: {
+    position: "relative",
+    width: 28,
+    height: 28,
+    border: "1px solid rgba(190, 157, 99, 0.3)",
+    background: "rgba(0, 0, 0, 0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  rewardItemIcon: { width: 24, height: 24, imageRendering: "pixelated" },
+  rewardItemText: { fontSize: 9, color: "#cbb38a" },
+  rewardItemCount: {
+    position: "absolute",
+    right: 1,
+    bottom: 0,
+    fontSize: 8,
+    lineHeight: "9px",
+    padding: "0 1px",
+    color: "#f8e6bb",
+    background: "rgba(0, 0, 0, 0.6)",
+  },
   actions: {
     position: "absolute",
     left: 12,
