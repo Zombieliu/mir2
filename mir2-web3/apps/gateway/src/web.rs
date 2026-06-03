@@ -2759,9 +2759,12 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 list_index,
             }))
         }
-        BrowserCommand::SetAutoPotValue { stat, value } => Ok(SessionAction::Packet(
-            ClientPacket::SetAutoPotValue { stat, value },
-        )),
+        BrowserCommand::SetAutoPotValue { stat, value } => {
+            Ok(SessionAction::Packet(ClientPacket::SetAutoPotValue {
+                stat,
+                value,
+            }))
+        }
         BrowserCommand::SetAutoPotItem { grid, item_index } => {
             Ok(SessionAction::Packet(ClientPacket::SetAutoPotItem {
                 grid: parse_hero_autopot_grid(&grid)?,
@@ -3079,7 +3082,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             }))
         }
         BrowserCommand::GuildNameReturn { name } => {
-            Ok(SessionAction::Packet(ClientPacket::GuildNameReturn { name }))
+            Ok(SessionAction::Packet(ClientPacket::GuildNameReturn {
+                name,
+            }))
         }
         BrowserCommand::RequestGuildInfo { info_type } => {
             Ok(SessionAction::Packet(ClientPacket::RequestGuildInfo {
@@ -3089,19 +3094,23 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::GuildStorageGoldChange {
             change_type,
             amount,
-        } => Ok(SessionAction::Packet(ClientPacket::GuildStorageGoldChange {
-            change_type,
-            amount,
-        })),
+        } => Ok(SessionAction::Packet(
+            ClientPacket::GuildStorageGoldChange {
+                change_type,
+                amount,
+            },
+        )),
         BrowserCommand::GuildStorageItemChange {
             change_type,
             from,
             to,
-        } => Ok(SessionAction::Packet(ClientPacket::GuildStorageItemChange {
-            change_type,
-            from,
-            to,
-        })),
+        } => Ok(SessionAction::Packet(
+            ClientPacket::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            },
+        )),
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
         BrowserCommand::Stage5Command { action, args } => {
@@ -6819,9 +6828,10 @@ mod tests {
     // command, so the frontend could not reach them.
     #[test]
     fn hero_and_world_control_commands_map_to_crystal_protocol_packets() {
-        let auto_pot_value =
-            serde_json::from_str::<BrowserCommand>(r#"{"type":"setAutoPotValue","stat":0,"value":80}"#)
-                .expect("set auto pot value command should deserialize");
+        let auto_pot_value = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"setAutoPotValue","stat":0,"value":80}"#,
+        )
+        .expect("set auto pot value command should deserialize");
         assert!(matches!(
             super::browser_command_to_action(auto_pot_value).expect("auto pot value maps"),
             SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 0, value: 80 })

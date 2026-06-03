@@ -57116,7 +57116,10 @@ fn critical_hit_amplifies_melee_when_crit_stats_present() {
             panic!("rolled {d} is neither a normal [{min},{max}] nor crit hit");
         }
     }
-    assert!(crits > 0, "a 90% effective crit rate should land many crits");
+    assert!(
+        crits > 0,
+        "a 90% effective crit rate should land many crits"
+    );
     assert!(
         normals > 0,
         "a 90% effective crit rate should still leave some normal swings"
