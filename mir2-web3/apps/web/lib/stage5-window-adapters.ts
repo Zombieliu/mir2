@@ -30,7 +30,7 @@ import type {
   ConquestSummary,
   GuildTerritorySummary,
 } from "../app/components/original-client-conquest-window";
-import type { TradeSummary } from "../app/components/original-client-trade-window";
+import type { TradeItemSlot, TradeSummary } from "../app/components/original-client-trade-window";
 import type { BuffEntry } from "../app/components/original-client-buff-window";
 import type { WorldMapMarker } from "../app/components/original-client-world-map-window";
 
@@ -565,6 +565,13 @@ export function adaptActiveRankingPage(
  * `seller`/`owner`, `price`/`gold`, `id`/`listingId`, plus optional
  * `icon`/`count`/`state`. When `viewerName` is given, listings whose seller
  * matches are flagged `mine` so the window enables their Cancel action.
+ *
+ * The enriched gateway payload additionally carries (all optional / additive,
+ * exact camelCase keys): `type` (item category label), `level` (required
+ * level), `expiry` (remaining-time label), `highestBid` (current auction bid),
+ * `auction` (bid vs fixed-price), and `sold` (consignment awaiting collection).
+ * Each is forwarded to the matching `MarketListing` optional field only when
+ * present, so legacy fixed-price rows keep their existing baseline shape.
  */
 export function adaptMarketListings(
   auction: Array<UnknownRecord> | null | undefined,
@@ -576,23 +583,39 @@ export function adaptMarketListings(
     const record = asRecord(entry);
     if (!record) return [];
     const id = readString(record, ["id", "listingId", "auctionId", "uniqueId"]) ?? `listing-${index}`;
-    const itemName = readString(record, ["item", "itemName", "name"]) ?? `Listing ${index + 1}`;
+    const itemName = readString(record, ["itemName", "item", "name"]) ?? `Listing ${index + 1}`;
     const seller = readString(record, ["seller", "owner", "sellerName"]) ?? "Market";
     const icon = readNumber(record, ["icon", "image"]);
     const mine =
       readBool(record, ["mine", "isOwner"]) ?? (viewer.length > 0 && seller === viewer);
-    return [
-      {
-        id,
-        itemName,
-        seller,
-        price: readNumber(record, ["price", "gold"]) ?? 0,
-        icon: typeof icon === "number" && icon > 0 ? icon : undefined,
-        count: readNumber(record, ["count", "quantity"]),
-        state: readString(record, ["state", "status"]),
-        mine,
-      },
-    ];
+
+    const listing: MarketListing = {
+      id,
+      itemName,
+      seller,
+      price: readNumber(record, ["price", "gold"]) ?? 0,
+      icon: typeof icon === "number" && icon > 0 ? icon : undefined,
+      count: readNumber(record, ["count", "quantity"]),
+      state: readString(record, ["state", "status"]),
+      mine,
+    };
+
+    // Enriched optional fields — attach only when present so fixed-price legacy
+    // rows stay byte-for-byte compatible.
+    const type = readString(record, ["type", "category"]);
+    if (type !== undefined) listing.type = type;
+    const level = readNumber(record, ["level", "requiredLevel"]);
+    if (level !== undefined) listing.level = level;
+    const expiry = readString(record, ["expiry"]);
+    if (expiry !== undefined) listing.expiry = expiry;
+    const highestBid = readNumber(record, ["highestBid"]);
+    if (highestBid !== undefined) listing.highestBid = highestBid;
+    const auctionFlag = readBool(record, ["auction"]);
+    if (auctionFlag !== undefined) listing.auction = auctionFlag;
+    const sold = readBool(record, ["sold"]);
+    if (sold !== undefined) listing.sold = sold;
+
+    return [listing];
   });
 }
 
@@ -636,6 +659,32 @@ export function adaptGuildTerritory(
 // ---------------------------------------------------------------------------
 
 /**
+ * Reads an enriched trade item array into the window's `TradeItemSlot[]`.
+ *
+ * The gateway sends each slot as `{ name, count?, grade? }` (exact camelCase
+ * keys from the trade contract). The window's `TradeItemSlot` keys items by a
+ * stable `id`; since the contract carries no per-slot id, we synthesise one
+ * from the array index. `grade` has no slot on `TradeItemSlot`, so it is read
+ * (for validation) but not surfaced. Entries without a usable name are dropped.
+ */
+function readTradeItems(value: unknown): TradeItemSlot[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value.flatMap((entry, index) => {
+    const record = asRecord(entry);
+    if (!record) return [];
+    const name = readString(record, ["name", "itemName"]);
+    if (name === undefined) return [];
+    const slot: TradeItemSlot = { id: index, name };
+    const count = readNumber(record, ["count", "quantity"]);
+    if (count !== undefined) slot.count = count;
+    const icon = readNumber(record, ["icon"]);
+    if (typeof icon === "number" && icon > 0) slot.icon = icon;
+    return [slot];
+  });
+  return items.length > 0 ? items : undefined;
+}
+
+/**
  * Adapts the stage-5 `trade` slice into the Trade window's `TradeSummary`.
  *
  * The page builds this incrementally from the trade packets: `partner` +
@@ -643,6 +692,15 @@ export function adaptGuildTerritory(
  * `partnerGold` from `TradeGold`, `partnerItemCount` from `TradeItem`, and
  * `confirmed` from `TradeConfirm`. Returns `null` when no trade is in flight so
  * the host can keep the window closed.
+ *
+ * The enriched gateway payload additionally carries (exact camelCase keys):
+ * `partnerName`, `partnerGold`, `partnerLocked` (the partner's confirm/lock
+ * flag → `confirmed`), and `partnerItems: [{ name, count?, grade? }]` →
+ * `partnerItems`. The viewer-side fields (`myGold`/`myLocked`/`myItems`) are
+ * intentionally NOT mapped here: they are separate `TradeWindow` props that the
+ * page supplies from its own inventory/gold state, and `TradeSummary` exposes
+ * no slot for them. All additions are optional/additive — absent fields leave
+ * the existing baseline untouched.
  */
 export function adaptTrade(trade: UnknownRecord | null | undefined): TradeSummary | null {
   const record = asRecord(trade);
@@ -651,13 +709,25 @@ export function adaptTrade(trade: UnknownRecord | null | undefined): TradeSummar
   const state = readString(record, ["state", "status"]);
   // A trade with neither a partner nor a known state has nothing to show.
   if (!partner && !state) return null;
-  return {
+
+  const summary: TradeSummary = {
     partner,
     state,
     partnerGold: readNumber(record, ["partnerGold", "gold"]),
     partnerItemCount: readNumber(record, ["partnerItemCount", "itemCount"]),
-    confirmed: readBool(record, ["confirmed", "partnerConfirmed"]),
+    // `partnerLocked` is the enriched alias for the partner's confirm state.
+    confirmed: readBool(record, ["confirmed", "partnerConfirmed", "partnerLocked"]),
   };
+
+  const partnerItems = readTradeItems(record.partnerItems);
+  if (partnerItems !== undefined) {
+    summary.partnerItems = partnerItems;
+    // Keep the count consistent with the enriched slot list when the server did
+    // not also send an explicit partnerItemCount.
+    if (summary.partnerItemCount === undefined) summary.partnerItemCount = partnerItems.length;
+  }
+
+  return summary;
 }
 
 // ---------------------------------------------------------------------------

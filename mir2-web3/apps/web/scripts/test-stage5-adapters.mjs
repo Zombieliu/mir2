@@ -54,6 +54,7 @@ const {
   adaptMarketListings,
   adaptConquest,
   adaptGuildTerritory,
+  adaptTrade,
   adaptBuffs,
 } = adapters;
 
@@ -735,6 +736,72 @@ check("adaptMarketListings returns [] for non-arrays / junk", () => {
   assert.deepEqual(adaptMarketListings([null, 1, "x"]), []);
 });
 
+check("adaptMarketListings reads the enriched auction shape", () => {
+  const listings = adaptMarketListings([
+    {
+      id: "auc-7",
+      itemName: "Mystery Helmet",
+      seller: "Bidder",
+      price: 1000,
+      type: "Armour",
+      level: 30,
+      expiry: "2h 15m",
+      highestBid: 1500,
+      auction: true,
+      sold: false,
+    },
+  ]);
+  assert.equal(listings.length, 1);
+  const l = listings[0];
+  // Existing baseline fields still resolve from the camelCase keys.
+  assert.equal(l.id, "auc-7");
+  assert.equal(l.itemName, "Mystery Helmet");
+  assert.equal(l.seller, "Bidder");
+  assert.equal(l.price, 1000);
+  assert.equal(l.mine, false);
+  // Enriched optional fields are forwarded verbatim.
+  assert.equal(l.type, "Armour");
+  assert.equal(l.level, 30);
+  assert.equal(l.expiry, "2h 15m");
+  assert.equal(l.highestBid, 1500);
+  assert.equal(l.auction, true);
+  assert.equal(l.sold, false);
+});
+
+check("adaptMarketListings keeps fixed-price rows additive (no enriched keys)", () => {
+  // A legacy row with none of the enriched keys must NOT gain undefined slots.
+  const [listing] = adaptMarketListings([
+    { id: "p1", itemName: "Plain Sword", seller: "Smith", price: 250 },
+  ]);
+  assert.deepEqual(listing, {
+    id: "p1",
+    itemName: "Plain Sword",
+    seller: "Smith",
+    price: 250,
+    icon: undefined,
+    count: undefined,
+    state: undefined,
+    mine: false,
+  });
+  for (const key of ["type", "level", "expiry", "highestBid", "auction", "sold"]) {
+    assert.ok(!(key in listing), `enriched key "${key}" should be absent on a fixed-price row`);
+  }
+});
+
+check("adaptMarketListings reads alternate enriched keys + drops non-positive bid handling", () => {
+  const [listing] = adaptMarketListings([
+    { id: "x", itemName: "Robe", seller: "S", price: 5, category: "Robe", requiredLevel: 12 },
+  ]);
+  // `category` -> type, `requiredLevel` -> level.
+  assert.equal(listing.type, "Robe");
+  assert.equal(listing.level, 12);
+  // No auction/expiry/highestBid/sold keys -> those stay absent.
+  assert.ok(!("auction" in listing));
+  assert.ok(!("expiry" in listing));
+  assert.ok(!("highestBid" in listing));
+  assert.ok(!("sold" in listing));
+});
+
 // ---------------------------------------------------------------------------
 // adaptConquest
 // ---------------------------------------------------------------------------
@@ -812,6 +879,104 @@ check("adaptGuildTerritory returns null / tolerates junk", () => {
   const empty = adaptGuildTerritory({});
   assert.ok(empty);
   assert.deepEqual(empty.recallLog, []);
+});
+
+// ---------------------------------------------------------------------------
+// adaptTrade
+// ---------------------------------------------------------------------------
+
+check("adaptTrade returns null when no partner and no state", () => {
+  assert.equal(adaptTrade(null), null);
+  assert.equal(adaptTrade(undefined), null);
+  assert.equal(adaptTrade({}), null);
+  for (const input of MALFORMED_INPUTS) {
+    assert.doesNotThrow(() => adaptTrade(input));
+  }
+});
+
+check("adaptTrade maps the baseline incremental slice", () => {
+  const trade = adaptTrade({
+    partner: "Merchant",
+    state: "open",
+    partnerGold: 500,
+    partnerItemCount: 3,
+    confirmed: true,
+  });
+  assert.ok(trade);
+  assert.equal(trade.partner, "Merchant");
+  assert.equal(trade.state, "open");
+  assert.equal(trade.partnerGold, 500);
+  assert.equal(trade.partnerItemCount, 3);
+  assert.equal(trade.confirmed, true);
+  // No enriched item list present -> partnerItems stays absent.
+  assert.equal(trade.partnerItems, undefined);
+});
+
+check("adaptTrade maps the enriched contract (partnerName/partnerLocked/partnerItems)", () => {
+  const trade = adaptTrade({
+    partnerName: "Trader",
+    state: "open",
+    partnerGold: 1200,
+    partnerLocked: true,
+    partnerItems: [
+      { name: "Dragon Sword", count: 1, grade: "Legend" },
+      { name: "Health Potion", count: 25 },
+    ],
+  });
+  assert.ok(trade);
+  // partnerName resolves into partner.
+  assert.equal(trade.partner, "Trader");
+  assert.equal(trade.partnerGold, 1200);
+  // partnerLocked -> confirmed.
+  assert.equal(trade.confirmed, true);
+  // partnerItems map to TradeItemSlot[] with synthesised ids; grade is dropped
+  // (no slot on TradeItemSlot).
+  assert.deepEqual(trade.partnerItems, [
+    { id: 0, name: "Dragon Sword", count: 1 },
+    { id: 1, name: "Health Potion", count: 25 },
+  ]);
+  // Count is derived from the slot list when not sent explicitly.
+  assert.equal(trade.partnerItemCount, 2);
+});
+
+check("adaptTrade keeps explicit partnerItemCount over derived slot length", () => {
+  const trade = adaptTrade({
+    partner: "T",
+    partnerItemCount: 9,
+    partnerItems: [{ name: "Only One" }],
+  });
+  assert.equal(trade.partnerItemCount, 9, "explicit count is not overwritten");
+  assert.equal(trade.partnerItems.length, 1);
+});
+
+check("adaptTrade drops nameless partner item slots, tolerates junk rows", () => {
+  const trade = adaptTrade({
+    partner: "T",
+    partnerItems: [{ name: "Keep", count: 2 }, { count: 5 }, null, "x", {}],
+  });
+  assert.deepEqual(trade.partnerItems, [{ id: 0, name: "Keep", count: 2 }]);
+});
+
+check("adaptTrade leaves partnerItems absent when the array is empty/invalid", () => {
+  assert.equal(adaptTrade({ partner: "T", partnerItems: [] }).partnerItems, undefined);
+  assert.equal(adaptTrade({ partner: "T", partnerItems: "nope" }).partnerItems, undefined);
+  // partnerItemCount must NOT be invented when no usable slots were read.
+  assert.equal(adaptTrade({ partner: "T", partnerItems: [] }).partnerItemCount, undefined);
+});
+
+check("adaptTrade ignores viewer-side fields not on TradeSummary", () => {
+  // myGold / myLocked / myItems are separate window props sourced from the page;
+  // the adapter must not try to surface them on the summary.
+  const trade = adaptTrade({
+    partner: "T",
+    myGold: 999,
+    myLocked: true,
+    myItems: [{ name: "Mine" }],
+  });
+  assert.ok(trade);
+  assert.ok(!("myGold" in trade));
+  assert.ok(!("myLocked" in trade));
+  assert.ok(!("myItems" in trade));
 });
 
 // ---------------------------------------------------------------------------
