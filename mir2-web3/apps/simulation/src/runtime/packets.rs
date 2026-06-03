@@ -10,13 +10,14 @@ use mir2_game_data::{
     localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
-    decode_server_packet, encode_frame, ChatItem, ChatType, ClientBuff, ClientFriend, ClientGtMap,
-    ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientPacket, GroupMember,
-    GuildMember, GuildRank, GuildStorageItem, HeroUserInformation, MirClass, MirDirection,
-    MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
-    ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo,
-    ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId,
-    Spell, StruckInfo, UserInformation, UserItem, UserItemStat,
+    decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
+    ClientFriend, ClientGtMap, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
+    ClientPacket, GroupMember, GuildMember, GuildRank, GuildStorageItem, HeroUserInformation,
+    MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo,
+    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, Point,
+    RankCharacterInfo, ServerPacket, ServerPacketId, Spell, StruckInfo, UserInformation, UserItem,
+    UserItemStat,
 };
 
 use crate::config::{
@@ -3021,30 +3022,135 @@ where
     }
 }
 
-fn stage5_market_listing_count_packet(world: &World, match_text: &str) -> Vec<ServerPacket> {
+/// Crystal market page size (`Crystal/Server/MirObjects/PlayerObject.cs:8356,
+/// 8405` iterate up to 10 listings per page).
+const STAGE5_MARKET_PAGE_SIZE: usize = 10;
+
+/// Whether a listing matches the search text, mirroring Crystal `Match`
+/// (`Crystal/Server/MirObjects/PlayerObject.cs:8318-8324`) name filter — an
+/// empty query matches everything; otherwise the (space-stripped) item name must
+/// contain the query. Sold / cancelled / expired listings are excluded so the
+/// public market only shows live listings (Crystal `Match`'s
+/// `!info.Expired && !info.Sold` guard).
+fn stage5_market_listing_matches(listing: &Stage5AuctionListing, normalized_query: &str) -> bool {
+    if listing.sold || listing.cancelled || listing.expired {
+        return false;
+    }
+    normalized_query.is_empty()
+        || listing
+            .item_key
+            .replace('-', "")
+            .to_ascii_lowercase()
+            .contains(normalized_query)
+        || stage5_item_name(&listing.item_key)
+            .replace(' ', "")
+            .to_ascii_lowercase()
+            .contains(normalized_query)
+}
+
+/// Builds a wire `ClientAuction` from a stored `Stage5AuctionListing`, resolving
+/// the `item_key` to a `UserItem` (so the browser can show the item name / grade
+/// / required level). Mirrors `Crystal/Server/MirDatabase/AuctionInfo.cs:104-115`
+/// (`CreateClientAuction`): `AuctionID`, `Item`, `Seller`, `Price`, the
+/// consignment date and `ItemType`. The simulation only models fixed-price
+/// consignments, so `ItemType` is `Consign` (1) and the consignment date is left
+/// at `0` (Crystal `DateTime.MinValue.ToBinary()`), which the gateway omits.
+fn stage5_client_auction(listing: &Stage5AuctionListing) -> ClientAuction {
+    let item = stage5_market_user_item(&listing.item_key);
+    ClientAuction {
+        auction_id: u64::from(listing.id),
+        item,
+        seller: listing.seller.clone(),
+        price: listing.price,
+        consignment_date_binary_datetime: 0,
+        // Crystal `MarketItemType.Consign = 1` — the simulation lists items as
+        // fixed-price consignments rather than live auctions.
+        item_type: 1,
+    }
+}
+
+/// Builds a minimal `UserItem` for a market listing from its `item_key`. The
+/// market only needs identity (index/name/grade via the template) plus a count
+/// of 1, so durability / stats default to the template values the way a freshly
+/// created `UserItem` would (`Crystal` markets ship the stored `UserItem`).
+fn stage5_market_user_item(item_key: &str) -> UserItem {
+    let template = crystal_item_template_for_item_key(item_key);
+    let item_index = template
+        .as_ref()
+        .map(|template| template.item_index)
+        .unwrap_or(0);
+    let (current_dura, max_dura) = template
+        .as_ref()
+        .map(|template| (template.durability, template.durability))
+        .unwrap_or((0, 0));
+    UserItem {
+        unique_id: u64::from(item_index.max(0) as u32),
+        item_index,
+        current_dura,
+        max_dura,
+        count: 1,
+        soul_bound_id: -1,
+        identified: true,
+        cursed: false,
+        slots: Vec::new(),
+        gem_count: 0,
+        added_stats: Vec::new(),
+        awake_type: 0,
+        awake_values: Vec::new(),
+        refined_value: 0,
+        refine_added: 0,
+        refine_success_chance: 0,
+        wedding_ring: -1,
+        expire_info: None,
+        rental_information: None,
+        is_shop_item: false,
+        sealed_info: None,
+        gm_made: false,
+    }
+}
+
+/// Mirrors Crystal `GetMarket` (`Crystal/Server/MirObjects/PlayerObject.cs:8376-
+/// 8421`): filters the auction list by the search text, builds up to one page of
+/// `ClientAuction`s, and enqueues `S.NPCMarket { Listings, Pages, UserMode }`.
+/// `page` selects the slice (`page * 10 .. +10`), as in Crystal `MarketPage`
+/// (`:8327-8373`). The `MarketSuccess` count line is retained alongside the
+/// `NPCMarket` packet for backward compatibility with the existing web client.
+fn stage5_market_listing_packets(
+    world: &World,
+    match_text: &str,
+    user_mode: bool,
+    page: usize,
+) -> Vec<ServerPacket> {
     let normalized = match_text.replace(' ', "").to_ascii_lowercase();
-    let count = world
+    let matched: Vec<&Stage5AuctionListing> = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
         .auction
         .iter()
-        .filter(|listing| !listing.sold && !listing.cancelled && !listing.expired)
-        .filter(|listing| {
-            normalized.is_empty()
-                || listing
-                    .item_key
-                    .replace('-', "")
-                    .to_ascii_lowercase()
-                    .contains(&normalized)
-                || stage5_item_name(&listing.item_key)
-                    .replace(' ', "")
-                    .to_ascii_lowercase()
-                    .contains(&normalized)
-        })
-        .count();
-    vec![ServerPacket::MarketSuccess {
-        message: format!("{count} market listings matched."),
-    }]
+        .filter(|listing| stage5_market_listing_matches(listing, &normalized))
+        .collect();
+    let count = matched.len();
+    let pages = if count == 0 {
+        0
+    } else {
+        i32::try_from((count - 1) / STAGE5_MARKET_PAGE_SIZE + 1).unwrap_or(i32::MAX)
+    };
+    let listings: Vec<ClientAuction> = matched
+        .iter()
+        .skip(page * STAGE5_MARKET_PAGE_SIZE)
+        .take(STAGE5_MARKET_PAGE_SIZE)
+        .map(|listing| stage5_client_auction(listing))
+        .collect();
+    vec![
+        ServerPacket::NPCMarket {
+            listings,
+            pages,
+            user_mode,
+        },
+        ServerPacket::MarketSuccess {
+            message: format!("{count} market listings matched."),
+        },
+    ]
 }
 
 fn stage5_consign_item_packet(
@@ -6769,13 +6875,20 @@ impl SimulationSession {
                 price,
                 market_type,
             } => stage5_consign_item_packet(self.app.world_mut(), unique_id, price, market_type),
-            ClientPacket::MarketSearch { match_text, .. } => {
-                stage5_market_listing_count_packet(self.app.world(), &match_text)
+            ClientPacket::MarketSearch {
+                match_text,
+                user_mode,
+                ..
+            } => stage5_market_listing_packets(self.app.world(), &match_text, user_mode, 0),
+            ClientPacket::MarketRefresh => {
+                stage5_market_listing_packets(self.app.world(), "", false, 0)
             }
-            ClientPacket::MarketRefresh => stage5_market_listing_count_packet(self.app.world(), ""),
-            ClientPacket::MarketPage { .. } => {
-                stage5_market_listing_count_packet(self.app.world(), "")
-            }
+            ClientPacket::MarketPage { page } => stage5_market_listing_packets(
+                self.app.world(),
+                "",
+                false,
+                usize::try_from(page.max(0)).unwrap_or(0),
+            ),
             ClientPacket::MarketBuy {
                 auction_id,
                 bid_price,
