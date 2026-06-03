@@ -285,12 +285,18 @@ type GatewayActiveBuff = {
   remainingTicks: number;
   attackBonus: number;
   defenceBonus: number;
+  // Enriched fields emitted by the gateway BuffSnapshot (B-wave).
+  buffType?: number;
+  remainingMs?: number;
+  infinite?: boolean;
+  paused?: boolean;
+  stats?: Array<{ stat?: number; label?: string; value?: number }>;
 };
 
 type Stage5SystemsState = {
-  group?: { members?: string[]; lootMode?: string };
+  group?: { members?: string[]; memberInfos?: Array<{ name: string; level?: number; class?: number; hp?: number; maxHp?: number; online?: boolean }>; lootMode?: string; leaderName?: string };
   guild?: { name?: string; members?: string[]; rank?: string; permissions?: string[]; chatLog?: string[] };
-  social?: { friends?: string[]; blocked?: string[] };
+  social?: { friends?: string[]; blocked?: string[]; friendInfos?: Array<{ name: string; online?: boolean; memo?: string }>; blockedInfos?: Array<{ name: string; memo?: string }> };
   relationship?: Record<string, unknown>;
   mentor?: Record<string, unknown>;
   mail?: Array<Record<string, unknown>>;
@@ -550,6 +556,11 @@ type ActiveBuff = {
   remainingTicks: number;
   attackBonus: number;
   defenceBonus: number;
+  // Enriched fields (B-wave): Crystal buff type, infinite/paused flags, and stat lines.
+  type?: number;
+  infinite?: boolean;
+  paused?: boolean;
+  stats?: Array<{ label?: string; value?: number }>;
 };
 
 type MapTransferArea = {
@@ -4713,9 +4724,13 @@ export default function HomePage() {
     const social = world.stage5Systems.social;
     const friends = Array.isArray(social?.friends) ? social.friends : [];
     const blocked = Array.isArray(social?.blocked) ? social.blocked : [];
-    const friendIdx = friends.findIndex((entry) => entry.toLowerCase() === name.toLowerCase());
+    // social entries may be bare names (legacy) or rich objects (B-wave); compare by name.
+    const entryName = (entry: string | { name?: string }) =>
+      (typeof entry === "string" ? entry : entry?.name ?? "").toLowerCase();
+    const target = name.toLowerCase();
+    const friendIdx = friends.findIndex((entry) => entryName(entry) === target);
     if (friendIdx >= 0) return friendIdx;
-    const blockedIdx = blocked.findIndex((entry) => entry.toLowerCase() === name.toLowerCase());
+    const blockedIdx = blocked.findIndex((entry) => entryName(entry) === target);
     if (blockedIdx >= 0) return friends.length + blockedIdx;
     return null;
   }
@@ -6588,12 +6603,47 @@ export default function HomePage() {
         }
         break;
       }
+      case "GroupMemberInfo": {
+        // Enriched full party roster (level/class/hp/online + leader), emitted
+        // alongside AddMember/DeleteMember. Stored in `memberInfos` (separate from
+        // the incremental name list) so the existing path stays intact; adaptGroup
+        // prefers memberInfos when present.
+        const rawMembers = Array.isArray(payload.members) ? payload.members : [];
+        const memberInfos = rawMembers.flatMap((entry) => {
+          const record = (entry ?? {}) as Record<string, unknown>;
+          const name = stringOrFallback(record.name, "");
+          if (!name) return [];
+          return [
+            {
+              name,
+              level: numberOrUndefined(record.level),
+              class: numberOrUndefined(record.class),
+              hp: numberOrUndefined(record.hp),
+              maxHp: numberOrUndefined(record.maxHp),
+              online: record.online === true,
+            },
+          ];
+        });
+        const leaderName = stringOrFallback(payload.leaderName, "");
+        setWorld((current) => ({
+          ...current,
+          stage5Systems: {
+            ...current.stage5Systems,
+            group: {
+              ...(current.stage5Systems.group ?? {}),
+              memberInfos,
+              leaderName: leaderName || undefined,
+            },
+          },
+        }));
+        break;
+      }
       case "DeleteGroup":
         setWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
-            group: { ...(current.stage5Systems.group ?? {}), members: [] },
+            group: { ...(current.stage5Systems.group ?? {}), members: [], memberInfos: [], leaderName: undefined },
           },
         }));
         break;
@@ -6611,15 +6661,27 @@ export default function HomePage() {
 
       // Social: friends / mentor / relationship --------------------------------
       case "FriendUpdate": {
-        const friends = normalizeFriendList(payload.friends);
+        // B-wave enrichment: keep the rich friend objects (name/online/memo) so the
+        // friends window shows status, not just names. Blocked entries now arrive
+        // under a separate `blocked` key; fall back to splitting the combined list.
+        const friendsRaw = normalizeFriendList(payload.friends);
+        const hasBlockedKey = payload.blocked !== undefined;
+        const blockedRaw = hasBlockedKey
+          ? normalizeFriendList(payload.blocked)
+          : friendsRaw.filter((friend) => friend.blocked);
+        const friendsList = hasBlockedKey ? friendsRaw : friendsRaw.filter((friend) => !friend.blocked);
         setWorld((current) => ({
           ...current,
           stage5Systems: {
             ...current.stage5Systems,
             social: {
               ...(current.stage5Systems.social ?? {}),
-              friends: friends.filter((friend) => !friend.blocked).map((friend) => friend.name),
-              blocked: friends.filter((friend) => friend.blocked).map((friend) => friend.name),
+              // Names kept for existing consumers (friendCharacterIndex); rich detail
+              // in the *Infos fields the adapter prefers (B-wave enrichment).
+              friends: friendsList.map((friend) => friend.name),
+              blocked: blockedRaw.map((friend) => friend.name),
+              friendInfos: friendsList.map((friend) => ({ name: friend.name, online: friend.online, memo: friend.memo })),
+              blockedInfos: blockedRaw.map((friend) => ({ name: friend.name, memo: friend.memo })),
             },
           },
         }));
@@ -8287,6 +8349,16 @@ export default function HomePage() {
         remainingTicks,
         attackBonus: 0,
         defenceBonus: 0,
+        // B-wave enriched fields.
+        type: buffType,
+        infinite: payload.infinite === true,
+        paused: payload.paused === true,
+        stats: Array.isArray(payload.stats)
+          ? (payload.stats as Array<Record<string, unknown>>).map((entry) => ({
+              label: typeof entry.label === "string" ? entry.label : undefined,
+              value: numberOrUndefined(entry.value),
+            }))
+          : undefined,
       };
 
       return {
@@ -8571,6 +8643,11 @@ export default function HomePage() {
       remainingTicks: buff.remainingTicks,
       attackBonus: buff.attackBonus,
       defenceBonus: buff.defenceBonus,
+      // B-wave enriched fields (Crystal buff type + stat lines + flags).
+      type: buff.buffType,
+      infinite: buff.infinite,
+      paused: buff.paused,
+      stats: buff.stats,
     }));
     const mapTransfers = (snapshot.mapTransfers ?? []).map((transfer) => ({
       key: transfer.key,

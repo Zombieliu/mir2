@@ -300,6 +300,7 @@ export function adaptGroup(
   group:
     | {
         members?: Array<string | RawGroupMember>;
+        memberInfos?: Array<string | RawGroupMember>;
         lootMode?: string;
         leaderName?: string;
       }
@@ -309,7 +310,14 @@ export function adaptGroup(
 ): GroupSummary | null {
   if (!group) return null;
   const leaderName = readString(asRecord(group), ["leaderName"]);
-  const rawMembers = Array.isArray(group.members) ? group.members : [];
+  // Prefer the enriched roster (level/class/hp/online) when present, else the
+  // incremental name list.
+  const rawMembers =
+    Array.isArray(group.memberInfos) && group.memberInfos.length > 0
+      ? group.memberInfos
+      : Array.isArray(group.members)
+        ? group.members
+        : [];
   const members: GroupMember[] = rawMembers.flatMap((entry, index) => {
     // Both shapes resolve to a member object; bare strings are names.
     const record = typeof entry === "string" ? null : asRecord(entry);
@@ -374,6 +382,8 @@ export function adaptFriends(
     | {
         friends?: Array<string | RawFriendEntry>;
         blocked?: Array<string | RawFriendEntry>;
+        friendInfos?: Array<string | RawFriendEntry>;
+        blockedInfos?: Array<string | RawFriendEntry>;
       }
     | null
     | undefined,
@@ -403,9 +413,11 @@ export function adaptFriends(
       return [extra ? { ...base, ...extra, name } : base];
     });
   };
+  // Prefer the enriched *Infos lists (online/memo) when the host provides them,
+  // else the bare-name lists.
   return {
-    friends: toEntries(social.friends),
-    blocked: toEntries(social.blocked),
+    friends: toEntries(social.friendInfos ?? social.friends),
+    blocked: toEntries(social.blockedInfos ?? social.blocked),
   };
 }
 
