@@ -5,14 +5,14 @@ use crate::io::{PacketReader, PacketWriter};
 use crate::types::{
     AwakeningMaterial, BaseStats, ChatItem, ChatType, ClientAuction, ClientBuff, ClientFriend,
     ClientGtMap, ClientHeroInformation, ClientIntelligentCreature, ClientMagic, ClientMail,
-    ClientMapInfo, ClientQuestInfo, ClientRecipeInfo, GameShopItem, GuildBuff, GuildBuffInfo,
-    GuildRank, GuildStorageItem, HeroUserInformation, ItemInfo, ItemRentalInformation,
-    MapInformation, MirClass, MirDirection, MirGender, MirGridType, MonsterInfo, Notice, NpcInfo,
-    ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo, ObjectGoldInfo, ObjectHealthInfo,
-    ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRangeAttackInfo,
-    ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo, PlayerInspectInfo, Point,
-    RankCharacterInfo, SelectInfo, Spell, StruckInfo, UserInformation, UserItem, UserLocation,
-    WorldMapSetup,
+    ClientMapInfo, ClientQuestInfo, ClientRecipeInfo, GameShopItem, GroupMember, GuildBuff,
+    GuildBuffInfo, GuildRank, GuildStorageItem, HeroUserInformation, ItemInfo,
+    ItemRentalInformation, MapInformation, MirClass, MirDirection, MirGender, MirGridType,
+    MonsterInfo, Notice, NpcInfo, ObjectAttackInfo, ObjectDiedInfo, ObjectEffectInfo,
+    ObjectGoldInfo, ObjectHealthInfo, ObjectItemInfo, ObjectManaInfo, ObjectMovement,
+    ObjectPlayerInfo, ObjectRangeAttackInfo, ObjectRevivedInfo, ObjectSpellInfo, ObjectStruckInfo,
+    PlayerInspectInfo, Point, RankCharacterInfo, SelectInfo, Spell, StruckInfo, UserInformation,
+    UserItem, UserLocation, WorldMapSetup,
 };
 use serde::Serialize;
 
@@ -2608,6 +2608,16 @@ pub enum ServerPacket {
         player_name: String,
         player_map: String,
     },
+    /// Custom, beyond Crystal: the full enriched party roster (see
+    /// [`ServerPacketId::GroupMemberInfo`]). `members[0]` is the group leader
+    /// (Crystal: `PlayerObject.GroupMembers[0]`, e.g.
+    /// `Crystal/Server/MirObjects/PlayerObject.cs:2497`); `leader_name` echoes
+    /// that name for convenience. Emitted alongside the Crystal-faithful
+    /// `AddMember`/`DeleteMember` packets so existing consumers keep working.
+    GroupMemberInfo {
+        members: Vec<GroupMember>,
+        leader_name: String,
+    },
     SendMemberLocation {
         member_name: String,
         member_location: Point,
@@ -3157,6 +3167,7 @@ impl ServerPacket {
             Self::GroupInvite { .. } => ServerPacketId::GroupInvite,
             Self::AddMember { .. } => ServerPacketId::AddMember,
             Self::GroupMembersMap { .. } => ServerPacketId::GroupMembersMap,
+            Self::GroupMemberInfo { .. } => ServerPacketId::GroupMemberInfo,
             Self::SendMemberLocation { .. } => ServerPacketId::SendMemberLocation,
             Self::ObjectRevived { .. } => ServerPacketId::ObjectRevived,
             Self::ObjectEffect { .. } => ServerPacketId::ObjectEffect,
@@ -4144,6 +4155,16 @@ impl ServerPacket {
             } => {
                 writer.write_string(player_name)?;
                 writer.write_string(player_map)?;
+            }
+            Self::GroupMemberInfo {
+                members,
+                leader_name,
+            } => {
+                writer.write_i32(members.len() as i32);
+                for member in members {
+                    member.encode(writer)?;
+                }
+                writer.write_string(leader_name)?;
             }
             Self::SendMemberLocation {
                 member_name,
@@ -5507,6 +5528,24 @@ impl ServerPacket {
                 player_name: reader.read_string()?,
                 player_map: reader.read_string()?,
             },
+            ServerPacketId::GroupMemberInfo => {
+                let count = reader.read_i32()?;
+                if count < 0 {
+                    return Err(PacketCodecError::NegativeLength {
+                        field: "group_member_info",
+                        value: count,
+                    });
+                }
+                let mut members = Vec::with_capacity(count as usize);
+                for _ in 0..count {
+                    members.push(GroupMember::decode(reader)?);
+                }
+                let leader_name = reader.read_string()?;
+                Self::GroupMemberInfo {
+                    members,
+                    leader_name,
+                }
+            }
             ServerPacketId::SendMemberLocation => Self::SendMemberLocation {
                 member_name: reader.read_string()?,
                 member_location: Point::decode(reader)?,

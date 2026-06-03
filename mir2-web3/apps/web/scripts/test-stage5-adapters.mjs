@@ -54,6 +54,7 @@ const {
   adaptMarketListings,
   adaptConquest,
   adaptGuildTerritory,
+  adaptBuffs,
 } = adapters;
 
 let passed = 0;
@@ -297,6 +298,81 @@ check("adaptGroup returns null/empty gracefully", () => {
   );
 });
 
+check("adaptGroup reads the enriched object member shape", () => {
+  const group = adaptGroup({
+    members: [
+      { name: "Alice", level: 40, class: "Wizard", hp: 80, maxHp: 100, online: true },
+      { name: "Bob", level: 22, class: "Warrior", hp: 30, maxHp: 60, online: false },
+    ],
+    lootMode: "group",
+  });
+  assert.ok(group);
+  assert.equal(group.lootMode, "group");
+  assert.equal(group.members.length, 2);
+  // First member is the leader (no explicit leaderName -> index 0).
+  assert.deepEqual(group.members[0], {
+    name: "Alice",
+    leader: true,
+    level: 40,
+    classKey: "wizard",
+    hp: 80,
+    maxHp: 100,
+    online: true,
+  });
+  assert.deepEqual(group.members[1], {
+    name: "Bob",
+    leader: false,
+    level: 22,
+    classKey: "warrior",
+    hp: 30,
+    maxHp: 60,
+    online: false,
+  });
+});
+
+check("adaptGroup honours top-level leaderName over index-0 fallback", () => {
+  const group = adaptGroup({
+    leaderName: "Bob",
+    members: [{ name: "Alice" }, { name: "Bob" }, { name: "Cara" }],
+  });
+  assert.equal(group.members[0].leader, false, "Alice is not the named leader");
+  assert.equal(group.members[1].leader, true, "Bob matches leaderName");
+  assert.equal(group.members[2].leader, false);
+});
+
+check("adaptGroup handles mixed legacy strings + enriched objects", () => {
+  const group = adaptGroup({
+    members: ["Alice", { name: "Bob", level: 10, online: true }, null, { level: 5 }],
+  });
+  // Bare string -> name only; object with no name -> dropped; nameless obj dropped.
+  assert.deepEqual(
+    group.members.map((m) => m.name),
+    ["Alice", "Bob"],
+  );
+  assert.deepEqual(group.members[0], { name: "Alice", leader: true });
+  assert.equal(group.members[1].level, 10);
+  assert.equal(group.members[1].online, true);
+  assert.equal(group.members[1].leader, false);
+});
+
+check("adaptGroup enrich layers in but adapter owns name + leader", () => {
+  const group = adaptGroup(
+    {
+      leaderName: "Bob",
+      members: [{ name: "Alice", online: true }, { name: "Bob" }],
+    },
+    {
+      // enrich tries (and fails) to hijack name + leader.
+      enrich: (name) => (name === "Alice" ? { name: "X", leader: true, level: 99 } : undefined),
+    },
+  );
+  assert.equal(group.members[0].name, "Alice", "canonical name wins");
+  assert.equal(group.members[0].leader, false, "leaderName=Bob means Alice is not leader");
+  assert.equal(group.members[0].level, 99, "other enrich fields are kept");
+  assert.equal(group.members[0].online, true, "object-shape fields are kept");
+  assert.equal(group.members[1].leader, true);
+});
+
 // ---------------------------------------------------------------------------
 // adaptFriends
 // ---------------------------------------------------------------------------
@@ -330,6 +406,50 @@ check("adaptFriends returns null/empty gracefully", () => {
   const empty = adaptFriends({});
   assert.deepEqual(empty.friends, []);
   assert.deepEqual(empty.blocked, []);
+});
+
+check("adaptFriends reads the enriched object entry shape", () => {
+  const social = adaptFriends({
+    friends: [
+      { name: "Pat", online: true, memo: "guildmate", level: 35, mapName: "Bichon" },
+      { name: "Sam", online: false, level: 12 },
+    ],
+    blocked: [{ name: "Troll", memo: "spammer" }],
+  });
+  assert.ok(social);
+  // mapName -> location; online/memo/level carried through.
+  assert.deepEqual(social.friends[0], {
+    name: "Pat",
+    online: true,
+    memo: "guildmate",
+    level: 35,
+    location: "Bichon",
+  });
+  assert.deepEqual(social.friends[1], { name: "Sam", online: false, level: 12 });
+  assert.deepEqual(social.blocked[0], { name: "Troll", memo: "spammer" });
+});
+
+check("adaptFriends handles mixed legacy strings + enriched objects", () => {
+  const social = adaptFriends({
+    friends: ["Pat", { name: "Sam", online: true }, null, { online: true }],
+  });
+  // Bare string -> name only; nameless object dropped.
+  assert.deepEqual(
+    social.friends.map((f) => f.name),
+    ["Pat", "Sam"],
+  );
+  assert.deepEqual(social.friends[0], { name: "Pat" });
+  assert.equal(social.friends[1].online, true);
+});
+
+check("adaptFriends enrich (e.g. lastSeen) layers in but name stays canonical", () => {
+  const social = adaptFriends(
+    { friends: [{ name: "Pat", online: false, mapName: "Town" }] },
+    { enrich: (name) => ({ name: "X", lastSeen: `yesterday:${name}` }) },
+  );
+  assert.equal(social.friends[0].name, "Pat");
+  assert.equal(social.friends[0].location, "Town");
+  assert.equal(social.friends[0].lastSeen, "yesterday:Pat");
 });
 
 // ---------------------------------------------------------------------------
@@ -692,6 +812,144 @@ check("adaptGuildTerritory returns null / tolerates junk", () => {
   const empty = adaptGuildTerritory({});
   assert.ok(empty);
   assert.deepEqual(empty.recallLog, []);
+});
+
+// ---------------------------------------------------------------------------
+// adaptBuffs
+// ---------------------------------------------------------------------------
+
+check("adaptBuffs maps the legacy ActiveBuff shape", () => {
+  const buffs = adaptBuffs([
+    {
+      key: "haste",
+      name: "Haste",
+      description: "Move faster",
+      remainingTicks: 300,
+      attackBonus: 5,
+      defenceBonus: 2,
+    },
+  ]);
+  assert.equal(buffs.length, 1);
+  assert.equal(buffs[0].key, "haste");
+  assert.equal(buffs[0].name, "Haste");
+  assert.equal(buffs[0].description, "Move faster");
+  assert.equal(buffs[0].remainingTicks, 300);
+  assert.equal(buffs[0].attackBonus, 5);
+  assert.equal(buffs[0].defenceBonus, 2);
+  // No enriched fields present.
+  assert.equal(buffs[0].kind, undefined);
+  assert.equal(buffs[0].infinite, undefined);
+  assert.equal(buffs[0].stats, undefined);
+});
+
+check("adaptBuffs maps the enriched gateway shape", () => {
+  const buffs = adaptBuffs([
+    {
+      type: "PoisonCloud",
+      name: "Poison",
+      remainingMs: 5000,
+      paused: false,
+      caster: "Boss",
+      stats: [
+        { label: "HP/s", value: -10 },
+        { label: "AC", value: 3, suffix: "%" },
+      ],
+    },
+  ]);
+  assert.equal(buffs.length, 1);
+  const b = buffs[0];
+  assert.equal(b.name, "Poison");
+  assert.equal(b.kind, "debuff", "PoisonCloud type -> debuff heuristic");
+  // remainingMs (5000) -> ticks at 10 ticks/sec -> 50.
+  assert.equal(b.remainingTicks, 50, "remainingMs converted to ticks");
+  assert.equal(b.paused, false);
+  assert.equal(b.caster, "Boss");
+  assert.deepEqual(b.stats, [
+    { label: "HP/s", value: -10 },
+    { label: "AC", value: 3, suffix: "%" },
+  ]);
+});
+
+check("adaptBuffs classifies buff vs debuff from type heuristic", () => {
+  const kinds = [
+    adaptBuffs([{ type: "MagicShield", name: "Shield" }])[0].kind,
+    adaptBuffs([{ type: "SomeBuff", name: "X" }])[0].kind,
+    adaptBuffs([{ type: "Curse", name: "C" }])[0].kind,
+    adaptBuffs([{ type: "Slow", name: "S" }])[0].kind,
+    adaptBuffs([{ type: "Frozen", name: "F" }])[0].kind,
+    adaptBuffs([{ name: "Unknown" }])[0].kind,
+  ];
+  // No hint and no "buff" substring -> undefined (treated as a buff by the window).
+  assert.deepEqual(kinds, [undefined, "buff", "debuff", "debuff", "debuff", undefined]);
+});
+
+check("adaptBuffs honours explicit infinite/paused flags", () => {
+  const buff = adaptBuffs([{ name: "Blessing", infinite: true, paused: true }])[0];
+  assert.equal(buff.infinite, true);
+  assert.equal(buff.paused, true);
+});
+
+check("adaptBuffs prefers remainingMs but falls back to remainingTicks", () => {
+  // Both present -> remainingMs wins.
+  const both = adaptBuffs([{ name: "B", remainingMs: 2000, remainingTicks: 999 }])[0];
+  assert.equal(both.remainingTicks, 20, "remainingMs (2000) -> 20 ticks wins over legacy field");
+  // Only legacy ticks present -> used directly.
+  const legacy = adaptBuffs([{ name: "L", remainingTicks: 123 }])[0];
+  assert.equal(legacy.remainingTicks, 123);
+});
+
+check("adaptBuffs falls back name to type and drops nameless entries", () => {
+  // type-only -> name derived from type.
+  const typed = adaptBuffs([{ type: "Regeneration" }]);
+  assert.equal(typed.length, 1);
+  assert.equal(typed[0].name, "Regeneration");
+  // Truly nameless (no name, no type) -> dropped.
+  assert.deepEqual(adaptBuffs([{ remainingMs: 100 }]), []);
+});
+
+check("adaptBuffs assigns positional keys + passes icon hints through", () => {
+  const buffs = adaptBuffs([
+    { name: "First" },
+    { name: "Second", icon: 7, iconLibrary: "magic" },
+    { name: "Third", iconLibrary: "bogus" },
+  ]);
+  assert.equal(buffs[0].key, "buff-0", "missing key -> positional id");
+  assert.equal(buffs[1].key, "buff-1");
+  assert.equal(buffs[1].icon, 7);
+  assert.equal(buffs[1].iconLibrary, "magic");
+  assert.equal(buffs[2].icon, undefined);
+  assert.equal(buffs[2].iconLibrary, undefined, "invalid iconLibrary is ignored");
+});
+
+check("adaptBuffs filters malformed stat rows", () => {
+  const buff = adaptBuffs([
+    {
+      name: "Mix",
+      stats: [
+        { label: "AC", value: 5 },
+        { label: "noValue" },
+        { value: 3 },
+        null,
+        "junk",
+        { label: "Suffixed", value: 2, suffix: "x" },
+      ],
+    },
+  ])[0];
+  assert.deepEqual(buff.stats, [
+    { label: "AC", value: 5 },
+    { label: "Suffixed", value: 2, suffix: "x" },
+  ]);
+});
+
+check("adaptBuffs returns [] for non-arrays / junk and skips bad rows", () => {
+  for (const input of MALFORMED_INPUTS) {
+    assert.doesNotThrow(() => adaptBuffs(input));
+    if (!Array.isArray(input)) {
+      assert.deepEqual(adaptBuffs(input), []);
+    }
+  }
+  // Non-object rows are skipped.
+  assert.deepEqual(adaptBuffs([null, 1, "x", true]), []);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

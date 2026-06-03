@@ -31519,6 +31519,42 @@ fn use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting
 }
 
 #[test]
+fn active_buff_snapshot_carries_browser_buff_contract_fields() {
+    // The `activeBuffs` snapshot the browser buff window consumes should expose the
+    // S.AddBuff-equivalent contract fields: numeric `buffType`, `remainingMs`
+    // (= remaining_ticks * 1000), `infinite`, and `{stat, label, value}` stats.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    add_inventory_crystal_item(&mut session, "ImpactDrug(S)", 31);
+    session.handle_packet(ClientPacket::UseItem {
+        unique_id: 31,
+        grid: MirGridType::Inventory,
+    });
+
+    let snapshot = session.world_snapshot();
+    let buff = snapshot
+        .active_buffs
+        .iter()
+        .find(|buff| buff.key == "impact")
+        .expect("impact buff present in snapshot");
+
+    // impact -> Crystal BuffType 200 (runtime/buffs.rs crystal_buff_type_for_key).
+    assert_eq!(buff.buff_type, Some(200));
+    assert!(!buff.infinite);
+    // remaining_ms mirrors the AddBuff packet path: remaining_ticks * 1000.
+    assert_eq!(buff.remaining_ms, u64::from(buff.remaining_ticks) * 1_000);
+    assert_eq!(buff.remaining_ms, 300_000);
+    // Impact's attack stat is Crystal MaxDC (stat id 5) -> label "MaxDC".
+    let attack_stat = buff
+        .stats
+        .iter()
+        .find(|stat| stat.stat == 5)
+        .expect("impact buff carries a MaxDC stat");
+    assert_eq!(attack_stat.label, "MaxDC");
+    assert_eq!(attack_stat.value, 5);
+}
+
+#[test]
 fn use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -49343,6 +49379,35 @@ fn group_packets_update_stage5_group_and_emit_crystal_surfaces() {
         vec!["Scout".to_string(), "Miner".to_string()]
     );
 
+    // The enriched roster packet (custom, beyond Crystal) carries the full member
+    // list with the leader first. The self player ("Scout") is a live world object
+    // so it resolves real level/class/HP/online; the synthetic "Miner" has no live
+    // object and is reported offline with no stats.
+    let roster = add_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::GroupMemberInfo {
+                members,
+                leader_name,
+            } => Some((members.clone(), leader_name.clone())),
+            _ => None,
+        })
+        .expect("AddMember should emit a GroupMemberInfo roster");
+    assert_eq!(roster.1, "Scout");
+    assert_eq!(roster.0.len(), 2);
+    let leader = &roster.0[0];
+    assert_eq!(leader.name, "Scout");
+    assert_eq!(leader.online, Some(true));
+    assert!(leader.level.is_some(), "self player level should resolve");
+    assert!(leader.class.is_some(), "self player class should resolve");
+    assert!(leader.hp.is_some(), "self player HP should resolve");
+    assert!(leader.max_hp.is_some(), "self player max HP should resolve");
+    let miner = &roster.0[1];
+    assert_eq!(miner.name, "Miner");
+    assert_eq!(miner.online, Some(false));
+    assert_eq!(miner.hp, None);
+    assert_eq!(miner.max_hp, None);
+
     let delete_packets = session.handle_packet(ClientPacket::DelMember {
         name: "Miner".to_string(),
     });
@@ -49372,6 +49437,58 @@ fn group_packets_update_stage5_group_and_emit_crystal_surfaces() {
     let group = session.world_snapshot().stage5_systems.group;
     assert!(!group.allow_group);
     assert!(group.members.is_empty());
+}
+
+#[test]
+fn group_member_info_roster_refreshes_when_a_member_leaves_a_larger_group() {
+    // With 3+ members, removing one keeps the group alive (DeleteMember, not
+    // DeleteGroup) and must re-emit the enriched roster so the web window updates.
+    let mut session = SimulationSession::new(SimulationConfig::default());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session.handle_packet(ClientPacket::SwitchGroup { allow_group: true });
+    session.handle_packet(ClientPacket::AddMember {
+        name: "Miner".to_string(),
+    });
+    session.handle_packet(ClientPacket::AddMember {
+        name: "Healer".to_string(),
+    });
+    assert_eq!(
+        session.world_snapshot().stage5_systems.group.members,
+        vec![
+            "Scout".to_string(),
+            "Miner".to_string(),
+            "Healer".to_string()
+        ]
+    );
+
+    let delete_packets = session.handle_packet(ClientPacket::DelMember {
+        name: "Miner".to_string(),
+    });
+    assert!(
+        delete_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DeleteMember { name } if name == "Miner")),
+        "removing a member from a larger group emits DeleteMember"
+    );
+    assert!(
+        !delete_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::DeleteGroup)),
+        "the group survives with two remaining members"
+    );
+    let roster = delete_packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::GroupMemberInfo {
+                members,
+                leader_name,
+            } => Some((members.clone(), leader_name.clone())),
+            _ => None,
+        })
+        .expect("DeleteMember should re-emit the enriched roster");
+    assert_eq!(roster.1, "Scout");
+    let names: Vec<&str> = roster.0.iter().map(|m| m.name.as_str()).collect();
+    assert_eq!(names, vec!["Scout", "Healer"]);
 }
 
 #[test]
