@@ -444,10 +444,10 @@ export function sceneAssetCandidateUrls(url: string, retryAttempt = 1): string[]
   };
 
   add(url);
+  add(cacheBustedSceneAssetUrl(url, retryAttempt));
+
   const remoteUrl = remoteSceneAssetUrl(url);
   add(remoteUrl);
-
-  add(cacheBustedSceneAssetUrl(url, retryAttempt));
   if (remoteUrl) {
     add(cacheBustedSceneAssetUrl(remoteUrl, retryAttempt));
   }
