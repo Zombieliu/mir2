@@ -7521,6 +7521,48 @@ fn zone_roll_stat_range(min: i32, max: i32, tick: u64, actor_id: u32, salt: u64)
     lo.saturating_add(i32::try_from(roll).unwrap_or_default())
 }
 
+/// Crystal `MapObject.GetAttackPower(min, max)` — a Luck-biased roll used for the
+/// physical attack-power channel (not for `GetDefencePower`/armour). Positive
+/// Luck can force the `max` end, negative Luck the `min` end. With `luck == 0`
+/// this is identical to [`zone_roll_stat_range`] (same tick/actor/salt), so a
+/// player with no Luck gear rolls exactly as before. Mirrors the per-session
+/// `crystal_attack_power_roll`.
+fn zone_roll_attack_power(
+    min: i32,
+    max: i32,
+    luck: i32,
+    tick: u64,
+    actor_id: u32,
+    salt: u64,
+) -> i32 {
+    let lo = min.min(max).max(0);
+    let hi = max.max(min).max(0);
+    const MAX_LUCK: u64 = 10; // Crystal Settings.MaxLuck default.
+    let actor = usize::try_from(actor_id).unwrap_or_default();
+    if luck > 0 {
+        let roll = zone_deterministic_roll(
+            tick,
+            actor,
+            usize::try_from(salt).unwrap_or_default(),
+            MAX_LUCK,
+        ) as i32;
+        if luck > roll {
+            return hi;
+        }
+    } else if luck < 0 {
+        let roll = zone_deterministic_roll(
+            tick,
+            actor,
+            usize::try_from(salt.wrapping_add(0xABCD)).unwrap_or_default(),
+            MAX_LUCK,
+        ) as i32;
+        if luck < -roll {
+            return lo;
+        }
+    }
+    zone_roll_stat_range(min, max, tick, actor_id, salt)
+}
+
 /// Authoritatively resolve a player's physical (melee/range) attack against a
 /// shared-zone monster.
 ///
@@ -7563,8 +7605,15 @@ fn zone_resolve_player_physical_attack(
         }
     }
 
-    let base = zone_roll_stat_range(stats.min_dc, stats.max_dc, now_ms, player.object_id, 0x5DC)
-        .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
+    let base = zone_roll_attack_power(
+        stats.min_dc,
+        stats.max_dc,
+        stats.luck,
+        now_ms,
+        player.object_id,
+        0x5DC,
+    )
+    .saturating_add(zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC));
     let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
     let armour = zone_roll_stat_range(
         monster.defense.min_ac,
@@ -7576,10 +7625,13 @@ fn zone_resolve_player_physical_attack(
     Some(base.saturating_sub(armour).max(0))
 }
 
-/// Crystal critical hit: with a `CriticalRate`/100 chance the blow is amplified
-/// by `CriticalDamage * 10%`. Resolved deterministically off the tick (mirrors
-/// the per-session `crystal_apply_player_critical`). Inert when the player has
-/// no crit gear.
+/// Crystal critical hit (HumanObject.cs:7156-7161, MonsterObject.cs:2594-2599):
+/// the blow crits when `Random(100) < CriticalRate * Settings.CriticalRateWeight`
+/// (weight 5) and is then amplified by
+/// `Floor(damage * (CriticalDamage / Settings.CriticalDamageWeight) * 10)`
+/// (weight 50 → +20% per `CriticalDamage` point). Resolved deterministically off
+/// the tick (mirrors the per-session `crystal_apply_player_critical`). Inert when
+/// the player has no crit gear.
 fn zone_apply_player_critical(
     damage: i32,
     stats: &super::types::ZonePlayerCombatStats,
@@ -7596,11 +7648,12 @@ fn zone_apply_player_critical(
         0xC817,
         100,
     );
-    if roll >= u64::try_from(rate).unwrap_or(0) {
+    let crit_chance =
+        rate.saturating_mul(crate::runtime::crystal_compat::CRYSTAL_CRITICAL_RATE_WEIGHT);
+    if roll >= u64::try_from(crit_chance).unwrap_or(0) {
         return damage;
     }
-    let bonus_steps = stats.critical_damage.max(1);
-    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+    crate::runtime::combat::crystal_critical_amplified_damage(damage, stats.critical_damage)
 }
 
 /// Subtract a target monster's authoritative magic armour `Random(MinMAC,MaxMAC)`

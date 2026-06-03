@@ -1,8 +1,16 @@
 "use client";
 
-import type { CSSProperties, MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
+import type { EffectAssets } from "../../lib/crystal-magic-effects";
+import { loadEffectAssets } from "../../lib/crystal-magic-effects";
+import {
+  collectViewportFallbackVfx,
+  fallbackVfxStyle,
+  paletteForElement,
+  type FallbackVfx,
+} from "../../lib/vfx-fallback";
 import type {
   DisplayEntity,
   DisplayProjectile,
@@ -60,6 +68,132 @@ type ViewportEntitySpriteEntry = {
   sprite: ViewportEntitySprite | null;
 };
 
+// --- Procedural magic / map VFX fallback ----------------------------------
+// The real effect atlases (lib/crystal-magic-effects) are PREFERRED: loadEffectAssets fetches the
+// exported manifest once, and resolveSpell/MapEffect take priority for any effect it can resolve.
+// Until those atlases exist the loader yields an empty set, the resolver returns null, and we draw
+// the data-driven CSS fallback (lib/vfx-fallback) instead — so casting / skills are visibly
+// reactive rather than inert. The loader is memoised at module scope so it never refetches.
+let effectAssetsPromise: Promise<EffectAssets> | null = null;
+function loadEffectAssetsOnce(): Promise<EffectAssets> {
+  if (!effectAssetsPromise) {
+    effectAssetsPromise = loadEffectAssets().catch(
+      () =>
+        ({
+          available: new Set<string>(),
+          libraries: new Map(),
+          spellByName: new Map(),
+          mapByName: new Map(),
+          groundBySpell: new Map(),
+          effectNameByNumber: new Map(),
+        }) as EffectAssets,
+    );
+  }
+  return effectAssetsPromise;
+}
+
+function useEffectAssets(): EffectAssets | null {
+  const [assets, setAssets] = useState<EffectAssets | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void loadEffectAssetsOnce().then((value) => {
+      if (!cancelled) {
+        setAssets(value);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return assets;
+}
+
+// Renders one procedural fallback effect as an inline-styled div (no globals.css changes). Returns
+// null once the effect has expired so finished effects drop out of the tree automatically.
+function FallbackVfxNode({
+  effect,
+  now,
+  cameraOffset,
+  viewportDepthPlayer,
+}: {
+  effect: FallbackVfx;
+  now: number;
+  cameraOffset: ViewportOffset;
+  viewportDepthPlayer: Pick<DisplayEntity, "x" | "y">;
+}) {
+  const style = fallbackVfxStyle(effect, now);
+  if (!style) {
+    return null;
+  }
+  const palette = paletteForElement(effect.element);
+  const zIndex = viewportDepthForCell(effect.worldX, effect.worldY, viewportDepthPlayer, 90);
+
+  if (effect.kind === "streak") {
+    // Coloured trail along the projectile path (origin -> target), drawn as a thin rotated bar.
+    const fromX = VIEWPORT_TILE_CENTER_X + effect.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x;
+    const fromY = VIEWPORT_TILE_CENTER_Y + effect.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y - 28;
+    const toX = VIEWPORT_TILE_CENTER_X + effect.toDx * VIEWPORT_CELL_WIDTH + cameraOffset.x;
+    const toY = VIEWPORT_TILE_CENTER_Y + effect.toDy * VIEWPORT_CELL_HEIGHT + cameraOffset.y - 28;
+    const dxPx = toX - fromX;
+    const dyPx = toY - fromY;
+    const length = Math.max(Math.hypot(dxPx, dyPx) * style.progress, 2);
+    const angle = Math.atan2(dyPx, dxPx);
+    return (
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: fromX,
+          top: fromY,
+          width: `${length}px`,
+          height: "4px",
+          transformOrigin: "0 50%",
+          transform: `rotate(${angle}rad) translateY(-50%)`,
+          background: `linear-gradient(90deg, transparent, ${palette.glow}, ${palette.core})`,
+          borderRadius: "2px",
+          opacity: style.opacity,
+          filter: "blur(0.5px)",
+          pointerEvents: "none",
+          zIndex,
+        }}
+      />
+    );
+  }
+
+  // cast / impact / aura: a glowing ring/burst centred on the tile.
+  const left = VIEWPORT_TILE_CENTER_X + effect.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x;
+  const baseSize = effect.kind === "aura" ? 56 : effect.kind === "impact" ? 44 : 38;
+  const top =
+    VIEWPORT_TILE_CENTER_Y +
+    effect.dy * VIEWPORT_CELL_HEIGHT +
+    cameraOffset.y +
+    (effect.kind === "aura" ? 6 : -18);
+  const size = baseSize * style.scale;
+  const ring = effect.kind === "aura";
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "absolute",
+        left,
+        top,
+        width: `${size}px`,
+        height: `${effect.kind === "aura" ? size * 0.6 : size}px`,
+        transform: "translate(-50%, -50%)",
+        borderRadius: "50%",
+        background: ring
+          ? `radial-gradient(closest-side, transparent 55%, ${palette.glow} 75%, transparent)`
+          : `radial-gradient(closest-side, ${palette.core}, ${palette.glow} 60%, transparent)`,
+        border: ring ? `2px solid ${palette.core}` : undefined,
+        opacity: style.opacity,
+        mixBlendMode: "screen",
+        pointerEvents: "none",
+        zIndex,
+      }}
+    />
+  );
+}
+
 export function OriginalClientSceneVisualLayers({
   screen,
   t,
@@ -99,6 +233,29 @@ export function OriginalClientSceneVisualLayers({
   onPickGroundDrop: (objectId: string) => void;
   onActivateEntity: (objectId: string) => void;
 }) {
+  // --- Magic / map VFX fallback integration (single block) ---------------
+  // Atlas-first: when loadEffectAssets resolves real frames, the collectors below skip the
+  // procedural fallback for those effects. Until then (assets empty / null) we derive short-lived
+  // CSS effects from the SAME viewport-delta data the projectiles use, so casting and skills are
+  // visibly distinct instead of inert. collectViewportFallbackVfx returns [] on idle frames, so
+  // this costs nothing when nothing is casting and no projectiles are live.
+  const effectAssets = useEffectAssets();
+  const fallbackVfx = collectViewportFallbackVfx(
+    {
+      entities: viewportEntitySprites.map(({ entity }) => ({
+        objectId: entity.objectId,
+        x: entity.x,
+        y: entity.y,
+        dx: entity.dx,
+        dy: entity.dy,
+        attackAnimation: entity.attackAnimation,
+        attackStartedAt: entity.attackStartedAt,
+      })),
+      projectiles: viewportProjectiles,
+    },
+    { now: motionNow, assets: effectAssets },
+  );
+
   return (
     <>
       <div className={`viewport-drop-overlay ${screen !== "game" ? "hidden" : ""}`}>
@@ -330,6 +487,16 @@ export function OriginalClientSceneVisualLayers({
             />
           );
         })}
+        {/* Procedural magic / map VFX fallback nodes (atlas-free; see FallbackVfxNode). */}
+        {fallbackVfx.map((effect) => (
+          <FallbackVfxNode
+            key={effect.key}
+            effect={effect}
+            now={motionNow}
+            cameraOffset={playerCameraMotionOffset}
+            viewportDepthPlayer={viewportDepthPlayer}
+          />
+        ))}
       </div>
 
       <div className={`viewport-entity-overlay ${screen !== "game" ? "hidden" : ""}`}>
