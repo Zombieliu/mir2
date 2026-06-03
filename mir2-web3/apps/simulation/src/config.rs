@@ -3287,6 +3287,17 @@ pub struct NpcScriptDiagnosticSnapshot {
     pub message: String,
 }
 
+/// A buff stat rendered for the browser buff window: keeps Crystal's raw `stat`
+/// byte (backward compatible) and adds the `label` (Crystal `Stat` enum name,
+/// `Crystal/Shared/Data/Stat.cs`) so the window can show `{label, value}`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BuffStatSnapshot {
+    pub stat: u8,
+    pub label: String,
+    pub value: i32,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffSnapshot {
@@ -3296,6 +3307,19 @@ pub struct BuffSnapshot {
     pub remaining_ticks: u32,
     pub attack_bonus: i32,
     pub defence_bonus: i32,
+    /// Numeric Crystal `BuffType` (mirrors `S.AddBuff` `Type`); `None` for buffs
+    /// without a Crystal type mapping. Matches the browser buff contract `type?`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub buff_type: Option<u8>,
+    /// Milliseconds remaining (Crystal maps `Expire`→remaining client-side); this
+    /// is `remaining_ticks * 1000`, the same value `S.AddBuff.expire_time` carries
+    /// on the simulation's packet path.
+    pub remaining_ms: u64,
+    /// True for non-expiring buffs (Crystal `BuffStackType.Infinite`).
+    pub infinite: bool,
+    /// Per-stat effects rendered as `{stat, label, value}` for the buff window.
+    #[serde(default)]
+    pub stats: Vec<BuffStatSnapshot>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -1357,6 +1357,67 @@ impl ClientFriend {
     }
 }
 
+/// A single party/group member, enriched with the attributes the simulation
+/// knows about the member's live world object (level / class / HP / online).
+///
+/// Crystal has no dedicated "full group list" packet: its client rebuilds the
+/// roster incrementally from `S.AddMember`/`S.DeleteMember` and pulls each
+/// member's level/class/HP from the live `ObjectPlayer` it already received
+/// (see `Crystal/Client/MirScenes/Dialogs/GroupDialog.cs`). Because the web
+/// gateway serialises packets to JSON one-at-a-time (with no world context in
+/// `server_packet_to_event`), this struct carries that already-known data
+/// alongside the authoritative roster so the browser group window can render
+/// full detail in a single update. Fields the simulation cannot know for a
+/// given member (e.g. a remote player's exact HP) stay `None` and are omitted
+/// from the JSON, matching Crystal's "Online = player object exists" semantics
+/// (`Crystal/Server/MirDatabase/CharacterInfo.cs:767`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GroupMember {
+    pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub level: Option<u16>,
+    /// Numeric Crystal `MirClass` (0 Warrior .. 4 Archer); kept numeric to match
+    /// the browser contract (`class?: number`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub class: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hp: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_hp: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub online: Option<bool>,
+}
+
+impl GroupMember {
+    pub fn decode(reader: &mut PacketReader<'_>) -> Result<Self> {
+        let name = reader.read_string()?;
+        let level = read_optional_u16(reader)?;
+        let class = read_optional_u8(reader)?;
+        let hp = read_optional_i32(reader)?;
+        let max_hp = read_optional_i32(reader)?;
+        let online = read_optional_bool(reader)?;
+        Ok(Self {
+            name,
+            level,
+            class,
+            hp,
+            max_hp,
+            online,
+        })
+    }
+
+    pub fn encode(&self, writer: &mut PacketWriter) -> Result<()> {
+        writer.write_string(&self.name)?;
+        write_optional_u16(writer, self.level);
+        write_optional_u8(writer, self.class);
+        write_optional_i32(writer, self.hp);
+        write_optional_i32(writer, self.max_hp);
+        write_optional_bool(writer, self.online);
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerInspectInfo {
@@ -1657,6 +1718,75 @@ impl ClientHeroInformation {
 pub struct UserItemStat {
     pub stat: u8,
     pub value: i32,
+}
+
+/// Maps a Crystal `Stat` byte to its enum name, used as the human-readable
+/// `label` for an item/buff stat. Mirrors `Crystal/Shared/Data/Stat.cs` (the
+/// client renders a buff stat via `Stat.ToString()`, BuffDialog.cs:351). Unknown
+/// ids fall back to `"Stat<n>"` so callers always have a stable key.
+pub fn crystal_stat_label(stat: u8) -> String {
+    let name = match stat {
+        0 => "MinAC",
+        1 => "MaxAC",
+        2 => "MinMAC",
+        3 => "MaxMAC",
+        4 => "MinDC",
+        5 => "MaxDC",
+        6 => "MinMC",
+        7 => "MaxMC",
+        8 => "MinSC",
+        9 => "MaxSC",
+        10 => "Accuracy",
+        11 => "Agility",
+        12 => "HP",
+        13 => "MP",
+        14 => "AttackSpeed",
+        15 => "Luck",
+        16 => "BagWeight",
+        17 => "HandWeight",
+        18 => "WearWeight",
+        19 => "Reflect",
+        20 => "Strong",
+        21 => "Holy",
+        22 => "Freezing",
+        23 => "PoisonAttack",
+        30 => "MagicResist",
+        31 => "PoisonResist",
+        32 => "HealthRecovery",
+        33 => "SpellRecovery",
+        34 => "PoisonRecovery",
+        35 => "CriticalRate",
+        36 => "CriticalDamage",
+        40 => "MaxACRatePercent",
+        41 => "MaxMACRatePercent",
+        42 => "MaxDCRatePercent",
+        43 => "MaxMCRatePercent",
+        44 => "MaxSCRatePercent",
+        45 => "AttackSpeedRatePercent",
+        46 => "HPRatePercent",
+        47 => "MPRatePercent",
+        48 => "HPDrainRatePercent",
+        100 => "ExpRatePercent",
+        101 => "ItemDropRatePercent",
+        102 => "GoldDropRatePercent",
+        103 => "MineRatePercent",
+        104 => "GemRatePercent",
+        105 => "FishRatePercent",
+        106 => "CraftRatePercent",
+        107 => "SkillGainMultiplier",
+        108 => "AttackBonus",
+        120 => "LoverExpRatePercent",
+        121 => "MentorDamageRatePercent",
+        123 => "MentorExpRatePercent",
+        124 => "DamageReductionPercent",
+        125 => "EnergyShieldPercent",
+        126 => "EnergyShieldHPGain",
+        127 => "ManaPenaltyPercent",
+        128 => "TeleportManaPenaltyPercent",
+        129 => "Hero",
+        _ => return format!("Stat{stat}"),
+    };
+    name.to_string()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2531,6 +2661,69 @@ fn read_non_negative_count(reader: &mut PacketReader<'_>, field: &'static str) -
         })
     } else {
         Ok(count as usize)
+    }
+}
+
+// Optional scalar codecs: a leading presence flag (bool) followed by the value
+// when present. Used by web-enrichment structs (e.g. `GroupMember`) whose fields
+// the simulation may or may not know for a given entity.
+fn read_optional_u8(reader: &mut PacketReader<'_>) -> Result<Option<u8>> {
+    Ok(if reader.read_bool()? {
+        Some(reader.read_u8()?)
+    } else {
+        None
+    })
+}
+
+fn write_optional_u8(writer: &mut PacketWriter, value: Option<u8>) {
+    writer.write_bool(value.is_some());
+    if let Some(value) = value {
+        writer.write_u8(value);
+    }
+}
+
+fn read_optional_u16(reader: &mut PacketReader<'_>) -> Result<Option<u16>> {
+    Ok(if reader.read_bool()? {
+        Some(reader.read_u16()?)
+    } else {
+        None
+    })
+}
+
+fn write_optional_u16(writer: &mut PacketWriter, value: Option<u16>) {
+    writer.write_bool(value.is_some());
+    if let Some(value) = value {
+        writer.write_u16(value);
+    }
+}
+
+fn read_optional_i32(reader: &mut PacketReader<'_>) -> Result<Option<i32>> {
+    Ok(if reader.read_bool()? {
+        Some(reader.read_i32()?)
+    } else {
+        None
+    })
+}
+
+fn write_optional_i32(writer: &mut PacketWriter, value: Option<i32>) {
+    writer.write_bool(value.is_some());
+    if let Some(value) = value {
+        writer.write_i32(value);
+    }
+}
+
+fn read_optional_bool(reader: &mut PacketReader<'_>) -> Result<Option<bool>> {
+    Ok(if reader.read_bool()? {
+        Some(reader.read_bool()?)
+    } else {
+        None
+    })
+}
+
+fn write_optional_bool(writer: &mut PacketWriter, value: Option<bool>) {
+    writer.write_bool(value.is_some());
+    if let Some(value) = value {
+        writer.write_bool(value);
     }
 }
 
