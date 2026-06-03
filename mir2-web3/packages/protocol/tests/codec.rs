@@ -9,8 +9,8 @@ use mir2_protocol::trace::{
     trace_client_packets, trace_server_packets, PacketTraceDirection, PacketTraceEntry,
 };
 use mir2_protocol::types::{
-    ChatType, ClientQuestInfo, ClientRecipeInfo, ItemInfo, MapInformation, MirClass, MirDirection,
-    MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectEffectInfo, ObjectMovement,
+    ChatType, ClientQuestInfo, ClientRecipeInfo, GroupMember, ItemInfo, MapInformation, MirClass,
+    MirDirection, MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectEffectInfo, ObjectMovement,
     ObjectPlayerInfo, ObjectSpellInfo, Point, QuestItemReward, Spell, UserInformation, UserItem,
     UserItemStat,
 };
@@ -261,6 +261,36 @@ fn server_packet_encoder_roundtrip_for_chat() {
 
         assert_eq!(decoded, packet);
     }
+}
+
+#[test]
+fn group_member_info_packet_roundtrips_optional_fields() {
+    let packet = ServerPacket::GroupMemberInfo {
+        members: vec![
+            GroupMember {
+                name: "Leader".to_string(),
+                level: Some(42),
+                class: Some(MirClass::Warrior as u8),
+                hp: Some(350),
+                max_hp: Some(400),
+                online: Some(true),
+            },
+            GroupMember {
+                name: "Offline".to_string(),
+                level: None,
+                class: None,
+                hp: None,
+                max_hp: None,
+                online: Some(false),
+            },
+        ],
+        leader_name: "Leader".to_string(),
+    };
+
+    let bytes = encode_server_packet(&packet).expect("packet should encode");
+    let decoded = decode_server_packet(&bytes).expect("packet should decode");
+
+    assert_eq!(decoded, packet);
 }
 
 #[test]

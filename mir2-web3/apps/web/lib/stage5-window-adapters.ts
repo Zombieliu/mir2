@@ -38,10 +38,23 @@ type UnknownRecord = Record<string, unknown>;
 
 type EntityClassKey = NonNullable<HeroSummary["classKey"]>;
 
-/** The subset of the page's stage-5 state these adapters read from. */
+/**
+ * The subset of the page's stage-5 state these adapters read from.
+ *
+ * `group.members` and `social.friends`/`social.blocked` accept BOTH the legacy
+ * `string[]` (bare names) and the gateway's enriched object form, so callers
+ * stay compatible before and after the backend lands the richer payloads.
+ */
 export type Stage5SystemsLike = {
-  group?: { members?: string[]; lootMode?: string } | null;
-  social?: { friends?: string[]; blocked?: string[] } | null;
+  group?: {
+    members?: Array<string | UnknownRecord>;
+    lootMode?: string;
+    leaderName?: string;
+  } | null;
+  social?: {
+    friends?: Array<string | UnknownRecord>;
+    blocked?: Array<string | UnknownRecord>;
+  } | null;
   relationship?: UnknownRecord | null;
   mentor?: UnknownRecord | null;
   auction?: Array<UnknownRecord> | null;
@@ -261,20 +274,76 @@ export function adaptCreatures(creatures: Array<UnknownRecord> | null | undefine
 // ---------------------------------------------------------------------------
 
 /**
+ * Incoming party-member record (the gateway's enriched form). Backward
+ * compatible: a member may instead be a bare name `string` (legacy shape).
+ */
+type RawGroupMember = {
+  name?: unknown;
+  level?: unknown;
+  class?: unknown;
+  hp?: unknown;
+  maxHp?: unknown;
+  online?: unknown;
+};
+
+/**
  * Adapts the stage-5 `group` slice into the Group window's `GroupSummary`.
- * Optionally enriches member rows with online/level/class/HP data looked up
- * from the world entity list by name.
+ *
+ * Handles BOTH member shapes the gateway can emit:
+ *  - legacy `members: string[]` (bare names), and
+ *  - enriched `members: Array<{ name, level?, class?, hp?, maxHp?, online? }>`
+ * plus an optional top-level `leaderName` used to flag the party leader (falling
+ * back to the first member when absent). An optional `enrich` callback can still
+ * layer in extra per-name metadata looked up from the world entity list.
  */
 export function adaptGroup(
-  group: { members?: string[]; lootMode?: string } | null | undefined,
+  group:
+    | {
+        members?: Array<string | RawGroupMember>;
+        memberInfos?: Array<string | RawGroupMember>;
+        lootMode?: string;
+        leaderName?: string;
+      }
+    | null
+    | undefined,
   options?: { enrich?: (name: string) => Partial<GroupMember> | undefined },
 ): GroupSummary | null {
   if (!group) return null;
-  const names = readStringArray(group.members);
-  const members: GroupMember[] = names.map((name, index) => {
-    const base: GroupMember = { name, leader: index === 0 };
+  const leaderName = readString(asRecord(group), ["leaderName"]);
+  // Prefer the enriched roster (level/class/hp/online) when present, else the
+  // incremental name list.
+  const rawMembers =
+    Array.isArray(group.memberInfos) && group.memberInfos.length > 0
+      ? group.memberInfos
+      : Array.isArray(group.members)
+        ? group.members
+        : [];
+  const members: GroupMember[] = rawMembers.flatMap((entry, index) => {
+    // Both shapes resolve to a member object; bare strings are names.
+    const record = typeof entry === "string" ? null : asRecord(entry);
+    const name = typeof entry === "string" ? entry.trim() : readString(record, ["name"]);
+    if (!name) return [];
+
+    // The leader is the named leader when supplied, else the first roster row.
+    const isLeader = leaderName ? name === leaderName : index === 0;
+    const base: GroupMember = { name, leader: isLeader };
+
+    if (record) {
+      const level = readNumber(record, ["level"]);
+      if (level !== undefined) base.level = level;
+      const classKey = classKeyFromUnknown(record.class);
+      if (classKey !== undefined) base.classKey = classKey;
+      const hp = readNumber(record, ["hp"]);
+      if (hp !== undefined) base.hp = hp;
+      const maxHp = readNumber(record, ["maxHp", "maxHP"]);
+      if (maxHp !== undefined) base.maxHp = maxHp;
+      const online = readBool(record, ["online"]);
+      if (online !== undefined) base.online = online;
+    }
+
     const extra = options?.enrich?.(name);
-    return extra ? { ...base, ...extra, name } : base;
+    // `enrich` augments, but the canonical name and computed leader flag win.
+    return [extra ? { ...base, ...extra, name, leader: isLeader } : base];
   });
   return {
     members,
@@ -287,23 +356,68 @@ export function adaptGroup(
 // ---------------------------------------------------------------------------
 
 /**
+ * Incoming friend/blocked record (the gateway's enriched form). Backward
+ * compatible: an entry may instead be a bare name `string` (legacy shape).
+ */
+type RawFriendEntry = {
+  name?: unknown;
+  online?: unknown;
+  memo?: unknown;
+  level?: unknown;
+  mapName?: unknown;
+};
+
+/**
  * Adapts the stage-5 `social` slice into the Friends window's `FriendsSummary`.
- * The page stores friends/blocked as `string[]`; an optional enricher can add
- * online/memo metadata (e.g. from a richer friend cache).
+ *
+ * Handles BOTH entry shapes the gateway can emit:
+ *  - legacy `string[]` (bare names), and
+ *  - enriched `friends: Array<{ name, online?, memo?, level?, mapName? }>` /
+ *    `blocked: Array<{ name, memo? }>`.
+ * The friend's last-seen map (`mapName`) maps to the window's `location` field.
+ * An optional enricher can still layer in extra metadata (e.g. `lastSeen`).
  */
 export function adaptFriends(
-  social: { friends?: string[]; blocked?: string[] } | null | undefined,
+  social:
+    | {
+        friends?: Array<string | RawFriendEntry>;
+        blocked?: Array<string | RawFriendEntry>;
+        friendInfos?: Array<string | RawFriendEntry>;
+        blockedInfos?: Array<string | RawFriendEntry>;
+      }
+    | null
+    | undefined,
   options?: { enrich?: (name: string) => Partial<FriendEntry> | undefined },
 ): FriendsSummary | null {
   if (!social) return null;
-  const toEntries = (names: string[]): FriendEntry[] =>
-    names.map((name) => {
+  const toEntries = (list: Array<string | RawFriendEntry> | undefined): FriendEntry[] => {
+    if (!Array.isArray(list)) return [];
+    return list.flatMap((entry) => {
+      const record = typeof entry === "string" ? null : asRecord(entry);
+      const name = typeof entry === "string" ? entry.trim() : readString(record, ["name"]);
+      if (!name) return [];
+
+      const base: FriendEntry = { name };
+      if (record) {
+        const online = readBool(record, ["online"]);
+        if (online !== undefined) base.online = online;
+        const memo = readString(record, ["memo"]);
+        if (memo !== undefined) base.memo = memo;
+        const level = readNumber(record, ["level"]);
+        if (level !== undefined) base.level = level;
+        const location = readString(record, ["mapName"]);
+        if (location !== undefined) base.location = location;
+      }
+
       const extra = options?.enrich?.(name);
-      return extra ? { ...extra, name } : { name };
+      return [extra ? { ...base, ...extra, name } : base];
     });
+  };
+  // Prefer the enriched *Infos lists (online/memo) when the host provides them,
+  // else the bare-name lists.
   return {
-    friends: toEntries(readStringArray(social.friends)),
-    blocked: toEntries(readStringArray(social.blocked)),
+    friends: toEntries(social.friendInfos ?? social.friends),
+    blocked: toEntries(social.blockedInfos ?? social.blocked),
   };
 }
 
@@ -557,39 +671,124 @@ type ActiveBuffLike = {
   remainingTicks?: unknown;
   attackBonus?: unknown;
   defenceBonus?: unknown;
+  // Enriched fields the gateway now emits (all optional / additive).
+  type?: unknown;
+  remainingMs?: unknown;
+  infinite?: unknown;
+  paused?: unknown;
+  caster?: unknown;
+  stats?: unknown;
+  icon?: unknown;
+  iconLibrary?: unknown;
 };
 
+/** Ticks-per-second the Buff window assumes by default when rendering durations. */
+const BUFF_TICKS_PER_SECOND = 10;
+
+/** Keywords that classify an enriched buff `type` as a harmful debuff. */
+const DEBUFF_TYPE_HINTS = [
+  "debuff",
+  "poison",
+  "curse",
+  "stun",
+  "slow",
+  "weaken",
+  "frozen",
+  "freeze",
+  "paralys",
+  "burn",
+  "bleed",
+  "silence",
+];
+
+/** Heuristically classify a buff as beneficial ("buff") or harmful ("debuff"). */
+function buffKindFromUnknown(type: unknown): BuffEntry["kind"] | undefined {
+  if (typeof type !== "string") return undefined;
+  const normalized = type.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (DEBUFF_TYPE_HINTS.some((hint) => normalized.includes(hint))) return "debuff";
+  if (normalized.includes("buff")) return "buff";
+  return undefined;
+}
+
+/** Reads the enriched `stats: [{ label, value, suffix? }]` array defensively. */
+function readBuffStats(value: unknown): BuffEntry["stats"] {
+  if (!Array.isArray(value)) return undefined;
+  const stats = value.flatMap((entry) => {
+    const record = asRecord(entry);
+    if (!record) return [];
+    const label = readString(record, ["label"]);
+    const statValue = readNumber(record, ["value"]);
+    if (label === undefined || statValue === undefined) return [];
+    const suffix = readString(record, ["suffix"]);
+    return [suffix !== undefined ? { label, value: statValue, suffix } : { label, value: statValue }];
+  });
+  return stats.length > 0 ? stats : undefined;
+}
+
 /**
- * Adapts the world's `activeBuffs` list (mirrors the gateway `ActiveBuff`
- * struct) into the Buff window's `BuffEntry[]`. Entries without a usable name
- * are dropped; a missing `key` falls back to a positional id.
+ * Adapts the world's `activeBuffs` list into the Buff window's `BuffEntry[]`.
+ *
+ * Handles BOTH the legacy `ActiveBuff` shape
+ * (`{ key, name, description, remainingTicks, attackBonus, defenceBonus }`) and
+ * the gateway's enriched form
+ * (`{ type?, name?, remainingMs?, infinite?, paused?, caster?, stats? }`). The
+ * enriched `type` drives a buff/debuff heuristic, `remainingMs` is converted to
+ * the window's tick units, and structured `stats` feed the tooltip. Entries
+ * without a usable name (falling back to `type`) are dropped; a missing `key`
+ * falls back to a positional id. The window keeps its own icon-library
+ * heuristics, so icon hints are passed through only when present.
  */
 export function adaptBuffs(buffs: Array<ActiveBuffLike> | null | undefined): BuffEntry[] {
   if (!Array.isArray(buffs)) return [];
   return buffs.flatMap((entry, index) => {
-    if (!entry || typeof entry !== "object") return [];
-    const name = typeof entry.name === "string" ? entry.name.trim() : "";
+    const record = asRecord(entry);
+    if (!record) return [];
+    // Prefer the explicit name; fall back to the enriched `type` so a typed
+    // buff still surfaces (the window drops nameless entries).
+    const name = readString(record, ["name"]) ?? readString(record, ["type"]);
     if (!name) return [];
-    const key = typeof entry.key === "string" && entry.key.length > 0 ? entry.key : `buff-${index}`;
-    return [
-      {
-        key,
-        name,
-        description: typeof entry.description === "string" ? entry.description : undefined,
-        remainingTicks:
-          typeof entry.remainingTicks === "number" && Number.isFinite(entry.remainingTicks)
-            ? entry.remainingTicks
-            : undefined,
-        attackBonus:
-          typeof entry.attackBonus === "number" && Number.isFinite(entry.attackBonus)
-            ? entry.attackBonus
-            : undefined,
-        defenceBonus:
-          typeof entry.defenceBonus === "number" && Number.isFinite(entry.defenceBonus)
-            ? entry.defenceBonus
-            : undefined,
-      },
-    ];
+    const key =
+      typeof record.key === "string" && record.key.length > 0 ? record.key : `buff-${index}`;
+
+    // Remaining duration: the enriched payload sends milliseconds, the legacy
+    // one sends server ticks. Convert ms -> ticks using the window's tick rate.
+    const remainingMs = readNumber(record, ["remainingMs"]);
+    const remainingTicks =
+      remainingMs !== undefined
+        ? Math.max(0, Math.round((remainingMs / 1000) * BUFF_TICKS_PER_SECOND))
+        : readNumber(record, ["remainingTicks"]);
+
+    const buff: BuffEntry = { key, name };
+
+    const description = readString(record, ["description"]);
+    if (description !== undefined) buff.description = description;
+    if (remainingTicks !== undefined) buff.remainingTicks = remainingTicks;
+    const attackBonus = readNumber(record, ["attackBonus"]);
+    if (attackBonus !== undefined) buff.attackBonus = attackBonus;
+    const defenceBonus = readNumber(record, ["defenceBonus"]);
+    if (defenceBonus !== undefined) buff.defenceBonus = defenceBonus;
+
+    const kind = buffKindFromUnknown(record.type);
+    if (kind !== undefined) buff.kind = kind;
+    const infinite = readBool(record, ["infinite"]);
+    if (infinite !== undefined) buff.infinite = infinite;
+    const paused = readBool(record, ["paused"]);
+    if (paused !== undefined) buff.paused = paused;
+    const caster = readString(record, ["caster"]);
+    if (caster !== undefined) buff.caster = caster;
+    const stats = readBuffStats(record.stats);
+    if (stats !== undefined) buff.stats = stats;
+
+    // Pass icon hints through when present; the window owns the library mapping.
+    const icon = readNumber(record, ["icon"]);
+    if (icon !== undefined) buff.icon = icon;
+    const iconLibrary = readString(record, ["iconLibrary"]);
+    if (iconLibrary === "buff" || iconLibrary === "magic" || iconLibrary === "prguse2") {
+      buff.iconLibrary = iconLibrary;
+    }
+
+    return [buff];
   });
 }
 

@@ -11,9 +11,9 @@ use mir2_game_data::{
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientBuff, ClientFriend, ClientGtMap,
-    ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientPacket, GuildMember,
-    GuildRank, GuildStorageItem, HeroUserInformation, MirClass, MirDirection, MirGender,
-    MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
+    ClientHeroInformation, ClientIntelligentCreature, ClientMail, ClientPacket, GroupMember,
+    GuildMember, GuildRank, GuildStorageItem, HeroUserInformation, MirClass, MirDirection,
+    MirGender, MirGridType, MonsterInfo, NpcInfo, ObjectDiedInfo, ObjectGoldInfo, ObjectHealthInfo,
     ObjectItemInfo, ObjectManaInfo, ObjectMovement, ObjectPlayerInfo, ObjectRevivedInfo,
     ObjectSpellInfo, ObjectStruckInfo, Point, RankCharacterInfo, ServerPacket, ServerPacketId,
     Spell, StruckInfo, UserInformation, UserItem, UserItemStat,
@@ -1462,6 +1462,88 @@ fn ensure_stage5_group_self_member(world: &mut World) -> String {
     player_name
 }
 
+/// Looks up a party member's live attributes (level / class / HP / online) from
+/// the world's player objects by name. Crystal reads these from the
+/// `ObjectPlayer` it already sent the client; we resolve them server-side
+/// because the web gateway serialises each packet without world context.
+///
+/// `online` mirrors Crystal's `CharacterInfo.CreateClientFriend` semantics
+/// (`Crystal/Server/MirDatabase/CharacterInfo.cs:767`): a member is online iff a
+/// live player object with that name exists in the world. HP is only known for
+/// objects the simulation tracks vitals for (self / hero); a remote player's HP
+/// is left `None` (Crystal likewise only ships exact HP for visible objects).
+#[allow(deprecated)]
+fn stage5_group_member_attributes(world: &World, name: &str) -> GroupMember {
+    let language = world.resource::<SessionResource>().language;
+    for entity in world.iter_entities() {
+        // Only player-type objects are valid group members (self, hero, remote).
+        let is_player = entity.contains::<SelfPlayer>()
+            || entity.contains::<Hero>()
+            || entity.contains::<RemotePlayer>();
+        if !is_player {
+            continue;
+        }
+        let Some(display) = entity.get::<DisplayName>() else {
+            continue;
+        };
+        if !display.resolve(language).eq_ignore_ascii_case(name) {
+            continue;
+        }
+        let body = entity.get::<CharacterBody>();
+        let vitals = entity.get::<PlayerVitals>();
+        return GroupMember {
+            name: name.to_string(),
+            level: body.map(|body| body.level),
+            class: body.map(|body| body.class as u8),
+            hp: vitals.map(|vitals| vitals.hp),
+            max_hp: vitals.map(|vitals| vitals.max_hp),
+            online: Some(true),
+        };
+    }
+    // No live object for this name: list it (Crystal keeps offline members in the
+    // roster) but mark it offline with no live stats.
+    GroupMember {
+        name: name.to_string(),
+        level: None,
+        class: None,
+        hp: None,
+        max_hp: None,
+        online: Some(false),
+    }
+}
+
+/// Builds the enriched roster from the authoritative `group.members` name list.
+fn stage5_group_members_enriched(world: &World) -> Vec<GroupMember> {
+    world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .group
+        .members
+        .clone()
+        .iter()
+        .map(|name| stage5_group_member_attributes(world, name))
+        .collect()
+}
+
+/// Emits the custom `GroupMemberInfo` roster packet, or `None` when the player
+/// is not currently grouped (so we never push an empty roster).
+fn stage5_group_member_info_packet(world: &World) -> Option<ServerPacket> {
+    let members = stage5_group_members_enriched(world);
+    if members.is_empty() {
+        return None;
+    }
+    // Crystal's group leader is `GroupMembers[0]` (the creator); the stage5 model
+    // seeds the self/creator first via `ensure_stage5_group_self_member`.
+    let leader_name = members
+        .first()
+        .map(|member| member.name.clone())
+        .unwrap_or_default();
+    Some(ServerPacket::GroupMemberInfo {
+        members,
+        leader_name,
+    })
+}
+
 fn stage5_group_switch_packet(world: &mut World, allow_group: bool) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
@@ -1508,7 +1590,7 @@ fn stage5_group_add_member_packet(world: &mut World, name: String) -> Vec<Server
     }
     let member_map = current_group_map_name(world);
     let member_location = current_location(world).position;
-    vec![
+    let mut packets = vec![
         ServerPacket::SwitchGroup { allow_group: true },
         ServerPacket::AddMember { name: player_name },
         ServerPacket::AddMember {
@@ -1522,7 +1604,11 @@ fn stage5_group_add_member_packet(world: &mut World, name: String) -> Vec<Server
             member_name: target_name,
             member_location,
         },
-    ]
+    ];
+    // Custom roster snapshot (beyond Crystal) carrying enriched member detail for
+    // the web group window. Follows the incremental AddMember packets above.
+    packets.extend(stage5_group_member_info_packet(world));
+    packets
 }
 
 fn stage5_group_del_member_packet(world: &mut World, name: String) -> Vec<ServerPacket> {
@@ -1533,18 +1619,30 @@ fn stage5_group_del_member_packet(world: &mut World, name: String) -> Vec<Server
     if target_name.is_empty() {
         return Vec::new();
     }
-    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    let members = &mut stage5.stage5_systems.group.members;
-    let before = members.len();
-    members.retain(|member| !member.eq_ignore_ascii_case(&target_name));
-    if members.len() == before {
+    let (changed, dissolved) = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let members = &mut stage5.stage5_systems.group.members;
+        let before = members.len();
+        members.retain(|member| !member.eq_ignore_ascii_case(&target_name));
+        if members.len() == before {
+            (false, false)
+        } else if members.len() <= 1 {
+            members.clear();
+            (true, true)
+        } else {
+            (true, false)
+        }
+    };
+    if !changed {
         return Vec::new();
     }
-    if members.len() <= 1 {
-        members.clear();
+    if dissolved {
         return vec![ServerPacket::DeleteGroup];
     }
-    vec![ServerPacket::DeleteMember { name: target_name }]
+    let mut packets = vec![ServerPacket::DeleteMember { name: target_name }];
+    // Refresh the enriched roster for the web group window after the removal.
+    packets.extend(stage5_group_member_info_packet(world));
+    packets
 }
 
 fn stage5_group_invite_reply_packet(world: &mut World, accept_invite: bool) -> Vec<ServerPacket> {
@@ -1555,10 +1653,12 @@ fn stage5_group_invite_reply_packet(world: &mut World, accept_invite: bool) -> V
         return vec![ServerPacket::DeleteGroup];
     }
     let player_name = ensure_stage5_group_self_member(world);
-    vec![
+    let mut packets = vec![
         ServerPacket::SwitchGroup { allow_group: true },
         ServerPacket::AddMember { name: player_name },
-    ]
+    ];
+    packets.extend(stage5_group_member_info_packet(world));
+    packets
 }
 
 fn stage5_guild_not_in_guild_chat(world: &World) -> ServerPacket {

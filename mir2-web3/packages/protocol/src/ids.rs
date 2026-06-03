@@ -605,6 +605,12 @@ pub enum ServerPacketId {
     StorageUnlockResult = 277,
     StoragePasswordResult = 278,
     MineNodeState = 279,
+    /// Custom, beyond Crystal: enriched full party roster (names + level/class/HP
+    /// /online) so the web group window can render full detail in one update.
+    /// Crystal rebuilds the roster client-side from `AddMember`/`DeleteMember`
+    /// plus the live `ObjectPlayer`s; the web gateway has no world context inside
+    /// `server_packet_to_event`, so the simulation pre-resolves it here.
+    GroupMemberInfo = 280,
 }
 
 impl TryFrom<i16> for ServerPacketId {
@@ -892,6 +898,7 @@ impl TryFrom<i16> for ServerPacketId {
             277 => Ok(Self::StorageUnlockResult),
             278 => Ok(Self::StoragePasswordResult),
             279 => Ok(Self::MineNodeState),
+            280 => Ok(Self::GroupMemberInfo),
             other => Err(PacketCodecError::UnknownServerPacketId(other)),
         }
     }
