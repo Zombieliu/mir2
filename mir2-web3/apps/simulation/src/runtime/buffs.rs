@@ -1,9 +1,9 @@
-use crate::config::BuffSnapshot;
+use crate::config::{BuffSnapshot, BuffStatSnapshot};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
     localized_text_or_fallback, starter_server_data, CrystalItemTemplate, LanguageCode,
 };
-use mir2_protocol::{ClientBuff, ServerPacket, UserItemStat};
+use mir2_protocol::{crystal_stat_label, ClientBuff, ServerPacket, UserItemStat};
 
 use super::components::{hero_entity, player_entity, PlayerVitals};
 use super::crystal_compat::*;
@@ -24,13 +24,29 @@ pub(super) struct BuffState {
 
 impl BuffState {
     pub(super) fn snapshot(&self, tick: u64, language: LanguageCode) -> BuffSnapshot {
+        let remaining_ticks = self.expires_at_tick.saturating_sub(tick);
+        let mut stats = self.stats.clone();
+        stats.sort_by_key(|stat| stat.stat);
         BuffSnapshot {
             key: self.key.clone(),
             name: localized_buff_name(language, &self.key, &self.name),
             description: localized_buff_description(language, &self.key, &self.description),
-            remaining_ticks: self.expires_at_tick.saturating_sub(tick) as u32,
+            remaining_ticks: remaining_ticks as u32,
             attack_bonus: buff_attack_bonus(self),
             defence_bonus: buff_defence_bonus(self),
+            // Crystal-faithful enrichment for the browser buff window, mirroring the
+            // `S.AddBuff` packet path (runtime/buffs.rs `client_buff_for_state`).
+            buff_type: crystal_buff_type_for_key(&self.key),
+            remaining_ms: remaining_ticks.saturating_mul(1_000),
+            infinite: self.expires_at_tick == u64::MAX,
+            stats: stats
+                .iter()
+                .map(|stat| BuffStatSnapshot {
+                    stat: stat.stat,
+                    label: crystal_stat_label(stat.stat),
+                    value: stat.value,
+                })
+                .collect(),
         }
     }
 }

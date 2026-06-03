@@ -13,8 +13,9 @@ use axum::routing::{get, post};
 use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
-    packet_payload_hex, server_packet_display_name, server_packet_raw_display_name,
-    ClientIntelligentCreature, ClientPacket, MirDirection, MirGridType, Point, ServerPacket,
+    crystal_stat_label, packet_payload_hex, server_packet_display_name,
+    server_packet_raw_display_name, ClientFriend, ClientIntelligentCreature, ClientPacket,
+    MirDirection, MirGridType, Point, ServerPacket, UserItemStat,
 };
 use mir2_simulation::{
     deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
@@ -3217,6 +3218,40 @@ async fn send_error_message(
         .await
 }
 
+/// Renders a buff stat as a superset object: keeps Crystal's raw `stat`+`value`
+/// (backward compatible) and adds `label` (Crystal `Stat` enum name) for the
+/// browser buff window's `{label, value}` contract.
+fn buff_stat_json(stat: &UserItemStat) -> Value {
+    json!({
+        "stat": stat.stat,
+        "label": crystal_stat_label(stat.stat),
+        "value": stat.value,
+    })
+}
+
+/// Renders a non-blocked friend for the browser `friends` list. `level`/`mapName`
+/// are intentionally absent (not carried by Crystal's `ClientFriend` nor known to
+/// the simulation); an empty memo is omitted.
+fn friend_entry_json(friend: &ClientFriend) -> Value {
+    let mut entry = serde_json::Map::new();
+    entry.insert("name".into(), json!(friend.name));
+    entry.insert("online".into(), json!(friend.online));
+    if !friend.memo.is_empty() {
+        entry.insert("memo".into(), json!(friend.memo));
+    }
+    Value::Object(entry)
+}
+
+/// Renders a blocked entry for the browser `blocked` list (`{name, memo?}`).
+fn blocked_entry_json(friend: &ClientFriend) -> Value {
+    let mut entry = serde_json::Map::new();
+    entry.insert("name".into(), json!(friend.name));
+    if !friend.memo.is_empty() {
+        entry.insert("memo".into(), json!(friend.memo));
+    }
+    Value::Object(entry)
+}
+
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
         ServerPacket::Raw { packet_id, payload } => {
@@ -3851,6 +3886,23 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "payload": {
                 "playerName": player_name,
                 "playerMap": player_map
+            }
+        }),
+        // Custom roster snapshot (beyond Crystal): the full enriched party list so
+        // the browser group window can render member level/class/HP/online in one
+        // update. `members[0]` is the group leader (Crystal `GroupMembers[0]`,
+        // e.g. PlayerObject.cs:2497); `leaderName` echoes it. Per-member fields the
+        // simulation can't know (e.g. a remote player's HP) are omitted by the
+        // `GroupMember` serde `skip_serializing_if` so consumers see only real data.
+        ServerPacket::GroupMemberInfo {
+            members,
+            leader_name,
+        } => json!({
+            "type": "packet",
+            "packet": "GroupMemberInfo",
+            "payload": {
+                "members": members,
+                "leaderName": leader_name
             }
         }),
         ServerPacket::SendMemberLocation {
@@ -4556,17 +4608,36 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "allow": allow
             }
         }),
+        // Crystal `S.AddBuff` ships a `ClientBuff` (Type, Caster, Visible, ObjectID,
+        // ExpireTime, Infinite, Paused, Stats, Values — Crystal/Shared/Data/
+        // ClientData.cs:575). The browser contract additionally wants `type`,
+        // `remainingMs`, and `stats` rendered as `{label, value}` (Crystal labels a
+        // buff stat with `Stat.ToString()`, BuffDialog.cs:351). In the simulation
+        // `ClientBuff.expire_time` is already milliseconds-from-now (it is built as
+        // `(expires_at_tick - tick) * 1000`, runtime/buffs.rs:168), so it maps
+        // straight to `remainingMs`. `caster` and `name` are omitted: the
+        // simulation's buff packet does not carry them (Crystal's `Caster` is a
+        // client-only field that is never serialised on the wire, ClientData.cs:595).
+        // Existing keys are kept for backward compatibility.
         ServerPacket::AddBuff { buff } => json!({
             "type": "packet",
             "packet": "AddBuff",
             "payload": {
                 "buffType": buff.buff_type,
+                "type": buff.buff_type,
                 "visible": buff.visible,
                 "objectId": buff.object_id,
                 "expireTime": buff.expire_time,
+                "remainingMs": buff.expire_time,
                 "infinite": buff.infinite,
                 "paused": buff.paused,
-                "stats": buff.stats,
+                // Superset objects: keep `stat`+`value` (backward compatible) and add
+                // `label` (Crystal `Stat` enum name) for the browser buff window.
+                "stats": buff
+                    .stats
+                    .iter()
+                    .map(buff_stat_json)
+                    .collect::<Vec<_>>(),
                 "values": buff.values
             }
         }),
@@ -5131,11 +5202,27 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "cost": cost
             }
         }),
+        // Crystal `S.FriendUpdate` carries one flat `List<ClientFriend>` where each
+        // entry has Name/Memo/Blocked/Online (Crystal/Shared/Data/ClientData.cs:122,
+        // populated by CharacterInfo.CreateClientFriend, CharacterInfo.cs:759). The
+        // browser contract wants the roster pre-split into a non-blocked `friends`
+        // list and a `blocked` list, with friend objects carrying name/online/memo.
+        // `level`/`mapName` are omitted: neither Crystal's `ClientFriend` nor the
+        // simulation's social state tracks them, so they are genuinely unknown here.
         ServerPacket::FriendUpdate { friends } => json!({
             "type": "packet",
             "packet": "FriendUpdate",
             "payload": {
                 "friends": friends
+                    .iter()
+                    .filter(|friend| !friend.blocked)
+                    .map(friend_entry_json)
+                    .collect::<Vec<_>>(),
+                "blocked": friends
+                    .iter()
+                    .filter(|friend| friend.blocked)
+                    .map(blocked_entry_json)
+                    .collect::<Vec<_>>()
             }
         }),
         ServerPacket::LoverUpdate {
@@ -5521,9 +5608,9 @@ mod tests {
     use axum::Json;
     use mir2_protocol::{
         ClientBuff, ClientFriend, ClientHeroInformation, ClientIntelligentCreature, ClientMail,
-        ClientMapInfo, ClientPacket, IntelligentCreatureItemFilter, IntelligentCreatureRules,
-        MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo, Point, RankCharacterInfo,
-        ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
+        ClientMapInfo, ClientPacket, GroupMember, IntelligentCreatureItemFilter,
+        IntelligentCreatureRules, MirClass, MirDirection, MirGender, MirGridType, ObjectManaInfo,
+        Point, RankCharacterInfo, ServerPacket, ServerPacketId, Spell, UserItem, UserItemStat,
     };
     use mir2_simulation::{
         AccountStore, SimulationConfig, Stage5MailTargetKind, Stage5SystemsState,
@@ -6609,6 +6696,12 @@ mod tests {
         assert_eq!(add_buff["packet"], "AddBuff");
         assert_eq!(add_buff["payload"]["buffType"], 5);
         assert_eq!(add_buff["payload"]["stats"][0]["stat"], 14);
+        // Browser buff contract: numeric `type`, `remainingMs` (= expire_time, which
+        // the sim already stores as ms-from-now), and `{label, value}` stats.
+        assert_eq!(add_buff["payload"]["type"], 5);
+        assert_eq!(add_buff["payload"]["remainingMs"], 60_000);
+        assert_eq!(add_buff["payload"]["stats"][0]["label"], "AttackSpeed");
+        assert_eq!(add_buff["payload"]["stats"][0]["value"], 4);
 
         let remove_buff = super::server_packet_to_event(&ServerPacket::RemoveBuff {
             buff_type: 5,
@@ -6682,6 +6775,42 @@ mod tests {
         });
         assert_eq!(member_map["packet"], "GroupMembersMap");
         assert_eq!(member_map["payload"]["playerMap"], "Bichon Province");
+
+        // Enriched roster: members widen to objects (level/class/hp/maxHp/online),
+        // unknown fields are omitted, and `leaderName` mirrors members[0].
+        let roster = super::server_packet_to_event(&ServerPacket::GroupMemberInfo {
+            members: vec![
+                GroupMember {
+                    name: "Scout".to_string(),
+                    level: Some(33),
+                    class: Some(MirClass::Archer as u8),
+                    hp: Some(210),
+                    max_hp: Some(260),
+                    online: Some(true),
+                },
+                GroupMember {
+                    name: "Faraway".to_string(),
+                    level: Some(40),
+                    class: Some(MirClass::Wizard as u8),
+                    hp: None,
+                    max_hp: None,
+                    online: Some(true),
+                },
+            ],
+            leader_name: "Scout".to_string(),
+        });
+        assert_eq!(roster["packet"], "GroupMemberInfo");
+        assert_eq!(roster["payload"]["leaderName"], "Scout");
+        assert_eq!(roster["payload"]["members"][0]["name"], "Scout");
+        assert_eq!(roster["payload"]["members"][0]["level"], 33);
+        assert_eq!(roster["payload"]["members"][0]["class"], 4);
+        assert_eq!(roster["payload"]["members"][0]["hp"], 210);
+        assert_eq!(roster["payload"]["members"][0]["maxHp"], 260);
+        assert_eq!(roster["payload"]["members"][0]["online"], true);
+        // A member with unknown HP omits hp/maxHp entirely.
+        assert!(roster["payload"]["members"][1].get("hp").is_none());
+        assert!(roster["payload"]["members"][1].get("maxHp").is_none());
+        assert_eq!(roster["payload"]["members"][1]["class"], 1);
 
         let location = super::server_packet_to_event(&ServerPacket::SendMemberLocation {
             member_name: "Scout".to_string(),
@@ -7258,16 +7387,43 @@ mod tests {
         assert_eq!(cost["payload"]["cost"], 200);
 
         let friends = super::server_packet_to_event(&ServerPacket::FriendUpdate {
+            friends: vec![
+                ClientFriend {
+                    index: 42,
+                    name: "Blade".to_string(),
+                    memo: "party lead".to_string(),
+                    blocked: false,
+                    online: true,
+                },
+                ClientFriend {
+                    index: 43,
+                    name: "Griefer".to_string(),
+                    memo: "ignored".to_string(),
+                    blocked: true,
+                    online: false,
+                },
+            ],
+        });
+        assert_eq!(friends["packet"], "FriendUpdate");
+        // Roster is split: non-blocked entries in `friends`, blocked in `blocked`.
+        assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
+        assert_eq!(friends["payload"]["friends"][0]["online"], true);
+        assert_eq!(friends["payload"]["friends"][0]["memo"], "party lead");
+        assert_eq!(friends["payload"]["friends"].as_array().unwrap().len(), 1);
+        assert_eq!(friends["payload"]["blocked"][0]["name"], "Griefer");
+        assert_eq!(friends["payload"]["blocked"][0]["memo"], "ignored");
+        assert_eq!(friends["payload"]["blocked"].as_array().unwrap().len(), 1);
+        // Friends with an empty memo omit the field entirely.
+        let no_memo = super::server_packet_to_event(&ServerPacket::FriendUpdate {
             friends: vec![ClientFriend {
-                index: 42,
-                name: "Blade".to_string(),
-                memo: "party lead".to_string(),
+                index: 1,
+                name: "Plain".to_string(),
+                memo: String::new(),
                 blocked: false,
                 online: true,
             }],
         });
-        assert_eq!(friends["packet"], "FriendUpdate");
-        assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
+        assert!(no_memo["payload"]["friends"][0].get("memo").is_none());
     }
 
     #[test]
