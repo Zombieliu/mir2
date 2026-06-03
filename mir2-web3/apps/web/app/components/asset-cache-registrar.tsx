@@ -275,8 +275,13 @@ export function AssetCacheRegistrar() {
           metrics.markMilestone("serviceWorkerRegisterStart");
           const registration = await navigator.serviceWorker.register(
             "/mir2-asset-worker.js",
-            { scope: "/" },
+            { scope: "/", updateViaCache: "none" },
           );
+          try {
+            await registration.update();
+          } catch {
+            // The active worker can still serve from cache if the update check is transiently unavailable.
+          }
           const readyRegistration = await navigator.serviceWorker.ready;
 
           if (disposed) return;
