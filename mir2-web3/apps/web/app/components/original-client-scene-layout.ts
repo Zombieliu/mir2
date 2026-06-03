@@ -31,6 +31,7 @@ export type SceneBackdropTile = {
 export type ViewportMapSprite = {
   key: string;
   path: string;
+  kind: "back" | "middle" | "front" | "tileAnimation";
   cellX: number;
   cellY: number;
   left: number;

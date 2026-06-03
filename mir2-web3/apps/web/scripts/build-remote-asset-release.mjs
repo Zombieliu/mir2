@@ -511,7 +511,8 @@ function extractSceneFrameUrls(blueprint, limit) {
 
   const urls = [];
   let sourceFrameCount = 0;
-  for (const sprite of Object.values(sprites)) {
+  for (const spriteKey of rankSceneSpriteKeys(blueprint)) {
+    const sprite = sprites[spriteKey];
     for (const frame of sprite?.frames ?? []) {
       if (typeof frame?.path === "string" && frame.path.startsWith("/original-map/")) {
         sourceFrameCount += 1;
@@ -524,6 +525,69 @@ function extractSceneFrameUrls(blueprint, limit) {
   }
 
   return [...new Set(urls)];
+}
+
+function rankSceneSpriteKeys(blueprint) {
+  const region = blueprint?.originalMapRegion;
+  const sprites = region?.sprites ?? {};
+  const center = scenePrewarmCenter(blueprint);
+  const seen = new Map();
+  let order = 0;
+
+  for (const cell of region?.cells ?? []) {
+    const x = typeof cell?.x === "number" ? cell.x : center.x;
+    const y = typeof cell?.y === "number" ? cell.y : center.y;
+    const distance = Math.max(Math.abs(x - center.x), Math.abs(y - center.y));
+    for (const [layer, key] of [cell.front, cell.middle, cell.tileAnimation, cell.back].entries()) {
+      if (!key || !(key in sprites)) continue;
+      const priority = sceneSpritePrewarmPriority(sprites[key], layer);
+      const previous = seen.get(key);
+      if (
+        !previous ||
+        priority < previous.priority ||
+        (priority === previous.priority && distance < previous.distance) ||
+        (priority === previous.priority && distance === previous.distance && layer < previous.layer)
+      ) {
+        seen.set(key, { distance, priority, layer, order });
+      }
+    }
+    order += 1;
+  }
+
+  const ranked = Array.from(seen.entries())
+    .sort(
+      (a, b) =>
+        a[1].priority - b[1].priority ||
+        a[1].distance - b[1].distance ||
+        a[1].layer - b[1].layer ||
+        a[1].order - b[1].order,
+    )
+    .map(([key]) => key);
+  for (const key of Object.keys(sprites)) {
+    if (!seen.has(key)) ranked.push(key);
+  }
+  return ranked;
+}
+
+function sceneSpritePrewarmPriority(sprite, layer) {
+  if (sprite?.drawMode === "object") return 0;
+  if (sprite?.kind === "front") return 1;
+  if (sprite?.kind === "middle" || sprite?.kind === "tileAnimation") return 2;
+  if (sprite?.kind === "back") return 4;
+  return 3 + layer;
+}
+
+function scenePrewarmCenter(blueprint) {
+  const center = blueprint?.sceneView?.center;
+  if (typeof center?.x === "number" && typeof center?.y === "number") return center;
+  const bounds = blueprint?.originalMapRegion?.playBounds;
+  if (bounds) {
+    return {
+      x: Math.round((bounds.minX + bounds.maxX) / 2),
+      y: Math.round((bounds.minY + bounds.maxY) / 2),
+    };
+  }
+  return { x: 0, y: 0 };
 }
 
 function normalizeStaticAssetPath(value) {
