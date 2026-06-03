@@ -3,6 +3,8 @@ const DEFAULT_ORIGIN_URL =
 const DEFAULT_GATEWAY_ORIGIN_URL = "https://165.154.65.136.sslip.io";
 const DEFAULT_ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const ASSET_NOT_FOUND_CACHE_CONTROL = "public, max-age=60";
+const ASSET_WORKER_SCRIPT_PATH = "/mir2-asset-worker.js";
+const ASSET_WORKER_CACHE_CONTROL = "public, max-age=0, must-revalidate";
 
 const HOP_BY_HOP_HEADERS = [
   "connection",
@@ -192,8 +194,18 @@ function cleanResponseHeaders(response: Response, publicUrl: URL, originUrl: str
 
   rewriteLocationHeader(headers, publicUrl, originUrl);
   appendNoTransformForHtml(headers);
+  applyAssetWorkerHeaders(headers, publicUrl);
   disableHttp3AltSvc(headers);
   return headers;
+}
+
+function applyAssetWorkerHeaders(headers: Headers, publicUrl: URL): void {
+  if (publicUrl.pathname !== ASSET_WORKER_SCRIPT_PATH) {
+    return;
+  }
+
+  headers.set("cache-control", ASSET_WORKER_CACHE_CONTROL);
+  headers.set("service-worker-allowed", "/");
 }
 
 function cleanAssetResponse(response: Response): Response {
