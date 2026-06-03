@@ -198,35 +198,42 @@ async function fetchStaticAsset(request) {
     return syntheticAssetResponse(negativeStatus, "asset recently unavailable");
   }
 
+  let originResponse = null;
+  try {
+    originResponse = await fetch(request);
+    if (originResponse.ok) return originResponse;
+  } catch {
+    originResponse = null;
+  }
+
   const remoteRequest = createRemoteAssetRequest(request);
   if (remoteRequest) {
     try {
       const remoteResponse = await fetch(remoteRequest);
       if (remoteResponse.ok) return remoteResponse;
-      // A definitive 404 from the remote means the origin will not have it
-      // either: short-circuit instead of paying for a second doomed request.
-      if (remoteResponse.status === 404) {
-        rememberNegativeResult(negativeKey, 404);
+      if (remoteResponse.status === 404 || !originResponse) {
+        if (remoteResponse.status === 404) {
+          rememberNegativeResult(negativeKey, 404);
+        }
         return remoteResponse;
       }
     } catch {
-      // Remote asset origin failure should fall back to the app origin.
+      // Remote asset origin failure should fall back to the app origin result.
     }
   }
 
-  // Preserve the remote -> origin fallback order.
-  try {
-    const originResponse = await fetch(request);
+  if (originResponse) {
     if (!originResponse.ok && (originResponse.status === 404 || originResponse.status === 410)) {
       rememberNegativeResult(negativeKey, originResponse.status);
     }
     return originResponse;
-  } catch {
-    // Origin fetch rejected (offline / aborted / DNS). Degrade gracefully so
-    // the fetch handler never emits an uncaught "Failed to fetch".
-    rememberNegativeResult(negativeKey, 504);
-    return syntheticAssetResponse(504, "asset fetch failed");
   }
+
+  // Both the app origin and the remote asset origin rejected (offline / DNS /
+  // aborted). Degrade gracefully so the fetch handler never emits an uncaught
+  // "Failed to fetch".
+  rememberNegativeResult(negativeKey, 504);
+  return syntheticAssetResponse(504, "asset fetch failed");
 }
 
 function syntheticAssetResponse(status, reason) {
