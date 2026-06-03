@@ -50,7 +50,10 @@ use super::resources::{
     RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
-use super::skills::{advance_magic_progression, crystal_magic_damage, normalize_crystal_skill_key};
+use super::skills::{
+    advance_magic_progression, crystal_attack_power_roll, crystal_magic_damage,
+    normalize_crystal_skill_key,
+};
 use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 
 #[allow(deprecated)]
@@ -335,8 +338,12 @@ fn crystal_slaying_melee_bonus(world: &World) -> i32 {
         .unwrap_or(0)
 }
 
-/// Crystal critical-hit application: when a `CriticalRate` roll lands, the blow
-/// is amplified by `CriticalDamage` (each point is +10%). Inert when the player
+/// Crystal critical-hit application (HumanObject.cs:7156-7161,
+/// MonsterObject.cs:2594-2599): a crit lands when
+/// `Random(100) < CriticalRate * Settings.CriticalRateWeight` (weight 5), and
+/// the blow is then amplified by
+/// `Floor(damage * ((CriticalDamage / Settings.CriticalDamageWeight) * 10))`
+/// (weight 50 → each point of `CriticalDamage` adds 20%). Inert when the player
 /// has no crit stats (the seed case).
 fn crystal_apply_player_critical(
     _world: &World,
@@ -355,27 +362,59 @@ fn crystal_apply_player_critical(
         CRYSTAL_SALT_CRITICAL as usize,
         100,
     );
-    if roll >= u64::try_from(rate).unwrap_or(0) {
+    let crit_chance = rate.saturating_mul(CRYSTAL_CRITICAL_RATE_WEIGHT);
+    if roll >= u64::try_from(crit_chance).unwrap_or(0) {
         return damage;
     }
-    let bonus_steps = stats.critical_damage().max(1);
-    damage.saturating_add(damage.saturating_mul(bonus_steps).div_euclid(10))
+    crystal_critical_amplified_damage(damage, stats.critical_damage())
 }
 
-/// Rolled melee damage for the local player: `Random(MinDC, MaxDC)` from the
-/// authoritative stat block, plus the Slaying bonus and the critical-hit roll.
+/// Crystal crit amplification: `damage + Floor(damage * (CriticalDamage /
+/// CriticalDamageWeight) * 10)` (HumanObject.cs:7159). `CriticalDamage` is
+/// floored to 1 to match the engine treating an equipped-but-zero crit-damage
+/// gem as a minimal amplifier. With the default weight 50 a `CriticalDamage` of
+/// 10 yields a tripled blow (`damage + damage*2`).
+pub(crate) fn crystal_critical_amplified_damage(damage: i32, critical_damage: i32) -> i32 {
+    let bonus_steps = critical_damage.max(1);
+    // (CriticalDamage / CriticalDamageWeight) * 10 evaluated as Crystal does in
+    // f64, then floored, matching `(int)Math.Floor(...)`.
+    let multiplier = (f64::from(bonus_steps) / f64::from(CRYSTAL_CRITICAL_DAMAGE_WEIGHT)) * 10.0;
+    let bonus = (f64::from(damage) * multiplier).floor();
+    let bonus = if bonus > f64::from(i32::MAX) {
+        i32::MAX
+    } else if bonus < 0.0 {
+        0
+    } else {
+        bonus as i32
+    };
+    damage.saturating_add(bonus)
+}
+
+/// Rolled melee damage for the local player: Crystal `PlayerObject.Attack()` →
+/// `GetAttackPower(MinDC, MaxDC)` from the authoritative stat block, plus the
+/// Slaying bonus and the critical-hit roll.
 ///
-/// For seed equipment the stat block's `MaxDC` equals
-/// [`crystal_player_melee_damage`] and `MinDC == MaxDC`, so the result is the
-/// historical flat figure; explicit `Min/Max DC` gear opens a real spread.
+/// `GetAttackPower` is a Luck-biased roll (`MapObject.GetAttackPower`): positive
+/// Luck can force the `MaxDC` end, negative Luck the `MinDC` end. The basic melee
+/// attack uses the same Luck-biased channel as the player's spells
+/// (`crystal_spell_attack_power`) so gear Luck affects auto-attacks too. For
+/// seed equipment the stat block's `MinDC == MaxDC` and Luck is `0`, so the
+/// result is the historical flat figure (the Luck-biased roll reduces to the
+/// previous uniform roll when Luck is 0); explicit `Min/Max DC` gear opens a
+/// real spread.
 pub(super) fn crystal_player_rolled_melee_damage(world: &World, current_tick: u64) -> i32 {
     let stats = player_stats(world);
     let slaying = crystal_slaying_melee_bonus(world);
     let min = (stats.min_dc() + slaying).max(1);
     let max = (stats.max_dc() + slaying).max(min);
     let actor_id = current_player_object_id(world).unwrap_or(0);
-    let rolled =
-        deterministic_range_roll(current_tick, actor_id, CRYSTAL_SALT_MELEE_DC_ROLL, min, max);
+    let rolled = crystal_attack_power_roll(
+        world,
+        current_tick,
+        CRYSTAL_SALT_MELEE_DC_ROLL as u64,
+        min,
+        max,
+    );
     crystal_apply_player_critical(world, &stats, actor_id, current_tick, rolled)
 }
 
@@ -434,6 +473,9 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         max_mac: stats.max_mac(),
         critical_rate: stats.critical_rate(),
         critical_damage: stats.critical_damage(),
+        // Luck biases the physical attack-power roll (Crystal GetAttackPower), so
+        // the zone melee/range path matches the per-session path's Luck handling.
+        luck: stats.luck(),
     }
 }
 

@@ -15,6 +15,12 @@ let runtimeConfig = {
 };
 let staticAssetTiers = new Map();
 
+// Short-lived negative cache so a flapping network / 404 storm does not spam
+// the network (and the console) with the same doomed request repeatedly.
+const NEGATIVE_CACHE_TTL_MS = 10_000;
+const NEGATIVE_CACHE_MAX_ENTRIES = 2000;
+const staticAssetNegativeCache = new Map();
+
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
@@ -148,20 +154,29 @@ function cacheName(kind) {
 }
 
 async function cacheFirst(request, name, maxEntries, event) {
-  const cache = await caches.open(name);
-  const cached = await cache.match(request);
-  if (cached) {
-    event?.waitUntil(touchCacheEntry(cache, request, cached, maxEntries));
-    return cached;
+  // This is fed directly to event.respondWith(): it must ALWAYS resolve.
+  // A rejected promise here surfaces as an uncaught "Failed to fetch" and can
+  // hard-fail dependent subsystems (e.g. chunk loading), so every failure path
+  // resolves to a cached entry or a graceful synthetic Response instead.
+  let cache;
+  try {
+    cache = await caches.open(name);
+    const cached = await cache.match(request);
+    if (cached) {
+      event?.waitUntil(touchCacheEntry(cache, request, cached, maxEntries));
+      return cached;
+    }
+  } catch {
+    // CacheStorage can be unavailable (private mode, quota teardown). Fall
+    // through to a direct fetch and never let it become an uncaught rejection.
+    cache = null;
   }
 
-  try {
-    const response = await fetchStaticAsset(request);
+  const response = await fetchStaticAsset(request);
+  if (cache && response && response.ok) {
     await putCacheEntry(cache, request, response, maxEntries);
-    return response;
-  } catch (error) {
-    return unavailableStaticAssetResponse(request, error);
   }
+  return response;
 }
 
 async function touchCacheEntry(cache, request, response, maxEntries) {
@@ -174,38 +189,73 @@ async function touchCacheEntry(cache, request, response, maxEntries) {
 }
 
 async function fetchStaticAsset(request) {
+  // Never throws. Resolves to the best available response and, on total
+  // failure, to a synthetic 504 so callers (cacheFirst -> respondWith) always
+  // receive a settled promise instead of an uncaught network rejection.
+  const negativeKey = request.url;
+  const negativeStatus = getNegativeCacheStatus(negativeKey);
+  if (negativeStatus) {
+    return syntheticAssetResponse(negativeStatus, "asset recently unavailable");
+  }
+
   const remoteRequest = createRemoteAssetRequest(request);
   if (remoteRequest) {
     try {
       const remoteResponse = await fetch(remoteRequest);
       if (remoteResponse.ok) return remoteResponse;
+      // A definitive 404 from the remote means the origin will not have it
+      // either: short-circuit instead of paying for a second doomed request.
+      if (remoteResponse.status === 404) {
+        rememberNegativeResult(negativeKey, 404);
+        return remoteResponse;
+      }
     } catch {
       // Remote asset origin failure should fall back to the app origin.
     }
   }
 
+  // Preserve the remote -> origin fallback order.
   try {
-    return await fetch(request);
-  } catch (error) {
-    const url = new URL(request.url);
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`static asset fetch failed for ${url.pathname}: ${message}`);
+    const originResponse = await fetch(request);
+    if (!originResponse.ok && (originResponse.status === 404 || originResponse.status === 410)) {
+      rememberNegativeResult(negativeKey, originResponse.status);
+    }
+    return originResponse;
+  } catch {
+    // Origin fetch rejected (offline / aborted / DNS). Degrade gracefully so
+    // the fetch handler never emits an uncaught "Failed to fetch".
+    rememberNegativeResult(negativeKey, 504);
+    return syntheticAssetResponse(504, "asset fetch failed");
   }
 }
 
-function unavailableStaticAssetResponse(request, error) {
-  const url = new URL(request.url);
-  const message = error instanceof Error ? error.message : String(error);
-  return new Response(`mir2 static asset unavailable\npath=${url.pathname}\n${message}\n`, {
-    status: 503,
+function syntheticAssetResponse(status, reason) {
+  return new Response(null, {
+    status,
+    statusText: reason,
     headers: {
       "cache-control": "no-store",
-      "content-type": "text/plain; charset=utf-8",
-      "x-mir2-asset-worker": "fetch-failed",
-      "x-mir2-asset-version": runtimeConfig.assetVersion || runtimeConfig.version || DEFAULT_VERSION,
-      "x-mir2-cache-namespace": runtimeConfig.version || DEFAULT_VERSION,
+      "x-mir2-asset-fallback": String(status),
     },
   });
+}
+
+function getNegativeCacheStatus(key) {
+  const entry = staticAssetNegativeCache.get(key);
+  if (!entry) return 0;
+  if (entry.expiresAt <= Date.now()) {
+    staticAssetNegativeCache.delete(key);
+    return 0;
+  }
+  return entry.status;
+}
+
+function rememberNegativeResult(key, status) {
+  staticAssetNegativeCache.set(key, { status, expiresAt: Date.now() + NEGATIVE_CACHE_TTL_MS });
+  if (staticAssetNegativeCache.size > NEGATIVE_CACHE_MAX_ENTRIES) {
+    const oldestKey = staticAssetNegativeCache.keys().next().value;
+    if (oldestKey !== undefined) staticAssetNegativeCache.delete(oldestKey);
+  }
 }
 
 function createRemoteAssetRequest(request) {

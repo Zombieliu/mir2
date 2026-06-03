@@ -14,7 +14,7 @@ use axum::{Json, Router};
 use futures_util::{SinkExt, StreamExt};
 use mir2_protocol::{
     packet_payload_hex, server_packet_display_name, server_packet_raw_display_name,
-    ClientIntelligentCreature, ClientPacket, MirDirection, Point, ServerPacket,
+    ClientIntelligentCreature, ClientPacket, MirDirection, MirGridType, Point, ServerPacket,
 };
 use mir2_simulation::{
     deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
@@ -852,6 +852,40 @@ enum BrowserCommand {
         #[serde(alias = "listIndex")]
         list_index: i32,
     },
+    // Crystal `C.SetAutoPotValue` (Shared/ClientPackets.cs:1221). Sets the
+    // hero auto-potion HP/MP trigger percentage. `stat` is the Crystal `Stat`
+    // byte (0 = HP, otherwise MP), matching MirConnection.SetAutoPotValue.
+    SetAutoPotValue {
+        stat: u8,
+        value: u32,
+    },
+    // Crystal `C.SetAutoPotItem` (Shared/ClientPackets.cs:1240). Selects which
+    // inventory item the hero auto-pots from. `grid` is the Crystal
+    // `MirGridType` (HeroHpItem = 23, HeroMpItem = 24).
+    SetAutoPotItem {
+        grid: String,
+        #[serde(alias = "itemIndex")]
+        item_index: i32,
+    },
+    // Crystal `C.ChangeAMode` (Shared/ClientPackets.cs:756). Cycles the
+    // player's attack mode (Peace/Group/Guild/etc.); server echoes
+    // `S.ChangeAMode` (MirConnection.ChangeAMode, MirConnection.cs:1432).
+    ChangeAMode {
+        mode: u8,
+    },
+    // Crystal `C.ChangePMode` (Shared/ClientPackets.cs:771). Cycles the
+    // player's pet command mode; server echoes `S.ChangePMode`
+    // (MirConnection.ChangePMode, MirConnection.cs:1440).
+    ChangePMode {
+        mode: u8,
+    },
+    // Crystal `C.Opendoor` (Shared/ClientPackets.cs:2524). Opens a map door /
+    // conquest siege gate by index; server runs Map.OpenDoor (auto-close after
+    // 5s) and toggles conquest gate bookkeeping (PlayerObject @GATES, Gate.cs).
+    OpenDoor {
+        #[serde(alias = "doorIndex")]
+        door_index: u8,
+    },
     ConsignItem {
         #[serde(alias = "uniqueId")]
         unique_id: u64,
@@ -1035,6 +1069,76 @@ enum BrowserCommand {
     ItemRentalLockFee,
     ItemRentalLockItem,
     ConfirmItemRental,
+    AcceptQuest {
+        #[serde(alias = "npcIndex", default)]
+        npc_index: u32,
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    FinishQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+        #[serde(alias = "selectedItemIndex", default = "default_selected_item_index")]
+        selected_item_index: i32,
+    },
+    AbandonQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    ShareQuest {
+        #[serde(alias = "questIndex")]
+        quest_index: i32,
+    },
+    SwitchGroup {
+        #[serde(alias = "allowGroup")]
+        allow_group: bool,
+    },
+    AddMember {
+        name: String,
+    },
+    DelMember {
+        name: String,
+    },
+    GroupInvite {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    EditGuildMember {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        #[serde(alias = "rankIndex", default)]
+        rank_index: u8,
+        #[serde(default)]
+        name: String,
+        #[serde(alias = "rankName", default)]
+        rank_name: String,
+    },
+    EditGuildNotice {
+        #[serde(default)]
+        notice: Vec<String>,
+    },
+    GuildInvite {
+        #[serde(alias = "acceptInvite")]
+        accept_invite: bool,
+    },
+    GuildNameReturn {
+        name: String,
+    },
+    RequestGuildInfo {
+        #[serde(alias = "infoType", default)]
+        info_type: u8,
+    },
+    GuildStorageGoldChange {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        amount: u32,
+    },
+    GuildStorageItemChange {
+        #[serde(alias = "changeType")]
+        change_type: u8,
+        from: i32,
+        to: i32,
+    },
     CastSkill {
         key: String,
     },
@@ -1070,6 +1174,12 @@ enum SessionAction {
     Stage5Command { action: String, args: Vec<String> },
     SetLanguage { language: String },
     Tick,
+}
+
+/// Default `selected_item_index` for `FinishQuest`: `-1` means "no reward
+/// choice", which the simulation maps to `None` (see `stage5_finish_quest_packet`).
+fn default_selected_item_index() -> i32 {
+    -1
 }
 
 #[derive(Debug, Serialize)]
@@ -2649,6 +2759,27 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
                 list_index,
             }))
         }
+        BrowserCommand::SetAutoPotValue { stat, value } => {
+            Ok(SessionAction::Packet(ClientPacket::SetAutoPotValue {
+                stat,
+                value,
+            }))
+        }
+        BrowserCommand::SetAutoPotItem { grid, item_index } => {
+            Ok(SessionAction::Packet(ClientPacket::SetAutoPotItem {
+                grid: parse_hero_autopot_grid(&grid)?,
+                item_index,
+            }))
+        }
+        BrowserCommand::ChangeAMode { mode } => {
+            Ok(SessionAction::Packet(ClientPacket::ChangeAMode { mode }))
+        }
+        BrowserCommand::ChangePMode { mode } => {
+            Ok(SessionAction::Packet(ClientPacket::ChangePMode { mode }))
+        }
+        BrowserCommand::OpenDoor { door_index } => {
+            Ok(SessionAction::Packet(ClientPacket::OpenDoor { door_index }))
+        }
         BrowserCommand::ConsignItem {
             unique_id,
             price,
@@ -2889,6 +3020,97 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ConfirmItemRental => {
             Ok(SessionAction::Packet(ClientPacket::ConfirmItemRental))
         }
+        BrowserCommand::AcceptQuest {
+            npc_index,
+            quest_index,
+        } => Ok(SessionAction::Packet(ClientPacket::AcceptQuest {
+            npc_index,
+            quest_index,
+        })),
+        BrowserCommand::FinishQuest {
+            quest_index,
+            selected_item_index,
+        } => Ok(SessionAction::Packet(ClientPacket::FinishQuest {
+            quest_index,
+            selected_item_index,
+        })),
+        BrowserCommand::AbandonQuest { quest_index } => {
+            Ok(SessionAction::Packet(ClientPacket::AbandonQuest {
+                quest_index,
+            }))
+        }
+        BrowserCommand::ShareQuest { quest_index } => {
+            Ok(SessionAction::Packet(ClientPacket::ShareQuest {
+                quest_index,
+            }))
+        }
+        BrowserCommand::SwitchGroup { allow_group } => {
+            Ok(SessionAction::Packet(ClientPacket::SwitchGroup {
+                allow_group,
+            }))
+        }
+        BrowserCommand::AddMember { name } => {
+            Ok(SessionAction::Packet(ClientPacket::AddMember { name }))
+        }
+        BrowserCommand::DelMember { name } => {
+            Ok(SessionAction::Packet(ClientPacket::DelMember { name }))
+        }
+        BrowserCommand::GroupInvite { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::GroupInvite {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::EditGuildMember {
+            change_type,
+            rank_index,
+            name,
+            rank_name,
+        } => Ok(SessionAction::Packet(ClientPacket::EditGuildMember {
+            change_type,
+            rank_index,
+            name,
+            rank_name,
+        })),
+        BrowserCommand::EditGuildNotice { notice } => {
+            Ok(SessionAction::Packet(ClientPacket::EditGuildNotice {
+                notice,
+            }))
+        }
+        BrowserCommand::GuildInvite { accept_invite } => {
+            Ok(SessionAction::Packet(ClientPacket::GuildInvite {
+                accept_invite,
+            }))
+        }
+        BrowserCommand::GuildNameReturn { name } => {
+            Ok(SessionAction::Packet(ClientPacket::GuildNameReturn {
+                name,
+            }))
+        }
+        BrowserCommand::RequestGuildInfo { info_type } => {
+            Ok(SessionAction::Packet(ClientPacket::RequestGuildInfo {
+                info_type,
+            }))
+        }
+        BrowserCommand::GuildStorageGoldChange {
+            change_type,
+            amount,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::GuildStorageGoldChange {
+                change_type,
+                amount,
+            },
+        )),
+        BrowserCommand::GuildStorageItemChange {
+            change_type,
+            from,
+            to,
+        } => Ok(SessionAction::Packet(
+            ClientPacket::GuildStorageItemChange {
+                change_type,
+                from,
+                to,
+            },
+        )),
         BrowserCommand::CastSkill { key } => Ok(SessionAction::CastSkill { key }),
         BrowserCommand::TransferMap { key } => Ok(SessionAction::TransferMap { key }),
         BrowserCommand::Stage5Command { action, args } => {
@@ -2897,6 +3119,19 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),
         BrowserCommand::Tick => Ok(SessionAction::Tick),
         BrowserCommand::LogOut => Ok(SessionAction::Packet(ClientPacket::LogOut)),
+    }
+}
+
+/// Decode the `MirGridType` for `C.SetAutoPotItem`. Crystal only ever sends
+/// `HeroHPItem`/`HeroMPItem` for this packet (HeroDialogs auto-pot slots), so we
+/// accept those two grids by name or by raw enum byte. `parse_grid` in
+/// `browser_commands.rs` does not cover the hero auto-pot grids, hence this
+/// dedicated decoder (mirrors `MirGridType` HeroHPItem = 23 / HeroMPItem = 24).
+fn parse_hero_autopot_grid(value: &str) -> Result<MirGridType, String> {
+    match value.trim().to_ascii_lowercase().as_str() {
+        "herohpitem" | "hero_hp_item" | "hp" | "23" => Ok(MirGridType::HeroHpItem),
+        "herompitem" | "hero_mp_item" | "mp" | "24" => Ok(MirGridType::HeroMpItem),
+        other => Err(format!("unsupported hero auto-pot grid: {other}")),
     }
 }
 
@@ -6583,6 +6818,76 @@ mod tests {
         assert!(matches!(
             super::browser_command_to_action(change).expect("change maps"),
             SessionAction::Packet(ClientPacket::ChangeHero { list_index: 1 })
+        ));
+    }
+
+    // Newly-wired player->server actions: hero auto-pot config (Crystal
+    // C.SetAutoPotValue / C.SetAutoPotItem), attack/pet mode toggles
+    // (C.ChangeAMode / C.ChangePMode) and the door / conquest gate open
+    // (C.Opendoor). Each previously had a simulation handler but no browser
+    // command, so the frontend could not reach them.
+    #[test]
+    fn hero_and_world_control_commands_map_to_crystal_protocol_packets() {
+        let auto_pot_value = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"setAutoPotValue","stat":0,"value":80}"#,
+        )
+        .expect("set auto pot value command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(auto_pot_value).expect("auto pot value maps"),
+            SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 0, value: 80 })
+        ));
+
+        let auto_pot_item = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"setAutoPotItem","grid":"heroHpItem","itemIndex":0}"#,
+        )
+        .expect("set auto pot item command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(auto_pot_item).expect("auto pot item maps"),
+            SessionAction::Packet(ClientPacket::SetAutoPotItem {
+                grid: MirGridType::HeroHpItem,
+                item_index: 0,
+            })
+        ));
+
+        let auto_pot_item_mp = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"setAutoPotItem","grid":"heroMpItem","itemIndex":12}"#,
+        )
+        .expect("set auto pot item (mp) command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(auto_pot_item_mp).expect("auto pot item mp maps"),
+            SessionAction::Packet(ClientPacket::SetAutoPotItem {
+                grid: MirGridType::HeroMpItem,
+                item_index: 12,
+            })
+        ));
+
+        // Unknown grids are rejected (only hero auto-pot grids are valid here).
+        let bad_grid = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"setAutoPotItem","grid":"inventory","itemIndex":0}"#,
+        )
+        .expect("command should deserialize");
+        assert!(super::browser_command_to_action(bad_grid).is_err());
+
+        let a_mode = serde_json::from_str::<BrowserCommand>(r#"{"type":"changeAMode","mode":4}"#)
+            .expect("change a mode command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(a_mode).expect("a mode maps"),
+            SessionAction::Packet(ClientPacket::ChangeAMode { mode: 4 })
+        ));
+
+        let p_mode = serde_json::from_str::<BrowserCommand>(r#"{"type":"changePMode","mode":1}"#)
+            .expect("change p mode command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(p_mode).expect("p mode maps"),
+            SessionAction::Packet(ClientPacket::ChangePMode { mode: 1 })
+        ));
+
+        let open_door =
+            serde_json::from_str::<BrowserCommand>(r#"{"type":"openDoor","doorIndex":3}"#)
+                .expect("open door command should deserialize");
+        assert!(matches!(
+            super::browser_command_to_action(open_door).expect("open door maps"),
+            SessionAction::Packet(ClientPacket::OpenDoor { door_index: 3 })
         ));
     }
 
